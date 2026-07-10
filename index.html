@@ -3,151 +3,154 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chris Hall — Media Operator</title>
-<meta name="description" content="Chris Hall — New York City–born media operator building high-leverage content systems for founders. Senior Video Producer at Y Combinator; founder of Hall Media.">
-<link rel="canonical" href="https://chrishall.co/">
-<!-- Open Graph / social -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="Chris Hall — Media Operator">
-<meta property="og:description" content="High-leverage content systems for founders at the highest level. Senior Video Producer at Y Combinator; founder of Hall Media.">
-<meta property="og:image" content="https://chrishall.co/chris-og.jpg">
-<meta property="og:url" content="https://chrishall.co/">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#0a0a0a">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<title>CHALL.NET — The Fleet</title>
+<meta name="description" content="Chris Hall's personal fleet — living ambient simulations and operator tools, all built in-house. Watchkeeper, Kitties, Specialops and more.">
+<link rel="canonical" href="https://chall.net/">
+<meta property="og:title" content="CHALL.NET — The Fleet">
+<meta property="og:description" content="A personal fleet of living ambient worlds: a carrier strike group, a cat meadow, a riverine patrol — all running live.">
+<meta property="og:image" content="https://chall.net/chris-og.jpg">
 <style>
-  :root{
-    --bg:#0a0a0a; --bg2:#101012; --panel:#141416; --line:#23232a;
-    --ink:#ece9e4; --dim:#9b968d; --faint:#6a665e;
-    --accent:#cda775;            /* warm bronze, one accent only */
-    --serif:"Fraunces",Georgia,serif;
-    --sans:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+  :root {
+    --bg: #070b12; --panel: #0c1220; --line: #1b2a44; --ink: #d7e3f4;
+    --dim: #6b7f9e; --gold: #e8b34b; --green: #37d67a; --amber: #e8a53b;
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);
-       font-weight:300;line-height:1.65;-webkit-font-smoothing:antialiased;
-       letter-spacing:.01em}
-  .wrap{max-width:1120px;margin:0 auto;padding:0 28px}
-  a{color:inherit;text-decoration:none}
-
-  /* ── top bar ── */
-  nav{display:flex;justify-content:space-between;align-items:center;
-      padding:26px 0;border-bottom:1px solid var(--line)}
-  .mark{font-family:var(--serif);font-size:19px;font-weight:500;letter-spacing:.02em}
-  .mark .dot{color:var(--accent)}
-  nav .links{display:flex;gap:26px;font-size:13px;color:var(--dim);
-             text-transform:uppercase;letter-spacing:.13em}
-  nav .links a:hover{color:var(--ink)}
-  @media(max-width:560px){nav .links{gap:18px}}
-
-  /* ── hero ── */
-  .hero{display:grid;grid-template-columns:1.05fr 1fr;gap:56px;
-        align-items:center;padding:74px 0 64px}
-  @media(max-width:860px){.hero{grid-template-columns:1fr;gap:38px;padding:48px 0 44px}}
-  .portrait{position:relative}
-  .portrait img{width:100%;height:auto;display:block;border-radius:4px;
-                filter:grayscale(100%) contrast(1.02);
-                box-shadow:0 30px 80px -30px rgba(0,0,0,.9)}
-  .portrait::after{content:"";position:absolute;inset:0;border:1px solid var(--line);
-                   border-radius:4px;pointer-events:none}
-
-  .lede .eyebrow{font-size:12px;color:var(--accent);text-transform:uppercase;
-                 letter-spacing:.22em;margin-bottom:20px}
-  .lede h1{font-family:var(--serif);font-weight:500;font-size:clamp(38px,6vw,62px);
-           line-height:1.02;letter-spacing:-.015em;margin-bottom:10px}
-  .lede .role{font-size:15px;color:var(--dim);letter-spacing:.02em;margin-bottom:26px}
-  .lede .role b{color:var(--ink);font-weight:500}
-  .lede p{color:#cfcabf;font-size:16px;max-width:46ch}
-
-  /* ── bio block ── */
-  .bio{padding:18px 0 70px;border-top:1px solid var(--line)}
-  .bio-inner{max-width:680px;margin:0 auto;padding-top:44px}
-  .bio-inner h2{font-family:var(--serif);font-weight:400;font-size:13px;
-                text-transform:uppercase;letter-spacing:.24em;color:var(--faint);margin-bottom:26px;text-align:center}
-  .bio-inner p{font-size:17.5px;line-height:1.9;color:#d6d1c7;text-align:left}
-  .bio-inner p .hl{color:var(--ink);font-weight:400}
-
-  /* ── contact ── */
-  .contact{padding:60px 0 30px;border-top:1px solid var(--line);text-align:center}
-  .contact h2{font-family:var(--serif);font-weight:400;font-size:13px;
-              text-transform:uppercase;letter-spacing:.24em;color:var(--faint);margin-bottom:34px}
-  .emails{display:flex;flex-direction:column;gap:2px;max-width:440px;margin:0 auto}
-  .email-row{display:flex;justify-content:space-between;align-items:baseline;
-             padding:17px 4px;border-bottom:1px solid var(--line);transition:.18s}
-  .email-row:hover{border-color:#34343f}
-  .email-row .lbl{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.14em}
-  .email-row a{font-family:var(--serif);font-size:18px;color:var(--ink)}
-  .email-row a:hover{color:var(--accent)}
-
-  /* ── footer ── */
-  footer{border-top:1px solid var(--line);margin-top:60px;padding:34px 0 50px;
-         display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
-  footer .who{font-family:var(--serif);font-size:15px}
-  footer .meta{font-size:12px;color:var(--faint);letter-spacing:.04em}
-  footer .social{display:flex;gap:20px;font-size:12px;color:var(--dim);
-                 text-transform:uppercase;letter-spacing:.13em}
-  footer .social a:hover{color:var(--accent)}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: var(--bg); }
+  body {
+    background:
+      radial-gradient(1200px 600px at 70% -10%, #0e1830 0%, transparent 60%),
+      var(--bg);
+    color: var(--ink);
+    font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    min-height: 100vh;
+    padding: 30px clamp(16px, 3vw, 40px) 60px;
+  }
+  header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 14px 18px; border-bottom: 1px solid var(--line); padding-bottom: 16px; }
+  .brand { font-size: clamp(20px, 2.4vw, 26px); letter-spacing: 6px; font-weight: 700; }
+  .brand b { color: var(--gold); }
+  .tag { color: var(--dim); font-size: 11px; letter-spacing: 2px; }
+  .clock { margin-left: auto; color: var(--dim); font-size: 11px; letter-spacing: 1px; white-space: nowrap; }
+  .clock b { color: var(--ink); }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; margin-top: 26px; }
+  @media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 720px)  { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    overflow: hidden; position: relative; min-width: 0;
+    transition: transform .18s ease, border-color .18s ease;
+  }
+  .card:hover { transform: translateY(-3px); border-color: var(--gold); }
+  .live-wrap { position: relative; height: 230px; overflow: hidden; background: #05080f; }
+  .live-wrap iframe {
+    position: absolute; top: 0; left: 0;
+    width: 1280px; height: 720px; border: 0;
+    transform-origin: top left;
+    pointer-events: none;
+  }
+  .veil { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 62%, rgba(7,11,18,.88) 100%); }
+  .meta { padding: 13px 16px 15px; }
+  .row1 { display: flex; align-items: center; gap: 10px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2.4s infinite; }
+  .dot.amber { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+  @keyframes pulse { 50% { opacity: .45; } }
+  .name { font-size: 14px; letter-spacing: 3px; font-weight: 700; }
+  .ver { margin-left: auto; color: var(--dim); font-size: 10px; letter-spacing: 1px; white-space: nowrap; }
+  .desc { color: var(--dim); font-size: 11.5px; line-height: 1.55; margin-top: 8px; letter-spacing: .3px; }
+  .still { display: flex; align-items: center; justify-content: center; height: 230px; }
+  .still .glyph { color: var(--dim); font-size: 12px; letter-spacing: 3px; text-align: center; line-height: 2; }
+  .still .big { font-size: 36px; display: block; margin-bottom: 8px; opacity: .85; }
+  .about-still { background: linear-gradient(160deg, #101a2e 0%, #0a0f1c 100%); }
+  .footer { margin-top: 32px; color: var(--dim); font-size: 10.5px; letter-spacing: 2px; display: flex; flex-wrap: wrap; gap: 14px 24px; }
+  .footer b { color: var(--gold); }
+  a.cardlink { color: inherit; text-decoration: none; display: block; }
+  .notice { color: var(--dim); font-size: 10px; letter-spacing: 1px; margin-top: 10px; }
 </style>
 </head>
 <body>
-<div class="wrap">
+<header>
+  <div class="brand">CHALL<b>.</b>NET</div>
+  <div class="tag">PERSONAL FLEET — ALL SYSTEMS AMBIENT</div>
+  <div class="clock">SAN FRANCISCO <b id="clk">--:--</b> · <span id="phase">WATCH COND IV</span></div>
+</header>
 
-  <nav>
-    <a class="mark" href="#top">Chris Hall<span class="dot">.</span></a>
-    <div class="links">
-      <a href="#bio">Profile</a>
-      <a href="#contact">Contact</a>
+<div class="grid">
+  <a class="cardlink" href="https://watchkeeper.chall.net/" aria-label="Watchkeeper"><div class="card">
+    <div class="live-wrap"><iframe src="https://watchkeeper.chall.net/" loading="lazy" scrolling="no" title="Watchkeeper live"></iframe><div class="veil"></div></div>
+    <div class="meta">
+      <div class="row1"><span class="dot"></span><span class="name">WATCHKEEPER</span><span class="ver">LIVE SIM</span></div>
+      <div class="desc">Carrier Strike Group 11 steams a seeded 360° ocean — real moon phase, doctrinal formation, 65 events, day and night. The flagship.</div>
     </div>
-  </nav>
+  </div></a>
 
-  <header class="hero" id="top">
-    <div class="portrait">
-      <img src="chris-hero.jpg" alt="Chris Hall" width="2000" height="1328">
+  <a class="cardlink" href="https://kitties.chall.net/" aria-label="Kitties"><div class="card">
+    <div class="live-wrap"><iframe src="https://kitties.chall.net/" loading="lazy" scrolling="no" title="Kitties live"></iframe><div class="veil"></div></div>
+    <div class="meta">
+      <div class="row1"><span class="dot"></span><span class="name">KITTIES</span><span class="ver">LIVE SIM</span></div>
+      <div class="desc">Esme, Elliott &amp; Oliver on meadow patrol through a pastel pixel world. Built for a friend — she commands changes herself through a wish console.</div>
     </div>
-    <div class="lede">
-      <div class="eyebrow">Media Operator</div>
-      <h1>Chris Hall</h1>
-      <div class="role"><b>Senior Video Producer</b>, Y Combinator &nbsp;·&nbsp; Founder, <b>Hall Media</b></div>
-      <p>High-leverage content systems for founders at the highest level — built on fifteen years of craft across film, audio, and live production.</p>
-    </div>
-  </header>
+  </div></a>
 
-  <section class="bio" id="bio">
-    <div class="bio-inner">
-      <h2>Profile</h2>
-      <p>
-        Chris Hall is a New York City–born media operator who builds <span class="hl">high-leverage content systems for founders at the highest level</span>. He combines early technical training in television, film, music, and photography with firsthand startup experience across consumer apps, influencer monetization, brand growth, and major influencer campaigns. After co-founding and operating multiple startups, he founded <span class="hl">Hall Media</span> in 2019 to help executives and founders develop durable personal brands and long-term media strategy. Since 2020, Chris has produced <span class="hl">Garry Tan’s</span> personal video content, and since 2022 he has been the producer of Jessica Livingston and Carolyn Levy’s podcast, <span class="hl">The Social Radars</span>, working at the intersection of storytelling, systems, and operator-level execution. In January 2026, he joined <span class="hl">Y Combinator</span> full-time in San Francisco as Senior Video Producer, overseeing flagship content at one of the most influential institutions in global technology.
-      </p>
+  <a class="cardlink" href="https://specialops.chall.net/" aria-label="Specialops"><div class="card">
+    <div class="live-wrap"><iframe src="https://specialops.chall.net/" loading="lazy" scrolling="no" title="Specialops live"></iframe><div class="veil"></div></div>
+    <div class="meta">
+      <div class="row1"><span class="dot"></span><span class="name">SPECIALOPS</span><span class="ver">LIVE SIM</span></div>
+      <div class="desc">SOC-R riverine patrol through seeded jungle — monsoon, moonwater and FLIR views over one world skeleton.</div>
     </div>
-  </section>
+  </div></a>
 
-  <section class="contact" id="contact">
-    <h2>Contact</h2>
-    <div class="emails">
-      <div class="email-row">
-        <span class="lbl">Hall Media</span>
-        <a href="mailto:chris@hallmedia.co">chris@hallmedia.co</a>
-      </div>
-      <div class="email-row">
-        <span class="lbl">Personal</span>
-        <a href="mailto:ny.christopher@gmail.com">ny.christopher@gmail.com</a>
-      </div>
+  <a class="cardlink" href="/about.html" aria-label="About Chris Hall"><div class="card">
+    <div class="live-wrap still about-still"><div class="glyph"><span class="big">⚓</span>THE KEEPER<br>CHRIS HALL · SF</div></div>
+    <div class="meta">
+      <div class="row1"><span class="dot"></span><span class="name">ABOUT</span><span class="ver">THE OPERATOR</span></div>
+      <div class="desc">Senior Video Producer at Y Combinator. Founder of Hall Media. Builds high-leverage media systems for founders — and living worlds for fun.</div>
     </div>
-  </section>
+  </div></a>
 
-  <footer>
-    <div>
-      <div class="who">Chris Hall<span style="color:var(--accent)">.</span></div>
-      <div class="meta">Media systems for founders · San Francisco</div>
+  <div class="card">
+    <div class="live-wrap still"><div class="glyph"><span class="big">🗺</span>ROADTRIP<br>STANDING BY FOR NEXT SORTIE</div></div>
+    <div class="meta">
+      <div class="row1"><span class="dot amber"></span><span class="name">ROADTRIP</span><span class="ver">STANDBY</span></div>
+      <div class="desc">Live GPS beacon + auto-narrator. When the truck moves, the map moves and the narrator calls the towns. Lights up on travel days.</div>
     </div>
-    <div class="social">
-      <a href="https://www.linkedin.com/in/chrishall" target="_blank" rel="noopener">LinkedIn</a>
-    </div>
-  </footer>
+  </div>
 
+  <div class="card">
+    <div class="live-wrap still"><div class="glyph"><span class="big">🏛</span>OPS DECK<br>RECALL · VAULT · WARCHEST · BRIDGE<br>OPERATOR ACCESS ONLY</div></div>
+    <div class="meta">
+      <div class="row1"><span class="dot amber"></span><span class="name">OPS DECK</span><span class="ver">GATED</span></div>
+      <div class="desc">The working tools behind the fleet: a searchable signal archive, artifact vault, finance board, and the Bridge — where plain-English orders refit the flagship.</div>
+    </div>
+  </div>
 </div>
+
+<div class="footer">
+  <span><b>3</b> AMBIENT SIMS RUNNING LIVE</span>
+  <span><b>10+</b> VESSELS IN COMMISSION</span>
+  <span>ALL BUILT IN-HOUSE · NO FRAMEWORKS, NO BACKENDS, ONE FILE EACH</span>
+  <span>© <span id="yr"></span> <b>CHRIS HALL</b></span>
+</div>
+
+<script>
+  // SF clock + watch phase
+  const clk = document.getElementById('clk'), ph = document.getElementById('phase');
+  const tick = () => {
+    const now = new Date();
+    clk.textContent = now.toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit',timeZone:'America/Los_Angeles'});
+    const h = parseInt(now.toLocaleTimeString('en-US', {hour:'2-digit',hour12:false,timeZone:'America/Los_Angeles'}), 10);
+    ph.textContent = (h >= 22 || h < 6) ? 'NIGHT WATCH' : (h < 12 ? 'MORNING WATCH' : (h < 18 ? 'AFTERNOON WATCH' : 'EVENING WATCH'));
+  };
+  tick(); setInterval(tick, 30000);
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  // scale live iframes to their card width (1280x720 virtual viewport)
+  const fit = () => {
+    document.querySelectorAll('.live-wrap iframe').forEach(f => {
+      const w = f.parentElement.clientWidth;
+      f.style.transform = `scale(${w / 1280})`;
+      f.parentElement.style.height = `${Math.round(w * 720 / 1280 * 0.9)}px`;
+    });
+  };
+  addEventListener('resize', fit); fit();
+</script>
 </body>
 </html>
