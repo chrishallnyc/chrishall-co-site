@@ -59,7 +59,6 @@ a:hover { color: var(--ink); text-decoration: underline; }
 .tl .loc { position: absolute; left: -46px; top: 50%; transform: translateY(-50%); width: 36px; text-align: right; font-size: 10px; letter-spacing: 1px; color: var(--dim); }
 .tags { display: flex; flex-wrap: wrap; gap: 8px 10px; }
 .tags span { border: 1px solid var(--dim); padding: 3px 10px; color: var(--mid); font-size: 12px; }
-.tags i { font-style: normal; color: var(--dim); font-size: 10px; letter-spacing: 1px; margin-left: 7px; }
 .intro { max-width: 860px; margin: 24px auto 0; color: var(--mid); }
 .intro b { color: var(--ink); }
 .bio { margin-top: 10px; }
@@ -68,6 +67,14 @@ a:hover { color: var(--ink); text-decoration: underline; }
 .bio summary::after { content: " +"; }
 .bio[open] summary::after { content: " −"; }
 .bio p { margin: 10px 0 0; }
+.tlwrap { position: relative; padding-right: 112px; }
+.rail { position: absolute; width: 1px; background: var(--dim); }
+.rail.on { background: linear-gradient(180deg, var(--dim) 78%, transparent); }
+.rail u { position: absolute; left: -2px; width: 5px; height: 5px; border-radius: 50%; background: var(--dim); }
+.rail u.t { top: -1px; } .rail u.b { bottom: -1px; }
+.rail span { position: absolute; top: 7px; left: 3px; writing-mode: vertical-rl; font-size: 9.5px;
+  letter-spacing: 1.8px; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+@media (max-width: 560px) { .tlwrap { padding-right: 96px; } }
 .foot a { color: var(--dim); }
 </style>
 </head>
@@ -100,6 +107,7 @@ the most influential institutions in global technology.</p>
 
 <div class="sec">
 <h2>TIMELINE</h2>
+<div class="tlwrap">
 <ul class="tl">
   <li><span class="loc">NYC</span><b>2009</b>freelance photo . video . audio — new york city, 220+ productions</li>
   <li><b>2012</b>young people's chorus of nyc — content lead, toured japan . china . usa</li>
@@ -115,14 +123,15 @@ the most influential institutions in global technology.</p>
   <li><b>2026</b>january — joined y combinator . senior video producer — san francisco</li>
 </ul>
 </div>
+</div>
 
 <div class="sec">
 <h2>CLIENTS</h2>
 <div class="tags">
-  <span>y combinator<i>'26—</i></span><span>garry tan<i>'20—</i></span><span>the social radars<i>'22—</i></span>
-  <span>principles / ray dalio</span><span>dj khaled<i>'16–'18</i></span><span>khalid<i>'17–'19</i></span>
-  <span>doja cat<i>'17–'19</i></span><span>drlupo<i>'17–'19</i></span><span>sara dietschy<i>'17–'19</i></span>
-  <span>tao group<i>'17–'22</i></span><span>lavo ny<i>'17–'19</i></span>
+  <span>y combinator</span><span>garry tan</span><span>the social radars</span>
+  <span>principles / ray dalio</span><span>dj khaled</span><span>khalid</span>
+  <span>doja cat</span><span>drlupo</span><span>sara dietschy</span>
+  <span>tao group</span><span>lavo ny</span>
 </div>
 </div>
 
@@ -143,5 +152,41 @@ the most influential institutions in global technology.</p>
   <a href="https://world.chall.net/">world</a> .
   <a href="https://listen.chall.net/">listen</a>
 </div>
+<script>
+(function(){
+  var wrap=document.querySelector('.tlwrap'); if(!wrap) return;
+  var CL=[{n:"dj khaled",f:2016,t:2018},{n:"tao group",f:2017,t:2022},
+          {n:"garry tan",f:2020,t:null},{n:"social radars",f:2022,t:null}];
+  function build(){
+    wrap.querySelectorAll('.rail').forEach(function(r){r.remove();});
+    var lis=[].slice.call(wrap.querySelectorAll('.tl li'));
+    var wr=wrap.getBoundingClientRect();
+    var rows=lis.map(function(li){return {y:parseInt(li.querySelector('b').textContent,10),el:li};});
+    function mid(el){var r=el.getBoundingClientRect();return r.top+r.height/2-wr.top;}
+    function yPos(year){
+      for(var i=0;i<rows.length;i++) if(rows[i].y===year) return mid(rows[i].el);
+      var lo=null,hi=null;
+      rows.forEach(function(r){ if(r.y<year) lo=r; if(r.y>year&&!hi) hi=r; });
+      if(!lo) return mid(hi.el); if(!hi) return mid(lo.el);
+      var a=mid(lo.el),b=mid(hi.el);
+      return a+(b-a)*((year-lo.y)/(hi.y-lo.y));
+    }
+    var last=lis[lis.length-1].getBoundingClientRect();
+    var endY=last.bottom-wr.top;
+    CL.forEach(function(c,i){
+      var top=yPos(c.f), bot=c.t?yPos(c.t):endY;
+      var d=document.createElement('div');
+      d.className='rail'+(c.t?'':' on');
+      d.style.top=top+'px'; d.style.height=Math.max(bot-top,18)+'px';
+      d.style.right=(78-i*26)+'px';
+      d.title=c.n+" \u2019"+String(c.f).slice(2)+(c.t?"\u2013\u2019"+String(c.t).slice(2):"\u2014");
+      d.innerHTML='<u class="t"></u>'+(c.t?'<u class="b"></u>':'')+'<span>'+c.n+'</span>';
+      wrap.appendChild(d);
+    });
+  }
+  build();
+  var to; window.addEventListener('resize',function(){clearTimeout(to);to=setTimeout(build,150);});
+})();
+</script>
 </body>
 </html>
