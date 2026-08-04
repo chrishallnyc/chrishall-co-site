@@ -3,40 +3,125 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CHALL.NET</title>
-<meta name="description" content="chall.net — refit underway.">
+<title>CHALL.NET — Chris Hall</title>
+<meta name="description" content="Chris Hall — Senior Video Producer at Y Combinator. San Francisco.">
 <link rel="canonical" href="https://chall.net/">
 <style>
-  :root { --bg:#070b12; --ink:#d7e3f4; --dim:#6b7f9e; --gold:#e8b34b; --line:#1b2a44; }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html,body { background:var(--bg); height:100%; }
-  body {
-    background:
-      radial-gradient(1100px 550px at 70% -10%, #0e1830 0%, transparent 60%),
-      var(--bg);
-    color:var(--ink);
-    font-family:"SF Mono", ui-monospace, Menlo, Consolas, monospace;
-    display:flex; align-items:center; justify-content:center;
-    min-height:100vh; padding:24px;
-  }
-  .box { text-align:center; max-width:520px; }
-  .brand { font-size:clamp(26px,5vw,38px); letter-spacing:10px; font-weight:700; }
-  .brand b { color:var(--gold); }
-  .rule { width:64px; height:1px; background:var(--line); margin:26px auto; }
-  .msg { color:var(--dim); font-size:12px; letter-spacing:3px; line-height:2.1; }
-  .msg b { color:var(--gold); letter-spacing:3px; }
-  .anchor { font-size:26px; margin-bottom:18px; opacity:.9; display:block; }
-  .foot { margin-top:44px; color:var(--dim); font-size:10px; letter-spacing:2px; opacity:.7; }
+:root { --bg:#f6f4ee; --tex:#eeebe4; --ink:#18181c; --mid:#56565e; --dim:#989690; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { background:var(--bg); }
+body {
+  background: repeating-linear-gradient(0deg, var(--bg) 0px, var(--bg) 3px, var(--tex) 3px, var(--tex) 4px);
+  color: var(--ink);
+  font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px; line-height: 1.5;
+  min-height: 100vh;
+  padding: 26px clamp(14px, 4vw, 46px);
+  image-rendering: pixelated;
+}
+a { color: var(--mid); text-decoration: none; }
+a:hover { color: var(--ink); text-decoration: underline; }
+.mast {
+  border: 1px solid var(--ink); padding: 10px 16px;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  position: relative;
+}
+.mast::after { content:""; position:absolute; inset:2px; border:1px solid var(--dim); pointer-events:none; }
+.mast .brand { font-weight: 700; letter-spacing: 2px; color: var(--ink); display:flex; align-items:center; gap:10px; }
+.mast .sub { color: var(--dim); font-size: 12px; margin-top: 2px; }
+.mast .right { color: var(--mid); text-align: right; font-size: 12px; }
+.icon { width: 16px; height: 16px; vertical-align: -3px; image-rendering: pixelated; }
+.tree { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; margin-top: 26px; max-width: 1100px; margin-left:auto; margin-right:auto; }
+@media (max-width: 760px) { .tree { grid-template-columns: 1fr; } }
+.cat { margin-bottom: 22px; }
+.cat h2 {
+  font-size: 13px; font-weight: 700; letter-spacing: 1px; color: var(--ink);
+  display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+}
+.cat h2::before { content:""; width: 12px; height: 1px; background: var(--mid); }
+.cat ul { list-style: none; border-left: 1px solid var(--dim); margin-left: 14px; }
+.cat li { position: relative; padding: 3px 0 3px 22px; display: flex; align-items: center; gap: 8px; }
+.cat li::before { content:""; position: absolute; left: 0; top: 50%; width: 14px; height: 1px; background: var(--dim); }
+.cat li .loc { margin-left: auto; color: var(--dim); font-size: 12px; }
+.lock { width: 8px; height: 10px; opacity: 0.75; }
+.foot { max-width: 1100px; margin: 26px auto 0; text-align: center; color: var(--mid); }
+.foot hr { border: 0; border-top: 1px solid var(--dim); margin-bottom: 10px; }
+.wrap { max-width: 1100px; margin: 0 auto; }
+
+.sec { max-width: 860px; margin: 30px auto 0; }
+.sec h2 { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--ink);
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.sec h2::after { content:""; flex: 1; height: 1px; background: var(--dim); }
+.tl { list-style: none; border-left: 1px solid var(--dim); margin-left: 4px; }
+.tl li { position: relative; padding: 4px 0 4px 20px; color: var(--mid); }
+.tl li::before { content:""; position: absolute; left: 0; top: 50%; width: 12px; height: 1px; background: var(--dim); }
+.tl b { color: var(--ink); font-weight: 700; margin-right: 8px; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px 10px; }
+.tags span { border: 1px solid var(--dim); padding: 3px 10px; color: var(--mid); font-size: 12px; }
+.intro { max-width: 860px; margin: 24px auto 0; color: var(--mid); }
+.intro b { color: var(--ink); }
+.foot a { color: var(--dim); }
 </style>
 </head>
 <body>
-  <div class="box">
-    <span class="anchor">⚓</span>
-    <div class="brand">CHALL<b>.</b>NET</div>
-    <div class="rule"></div>
-    <div class="msg"><b>REFIT UNDERWAY</b><br>THE FLEET IS IN DRYDOCK<br>A NEW COMMAND DECK IS BEING FITTED</div>
-    <div class="foot">© <span id="yr"></span> CHRIS HALL · SF</div>
+<div class="wrap">
+<div class="mast">
+  <div>
+    <div class="brand">CHALL.NET</div>
+    <div class="sub">chris hall . san francisco</div>
   </div>
-  <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+  <div class="right">senior video producer<br>y combinator</div>
+</div>
+</div>
+
+<div class="intro">
+NYC-born media operator. <b>~15 years</b> across video, audio, photo and live production —
+now producing flagship content inside <b>Y Combinator</b>.
+</div>
+
+<div class="sec">
+<h2>TIMELINE</h2>
+<ul class="tl">
+  <li><b>2009</b>freelance photo . video . audio — new york city, 220+ productions</li>
+  <li><b>2012</b>young people's chorus of nyc — content lead, toured japan . china . usa</li>
+  <li><b>2014</b>kickster, co-founder — #1 sneaker app on the app store</li>
+  <li><b>2016</b>dj khaled snapchat campaign — 300M+ impressions</li>
+  <li><b>2017</b>showroom, co-founder — premium merch for top creators</li>
+  <li><b>2019</b>hall media, founder — media systems for founders &amp; executives</li>
+  <li><b>2020</b>garry tan on youtube — executive producer</li>
+  <li><b>2021</b>boerum studios, co-founder — commercial studio, brooklyn</li>
+  <li><b>2023</b>the social radars — executive producer, w/ jessica livingston &amp; carolynn levy</li>
+  <li><b>2024</b>moved west . joined y combinator</li>
+  <li><b>2026</b>senior video producer, y combinator — san francisco</li>
+</ul>
+</div>
+
+<div class="sec">
+<h2>CLIENTS</h2>
+<div class="tags">
+  <span>y combinator</span><span>garry tan</span><span>the social radars</span>
+  <span>principles / ray dalio</span><span>dj khaled</span><span>khalid</span>
+  <span>doja cat</span><span>drlupo</span><span>sara dietschy</span>
+  <span>tao group</span><span>lavo ny</span>
+</div>
+</div>
+
+<div class="sec">
+<h2>SKILLS</h2>
+<div class="tags">
+  <span>video production</span><span>cinematography</span><span>audio engineering</span>
+  <span>podcast production</span><span>live event production</span><span>photography</span>
+  <span>media strategy</span><span>ai agent systems</span>
+</div>
+</div>
+
+<div class="foot">
+  <hr>
+  <a href="https://watchkeeper.chall.net/">watchkeeper</a> .
+  <a href="https://kitties.chall.net/">kitties</a> .
+  <a href="https://specialops.chall.net/">specialops</a> .
+  <a href="https://world.chall.net/">world</a> .
+  <a href="https://listen.chall.net/">listen</a>
+</div>
 </body>
 </html>

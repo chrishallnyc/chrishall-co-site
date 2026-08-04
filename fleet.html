@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CHALL.NET</title>
+<meta name="description" content="chall.net — refit underway.">
+<link rel="canonical" href="https://chall.net/">
+<style>
+  :root { --bg:#070b12; --ink:#d7e3f4; --dim:#6b7f9e; --gold:#e8b34b; --line:#1b2a44; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { background:var(--bg); height:100%; }
+  body {
+    background:
+      radial-gradient(1100px 550px at 70% -10%, #0e1830 0%, transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:"SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; padding:24px;
+  }
+  .box { text-align:center; max-width:520px; }
+  .brand { font-size:clamp(26px,5vw,38px); letter-spacing:10px; font-weight:700; }
+  .brand b { color:var(--gold); }
+  .rule { width:64px; height:1px; background:var(--line); margin:26px auto; }
+  .msg { color:var(--dim); font-size:12px; letter-spacing:3px; line-height:2.1; }
+  .msg b { color:var(--gold); letter-spacing:3px; }
+  .anchor { font-size:26px; margin-bottom:18px; opacity:.9; display:block; }
+  .foot { margin-top:44px; color:var(--dim); font-size:10px; letter-spacing:2px; opacity:.7; }
+</style>
+</head>
+<body>
+  <div class="box">
+    <span class="anchor">⚓</span>
+    <div class="brand">CHALL<b>.</b>NET</div>
+    <div class="rule"></div>
+    <div class="msg"><b>REFIT UNDERWAY</b><br>THE FLEET IS IN DRYDOCK<br>A NEW COMMAND DECK IS BEING FITTED</div>
+    <div class="foot">© <span id="yr"></span> CHRIS HALL · SF</div>
+  </div>
+  <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+</body>
+</html>
