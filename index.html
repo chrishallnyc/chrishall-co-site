@@ -79,6 +79,16 @@ a:hover { color: var(--ink); text-decoration: underline; }
 .glab { position: absolute; top: 0; font-size: 9.5px; letter-spacing: 3px; text-transform: uppercase; color: var(--dim); }
 .glab::after { content:""; display:inline-block; width: 14px; height: 1px; background: var(--dim); vertical-align: 3px; margin-left: 6px; }
 .glab.l::before { content:""; display:inline-block; width: 14px; height: 1px; background: var(--dim); vertical-align: 3px; margin-right: 6px; }
+.rail.tipd { cursor: help; }
+.rail.hl { background: var(--mid); }
+.rail.hl span { color: var(--ink); }
+#tip { position: absolute; z-index: 50; max-width: 280px; background: var(--bg);
+  border: 1px solid var(--ink); padding: 9px 12px; font-size: 11px; line-height: 1.6;
+  color: var(--mid); display: none; pointer-events: none; }
+#tip::after { content:""; position:absolute; inset:2px; border:1px solid var(--dim); pointer-events:none; }
+#tip .k { display:block; font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 5px; }
+#tip b { color: var(--ink); }
 .foot a { color: var(--dim); }
 .foot .ver { font-size: 11px; letter-spacing: 2px; text-decoration: none; }
 .foot .ver:hover { color: var(--ink); }
@@ -135,11 +145,30 @@ the most influential institutions in global technology.</p>
 
 <div class="foot">
   <hr>
-  <a href="/changelog.html" class="ver">v1.6.0</a>
+  <a href="/changelog.html" class="ver">v1.7.0</a>
 </div>
 <script>
 (function(){
   var wrap=document.querySelector('.tlwrap'); if(!wrap) return;
+  var tip=document.createElement('div'); tip.id='tip'; document.body.appendChild(tip);
+  var curRail=null;
+  function showTip(d,c){
+    if(curRail) curRail.classList.remove('hl');
+    curRail=d; d.classList.add('hl');
+    var yy="'"+String(c.f).slice(2);
+    tip.innerHTML='<span class="k">'+c.n+' . since '+yy+' \u2014 the world, same moment</span>'+c.w;
+    tip.style.display='block';
+    var r=d.getBoundingClientRect();
+    var x=r.right+14+window.scrollX, y=r.top+window.scrollY-4;
+    if(x+300>window.scrollX+document.documentElement.clientWidth) x=window.scrollX+document.documentElement.clientWidth-300;
+    tip.style.left=x+'px'; tip.style.top=y+'px';
+  }
+  function hideTip(){
+    tip.style.display='none';
+    if(curRail){curRail.classList.remove('hl');curRail=null;}
+  }
+  document.addEventListener('click',hideTip);
+  window.addEventListener('scroll',hideTip,{passive:true});
   var CL=[
     {n:"carmelo anthony",f:2011,t:2012,c:1},
     {n:"ypc of nyc",f:2012,t:2015,c:0},
@@ -157,14 +186,14 @@ the most influential institutions in global technology.</p>
     {n:"jessica livingston",f:2022,t:null,c:2}
   ];
   var SK=[
-    {n:"video production",f:2009,c:0},
-    {n:"audio production",f:2009,c:1},
-    {n:"photography",f:2010,c:2},
-    {n:"live event production",f:2012,c:3},
-    {n:"social media marketing",f:2012,c:4},
-    {n:"podcast production",f:2017,c:5},
-    {n:"personal branding",f:2019,c:6},
-    {n:"software building",f:2026,c:7}
+    {n:"video production",f:2009,c:0,w:"months earlier, the first video dslrs shipped — nikon d90 . canon 5d mk ii. cinematic video had just left hollywood"},
+    {n:"audio production",f:2009,c:1,w:"the same year the joe rogan experience started as a webcast. audio was still a niche bet"},
+    {n:"photography",f:2010,c:2,w:"instagram launched october '10. the iphone 4 had just put a camera in every pocket"},
+    {n:"live event production",f:2012,c:3,w:"twitch was one year old. live video wasn't an industry yet"},
+    {n:"social media marketing",f:2012,c:4,w:"the year social became an economy — instagram sold to facebook for $1b . facebook went public"},
+    {n:"podcast production",f:2017,c:5,w:"two years before spotify paid $340m for gimlet + anchor. three before rogan's nine-figure deal"},
+    {n:"personal branding",f:2019,c:6,w:"'the passion economy' was named that october. 'creator economy' wasn't a term yet"},
+    {n:"software building",f:2026,c:7,w:"the agentic era, month one — 'vibe coding' had just been named word of the year"}
   ];
   function build(){
     wrap.querySelectorAll('.rail,.glab').forEach(function(r){r.remove();});
@@ -189,10 +218,16 @@ the most influential institutions in global technology.</p>
       d.className='rail'+(c.t?'':' on');
       d.style.top=top+'px'; d.style.height=Math.max(bot-top,18)+'px';
       if(side==='r'){ d.style.right=((8-c.c)*S)+'px'; } else { d.style.left=(c.c*S)+'px'; }
-      d.title=c.n;
+      d.title=c.t?c.n:'';
       var h=Math.max(bot-top,18);
       var sh=(h<140 && bot>endY-60)?' class="up"':'';
       d.innerHTML='<u class="t"></u>'+(c.t?'<u class="b"></u>':'')+'<span'+sh+'>'+c.n+'</span>';
+      if(c.w){
+        d.classList.add('tipd');
+        d.addEventListener('mouseenter',function(){showTip(d,c);});
+        d.addEventListener('mouseleave',hideTip);
+        d.addEventListener('click',function(ev){ev.stopPropagation();showTip(d,c);});
+      }
       wrap.appendChild(d);
     }
     CL.forEach(function(c){rail(c,'r');});
