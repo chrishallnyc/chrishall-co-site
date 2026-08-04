@@ -67,14 +67,14 @@ a:hover { color: var(--ink); text-decoration: underline; }
 .bio summary::after { content: " +"; }
 .bio[open] summary::after { content: " −"; }
 .bio p { margin: 10px 0 0; }
-.tlwrap { position: relative; padding-right: 112px; }
+.tlwrap { position: relative; padding-right: 196px; }
 .rail { position: absolute; width: 1px; background: var(--dim); }
 .rail.on { background: linear-gradient(180deg, var(--dim) 78%, transparent); }
 .rail u { position: absolute; left: -2px; width: 5px; height: 5px; border-radius: 50%; background: var(--dim); }
 .rail u.t { top: -1px; } .rail u.b { bottom: -1px; }
 .rail span { position: absolute; top: 7px; left: 3px; writing-mode: vertical-rl; font-size: 9.5px;
   letter-spacing: 1.8px; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
-@media (max-width: 560px) { .tlwrap { padding-right: 96px; } }
+@media (max-width: 560px) { .tlwrap { padding-right: 162px; } }
 .foot a { color: var(--dim); }
 </style>
 </head>
@@ -117,8 +117,8 @@ the most influential institutions in global technology.</p>
   <li><b>2019</b>hall media, founder — media systems for founders &amp; executives</li>
   <li><b>2020</b>garry tan on youtube — executive producer</li>
   <li><b>2021</b>boerum studios, co-founder — commercial studio, brooklyn</li>
-  <li><span class="loc">FL</span><b>2023</b>jessica livingston — executive producer, the social radars podcast w/ carolynn levy</li>
-  <li><span class="loc">SF</span><b>2025</b>may — moved to sf to work more with garry tan in person, and be where the puck is going</li>
+  <li><span class="loc">FL</span><b>2023</b>jessica livingston — ep, the social radars w/ carolynn levy</li>
+  <li><span class="loc">SF</span><b>2025</b>may — moved to sf to work more with garry tan in person</li>
   <li><b>2025</b>december — agi arrives</li>
   <li><b>2026</b>january — joined y combinator . senior video producer — san francisco</li>
 </ul>
@@ -130,7 +130,7 @@ the most influential institutions in global technology.</p>
 <div class="tags">
   <span>y combinator</span><span>garry tan</span><span>jessica livingston</span>
   <span>principles / ray dalio</span><span>dj khaled</span><span>khalid</span>
-  <span>doja cat</span><span>drlupo</span><span>sara dietschy</span>
+  <span>doja cat</span><span>sony music</span><span>b&amp;h photo</span><span>drlupo</span><span>sara dietschy</span>
   <span>tao group</span><span>lavo ny</span>
 </div>
 </div>
@@ -155,12 +155,22 @@ the most influential institutions in global technology.</p>
 <script>
 (function(){
   var wrap=document.querySelector('.tlwrap'); if(!wrap) return;
-  var CL=[{n:"dj khaled",f:2016,t:2018},{n:"tao group",f:2017,t:2022},
-          {n:"garry tan",f:2020,t:null},{n:"jessica livingston",f:2022,t:null}];
+  var CL=[
+    {n:"dj khaled",f:2016,t:2018,c:0},
+    {n:"tao group",f:2017,t:2022,c:1},
+    {n:"doja cat",f:2017,t:2020,c:2},
+    {n:"khalid",f:2017,t:2020,c:3},
+    {n:"sony music",f:2017,t:2020,c:4},
+    {n:"b&h photo",f:2017,t:2020,c:5},
+    {n:"sara dietschy",f:2017,t:2020,c:6},
+    {n:"garry tan",f:2020,t:null,c:7},
+    {n:"jessica livingston",f:2022,t:null,c:2}
+  ];
   function build(){
     wrap.querySelectorAll('.rail').forEach(function(r){r.remove();});
     var lis=[].slice.call(wrap.querySelectorAll('.tl li'));
     var wr=wrap.getBoundingClientRect();
+    var S=(window.innerWidth<600)?20:24;
     var rows=lis.map(function(li){return {y:parseInt(li.querySelector('b').textContent,10),el:li};});
     function mid(el){var r=el.getBoundingClientRect();return r.top+r.height/2-wr.top;}
     function yPos(year){
@@ -173,18 +183,19 @@ the most influential institutions in global technology.</p>
     }
     var last=lis[lis.length-1].getBoundingClientRect();
     var endY=last.bottom-wr.top;
-    CL.forEach(function(c,i){
+    CL.forEach(function(c){
       var top=yPos(c.f), bot=c.t?yPos(c.t):endY;
       var d=document.createElement('div');
       d.className='rail'+(c.t?'':' on');
       d.style.top=top+'px'; d.style.height=Math.max(bot-top,18)+'px';
-      d.style.right=(78-i*26)+'px';
-      d.title=c.n+" \u2019"+String(c.f).slice(2)+(c.t?"\u2013\u2019"+String(c.t).slice(2):"\u2014");
+      d.style.right=((7-c.c)*S)+'px';
+      d.title=c.n;
       d.innerHTML='<u class="t"></u>'+(c.t?'<u class="b"></u>':'')+'<span>'+c.n+'</span>';
       wrap.appendChild(d);
     });
   }
   build();
+  window.addEventListener('load',build);
   var to; window.addEventListener('resize',function(){clearTimeout(to);to=setTimeout(build,150);});
 })();
 </script>
