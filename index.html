@@ -52,10 +52,11 @@ a:hover { color: var(--ink); text-decoration: underline; }
 .sec h2 { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--ink);
   display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .sec h2::after { content:""; flex: 1; height: 1px; background: var(--dim); }
-.tl { list-style: none; border-left: 1px solid var(--dim); margin-left: 4px; }
+.tl { list-style: none; border-left: 1px solid var(--dim); margin-left: 46px; }
 .tl li { position: relative; padding: 4px 0 4px 20px; color: var(--mid); }
 .tl li::before { content:""; position: absolute; left: 0; top: 50%; width: 12px; height: 1px; background: var(--dim); }
 .tl b { color: var(--ink); font-weight: 700; margin-right: 8px; }
+.tl .loc { position: absolute; left: -46px; top: 50%; transform: translateY(-50%); width: 36px; text-align: right; font-size: 10px; letter-spacing: 1px; color: var(--dim); }
 .tags { display: flex; flex-wrap: wrap; gap: 8px 10px; }
 .tags span { border: 1px solid var(--dim); padding: 3px 10px; color: var(--mid); font-size: 12px; }
 .intro { max-width: 860px; margin: 24px auto 0; color: var(--mid); }
@@ -88,7 +89,7 @@ the most influential institutions in global technology.
 <div class="sec">
 <h2>TIMELINE</h2>
 <ul class="tl">
-  <li><b>2009</b>freelance photo . video . audio — new york city, 220+ productions</li>
+  <li><span class="loc">NYC</span><b>2009</b>freelance photo . video . audio — new york city, 220+ productions</li>
   <li><b>2012</b>young people's chorus of nyc — content lead, toured japan . china . usa</li>
   <li><b>2014</b>kickster, co-founder — #1 sneaker app on the app store</li>
   <li><b>2016</b>dj khaled snapchat campaign — 300M+ impressions</li>
@@ -96,8 +97,8 @@ the most influential institutions in global technology.
   <li><b>2019</b>hall media, founder — media systems for founders &amp; executives</li>
   <li><b>2020</b>garry tan on youtube — executive producer</li>
   <li><b>2021</b>boerum studios, co-founder — commercial studio, brooklyn</li>
-  <li><b>2023</b>the social radars — executive producer, w/ jessica livingston &amp; carolynn levy</li>
-  <li><b>2025</b>may — moved to sf to work more with garry tan in person, and be where the puck is going</li>
+  <li><span class="loc">FL</span><b>2023</b>the social radars — executive producer, w/ jessica livingston &amp; carolynn levy</li>
+  <li><span class="loc">SF</span><b>2025</b>may — moved to sf to work more with garry tan in person, and be where the puck is going</li>
   <li><b>2025</b>december — agi arrives</li>
   <li><b>2026</b>january — joined y combinator . senior video producer — san francisco</li>
 </ul>
