@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ESSAYS — Chris Hall</title>
+<meta name="description" content="Essays by Chris Hall.">
+<style>
+:root { --bg:#f6f4ee; --tex:#eeebe4; --ink:#18181c; --mid:#56565e; --dim:#989690; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { background:var(--bg); }
+body { background: repeating-linear-gradient(0deg, var(--bg) 0px, var(--bg) 3px, var(--tex) 3px, var(--tex) 4px);
+  color: var(--ink); font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px; line-height: 1.5; min-height: 100vh; padding: 26px clamp(14px, 4vw, 46px); }
+a { color: var(--mid); text-decoration: none; }
+a:hover { color: var(--ink); text-decoration: underline; }
+.mast { border: 1px solid var(--ink); padding: 10px 16px; display: flex; justify-content: space-between;
+  align-items: center; gap: 12px; position: relative; max-width: 860px; margin: 0 auto; }
+.mast::after { content:""; position:absolute; inset:2px; border:1px solid var(--dim); pointer-events:none; }
+.mast .brand { font-weight: 700; letter-spacing: 2px; }
+.mast .sub { color: var(--dim); font-size: 12px; margin-top: 2px; }
+.mast .right { color: var(--mid); text-align: right; font-size: 12px; }
+.sec { max-width: 860px; margin: 30px auto 0; }
+.sec h2 { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--ink);
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.sec h2::after { content:""; flex: 1; height: 1px; background: var(--dim); }
+.el { list-style: none; border-left: 1px solid var(--dim); margin-left: 4px; }
+.el li { position: relative; padding: 7px 0 7px 20px; }
+.el li::before { content:""; position: absolute; left: 0; top: 50%; width: 12px; height: 1px; background: var(--dim); }
+.el a { color: var(--ink); font-weight: 700; letter-spacing: 0.5px; }
+.el .sub { color: var(--mid); font-size: 12px; display: block; margin-top: 1px; }
+.el .d { color: var(--dim); font-size: 11px; letter-spacing: 1px; }
+.foot { max-width: 860px; margin: 26px auto 0; text-align: center; color: var(--mid); }
+.foot hr { border: 0; border-top: 1px solid var(--dim); margin-bottom: 10px; }
+.foot a { color: var(--dim); font-size: 11px; letter-spacing: 2px; }
+</style>
+</head>
+<body>
+<div class="mast">
+  <div>
+    <div class="brand">ESSAYS</div>
+    <div class="sub">chris hall . chall.net</div>
+  </div>
+  <div class="right"><a href="/">&larr; home</a></div>
+</div>
+
+<div class="sec">
+<h2>THE SHELF</h2>
+<ul class="el">
+  <li><a href="/essays/get-in-the-frame.html">get in the frame</a>
+    <span class="sub">you can't judge work from outside its frame — and you must judge your own from outside it. <span class="d">sep 2025</span></span></li>
+  <li><a href="/essays/set-the-standard.html">set the standard</a>
+    <span class="sub">industry standard means what most people do. give the platform your best file precisely because it will destroy it. <span class="d">sep 2025</span></span></li>
+  <li><a href="/essays/make-mistakes-but-not-fatal-ones.html">make mistakes, but not fatal ones</a>
+    <span class="sub">margin of safety as a life system. two is one, one is none. <span class="d">oct 2025</span></span></li>
+  <li><a href="/essays/solve-the-problem-make-it-easy.html">solve the problem, make it easy</a>
+    <span class="sub">the professional absorbs the difficulty. the client presses a button that says video. <span class="d">sep 2025</span></span></li>
+  <li><a href="/essays/life-is-like-a-game.html">life is like a game</a>
+    <span class="sub">manage your skills, manage your resources, make the best available move. <span class="d">sep 2025</span></span></li>
+</ul>
+</div>
+
+<div class="foot">
+  <hr>
+  <a href="/">chall.net</a>
+</div>
+</body>
+</html>

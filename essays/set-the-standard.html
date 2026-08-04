@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set the Standard — Chris Hall</title>
+<meta name="description" content="Industry standard means what most people do. An essay by Chris Hall.">
+<style>
+:root { --bg:#f6f4ee; --tex:#eeebe4; --ink:#18181c; --mid:#56565e; --dim:#989690; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { background:var(--bg); }
+body { background: repeating-linear-gradient(0deg, var(--bg) 0px, var(--bg) 3px, var(--tex) 3px, var(--tex) 4px);
+  color: var(--ink); font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px; line-height: 1.5; min-height: 100vh; padding: 26px clamp(14px, 4vw, 46px); }
+a { color: var(--mid); text-decoration: none; }
+a:hover { color: var(--ink); text-decoration: underline; }
+.mast { border: 1px solid var(--ink); padding: 10px 16px; display: flex; justify-content: space-between;
+  align-items: center; gap: 12px; position: relative; max-width: 720px; margin: 0 auto; }
+.mast::after { content:""; position:absolute; inset:2px; border:1px solid var(--dim); pointer-events:none; }
+.mast .brand { font-weight: 700; letter-spacing: 2px; }
+.mast .sub { color: var(--dim); font-size: 12px; margin-top: 2px; }
+.mast .right { color: var(--mid); text-align: right; font-size: 12px; }
+.essay { max-width: 680px; margin: 34px auto 0; }
+.kicker { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+h1 { font-size: 22px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8px; }
+.epi { font-size: 12px; color: var(--mid); margin-bottom: 24px; }
+.fig { border: 1px solid var(--ink); position: relative; margin: 4px 0 8px; height: 280px; }
+.fig::after { content:""; position:absolute; inset:2px; border:1px solid var(--dim); pointer-events:none; }
+.figcap { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin: 8px 0 30px; }
+.body { font-family: Georgia, "Times New Roman", serif; font-size: 16.5px; line-height: 1.75; color: #232327; }
+.body p { margin: 0 0 18px; }
+.sig { font-family: Georgia, serif; font-size: 15px; color: var(--mid); margin: 26px 0 6px; }
+.prov { font-size: 10.5px; letter-spacing: 1.5px; color: var(--dim); text-transform: uppercase; margin-bottom: 20px; }
+.foot { max-width: 720px; margin: 30px auto 0; text-align: center; color: var(--mid); }
+.foot hr { border: 0; border-top: 1px solid var(--dim); margin-bottom: 10px; }
+.foot a { color: var(--dim); font-size: 11px; letter-spacing: 2px; }
+/* fig 2 — the rising bar */
+#ruler { position:absolute; left: 90px; top: 20px; bottom: 20px; width: 1px; background: var(--dim); }
+#ind { position:absolute; left: 70px; right: 60px; height: 1px; background: var(--dim); bottom: 25%; }
+#indlab { position:absolute; right: 20px; bottom: calc(25% + 6px); font-size: 9.5px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--dim); text-align: right; }
+#bar { position:absolute; left: 86px; bottom: 20px; width: 9px; background: var(--ink); height: 8%;
+  transition: height 0.15s linear; }
+#barlab { position:absolute; left: 108px; font-size: 9.5px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--ink); bottom: 24px; transition: bottom 0.15s linear; }
+#tickwrap { position:absolute; left: 78px; top: 20px; bottom: 20px; width: 12px; }
+</style>
+</head>
+<body>
+<div class="mast">
+  <div>
+    <div class="brand">CHRIS HALL</div>
+    <div class="sub">essays . chall.net</div>
+  </div>
+  <div class="right"><a href="/">home</a> · <a href="/essays/">essays</a></div>
+</div>
+
+<article class="essay">
+<div class="kicker">essay ii . september 2025</div>
+<h1>SET THE STANDARD</h1>
+<div class="epi">industry standard means what most people do.</div>
+
+<div class="fig" id="fig2">
+  <div id="ruler"></div>
+  <div id="ind"></div>
+  <div id="indlab">industry standard —<br>what most people do</div>
+  <div id="bar"></div>
+  <div id="barlab">yours</div>
+</div>
+<div class="figcap">fig. 2 — the bar rises as you read. it does not stop at the line.</div>
+
+<div class="body">
+<p>We shoot everything in 4K, twelve-bit raw, no matter what. Then we hand the file to YouTube, which compresses it somewhere between ten and a hundred times. Compression is YouTube's lifeblood; the platform exists because it crushes files. So a reasonable person asks: why shoot 4K raw for a machine built to destroy it?</p>
+
+<p>Because quality survives the downgrade. A 4K master compressed to 1080 looks sharper than native 1080 — four times the information walked into the compressor, so more walks out. Good lighting, a crisp lens, and clean sound read at 480p on a phone in a way bad lighting never will. The platform decimates your file. It cannot decimate your standard. So you give the platform the best file you can make <i>precisely because</i> it's going to destroy it — you start from the top so that whatever survives still clears the bar.</p>
+
+<p>Music figured this out long ago. A hit record gets mastered for weeks, by the best engineers alive, on equipment worth more than a house — for an audience that will mostly hear it through a phone speaker, where none of that detail survives. Nobody in that studio says "the bass is good enough for iPhones." They do it because they're the best and being the best is the point. For the love of the game.</p>
+
+<p>Now, the phrase everyone hides behind: <i>industry standard</i>. It sounds like a bar to clear. It's a floor pretending to be a ceiling. Industry standard means, literally, what most people in the industry do — and most people, in every industry, are mediocre. That's not cynicism; it's what the word "most" means. So when someone tells you their work is industry standard, they are telling you it is indistinguishable from the median. Do you want to do what most people do?</p>
+
+<p>But here's where it gets harder, because setting a high standard isn't the end of the job. Time only moves in one direction. Everyone around you is learning, tools are improving, and the median is drifting — so a standard that just sits there is a standard in decline. If you're not moving forward, you are moving back. There is no holding position. The work you were proud of a year ago should embarrass you a little now. Not because you were bad then — because you're better now. That small embarrassment is the signal that you're moving. Its absence is the alarm.</p>
+
+<p>The mechanism is unglamorous: treat the craft as a lifestyle rather than a job, and the hours accumulate on their own — thousands a year, more in a decade than an entire education. The person who clocks out at the industry standard never accumulates them. This is also why the people who live this way are rare, and why, when you find one, you should hold on to them.</p>
+
+<p>One warning. This standard is for you, not for conversation. Announce it and it curdles into arrogance; nobody wants the speech. Keep it internal — a small voice on your shoulder that looks at every file before it ships and asks, is this the best we can do? Program that voice. Then let the work do all the talking.</p>
+</div>
+
+<div class="sig">— chris hall</div>
+<div class="prov">adapted from a talk, september 2025 · figure drawn in-house</div>
+</article>
+
+<div class="foot">
+  <hr>
+  <a href="/">chall.net</a> · <a href="/essays/">essays</a>
+</div>
+<script>
+(function(){
+  var bar=document.getElementById('bar'), lab=document.getElementById('barlab'),
+      fig=document.getElementById('fig2'), body=document.querySelector('.body');
+  function upd(){
+    var br=body.getBoundingClientRect();
+    var vh=window.innerHeight;
+    var prog=(vh*0.8-br.top)/(br.height+vh*0.5);
+    prog=Math.max(0,Math.min(1,prog));
+    var h=8+prog*82;
+    bar.style.height=h+'%';
+    var fh=fig.clientHeight-40;
+    lab.style.bottom=(24+fh*(h/100)*0.96)+'px';
+    if(prog>0.98) lab.textContent='yours — raise it again';
+  }
+  window.addEventListener('scroll',upd,{passive:true});
+  window.addEventListener('resize',upd);
+  upd();
+})();
+</script>
+</body>
+</html>

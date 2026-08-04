@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Get in the Frame — Chris Hall</title>
+<meta name="description" content="You can't judge work from outside its frame. An essay by Chris Hall.">
+<style>
+:root { --bg:#f6f4ee; --tex:#eeebe4; --ink:#18181c; --mid:#56565e; --dim:#989690; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { background:var(--bg); }
+body { background: repeating-linear-gradient(0deg, var(--bg) 0px, var(--bg) 3px, var(--tex) 3px, var(--tex) 4px);
+  color: var(--ink); font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px; line-height: 1.5; min-height: 100vh; padding: 26px clamp(14px, 4vw, 46px); }
+a { color: var(--mid); text-decoration: none; }
+a:hover { color: var(--ink); text-decoration: underline; }
+.mast { border: 1px solid var(--ink); padding: 10px 16px; display: flex; justify-content: space-between;
+  align-items: center; gap: 12px; position: relative; max-width: 720px; margin: 0 auto; }
+.mast::after { content:""; position:absolute; inset:2px; border:1px solid var(--dim); pointer-events:none; }
+.mast .brand { font-weight: 700; letter-spacing: 2px; }
+.mast .sub { color: var(--dim); font-size: 12px; margin-top: 2px; }
+.mast .right { color: var(--mid); text-align: right; font-size: 12px; }
+.essay { max-width: 680px; margin: 34px auto 0; }
+.kicker { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+h1 { font-size: 22px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8px; }
+.epi { font-size: 12px; color: var(--mid); margin-bottom: 24px; }
+.fig { border: 1px solid var(--ink); position: relative; margin: 4px 0 8px; padding: 22px 20px; cursor: pointer;
+  user-select: none; }
+.fig::after { content:""; position:absolute; inset:2px; border:1px solid var(--dim); pointer-events:none; }
+.figcap { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin: 8px 0 30px; }
+.body { font-family: Georgia, "Times New Roman", serif; font-size: 16.5px; line-height: 1.75; color: #232327; }
+.body p { margin: 0 0 18px; }
+.sig { font-family: Georgia, serif; font-size: 15px; color: var(--mid); margin: 26px 0 6px; }
+.prov { font-size: 10.5px; letter-spacing: 1.5px; color: var(--dim); text-transform: uppercase; margin-bottom: 20px; }
+.foot { max-width: 720px; margin: 30px auto 0; text-align: center; color: var(--mid); }
+.foot hr { border: 0; border-top: 1px solid var(--dim); margin-bottom: 10px; }
+.foot a { color: var(--dim); font-size: 11px; letter-spacing: 2px; }
+/* fig 1 — the frame toggle */
+#frametext { font-family: Georgia, serif; font-size: 15.5px; line-height: 1.7; color: #232327;
+  filter: blur(2.4px); opacity: 0.5; transition: filter 0.7s ease, opacity 0.7s ease; }
+.fig.inframe #frametext { filter: blur(0); opacity: 1; }
+#framelabel { font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--dim); margin-top: 14px; }
+#framelabel b { color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="mast">
+  <div>
+    <div class="brand">CHRIS HALL</div>
+    <div class="sub">essays . chall.net</div>
+  </div>
+  <div class="right"><a href="/">home</a> · <a href="/essays/">essays</a></div>
+</div>
+
+<article class="essay">
+<div class="kicker">essay i . september 2025</div>
+<h1>GET IN THE FRAME</h1>
+<div class="epi">listen with purpose.</div>
+
+<div class="fig" id="fig1" title="click">
+  <div id="frametext">Play an old record next to a new one and it sounds thin. Give it sixty seconds
+  with your eyes closed and something switches: the lows become low, the details become detailed,
+  and the song plays the way the people who made it heard it. The song didn't change. You did.</div>
+  <div id="framelabel">you are <b id="framestate">outside the frame</b> — click</div>
+</div>
+<div class="figcap">fig. 1 — the same passage, judged from outside and inside the frame</div>
+
+<div class="body">
+<p>I've spent about seventeen years editing sound and picture for a living, and the most useful thing I know I learned from listening to old records.</p>
+
+<p>Play <i>Thriller</i> back to back with anything released this year and it sounds thin. Less bass, less loudness, less of everything modern ears are trained to want. Most people stop right there. "There's no bass in this." Verdict delivered in eight seconds, through a phone speaker — against one of the most carefully produced albums ever made.</p>
+
+<p>But sit with it. Close your eyes and give it sixty seconds of actual attention. Something switches. The lows become low. The details become detailed. The record starts to bang — not despite being from 1982, but as 1982, the way the people in that room meant it. The song didn't change. You did. You got in the frame.</p>
+
+<p>A song is a moment in time. Specific people, in a specific room, with specific machines, captured in a way that can never be captured again. Judged from outside that frame, it's only ever a list of things it isn't. Judged from inside, it's what it is — which is the only fair fight.</p>
+
+<p>This is not really about music. Most bad criticism, of anything, is delivered from outside the frame. The engineer sneering at code written under constraints he never saw. The critic scoring a decades-old film for its pacing. Anyone judging a decision you made years ago with information you didn't have. It's the cheapest kind of judgment there is, because it requires nothing: no attention, no surrender, no sixty seconds. If you want your opinions of other people's work to be worth anything, get in the frame first. Then judge.</p>
+
+<p>Now the part that matters if you make things: when the work is your own, reverse everything.</p>
+
+<p>The frame is generous. That's its gift and its danger. Stay inside anything long enough and you adapt — an iPhone speaker develops "good bass" after twenty minutes, because your ears are kind. Kindness is exactly what you don't want pointed at your own work. Mixing engineers call it ear fatigue: after hours in the frame, the flaws sound like features. So the discipline for your own work is the opposite one — come in fresh, on rested ears, first thing, like a stranger who owes you nothing. I check a finished video on twenty devices before it ships, not because I doubt the work, but because I know exactly how much my own frame flatters me.</p>
+
+<p>So: two modes. For everyone else's work — get in the frame, surrender first, judge second. For your own — stay out of it, come in cold, and hunt. Most people run this exactly backwards. They're merciless with the work of strangers and comfortable inside their own. Swap the two and almost everything you make, and almost everything you say about what others make, gets better.</p>
+
+<p>Listen with purpose.</p>
+</div>
+
+<div class="sig">— chris hall</div>
+<div class="prov">adapted from a talk, september 2025 · figure drawn in-house</div>
+</article>
+
+<div class="foot">
+  <hr>
+  <a href="/">chall.net</a> · <a href="/essays/">essays</a>
+</div>
+<script>
+(function(){
+  var f=document.getElementById('fig1'), s=document.getElementById('framestate'), on=false;
+  f.addEventListener('click',function(){
+    on=!on; f.classList.toggle('inframe',on);
+    s.textContent=on?'inside the frame':'outside the frame';
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Life Is Like a Game — Chris Hall</title>
+<meta name="description" content="Manage your skills, manage your resources. An essay by Chris Hall.">
+<style>
+:root { --bg:#f6f4ee; --tex:#eeebe4; --ink:#18181c; --mid:#56565e; --dim:#989690; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { background:var(--bg); }
+body { background: repeating-linear-gradient(0deg, var(--bg) 0px, var(--bg) 3px, var(--tex) 3px, var(--tex) 4px);
+  color: var(--ink); font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px; line-height: 1.5; min-height: 100vh; padding: 26px clamp(14px, 4vw, 46px); }
+a { color: var(--mid); text-decoration: none; }
+a:hover { color: var(--ink); text-decoration: underline; }
+.mast { border: 1px solid var(--ink); padding: 10px 16px; display: flex; justify-content: space-between;
+  align-items: center; gap: 12px; position: relative; max-width: 720px; margin: 0 auto; }
+.mast::after { content:""; position:absolute; inset:2px; border:1px solid var(--dim); pointer-events:none; }
+.mast .brand { font-weight: 700; letter-spacing: 2px; }
+.mast .sub { color: var(--dim); font-size: 12px; margin-top: 2px; }
+.mast .right { color: var(--mid); text-align: right; font-size: 12px; }
+.essay { max-width: 680px; margin: 34px auto 0; }
+.kicker { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+h1 { font-size: 22px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8px; }
+.epi { font-size: 12px; color: var(--mid); margin-bottom: 24px; }
+.fig { border: 1px solid var(--ink); position: relative; margin: 4px 0 8px; padding: 18px 20px 16px; }
+.fig::after { content:""; position:absolute; inset:2px; border:1px solid var(--dim); pointer-events:none; }
+.figcap { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin: 8px 0 30px; }
+.skrow { display: flex; align-items: center; gap: 10px; margin: 7px 0; }
+.skname { width: 178px; font-size: 9.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--mid);
+  text-align: right; white-space: nowrap; }
+.skbar { flex: 1; height: 7px; border: 1px solid var(--dim); position: relative; }
+.skfill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink); width: 0; }
+.sklvl { width: 34px; font-size: 9.5px; color: var(--dim); }
+#figtitle { font-size: 9.5px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+#figtitle b { color: var(--ink); }
+@media (max-width: 500px) { .skname { width: 120px; font-size: 8.5px; } }
+.body { font-family: Georgia, "Times New Roman", serif; font-size: 16.5px; line-height: 1.75; color: #232327; }
+.body p { margin: 0 0 18px; }
+.sig { font-family: Georgia, serif; font-size: 15px; color: var(--mid); margin: 26px 0 6px; }
+.prov { font-size: 10.5px; letter-spacing: 1.5px; color: var(--dim); text-transform: uppercase; margin-bottom: 20px; }
+.foot { max-width: 720px; margin: 30px auto 0; text-align: center; color: var(--mid); }
+.foot hr { border: 0; border-top: 1px solid var(--dim); margin-bottom: 10px; }
+.foot a { color: var(--dim); font-size: 11px; letter-spacing: 2px; }
+</style>
+</head>
+<body>
+<div class="mast">
+  <div>
+    <div class="brand">CHRIS HALL</div>
+    <div class="sub">essays . chall.net</div>
+  </div>
+  <div class="right"><a href="/">home</a> · <a href="/essays/">essays</a></div>
+</div>
+
+<article class="essay">
+<div class="kicker">essay v . september 2025</div>
+<h1>LIFE IS LIKE A GAME</h1>
+<div class="epi">manage your skills, manage your resources.</div>
+
+<div class="fig" id="fig5">
+  <div id="figtitle">stats — <b>chris hall</b> . levels rise to 7–8, then a new skill begins</div>
+  <div id="skills"></div>
+</div>
+<div class="figcap">fig. 5 — the actual skill rails from this site's timeline, replayed as a stats panel. no skill waits for another to reach 99.</div>
+
+<div class="body">
+<p>The first game I ever loved was RuneScape. I was a kid in New York with no money, no status, and no idea that the thing I was practicing — staring at a skill panel, deciding what to level next — was the most useful model of life I'd ever get. People dismiss the games-as-life idea because of the swords and dragons. Wrong layer. RuneScape and World of Warcraft simulate entire worlds with working economies. Strip the fantasy and what's left maps onto reality almost completely: you have skills, you have resources, and you win by making the best available move, over and over, for years.</p>
+
+<p>Chess players know there's always a best move on the board, no matter how bad the position. Life is the same, and this is more hopeful than it sounds — a terrible position still has a best move, and finding it beats mourning the position. When the situation changes, and it will, you don't ask why. You re-read the board and find the new best move. That's the whole loop. Everything else is deciding what the move is, and that comes down to managing two things.</p>
+
+<p>Skills are the first. The key insight comes straight from the game: you cannot max everything, and trying is the classic beginner's error. RuneScape capped every skill at 99, and the players grinding one skill to the cap while their account stayed level-30 everywhere else were miserable and broke. The winning pattern is different: take each skill you actually care about from zero to a seven or eight — fast, with real intensity, like it matters — then move to the next one. Sevens compound across a life in a way one 99 never does. The 9.9s come later, for the two or three things that turn out to be yours. Rushing them on day one is fighting the biggest dragon in the game at level one. The dragon eats you.</p>
+
+<p>Resources are the second, and here's where most people under-count. Money is one resource. The full inventory: your family's knowledge — their specialties, their scar tissue, their access, which they'll hand you for free because you're family. Your location — I could walk out any door in New York and bump into business all day; that's a resource strangers pay to visit. Your time — the most valuable when you're young and dumbest to waste, including the hidden kind: any job that frees your ears is a classroom. And whatever you were born with — height, temperament, a good ear. Everyone's dealt something. The game isn't the hand; it's playing the hand to full advantage.</p>
+
+<p>I know because I ran this strategy with no head start. Twenty-eight years in New York — no famous family, no money, nobody's son. What I had: a family with brains, a city full of collisions, time, and the willingness to go all-in on a skill until it hit seven and then start the next one. Video, audio, photography, events, marketing — the panel above is real, and it filled left to right exactly the way a game account does. Nothing about it required luck. It required knowing which skill was next and refusing to grind past eight while other skills sat at zero.</p>
+
+<p>I still score myself like a stat sheet — intelligence, fitness, finances, mental state, health, how happy my clients are. Daily. And one rule keeps the whole system honest: until I'm an eight or nine in a category, I count myself a zero. All-in or not in. Half-leveled skills are the most expensive things you can own — all the cost of starting, none of the payoff of arriving.</p>
+
+<p>Life is like a game. Not a metaphor — a mechanism: skills, resources, best move, repeat. Play it deliberately, because you're playing it either way. And as I tell my dog on our runs: we're not here to have fun. We're here to win, baby.</p>
+</div>
+
+<div class="sig">— chris hall</div>
+<div class="prov">adapted from a talk, september 2025 · figure drawn in-house</div>
+</article>
+
+<div class="foot">
+  <hr>
+  <a href="/">chall.net</a> · <a href="/essays/">essays</a>
+</div>
+<script>
+(function(){
+  var SK=[
+    {n:"video production",lvl:8,d:0},
+    {n:"audio production",lvl:8,d:300},
+    {n:"photography",lvl:8,d:900},
+    {n:"event production",lvl:7,d:1200},
+    {n:"social media marketing",lvl:8,d:1900},
+    {n:"live video production",lvl:7,d:2600},
+    {n:"podcast production",lvl:8,d:2900},
+    {n:"personal branding",lvl:7,d:3600},
+    {n:"software building",lvl:2,d:4300}
+  ];
+  var wrap=document.getElementById('skills');
+  SK.forEach(function(s){
+    var row=document.createElement('div'); row.className='skrow';
+    row.innerHTML='<div class="skname">'+s.n+'</div><div class="skbar"><div class="skfill"></div></div><div class="sklvl">0/10</div>';
+    wrap.appendChild(row);
+    s.fill=row.querySelector('.skfill'); s.out=row.querySelector('.sklvl');
+  });
+  var t0=null, ran=false;
+  function animate(ts){
+    if(!t0) t0=ts;
+    var el=ts-t0, done=true;
+    SK.forEach(function(s){
+      var p=Math.max(0,Math.min(1,(el-s.d)/1400));
+      var v=p*s.lvl;
+      s.fill.style.width=(v*10)+'%';
+      s.out.textContent=(Math.round(v*10)/10).toFixed(0)+'/10';
+      if(p<1) done=false;
+    });
+    if(!done) requestAnimationFrame(animate);
+  }
+  var io=new IntersectionObserver(function(en){
+    if(en[0].isIntersecting && !ran){ ran=true; requestAnimationFrame(animate); }
+  },{threshold:0.4});
+  io.observe(document.getElementById('fig5'));
+})();
+</script>
+</body>
+</html>

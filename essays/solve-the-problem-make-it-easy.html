@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solve the Problem, Make It Easy — Chris Hall</title>
+<meta name="description" content="The professional absorbs the difficulty. An essay by Chris Hall.">
+<style>
+:root { --bg:#f6f4ee; --tex:#eeebe4; --ink:#18181c; --mid:#56565e; --dim:#989690; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { background:var(--bg); }
+body { background: repeating-linear-gradient(0deg, var(--bg) 0px, var(--bg) 3px, var(--tex) 3px, var(--tex) 4px);
+  color: var(--ink); font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px; line-height: 1.5; min-height: 100vh; padding: 26px clamp(14px, 4vw, 46px); }
+a { color: var(--mid); text-decoration: none; }
+a:hover { color: var(--ink); text-decoration: underline; }
+.mast { border: 1px solid var(--ink); padding: 10px 16px; display: flex; justify-content: space-between;
+  align-items: center; gap: 12px; position: relative; max-width: 720px; margin: 0 auto; }
+.mast::after { content:""; position:absolute; inset:2px; border:1px solid var(--dim); pointer-events:none; }
+.mast .brand { font-weight: 700; letter-spacing: 2px; }
+.mast .sub { color: var(--dim); font-size: 12px; margin-top: 2px; }
+.mast .right { color: var(--mid); text-align: right; font-size: 12px; }
+.essay { max-width: 680px; margin: 34px auto 0; }
+.kicker { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+h1 { font-size: 22px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8px; }
+.epi { font-size: 12px; color: var(--mid); margin-bottom: 24px; }
+.fig { border: 1px solid var(--ink); position: relative; margin: 4px 0 8px; height: 240px; cursor: pointer;
+  user-select: none; overflow: hidden; }
+.fig::after { content:""; position:absolute; inset:2px; border:1px solid var(--dim); pointer-events:none; }
+.fig canvas { display:block; width:100%; height:100%; }
+.figcap { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin: 8px 0 30px; }
+#figlab { position:absolute; top: 10px; left: 12px; font-size: 9.5px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--dim); z-index: 2; }
+#figlab b { color: var(--ink); }
+.body { font-family: Georgia, "Times New Roman", serif; font-size: 16.5px; line-height: 1.75; color: #232327; }
+.body p { margin: 0 0 18px; }
+.sig { font-family: Georgia, serif; font-size: 15px; color: var(--mid); margin: 26px 0 6px; }
+.prov { font-size: 10.5px; letter-spacing: 1.5px; color: var(--dim); text-transform: uppercase; margin-bottom: 20px; }
+.foot { max-width: 720px; margin: 30px auto 0; text-align: center; color: var(--mid); }
+.foot hr { border: 0; border-top: 1px solid var(--dim); margin-bottom: 10px; }
+.foot a { color: var(--dim); font-size: 11px; letter-spacing: 2px; }
+</style>
+</head>
+<body>
+<div class="mast">
+  <div>
+    <div class="brand">CHRIS HALL</div>
+    <div class="sub">essays . chall.net</div>
+  </div>
+  <div class="right"><a href="/">home</a> · <a href="/essays/">essays</a></div>
+</div>
+
+<article class="essay">
+<div class="kicker">essay iv . september 2025</div>
+<h1>SOLVE THE PROBLEM, MAKE IT EASY</h1>
+<div class="epi">the client should never feel the weight.</div>
+
+<div class="fig" id="fig4" title="press and hold">
+  <div id="figlab">what the client sees — <b>press and hold</b></div>
+  <canvas id="cv"></canvas>
+</div>
+<div class="figcap">fig. 4 — the surface, and what it took. press to see underneath.</div>
+
+<div class="body">
+<p>There are two halves to serving anyone well, and they must stay in balance: solve the problem, and make it easy. The first half everyone understands. The second half is where careers are actually made.</p>
+
+<p>Solving the problem is the visible work — tactical, sometimes brutal. Making it easy is the discipline of ensuring the client never feels any of that. My standard is literal: working with us should be as easy as pressing a button that says <i>video</i>. The client presses it; a finished thing arrives. Between the press and the delivery there may have been three equipment failures, a location that fell through at midnight, and a drive to another state — and none of it is the client's problem, because I didn't make it their problem.</p>
+
+<p>The rule underneath: never bring the difficulty back to the client. If I had to swim across the Hudson and crawl through mud to deliver, the client hears none of it. This is harder than it sounds, because the difficulty is precisely the part you want to talk about — it's the heroic part, the proof of effort. Resist it. The moment you narrate your struggle up the chain, you've handed the weight to the person who paid you to carry it. They don't care, don't need to know, and every minute you spend proving how hard you worked is a minute of theirs you're spending on your own ego. Busy people notice who costs them time. There are only two reasons to interrupt a client: a decision that costs their money, or a problem that genuinely requires their judgment. Everything else you eat.</p>
+
+<p>And here's the strange economics of it: done right, your best work is indistinguishable from things having simply been easy. The client has no idea what was difficult. No debrief, no applause — the appreciation was the invoice they paid, and the reward is that they call again. Working quietly turns out to be a compounding asset: the less you narrate, the more they trust, and trust is the entire business. If you need the glory anyway, do what I'm doing — put it in an essay.</p>
+
+<p>Pulling this off doesn't take an army. It takes the opposite. Think SEAL Team Six, not ten thousand infantry — the Skunk Works, the Macintosh team, two dozen people who each replace several. Small elite teams carry this doctrine naturally: fewer handoffs, less communication overhead, and everyone senior enough to absorb difficulty without escalating it. For a major shoot I might make one phone call and coordinate for thirty minutes. That's not a smaller version of a big operation. It's a different, better machine.</p>
+
+<p>One warning, because there's a counterfeit version of this. Corporate life is full of people who mastered only the second half — friendly, smooth, easy to work with, and mediocre. Charm without competence survives surprisingly long in big organizations. It does not survive high performers, who sort the pleasant from the excellent by the second engagement. Be both or be neither: extremely good, and easy. That combination is so rare that the people who have it effectively cannot be fired. In a country where anyone can be let go on any Tuesday, I never found a better form of job security.</p>
+
+<p>Solve the problem. Make it easy. Eat the weight, keep the trust, and let the work arrive looking effortless — like a duck crossing a lake, serene above the water, paddling like hell below.</p>
+</div>
+
+<div class="sig">— chris hall</div>
+<div class="prov">adapted from a talk, september 2025 · figure drawn in-house</div>
+</article>
+
+<div class="foot">
+  <hr>
+  <a href="/">chall.net</a> · <a href="/essays/">essays</a>
+</div>
+<script>
+(function(){
+  var fig=document.getElementById('fig4'), cv=document.getElementById('cv'), lab=document.getElementById('figlab');
+  var ctx=cv.getContext('2d'), dpr=window.devicePixelRatio||1, W,H, pressed=false, t=0;
+  function size(){ W=fig.clientWidth; H=fig.clientHeight; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+  size(); window.addEventListener('resize',size);
+  // pre-generate the chaos layer (deterministic per load)
+  var scrib=[];
+  for(var i=0;i<46;i++){
+    var pts=[], n=8+Math.floor(Math.random()*14);
+    var sx=20+Math.random()*0.9, sy=0;
+    for(var j=0;j<n;j++) pts.push([Math.random(), Math.random()]);
+    scrib.push(pts);
+  }
+  var labels=['recorder died — swapped to backup','location fell through 23:40','card full mid-take','re-lit the whole room','drove it there myself','fire truck in the take','no permit — found an angle','client never knew'];
+  function draw(){
+    t+=0.016;
+    ctx.clearRect(0,0,W,H);
+    var mid=H*0.42;
+    if(pressed){
+      // the chaos beneath
+      ctx.strokeStyle='rgba(24,24,28,0.28)'; ctx.lineWidth=0.7;
+      scrib.forEach(function(pts,i){
+        ctx.beginPath();
+        pts.forEach(function(p,j){
+          var px=30+p[0]*(W-60), py=mid+18+p[1]*(H-mid-34);
+          if(j===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+        });
+        ctx.stroke();
+      });
+      ctx.fillStyle='#56565e'; ctx.font='9px ui-monospace,monospace';
+      labels.forEach(function(s,i){
+        ctx.fillText(s, 30+(i%2)*(W/2-30), mid+34+Math.floor(i/2)*((H-mid-52)/4));
+      });
+      lab.innerHTML='what it took — <b>release</b>';
+    } else {
+      lab.innerHTML='what the client sees — <b>press and hold</b>';
+    }
+    // the serene line (always)
+    ctx.strokeStyle='#18181c'; ctx.lineWidth=1.2;
+    ctx.beginPath();
+    for(var x=20;x<W-20;x++){
+      var y=mid+Math.sin(x*0.015+t*0.7)*2.5;
+      if(x===20) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    ctx.fillStyle='#989690'; ctx.font='9px ui-monospace,monospace';
+    ctx.fillText('VIDEO, DELIVERED', 22, mid-12);
+    requestAnimationFrame(draw);
+  }
+  function down(e){ pressed=true; e.preventDefault(); }
+  function up(){ pressed=false; }
+  fig.addEventListener('mousedown',down); fig.addEventListener('mouseup',up); fig.addEventListener('mouseleave',up);
+  fig.addEventListener('touchstart',down,{passive:false}); fig.addEventListener('touchend',up);
+  requestAnimationFrame(draw);
+})();
+</script>
+</body>
+</html>
