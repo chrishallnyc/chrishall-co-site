@@ -127,6 +127,46 @@ a:hover { color: var(--ink); text-decoration: underline; }
 .foot a { color: var(--dim); }
 .foot .ver { font-size: 11px; letter-spacing: 2px; text-decoration: none; }
 .foot .ver:hover { color: var(--ink); }
+
+/* ── MOBILE REWORK (≤719px): the dual-sided gantt becomes horizontal bands ── */
+.band { display: none; }
+@media (max-width: 719px) {
+  body { padding: 18px 16px; }
+  .mast { flex-direction: column; align-items: flex-start; gap: 4px; padding: 10px 12px; }
+  .mast .right { text-align: left; font-size: 11px; }
+  #mode { position: absolute; top: 8px; right: 10px; font-size: 15px; padding: 4px 6px; }
+  .intro .brand { letter-spacing: 4px; }
+  /* timeline: full width, rails off */
+  .tlwrap { padding: 6px 0 0 !important; }
+  .rail, .glab { display: none !important; }
+  .tl { margin-left: 40px; }
+  .tl li { padding: 5px 0 5px 16px; }
+  .tl .loc { left: -40px; }
+  /* bands */
+  .band { display: block; margin-top: 26px; }
+  .band h3 { font-size: 10.5px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--mid); display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .band h3::after { content:""; flex:1; height:1px; background: var(--dim); }
+  .brow { margin-bottom: 11px; }
+  .brow .bl { display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--mid); }
+  .brow .bl .byr { font-size: 9.5px; letter-spacing: 1px; color: var(--dim); }
+  .brow.tipd .bl { cursor: pointer; }
+  .brow.tipd .bl .nm { border-bottom: 1px dotted var(--dim); padding-bottom: 1px; }
+  .btrack { position: relative; height: 4px; margin-top: 5px; background:
+    repeating-linear-gradient(90deg, var(--dim) 0 1px, transparent 1px 5px); opacity: 0.9; }
+  .bseg { position: absolute; top: 0; height: 4px; background: var(--mid); }
+  .brow.open .bseg, .brow:active .bseg { background: var(--acc); }
+  .bseg.on { background: linear-gradient(90deg, var(--mid) 70%, transparent); }
+  body.dark .brow.open .bseg { background: var(--acc); }
+  .bnote { display: none; margin: 8px 0 2px; padding: 8px 10px; border: 1px solid var(--dim);
+    font-size: 11px; line-height: 1.6; color: var(--mid); }
+  .bnote .k { display:block; font-size: 8.5px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--dim); margin-bottom: 4px; }
+  .brow.open .bnote { display: block; }
+  .baxis { display: flex; justify-content: space-between; font-size: 9px; letter-spacing: 1px;
+    color: var(--dim); margin-top: 8px; padding-top: 5px; border-top: 1px solid var(--dim); }
+}
 </style>
 </head>
 <body>
@@ -189,7 +229,7 @@ the most influential institutions in global technology.</p>
 
 <div class="foot">
   <hr>
-  <a href="/changelog.html" class="ver">v1.12.0</a>
+  <a href="/changelog.html" class="ver">v1.13.0</a>
 </div>
 <script>
 (function(){
@@ -261,6 +301,9 @@ the most influential institutions in global technology.</p>
   ];
   function build(){
     wrap.querySelectorAll('.rail,.glab').forEach(function(r){r.remove();});
+    var sec=wrap.parentElement;
+    sec.querySelectorAll('.band').forEach(function(b){b.remove();});
+    if(window.innerWidth<720){ buildBands(sec); return; }
     var lis=[].slice.call(wrap.querySelectorAll('.tl li'));
     var wr=wrap.getBoundingClientRect();
     var S=(window.innerWidth<600)?18:24;
@@ -300,6 +343,38 @@ the most influential institutions in global technology.</p>
     gl.style.left='0px'; wrap.appendChild(gl);
     var gr=document.createElement('div'); gr.className='glab'; gr.textContent='clients';
     gr.style.right='0px'; wrap.appendChild(gr);
+  }
+  /* ── mobile: horizontal band charts — same data, readable at 390px ── */
+  function buildBands(sec){
+    var Y0=2009, Y1=2026.7;
+    function pct(y){ return Math.min(100, Math.max(0, (y-Y0)/(Y1-Y0)*100)); }
+    function mkBand(title, rows){
+      var b=document.createElement('div'); b.className='band';
+      var h=document.createElement('h3'); h.textContent=title; b.appendChild(h);
+      rows.slice().sort(function(a,c){return a.f-c.f;}).forEach(function(c){
+        var r=document.createElement('div'); r.className='brow'+(c.w?' tipd':'');
+        var yy="'"+String(Math.floor(c.f)).slice(2);
+        var yr=c.t?(yy+"\u2009\u2013\u2009'"+String(Math.floor(c.t)).slice(2)):(yy+"\u2009\u2013\u2009now");
+        var x0=pct(c.f), x1=pct(c.t||Y1);
+        r.innerHTML='<div class="bl"><span class="nm">'+c.n+'</span><span class="byr">'+yr+'</span></div>'
+          +'<div class="btrack"><i class="bseg'+(c.t?'':' on')+'" style="left:'+x0.toFixed(1)+'%;width:'+Math.max(x1-x0,1.5).toFixed(1)+'%"></i></div>'
+          +(c.w?'<div class="bnote"><span class="k">the world, same moment</span>'+c.w+'</div>':'');
+        if(c.w){
+          r.querySelector('.bl').addEventListener('click',function(){
+            var was=r.classList.contains('open');
+            sec.querySelectorAll('.brow.open').forEach(function(o){o.classList.remove('open');});
+            if(!was) r.classList.add('open');
+          });
+        }
+        b.appendChild(r);
+      });
+      var ax=document.createElement('div'); ax.className='baxis';
+      ax.innerHTML='<span>2009</span><span>2014</span><span>2019</span><span>2026</span>';
+      b.appendChild(ax);
+      sec.appendChild(b);
+    }
+    mkBand('skills', SK);
+    mkBand('clients', CL);
   }
   build();
   window.addEventListener('load',build);
