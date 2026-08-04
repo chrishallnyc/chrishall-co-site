@@ -6,6 +6,7 @@
 <title>CHALL.NET — Chris Hall</title>
 <meta name="description" content="Chris Hall — Senior Video Producer at Y Combinator. San Francisco.">
 <link rel="canonical" href="https://chall.net/">
+<meta name="theme-color" content="#0f1013">
 <style>
 :root { --bg:#f6f4ee; --tex:#eeebe4; --ink:#18181c; --mid:#56565e; --dim:#989690; --acc:#18181c; }
 body.dark { --bg:#0f1013; --tex:#131418; --ink:#ede6d6; --mid:#bab29e; --dim:#6b6559; --acc:#e8b46f; }
@@ -133,7 +134,11 @@ a:hover { color: var(--ink); text-decoration: underline; }
 <div id="aurora"></div>
 <script>
 (function(){
-  try { if(localStorage.getItem('challnet-theme')==='dark') document.body.classList.add('dark'); } catch(e){}
+  try {
+    var q = new URLSearchParams(location.search).get('theme');
+    var t = q || localStorage.getItem('challnet-theme') || 'dark';
+    if (t !== 'light') document.body.classList.add('dark');
+  } catch(e){ document.body.classList.add('dark'); }
 })();
 </script>
 <div class="wrap">
@@ -184,7 +189,7 @@ the most influential institutions in global technology.</p>
 
 <div class="foot">
   <hr>
-  <a href="/changelog.html" class="ver">v1.11.0</a>
+  <a href="/changelog.html" class="ver">v1.12.0</a>
 </div>
 <script>
 (function(){
