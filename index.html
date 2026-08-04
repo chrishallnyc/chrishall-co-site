@@ -7,7 +7,8 @@
 <meta name="description" content="Chris Hall — Senior Video Producer at Y Combinator. San Francisco.">
 <link rel="canonical" href="https://chall.net/">
 <style>
-:root { --bg:#f6f4ee; --tex:#eeebe4; --ink:#18181c; --mid:#56565e; --dim:#989690; }
+:root { --bg:#f6f4ee; --tex:#eeebe4; --ink:#18181c; --mid:#56565e; --dim:#989690; --acc:#18181c; }
+body.dark { --bg:#0f1013; --tex:#131418; --ink:#ede6d6; --mid:#bab29e; --dim:#6b6559; --acc:#e8b46f; }
 * { margin:0; padding:0; box-sizing:border-box; }
 html,body { background:var(--bg); }
 body {
@@ -18,7 +19,22 @@ body {
   min-height: 100vh;
   padding: 26px clamp(14px, 4vw, 46px);
   image-rendering: pixelated;
+  transition: background 0.4s ease, color 0.4s ease;
 }
+#lamp { display:none; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:radial-gradient(540px 540px at var(--lx,50%) var(--ly,25%),
+    rgba(255,204,140,0.14), rgba(255,204,140,0.045) 45%, transparent 72%); }
+body.dark #lamp { display:block; }
+body.dark .mast .brand { text-shadow:0 0 26px rgba(255,204,140,0.22); }
+body.dark a:hover { color:var(--acc); }
+body.dark .rail.hl { background:var(--acc); }
+body.dark .rail.hl span { color:var(--acc); }
+body.dark #tip { background:#16171c; border-color:var(--acc); }
+body.dark .foot .ver:hover { color:var(--acc); }
+.wrap,.intro,.sec,.foot { position:relative; z-index:1; }
+#mode { cursor:pointer; background:none; border:none; color:var(--dim); font-family:inherit;
+  font-size:13px; padding:0 0 0 10px; line-height:1; }
+#mode:hover { color:var(--ink); }
 a { color: var(--mid); text-decoration: none; }
 a:hover { color: var(--ink); text-decoration: underline; }
 .mast {
@@ -96,13 +112,19 @@ a:hover { color: var(--ink); text-decoration: underline; }
 </style>
 </head>
 <body>
+<div id="lamp"></div>
+<script>
+(function(){
+  try { if(localStorage.getItem('challnet-theme')==='dark') document.body.classList.add('dark'); } catch(e){}
+})();
+</script>
 <div class="wrap">
 <div class="mast">
   <div>
     <div class="brand">CHRIS HALL</div>
     <div class="sub">chall.net . nyc . sf . worldwide</div>
   </div>
-  <div class="right">entrepreneur<br>senior video producer, y combinator</div>
+  <div class="right">entrepreneur<br>senior video producer, y combinator <button id="mode" title="lights">☾</button></div>
 </div>
 </div>
 
@@ -146,8 +168,26 @@ the most influential institutions in global technology.</p>
 
 <div class="foot">
   <hr>
-  <a href="/changelog.html" class="ver">v1.8.1</a>
+  <a href="/changelog.html" class="ver">v1.9.0</a>
 </div>
+<script>
+(function(){
+  var btn=document.getElementById('mode');
+  function label(){ btn.textContent=document.body.classList.contains('dark')?'☀':'☾'; }
+  label();
+  btn.addEventListener('click',function(){
+    document.body.classList.toggle('dark');
+    try { localStorage.setItem('challnet-theme', document.body.classList.contains('dark')?'dark':'light'); } catch(e){}
+    label();
+  });
+  var l=document.getElementById('lamp'),tx=innerWidth/2,ty=innerHeight*.25,x=tx,y=ty;
+  addEventListener('mousemove',function(e){tx=e.clientX;ty=e.clientY;});
+  addEventListener('touchmove',function(e){tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+  (function a(){ x+=(tx-x)*.07; y+=(ty-y)*.07;
+    l.style.setProperty('--lx',x+'px'); l.style.setProperty('--ly',y+'px');
+    requestAnimationFrame(a); })();
+})();
+</script>
 <script>
 (function(){
   var wrap=document.querySelector('.tlwrap'); if(!wrap) return;
