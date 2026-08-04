@@ -190,7 +190,8 @@ the most influential institutions in global technology.</p>
       d.style.top=top+'px'; d.style.height=Math.max(bot-top,18)+'px';
       if(side==='r'){ d.style.right=((8-c.c)*S)+'px'; } else { d.style.left=(c.c*S)+'px'; }
       d.title=c.n;
-      var sh=(Math.max(bot-top,18)<140)?' class="up"':'';
+      var h=Math.max(bot-top,18);
+      var sh=(h<140 && bot>endY-60)?' class="up"':'';
       d.innerHTML='<u class="t"></u>'+(c.t?'<u class="b"></u>':'')+'<span'+sh+'>'+c.n+'</span>';
       wrap.appendChild(d);
     }
