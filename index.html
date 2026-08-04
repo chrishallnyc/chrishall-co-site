@@ -67,14 +67,17 @@ a:hover { color: var(--ink); text-decoration: underline; }
 .bio summary::after { content: " +"; }
 .bio[open] summary::after { content: " −"; }
 .bio p { margin: 10px 0 0; }
-.tlwrap { position: relative; padding-right: 196px; padding-bottom: 6px; }
+.tlwrap { position: relative; padding-right: 196px; padding-left: 210px; padding-top: 22px; padding-bottom: 6px; }
 .rail { position: absolute; width: 1px; background: var(--dim); }
 .rail.on { background: linear-gradient(180deg, var(--dim) 78%, transparent); }
 .rail u { position: absolute; left: -2px; width: 5px; height: 5px; border-radius: 50%; background: var(--dim); }
 .rail u.t { top: -1px; } .rail u.b { bottom: -1px; }
 .rail span { position: absolute; top: 7px; left: 3px; writing-mode: vertical-rl; font-size: 9.5px;
   letter-spacing: 1.8px; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
-@media (max-width: 560px) { .tlwrap { padding-right: 162px; } }
+@media (max-width: 560px) { .tlwrap { padding-right: 150px; padding-left: 160px; } }
+.glab { position: absolute; top: 0; font-size: 9.5px; letter-spacing: 3px; text-transform: uppercase; color: var(--dim); }
+.glab::after { content:""; display:inline-block; width: 14px; height: 1px; background: var(--dim); vertical-align: 3px; margin-left: 6px; }
+.glab.l::before { content:""; display:inline-block; width: 14px; height: 1px; background: var(--dim); vertical-align: 3px; margin-right: 6px; }
 .foot a { color: var(--dim); }
 .foot .ver { font-size: 11px; letter-spacing: 2px; text-decoration: none; }
 .foot .ver:hover { color: var(--ink); }
@@ -129,15 +132,6 @@ the most influential institutions in global technology.</p>
 
 </div>
 
-<div class="sec">
-<h2>SKILLS</h2>
-<div class="tags">
-  <span>video production</span><span>cinematography</span><span>audio engineering</span>
-  <span>podcast production</span><span>live event production</span><span>photography</span>
-  <span>media strategy</span><span>ai agent systems</span>
-</div>
-</div>
-
 <div class="foot">
   <hr>
   <a href="/changelog.html" class="ver">v1.4.0</a>
@@ -154,13 +148,23 @@ the most influential institutions in global technology.</p>
     {n:"b&h photo",f:2017,t:2020,c:5},
     {n:"sara dietschy",f:2017,t:2020,c:6},
     {n:"garry tan",f:2020,t:null,c:7},
-    {n:"j. livingston",f:2022,t:null,c:2}
+    {n:"jessica livingston",f:2022,t:null,c:2}
+  ];
+  var SK=[
+    {n:"video production",f:2009,c:0},
+    {n:"audio production",f:2009,c:1},
+    {n:"photography",f:2010,c:2},
+    {n:"live event production",f:2012,c:3},
+    {n:"social media marketing",f:2012,c:4},
+    {n:"podcast production",f:2017,c:5},
+    {n:"personal branding",f:2019,c:6},
+    {n:"software building",f:2026,c:7}
   ];
   function build(){
-    wrap.querySelectorAll('.rail').forEach(function(r){r.remove();});
+    wrap.querySelectorAll('.rail,.glab').forEach(function(r){r.remove();});
     var lis=[].slice.call(wrap.querySelectorAll('.tl li'));
     var wr=wrap.getBoundingClientRect();
-    var S=(window.innerWidth<600)?20:24;
+    var S=(window.innerWidth<600)?18:24;
     var rows=lis.map(function(li){return {y:parseInt(li.querySelector('b').textContent,10),el:li};});
     function mid(el){var r=el.getBoundingClientRect();return r.top+r.height/2-wr.top;}
     function yPos(year){
@@ -173,16 +177,22 @@ the most influential institutions in global technology.</p>
     }
     var last=lis[lis.length-1].getBoundingClientRect();
     var endY=last.bottom-wr.top;
-    CL.forEach(function(c){
+    function rail(c,side){
       var top=yPos(c.f), bot=c.t?yPos(c.t):endY;
       var d=document.createElement('div');
       d.className='rail'+(c.t?'':' on');
       d.style.top=top+'px'; d.style.height=Math.max(bot-top,18)+'px';
-      d.style.right=((7-c.c)*S)+'px';
+      if(side==='r'){ d.style.right=((7-c.c)*S)+'px'; } else { d.style.left=(c.c*S)+'px'; }
       d.title=c.n;
       d.innerHTML='<u class="t"></u>'+(c.t?'<u class="b"></u>':'')+'<span>'+c.n+'</span>';
       wrap.appendChild(d);
-    });
+    }
+    CL.forEach(function(c){rail(c,'r');});
+    SK.forEach(function(c){rail(c,'l');});
+    var gl=document.createElement('div'); gl.className='glab l'; gl.textContent='skills';
+    gl.style.left='0px'; wrap.appendChild(gl);
+    var gr=document.createElement('div'); gr.className='glab'; gr.textContent='clients';
+    gr.style.right='0px'; wrap.appendChild(gr);
   }
   build();
   window.addEventListener('load',build);
