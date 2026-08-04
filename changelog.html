@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CHANGELOG — CHALL.NET</title>
+<meta name="robots" content="noindex">
+<style>
+:root { --bg:#f6f4ee; --tex:#eeebe4; --ink:#18181c; --mid:#56565e; --dim:#989690; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { background:var(--bg); }
+body {
+  background: repeating-linear-gradient(0deg, var(--bg) 0px, var(--bg) 3px, var(--tex) 3px, var(--tex) 4px);
+  color: var(--ink);
+  font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px; line-height: 1.5;
+  min-height: 100vh;
+  padding: 26px clamp(14px, 4vw, 46px);
+  image-rendering: pixelated;
+}
+a { color: var(--mid); text-decoration: none; }
+a:hover { color: var(--ink); text-decoration: underline; }
+.mast {
+  border: 1px solid var(--ink); padding: 10px 16px;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  position: relative; max-width: 1100px; margin: 0 auto;
+}
+.mast::after { content:""; position:absolute; inset:2px; border:1px solid var(--dim); pointer-events:none; }
+.mast .brand { font-weight: 700; letter-spacing: 2px; color: var(--ink); }
+.mast .sub { color: var(--dim); font-size: 12px; margin-top: 2px; }
+.mast .right { color: var(--mid); text-align: right; font-size: 12px; }
+.sec { max-width: 860px; margin: 30px auto 0; }
+.sec h2 { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--ink);
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.sec h2::after { content:""; flex: 1; height: 1px; background: var(--dim); }
+.cl { list-style: none; border-left: 1px solid var(--dim); margin-left: 4px; }
+.cl li { position: relative; padding: 4px 0 4px 20px; color: var(--mid); }
+.cl li::before { content:""; position: absolute; left: 0; top: 50%; width: 12px; height: 1px; background: var(--dim); }
+.cl b { color: var(--ink); font-weight: 700; margin-right: 8px; }
+.cl .d { color: var(--dim); font-size: 11px; letter-spacing: 1px; margin-left: 8px; }
+.foot { max-width: 1100px; margin: 26px auto 0; text-align: center; color: var(--mid); }
+.foot hr { border: 0; border-top: 1px solid var(--dim); margin-bottom: 10px; }
+.foot a { color: var(--dim); font-size: 11px; letter-spacing: 2px; }
+</style>
+</head>
+<body>
+<div class="mast">
+  <div>
+    <div class="brand">CHANGELOG</div>
+    <div class="sub">chall.net . record of strikes</div>
+  </div>
+  <div class="right"><a href="/">&larr; home</a></div>
+</div>
+
+<div class="sec">
+<h2>RELEASES</h2>
+<ul class="cl">
+  <li><b>v1.4.0</b>changelog page . version badge in the footer . footer sim links removed . masthead adds new york city<span class="d">2026-08-03</span></li>
+  <li><b>v1.3.0</b>client tenure rails on the timeline — nine clients as hairline gantt bars off the spine . clients chip section retired<span class="d">2026-08-03</span></li>
+  <li><b>v1.2.0</b>location gutter (nyc / fl / sf) left of the timeline . tenure years interpolated between rows<span class="d">2026-08-03</span></li>
+  <li><b>v1.1.0</b>short bio with collapsible long-form . entrepreneur added to the masthead . timeline rewrite: may 2025 sf, december 2025 agi arrives, january 2026 y combinator<span class="d">2026-08-03</span></li>
+  <li><b>v1.0.0</b>ink-on-paper rebuild — timeline . clients . skills . the b&amp;w system shared with admin.chall.net<span class="d">2026-08-03</span></li>
+  <li><b>v0.x</b>the fleet board era — live sim cards (watchkeeper . kitties . specialops . overworld)<span class="d">2026-07-10</span></li>
+</ul>
+</div>
+
+<div class="foot">
+  <hr>
+  <a href="/">chall.net</a>
+</div>
+</body>
+</html>
