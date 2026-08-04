@@ -68,19 +68,20 @@ a:hover { color: var(--ink); text-decoration: underline; }
 .bio[open] summary::after { content: " −"; }
 .bio p { margin: 10px 0 0; }
 .tlwrap { position: relative; padding-right: 224px; padding-left: 210px; padding-top: 22px; padding-bottom: 6px; }
-.rail { position: absolute; width: 1px; background: var(--dim); }
-.rail.on { background: linear-gradient(180deg, var(--dim) 78%, transparent); }
-.rail u { position: absolute; left: -2px; width: 5px; height: 5px; border-radius: 50%; background: var(--dim); }
-.rail u.t { top: -1px; } .rail u.b { bottom: -1px; }
-.rail span.up { top: auto; bottom: 100%; padding-bottom: 5px; }
-.rail span { position: absolute; top: 7px; left: 3px; writing-mode: vertical-rl; font-size: 9.5px;
-  letter-spacing: 1.8px; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+.rail { position: absolute; width: 2px; background: var(--mid); }
+.rail.on { background: linear-gradient(180deg, var(--mid) 78%, transparent); }
+.rail u { position: absolute; left: -2px; width: 6px; height: 6px; border-radius: 50%; background: var(--mid); }
+.rail u.t { top: -2px; } .rail u.b { bottom: -2px; }
+.rail span.up { top: auto; bottom: 100%; padding-bottom: 6px; }
+.rail span { position: absolute; top: 8px; left: 4px; writing-mode: vertical-rl; font-size: 11px; font-weight: 600;
+  letter-spacing: 1.6px; text-transform: uppercase; color: var(--mid); white-space: nowrap; }
+@media (max-width: 560px) { .rail span { font-size: 9.5px; } }
 @media (max-width: 560px) { .tlwrap { padding-right: 172px; padding-left: 160px; } }
-.glab { position: absolute; top: 0; font-size: 9.5px; letter-spacing: 3px; text-transform: uppercase; color: var(--dim); }
+.glab { position: absolute; top: 0; font-size: 10.5px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--mid); }
 .glab::after { content:""; display:inline-block; width: 14px; height: 1px; background: var(--dim); vertical-align: 3px; margin-left: 6px; }
 .glab.l::before { content:""; display:inline-block; width: 14px; height: 1px; background: var(--dim); vertical-align: 3px; margin-right: 6px; }
 .rail.tipd { cursor: help; }
-.rail.hl { background: var(--mid); }
+.rail.hl { background: var(--ink); }
 .rail.hl span { color: var(--ink); }
 #tip { position: absolute; z-index: 50; max-width: 280px; background: var(--bg);
   border: 1px solid var(--ink); padding: 9px 12px; font-size: 11px; line-height: 1.6;
