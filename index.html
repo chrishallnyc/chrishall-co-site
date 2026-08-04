@@ -67,7 +67,7 @@ a:hover { color: var(--ink); text-decoration: underline; }
 .bio summary::after { content: " +"; }
 .bio[open] summary::after { content: " −"; }
 .bio p { margin: 10px 0 0; }
-.tlwrap { position: relative; padding-right: 196px; padding-left: 210px; padding-top: 22px; padding-bottom: 6px; }
+.tlwrap { position: relative; padding-right: 224px; padding-left: 210px; padding-top: 22px; padding-bottom: 6px; }
 .rail { position: absolute; width: 1px; background: var(--dim); }
 .rail.on { background: linear-gradient(180deg, var(--dim) 78%, transparent); }
 .rail u { position: absolute; left: -2px; width: 5px; height: 5px; border-radius: 50%; background: var(--dim); }
@@ -75,7 +75,7 @@ a:hover { color: var(--ink); text-decoration: underline; }
 .rail span.up { top: auto; bottom: 100%; padding-bottom: 5px; }
 .rail span { position: absolute; top: 7px; left: 3px; writing-mode: vertical-rl; font-size: 9.5px;
   letter-spacing: 1.8px; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
-@media (max-width: 560px) { .tlwrap { padding-right: 150px; padding-left: 160px; } }
+@media (max-width: 560px) { .tlwrap { padding-right: 172px; padding-left: 160px; } }
 .glab { position: absolute; top: 0; font-size: 9.5px; letter-spacing: 3px; text-transform: uppercase; color: var(--dim); }
 .glab::after { content:""; display:inline-block; width: 14px; height: 1px; background: var(--dim); vertical-align: 3px; margin-left: 6px; }
 .glab.l::before { content:""; display:inline-block; width: 14px; height: 1px; background: var(--dim); vertical-align: 3px; margin-right: 6px; }
@@ -135,12 +135,14 @@ the most influential institutions in global technology.</p>
 
 <div class="foot">
   <hr>
-  <a href="/changelog.html" class="ver">v1.5.0</a>
+  <a href="/changelog.html" class="ver">v1.6.0</a>
 </div>
 <script>
 (function(){
   var wrap=document.querySelector('.tlwrap'); if(!wrap) return;
   var CL=[
+    {n:"carmelo anthony",f:2011,t:2012,c:1},
+    {n:"ypc of nyc",f:2012,t:2015,c:0},
     {n:"dj khaled",f:2016,t:2018,c:0},
     {n:"tao group",f:2017,t:2022,c:1},
     {n:"doja cat",f:2017,t:2020,c:2},
@@ -148,7 +150,10 @@ the most influential institutions in global technology.</p>
     {n:"sony music",f:2017,t:2020,c:4},
     {n:"b&h photo",f:2017,t:2020,c:5},
     {n:"sara dietschy",f:2017,t:2020,c:6},
-    {n:"garry tan",f:2020,t:null,c:7},
+    {n:"girl with no job",f:2017,t:2020,c:7},
+    {n:"ray dalio",f:2019,t:2020,c:0},
+    {n:"initialized capital",f:2020.5,t:2023,c:3},
+    {n:"garry tan",f:2020,t:null,c:8},
     {n:"jessica livingston",f:2022,t:null,c:2}
   ];
   var SK=[
@@ -183,7 +188,7 @@ the most influential institutions in global technology.</p>
       var d=document.createElement('div');
       d.className='rail'+(c.t?'':' on');
       d.style.top=top+'px'; d.style.height=Math.max(bot-top,18)+'px';
-      if(side==='r'){ d.style.right=((7-c.c)*S)+'px'; } else { d.style.left=(c.c*S)+'px'; }
+      if(side==='r'){ d.style.right=((8-c.c)*S)+'px'; } else { d.style.left=(c.c*S)+'px'; }
       d.title=c.n;
       var sh=(Math.max(bot-top,18)<140)?' class="up"':'';
       d.innerHTML='<u class="t"></u>'+(c.t?'<u class="b"></u>':'')+'<span'+sh+'>'+c.n+'</span>';
