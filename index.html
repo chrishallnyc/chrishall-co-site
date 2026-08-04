@@ -25,6 +25,22 @@ body {
   background:radial-gradient(540px 540px at var(--lx,50%) var(--ly,25%),
     rgba(255,204,140,0.14), rgba(255,204,140,0.045) 45%, transparent 72%); }
 body.dark #lamp { display:block; }
+#aurora { position:fixed; inset:-22%; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(58% 52% at 16% 20%, rgba(255,170,128,0.34), transparent 66%),
+    radial-gradient(52% 48% at 84% 28%, rgba(132,166,255,0.30), transparent 66%),
+    radial-gradient(62% 58% at 52% 88%, rgba(198,148,255,0.26), transparent 66%);
+  filter: blur(46px);
+  animation: aur 28s ease-in-out infinite alternate;
+}
+body.dark #aurora { display:none; }
+@keyframes aur {
+  0%   { transform: translate3d(-3%,-2%,0) scale(1); }
+  50%  { transform: translate3d(2.5%,3%,0) scale(1.07); }
+  100% { transform: translate3d(4%,-3%,0) scale(1.02); }
+}
+body:not(.dark) .mast { background: rgba(246,244,238,0.55);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 body.dark .mast .brand { text-shadow:0 0 26px rgba(255,204,140,0.22); }
 body.dark a:hover { color:var(--acc); }
 body.dark .rail.hl { background:var(--acc); }
@@ -113,6 +129,7 @@ a:hover { color: var(--ink); text-decoration: underline; }
 </head>
 <body>
 <div id="lamp"></div>
+<div id="aurora"></div>
 <script>
 (function(){
   try { if(localStorage.getItem('challnet-theme')==='dark') document.body.classList.add('dark'); } catch(e){}
@@ -168,7 +185,7 @@ the most influential institutions in global technology.</p>
 
 <div class="foot">
   <hr>
-  <a href="/changelog.html" class="ver">v1.9.0</a>
+  <a href="/changelog.html" class="ver">v1.10.0</a>
 </div>
 <script>
 (function(){
