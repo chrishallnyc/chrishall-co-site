@@ -61,6 +61,12 @@ a:hover { color: var(--ink); text-decoration: underline; }
 .tags span { border: 1px solid var(--dim); padding: 3px 10px; color: var(--mid); font-size: 12px; }
 .intro { max-width: 860px; margin: 24px auto 0; color: var(--mid); }
 .intro b { color: var(--ink); }
+.bio { margin-top: 10px; }
+.bio summary { cursor: pointer; color: var(--dim); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; list-style: none; }
+.bio summary::-webkit-details-marker { display: none; }
+.bio summary::after { content: " +"; }
+.bio[open] summary::after { content: " −"; }
+.bio p { margin: 10px 0 0; }
 .foot a { color: var(--dim); }
 </style>
 </head>
@@ -76,14 +82,19 @@ a:hover { color: var(--ink); text-decoration: underline; }
 </div>
 
 <div class="intro">
-<b>NYC-born media operator</b> building high-leverage content systems for founders at the highest level.
+NYC-born media operator. <b>~15 years</b> across video, audio, photo and live production —
+now producing flagship content inside <b>Y Combinator</b>.
+<details class="bio">
+<summary>more</summary>
+<p><b>NYC-born media operator</b> building high-leverage content systems for founders at the highest level.
 Early technical training in television, film, music and photography; firsthand startup experience across
 consumer apps, influencer monetization and brand growth. After co-founding and operating multiple startups,
 founded <b>Hall Media</b> in 2019 — durable personal brands and long-term media strategy for executives and founders.
 Producer of <b>Garry Tan's</b> personal video content since 2020, and of Jessica Livingston &amp; Carolynn Levy's
 podcast <b>The Social Radars</b> since 2022 — storytelling, systems, and operator-level execution. Joined
 <b>Y Combinator</b> full-time in January 2026 as Senior Video Producer, overseeing flagship content at one of
-the most influential institutions in global technology.
+the most influential institutions in global technology.</p>
+</details>
 </div>
 
 <div class="sec">
