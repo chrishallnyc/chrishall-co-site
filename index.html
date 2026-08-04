@@ -72,6 +72,7 @@ a:hover { color: var(--ink); text-decoration: underline; }
 .rail.on { background: linear-gradient(180deg, var(--dim) 78%, transparent); }
 .rail u { position: absolute; left: -2px; width: 5px; height: 5px; border-radius: 50%; background: var(--dim); }
 .rail u.t { top: -1px; } .rail u.b { bottom: -1px; }
+.rail span.up { top: auto; bottom: 100%; padding-bottom: 5px; }
 .rail span { position: absolute; top: 7px; left: 3px; writing-mode: vertical-rl; font-size: 9.5px;
   letter-spacing: 1.8px; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
 @media (max-width: 560px) { .tlwrap { padding-right: 150px; padding-left: 160px; } }
@@ -134,7 +135,7 @@ the most influential institutions in global technology.</p>
 
 <div class="foot">
   <hr>
-  <a href="/changelog.html" class="ver">v1.4.0</a>
+  <a href="/changelog.html" class="ver">v1.5.0</a>
 </div>
 <script>
 (function(){
@@ -184,7 +185,8 @@ the most influential institutions in global technology.</p>
       d.style.top=top+'px'; d.style.height=Math.max(bot-top,18)+'px';
       if(side==='r'){ d.style.right=((7-c.c)*S)+'px'; } else { d.style.left=(c.c*S)+'px'; }
       d.title=c.n;
-      d.innerHTML='<u class="t"></u>'+(c.t?'<u class="b"></u>':'')+'<span>'+c.n+'</span>';
+      var sh=(Math.max(bot-top,18)<140)?' class="up"':'';
+      d.innerHTML='<u class="t"></u>'+(c.t?'<u class="b"></u>':'')+'<span'+sh+'>'+c.n+'</span>';
       wrap.appendChild(d);
     }
     CL.forEach(function(c){rail(c,'r');});
