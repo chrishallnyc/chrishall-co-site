@@ -278,9 +278,18 @@ the most influential institutions in global technology.</p>
     tip.innerHTML='<span class="k">'+c.n+' . since '+yy+' \u2014 the world, same moment</span>'+c.w;
     tip.style.display='block';
     var r=d.getBoundingClientRect();
-    var x=r.right+34+window.scrollX, y=r.top+window.scrollY-4;
-    if(x+300>window.scrollX+document.documentElement.clientWidth) x=window.scrollX+document.documentElement.clientWidth-300;
-    tip.style.left=x+'px'; tip.style.top=y+'px';
+    var tw=tip.offsetWidth, th=tip.offsetHeight;
+    var vw=document.documentElement.clientWidth, vh=document.documentElement.clientHeight;
+    /* keep the tip clear of the whole skill-rail band so it never lands on a
+       sibling rail's vertical label \u2014 prefer the open left margin, else flip
+       to the right of the band. clamp on both axes. */
+    var bandL=Infinity,bandR=-Infinity;
+    wrap.querySelectorAll('.rail.tipd').forEach(function(el){var b=el.getBoundingClientRect();if(b.left<bandL)bandL=b.left;if(b.right>bandR)bandR=b.right;});
+    var GAP=24;
+    var x=(bandL-GAP-tw>=8)?(bandL-GAP-tw):(bandR+GAP);
+    x=Math.min(x,vw-tw-12); x=Math.max(x,8);
+    var y=Math.min(r.top-4,vh-th-12); y=Math.max(y,8);
+    tip.style.left=(x+window.scrollX)+'px'; tip.style.top=(y+window.scrollY)+'px';
   }
   function hideTip(){
     tip.style.display='none';
