@@ -1,0 +1,1047 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Forest Hill, San Francisco, and 554 Magellan Avenue: an evidence-led visual history.">
+<meta name="theme-color" content="#123b2c">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Forest Hill / 554 Magellan Avenue">
+<meta property="og:description" content="A 40-slide visual history of Forest Hill, San Francisco—and the documented biography of one house.">
+<meta property="og:url" content="https://chall.net/forest-hill/">
+<meta property="og:image" content="https://www.rentsfnow.com/wp-content/uploads/2025/04/veritas-554-magellan-unit-1-18.jpg">
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1365">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://chall.net/forest-hill/">
+<link rel="preconnect" href="https://opensfhistory.org" crossorigin>
+<link rel="preconnect" href="https://www.rentsfnow.com" crossorigin>
+<link rel="preconnect" href="https://static.wixstatic.com" crossorigin>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23123b2c'/%3E%3Cpath d='M32 10 18 31h9L16 50h32L37 31h9Z' fill='%23f2ead8'/%3E%3C/svg%3E">
+<title>Forest Hill / 554 Magellan Avenue</title>
+<style>
+  :root{
+    --forest:#123b2c; --deep:#09271e; --pine:#285a42; --moss:#80906b;
+    --cream:#f2ead8; --paper:#fbf7ee; --fog:#d8ded8; --mist:#eef0ea;
+    --ink:#17211c; --rust:#a44934; --gold:#c7a45a; --char:#242a27;
+    --pad-x:clamp(24px,5vw,190px); --pad-y:clamp(22px,5vh,110px);
+    --serif:Iowan Old Style,Palatino Linotype,Book Antiqua,Palatino,Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--deep);color:var(--ink)}
+  body{font-family:var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  a{color:inherit;text-decoration-color:currentColor;text-decoration-thickness:1px;text-underline-offset:3px}
+  button{font:inherit}
+  #viewport{position:fixed;inset:0;overflow:hidden;background:var(--deep)}
+  #deck{height:100%;display:flex;will-change:transform;transition:transform .72s cubic-bezier(.22,.8,.2,1)}
+  .slide{position:relative;isolation:isolate;flex:0 0 100vw;width:100vw;height:100svh;overflow:hidden;background:var(--paper);padding:var(--pad-y) var(--pad-x);display:flex;align-items:center}
+  .slide.dark{background:var(--deep);color:var(--cream)}
+  .slide.green{background:var(--forest);color:var(--cream)}
+  .slide.fog{background:var(--mist)}
+  .slide.rust{background:var(--rust);color:var(--paper)}
+  .slide.black{background:#090b0a;color:var(--paper)}
+  .inner{position:relative;z-index:2;width:min(100%,3000px);margin-inline:auto}
+  .top{position:absolute;z-index:4;left:var(--pad-x);right:var(--pad-x);top:clamp(16px,2.4vh,52px);display:flex;justify-content:space-between;align-items:center;font-size:clamp(10px,.66vw,24px);letter-spacing:.18em;text-transform:uppercase;opacity:.76}
+  .chapter{font-weight:750}
+  .kicker,.eyebrow{font-size:clamp(10px,1vw,28px);letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin:0 0 clamp(14px,1vw,32px)}
+  .kicker{color:var(--rust)}
+  .dark .kicker,.green .kicker,.black .kicker{color:#d9bd7a}
+  h1,h2,h3,p{margin-top:0}
+  h1,.display{font-family:var(--serif);font-weight:500;font-size:clamp(54px,8.1vw,310px);letter-spacing:-.055em;line-height:.84;margin:0}
+  h2{font-family:var(--serif);font-weight:500;font-size:clamp(38px,5.6vw,215px);letter-spacing:-.045em;line-height:.93;margin:0 0 clamp(20px,1.5vw,48px)}
+  h3{font-family:var(--serif);font-weight:500;font-size:clamp(24px,2.6vw,96px);letter-spacing:-.025em;line-height:1.02;margin-bottom:clamp(12px,.8vw,30px)}
+  .lede{font-family:var(--serif);font-size:clamp(21px,2.25vw,82px);line-height:1.2;max-width:34em;margin:0}
+  .body{font-size:clamp(15px,1.25vw,46px);line-height:1.47;max-width:48em}
+  .small{font-size:clamp(11px,.92vw,32px);line-height:1.45}
+  .huge-number{font-family:var(--serif);font-size:clamp(72px,12vw,380px);line-height:.72;letter-spacing:-.07em;font-variant-numeric:tabular-nums}
+  .rule{width:clamp(72px,5vw,190px);height:clamp(2px,.11vw,4px);background:currentColor;opacity:.7;margin:clamp(20px,1.4vw,52px) 0}
+  .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(24px,5vw,168px);align-items:center}
+  .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,2.2vw,70px)}
+  .grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(10px,1.5vw,50px)}
+  .vstack{display:flex;flex-direction:column;gap:clamp(18px,1.25vw,48px)}
+  .stat{border-top:1px solid currentColor;padding-top:clamp(12px,.8vw,30px)}
+  .stat strong{display:block;font-family:var(--serif);font-size:clamp(34px,4.2vw,150px);line-height:.9;font-weight:500;letter-spacing:-.045em}
+  .stat span{display:block;margin-top:clamp(8px,.55vw,20px);font-size:clamp(10px,.9vw,30px);line-height:1.35;text-transform:uppercase;letter-spacing:.08em}
+  .tag{display:inline-flex;border:1px solid currentColor;border-radius:99px;padding:clamp(7px,.5vw,18px) clamp(11px,.8vw,30px);font-size:clamp(10px,.65vw,24px);letter-spacing:.13em;text-transform:uppercase;font-weight:700}
+  .card{padding:clamp(17px,2.4vw,70px);border:1px solid color-mix(in srgb,currentColor 24%,transparent);background:color-mix(in srgb,var(--paper) 82%,transparent)}
+  .dark .card,.green .card,.black .card{background:color-mix(in srgb,var(--deep) 65%,transparent)}
+  .quote{font-family:var(--serif);font-size:clamp(28px,4.1vw,150px);line-height:1.02;letter-spacing:-.035em}
+  .quote small{display:block;font-family:var(--sans);font-size:clamp(11px,.72vw,26px);letter-spacing:.13em;text-transform:uppercase;line-height:1.4;margin-top:clamp(20px,1.35vw,50px)}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+  .media{position:relative;overflow:hidden;background:#c9cec6;min-height:clamp(320px,30vh,700px)}
+  .media img{display:block;width:100%;height:100%;object-fit:cover;image-rendering:auto}
+  .media.contain img{object-fit:contain;background:var(--cream)}
+  .media .cap,.cap{font-size:clamp(10px,.66vw,24px);line-height:1.35;letter-spacing:.02em}
+  .media .cap{position:absolute;z-index:2;left:0;right:0;bottom:0;padding:clamp(18px,1.2vw,46px) clamp(18px,1.2vw,46px) clamp(12px,.8vw,30px);color:white;background:linear-gradient(transparent,rgba(0,0,0,.75))}
+  .bleed{position:absolute;z-index:-2;inset:0;width:100%;height:100%;object-fit:cover}
+  .shade{position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,rgba(5,18,13,.92) 0%,rgba(5,18,13,.58) 44%,rgba(5,18,13,.04) 76%)}
+  .shade.bottom{background:linear-gradient(0deg,rgba(5,18,13,.92) 0%,rgba(5,18,13,.32) 50%,rgba(5,18,13,.06) 100%)}
+  .photo-title{align-self:flex-end;padding-bottom:clamp(44px,7vh,150px);color:white;text-shadow:0 2px 25px rgba(0,0,0,.3)}
+  .photo-title .lede{max-width:28em}
+  .cite{position:absolute;z-index:5;left:var(--pad-x);right:calc(var(--pad-x) + clamp(90px,6vw,230px));bottom:clamp(12px,2vh,42px);font-size:clamp(9.5px,.66vw,24px);line-height:1.35;letter-spacing:.015em;opacity:.76}
+  .cite a{margin-right:clamp(8px,.55vw,20px)}
+  .side-note{border-left:clamp(2px,.1vw,4px) solid var(--rust);padding-left:clamp(18px,1.2vw,46px);font-size:clamp(12px,1vw,36px);line-height:1.45}
+  .label{font-size:clamp(10px,.66vw,24px);text-transform:uppercase;letter-spacing:.16em;font-weight:750}
+  .pill-row{display:flex;gap:clamp(8px,.55vw,20px);flex-wrap:wrap}
+  svg{display:block;max-width:100%;height:auto;overflow:visible;shape-rendering:geometricPrecision;text-rendering:geometricPrecision}
+  .chart text,.map text,.timeline text{font-family:var(--sans);fill:currentColor}
+  .chart .serif,.map .serif,.timeline .serif{font-family:var(--serif)}
+  .soft{opacity:.62}.faint{opacity:.25}
+  .hair{stroke:currentColor;stroke-width:1;opacity:.25}
+  .dot{width:clamp(10px,.65vw,24px);height:clamp(10px,.65vw,24px);border-radius:50%;display:inline-block;margin-right:clamp(7px,.45vw,18px)}
+  .photo-pair{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,.7vw,26px);height:min(66vh,1300px)}
+  .photo-pair .media{height:100%}
+  .warning{display:inline-flex;align-items:center;gap:clamp(10px,.65vw,24px);border:1px solid currentColor;padding:clamp(10px,.7vw,26px) clamp(13px,.9vw,34px);font-size:clamp(10px,.66vw,24px);text-transform:uppercase;letter-spacing:.15em;font-weight:750}
+  .warning:before{content:"";width:clamp(8px,.5vw,18px);height:clamp(8px,.5vw,18px);background:var(--rust);border-radius:50%}
+  .dark .warning:before,.black .warning:before{background:#e5bd6d}
+  .mobile-only{display:none}
+  .source-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(13px,.9vw,34px) clamp(28px,1.9vw,72px);align-content:start}
+  .source-group{break-inside:avoid;border-top:1px solid currentColor;padding-top:clamp(8px,.55vw,20px)}
+  .source-group h3{font-family:var(--sans);font-size:clamp(10px,.66vw,24px);letter-spacing:.15em;text-transform:uppercase;font-weight:750;margin:0 0 clamp(6px,.4vw,16px)}
+  .source-group a{display:block;font-size:clamp(9.5px,.62vw,22px);line-height:1.35;margin:clamp(2px,.14vw,5px) 0}
+  #chrome{position:fixed;z-index:100;inset:0;pointer-events:none;color:var(--cream)}
+  #progress{position:absolute;left:0;bottom:0;height:clamp(3px,.16vw,6px);background:var(--gold);width:2.5%;transition:width .55s ease}
+  #counter{position:absolute;right:clamp(18px,1.2vw,46px);bottom:clamp(14px,.95vw,36px);font-size:clamp(10px,.66vw,24px);letter-spacing:.12em;font-variant-numeric:tabular-nums;text-shadow:0 1px 8px #000}
+  .nav{pointer-events:auto;position:absolute;right:clamp(15px,1vw,38px);top:50%;display:flex;flex-direction:column;gap:clamp(8px,.55vw,20px);transform:translateY(-50%)}
+  .nav button{width:clamp(36px,2.5vw,92px);height:clamp(36px,2.5vw,92px);border:1px solid rgba(255,255,255,.45);color:white;background:rgba(8,20,15,.28);border-radius:50%;cursor:pointer;backdrop-filter:blur(10px)}
+  .nav button:hover,.nav button:focus-visible{background:var(--cream);color:var(--deep);outline:none}
+  #hint{position:absolute;right:clamp(18px,1.2vw,46px);top:clamp(16px,1.1vw,42px);font-size:clamp(9px,.6vw,22px);letter-spacing:.15em;text-transform:uppercase;opacity:.7;text-shadow:0 1px 8px #000;transition:opacity .5s}
+  .forest-rings{position:absolute;right:-7vw;top:-12vw;width:58vw;height:58vw;border:1px solid currentColor;border-radius:50%;opacity:.09;box-shadow:0 0 0 5vw transparent,0 0 0 calc(5vw + 1px) currentColor,0 0 0 10vw transparent,0 0 0 calc(10vw + 1px) currentColor,0 0 0 15vw transparent,0 0 0 calc(15vw + 1px) currentColor}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  @media(max-width:760px){
+    :root{--pad-x:22px;--pad-y:58px}
+    .slide{align-items:stretch;flex-direction:column;overflow-y:auto;overflow-x:hidden}
+    .slide>*{min-width:0;max-width:100%}
+    .inner{margin:auto 0;flex:0 0 auto;width:100%;min-width:0;max-width:100%}
+    .grid2,.grid3,.grid4{grid-template-columns:1fr;gap:18px}
+    .grid4{grid-template-columns:1fr 1fr}
+    .hide-mobile{display:none!important}
+    .photo-pair{grid-template-columns:1fr;height:auto}.photo-pair .media{height:32vh;min-height:220px}
+    .media{min-height:270px}
+    .cite{position:static;left:auto;right:auto;bottom:auto;margin-top:24px;padding-bottom:20px;flex:0 0 auto}
+    .top{position:absolute;left:22px;right:55px;top:18px;text-shadow:0 1px 10px rgba(255,255,255,.9)}
+    .dark .top,.green .top,.black .top{color:var(--cream);text-shadow:0 1px 10px #000}
+    .photo-title{align-self:stretch;margin-top:auto}
+    .source-grid{grid-template-columns:1fr;gap:10px 16px}
+    .source-group a{font-size:9.5px;line-height:1.5;padding:1px 0}
+    .source-group a,.cite,.lede,.body{overflow-wrap:anywhere}
+    .pill-row{max-width:100%}.tag{max-width:100%;white-space:normal}
+    .mobile-series{display:grid;gap:5px;margin:8px 0 12px;font-size:11px;line-height:1.35;font-variant-numeric:tabular-nums}
+    .demographic-chart .chart-copy{display:none}
+    .desktop-legend{display:none}
+    svg{width:100%;min-width:0}
+    .nav{display:none}
+    #hint{display:none}
+  }
+  @media(max-height:650px) and (min-width:761px){
+    :root{--pad-y:38px}.body{font-size:14px}.media{min-height:260px}.cite{font-size:8px}.top{top:10px}
+  }
+  @media(min-width:2200px) and (min-height:1200px){
+    /* Keep limited-resolution documentary photographs at their native pixel size
+       on UHD canvases. The surrounding composition scales; evidence does not. */
+    .uhd-artifact{background:radial-gradient(circle at 76% 50%,#174735 0%,var(--deep) 54%,#061812 100%)}
+    .uhd-artifact .bleed{z-index:-1;inset:50% clamp(150px,5vw,220px) auto auto;transform:translateY(-50%);width:var(--artifact-width);height:auto;max-height:calc(100svh - 400px);object-fit:contain;outline:2px solid rgba(242,234,216,.34);box-shadow:0 36px 110px rgba(0,0,0,.42)}
+    .uhd-artifact .shade{z-index:-2;background:linear-gradient(90deg,rgba(5,18,13,.38),rgba(5,18,13,.02))}
+    .uhd-artifact--archive{--artifact-width:1000px}
+    .uhd-artifact--archive .inner{width:min(62vw,2200px);max-width:min(62vw,2200px)!important;margin-left:0;margin-right:auto}
+    .uhd-artifact--archive .photo-title{align-self:center;padding-bottom:0}
+    .uhd-artifact--archive .grid4{grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(28px,2vw,72px)}
+    .uhd-artifact--house{--artifact-width:2048px}
+    .uhd-artifact--house .inner{width:min(37vw,1420px);max-width:min(37vw,1420px)!important;margin-left:0;margin-right:auto}
+    .native-archive{background:color-mix(in srgb,var(--deep) 90%,var(--cream));outline:2px solid color-mix(in srgb,currentColor 20%,transparent)}
+    .native-archive img{position:absolute;inset:50% auto auto 50%;width:auto;height:auto;max-width:1000px;max-height:1000px;transform:translate(-50%,-50%);object-fit:contain}
+    .native-photo{background:color-mix(in srgb,var(--deep) 90%,var(--cream));outline:2px solid color-mix(in srgb,currentColor 20%,transparent)}
+    .native-photo img{position:absolute;inset:50% auto auto 50%;width:100%;height:auto;max-width:1600px;max-height:1064px;transform:translate(-50%,-50%);object-fit:contain}
+  }
+  @media(prefers-reduced-motion:reduce){#deck{transition:none!important}*{scroll-behavior:auto!important}}
+  @media print{html,body{overflow:visible}#viewport{position:static;overflow:visible}#deck{display:block;transform:none!important}.slide{page-break-after:always;width:100vw;height:100vh}#chrome{display:none}}
+</style>
+</head>
+<body>
+<div id="viewport" aria-label="Horizontal slide deck">
+<main id="deck">
+
+<!-- 01 -->
+<section class="slide dark uhd-artifact uhd-artifact--house" data-title="Forest Hill / 554 Magellan">
+  <img class="bleed" src="https://www.rentsfnow.com/wp-content/uploads/2025/04/veritas-554-magellan-unit-1-18.jpg" alt="The cream stucco facade of 554 Magellan Avenue in April 2025" fetchpriority="high">
+  <div class="shade"></div>
+  <div class="top"><span class="chapter">Forest Hill / a visual history</span><span>01</span></div>
+  <div class="inner photo-title">
+    <p class="eyebrow">One neighborhood. One house. No mythology left untested.</p>
+    <h1>Forest<br>Hill</h1>
+    <p class="lede" style="margin-top:22px">and the biography of <em>554 Magellan Avenue</em></p>
+  </div>
+  <div class="cite">554 Magellan Avenue, April 2025. RentSFNow/Veritas rental-listing photograph; photographer not identified; no reuse license found. <a href="https://www.rentsfnow.com/apartments/rental/554-magellan-1/" target="_blank" rel="noreferrer">Listing record</a>.</div>
+</section>
+
+<!-- 02 -->
+<section class="slide green" data-title="A designed system">
+  <div class="forest-rings"></div>
+  <div class="top"><span class="chapter">The thesis</span><span>02</span></div>
+  <div class="inner">
+    <p class="kicker">Read the landscape like a document</p>
+    <h2>Forest Hill was not merely built.<br><em>It was edited.</em></h2>
+    <div class="grid4" style="margin-top:8vh">
+      <div class="stat"><strong>land</strong><span>Indigenous homeland remade through mission, rancho, estate and subdivision</span></div>
+      <div class="stat"><strong>lines</strong><span>Curves, slopes and setbacks engineered a garden-suburb image</span></div>
+      <div class="stat"><strong>rail</strong><span>A tunnel made low-density separation compatible with downtown work</span></div>
+      <div class="stat"><strong>rules</strong><span>Design controls and racial restrictions protected the same product</span></div>
+    </div>
+  </div>
+  <div class="cite">Interpretive synthesis: <a href="https://www.ramaytush.org/spanish-arrival.html" target="_blank" rel="noreferrer">Association of Ramaytush Ohlone</a>; <a href="https://www.nps.gov/articles/000/redpower50.htm" target="_blank" rel="noreferrer">NPS</a>; <a href="https://digicoll.lib.berkeley.edu/record/264399?ln=en" target="_blank" rel="noreferrer">Bancroft Rancho San Miguel case</a>; <a href="https://sfplanning.org/sites/default/files/documents/preserv/ResidenceParksHCS/2014.0263U_Gardens_In_The_City_HCS_draft-Oct2016.pdf" target="_blank" rel="noreferrer">SF Planning</a>; <a href="https://www.outsidelands.org/forest-hill.php" target="_blank" rel="noreferrer">WNP</a>.</div>
+</section>
+
+<!-- 03 -->
+<section class="slide fog" data-title="Ancestral land">
+  <div class="top"><span class="chapter">Before Forest Hill / 1</span><span>03</span></div>
+  <div class="inner grid2">
+    <div>
+      <p class="kicker">Start before the property line</p>
+      <h2>Unceded<br>ancestral land.</h2>
+      <p class="lede">The San Francisco Peninsula is the homeland of the Ramaytush Ohlone. The Yelamu were the local community in what became San Francisco.</p>
+      <p class="side-note" style="margin-top:26px">No authoritative source reviewed places a village on the exact Forest Hill tract. The honest claim is territory—not an invented village site.</p>
+    </div>
+    <svg viewBox="0 0 650 540" role="img" aria-label="Abstract contour map representing the peninsula and successive land layers">
+      <path d="M126 40C264 74 414 39 523 137c86 77 53 185-9 265-57 73-115 105-195 96-85-10-186-35-219-122-31-83 8-154 30-225 11-37-18-83-4-111z" fill="#dce2d4" stroke="#123b2c" stroke-width="2"/>
+      <g fill="none" stroke="#80906b" opacity=".7">
+        <path d="M145 87c105 38 242 6 333 70 76 53 45 151-8 211-52 58-103 83-171 74-73-9-139-28-166-94-26-64 18-127 30-181 6-27-30-58-18-80z"/>
+        <path d="M181 131c80 30 184 4 252 50 59 40 33 110-8 155-39 44-79 64-132 57-55-7-105-22-124-72-18-47 17-93 25-133 4-20-23-42-13-57z"/>
+        <path d="M219 176c53 21 123 1 168 31 40 27 20 72-6 101-27 29-54 42-89 37-37-5-68-15-80-48-12-31 10-60 14-86 3-14-14-26-7-35z"/>
+      </g>
+      <circle cx="307" cy="260" r="15" fill="#a44934"/>
+      <path d="M307 275v76" stroke="#a44934" stroke-width="2"/>
+      <text x="307" y="379" text-anchor="middle" font-size="15" font-weight="700" letter-spacing="2">FOREST HILL</text>
+      <text x="39" y="505" font-size="12" letter-spacing="1.6">DIAGRAMMATIC • NOT A VILLAGE-SITE MAP</text>
+    </svg>
+  </div>
+  <div class="cite">Sources: <a href="https://www.ramaytush.org/terminology.html" target="_blank" rel="noreferrer">Association of Ramaytush Ohlone, terminology</a>; <a href="https://www.nps.gov/places/000/8-home-of-the-yelamu.htm" target="_blank" rel="noreferrer">National Park Service, Home of the Yelamu</a>; <a href="https://www.sf.gov/sites/default/files/2021-08/21_4%20Ramaytush%20Ohlone%20Land%20Acknowledgement_0.pdf" target="_blank" rel="noreferrer">City land acknowledgment</a>.</div>
+</section>
+
+<!-- 04 -->
+<section class="slide dark uhd-artifact uhd-artifact--archive" data-title="Land regimes">
+  <img class="bleed" src="https://opensfhistory.org/Download/wnp33.01157.jpg" alt="Panoramic view across San Miguel Ranch in 1910">
+  <div class="shade bottom"></div>
+  <div class="top"><span class="chapter">Before Forest Hill / 2</span><span>04</span></div>
+  <div class="inner photo-title">
+    <p class="kicker">The land changed regimes—not just names</p>
+    <div class="grid4">
+      <div class="stat"><strong>1776–1801</strong><span>Mission Dolores; coercion, disease and forced labor devastate Yelamu communities</span></div>
+      <div class="stat"><strong>1845</strong><span>Pío Pico grants Rancho San Miguel to José de Jesús Noé</span></div>
+      <div class="stat"><strong>1857</strong><span>U.S. patent confirms 4,443.38 acres after land-claim proceedings</span></div>
+      <div class="stat"><strong>1880</strong><span>Adolph Sutro buys the roughly 1,200-acre remnant</span></div>
+    </div>
+  </div>
+  <div class="cite">Image: San Miguel Ranch panorama, 1910; photographer unknown, A. S. Baldwin/Sutro Estate Album, courtesy private collector; <a href="https://opensfhistory.org/Display/wnp33.01157.jpg" target="_blank" rel="noreferrer">OpenSFHistory wnp33.01157</a>. Land sequence: <a href="https://digicoll.lib.berkeley.edu/record/264399?ln=en" target="_blank" rel="noreferrer">Bancroft Library land case 123 ND</a>; <a href="https://www.nps.gov/articles/000/redpower50.htm" target="_blank" rel="noreferrer">NPS missionization history</a>; <a href="https://www.ramaytush.org/spanish-arrival.html" target="_blank" rel="noreferrer">ARO</a>.</div>
+</section>
+
+<!-- 05 -->
+<section class="slide" data-title="Sutro’s manufactured forest">
+  <div class="top"><span class="chapter">Before Forest Hill / 3</span><span>05</span></div>
+  <div class="inner grid2">
+    <div class="media native-archive" style="height:min(72vh,1400px)">
+      <img src="https://opensfhistory.org/Download/wnp15.1440.jpg" alt="Clear-cutting Sutro Forest for Forest Hill development near Pacheco and Dewey around 1912">
+      <div class="cap">Pacheco near Dewey, c.1912: clear-cutting Sutro Forest for residential development. Photographer Unknown / Courtesy of a Private Collector.</div>
+    </div>
+    <div>
+      <p class="kicker">A useful correction</p>
+      <h2>The “forest” was already designed.</h2>
+      <p class="lede">Sutro planted eucalyptus, cypress and pine over a landscape of grass, dunes and cultivation.</p>
+      <div class="rule"></div>
+      <p class="body">Newell–Murdoch later cut much of it for streets and lots, preserving conspicuous stands as atmosphere. “Country in the city” was both landscape and sales copy.</p>
+      <div class="pill-row"><span class="tag">planted</span><span class="tag">cut</span><span class="tag">marketed</span></div>
+    </div>
+  </div>
+  <div class="cite">Image: <a href="https://opensfhistory.org/Display/wnp15.1440.jpg" target="_blank" rel="noreferrer">OpenSFHistory/WNP wnp15.1440</a>. History: <a href="https://sfplanning.org/sites/default/files/documents/preserv/ResidenceParksHCS/2014.0263U_Gardens_In_The_City_HCS_draft-Oct2016.pdf" target="_blank" rel="noreferrer">SF Planning, <em>Gardens in the City</em>, pp. 13, 85–95</a>; <a href="https://www.outsidelands.org/forest-hill.php" target="_blank" rel="noreferrer">WNP, Forest Hill</a>.</div>
+</section>
+
+<!-- 06 -->
+<section class="slide dark uhd-artifact uhd-artifact--archive" data-title="The tract begins">
+  <img class="bleed" src="https://opensfhistory.org/Download/wnp15.1306.jpg" alt="Forest Hill tract office and early grading at Dewey Boulevard and Pacheco Avenue in 1912">
+  <div class="shade"></div>
+  <div class="top"><span class="chapter">The building period / 1</span><span>06</span></div>
+  <div class="inner" style="max-width:clamp(1120px,78vw,2800px);margin-left:0">
+    <p class="kicker">1912</p>
+    <h2 style="max-width:9em">A residence park is staked into a hillside.</h2>
+    <p class="lede" style="max-width:20em">Newell–Murdoch hired landscape engineer Mark R. Daniels to make topography look effortless.</p>
+    <div class="grid3" style="max-width:clamp(760px,53vw,1900px);margin-top:clamp(34px,2.4vw,90px)">
+      <div class="stat"><strong>1912</strong><span>construction begins</span></div>
+      <div class="stat"><strong>1914</strong><span>first completed house</span></div>
+      <div class="stat"><strong>1920s</strong><span>main building boom</span></div>
+    </div>
+  </div>
+  <div class="cite">Image: Dewey Boulevard &amp; Pacheco Avenue, 1912; photographer unknown, courtesy private collector; <a href="https://opensfhistory.org/Display/wnp15.1306.jpg" target="_blank" rel="noreferrer">OpenSFHistory wnp15.1306</a>. Dates: <a href="https://www.outsidelands.org/forest-hill.php" target="_blank" rel="noreferrer">WNP</a>; <a href="https://sfplanning.org/sites/default/files/documents/preserv/ResidenceParksHCS/2014.0263U_Gardens_In_The_City_HCS_draft-Oct2016.pdf" target="_blank" rel="noreferrer">SF Planning</a>.</div>
+</section>
+
+<!-- 07 -->
+<section class="slide fog" data-title="The residence-park formula">
+  <div class="top"><span class="chapter">The building period / 2</span><span>07</span></div>
+  <div class="inner">
+    <p class="kicker">The residence-park formula</p>
+    <h2>Beauty was infrastructure.</h2>
+    <svg viewBox="0 0 1240 470" class="chart" role="img" aria-label="Diagram showing how topography, landscape, transit and restrictions formed a real-estate product">
+      <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4 0 8z" fill="#a44934"/></marker></defs>
+      <g fill="none" stroke="#a44934" stroke-width="2" marker-end="url(#arrow)">
+        <path d="M235 210C330 120 380 120 470 210"/><path d="M515 210C610 120 660 120 750 210"/><path d="M795 210C890 120 940 120 1030 210"/>
+      </g>
+      <g>
+        <circle cx="140" cy="235" r="112" fill="#d9e0d5"/><circle cx="420" cy="235" r="112" fill="#e6dcc5"/><circle cx="700" cy="235" r="112" fill="#ccd8d2"/><circle cx="980" cy="235" r="112" fill="#d8c3b6"/>
+        <path d="M75 262c26-55 50-72 76-46 23 23 43 8 67-37" fill="none" stroke="#285a42" stroke-width="8" stroke-linecap="round"/>
+        <path d="M365 282v-86h110v86m-88-63h66m-66 23h66" fill="none" stroke="#735f42" stroke-width="7"/>
+        <path d="M635 270h130M652 270v-72h96v72M670 198v-35h60v35" fill="none" stroke="#285a42" stroke-width="7"/>
+        <path d="M930 175v115m44-115v115m-75-76h106m-106 44h106" fill="none" stroke="#a44934" stroke-width="7"/>
+      </g>
+      <g text-anchor="middle">
+        <text x="140" y="388" font-size="14" font-weight="750" letter-spacing="2">TOPOGRAPHY</text><text x="140" y="413" font-size="13">curves + framed views</text>
+        <text x="420" y="388" font-size="14" font-weight="750" letter-spacing="2">LANDSCAPE</text><text x="420" y="413" font-size="13">trees + medians + stairs</text>
+        <text x="700" y="388" font-size="14" font-weight="750" letter-spacing="2">TRANSIT</text><text x="700" y="413" font-size="13">a tunnel to downtown</text>
+        <text x="980" y="388" font-size="14" font-weight="750" letter-spacing="2">CONTROL</text><text x="980" y="413" font-size="13">setbacks + use + people</text>
+        <text x="1190" y="228" font-size="17" font-weight="750" fill="#a44934" transform="rotate(90 1190 228)">A PREMIUM PRODUCT</text>
+      </g>
+    </svg>
+  </div>
+  <div class="cite">Diagram is interpretive. Inputs: <a href="https://sfplanning.org/sites/default/files/documents/preserv/ResidenceParksHCS/2014.0263U_Gardens_In_The_City_HCS_draft-Oct2016.pdf" target="_blank" rel="noreferrer">SF Planning residence-park context</a>; <a href="https://www.outsidelands.org/sw22.php" target="_blank" rel="noreferrer">WNP, Streetwise: Forest Hill</a>.</div>
+</section>
+
+<!-- 08 -->
+<section class="slide green" data-title="The Daniels street plan">
+  <div class="top"><span class="chapter">The building period / map</span><span>08</span></div>
+  <div class="inner grid2">
+    <div>
+      <p class="kicker">A diagrammatic map</p>
+      <h2>Magellan is one of the plan’s long, bending spines.</h2>
+      <p class="body">Daniels followed contours, slowed traffic with curves, and joined roads to stairways. The diagram highlights 554—not as an isolated parcel, but as a point in the composition.</p>
+      <div class="pill-row"><span class="tag">37.744253° N</span><span class="tag">122.467238° W</span></div>
+    </div>
+    <svg class="map" viewBox="0 0 660 610" role="img" aria-label="Diagrammatic map of Forest Hill streets with Magellan Avenue highlighted and 554 pinned">
+      <path d="M87 523C143 450 194 391 207 314c17-99-39-156 31-211 81-64 191-11 279 49 53 37 73 95 65 156-10 82-61 144-130 188-88 56-263 64-365 27z" fill="#e8e3d6" opacity=".97"/>
+      <g fill="none" stroke="#9aa694" stroke-width="9" stroke-linecap="round">
+        <path d="M104 492C174 430 243 421 289 352S315 194 399 143c49-30 113 4 151 65"/>
+        <path d="M113 372c60 34 97 32 151-3 47-31 94-18 150 18 51 33 96 32 140 7"/>
+        <path d="M148 251c51 45 106 36 151-1 44-36 81-38 142-17 45 16 79 7 112-22"/>
+        <path d="M213 493c-8-55 8-94 48-126"/>
+        <path d="M359 511c-7-66 12-102 56-126"/>
+        <path d="M464 470c-37-43-39-76-10-116"/>
+        <path d="M194 167c40 23 80 23 119-1"/>
+      </g>
+      <path d="M104 492C174 430 243 421 289 352S315 194 399 143c49-30 113 4 151 65" fill="none" stroke="#d2ad61" stroke-width="17" stroke-linecap="round"/>
+      <path d="M104 492C174 430 243 421 289 352S315 194 399 143c49-30 113 4 151 65" fill="none" stroke="#123b2c" stroke-width="5" stroke-linecap="round"/>
+      <path d="M113 372c60 34 97 32 151-3 47-31 94-18 150 18 51 33 96 32 140 7" fill="none" stroke="#f7f2e7" stroke-width="3" stroke-dasharray="4 10"/>
+      <g transform="translate(257 390)">
+        <path d="M0-48c-22 0-39 17-39 38 0 29 39 64 39 64s39-35 39-64c0-21-17-38-39-38z" fill="#a44934" stroke="#f2ead8" stroke-width="5"/>
+        <circle cy="-10" r="12" fill="#f2ead8"/>
+      </g>
+      <g font-size="12" font-weight="700" letter-spacing="1.4">
+        <text x="329" y="205" transform="rotate(-56 329 205)" fill="#f2ead8">MAGELLAN AVE</text>
+        <text x="185" y="360" fill="#536259">PACHECO AVE</text><text x="413" y="378" fill="#536259">CASTENADA AVE</text>
+        <text x="83" y="546" fill="#536259">DEWEY BLVD</text><text x="288" y="460" fill="#a44934">554</text>
+      </g>
+      <text x="330" y="588" text-anchor="middle" font-size="10" letter-spacing="1.5">DIAGRAMMATIC • STREET RELATIONSHIPS GENERALIZED • NOT A SURVEY</text>
+    </svg>
+  </div>
+  <div class="cite">Street-plan basis: <a href="https://sfplanning.org/sites/default/files/documents/preserv/ResidenceParksHCS/2014.0263U_Gardens_In_The_City_HCS_draft-Oct2016.pdf" target="_blank" rel="noreferrer">SF Planning</a>; modern street relationships cross-checked against <a href="https://www.openstreetmap.org/#map=16/37.747/-122.465" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>. Pin coordinates: <a href="https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress?address=554%20Magellan%20Ave%2C%20San%20Francisco%2C%20CA%2094116&amp;benchmark=Public_AR_Current&amp;vintage=Current_Current&amp;format=json" target="_blank" rel="noreferrer">U.S. Census Geocoder</a>.</div>
+</section>
+
+<!-- 09 -->
+<section class="slide" data-title="Master timeline">
+  <div class="top"><span class="chapter">The long view</span><span>09</span></div>
+  <div class="inner">
+    <p class="kicker">Master timeline / 1845–2026</p>
+    <h2>Six eras. One accumulating landscape.</h2>
+    <svg class="timeline" viewBox="0 0 1340 480" role="img" aria-label="Era-banded timeline from Rancho San Miguel to today">
+      <defs><clipPath id="c1"><circle cx="236" cy="128" r="47"/></clipPath><clipPath id="c2"><circle cx="535" cy="128" r="47"/></clipPath><clipPath id="c3"><circle cx="930" cy="128" r="47"/></clipPath></defs>
+      <g>
+        <rect x="30" y="238" width="182" height="74" fill="#cbb991"/><rect x="212" y="238" width="250" height="74" fill="#80906b"/><rect x="462" y="238" width="264" height="74" fill="#c7a45a"/><rect x="726" y="238" width="207" height="74" fill="#a44934"/><rect x="933" y="238" width="157" height="74" fill="#8a9a92"/><rect x="1090" y="238" width="220" height="74" fill="#285a42"/>
+        <rect x="462" y="208" width="264" height="30" fill="#7e2f25"/>
+      </g>
+      <g font-size="11" font-weight="750" letter-spacing="1.2" text-anchor="middle" fill="#fff">
+        <text x="121" y="281">RANCHO</text><text x="337" y="281">SUTRO FOREST</text><text x="594" y="281">BUILDING BOOM / BUILDOUT</text><text x="829" y="276">UNENFORCEABLE</text><text x="829" y="293">/ INFORMAL EXCLUSION</text><text x="1011" y="281">POSTWAR</text><text x="1200" y="281">TODAY</text><text x="594" y="228" font-size="9.5">ENFORCEABLE RACIAL RESTRICTIONS • c.1912–1948</text>
+      </g>
+      <line x1="30" y1="331" x2="1310" y2="331" stroke="currentColor" opacity=".45"/>
+      <g font-size="11" text-anchor="middle">
+        <g><line x1="30" y1="321" x2="30" y2="343" stroke="currentColor"/><text x="30" y="364">1845</text><text x="30" y="389" class="soft">grant</text></g>
+        <g><line x1="212" y1="321" x2="212" y2="343" stroke="currentColor"/><text x="212" y="364">1880</text><text x="212" y="389" class="soft">Sutro buys</text></g>
+        <g><line x1="462" y1="321" x2="462" y2="343" stroke="currentColor"/><text x="462" y="364">1912</text><text x="462" y="389" class="soft">tract starts</text></g>
+        <g><line x1="532" y1="321" x2="532" y2="343" stroke="currentColor"/><text x="532" y="364">1918</text><text x="532" y="389" class="soft">tunnel</text></g>
+        <g><line x1="726" y1="321" x2="726" y2="343" stroke="currentColor"/><text x="726" y="364">1948</text><text x="726" y="389" class="soft">Shelley</text></g>
+        <g><line x1="933" y1="321" x2="933" y2="343" stroke="currentColor"/><text x="933" y="364">1968</text><text x="933" y="389" class="soft">Fair Housing</text></g>
+        <g><line x1="1100" y1="321" x2="1100" y2="343" stroke="currentColor"/><text x="1100" y="364">2016</text><text x="1100" y="389" class="soft">housing fight</text></g>
+        <g><line x1="1310" y1="321" x2="1310" y2="343" stroke="currentColor"/><text x="1310" y="364">2026</text><text x="1310" y="389" class="soft">new proposal</text></g>
+      </g>
+      <image href="https://opensfhistory.org/Download/wnp33.01157.jpg" x="189" y="81" width="94" height="94" preserveAspectRatio="xMidYMid slice" clip-path="url(#c1)"/><circle cx="236" cy="128" r="49" fill="none" stroke="#f2ead8" stroke-width="4"/>
+      <image href="https://opensfhistory.org/Download/wnp15.173.jpg" x="488" y="81" width="94" height="94" preserveAspectRatio="xMidYMid slice" clip-path="url(#c2)"/><circle cx="535" cy="128" r="49" fill="none" stroke="#f2ead8" stroke-width="4"/>
+      <image href="https://opensfhistory.org/Download/wnp72.281.jpg" x="883" y="81" width="94" height="94" preserveAspectRatio="xMidYMid slice" clip-path="url(#c3)"/><circle cx="930" cy="128" r="49" fill="none" stroke="#f2ead8" stroke-width="4"/>
+      <line x1="236" y1="177" x2="236" y2="238" stroke="currentColor" opacity=".4"/><line x1="535" y1="177" x2="535" y2="238" stroke="currentColor" opacity=".4"/><line x1="930" y1="177" x2="930" y2="238" stroke="currentColor" opacity=".4"/>
+    </svg>
+  </div>
+  <div class="cite">Timeline dates: Bancroft Library; SFMTA; SF Planning; U.S. Supreme Court; U.S. DOJ; MOHCD. Image credits appear on their dedicated slides and in the source ledger.</div>
+</section>
+
+<!-- 10 -->
+<section class="slide dark uhd-artifact uhd-artifact--archive" data-title="Tunnel construction">
+  <img class="bleed" src="https://opensfhistory.org/Download/wnp36.00866.jpg" alt="Excavation at the Forest Hill station site in September 1915">
+  <div class="shade bottom"></div>
+  <div class="top"><span class="chapter">Transit made the tract / 1</span><span>10</span></div>
+  <div class="inner photo-title">
+    <p class="kicker">September 3, 1915</p>
+    <h2 style="max-width:11em">Before the station, a wound in the hill.</h2>
+    <p class="lede">The tunnel converted distance into commute time—and speculative lots into a plausible neighborhood.</p>
+  </div>
+  <div class="cite">Image: Laguna Honda/Forest Hill Station excavation, Sept. 3, 1915; Horace Chaffee, SF Department of Public Works; courtesy private collector; <a href="https://opensfhistory.org/Display/wnp36.00866.jpg" target="_blank" rel="noreferrer">OpenSFHistory wnp36.00866</a>.</div>
+</section>
+
+<!-- 11 -->
+<section class="slide dark uhd-artifact uhd-artifact--archive" data-title="Tunnel opening">
+  <img class="bleed" src="https://opensfhistory.org/Download/wnp15.173.jpg" alt="Crowd surrounding the first streetcars at the Twin Peaks Tunnel opening in 1918">
+  <div class="shade bottom"></div>
+  <div class="top"><span class="chapter">Transit made the tract / 2</span><span>11</span></div>
+  <div class="inner photo-title">
+    <p class="kicker">February 3, 1918</p>
+    <div class="huge-number">2 miles</div>
+    <p class="lede" style="margin-top:24px">Twin Peaks Tunnel opens. Downtown is suddenly less than half an hour away in contemporary promotion.</p>
+  </div>
+  <div class="cite">Image: Twin Peaks Tunnel opening at St. Francis Circle, Feb. 3, 1918; photographer unknown, courtesy private collector; <a href="https://opensfhistory.org/Display/wnp15.173.jpg" target="_blank" rel="noreferrer">OpenSFHistory wnp15.173</a>. Context: <a href="https://www.sfmta.com/blog/twin-peaks-tunnel-portal-west" target="_blank" rel="noreferrer">SFMTA</a>; <a href="https://www.sfheritage.org/news/the-birth-and-rebirth-of-the-first-subway-station-in-the-west/" target="_blank" rel="noreferrer">SF Heritage</a>.</div>
+</section>
+
+<!-- 12 -->
+<section class="slide fog" data-title="Forest Hill Station">
+  <div class="top"><span class="chapter">Transit made the tract / 3</span><span>12</span></div>
+  <div class="inner grid2">
+    <div>
+      <p class="kicker">Laguna Honda Station → Forest Hill</p>
+      <h2>The neighborhood’s front door was underground.</h2>
+      <p class="lede">The developer donated station land before the tunnel opened. San Francisco Heritage calls this the first subway station in the West.</p>
+      <p class="side-note" style="margin-top:26px">The often-repeated superlative changes by source. This deck uses the precise, attributed claim—not the folklore version.</p>
+      <div class="pill-row" style="margin-top:20px"><span class="tag"><em>Dirty Harry</em> · 1971</span><span class="tag"><em>The Last Black Man in San Francisco</em> · 2019</span><span class="tag"><em>Chance</em> · 2016</span></div>
+    </div>
+    <div class="media native-archive" style="height:min(70vh,1380px)">
+      <img src="https://opensfhistory.org/Download/wnp36.02568.jpg" alt="Forest Hill Station and Laguna Honda Boulevard in June 1921">
+      <div class="cap">Laguna Honda (now Forest Hill) Station, June 23, 1921. Horace Chaffee / SF DPW.</div>
+    </div>
+  </div>
+  <div class="cite">Image: <a href="https://opensfhistory.org/Display/wnp36.02568.jpg" target="_blank" rel="noreferrer">OpenSFHistory wnp36.02568</a>, SF DPW, courtesy private collector. History: <a href="https://www.outsidelands.org/forest-hill-station.php" target="_blank" rel="noreferrer">WNP</a>; <a href="https://www.sfheritage.org/news/the-birth-and-rebirth-of-the-first-subway-station-in-the-west/" target="_blank" rel="noreferrer">SF Heritage</a>. Production locations: <a href="https://data.sfgov.org/Arts-Culture-and-Recreation/Film-Locations-in-San-Francisco/yitu-d5am/about_data" target="_blank" rel="noreferrer">DataSF Film Locations</a>.</div>
+</section>
+
+<!-- 13 -->
+<section class="slide green" data-title="Architecture without uniformity">
+  <div class="top"><span class="chapter">Architecture</span><span>13</span></div>
+  <div class="inner">
+    <p class="kicker">A controlled landscape; an eclectic wardrobe</p>
+    <h2>Not one style. One <em>setting.</em></h2>
+    <div class="grid4" style="margin-top:5vh">
+      <div class="card"><svg viewBox="0 0 220 150" aria-hidden="true"><path d="M28 124V64l82-42 82 42v60" fill="none" stroke="#f2ead8" stroke-width="6"/><path d="M58 124V76h104v48M96 124V88h28v36" fill="none" stroke="#c7a45a" stroke-width="5"/></svg><h3>Arts &amp; Crafts</h3><p class="small">expressed roofs, timber, masonry, craft</p></div>
+      <div class="card"><svg viewBox="0 0 220 150" aria-hidden="true"><path d="M35 124V64h150v60M24 64h172L110 25z" fill="none" stroke="#f2ead8" stroke-width="6"/><path d="M70 124V82h80v42M94 124V92h32v32" fill="none" stroke="#c7a45a" stroke-width="5"/></svg><h3>Mediterranean</h3><p class="small">stucco, tile, arches, restrained massing</p></div>
+      <div class="card"><svg viewBox="0 0 220 150" aria-hidden="true"><path d="M35 124V51h150v73M26 51h168M51 51l59-28 59 28" fill="none" stroke="#f2ead8" stroke-width="6"/><path d="M62 80h28v24H62zm68 0h28v24h-28z" fill="none" stroke="#c7a45a" stroke-width="5"/></svg><h3>Period revival</h3><p class="small">Tudor, English, French and storybook notes</p></div>
+      <div class="card"><svg viewBox="0 0 220 150" aria-hidden="true"><path d="M25 124V59h170v65M25 59h170M54 88h31v36m24-36h31v36m24-36h31v36" fill="none" stroke="#f2ead8" stroke-width="6"/><path d="M25 46h132" stroke="#c7a45a" stroke-width="5"/></svg><h3>Modern outlier</h3><p class="small">flat planes and International Style experiments</p></div>
+    </div>
+    <p class="body" style="margin-top:30px">Bernard Maybeck is securely linked to houses at 51 Sotelo and 270 Castenada—and to the clubhouse. Most of Forest Hill was built later, through the 1920s and ’30s.</p>
+  </div>
+  <div class="cite">Source: <a href="https://sfplanning.org/sites/default/files/documents/preserv/ResidenceParksHCS/2014.0263U_Gardens_In_The_City_HCS_draft-Oct2016.pdf" target="_blank" rel="noreferrer">SF Planning, <em>Gardens in the City</em></a>; <a href="https://www.outsidelands.org/forest-hill-clubhouse.php" target="_blank" rel="noreferrer">WNP clubhouse history</a>. House icons are interpretive, not identified buildings.</div>
+</section>
+
+<!-- 14 -->
+<section class="slide" data-title="The Maybeck clubhouse">
+  <div class="top"><span class="chapter">Architecture / the clubhouse</span><span>14</span></div>
+  <div class="inner grid2">
+    <div class="media native-photo" style="height:min(68vh,1320px)">
+      <img src="assets/forest-hill-clubhouse-2015.jpg" alt="Forest Hill Clubhouse at 381 Magellan Avenue in March 2015">
+      <div class="cap">381 Magellan Avenue, March 23, 2015. sftrajan / Flickr.</div>
+    </div>
+    <div>
+      <p class="kicker">Bernard Maybeck / 1919</p>
+      <h2>A civic room disguised as a cottage.</h2>
+      <p class="lede">Its exterior is restrained. Inside, huge beams make the association’s meeting house feel almost theatrical.</p>
+      <div class="rule"></div>
+      <p class="body">The building is both architecture and governance: the place where beauty, rules, sociability and conflict have repeatedly met.</p>
+      <span class="tag">381 Magellan Avenue</span>
+    </div>
+  </div>
+  <div class="cite">Image: <a href="https://www.flickr.com/photos/sftrajan/16309208773/" target="_blank" rel="noreferrer">sftrajan / Flickr</a>, March 23, 2015; all rights reserved. History: <a href="https://www.outsidelands.org/forest-hill-clubhouse.php" target="_blank" rel="noreferrer">Western Neighborhoods Project</a>. Construction date is 1919; sources vary on dedication/opening wording.</div>
+</section>
+
+<!-- 15 -->
+<section class="slide dark uhd-artifact uhd-artifact--archive" data-title="The staircase oddity">
+  <img class="bleed" src="https://opensfhistory.org/Download/wnp15.242.jpg" alt="An automobile being driven up the Pacheco Street staircase around 1920">
+  <div class="shade bottom"></div>
+  <div class="top"><span class="chapter">Texture / the stairs</span><span>15</span></div>
+  <div class="inner photo-title">
+    <p class="kicker">Pacheco &amp; Magellan / c.1920</p>
+    <h2 style="max-width:10em">Someone drove a car up the grand staircase.</h2>
+    <p class="lede">Daniels designed the stairs as ceremony. The archive preserved a less ceremonial use.</p>
+  </div>
+  <div class="cite">Image: automobile on the Pacheco stairway at Magellan, c.1920; Christopher Helin, courtesy private collector; <a href="https://opensfhistory.org/Display/wnp15.242.jpg" target="_blank" rel="noreferrer">OpenSFHistory wnp15.242</a>.</div>
+</section>
+
+<!-- 16 -->
+<section class="slide fog" data-title="Pacheco and Magellan, then / later">
+  <div class="top"><span class="chapter">Then / later</span><span>16</span></div>
+  <div class="inner">
+    <p class="kicker">The same intersection; the landscape fills in</p>
+    <h2>Pacheco × Magellan</h2>
+    <div class="photo-pair">
+      <div class="media native-archive"><img src="https://opensfhistory.org/Download/wnp15.695.jpg" alt="Pacheco and Magellan intersection in 1923"><div class="cap"><b>1923</b> — young planting, open sky. Christopher Helin; courtesy private collector.</div></div>
+      <div class="media native-archive"><img src="https://opensfhistory.org/Download/wnp72.281.jpg" alt="Pacheco staircase near Magellan in 1974"><div class="cap"><b>1974</b> — hedges and mature canopy. © Greg Gaar Photography.</div></div>
+    </div>
+    <p class="small" style="margin-top:8px">Same intersection, different camera positions—not a pixel-matched repeat.</p>
+  </div>
+  <div class="cite">Images: <a href="https://opensfhistory.org/Display/wnp15.695.jpg" target="_blank" rel="noreferrer">OpenSFHistory wnp15.695</a> and <a href="https://opensfhistory.org/Display/wnp72.281.jpg" target="_blank" rel="noreferrer">wnp72.281</a>. Full credits in captions.</div>
+</section>
+
+<!-- 17 -->
+<section class="slide black" data-title="Content note">
+  <div class="top"><span class="chapter">The ugly / content note</span><span>17</span></div>
+  <div class="inner" style="max-width:clamp(1050px,73vw,2600px);text-align:center">
+    <div class="warning">Historical developer racist language follows</div>
+    <h2 style="margin-top:42px">The curves were welcoming.<br>The sales promise was not.</h2>
+    <p class="lede" style="margin-inline:auto">Forest Hill’s beauty and its exclusion were sold together. The next slide preserves the language because euphemism would hide the mechanism.</p>
+  </div>
+  <div class="cite">Context: <a href="https://www.outsidelands.org/forest-hill-broadsheet.php" target="_blank" rel="noreferrer">WNP transcription of a Newell–Murdoch broadsheet</a>; <a href="https://sfplanning.org/sites/default/files/documents/preserv/ResidenceParksHCS/2014.0263U_Gardens_In_The_City_HCS_draft-Oct2016.pdf" target="_blank" rel="noreferrer">SF Planning residence-park context</a>.</div>
+</section>
+
+<!-- 18 -->
+<section class="slide rust" data-title="Advertised racial restrictions">
+  <div class="top"><span class="chapter">The ugly / advertised restrictions</span><span>18</span></div>
+  <div class="inner">
+    <p class="eyebrow">Newell–Murdoch sales brochure, reported by SF Planning • original historical slur</p>
+    <div class="quote" style="max-width:16em">“No Japanese, Chinese or Negros.”</div>
+    <div class="rule"></div>
+    <p class="lede" style="max-width:34em">Another developer broadsheet promised “no Mongols, Africans or ‘shack builders’” and assured “the person of taste and refinement” that nothing “disagreeable” would enter.</p>
+    <p class="side-note" style="border-color:var(--cream);max-width:60em;margin-top:30px">This was not a stray prejudice beside the real-estate product. Race, class, housing type, building cost and setbacks were bundled as one guarantee of “exclusiveness.”</p>
+  </div>
+  <div class="cite">Language as reported by <a href="https://sfplanning.org/sites/default/files/documents/preserv/ResidenceParksHCS/2014.0263U_Gardens_In_The_City_HCS_draft-Oct2016.pdf" target="_blank" rel="noreferrer">SF Planning, <em>Gardens in the City</em></a> from an undated Newell–Murdoch brochure, and transcribed/recreated by <a href="https://www.outsidelands.org/forest-hill-broadsheet.php" target="_blank" rel="noreferrer">WNP</a> from a separate broadsheet. No recorded deed scan was located. “Negros” is the reported source spelling.</div>
+</section>
+
+<!-- 19 -->
+<section class="slide fog" data-title="The exclusion machine">
+  <div class="top"><span class="chapter">The ugly / how it worked</span><span>19</span></div>
+  <div class="inner">
+    <p class="kicker">One restriction system policed many boundaries</p>
+    <h2>The exclusion machine</h2>
+    <div class="grid3" style="margin-top:5vh">
+      <div class="card"><div class="huge-number" style="color:var(--rust)">01</div><h3>Race</h3><p class="body">Explicitly barred named Asian and Black groups.</p></div>
+      <div class="card"><div class="huge-number" style="color:var(--rust)">02</div><h3>Class</h3><p class="body">A $4,000 minimum house cost filtered buyers by wealth.</p></div>
+      <div class="card"><div class="huge-number" style="color:var(--rust)">03</div><h3>Density</h3><p class="body">No flats, apartments, double houses or more than one house per lot.</p></div>
+    </div>
+    <p class="lede" style="margin-top:30px">The physical result—large detached homes on controlled lots—outlived judicial enforcement of the advertised racial restrictions.</p>
+  </div>
+  <div class="cite">Restrictions summarized from <a href="https://sfplanning.org/sites/default/files/documents/preserv/ResidenceParksHCS/2014.0263U_Gardens_In_The_City_HCS_draft-Oct2016.pdf" target="_blank" rel="noreferrer">SF Planning</a> and <a href="https://www.outsidelands.org/sw22.php" target="_blank" rel="noreferrer">WNP</a>. Historic $4,000 is nominal; no present-day conversion is implied.</div>
+</section>
+
+<!-- 20 -->
+<section class="slide green" data-title="Law changes; boundaries linger">
+  <div class="top"><span class="chapter">Exclusion → integration</span><span>20</span></div>
+  <div class="inner">
+    <p class="kicker">Law moved faster than custom</p>
+    <h2>Judicially unenforceable in 1948.<br>Not magically undone.</h2>
+    <svg class="timeline" viewBox="0 0 1260 340" role="img" aria-label="Timeline from restrictive covenants through Shelley v Kraemer and the Fair Housing Act">
+      <line x1="90" y1="165" x2="1165" y2="165" stroke="#f2ead8" stroke-width="2" opacity=".45"/>
+      <g>
+        <circle cx="130" cy="165" r="17" fill="#a44934"/><text x="130" y="112" text-anchor="middle" font-size="26" class="serif" fill="#f2ead8">c.1912</text><text x="130" y="222" text-anchor="middle" font-size="12" fill="#f2ead8">RACIAL RESTRICTIONS</text><text x="130" y="242" text-anchor="middle" font-size="10" fill="#f2ead8" opacity=".7">advertised</text>
+        <circle cx="485" cy="165" r="17" fill="#c7a45a"/><text x="485" y="112" text-anchor="middle" font-size="26" class="serif" fill="#f2ead8">1948</text><text x="485" y="222" text-anchor="middle" font-size="12" fill="#f2ead8">SHELLEY v. KRAEMER</text><text x="485" y="245" text-anchor="middle" font-size="11" fill="#f2ead8" opacity=".7">courts cannot enforce</text>
+        <circle cx="810" cy="165" r="17" fill="#d8ded8"/><text x="810" y="112" text-anchor="middle" font-size="26" class="serif" fill="#f2ead8">1960s</text><text x="810" y="222" text-anchor="middle" font-size="12" fill="#f2ead8">VISIBLE INTEGRATION</text>
+        <circle cx="1120" cy="165" r="17" fill="#f2ead8"/><text x="1120" y="112" text-anchor="middle" font-size="26" class="serif" fill="#f2ead8">1968</text><text x="1120" y="222" text-anchor="middle" font-size="12" fill="#f2ead8">FAIR HOUSING ACT</text><text x="1120" y="245" text-anchor="middle" font-size="11" fill="#f2ead8" opacity=".7">race discrimination illegal</text>
+      </g>
+    </svg>
+    <p class="body">The Supreme Court decision stopped judicial enforcement; it did not erase deed language or informal gatekeeping. Prominent Black residents—including Willie Mays and Terry Francois—arrived later.</p>
+  </div>
+  <div class="cite">Sources: <a href="https://tile.loc.gov/storage-services/service/ll/usrep/usrep334/usrep334001/usrep334001.pdf" target="_blank" rel="noreferrer"><em>Shelley v. Kraemer</em>, 334 U.S. 1 (1948), official U.S. Reports</a>; <a href="https://www.justice.gov/crt/fair-housing-act-1" target="_blank" rel="noreferrer">U.S. DOJ, Fair Housing Act</a>; <a href="https://www.outsidelands.org/sw5.php" target="_blank" rel="noreferrer">WNP, Willie Mays</a>; <a href="https://www.outsidelands.org/forest-hill.php" target="_blank" rel="noreferrer">WNP, Forest Hill (Francois)</a>.</div>
+</section>
+
+<!-- 21 -->
+<section class="slide fog" data-title="Willie Mays in Forest Hill">
+  <div class="top"><span class="chapter">Integration / a necessary correction</span><span>21</span></div>
+  <div class="inner grid2">
+    <svg viewBox="0 0 600 590" role="img" aria-label="Baseball diamond diagram marked 1957 in Sherwood Forest and 1963 in Forest Hill">
+      <rect x="110" y="102" width="380" height="380" rx="34" transform="rotate(45 300 292)" fill="#d9e0d5"/>
+      <path d="M300 505L95 300 300 95 505 300z" fill="none" stroke="#285a42" stroke-width="5" stroke-dasharray="4 11"/>
+      <circle cx="300" cy="505" r="14" fill="#a44934"/><circle cx="95" cy="300" r="10" fill="#123b2c"/><circle cx="300" cy="95" r="10" fill="#123b2c"/><circle cx="505" cy="300" r="10" fill="#123b2c"/>
+      <path d="M300 505C292 393 257 309 192 238" fill="none" stroke="#a44934" stroke-width="4"/>
+      <text x="300" y="545" text-anchor="middle" font-size="13" font-weight="750" letter-spacing="1.5">1957 • SHERWOOD FOREST</text>
+      <text x="192" y="211" text-anchor="middle" font-size="13" font-weight="750" letter-spacing="1.5">1963 • FOREST HILL</text>
+      <text x="300" y="286" text-anchor="middle" font-size="58" font-family="Georgia,serif" fill="#123b2c">54</text>
+      <text x="300" y="315" text-anchor="middle" font-size="12" letter-spacing="2">MENDOSA</text>
+    </svg>
+    <div>
+      <p class="kicker">Willie Mays / 1963</p>
+      <h2>Welcome is a more complicated word.</h2>
+      <p class="lede">Mays bought 54 Mendosa Avenue and hosted nearly 100 neighborhood children. The association helped with the party.</p>
+      <div class="rule"></div>
+      <p class="body"><b>Correction:</b> his infamous 1957 rejected purchase was at 175 Miraloma in adjacent Sherwood Forest—not Forest Hill. A later resident’s oral history remembered children’s delight at Mendosa and an unmistakably colder adult undercurrent.</p>
+      <span class="tag">Do not conflate the two addresses</span>
+    </div>
+  </div>
+  <div class="cite">Sources: <a href="https://www.outsidelands.org/sw5.php" target="_blank" rel="noreferrer">WNP, Willie Mays in Forest Hill</a>; <a href="https://www.sfchronicle.com/oursf/article/Willie-Mays-threw-a-party-for-the-kids-and-the-11225810.php" target="_blank" rel="noreferrer">SF Chronicle, 2017</a>. Adult reaction is one resident’s retrospective memory, not a neighborhood poll.</div>
+</section>
+
+<!-- 22 -->
+<section class="slide green" data-title="The affordable-housing proposal">
+  <div class="top"><span class="chapter">The modern echo / 1</span><span>22</span></div>
+  <div class="inner grid2">
+    <div>
+      <p class="kicker">250 Laguna Honda Boulevard / 2016</p>
+      <h2>150 affordable homes for seniors.</h2>
+      <p class="lede">Five stories. Roughly 132,000 square feet. Thirty apartments for seniors experiencing homelessness.</p>
+      <div class="grid3" style="margin-top:34px">
+        <div class="stat"><strong>150</strong><span>homes</span></div><div class="stat"><strong>100%</strong><span>low-income seniors</span></div><div class="stat"><strong>20%</strong><span>formerly homeless</span></div>
+      </div>
+    </div>
+    <svg viewBox="0 0 650 550" role="img" aria-label="Section diagram of the proposed senior housing site on the hillside">
+      <path d="M45 451C201 424 326 377 458 267c78-65 115-82 153-85v310H45z" fill="#80906b"/>
+      <g fill="#f2ead8" stroke="#09271e" stroke-width="4">
+        <path d="M111 358h290v98H111z"/><path d="M133 296h246v62H133z"/><path d="M159 234h194v62H159z"/><path d="M185 172h142v62H185z"/><path d="M212 110h88v62H212z"/>
+      </g>
+      <g fill="#123b2c"><rect x="142" y="320" width="24" height="20"/><rect x="188" y="320" width="24" height="20"/><rect x="234" y="320" width="24" height="20"/><rect x="280" y="320" width="24" height="20"/><rect x="326" y="320" width="24" height="20"/><rect x="183" y="257" width="24" height="20"/><rect x="229" y="257" width="24" height="20"/><rect x="275" y="257" width="24" height="20"/><rect x="217" y="194" width="24" height="20"/><rect x="263" y="194" width="24" height="20"/></g>
+      <path d="M444 267v189" stroke="#d2ad61" stroke-width="7" stroke-dasharray="8 10"/>
+      <text x="486" y="388" font-size="12" font-weight="750" letter-spacing="1.5" fill="#f2ead8" transform="rotate(-48 486 388)">STEEP SITE</text>
+      <text x="256" y="506" text-anchor="middle" font-size="11" letter-spacing="1.5" fill="#f2ead8">CONCEPTUAL MASSING • NOT THE PROJECT DRAWING</text>
+    </svg>
+  </div>
+  <div class="cite">Proposal facts: <a href="https://www.sfchronicle.com/bayarea/article/In-a-wealthy-SF-neighborhood-residents-fight-10617213.php" target="_blank" rel="noreferrer">SF Chronicle, Nov. 16, 2016</a>; <a href="https://media.api.sf.gov/documents/250_Laguna_Honda_Predevelopment_Loan_Eval_-_LC_10-13-23_0.pdf" target="_blank" rel="noreferrer">MOHCD loan evaluation, Oct. 2023</a>. Diagram is editorial.</div>
+</section>
+
+<!-- 23 -->
+<section class="slide black" data-title="What was said">
+  <div class="top"><span class="chapter">The modern echo / 2</span><span>23</span></div>
+  <div class="inner">
+    <p class="kicker">November 14, 2016 / 100+ attended / Association vote unanimous</p>
+    <h2>Land-use language—and fear of who might live there.</h2>
+    <div class="grid4" style="margin-top:5vh">
+      <div class="card"><div class="quote">height</div><p class="small">density, traffic, noise</p></div>
+      <div class="card"><div class="quote">“saving<br>the hill”</div><p class="small">opponent Joe Bravo, a resident and attorney</p></div>
+      <div class="card"><div class="quote">“sex<br>offenders”</div><p class="small">a resident asked who could qualify</p></div>
+      <div class="card"><div class="quote">“Russian<br>gulag”</div><p class="small">association president on the design</p></div>
+    </div>
+    <p class="lede" style="margin-top:34px">Some objections were ordinary planning concerns. Others stigmatized formerly homeless people as a threat to children and elders. Both are in the record.</p>
+  </div>
+  <div class="cite">Quoted fragments and meeting account: <a href="https://www.sfchronicle.com/bayarea/article/In-a-wealthy-SF-neighborhood-residents-fight-10617213.php" target="_blank" rel="noreferrer">J. K. Dineen, SF Chronicle, Nov. 16, 2016</a>. Quotes are attributed to individual speakers, not every resident.</div>
+</section>
+
+<!-- 24 -->
+<section class="slide fog" data-title="Why the proposal died">
+  <div class="top"><span class="chapter">The modern echo / 3</span><span>24</span></div>
+  <div class="inner grid2">
+    <div>
+      <p class="kicker">Withdrawn / March 2018</p>
+      <h2>Opposition mattered.<br>So did the hill.</h2>
+      <p class="lede">The strongest reading is both/and—not a one-cause morality play.</p>
+      <div class="vstack" style="margin-top:30px">
+        <p class="side-note"><b>Geology:</b> engineers recommended deep soil mixing and a stabilizing buttress for a creeping sandy slope.</p>
+        <p class="side-note"><b>Preservation:</b> Planning identified the 1962 church as a rare, intact Expressionist resource.</p>
+        <p class="side-note"><b>Politics:</b> organized opposition lengthened an already uncertain entitlement path.</p>
+      </div>
+    </div>
+    <svg viewBox="0 0 650 580" role="img" aria-label="Cutaway diagram showing hillside soil stabilization">
+      <path d="M33 162C209 170 292 236 406 321c76 57 129 67 214 73v155H33z" fill="#d9cfb7"/>
+      <path d="M35 276c142-7 244 48 361 135 79 58 147 70 224 76" fill="none" stroke="#a44934" stroke-width="7" stroke-dasharray="9 12"/>
+      <g stroke="#285a42" stroke-width="12" opacity=".9"><line x1="178" y1="177" x2="171" y2="407"/><line x1="224" y1="190" x2="214" y2="428"/><line x1="270" y1="210" x2="260" y2="451"/><line x1="316" y1="234" x2="305" y2="470"/></g>
+      <path d="M430 459h125v65H393z" fill="#80906b" stroke="#123b2c" stroke-width="4"/>
+      <path d="M112 171h242v68H112zM145 115h177v56H145z" fill="#f2ead8" stroke="#123b2c" stroke-width="4"/>
+      <text x="238" y="85" text-anchor="middle" font-size="12" font-weight="750" letter-spacing="1.5">PROPOSED BUILDING</text><text x="128" y="465" font-size="11" font-weight="750" transform="rotate(-88 128 465)">DEEP SOIL MIXING</text><text x="476" y="551" text-anchor="middle" font-size="11" font-weight="750">TOE BUTTRESS</text>
+    </svg>
+  </div>
+  <div class="cite">Sources: <a href="https://www.chron.com/bayarea/article/Housing-developer-undeterred-by-report-urging-12495068.php" target="_blank" rel="noreferrer">SF Chronicle, Jan. 2018</a>; <a href="https://www.sfchronicle.com/bayarea/article/Senior-housing-project-near-SF-s-Forest-Hill-12742358.php" target="_blank" rel="noreferrer">SF Chronicle, Mar. 2018</a>; <a href="https://media.api.sf.gov/documents/250_Laguna_Honda_Predevelopment_Loan_Eval_-_LC_10-13-23_0.pdf" target="_blank" rel="noreferrer">MOHCD, 2023</a>. Cutaway is explanatory, not engineering documentation.</div>
+</section>
+
+<!-- 25 -->
+<section class="slide dark" data-title="The site returns">
+  <img class="bleed" src="https://static.wixstatic.com/media/05555c_367059d590ea4e8d96939c2072b9782f~mv2.jpg" alt="Concept rendering of a new affordable housing proposal at 250 Laguna Honda Boulevard">
+  <div class="shade"></div>
+  <div class="top"><span class="chapter">The modern echo / 4</span><span>25</span></div>
+  <div class="inner" style="max-width:clamp(760px,53vw,1900px);margin-left:0">
+    <p class="kicker">The site did not disappear</p>
+    <h2>A new proposal:<br>172 homes.</h2>
+    <p class="lede">Mission Housing now presents an eight-story, 100% affordable family project; 25% of homes are intended for families exiting homelessness.</p>
+    <div class="pill-row" style="margin-top:24px"><span class="tag">current proposal</span><span class="tag">not the 2016 design</span></div>
+  </div>
+  <div class="cite">Concept rendering and current program published by <a href="https://www.missionhousing.org/250-laguna-honda" target="_blank" rel="noreferrer">Mission Housing, 250 Laguna Honda</a>, accessed Aug. 4, 2026. This is a later proposal; status and design can change.</div>
+</section>
+
+<!-- 26 -->
+<section class="slide green" data-title="The private-street myth">
+  <div class="top"><span class="chapter">Governance / myth audit</span><span>26</span></div>
+  <div class="inner grid2">
+    <div>
+      <p class="eyebrow">Myth</p>
+      <div class="quote">“Residents still own and maintain all the streets.”</div>
+      <div style="font-size:clamp(80px,12vw,400px);line-height:.8;margin-top:28px;opacity:.18">×</div>
+    </div>
+    <div>
+      <p class="kicker">Fact</p>
+      <h2>The city maintains the streets today.</h2>
+      <p class="lede">Residents did take over substandard developer-built streets, sewers and lighting in 1918–19. San Francisco later assumed street and curb responsibility.</p>
+      <div class="rule"></div>
+      <p class="body">The association remains consequential. Its published materials document parcel assessments supporting the Maybeck clubhouse, trees/landscaping and events; its guidelines request review of exterior work.</p>
+      <p class="side-note">Sources disagree on the handoff date: WNP says 1978; a local history ties a final assessment to 1984. Present-day responsibility is the secure fact.</p>
+    </div>
+  </div>
+  <div class="cite">Sources: <a href="https://www.outsidelands.org/forest-hill.php" target="_blank" rel="noreferrer">WNP</a>; <a href="https://www.sf.gov/sites/default/files/2023-05/CY22_Street_Sidewalk_Standards_Report_05222023.pdf" target="_blank" rel="noreferrer">SF Public Works street/sidewalk standards report</a>; Association <a href="https://foresthill-association.com/wp-content/uploads/2015/11/FHAeNews2014-4Q.pdf" target="_blank" rel="noreferrer">2014 assessment newsletter</a> and <a href="https://foresthill-association.com/wp-content/uploads/2015/09/architectural-Review-Guidelines.pdf" target="_blank" rel="noreferrer">design guidelines</a>; <a href="https://foresthillsf.weebly.com/history.html" target="_blank" rel="noreferrer">local history</a>. Assessment spending evidence is historical, not a current-dollar budget.</div>
+</section>
+
+<!-- 27 -->
+<section class="slide fog" data-title="Forest Hill today">
+  <div class="top"><span class="chapter">Forest Hill today / profile</span><span>27</span></div>
+  <div class="inner">
+    <p class="kicker">A small, older, owner-heavy enclave</p>
+    <h2>Forest Hill today—in careful proxies.</h2>
+    <div class="grid4" style="margin-top:5vh">
+      <div class="stat"><strong>2,220</strong><span>2020 population inside the SF Find Forest Hill polygon, block approximation</span></div>
+      <div class="stat"><strong>53.6</strong><span>median age in tract 304 ±4.7 years</span></div>
+      <div class="stat"><strong>81.9%</strong><span>owner-occupied in tract 304</span></div>
+      <div class="stat"><strong>$137k</strong><span>median household income ±$38k</span></div>
+    </div>
+    <div class="grid3" style="margin-top:5vh">
+      <div class="card"><h3>31.8%</h3><p class="small">age 65+</p></div>
+      <div class="card"><h3>47.8%</h3><p class="small">non-Hispanic Asian</p></div>
+      <div class="card"><h3>31.0%</h3><p class="small">non-Hispanic White</p></div>
+    </div>
+    <p class="side-note" style="margin-top:24px"><b>Boundary warning:</b> 93.7% of Forest Hill land lies in tract 304, but Forest Hill is only 49.5% of that tract. ACS tract values are a useful proxy—not a neighborhood census.</p>
+    <p class="small"><b>Documented past residents:</b> Willie Mays, civil-rights lawyer/Supervisor Terry Francois, Governor Pat Brown, and Jerry Brown. Current private residents are omitted without strong public evidence.</p>
+  </div>
+  <div class="cite">Population: 2020 Census blocks spatially assigned to the <a href="https://data.sfgov.org/Geographic-Locations-and-Boundaries/SF-Find-Neighborhoods/gfpk-269f" target="_blank" rel="noreferrer">SF Find neighborhood polygon</a>. Profile: <a href="https://censusreporter.org/profiles/14000US06075030400-census-tract-304-san-francisco-ca/" target="_blank" rel="noreferrer">2024 ACS 5-year</a>. Residents: <a href="https://www.outsidelands.org/forest-hill.php" target="_blank" rel="noreferrer">WNP</a>; <a href="https://sfplanning.org/sites/default/files/documents/preserv/ResidenceParksHCS/2014.0263U_Gardens_In_The_City_HCS_draft-Oct2016.pdf" target="_blank" rel="noreferrer">SF Planning</a>. ACS margins of error are 90%.</div>
+</section>
+
+<!-- 28 -->
+<section class="slide" data-title="Demographic change">
+  <div class="top"><span class="chapter">Forest Hill today / change</span><span>28</span></div>
+  <div class="inner">
+    <p class="kicker">Census tract 304 / 2000–2020</p>
+    <h2>White share fell. Asian share stayed large. Hispanic share rose.</h2>
+    <svg class="chart demographic-chart" viewBox="0 0 1300 480" role="img" aria-label="Line chart showing White, Asian and Hispanic shares of Census tract 304 in 2000, 2010 and 2020">
+      <g class="hair"><line x1="110" y1="80" x2="1200" y2="80"/><line x1="110" y1="177" x2="1200" y2="177"/><line x1="110" y1="274" x2="1200" y2="274"/><line x1="110" y1="371" x2="1200" y2="371"/></g>
+      <g class="chart-copy" font-size="11" opacity=".65"><text x="72" y="84">60%</text><text x="72" y="181">40%</text><text x="72" y="278">20%</text><text x="80" y="375">0%</text></g>
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="7">
+        <path d="M170 96L650 116L1130 148" stroke="#a44934"/><path d="M170 190L650 176L1130 179" stroke="#285a42"/><path d="M170 350L650 345L1130 335" stroke="#c7a45a"/>
+      </g>
+      <g>
+        <g fill="#a44934"><circle cx="170" cy="96" r="8"/><circle cx="650" cy="116" r="8"/><circle cx="1130" cy="148" r="8"/></g>
+        <g fill="#285a42"><circle cx="170" cy="190" r="8"/><circle cx="650" cy="176" r="8"/><circle cx="1130" cy="179" r="8"/></g>
+        <g fill="#c7a45a"><circle cx="170" cy="350" r="8"/><circle cx="650" cy="345" r="8"/><circle cx="1130" cy="335" r="8"/></g>
+      </g>
+      <g class="chart-copy" font-size="14" font-weight="750"><text x="170" y="420" text-anchor="middle">2000</text><text x="650" y="420" text-anchor="middle">2010</text><text x="1130" y="420" text-anchor="middle">2020</text></g>
+      <g class="chart-copy" font-size="13" font-weight="750"><text x="1180" y="145" fill="#a44934">WHITE 45.9%</text><text x="1180" y="182" fill="#285a42">ASIAN 39.6%</text><text x="1180" y="339" fill="#8f6c24">HISPANIC 7.5%</text></g>
+      <g class="chart-copy" font-size="12"><text x="180" y="85" fill="#a44934">56.7%</text><text x="180" y="207" fill="#285a42">37.3%</text><text x="180" y="369" fill="#8f6c24">4.3%</text></g>
+    </svg>
+    <div class="pill-row desktop-legend"><span class="tag"><i class="dot" style="background:#a44934"></i>White alone</span><span class="tag"><i class="dot" style="background:#285a42"></i>Asian alone</span><span class="tag"><i class="dot" style="background:#c7a45a"></i>Hispanic, any race</span></div>
+    <div class="mobile-only mobile-series" aria-label="Exact 2000, 2010 and 2020 chart values"><span><i class="dot" style="background:#a44934"></i><b>White alone</b> 56.7% → 52.5% → 45.9%</span><span><i class="dot" style="background:#285a42"></i><b>Asian alone</b> 37.3% → 40.3% → 39.6%</span><span><i class="dot" style="background:#c7a45a"></i><b>Hispanic, any race</b> 4.3% → 5.4% → 7.5%</span></div>
+    <p class="small" style="margin-top:14px">Race-alone and Hispanic-origin series overlap. Tract population: 5,177 → 5,106 → 5,269. The tract boundary is effectively stable from 2010 to 2020; 2000 comparability is used with caution.</p>
+  </div>
+  <div class="cite">Source: U.S. Census decennial tract 304 tables: <a href="https://api.census.gov/data/2000/dec/sf1/groups/P004.html" target="_blank" rel="noreferrer">2000 SF1 P004</a>, <a href="https://api.census.gov/data/2010/dec/sf1/groups/P9.html" target="_blank" rel="noreferrer">2010 SF1 P9</a>, <a href="https://api.census.gov/data/2020/dec/dhc/groups/P9.html" target="_blank" rel="noreferrer">2020 DHC P9</a>; cross-checked with <a href="https://data.sfgov.org/resource/ubhq-cziz.json?tract=030400&amp;$select=pop2000,white,asian,hispanic" target="_blank" rel="noreferrer">DataSF’s direct 2000 record</a> and tract geometries.</div>
+</section>
+
+<!-- 29 -->
+<section class="slide green" data-title="Home values">
+  <div class="top"><span class="chapter">Forest Hill today / values</span><span>29</span></div>
+  <div class="inner">
+    <p class="kicker">Median owner-occupied home value / nominal dollars</p>
+    <h2>A persistent premium.</h2>
+    <svg class="chart" viewBox="0 0 1320 475" role="img" aria-label="Line chart comparing median owner-occupied home values in tract 304 and San Francisco, 2010 to 2024">
+      <g class="hair"><line x1="115" y1="76" x2="1210" y2="76"/><line x1="115" y1="164" x2="1210" y2="164"/><line x1="115" y1="252" x2="1210" y2="252"/><line x1="115" y1="340" x2="1210" y2="340"/></g>
+      <g font-size="11" opacity=".75"><text x="59" y="80">$2.0m</text><text x="59" y="168">$1.5m</text><text x="59" y="256">$1.0m</text><text x="59" y="344">$0.5m</text></g>
+      <path d="M170 252L500 237L830 198L1160 104" fill="none" stroke="#f2ead8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M170 290L500 287L830 225L1160 184" fill="none" stroke="#c7a45a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <g fill="#f2ead8"><path d="M158 240h24v24h-24z"/><circle cx="500" cy="237" r="8"/><circle cx="830" cy="198" r="8"/><circle cx="1160" cy="104" r="8"/></g>
+      <g fill="#c7a45a"><circle cx="170" cy="290" r="8"/><circle cx="500" cy="287" r="8"/><circle cx="830" cy="225" r="8"/><circle cx="1160" cy="184" r="8"/></g>
+      <g fill="none" stroke="#f2ead8" stroke-width="2" opacity=".7"><path d="M500 224v26m-8-26h16m-16 26h16M830 153v90m-8-90h16m-16 90h16M1160 56v96m-8-96h16m-16 96h16"/></g>
+      <g font-size="13" font-weight="750" text-anchor="middle"><text x="170" y="395">2010</text><text x="500" y="395">2015</text><text x="830" y="395">2020</text><text x="1160" y="395">2024</text></g>
+      <g font-size="12"><text x="170" y="228" text-anchor="middle" fill="#f2ead8">$1.0m+*</text><text x="500" y="220" text-anchor="middle" fill="#f2ead8">$1.085m</text><text x="830" y="181" text-anchor="middle" fill="#f2ead8">$1.313m</text><text x="1160" y="84" text-anchor="middle" fill="#f2ead8">$1.840m</text><text x="1160" y="207" text-anchor="middle" fill="#c7a45a">SF $1.395m</text></g>
+    </svg>
+    <div class="pill-row"><span class="tag"><i class="dot" style="background:#f2ead8"></i>Tract 304 proxy</span><span class="tag"><i class="dot" style="background:#c7a45a"></i>San Francisco</span></div>
+    <p class="small" style="margin-top:14px">*2010 tract median is censored at “$1,000,000 or more.” Tract 90% MOEs: 2015 ±$72.5k; 2020 ±$255.3k; 2024 ±$274.2k; 2010 unavailable. SF MOEs: ±$7.5k / $7.7k / $11.3k / $20.6k. Five-year windows overlap, and ACS changed within-window inflation adjustment beginning in 2022. Owner-reported value—not sale price or Zillow.</p>
+  </div>
+  <div class="cite">Source: U.S. Census Bureau ACS 5-year B25077 summary files, <a href="https://www2.census.gov/programs-surveys/acs/summary_file/" target="_blank" rel="noreferrer">2010/2015/2020/2024</a>; <a href="https://www.census.gov/programs-surveys/acs/technical-documentation/user-notes/2023-07.html" target="_blank" rel="noreferrer">2022 value-adjustment user note</a>. Nominal release-year dollars; tract 304/city-county.</div>
+</section>
+
+<!-- 30 -->
+<section class="slide fog" data-title="Crime picture">
+  <div class="top"><span class="chapter">Forest Hill today / reported crime</span><span>30</span></div>
+  <div class="inner grid2">
+    <div>
+      <p class="kicker">2023–2025 annual average</p>
+      <h2>Quieter in the data, with a small-N warning.</h2>
+      <p class="lede">Broad major-offense rows per 1,000 residents:</p>
+      <div class="grid2" style="gap:18px;margin-top:30px">
+        <div class="card"><div class="huge-number" style="font-size:clamp(58px,7vw,260px);color:var(--rust)">24.6</div><p class="label">Forest Hill</p></div>
+        <div class="card"><div class="huge-number" style="font-size:clamp(58px,7vw,260px);color:var(--forest)">59.5</div><p class="label">San Francisco</p></div>
+      </div>
+    </div>
+    <svg class="chart" viewBox="0 0 650 520" role="img" aria-label="Bar chart comparing violent and property incident rates in Forest Hill and San Francisco">
+      <g font-size="12" font-weight="750" letter-spacing="1.2"><text x="20" y="112">VIOLENT</text><text x="20" y="312">PROPERTY</text></g>
+      <g><rect x="20" y="140" width="19" height="38" fill="#a44934"/><rect x="20" y="186" width="131" height="38" fill="#123b2c"/><rect x="20" y="340" width="246" height="38" fill="#a44934"/><rect x="20" y="386" width="512" height="38" fill="#123b2c"/></g>
+      <g font-size="12"><text x="50" y="165">FH 1.8 / 1k</text><text x="162" y="211">SF 12.1 / 1k</text><text x="277" y="365">FH 22.8 / 1k</text><text x="543" y="411">SF 47.4 / 1k</text></g>
+      <g transform="translate(20 472)" font-size="11"><circle cx="5" cy="-4" r="5" fill="#a44934"/><text x="17">Forest Hill polygon</text><circle cx="180" cy="-4" r="5" fill="#123b2c"/><text x="192">San Francisco</text></g>
+    </svg>
+    <p class="side-note" style="grid-column:1/-1"><b>Method warning:</b> reported incident rows are not victimization or an official UCR rate. Points are privacy-snapped; the neighborhood count is tiny and boundary-sensitive. Broad “assault” includes simple assault. Fixed 2020 population denominators are used for all three years.</p>
+  </div>
+  <div class="cite">Source: spatial intersection of <a href="https://data.sfgov.org/Public-Safety/Police-Department-Incident-Reports-2018-to-Present/wg3w-h783/about_data" target="_blank" rel="noreferrer">DataSF SFPD Incident Reports 2018–present</a> with the <a href="https://data.sfgov.org/Geographic-Locations-and-Boundaries/SF-Find-Neighborhoods/gfpk-269f" target="_blank" rel="noreferrer">SF Find Forest Hill polygon</a>; 2020 Census denominators. Categories: homicide, rape, robbery, assault, burglary, larceny, motor-vehicle theft, arson.</div>
+</section>
+
+<!-- 31 -->
+<section class="slide green" data-title="The neighborhood in daily life">
+  <div class="top"><span class="chapter">Forest Hill today / daily life</span><span>31</span></div>
+  <div class="inner grid2">
+    <div>
+      <p class="kicker">A quiet interior with borrowed edges</p>
+      <h2>West Portal is the downtown Forest Hill never built.</h2>
+      <p class="lede">Retail and restaurants sit downhill; rail is underground; schools and a major public-health campus ring the residence park.</p>
+      <p class="side-note" style="margin-top:26px">Walkability is topographic: destinations are close on a map, but hills, stairways and sparse interior commerce change the experience.</p>
+      <div class="pill-row" style="margin-top:20px"><span class="tag">Forest Hill walk 68</span><span class="tag">554 Magellan walk 90</span></div>
+    </div>
+    <svg class="map" viewBox="0 0 680 600" role="img" aria-label="Constellation diagram of Forest Hill, West Portal, Forest Hill station, Laguna Honda and nearby schools">
+      <circle cx="338" cy="296" r="178" fill="#285a42" stroke="#d2ad61" stroke-width="2"/>
+      <g fill="none" stroke="#f2ead8" stroke-width="2" stroke-dasharray="4 9" opacity=".75"><line x1="338" y1="296" x2="94" y2="118"/><line x1="338" y1="296" x2="561" y2="112"/><line x1="338" y1="296" x2="576" y2="449"/><line x1="338" y1="296" x2="130" y2="480"/></g>
+      <g text-anchor="middle" fill="#f2ead8"><text x="338" y="282" font-size="18" class="serif">FOREST HILL</text><text x="338" y="314" font-size="12" letter-spacing="1.5">RESIDENTIAL INTERIOR</text>
+        <circle cx="94" cy="118" r="52" fill="#c7a45a"/><text x="94" y="114" font-size="13" font-weight="750" fill="#09271e">WEST</text><text x="94" y="132" font-size="13" font-weight="750" fill="#09271e">PORTAL</text>
+        <circle cx="561" cy="112" r="52" fill="#d8ded8"/><text x="561" y="107" font-size="12" font-weight="750" fill="#09271e">FOREST HILL</text><text x="561" y="126" font-size="12" font-weight="750" fill="#09271e">STATION</text>
+        <circle cx="576" cy="449" r="58" fill="#80906b"/><text x="576" y="445" font-size="12" font-weight="750">LAGUNA</text><text x="576" y="464" font-size="12" font-weight="750">HONDA</text>
+        <circle cx="130" cy="480" r="58" fill="#a44934"/><text x="130" y="474" font-size="12" font-weight="750">SCHOOLS</text><text x="130" y="493" font-size="9">nearby; placement</text><text x="130" y="506" font-size="9">not implied</text>
+      </g>
+      <g font-size="10" letter-spacing="1.1" fill="#f2ead8" opacity=".75"><text x="44" y="194">cafés • library • shops</text><text x="481" y="187">Muni Metro</text><text x="483" y="529">public hospital campus</text><text x="31" y="559">West Portal ES • Asawa SOTA</text></g>
+    </svg>
+  </div>
+  <div class="cite">Sources: <a href="https://www.sfmta.com/shop-dine-and-explore-west-portal-muni" target="_blank" rel="noreferrer">SFMTA, West Portal guide</a> and <a href="https://www.sfmta.com/stops/forest-hill-station-16993" target="_blank" rel="noreferrer">Forest Hill service</a>; <a href="https://media.api.sf.gov/documents/FY21-22_Facility_Assessment_022323.pdf" target="_blank" rel="noreferrer">Laguna Honda</a>; <a href="https://www.sfusd.edu/school/west-portal-elementary-school" target="_blank" rel="noreferrer">West Portal ES</a>; <a href="https://www.sfusd.edu/school/ruth-asawa-san-francisco-school-arts" target="_blank" rel="noreferrer">Asawa SOTA</a>; <a href="https://www.walkscore.com/CA/San_Francisco/Forest_Hill" target="_blank" rel="noreferrer">Walk Score</a> / address score via PropertyShark. Scores are proprietary shorthand; placement/admission is not implied.</div>
+</section>
+
+<!-- 32 -->
+<section class="slide dark uhd-artifact uhd-artifact--house" data-title="554 Magellan Avenue">
+  <img class="bleed" src="https://www.rentsfnow.com/wp-content/uploads/2025/04/veritas-554-magellan-unit-1-18.jpg" alt="Front facade of 554 Magellan Avenue in April 2025">
+  <div class="shade bottom"></div>
+  <div class="top"><span class="chapter">Biography of a house / 1</span><span>32</span></div>
+  <div class="inner photo-title">
+    <p class="kicker">APN 2927-010</p>
+    <h2>554<br>Magellan Avenue</h2>
+    <p class="lede">The assessor dates the house to 1920—the year Lang Realty took over tract development; no property-specific Lang, architect or builder link is verified.</p>
+  </div>
+  <div class="cite">Image: RentSFNow/Veritas listing photograph, April 2025; photographer not identified. <a href="https://www.rentsfnow.com/apartments/rental/554-magellan-1/" target="_blank" rel="noreferrer">Listing record</a>. Year/APN: <a href="https://data.sfgov.org/Housing-and-Buildings/Assessor-Historical-Secured-Property-Tax-Rolls/wv5m-vpq2/about_data" target="_blank" rel="noreferrer">DataSF Assessor Historical Rolls</a>.</div>
+</section>
+
+<!-- 33 -->
+<section class="slide fog" data-title="The verified dossier">
+  <div class="top"><span class="chapter">Biography of a house / 2</span><span>33</span></div>
+  <div class="inner">
+    <p class="kicker">The verified dossier</p>
+    <h2>What the public record actually says.</h2>
+    <div class="grid4" style="margin-top:4.5vh">
+      <div class="stat"><strong>1920</strong><span>year built</span></div><div class="stat"><strong>1,300</strong><span>square feet</span></div><div class="stat"><strong>3,828</strong><span>square-foot lot</span></div><div class="stat"><strong>1</strong><span>dwelling unit</span></div>
+    </div>
+    <div class="grid4" style="margin-top:4.5vh">
+      <div class="card"><h3>5 rooms</h3><p class="small">assessor roll</p></div><div class="card"><h3>1 bath</h3><p class="small">official and listing sources agree</p></div><div class="card"><h3>Story count</h3><p class="small">2 assessor · 1 permit rows · “two-level” rental copy</p></div><div class="card"><h3>RH-1(D)</h3><p class="small">Planning zoning designation</p></div>
+    </div>
+    <p class="side-note" style="margin-top:24px"><b>Bedroom conflict:</b> the assessor field is zero—an evident missing/zero-coded value. 2024–25 rental ads describe two bedrooms plus a sunroom/office; large portals normalize the home as three bedrooms. This deck does not turn that disagreement into certainty.</p>
+    <div class="pill-row" style="margin-top:14px"><span class="tag">CEQA status A · district-derived</span><span class="tag">California Register–eligible Forest Hill Historic District</span><span class="tag">not an individual landmark</span></div>
+    <p class="small" style="margin-top:10px">The story-count mismatch likely reflects differing treatment of the lower garage/basement level; the record does not resolve it.</p>
+    <p class="small" style="margin-top:12px">The 1999 Recorder document preserves the original subdivision description: parts of Lots 9 and 10, Block 6, Forest Hill map filed May 8, 1913.</p>
+  </div>
+  <div class="cite">Official sources: <a href="https://data.sfgov.org/Housing-and-Buildings/Assessor-Historical-Secured-Property-Tax-Rolls/wv5m-vpq2/about_data" target="_blank" rel="noreferrer">assessor rolls</a>; <a href="https://sfplanninggis.org/pim/?search=2927010" target="_blank" rel="noreferrer">PIM</a>; <a href="https://data.sfgov.org/resource/3tsw-4idn.json?%24where=apn%3D%222927010%22" target="_blank" rel="noreferrer">historic-resource status</a>. Layout cross-check: <a href="https://www.rentsfnow.com/apartments/rental/554-magellan-1/" target="_blank" rel="noreferrer">RentSFNow</a>, <a href="https://www.zumper.com/address/554-magellan-ave-san-francisco-ca-94116-usa" target="_blank" rel="noreferrer">Zumper</a>, Redfin/Zillow.</div>
+</section>
+
+<!-- 34 -->
+<section class="slide" data-title="Architectural family">
+  <div class="top"><span class="chapter">Biography of a house / 3</span><span>34</span></div>
+  <div class="inner">
+    <p class="kicker">Architectural family—not a fabricated pedigree</p>
+    <h2>A Craftsman-influenced period house, adapted to a hill.</h2>
+    <div class="photo-pair" style="height:min(57vh,1120px)">
+      <div class="media"><img src="https://www.rentsfnow.com/wp-content/uploads/2025/04/veritas-554-magellan-unit-1-18.jpg" alt="Front exterior of 554 Magellan in April 2025"><div class="cap">Front gable • stucco • broad eaves and rafter tails • raised main floor.</div></div>
+      <div class="media"><img src="https://www.rentsfnow.com/wp-content/uploads/2025/04/veritas-554-magellan-unit-1-01.jpg" alt="Living room of 554 Magellan with dark wood trim and brick fireplace"><div class="cap">Living room: multi-light windows • dark wood trim • brick fireplace • coved/tray ceiling.</div></div>
+    </div>
+    <p class="body" style="margin-top:18px">The visible evidence supports a front-gabled, Craftsman-influenced period house whose living floor appears lifted above garage/basement space. This is a medium-low-confidence visual interpretation. <b>No verified architect or builder was found.</b></p>
+  </div>
+  <div class="cite">Images: RentSFNow/Veritas listing photographs, April 2025; photographer not identified; no reuse license found. <a href="https://www.rentsfnow.com/apartments/rental/554-magellan-1/" target="_blank" rel="noreferrer">Listing record</a>. Style description is visual analysis, not an archival classification.</div>
+</section>
+
+<!-- 35 -->
+<section class="slide green" data-title="A century in records">
+  <div class="top"><span class="chapter">Biography of a house / 4</span><span>35</span></div>
+  <div class="inner">
+    <p class="kicker">A century in records</p>
+    <h2>The house leaves a thin—but real—paper trail.</h2>
+    <svg class="timeline" viewBox="0 0 1340 475" role="img" aria-label="Timeline of 554 Magellan Avenue from construction through permits and 2024 to 2025 rental listings">
+      <line x1="70" y1="246" x2="1270" y2="246" stroke="#f2ead8" stroke-width="2" opacity=".45"/>
+      <g fill="#c7a45a">
+        <circle cx="80" cy="246" r="10"/><circle cx="205" cy="246" r="10"/><circle cx="365" cy="246" r="10"/><circle cx="525" cy="246" r="10"/><circle cx="690" cy="246" r="10"/><circle cx="835" cy="246" r="10"/><circle cx="980" cy="246" r="10"/><circle cx="1125" cy="246" r="10"/><circle cx="1260" cy="246" r="10"/>
+      </g>
+      <g font-size="12" fill="#f2ead8">
+        <g><text x="80" y="195" text-anchor="middle" font-size="27" class="serif">1920</text><text x="80" y="282" text-anchor="middle">ASSESSOR DATE</text></g>
+        <g><text x="205" y="306" text-anchor="middle" font-size="22" class="serif">1922</text><text x="205" y="332" text-anchor="middle">A. W. YOUNG</text><text x="205" y="349" text-anchor="middle" opacity=".7">directory</text></g>
+        <g><text x="365" y="195" text-anchor="middle" font-size="22" class="serif">1944/50</text><text x="365" y="218" text-anchor="middle">T. R. SHAW</text><text x="365" y="235" text-anchor="middle" opacity=".7">phone listings</text></g>
+        <g><text x="525" y="306" text-anchor="middle" font-size="22" class="serif">1993</text><text x="525" y="332" text-anchor="middle">$160K LOAN</text><text x="525" y="349" text-anchor="middle" opacity=".7">not a sale</text></g>
+        <g><text x="690" y="195" text-anchor="middle" font-size="22" class="serif">1994–97</text><text x="690" y="218" text-anchor="middle">SEWER + ROOF</text></g>
+        <g><text x="835" y="306" text-anchor="middle" font-size="22" class="serif">1999</text><text x="835" y="332" text-anchor="middle">TRUST TRANSFER</text><text x="835" y="349" text-anchor="middle" opacity=".7">not a sale</text></g>
+        <g><text x="980" y="195" text-anchor="middle" font-size="22" class="serif">2011</text><text x="980" y="218" text-anchor="middle">BOLTING ISSUED</text></g>
+        <g><text x="1125" y="306" text-anchor="middle" font-size="22" class="serif">2012</text><text x="1125" y="332" text-anchor="middle">BATH + KITCHEN</text><text x="1125" y="349" text-anchor="middle" opacity=".7">completed</text></g>
+        <g><text x="1260" y="195" text-anchor="middle" font-size="22" class="serif">2024/25</text><text x="1260" y="218" text-anchor="middle">RENTAL LISTINGS</text></g>
+      </g>
+    </svg>
+    <p class="small">The 1994/97 sewer permits were filed/issued; completion is not shown. Reroof #9611779 completed in 1996 ($14,316 estimated). Foundation bolting #201109124407 was issued in 2011 ($3,000), but completion is unconfirmed. Bath/partial kitchen #201206263470 completed in 2012 ($11,000 revised); electrical and plumbing companion records corroborate it.</p>
+  </div>
+  <div class="cite">Sources: <a href="https://data.sfgov.org/Housing-and-Buildings/Building-Permits/i98e-djp9/about_data" target="_blank" rel="noreferrer">building</a>, <a href="https://data.sfgov.org/Housing-and-Buildings/Electrical-Permits/ftty-kx6y/about_data" target="_blank" rel="noreferrer">electrical</a>, and <a href="https://data.sfgov.org/Housing-and-Buildings/Plumbing-Permits/a6aw-rudh/about_data" target="_blank" rel="noreferrer">plumbing permits</a>; directories; <a href="https://recorder.sfgov.org/" target="_blank" rel="noreferrer">SF Recorder docs 1993423995 / 1999697225</a>; <a href="https://www.realtor.com/realestateandhomes-detail/554-Magellan-Ave_San-Francisco_CA_94116_M12592-70021" target="_blank" rel="noreferrer">Realtor.com 2024 rental history</a>; <a href="https://www.rentsfnow.com/apartments/rental/554-magellan-1/" target="_blank" rel="noreferrer">RentSFNow 2025</a>.</div>
+</section>
+
+<!-- 36 -->
+<section class="slide black" data-title="The honest sale chart">
+  <div class="top"><span class="chapter">Biography of a house / 5</span><span>36</span></div>
+  <div class="inner grid2">
+    <div>
+      <p class="kicker">The sale history chart</p>
+      <h2>There isn’t one.</h2>
+      <p class="lede">No verified public price series was found for 554 Magellan.</p>
+      <div class="rule"></div>
+      <p class="body">The official Recorder resolves the confusion. A <b>1993 deed of trust</b> secured a $160,000 loan—debt, not price. A <b>1999 quitclaim deed</b> moved the same people’s interest into their revocable trust “WITHOUT CONSIDERATION,” with $0 transfer tax—not a sale.</p>
+      <p class="body"><b>No arm’s-length sale appears in the official online index from 1990 onward.</b> Zillow and Redfin estimates are not sales. They stay off the chart.</p>
+    </div>
+    <svg class="chart" viewBox="0 0 660 530" role="img" aria-label="Intentionally empty sale-price chart marking 1993 and 1999 non-sale documents at the same non-price level">
+      <g class="hair"><line x1="90" y1="72" x2="610" y2="72"/><line x1="90" y1="172" x2="610" y2="172"/><line x1="90" y1="272" x2="610" y2="272"/><line x1="90" y1="372" x2="610" y2="372"/></g>
+      <line x1="90" y1="420" x2="610" y2="420" stroke="#f2ead8" opacity=".7"/><line x1="90" y1="60" x2="90" y2="420" stroke="#f2ead8" opacity=".7"/>
+      <line x1="285" y1="60" x2="285" y2="420" stroke="#c7a45a" stroke-width="2" stroke-dasharray="5 9"/><line x1="455" y1="60" x2="455" y2="420" stroke="#c7a45a" stroke-width="2" stroke-dasharray="5 9"/>
+      <g fill="none" stroke="#c7a45a" stroke-width="4"><circle cx="285" cy="242" r="16"/><circle cx="455" cy="242" r="16"/></g><g stroke="#c7a45a" stroke-width="3"><path d="M276 233l18 18m0-18l-18 18M446 233l18 18m0-18l-18 18"/></g>
+      <text x="285" y="456" text-anchor="middle" font-size="14" fill="#f2ead8">1993</text><text x="455" y="456" text-anchor="middle" font-size="14" fill="#f2ead8">1999</text><text x="285" y="194" text-anchor="middle" font-size="11" font-weight="750" fill="#c7a45a">LOAN ≠ PRICE</text><text x="455" y="194" text-anchor="middle" font-size="11" font-weight="750" fill="#c7a45a">TRUST TRANSFER ≠ SALE</text>
+      <text x="350" y="500" text-anchor="middle" font-size="11" letter-spacing="1.4" fill="#f2ead8" opacity=".65">AN EMPTY CHART IS MORE ACCURATE THAN A MADE-UP LINE</text>
+    </svg>
+    <p class="side-note" style="grid-column:1/-1"><b>Assessment is not price:</b> the 2025 secured-roll assessed land + improvements total $90,726. That assessed figure is not a market valuation.</p>
+  </div>
+  <div class="cite">Official records: <a href="https://recorder.sfgov.org/" target="_blank" rel="noreferrer">SF Assessor-Recorder</a>, docs 1993423995 and 1999697225; <a href="https://media.api.sf.gov/documents/ASR_Factsheet_PropertyTransfer_English_2021_Cy4s1cO.pdf" target="_blank" rel="noreferrer">search fact sheet</a>. Assessment: <a href="https://data.sfgov.org/Housing-and-Buildings/Assessor-Historical-Secured-Property-Tax-Rolls/wv5m-vpq2/about_data" target="_blank" rel="noreferrer">DataSF</a>. PropertyShark’s “last sold” label is contradicted by the official no-consideration deed. Zillow/Redfin estimates intentionally excluded.</div>
+</section>
+
+<!-- 37 -->
+<section class="slide fog" data-title="Magellan Avenue, then / now">
+  <div class="top"><span class="chapter">Biography of a house / 6</span><span>37</span></div>
+  <div class="inner">
+    <p class="kicker">The street becomes a room</p>
+    <h2>Magellan Avenue / 1920s → 2025</h2>
+    <div class="photo-pair">
+      <div class="media native-archive"><img src="https://opensfhistory.org/Download/wnp37.03073.jpg" alt="Magellan Avenue near Marcela in the 1920s"><div class="cap"><b>1920s</b> — Magellan near Marcela; young homes and open canopy. Photographer Unknown, Marilyn Blaisdell Collection / Courtesy of a Private Collector.</div></div>
+      <div class="media"><img src="https://www.rentsfnow.com/wp-content/uploads/2025/04/veritas-554-magellan-unit-1-21.jpg" alt="Tree-lined Magellan Avenue near 554 in April 2025"><div class="cap"><b>2025</b> — 554’s block; the street reads as a planted room. RentSFNow/Veritas; photographer not identified.</div></div>
+    </div>
+    <p class="small" style="margin-top:8px">Same avenue, not the same block or matched vantage. SFPL indexes one exact-address assessor photo in Photo Box 52, Bundle 1038; no direct online scan was located, and none appears in PIM.</p>
+  </div>
+  <div class="cite">Archival image: Photographer Unknown (Marilyn Blaisdell Collection / Courtesy of a Private Collector), <a href="https://opensfhistory.org/Display/wnp37.03073.jpg" target="_blank" rel="noreferrer">OpenSFHistory/WNP wnp37.03073</a>. Current image: RentSFNow/Veritas, April 2025; photographer not identified; no reuse license found; <a href="https://www.rentsfnow.com/apartments/rental/554-magellan-1/" target="_blank" rel="noreferrer">listing record</a>. Photo locator: <a href="https://public.tableau.com/views/SFPL_History_Center_Assessor_Photos_Negatives_Color/Search.csv?:showVizHome=no&amp;Address=554%20MAGELLAN%20AVE" target="_blank" rel="noreferrer">SFPL</a>.</div>
+</section>
+
+<!-- 38 -->
+<section class="slide" data-title="The good / the bad / the ugly">
+  <div class="top"><span class="chapter">The honest verdict</span><span>38</span></div>
+  <div class="inner">
+    <p class="kicker">The good / the bad / the ugly</p>
+    <h2>All three are visible in the same streets.</h2>
+    <div class="grid3" style="margin-top:5vh">
+      <div class="card" style="background:#dce5d9;border-top:clamp(7px,.45vw,17px) solid #285a42"><p class="eyebrow">The good</p><h3>A coherent work of landscape urbanism</h3><p class="body">Rail access, mature canopy, humane curves, architectural texture, quiet streets and a rare neighborhood room by Maybeck.</p></div>
+      <div class="card" style="background:#e8dfca;border-top:clamp(7px,.45vw,17px) solid #c7a45a"><p class="eyebrow">The bad</p><h3>Scarcity preserved as character</h3><p class="body">Low density, an older population, high owner occupancy, high values and weak interior commerce limit who can enter and how the neighborhood adapts.</p></div>
+      <div class="card" style="background:#d7b9ad;border-top:clamp(7px,.45vw,17px) solid #a44934"><p class="eyebrow">The ugly</p><h3>Exclusion was written into the product</h3><p class="body">Racial restrictions and some residents’ documented fear of formerly homeless neighbors are not footnotes. They are part of how “tranquility” was produced and defended.</p></div>
+    </div>
+    <p class="lede" style="margin-top:32px">Forest Hill deserves admiration precise enough to survive the truth.</p>
+  </div>
+  <div class="cite">Synthesis based on the cited historical, demographic, housing and property records throughout this deck.</div>
+</section>
+
+<!-- 39 -->
+<section class="slide green" data-title="Evidence audit and gaps">
+  <div class="top"><span class="chapter">Research audit</span><span>39</span></div>
+  <div class="inner grid2">
+    <div>
+      <p class="kicker">What survived verification</p>
+      <h2>Strong record</h2>
+      <div class="vstack">
+        <p class="side-note">Neighborhood formation, tract controls, transit dates and advertised developer restriction language</p>
+        <p class="side-note">554’s assessor facts, zoning, Sanborn footprint and seven permit records</p>
+        <p class="side-note">Tract demographics/values and derived incident-rate method with stated boundaries</p>
+      </div>
+    </div>
+    <div>
+      <p class="kicker">What remains genuinely missing</p>
+      <h2>Open record</h2>
+      <div class="vstack">
+        <p class="side-note"><b>Architect / builder:</b> not found in the accessible records reviewed</p>
+        <p class="side-note"><b>Acquisition / prices:</b> no arm’s-length sale in the 1990–present online index; pre-1990 chain unresolved</p>
+        <p class="side-note"><b>Exact-address assessor photograph:</b> indexed in SFPL Photo Box 52, Bundle 1038; view unknown and no online scan located</p>
+        <p class="side-note"><b>“Magellan” naming file:</b> no authoritative naming record located</p>
+      </div>
+    </div>
+    <p class="small" style="grid-column:1/-1;margin-top:12px">Also unresolved: the precise 1978/1984 street-transfer sequence; a parcel-level geotechnical study for 554; comprehensive pre-1980 permits; the pre-1990 acquisition deed/ownership chain; and a verified exact-address newspaper feature. These are research gaps—not invitations to infer.</p>
+  </div>
+  <div class="cite">See the companion <a href="appendix.html" target="_blank">research appendix</a> for the records searched and practical next steps.</div>
+</section>
+
+<!-- 40 -->
+<section class="slide fog" data-title="Full source ledger">
+  <div class="top"><span class="chapter">Full source ledger</span><span>40</span></div>
+  <div class="inner" style="align-self:flex-start;padding-top:0">
+    <p class="kicker">Direct links / accessed July–August 2026</p>
+    <h2 style="font-size:clamp(32px,4vw,140px);margin-bottom:clamp(18px,1.25vw,46px)">Sources, grouped by claim.</h2>
+    <div class="source-grid">
+      <div class="source-group"><h3>Indigenous &amp; land</h3><a href="https://www.ramaytush.org/terminology.html" target="_blank">Association of Ramaytush Ohlone — terminology</a><a href="https://www.ramaytush.org/spanish-arrival.html" target="_blank">ARO — Spanish arrival</a><a href="https://www.nps.gov/places/000/8-home-of-the-yelamu.htm" target="_blank">NPS — Home of the Yelamu</a><a href="https://www.nps.gov/articles/000/redpower50.htm" target="_blank">NPS — missionization impacts</a><a href="https://www.sf.gov/sites/default/files/2021-08/21_4%20Ramaytush%20Ohlone%20Land%20Acknowledgement_0.pdf" target="_blank">City Ramaytush land acknowledgment</a><a href="https://digicoll.lib.berkeley.edu/record/264399?ln=en" target="_blank">Bancroft — Rancho San Miguel case</a><a href="https://www.sutrostewards.org/history" target="_blank">Sutro Stewards — land history</a></div>
+      <div class="source-group"><h3>Plan &amp; architecture</h3><a href="https://sfplanning.org/project/residence-parks-historic-context-statement" target="_blank">SF Planning — Residence Parks context, final project</a><a href="https://www.outsidelands.org/forest-hill.php" target="_blank">WNP — Forest Hill</a><a href="https://www.outsidelands.org/sw22.php" target="_blank">WNP — Streetwise: Forest Hill</a><a href="https://www.outsidelands.org/forest-hill-clubhouse.php" target="_blank">WNP — Maybeck clubhouse</a><a href="https://www.flickr.com/photos/sftrajan/16309208773/" target="_blank">sftrajan / Flickr — clubhouse, 2015</a><a href="https://www.openstreetmap.org/#map=16/37.747/-122.465" target="_blank">OpenStreetMap contributors — map</a></div>
+      <div class="source-group"><h3>Transit</h3><a href="https://www.sfmta.com/blog/twin-peaks-tunnel-portal-west" target="_blank">SFMTA — Twin Peaks Tunnel</a><a href="https://www.sfmta.com/blog/kickin-it-k-100-years-and-counting" target="_blank">SFMTA — opening/service history</a><a href="https://www.outsidelands.org/forest-hill-station.php" target="_blank">WNP — Forest Hill Station</a><a href="https://www.sfheritage.org/news/the-birth-and-rebirth-of-the-first-subway-station-in-the-west/" target="_blank">SF Heritage — station history</a></div>
+      <div class="source-group"><h3>Exclusion &amp; integration</h3><a href="https://www.outsidelands.org/forest-hill-broadsheet.php" target="_blank">WNP — developer broadsheet</a><a href="https://tile.loc.gov/storage-services/service/ll/usrep/usrep334/usrep334001/usrep334001.pdf" target="_blank">Shelley v. Kraemer — official U.S. Reports</a><a href="https://www.justice.gov/crt/fair-housing-act-1" target="_blank">DOJ — Fair Housing Act</a><a href="https://www.outsidelands.org/sw5.php" target="_blank">WNP — Willie Mays</a><a href="https://www.sfchronicle.com/oursf/article/Willie-Mays-threw-a-party-for-the-kids-and-the-11225810.php" target="_blank">SF Chronicle — Mays party</a></div>
+      <div class="source-group"><h3>250 Laguna Honda</h3><a href="https://www.sfchronicle.com/bayarea/article/In-a-wealthy-SF-neighborhood-residents-fight-10617213.php" target="_blank">Chronicle — opposition, 2016</a><a href="https://www.chron.com/bayarea/article/Housing-developer-undeterred-by-report-urging-12495068.php" target="_blank">Chronicle — geology, 2018</a><a href="https://www.sfchronicle.com/bayarea/article/Senior-housing-project-near-SF-s-Forest-Hill-12742358.php" target="_blank">Chronicle — withdrawal, 2018</a><a href="https://media.api.sf.gov/documents/250_Laguna_Honda_Predevelopment_Loan_Eval_-_LC_10-13-23_0.pdf" target="_blank">MOHCD — loan evaluation, 2023</a><a href="https://www.missionhousing.org/250-laguna-honda" target="_blank">Mission Housing — current proposal</a></div>
+      <div class="source-group"><h3>Population, value &amp; safety</h3><a href="https://censusreporter.org/profiles/14000US06075030400-census-tract-304-san-francisco-ca/" target="_blank">2024 ACS — tract 304</a><a href="https://www2.census.gov/programs-surveys/acs/summary_file/2010/data/5_year_seq_by_state/California/Tracts_Block_Groups_Only/20105ca0099000.zip" target="_blank">2010 B25077 — CA sequence 99</a><a href="https://www2.census.gov/programs-surveys/acs/summary_file/2015/data/5_year_seq_by_state/California/Tracts_Block_Groups_Only/20155ca0106000.zip" target="_blank">2015 B25077 — CA sequence 106</a><a href="https://www2.census.gov/programs-surveys/acs/summary_file/2020/prototype/5YRData/acsdt5y2020-b25077.dat" target="_blank">2020 B25077 table file</a><a href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b25077.dat" target="_blank">2024 B25077 table file</a><a href="https://www.census.gov/programs-surveys/acs/technical-documentation/user-notes/2023-07.html" target="_blank">ACS value-adjustment user note</a><a href="https://api.census.gov/data/2000/dec/sf1/groups/P004.html" target="_blank">2000 SF1 P004 definitions</a><a href="https://api.census.gov/data/2010/dec/sf1/groups/P9.html" target="_blank">2010 SF1 P9 definitions</a><a href="https://api.census.gov/data/2020/dec/dhc/groups/P9.html" target="_blank">2020 DHC P9 definitions</a><a href="https://data.sfgov.org/Geographic-Locations-and-Boundaries/SF-Find-Neighborhoods/gfpk-269f" target="_blank">DataSF — SF Find neighborhoods</a><a href="https://data.sfgov.org/Public-Safety/Police-Department-Incident-Reports-2018-to-Present/wg3w-h783/about_data" target="_blank">DataSF — SFPD incidents</a></div>
+      <div class="source-group"><h3>554 / official property</h3><a href="https://sfplanninggis.org/pim/?search=2927010" target="_blank">SF Planning PIM — APN 2927010</a><a href="https://data.sfgov.org/resource/acdm-wktn.json?%24where=block_num%3D%222927%22%20and%20lot_num%3D%22010%22" target="_blank">Active parcel — exact block/lot</a><a href="https://data.sfgov.org/resource/wv5m-vpq2.json?%24where=parcel_number%3D%272927010%27&amp;%24order=closed_roll_year" target="_blank">Assessor secured rolls — exact APN</a><a href="https://data.sfgov.org/resource/3tsw-4idn.json?%24where=apn%3D%222927010%22" target="_blank">Historic status — exact APN</a><a href="https://data.sfgov.org/resource/63x5-g3m4.json?%24where=upper%28name_1%29%20like%20%22%25FOREST%25%22" target="_blank">Forest Hill district record</a><a href="https://sfplanninggis.org/blockbooks/AssessorBlock2927.pdf" target="_blank">Current assessor Block 2927 map</a><a href="https://data.sfgov.org/resource/i98e-djp9.json?%24where=block%3D%222927%22%20and%20lot%3D%22010%22&amp;%24order=permit_creation_date" target="_blank">Building permits — exact parcel</a><a href="https://data.sfgov.org/resource/ftty-kx6y.json?%24where=block%3D%222927%22%20and%20lot%3D%22010%22" target="_blank">Electrical permits — exact parcel</a><a href="https://data.sfgov.org/resource/a6aw-rudh.json?%24where=block%3D%222927%22%20and%20lot%3D%22010%22&amp;%24order=application_date" target="_blank">Plumbing permits — exact parcel</a><a href="https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress?address=554%20Magellan%20Ave%2C%20San%20Francisco%2C%20CA%2094116&amp;benchmark=Public_AR_Current&amp;vintage=Current_Current&amp;format=json" target="_blank">Census Geocoder — exact point</a></div>
+      <div class="source-group"><h3>554 / archives</h3><a href="https://sanborn.s3.us-east-1.amazonaws.com/1928/San%2BFrancisco%2B1928%2BSheet%2B1063.pdf" target="_blank">1928 Sanborn — sheet 1063</a><a href="https://sfplanninggis.org/sanborns/V10P1063.pdf" target="_blank">Mid-1990s Sanborn-context sheet</a><a href="https://public.tableau.com/views/SFPL_History_Center_Assessor_Photos_Negatives_Color/Search.csv?:showVizHome=no&amp;Address=554%20MAGELLAN%20AVE" target="_blank">SFPL photo index — Box 52 / Bundle 1038</a><a href="https://library.sfgenealogy.org/directory/san-francisco-county-directory/1922/1922_1659.pdf" target="_blank">1922 Crocker-Langley directory</a><a href="https://library.sfgenealogy.org/telephone/san-francisco-county/1944a/1944a%20221.pdf" target="_blank">1944 telephone directory</a><a href="https://library.sfgenealogy.org/telephone/san-francisco-county/1950a1/1950a1%20304.pdf" target="_blank">1950 telephone directory</a><a href="https://library.sfgenealogy.org/directory/san-francisco-county-directory/1969/1969_2167.pdf" target="_blank">1969 reverse directory</a></div>
+      <div class="source-group"><h3>554 / listings &amp; deeds</h3><a href="https://www.rentsfnow.com/apartments/rental/554-magellan-1/" target="_blank">RentSFNow — 2025 listing/photos</a><a href="https://www.realtor.com/realestateandhomes-detail/554-Magellan-Ave_San-Francisco_CA_94116_M12592-70021" target="_blank">Realtor.com — 2024 rental history</a><a href="https://www.zumper.com/address/554-magellan-ave-san-francisco-ca-94116-usa" target="_blank">Zumper — layout cross-check</a><a href="https://www.propertyshark.com/mason/Property/30510173/554-Magellan-Ave-San-Francisco-CA-94116/" target="_blank">PropertyShark — “last sold” label contradicted by Recorder</a><a href="https://recorder.sfgov.org/" target="_blank">Recorder — docs 1993423995 / 1999697225</a><a href="https://media.api.sf.gov/documents/ASR_Factsheet_PropertyTransfer_English_2021_Cy4s1cO.pdf" target="_blank">Recorder search / transfer fact sheet</a><a href="https://media.api.sf.gov/documents/Recorded_Document_Request_by_mail_form-2025.pdf" target="_blank">Official recorded-document copy request</a><a href="https://www.redfin.com/CA/San-Francisco/554-Magellan-Ave-94116/home/686902" target="_blank">Redfin — attributes cross-check</a><a href="https://www.zillow.com/homedetails/554-Magellan-Ave-San-Francisco-CA-94116/15134060_zpid/" target="_blank">Zillow — attributes cross-check</a></div>
+      <div class="source-group"><h3>Archival images</h3><a href="https://opensfhistory.org/Display/wnp33.01157.jpg" target="_blank">OpenSFHistory — wnp33.01157</a><a href="https://opensfhistory.org/Display/wnp15.1306.jpg" target="_blank">— wnp15.1306</a><a href="https://opensfhistory.org/Display/wnp15.1440.jpg" target="_blank">— wnp15.1440</a><a href="https://opensfhistory.org/Display/wnp36.00866.jpg" target="_blank">— wnp36.00866</a><a href="https://opensfhistory.org/Display/wnp15.173.jpg" target="_blank">— wnp15.173</a><a href="https://opensfhistory.org/Display/wnp36.02568.jpg" target="_blank">— wnp36.02568</a><a href="https://opensfhistory.org/Display/wnp15.242.jpg" target="_blank">— wnp15.242</a><a href="https://opensfhistory.org/Display/wnp15.695.jpg" target="_blank">— wnp15.695</a><a href="https://opensfhistory.org/Display/wnp72.281.jpg" target="_blank">— wnp72.281</a><a href="https://opensfhistory.org/Display/wnp37.03073.jpg" target="_blank">— wnp37.03073</a></div>
+      <div class="source-group"><h3>Current context &amp; governance</h3><a href="https://catalog.data.gov/dataset/landslide-susceptibility-hazard-zones" target="_blank">SF landslide-susceptibility zones</a><a href="https://media.api.sf.gov/documents/FY21-22_Facility_Assessment_022323.pdf" target="_blank">Laguna Honda facility assessment</a><a href="https://www.sfusd.edu/schools/enroll/discover/school-finder" target="_blank">SFUSD School Finder</a><a href="https://www.sfmta.com/shop-dine-and-explore-west-portal-muni" target="_blank">SFMTA — West Portal guide</a><a href="https://www.sfmta.com/stops/forest-hill-station-16993" target="_blank">SFMTA — Forest Hill service</a><a href="https://www.walkscore.com/CA/San_Francisco/Forest_Hill" target="_blank">Walk Score — Forest Hill</a><a href="https://data.sfgov.org/Arts-Culture-and-Recreation/Film-Locations-in-San-Francisco/yitu-d5am/about_data" target="_blank">DataSF — film locations</a><a href="https://www.sf.gov/sites/default/files/2023-05/CY22_Street_Sidewalk_Standards_Report_05222023.pdf" target="_blank">SF Public Works — streets report</a><a href="https://foresthill-association.com/wp-content/uploads/2015/11/FHAeNews2014-4Q.pdf" target="_blank">FHA 2014 assessment newsletter</a><a href="https://foresthill-association.com/wp-content/uploads/2015/09/architectural-Review-Guidelines.pdf" target="_blank">FHA architectural guidelines</a><a href="https://foresthillsf.weebly.com/history.html" target="_blank">Local history — 1984 handoff account</a></div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<div id="chrome" aria-hidden="true">
+  <div id="hint">← → keys · click · swipe</div>
+  <div class="nav"><button id="prev" aria-label="Previous slide">↑</button><button id="next" aria-label="Next slide">↓</button></div>
+  <div id="counter">01 / 40</div><div id="progress"></div>
+</div>
+
+<script>
+(() => {
+  const deck = document.getElementById('deck');
+  const slides = [...document.querySelectorAll('.slide')];
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  const hint = document.getElementById('hint');
+  let index = Math.max(0, Math.min(slides.length - 1, Number(location.hash.slice(1)) - 1 || 0));
+  let startX = 0, startY = 0;
+  function show(next, replace = false) {
+    index = Math.max(0, Math.min(slides.length - 1, next));
+    deck.style.transform = `translate3d(${-index * 100}vw,0,0)`;
+    counter.textContent = `${String(index + 1).padStart(2,'0')} / ${String(slides.length).padStart(2,'0')}`;
+    progress.style.width = `${((index + 1) / slides.length) * 100}%`;
+    const hash = `#${index + 1}`;
+    if (replace) history.replaceState(null,'',hash); else history.pushState(null,'',hash);
+    document.title = `${slides[index].dataset.title || 'Forest Hill'} — ${index + 1}/${slides.length}`;
+    slides.forEach((s,i) => s.setAttribute('aria-hidden', i === index ? 'false' : 'true'));
+    if (index > 0) hint.style.opacity = '0';
+  }
+  const go = d => show(index + d);
+  document.getElementById('prev').addEventListener('click', e => { e.stopPropagation(); go(-1); });
+  document.getElementById('next').addEventListener('click', e => { e.stopPropagation(); go(1); });
+  addEventListener('keydown', e => {
+    if (['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)) { e.preventDefault(); go(1); }
+    if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); go(-1); }
+    if (e.key === 'Home') show(0); if (e.key === 'End') show(slides.length - 1);
+  });
+  addEventListener('popstate', () => show(Number(location.hash.slice(1)) - 1 || 0, true));
+  deck.addEventListener('click', e => {
+    if (e.target.closest('a,button,[data-no-advance]')) return;
+    go(e.clientX < innerWidth * .28 ? -1 : 1);
+  });
+  deck.addEventListener('touchstart', e => { startX = e.changedTouches[0].clientX; startY = e.changedTouches[0].clientY; }, {passive:true});
+  deck.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - startX, dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.25) go(dx < 0 ? 1 : -1);
+  }, {passive:true});
+  show(index, true);
+  if (new URLSearchParams(location.search).has('audit')) {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const report = slides.map((s,i) => ({
+        slide:i+1,
+        xOverflow:Math.max(0,s.scrollWidth-s.clientWidth),
+        yOverflow:Math.max(0,s.scrollHeight-s.clientHeight)
+      }));
+      document.body.dataset.layoutAudit = JSON.stringify(report);
+    }));
+  }
+})();
+</script>
+</body>
+</html>
