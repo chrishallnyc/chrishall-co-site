@@ -38,7 +38,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 .cl li { position: relative; padding: 4px 0 4px 20px; color: var(--mid); }
 .cl li::before { content:""; position: absolute; left: 0; top: 50%; width: 12px; height: 1px; background: var(--dim); }
 .cl b { color: var(--ink); font-weight: 700; margin-right: 8px; }
-.cl .d { color: var(--dim); font-size: 11px; letter-spacing: 1px; margin-left: 8px; }
+.cl .d { color: var(--dim); font-size: 11px; letter-spacing: 1px; margin-left: 8px; white-space: nowrap; }
 .foot { max-width: 1100px; margin: 26px auto 0; text-align: center; color: var(--mid); }
 .foot hr { border: 0; border-top: 1px solid var(--dim); margin-bottom: 10px; }
 .foot a { color: var(--dim); font-size: 11px; letter-spacing: 2px; }
@@ -56,33 +56,33 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 <div class="sec">
 <h2>RELEASES</h2>
 <ul class="cl">
-  <li><b>v1.19.0</b>the dot grid, perfected — 20px paper pitch (true 5mm), warm-grey dots full-strength in the margins and hushed to 45% behind the text column . the page reads like premium stationery with a calm writing area<span class="d">2026-08-05</span></li>
-  <li><b>v1.18.0</b>dot grid — the horizontal grain gives way to a quiet 16px dot lattice . the paper a timeline belongs on<span class="d">2026-08-05</span></li>
-  <li><b>v1.17.2</b>design-review pass lands on the new paper — timeline keyboard-operable with in-flow notes that follow focus and hover . visible focus everywhere . 44px touch targets and separated tap zones on the mobile bands . essay figures keyboard-operable, redraw after resize under reduced motion, labels wrap at ≤360px . about contact rows stack on narrow screens, anchor scrolling honours reduced motion<span class="d">2026-08-05</span></li>
-  <li><b>v1.17.1</b>audit pass — favicon (inline svg, zero requests) . og + twitter cards . proper h1 . dim ink darkened for wcag contrast (hairlines split to their own token) . styled 404 . robots + sitemap<span class="d">2026-08-05</span></li>
-  <li><b>v1.17.0</b>back to the paper — the attack center easter egg, dark mode, aurora wash, lamp, and theme toggle are all retired . no animation, no scroll tricks . white by default . just the ink and the timeline<span class="d">2026-08-05</span></li>
-  <li><b>v1.16.0</b>the screen becomes real — the site is mapped onto the attack center's display with a true perspective fit (it's a trapezoid, not a rectangle), photo-registered edge feathering, and the page picks up the room's optical softness . landing no longer off-center<span class="d">2026-08-05</span></li>
-  <li><b>v1.15.0</b>the attack center goes wordless — brand line + scroll hint removed from the easter egg . just the room<span class="d">2026-08-05</span></li>
-  <li><b>v1.14.0</b>the masthead is gone — the page opens straight on CHRIS HALL . the attack center becomes an easter egg: scroll up past the top and the camera pulls back to the big board . ☾ toggle floats free<span class="d">2026-08-04</span></li>
-  <li><b>v1.13.0</b>mobile, reworked — the dual-sided gantt becomes tappable horizontal bands on phones . full-width timeline . stacked masthead<span class="d">2026-08-04</span></li>
-  <li><b>v1.12.0</b>lights out — the listening room becomes the DEFAULT . light mode behind ☀ . ?theme= override for embeds<span class="d">2026-08-04</span></li>
-  <li><b>v1.11.0</b>masthead one line — chall.net . nyc . sf + role . entrepreneur — chris hall drops to a hero title above the intro<span class="d">2026-08-03</span></li>
-  <li><b>v1.10.0</b>morning paper — light mode aurora wash (peach / blue / lavender, slow drift) . frosted-glass masthead<span class="d">2026-08-03</span></li>
-  <li><b>v1.9.0</b>the listening room — dark mode (studio black, warm lamp follows the cursor) . ☾ toggle in the masthead . light default<span class="d">2026-08-03</span></li>
-  <li><b>v1.8.2</b>rails legibility — thicker rails, larger dots, semibold labels<span class="d">2026-08-03</span></li>
-  <li><b>v1.8.1</b>essays unlisted — homepage section removed, /essays de-indexed, drafts pending review<span class="d">2026-08-03</span></li>
-  <li><b>v1.8.0</b>essays — five essays with interactive figures (get in the frame . set the standard . make mistakes . solve the problem . life is like a game) . essays section under the timeline<span class="d">2026-08-03</span></li>
-  <li><b>v1.7.2</b>skills split: event production '10 — . live video production '17 — . nine rails on the left<span class="d">2026-08-03</span></li>
-  <li><b>v1.7.1</b>y combinator joins the client rails '26 — . boerum studios reads commercial photo + video studio<span class="d">2026-08-03</span></li>
-  <li><b>v1.7.0</b>the world, same moment — hover a skill rail and the page recalls what the world was doing when the skill began<span class="d">2026-08-03</span></li>
-  <li><b>v1.6.0</b>five clients join the rails: carmelo anthony, ypc of nyc, girl with no job, ray dalio, initialized capital<span class="d">2026-08-03</span></li>
-  <li><b>v1.5.0</b>skills rails on the left of the spine — eight skills '09→ . gutter labels skills / clients . skills chip section retired<span class="d">2026-08-03</span></li>
-  <li><b>v1.4.0</b>changelog page . version badge in the footer . footer sim links removed . masthead adds new york city<span class="d">2026-08-03</span></li>
-  <li><b>v1.3.0</b>client tenure rails on the timeline — nine clients as hairline gantt bars off the spine . clients chip section retired<span class="d">2026-08-03</span></li>
-  <li><b>v1.2.0</b>location gutter (nyc / fl / sf) left of the timeline . tenure years interpolated between rows<span class="d">2026-08-03</span></li>
-  <li><b>v1.1.0</b>short bio with collapsible long-form . entrepreneur added to the masthead . timeline rewrite: may 2025 sf, december 2025 agi arrives, january 2026 y combinator<span class="d">2026-08-03</span></li>
-  <li><b>v1.0.0</b>ink-on-paper rebuild — timeline . clients . skills . the b&amp;w system shared with admin.chall.net<span class="d">2026-08-03</span></li>
-  <li><b>v0.x</b>the fleet board era — live sim cards (watchkeeper . kitties . specialops . overworld)<span class="d">2026-07-10</span></li>
+  <li><b>v1.19.0</b>the dot grid, perfected — 20px paper pitch (true 5mm), warm-grey dots full-strength in the margins and hushed to 45% behind the text column . the page reads like premium stationery with a calm writing area<span class="d">2026-08-04 · 21:14:51 PT</span></li>
+  <li><b>v1.18.0</b>dot grid — the horizontal grain gives way to a quiet 16px dot lattice . the paper a timeline belongs on<span class="d">2026-08-04 · 20:54:47 PT</span></li>
+  <li><b>v1.17.2</b>design-review pass lands on the new paper — timeline keyboard-operable with in-flow notes that follow focus and hover . visible focus everywhere . 44px touch targets and separated tap zones on the mobile bands . essay figures keyboard-operable, redraw after resize under reduced motion, labels wrap at ≤360px . about contact rows stack on narrow screens, anchor scrolling honours reduced motion<span class="d">2026-08-04 · 20:48:42 PT</span></li>
+  <li><b>v1.17.1</b>audit pass — favicon (inline svg, zero requests) . og + twitter cards . proper h1 . dim ink darkened for wcag contrast (hairlines split to their own token) . styled 404 . robots + sitemap<span class="d">2026-08-04 · 20:34:12 PT</span></li>
+  <li><b>v1.17.0</b>back to the paper — the attack center easter egg, dark mode, aurora wash, lamp, and theme toggle are all retired . no animation, no scroll tricks . white by default . just the ink and the timeline<span class="d">2026-08-04 · 20:17:02 PT</span></li>
+  <li><b>v1.16.0</b>the screen becomes real — the site is mapped onto the attack center's display with a true perspective fit (it's a trapezoid, not a rectangle), photo-registered edge feathering, and the page picks up the room's optical softness . landing no longer off-center<span class="d">2026-08-04 · 19:58:09 PT</span></li>
+  <li><b>v1.15.0</b>the attack center goes wordless — brand line + scroll hint removed from the easter egg . just the room<span class="d">2026-08-04 · 17:41:51 PT</span></li>
+  <li><b>v1.14.0</b>the masthead is gone — the page opens straight on CHRIS HALL . the attack center becomes an easter egg: scroll up past the top and the camera pulls back to the big board . ☾ toggle floats free<span class="d">2026-08-04 · 17:09:34 PT</span></li>
+  <li><b>v1.13.0</b>mobile, reworked — the dual-sided gantt becomes tappable horizontal bands on phones . full-width timeline . stacked masthead<span class="d">2026-08-04 · 16:18:46 PT</span></li>
+  <li><b>v1.12.0</b>lights out — the listening room becomes the DEFAULT . light mode behind ☀ . ?theme= override for embeds<span class="d">2026-08-04 · 14:10:03 PT</span></li>
+  <li><b>v1.11.0</b>masthead one line — chall.net . nyc . sf + role . entrepreneur — chris hall drops to a hero title above the intro<span class="d">2026-08-03 · 23:49:41 PT</span></li>
+  <li><b>v1.10.0</b>morning paper — light mode aurora wash (peach / blue / lavender, slow drift) . frosted-glass masthead<span class="d">2026-08-03 · 23:43:49 PT</span></li>
+  <li><b>v1.9.0</b>the listening room — dark mode (studio black, warm lamp follows the cursor) . ☾ toggle in the masthead . light default<span class="d">2026-08-03 · 23:29:47 PT</span></li>
+  <li><b>v1.8.2</b>rails legibility — thicker rails, larger dots, semibold labels<span class="d">2026-08-03 · 23:20:30 PT</span></li>
+  <li><b>v1.8.1</b>essays unlisted — homepage section removed, /essays de-indexed, drafts pending review<span class="d">2026-08-03 · 21:34:10 PT</span></li>
+  <li><b>v1.8.0</b>essays — five essays with interactive figures (get in the frame . set the standard . make mistakes . solve the problem . life is like a game) . essays section under the timeline<span class="d">2026-08-03 · 21:03:45 PT</span></li>
+  <li><b>v1.7.2</b>skills split: event production '10 — . live video production '17 — . nine rails on the left<span class="d">2026-08-03 · 20:42:39 PT</span></li>
+  <li><b>v1.7.1</b>y combinator joins the client rails '26 — . boerum studios reads commercial photo + video studio<span class="d">2026-08-03 · 20:22:02 PT</span></li>
+  <li><b>v1.7.0</b>the world, same moment — hover a skill rail and the page recalls what the world was doing when the skill began<span class="d">2026-08-03 · 19:59:48 PT</span></li>
+  <li><b>v1.6.0</b>five clients join the rails: carmelo anthony, ypc of nyc, girl with no job, ray dalio, initialized capital<span class="d">2026-08-03 · 19:15:26 PT</span></li>
+  <li><b>v1.5.0</b>skills rails on the left of the spine — eight skills '09→ . gutter labels skills / clients . skills chip section retired<span class="d">2026-08-03 · 19:12:07 PT</span></li>
+  <li><b>v1.4.0</b>changelog page . version badge in the footer . footer sim links removed . masthead adds new york city<span class="d">2026-08-03 · 18:58:18 PT</span></li>
+  <li><b>v1.3.0</b>client tenure rails on the timeline — nine clients as hairline gantt bars off the spine . clients chip section retired<span class="d">2026-08-03 · 18:23:41 PT</span></li>
+  <li><b>v1.2.0</b>location gutter (nyc / fl / sf) left of the timeline . tenure years interpolated between rows<span class="d">2026-08-03 · 17:49:46 PT</span></li>
+  <li><b>v1.1.0</b>short bio with collapsible long-form . entrepreneur added to the masthead . timeline rewrite: may 2025 sf, december 2025 agi arrives, january 2026 y combinator<span class="d">2026-08-03 · 18:02:15 PT</span></li>
+  <li><b>v1.0.0</b>ink-on-paper rebuild — timeline . clients . skills . the b&amp;w system shared with admin.chall.net<span class="d">2026-08-03 · 17:02:18 PT</span></li>
+  <li><b>v0.x</b>the fleet board era — live sim cards (watchkeeper . kitties . specialops . overworld)<span class="d">2026-07-10 · 15:38:22 PT</span></li>
 </ul>
 </div>
 
