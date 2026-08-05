@@ -93,7 +93,7 @@ h1 { font-size: 22px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8p
   var ctx=cv.getContext('2d'), dpr=window.devicePixelRatio||1, W,H, pressed=false, t=0;
   var RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   function size(){ W=fig.clientWidth; H=fig.clientHeight; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
-  size(); window.addEventListener('resize',size);
+  size(); window.addEventListener('resize',function(){ size(); if(RM) draw(); });
   // pre-generate the chaos layer (deterministic per load)
   var scrib=[];
   for(var i=0;i<46;i++){
