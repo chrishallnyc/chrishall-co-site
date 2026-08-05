@@ -98,10 +98,14 @@ h1 { font-size: 22px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8p
 <script>
 (function(){
   var f=document.getElementById('fig1'), s=document.getElementById('framestate'), on=false;
-  f.addEventListener('click',function(){
+  f.tabIndex=0; f.setAttribute('role','button'); f.setAttribute('aria-pressed','false');
+  function toggle(){
     on=!on; f.classList.toggle('inframe',on);
+    f.setAttribute('aria-pressed', on);
     s.textContent=on?'inside the frame':'outside the frame';
-  });
+  }
+  f.addEventListener('click',toggle);
+  f.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); } });
 })();
 </script>
 </body>

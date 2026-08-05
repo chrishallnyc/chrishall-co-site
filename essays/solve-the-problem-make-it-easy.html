@@ -138,10 +138,13 @@ h1 { font-size: 22px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8p
     ctx.fillText('VIDEO, DELIVERED', 22, mid-12);
     if(!RM) requestAnimationFrame(draw);
   }
-  function down(e){ pressed=true; e.preventDefault(); if(RM) draw(); }
-  function up(){ pressed=false; if(RM) draw(); }
+  function setPressed(v){ pressed=v; fig.setAttribute('aria-pressed', v); if(RM) draw(); }
+  function down(e){ setPressed(true); e.preventDefault(); }
+  function up(){ setPressed(false); }
+  fig.tabIndex=0; fig.setAttribute('role','button'); fig.setAttribute('aria-pressed','false');
   fig.addEventListener('mousedown',down); fig.addEventListener('mouseup',up); fig.addEventListener('mouseleave',up);
   fig.addEventListener('touchstart',down,{passive:false}); fig.addEventListener('touchend',up);
+  fig.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); setPressed(!pressed); } });
   requestAnimationFrame(draw);
 })();
 </script>
