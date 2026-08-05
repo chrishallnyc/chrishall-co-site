@@ -134,14 +134,6 @@ a:hover { color: var(--ink); text-decoration: underline; }
   box-shadow: 0 0 36px 8px rgba(190,216,255,0.40), 0 0 130px 34px rgba(140,180,255,0.24);
   animation: acbreathe 6.5s ease-in-out infinite; }
 @keyframes acbreathe { 0%,100% { filter:brightness(1) } 50% { filter:brightness(1.35) } }
-#acbrand { position: absolute; top: 17px; left: 20px; color: #6b85a6; font-size: 10px;
-  letter-spacing: 4px; opacity: 0; pointer-events: none; text-shadow: 0 1px 8px rgba(0,0,0,0.9); }
-#acbrand b { color: #b7cbe8; font-weight: 600; }
-#achint { position: absolute; left: 50%; bottom: 4.4vh; transform: translateX(-50%);
-  color: #a9c2e2; font-size: 11px; letter-spacing: 5px; text-align: center; opacity: 0;
-  pointer-events: none; text-shadow: 0 1px 10px rgba(0,0,0,0.9); transition: opacity .5s ease; }
-#achint .chev { display: block; margin-top: 10px; animation: acchev 1.8s ease-in-out infinite; font-size: 13px; }
-@keyframes acchev { 0%,100% { transform:translateY(0); opacity:.85 } 50% { transform:translateY(7px); opacity:.35 } }
 #pageclip { position: relative; z-index: 2; }
 #accrt { display: none; position: absolute; inset: 0; pointer-events: none; opacity: 0;
   background:
@@ -208,8 +200,6 @@ body.dive #lamp, body.dive #aurora { display: none !important; }
 <div id="ac">
   <div id="acworld" style="position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform,filter;"><img id="acroom" src="attack-center.jpg" alt="" draggable="false"></div>
   <div id="acglow"></div>
-  <div id="acbrand"><b>CHALL.NET</b> · ATTACK CENTER · SILENT RUNNING</div>
-  <div id="achint">SCROLL TO TAKE THE SCREEN<span class="chev">▼</span></div>
 </div>
 <div id="pageclip"><div id="pagein"><div id="page">
 <div id="lamp"></div>
@@ -254,7 +244,7 @@ the most influential institutions in global technology.</p>
 
 <div class="foot">
   <hr>
-  <a href="/changelog.html" class="ver">v1.14.0</a>
+  <a href="/changelog.html" class="ver">v1.15.0</a>
 </div>
 </div></div><div id="accrt"></div></div>
 <button id="mode" title="lights">☾</button>
@@ -420,7 +410,7 @@ the most influential institutions in global technology.</p>
 
   var $=function(i){return document.getElementById(i);};
   var ac=$("ac"), world=$("acworld"), room=$("acroom"), glow=$("acglow"),
-      brand=$("acbrand"), hint=$("achint"), clip=$("pageclip"), inner=$("pagein"), crt=$("accrt");
+      clip=$("pageclip"), inner=$("pagein"), crt=$("accrt");
   if(!ac||!clip) return;
 
   var REDUCED=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -467,8 +457,6 @@ the most influential institutions in global technology.</p>
     glow.style.transformOrigin="0 0";
     glow.style.transform="translate3d("+(cx-Z*rw/2).toFixed(2)+"px,"+(cy-Z*rh/2).toFixed(2)+"px,0) scale("+Z.toFixed(4)+")";
     glow.style.opacity=String(1-smooth(0.45,0.8,p));
-    brand.style.opacity=String(1-smooth(0.2,0.5,p));
-    hint.style.opacity=(p<0.05)?"1":"0";
   }
 
   function frame(now){
@@ -504,7 +492,7 @@ the most influential institutions in global technology.</p>
     ac.style.visibility="hidden"; ac.style.opacity="0";
     clip.style.transform=""; clip.style.width=""; clip.style.height=""; clip.style.borderRadius="";
     inner.style.transform=""; inner.style.width="";
-    crt.style.opacity="0"; hint.style.opacity="0";
+    crt.style.opacity="0";
     window.scrollTo(0,0);
   }
 
