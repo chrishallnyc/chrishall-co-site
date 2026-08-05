@@ -31,7 +31,8 @@ body {
   image-rendering: pixelated;
 }
 #page {
-  background: radial-gradient(circle, #e3dfd3 1px, transparent 1.4px) 0 0 / 16px 16px, var(--bg);
+  background: var(--bg);
+  position: relative;
   min-height: 100vh;
   padding: 26px clamp(14px, 4vw, 46px);
 }
@@ -124,6 +125,13 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
   .baxis { display: flex; justify-content: space-between; font-size: 9px; letter-spacing: 1px;
     color: var(--dim); margin-top: 8px; padding-top: 5px; border-top: 1px solid var(--hair); }
 }
+
+#page::before { content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+  background: radial-gradient(circle, #d9d4c4 1.1px, transparent 1.55px) 0 0 / 20px 20px;
+  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,1) 0, rgba(0,0,0,1) calc(50% - 470px), rgba(0,0,0,0.45) calc(50% - 380px), rgba(0,0,0,0.45) calc(50% + 380px), rgba(0,0,0,1) calc(50% + 470px), rgba(0,0,0,1) 100%);
+  mask-image: linear-gradient(90deg, rgba(0,0,0,1) 0, rgba(0,0,0,1) calc(50% - 470px), rgba(0,0,0,0.45) calc(50% - 380px), rgba(0,0,0,0.45) calc(50% + 380px), rgba(0,0,0,1) calc(50% + 470px), rgba(0,0,0,1) 100%);
+}
+.intro,.sec,.foot { position:relative; z-index:1; }
 </style>
 </head>
 <body>
@@ -168,7 +176,7 @@ the most influential institutions in global technology.</p>
 
 <div class="foot">
   <hr>
-  <a href="/changelog.html" class="ver">v1.18.0</a>
+  <a href="/changelog.html" class="ver">v1.19.0</a>
 </div>
 </div>
 <script>
