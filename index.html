@@ -280,7 +280,7 @@ the most influential institutions in global technology.</p>
 (function(){
   var wrap=document.querySelector('.tlwrap'); if(!wrap) return;
   var tip=document.createElement('div'); tip.id='tip'; wrap.appendChild(tip);
-  var curRail=null;
+  var curRail=null, tipData=new WeakMap();
   function showTip(d,c){
     if(curRail) curRail.classList.remove('hl');
     curRail=d; d.classList.add('hl');
@@ -292,8 +292,16 @@ the most influential institutions in global technology.</p>
     tip.style.display='none';
     if(curRail){curRail.classList.remove('hl');curRail=null;}
   }
-  document.addEventListener('click',hideTip);
-  window.addEventListener('scroll',hideTip,{passive:true});
+  function settleTip(d){
+    if(d.matches(':hover') || document.activeElement===d) return;
+    var live=document.querySelector('.rail.tipd:hover');
+    if(!live || !tipData.has(live)) live=tipData.has(document.activeElement)?document.activeElement:null;
+    if(live) showTip(live,tipData.get(live)); else hideTip();
+  }
+  document.addEventListener('click',function(){
+    if(curRail && document.activeElement===curRail) curRail.blur();
+    hideTip();
+  });
   var CL=[
     {n:"carmelo anthony",f:2011,t:2012,c:1},
     {n:"ypc of nyc",f:2012,t:2015,c:0},
@@ -354,11 +362,12 @@ the most influential institutions in global technology.</p>
       d.innerHTML='<u class="t"></u>'+(c.t?'<u class="b"></u>':'')+'<span'+sh+'>'+c.n+'</span>';
       if(c.w){
         d.classList.add('tipd');
+        tipData.set(d,c);
         d.tabIndex=0; d.setAttribute('role','button'); d.setAttribute('aria-label',c.n+' — the world, same moment');
         d.addEventListener('mouseenter',function(){showTip(d,c);});
-        d.addEventListener('mouseleave',hideTip);
+        d.addEventListener('mouseleave',function(){settleTip(d);});
         d.addEventListener('focus',function(){showTip(d,c);});
-        d.addEventListener('blur',hideTip);
+        d.addEventListener('blur',function(){settleTip(d);});
         d.addEventListener('click',function(ev){ev.stopPropagation();showTip(d,c);});
         d.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); showTip(d,c); } });
       }
