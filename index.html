@@ -18,7 +18,21 @@
 <meta name="twitter:title" content="CHALL.NET — Chris Hall">
 <meta name="twitter:description" content="Chris Hall — Senior Video Producer at Y Combinator. San Francisco.">
 <meta name="twitter:image" content="https://chall.net/chris-og.jpg">
-<meta name="theme-color" content="#f6f4ee">
+<meta name="theme-color" content="#eee9dd" id="theme-color">
+<script>
+(function(){
+  var key='chall.net:theme';
+  var query=new URLSearchParams(window.location.search).get('theme');
+  var saved=null;
+  try { saved=window.localStorage.getItem(key); } catch(e) {}
+  var theme=(query==='grunge'||query==='hacker')?query:
+    ((saved==='grunge'||saved==='hacker')?saved:'grunge');
+  document.documentElement.dataset.theme=theme;
+  document.documentElement.style.colorScheme=theme==='hacker'?'dark':'light';
+  document.getElementById('theme-color').setAttribute('content',theme==='hacker'?'#06100a':'#eee9dd');
+  window.__CHALL_THEME__=theme;
+})();
+</script>
 <style>
 :root { --bg:#f6f4ee; --tex:#eeebe4; --ink:#18181c; --mid:#56565e; --dim:#6e6c64; --hair:#989690; }
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -88,9 +102,9 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 .foot .ver { font-size: 11px; letter-spacing: 2px; text-decoration: none; }
 .foot .ver:hover { color: var(--ink); }
 
-/* ── MOBILE (≤719px): the dual-sided gantt becomes horizontal bands ── */
+/* ── COMPACT (≤959px): the dual-sided gantt becomes horizontal bands ── */
 .band { display: none; }
-@media (max-width: 719px) {
+@media (max-width: 959px) {
   #page { padding: 18px 16px; }
   .intro { margin-top: 16px; }
   .intro .brand { letter-spacing: 4px; }
@@ -133,14 +147,25 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 }
 .intro,.sec,.foot { position:relative; z-index:1; }
 </style>
+<link rel="stylesheet" href="/chall-themes.css?v=1.20.0">
 </head>
-<body>
-<div id="page">
+<body class="theme-grunge">
+<script>document.body.className='theme-'+window.__CHALL_THEME__;</script>
 
-<div class="intro">
-<h1 class="brand">CHRIS HALL</h1>
-NYC-born media operator. <b>~15 years</b> across video, audio, photo and live production —
-now producing flagship content inside <b>Y Combinator</b>.
+<div class="theme-switcher" role="group" aria-label="Visual theme">
+  <span class="theme-switcher__label" aria-hidden="true">DISPLAY</span>
+  <button type="button" data-theme-option="grunge" aria-pressed="true"><span>01</span> GRUNGE</button>
+  <button type="button" data-theme-option="hacker" aria-pressed="false"><span>02</span> CRT</button>
+</div>
+<p class="sr-only" id="theme-announcer" aria-live="polite"></p>
+
+<main id="page" class="site-shell">
+
+<header class="intro site-header">
+<p class="site-kicker">CHALL.NET<br>NYC / SF</p>
+<h1 class="brand site-title">CHRIS HALL</h1>
+<p class="site-intro">NYC-born media operator. <b>~15 years</b> across video, audio, photo and live production —
+now producing flagship content inside <b>Y Combinator</b>.</p>
 <details class="bio">
 <summary>more</summary>
 <p><b>NYC-born media operator</b> building high-leverage content systems for founders at the highest level.
@@ -152,12 +177,12 @@ The Social Radars (w/ Carolynn Levy) since 2022 — storytelling, systems, and o
 <b>Y Combinator</b> full-time in January 2026 as Senior Video Producer, overseeing flagship content at one of
 the most influential institutions in global technology.</p>
 </details>
-</div>
+</header>
 
-<div class="sec">
-<h2>TIMELINE</h2>
+<section class="sec timeline-layout" aria-labelledby="timeline-title">
+<h2 id="timeline-title">TIMELINE</h2>
 <div class="tlwrap">
-<ul class="tl">
+<ul class="tl timeline-list">
   <li><span class="loc">NYC</span><b>2009</b>freelance photo . video . audio — new york city, 220+ productions</li>
   <li><b>2012</b>young people's chorus of nyc — content lead, toured japan . china . usa</li>
   <li><b>2014</b>kickster, co-founder — #1 sneaker app on the app store</li>
@@ -172,13 +197,49 @@ the most influential institutions in global technology.</p>
   <li><b>2026</b>january — joined y combinator . senior video producer — san francisco</li>
 </ul>
 </div>
-</div>
+</section>
 
-<div class="foot">
+<footer class="foot site-footer">
   <hr>
-  <a href="/changelog.html" class="ver">v1.19.0</a>
-</div>
-</div>
+  <a href="/changelog.html" class="ver">v1.20.0</a>
+</footer>
+</main>
+<script>
+(function(){
+  var key='chall.net:theme';
+  var html=document.documentElement;
+  var body=document.body;
+  var meta=document.getElementById('theme-color');
+  var announcer=document.getElementById('theme-announcer');
+  var buttons=[].slice.call(document.querySelectorAll('[data-theme-option]'));
+  function applyTheme(theme,persist,announce){
+    if(theme!=='grunge'&&theme!=='hacker') return;
+    html.dataset.theme=theme;
+    html.style.colorScheme=theme==='hacker'?'dark':'light';
+    body.classList.remove('theme-grunge','theme-hacker');
+    body.classList.add('theme-'+theme);
+    buttons.forEach(function(button){
+      button.setAttribute('aria-pressed',String(button.dataset.themeOption===theme));
+    });
+    meta.setAttribute('content',theme==='hacker'?'#06100a':'#eee9dd');
+    if(persist){
+      try { window.localStorage.setItem(key,theme); } catch(e) {}
+      if(window.history&&window.history.replaceState&&new URLSearchParams(window.location.search).has('theme')){
+        var url=new URL(window.location.href);
+        url.searchParams.set('theme',theme);
+        window.history.replaceState(null,'',url.pathname+url.search+url.hash);
+      }
+    }
+    if(announce) announcer.textContent=(theme==='hacker'?'CRT hacker':'Grunge paper')+' theme active';
+    window.__CHALL_THEME__=theme;
+    document.dispatchEvent(new CustomEvent('chall:themechange',{detail:{theme:theme}}));
+  }
+  buttons.forEach(function(button){
+    button.addEventListener('click',function(){applyTheme(button.dataset.themeOption,true,true);});
+  });
+  applyTheme(window.__CHALL_THEME__||'grunge',false,false);
+})();
+</script>
 <script>
 (function(){
   var wrap=document.querySelector('.tlwrap'); if(!wrap) return;
@@ -237,10 +298,10 @@ the most influential institutions in global technology.</p>
     wrap.querySelectorAll('.rail,.glab').forEach(function(r){r.remove();});
     var sec=wrap.parentElement;
     sec.querySelectorAll('.band').forEach(function(b){b.remove();});
-    if(window.innerWidth<720){ buildBands(sec); return; }
+    if(window.innerWidth<960){ buildBands(sec); return; }
     var lis=[].slice.call(wrap.querySelectorAll('.tl li'));
     var wr=wrap.getBoundingClientRect();
-    var S=(window.innerWidth<600)?18:24;
+    var S=(window.innerWidth<=1120)?21:24;
     var rows=lis.map(function(li){return {y:parseInt(li.querySelector('b').textContent,10),el:li};});
     function mid(el){var r=el.getBoundingClientRect();return r.top+r.height/2-wr.top;}
     function yPos(year){
@@ -256,7 +317,7 @@ the most influential institutions in global technology.</p>
     function rail(c,side){
       var top=yPos(c.f), bot=c.t?yPos(c.t):endY;
       var d=document.createElement('div');
-      d.className='rail'+(c.t?'':' on');
+      d.className='rail rail--'+(side==='r'?'clients':'skills')+(c.t?'':' on');
       d.style.top=top+'px'; d.style.height=Math.max(bot-top,18)+'px';
       if(side==='r'){ d.style.right=((8-c.c)*S)+'px'; } else { d.style.left=(c.c*S)+'px'; }
       d.title=c.t?c.n:'';
@@ -321,6 +382,7 @@ the most influential institutions in global technology.</p>
   }
   build();
   window.addEventListener('load',build);
+  document.addEventListener('chall:themechange',build);
   var to; window.addEventListener('resize',function(){clearTimeout(to);to=setTimeout(build,150);});
 })();
 </script>
