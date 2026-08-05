@@ -130,9 +130,12 @@ a:hover { color: var(--ink); text-decoration: underline; }
 #ac img { position: absolute; display: block; user-select: none; -webkit-user-drag: none; }
 #ac::after { content:""; position:absolute; inset:0; pointer-events:none;
   background: radial-gradient(120% 90% at 50% 42%, transparent 40%, rgba(2,4,9,0.6) 100%); }
-#acglow { position: absolute; pointer-events: none; border-radius: 3px; opacity: 0;
-  box-shadow: 0 0 36px 8px rgba(190,216,255,0.40), 0 0 130px 34px rgba(140,180,255,0.24);
+#acglow { position: absolute; pointer-events: none; border-radius: 8px; opacity: 0;
+  box-shadow: 0 0 30px 6px rgba(190,216,255,0.30), 0 0 110px 30px rgba(140,180,255,0.17);
   animation: acbreathe 6.5s ease-in-out infinite; }
+#acover { position: fixed; left: 0; top: 0; z-index: 3; pointer-events: none;
+  transform-origin: 0 0; will-change: transform, opacity; opacity: 0; }
+#acover img { position: absolute; user-select: none; -webkit-user-drag: none; }
 @keyframes acbreathe { 0%,100% { filter:brightness(1) } 50% { filter:brightness(1.35) } }
 #pageclip { position: relative; z-index: 2; }
 #accrt { display: none; position: absolute; inset: 0; pointer-events: none; opacity: 0;
@@ -141,9 +144,10 @@ a:hover { color: var(--ink); text-decoration: underline; }
     linear-gradient(180deg, rgba(140,175,235,0.09), rgba(120,150,215,0.04) 40%, rgba(150,180,240,0.10));
   mix-blend-mode: screen; }
 html.dive, html.dive body { background: #04070d; }
-body.dive #pageclip { position: fixed; left: 0; top: 0; overflow: hidden; z-index: 2;
-  transform-origin: 0 0; will-change: transform, width, height; }
-body.dive #pagein { transform-origin: 0 0; will-change: transform; }
+body.dive #pageclip { position: fixed; inset: 0; width: 100%; height: 100%;
+  overflow: hidden; z-index: 2; will-change: clip-path; }
+body.dive #pagein { transform-origin: 0 0; will-change: transform, filter; }
+body.dive #mode { display: none !important; }
 body.dive #accrt { display: block; }
 body.dive #page { pointer-events: none; }
 body.dive #lamp, body.dive #aurora { display: none !important; }
@@ -198,9 +202,9 @@ body.dive #lamp, body.dive #aurora { display: none !important; }
 })();
 </script>
 <div id="ac">
-  <div id="acworld" style="position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform,filter;"><img id="acroom" src="attack-center.jpg" alt="" draggable="false"></div>
-  <div id="acglow"></div>
+  <div id="acworld" style="position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform,filter;"><img id="acroom" src="attack-center.jpg" alt="" draggable="false"><div id="acglow"></div></div>
 </div>
+<div id="acover"><img id="acfeather" src="ac-feather.png" alt="" draggable="false"></div>
 <div id="pageclip"><div id="pagein"><div id="page">
 <div id="lamp"></div>
 <div id="aurora"></div>
@@ -244,7 +248,7 @@ the most influential institutions in global technology.</p>
 
 <div class="foot">
   <hr>
-  <a href="/changelog.html" class="ver">v1.15.0</a>
+  <a href="/changelog.html" class="ver">v1.16.0</a>
 </div>
 </div></div><div id="accrt"></div></div>
 <button id="mode" title="lights">☾</button>
@@ -401,31 +405,84 @@ the most influential institutions in global technology.</p>
 <script>
 /* ── ATTACK CENTER easter egg: scroll up past the top of the site and the
      camera pulls back — you were on the attack center's big board all along.
-     Scroll down to take the screen again. ── */
+     Scroll down to take the screen again.
+     v1.16: true-quad homography mapping (the display in the photograph is a
+     trapezoid, not a rect), photo-registered edge feather, fixed the
+     off-center landing on non-16:9 viewports. ── */
 (function(){
   "use strict";
   var IW=1672, IH=941;
-  var RX=0.1990, RY=0.1390, RW=0.6070, RH=0.5300, INSET=0.013;
-  RX+=RW*INSET; RY+=RH*INSET; RW*=(1-2*INSET); RH*=(1-2*INSET);
+  /* display-surface quad in source px, measured at 3x zoom: TL TR BR BL */
+  var QUAD=[[332,178],[1340,185],[1355,668],[310,668]];
+  /* feather overlay bbox in source px (baked into ac-feather.png) */
+  var FB=[276,144,1113,558];
 
   var $=function(i){return document.getElementById(i);};
   var ac=$("ac"), world=$("acworld"), room=$("acroom"), glow=$("acglow"),
+      over=$("acover"), feather=$("acfeather"),
       clip=$("pageclip"), inner=$("pagein"), crt=$("accrt");
-  if(!ac||!clip) return;
+  if(!ac||!clip||!over) return;
 
   var REDUCED=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var vw=0,vh=0,s0=1,ox=0,oy=0,rcx=0,rcy=0,rw=0,rh=0,Zend=2;
+  var EGG=null;
+  try{ var _e=new URLSearchParams(location.search).get("egg");
+       if(_e!==null){ EGG=Math.min(0.999,Math.max(0,parseFloat(_e)||0)); } }catch(err){}
+
+  var vw=0,vh=0,s0=1,ox=0,oy=0,Zend=2,qL=[],cx0=0,cy0=0,bw0=0,bh0=0,cropW=0,cropH=0;
   function layout(){
     vw=window.innerWidth; vh=window.innerHeight;
     s0=Math.max(vw/IW, vh/IH);
     ox=(vw-IW*s0)/2; oy=(vh-IH*s0)/2;
     room.style.width=(IW*s0)+"px"; room.style.height=(IH*s0)+"px";
-    rw=RW*IW*s0; rh=RH*IH*s0;
-    rcx=ox+(RX+RW/2)*IW*s0;
-    rcy=oy+(RY+RH/2)*IH*s0;
-    Zend=Math.max(vw/rw, vh/rh);
-    glow.style.width=rw+"px"; glow.style.height=rh+"px";
+    room.style.left=ox+"px"; room.style.top=oy+"px";
+    qL=QUAD.map(function(p){ return [ox+p[0]*s0, oy+p[1]*s0]; });
+    var xs=qL.map(function(p){return p[0];}), ys=qL.map(function(p){return p[1];});
+    var mnx=Math.min.apply(null,xs), mxx=Math.max.apply(null,xs),
+        mny=Math.min.apply(null,ys), mxy=Math.max.apply(null,ys);
+    bw0=mxx-mnx; bh0=mxy-mny;
+    cx0=(mnx+mxx)/2; cy0=(mny+mxy)/2;
+    Zend=Math.max(vw/bw0, vh/bh0);
+    var A=bw0/bh0, Av=vw/vh;
+    if(A>Av){ cropW=vw; cropH=vw/A; } else { cropH=vh; cropW=vh*A; }
+    glow.style.left=Math.min.apply(null,xs)+"px"; glow.style.top=Math.min.apply(null,ys)+"px";
+    glow.style.width=bw0+"px"; glow.style.height=bh0+"px";
+    feather.style.left=(ox+FB[0]*s0)+"px"; feather.style.top=(oy+FB[1]*s0)+"px";
+    feather.style.width=(FB[2]*s0)+"px"; feather.style.height=(FB[3]*s0)+"px";
   }
+
+  /* solve 2D homography mapping 4 src pts -> 4 dst pts (DLT, gaussian elim) */
+  function homography(S,D){
+    var A=[],b=[],i;
+    for(i=0;i<4;i++){
+      var sx=S[i][0],sy=S[i][1],dx=D[i][0],dy=D[i][1];
+      A.push([sx,sy,1,0,0,0,-sx*dx,-sy*dx]); b.push(dx);
+      A.push([0,0,0,sx,sy,1,-sx*dy,-sy*dy]); b.push(dy);
+    }
+    for(var c=0;c<8;c++){
+      var piv=c;
+      for(i=c+1;i<8;i++) if(Math.abs(A[i][c])>Math.abs(A[piv][c])) piv=i;
+      var t=A[c];A[c]=A[piv];A[piv]=t; var tb=b[c];b[c]=b[piv];b[piv]=tb;
+      if(Math.abs(A[c][c])<1e-12) return null;
+      for(i=c+1;i<8;i++){
+        var f=A[i][c]/A[c][c];
+        for(var j=c;j<8;j++) A[i][j]-=f*A[c][j];
+        b[i]-=f*b[c];
+      }
+    }
+    var h=new Array(8);
+    for(i=7;i>=0;i--){
+      var s=b[i];
+      for(var j=i+1;j<8;j++) s-=A[i][j]*h[j];
+      h[i]=s/A[i][i];
+    }
+    return h; /* [a,b,c,d,e,f,g,hh] */
+  }
+  function m3d(h){
+    return "matrix3d("+h[0].toFixed(6)+","+h[3].toFixed(6)+",0,"+h[6].toExponential(6)+","
+      +h[1].toFixed(6)+","+h[4].toFixed(6)+",0,"+h[7].toExponential(6)+",0,0,1,0,"
+      +h[2].toFixed(3)+","+h[5].toFixed(3)+",0,1)";
+  }
+
   var easeZ=function(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;};
   function smooth(a,b,x){var t=Math.min(1,Math.max(0,(x-a)/(b-a)));return t*t*(3-2*t);}
 
@@ -433,29 +490,37 @@ the most influential institutions in global technology.</p>
 
   function apply(p){
     var e=easeZ(p), away=1-e;
-    var driftX=REDUCED?0:(Math.sin(simT*0.21)*6+Math.sin(simT*0.083)*4)*away;
-    var driftY=REDUCED?0:(Math.cos(simT*0.17)*4+Math.sin(simT*0.061)*3)*away;
+    var drift = (REDUCED||EGG!==null) ? 0 : 1;
+    var driftX=(Math.sin(simT*0.21)*6+Math.sin(simT*0.083)*4)*away*drift;
+    var driftY=(Math.cos(simT*0.17)*4+Math.sin(simT*0.061)*3)*away*drift;
     var Z=1+(Zend-1)*e;
-    var cx=rcx+(vw/2-rcx)*e+driftX;
-    var cy=rcy+(vh/2-rcy)*e+driftY;
-    var tx=cx-Z*rcx, ty=cy-Z*rcy;
-    world.style.transform="translate3d("+tx.toFixed(2)+"px,"+ty.toFixed(2)+"px,0) scale("+Z.toFixed(5)+")";
+    var cx=cx0+(vw/2-cx0)*e+driftX;
+    var cy=cy0+(vh/2-cy0)*e+driftY;
+    var tx=cx-Z*cx0, ty=cy-Z*cy0;
+    var wt="translate3d("+tx.toFixed(2)+"px,"+ty.toFixed(2)+"px,0) scale("+Z.toFixed(5)+")";
+    world.style.transform=wt;
+    over.style.transform=wt;
     var dof=smooth(0.5,0.96,p);
     world.style.filter="blur("+(dof*3.4).toFixed(2)+"px)";
     var m=smooth(0.86,1,p);
-    var bx=(cx-Z*rw/2), by=(cy-Z*rh/2), bw=Z*rw, bh=Z*rh;
-    bx+=(0-bx)*m; by+=(0-by)*m; bw+=(vw-bw)*m; bh+=(vh-bh)*m;
-    clip.style.transform="translate3d("+bx.toFixed(2)+"px,"+by.toFixed(2)+"px,0)";
-    clip.style.width=bw.toFixed(2)+"px";
-    clip.style.height=bh.toFixed(2)+"px";
-    clip.style.borderRadius=(5*(1-m)).toFixed(2)+"px";
-    var sc=Math.max(bw/vw, bh/vh);
-    var ix=(bw-vw*sc)/2, iy=(bh-vh*sc)/2;
-    inner.style.transform="translate3d("+ix.toFixed(2)+"px,"+iy.toFixed(2)+"px,0) scale("+sc.toFixed(5)+")";
-    inner.style.width=vw+"px";
+    /* destination quad: photo quad under camera, blended to full viewport */
+    var V=[[0,0],[vw,0],[vw,vh],[0,vh]], C=[], i;
+    for(i=0;i<4;i++){
+      var wxp=tx+Z*qL[i][0], wyp=ty+Z*qL[i][1];
+      C.push([wxp+(V[i][0]-wxp)*m, wyp+(V[i][1]-wyp)*m]);
+    }
+    /* source rect: screen-aspect center crop of the page, blended to full */
+    var sw=cropW+(vw-cropW)*m, sh=cropH+(vh-cropH)*m;
+    var sx=(vw-sw)/2, sy=(vh-sh)*0.18*(1-m);
+    var S=[[sx,sy],[sx+sw,sy],[sx+sw,sy+sh],[sx,sy+sh]];
+    var h=homography(S,C);
+    if(h) inner.style.transform=m3d(h);
+    clip.style.clipPath="polygon("+C.map(function(pt){return pt[0].toFixed(2)+"px "+pt[1].toFixed(2)+"px";}).join(",")+")";
+    /* page inherits the photo's optical softness while it lives in the room */
+    var soft=(1-m);
+    inner.style.filter=soft>0.02?("blur("+(soft*0.45).toFixed(2)+"px) brightness("+(1-soft*0.07).toFixed(3)+") saturate("+(1-soft*0.06).toFixed(3)+")"):"";
     crt.style.opacity=String(0.9*(1-smooth(0.55,0.9,p)));
-    glow.style.transformOrigin="0 0";
-    glow.style.transform="translate3d("+(cx-Z*rw/2).toFixed(2)+"px,"+(cy-Z*rh/2).toFixed(2)+"px,0) scale("+Z.toFixed(4)+")";
+    over.style.opacity=String(1-smooth(0.7,0.95,p));
     glow.style.opacity=String(1-smooth(0.45,0.8,p));
   }
 
@@ -480,6 +545,7 @@ the most influential institutions in global technology.</p>
     document.body.classList.add("dive");
     document.documentElement.style.overflow="hidden";
     ac.style.visibility="visible"; ac.style.opacity="1";
+    over.style.visibility="visible";
     cur=1; target=0; lastT=performance.now(); simT=0;
     raf=requestAnimationFrame(frame);
   }
@@ -490,8 +556,9 @@ the most influential institutions in global technology.</p>
     document.body.classList.remove("dive");
     document.documentElement.style.overflow="";
     ac.style.visibility="hidden"; ac.style.opacity="0";
-    clip.style.transform=""; clip.style.width=""; clip.style.height=""; clip.style.borderRadius="";
-    inner.style.transform=""; inner.style.width="";
+    over.style.visibility="hidden"; over.style.opacity="0";
+    clip.style.clipPath="";
+    inner.style.transform=""; inner.style.filter="";
     crt.style.opacity="0";
     window.scrollTo(0,0);
   }
@@ -501,7 +568,7 @@ the most influential institutions in global technology.</p>
   window.addEventListener("wheel",function(e){
     if(diving){
       e.preventDefault();
-      target=Math.min(1,Math.max(0,target+e.deltaY*0.0011));
+      if(EGG===null) target=Math.min(1,Math.max(0,target+e.deltaY*0.0011));
       return;
     }
     var y=window.scrollY||document.documentElement.scrollTop||0;
@@ -523,7 +590,7 @@ the most influential institutions in global technology.</p>
     if(diving){
       e.preventDefault();
       var yy=e.touches[0].clientY;
-      target=Math.min(1,Math.max(0,target+(tLast-yy)*0.004));
+      if(EGG===null) target=Math.min(1,Math.max(0,target+(tLast-yy)*0.004));
       tLast=yy;
       return;
     }
@@ -532,9 +599,16 @@ the most influential institutions in global technology.</p>
     }
   },{passive:false});
   window.addEventListener("keydown",function(e){
-    if(diving&&(e.key==="Escape"||e.key==="Enter")) target=1;
+    if(diving&&EGG===null&&(e.key==="Escape"||e.key==="Enter")) target=1;
   });
   window.addEventListener("resize",function(){ if(diving){ layout(); } });
+
+  /* deterministic QA hook: ?egg=0..1 freezes the dive at that progress */
+  if(EGG!==null){
+    var arm=function(){ enterDive(); cur=EGG; target=EGG; apply(EGG); };
+    if(document.readyState==="complete") setTimeout(arm,60);
+    else window.addEventListener("load",function(){ setTimeout(arm,60); });
+  }
 })();
 </script>
 </body>
