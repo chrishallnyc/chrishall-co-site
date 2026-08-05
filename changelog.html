@@ -6,94 +6,355 @@
 <title>CHANGELOG — CHALL.NET</title>
 <meta name="robots" content="noindex">
 <style>
-:root { --bg:#f6f4ee; --tex:#eeebe4; --ink:#18181c; --mid:#56565e; --dim:#726f67; }
+:root { --bg:#f6f4ee; --tex:#eeebe4; --ink:#18181c; --mid:#56565e; --dim:#6e6c64; --hair:#989690; }
 * { margin:0; padding:0; box-sizing:border-box; }
 html,body { background:var(--bg); }
 body {
-  background: repeating-linear-gradient(0deg, var(--bg) 0px, var(--bg) 3px, var(--tex) 3px, var(--tex) 4px);
   color: var(--ink);
   font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
   font-size: 13px; line-height: 1.5;
   min-height: 100vh;
-  padding: 26px clamp(14px, 4vw, 46px);
   image-rendering: pixelated;
 }
+#page {
+  background: var(--bg);
+  position: relative;
+  min-height: 100vh;
+  padding: 26px clamp(14px, 4vw, 46px);
+}
+#page::before { content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+  background: radial-gradient(circle, #d9d4c4 1.1px, transparent 1.55px) 0 0 / 20px 20px;
+  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,1) 0, rgba(0,0,0,1) calc(50% - 470px), rgba(0,0,0,0.45) calc(50% - 380px), rgba(0,0,0,0.45) calc(50% + 380px), rgba(0,0,0,1) calc(50% + 470px), rgba(0,0,0,1) 100%);
+  mask-image: linear-gradient(90deg, rgba(0,0,0,1) 0, rgba(0,0,0,1) calc(50% - 470px), rgba(0,0,0,0.45) calc(50% - 380px), rgba(0,0,0,0.45) calc(50% + 380px), rgba(0,0,0,1) calc(50% + 470px), rgba(0,0,0,1) 100%);
+}
+.mast,.sec,.foot { position:relative; z-index:1; }
 a { color: var(--mid); text-decoration: none; }
 a:hover { color: var(--ink); text-decoration: underline; }
-a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--acc, var(--ink)); outline-offset: 2px; }
+a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .mast {
   border: 1px solid var(--ink); padding: 10px 16px;
-  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
   position: relative; max-width: 1100px; margin: 0 auto;
 }
-.mast::after { content:""; position:absolute; inset:2px; border:1px solid var(--dim); pointer-events:none; }
+.mast::after { content:""; position:absolute; inset:2px; border:1px solid var(--hair); pointer-events:none; }
 .mast .brand { font-weight: 700; letter-spacing: 2px; color: var(--ink); }
 .mast .sub { color: var(--dim); font-size: 12px; margin-top: 2px; }
 .mast .right { color: var(--mid); text-align: right; font-size: 12px; }
+.mast .right .cur { color: var(--ink); font-weight: 700; }
+.mast .right .tot { color: var(--dim); font-size: 11px; }
 .sec { max-width: 860px; margin: 30px auto 0; }
 .sec h2 { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--ink);
-  display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.sec h2::after { content:""; flex: 1; height: 1px; background: var(--dim); }
-.cl { list-style: none; border-left: 1px solid var(--dim); margin-left: 4px; }
-.cl li { position: relative; padding: 4px 0 4px 20px; color: var(--mid); }
-.cl li::before { content:""; position: absolute; left: 0; top: 50%; width: 12px; height: 1px; background: var(--dim); }
-.cl b { color: var(--ink); font-weight: 700; margin-right: 8px; }
-.cl .d { color: var(--dim); font-size: 11px; letter-spacing: 1px; margin-left: 8px; white-space: nowrap; }
+  display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.sec h2::after { content:""; flex: 1; height: 1px; background: var(--hair); }
+.rel { padding: 12px 0; border-bottom: 1px solid var(--hair); }
+.rel:last-child { border-bottom: 0; }
+.rh { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.rh .rv { color: var(--ink); font-weight: 700; }
+.rh .rv:hover { text-decoration: none; border-bottom: 1px solid var(--ink); }
+.tag { font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  border: 1px solid var(--hair); color: var(--mid); padding: 1px 6px; }
+.rh .rt { margin-left: auto; color: var(--dim); font-size: 11px; letter-spacing: 1px; white-space: nowrap; }
+.rb { color: var(--mid); margin-top: 4px; max-width: 720px; }
+.rb b { color: var(--ink); }
+.ri { list-style: none; margin: 6px 0 0 4px; border-left: 1px solid var(--hair); }
+.ri li { position: relative; padding: 2px 0 2px 18px; font-size: 12px; }
+.ri li::before { content:""; position: absolute; left: 0; top: 50%; width: 10px; height: 1px; background: var(--hair); }
+.ri .it { color: var(--dim); font-size: 10.5px; letter-spacing: 1px; margin-right: 8px; white-space: nowrap; }
+.note { max-width: 860px; margin: 26px auto 0; color: var(--dim); font-size: 11px; }
 .foot { max-width: 1100px; margin: 26px auto 0; text-align: center; color: var(--mid); }
-.foot hr { border: 0; border-top: 1px solid var(--dim); margin-bottom: 10px; }
 .foot a { color: var(--dim); font-size: 11px; letter-spacing: 2px; }
 </style>
 </head>
 <body>
+<div id="page">
+
 <div class="mast">
   <div>
     <div class="brand">CHANGELOG</div>
-    <div class="sub">chall.net . record of strikes</div>
+    <div class="sub">chall.net . every release, every push</div>
   </div>
-  <div class="right"><a href="/">&larr; home</a></div>
+  <div class="right">
+    <div class="cur">v1.23.0 — current</div>
+    <div class="tot">38 releases · 81 commits · since jun 2026</div>
+    <a href="/">&larr; home</a>
+  </div>
 </div>
 
 <div class="sec">
-<h2>RELEASES</h2>
-<ul class="cl">
-  <li><b>v1.22.2</b>the page ends quietly — the footer rule above the version number is gone<span class="d">2026-08-05 · 00:06:56 PT</span></li>
-  <li><b>v1.22.1</b>timeline, uninterrupted — the long horizontal rule after its heading is gone<span class="d">2026-08-05 · 00:04:55 PT</span></li>
-  <li><b>v1.22.0</b>the paper stands alone — the display selector retires and the site returns to its one true face . grunge, crt, and the zen garden come off the public page (the garden is replanted in a quieter grove)<span class="d">2026-08-04 · 23:39:11 PT</span></li>
-  <li><b>v1.21.0</b>the zen garden — a sumi-e ink tree takes the third display slot . it grows in over nine seconds, buds through spring, stands lush through summer, turns gold and sheds through autumn, rests bare in winter — a seven-minute cycle . leaves flutter down the wordless margins, drift around the text column, and bank into a slow-dissolving pile at the foot of the page . reduced motion receives a still summer painting<span class="d">2026-08-04 · 23:24:31 PT</span></li>
-  <li><b>v1.20.0</b>two transmissions — grunge paper and monochrome crt become full switchable themes . the display selector persists locally, accepts ?theme=grunge|hacker, and keeps the timeline, skill notes, mobile bands, reduced-motion behavior, and keyboard controls intact<span class="d">2026-08-04 · 22:59:06 PT</span></li>
-  <li><b>v1.19.0</b>the dot grid, perfected — 20px paper pitch (true 5mm), warm-grey dots full-strength in the margins and hushed to 45% behind the text column . the page reads like premium stationery with a calm writing area<span class="d">2026-08-04 · 21:14:51 PT</span></li>
-  <li><b>v1.18.0</b>dot grid — the horizontal grain gives way to a quiet 16px dot lattice . the paper a timeline belongs on<span class="d">2026-08-04 · 20:54:47 PT</span></li>
-  <li><b>v1.17.2</b>design-review pass lands on the new paper — timeline keyboard-operable with in-flow notes that follow focus and hover . visible focus everywhere . 44px touch targets and separated tap zones on the mobile bands . essay figures keyboard-operable, redraw after resize under reduced motion, labels wrap at ≤360px . about contact rows stack on narrow screens, anchor scrolling honours reduced motion<span class="d">2026-08-04 · 20:48:42 PT</span></li>
-  <li><b>v1.17.1</b>audit pass — favicon (inline svg, zero requests) . og + twitter cards . proper h1 . dim ink darkened for wcag contrast (hairlines split to their own token) . styled 404 . robots + sitemap<span class="d">2026-08-04 · 20:34:12 PT</span></li>
-  <li><b>v1.17.0</b>back to the paper — the attack center easter egg, dark mode, aurora wash, lamp, and theme toggle are all retired . no animation, no scroll tricks . white by default . just the ink and the timeline<span class="d">2026-08-04 · 20:17:02 PT</span></li>
-  <li><b>v1.16.0</b>the screen becomes real — the site is mapped onto the attack center's display with a true perspective fit (it's a trapezoid, not a rectangle), photo-registered edge feathering, and the page picks up the room's optical softness . landing no longer off-center<span class="d">2026-08-04 · 19:58:09 PT</span></li>
-  <li><b>v1.15.0</b>the attack center goes wordless — brand line + scroll hint removed from the easter egg . just the room<span class="d">2026-08-04 · 17:41:51 PT</span></li>
-  <li><b>v1.14.0</b>the masthead is gone — the page opens straight on CHRIS HALL . the attack center becomes an easter egg: scroll up past the top and the camera pulls back to the big board . ☾ toggle floats free<span class="d">2026-08-04 · 17:09:34 PT</span></li>
-  <li><b>v1.13.0</b>mobile, reworked — the dual-sided gantt becomes tappable horizontal bands on phones . full-width timeline . stacked masthead<span class="d">2026-08-04 · 16:18:46 PT</span></li>
-  <li><b>v1.12.0</b>lights out — the listening room becomes the DEFAULT . light mode behind ☀ . ?theme= override for embeds<span class="d">2026-08-04 · 14:10:03 PT</span></li>
-  <li><b>v1.11.0</b>masthead one line — chall.net . nyc . sf + role . entrepreneur — chris hall drops to a hero title above the intro<span class="d">2026-08-03 · 23:49:41 PT</span></li>
-  <li><b>v1.10.0</b>morning paper — light mode aurora wash (peach / blue / lavender, slow drift) . frosted-glass masthead<span class="d">2026-08-03 · 23:43:49 PT</span></li>
-  <li><b>v1.9.0</b>the listening room — dark mode (studio black, warm lamp follows the cursor) . ☾ toggle in the masthead . light default<span class="d">2026-08-03 · 23:29:47 PT</span></li>
-  <li><b>v1.8.2</b>rails legibility — thicker rails, larger dots, semibold labels<span class="d">2026-08-03 · 23:20:30 PT</span></li>
-  <li><b>v1.8.1</b>essays unlisted — homepage section removed, /essays de-indexed, drafts pending review<span class="d">2026-08-03 · 21:34:10 PT</span></li>
-  <li><b>v1.8.0</b>essays — five essays with interactive figures (get in the frame . set the standard . make mistakes . solve the problem . life is like a game) . essays section under the timeline<span class="d">2026-08-03 · 21:03:45 PT</span></li>
-  <li><b>v1.7.2</b>skills split: event production '10 — . live video production '17 — . nine rails on the left<span class="d">2026-08-03 · 20:42:39 PT</span></li>
-  <li><b>v1.7.1</b>y combinator joins the client rails '26 — . boerum studios reads commercial photo + video studio<span class="d">2026-08-03 · 20:22:02 PT</span></li>
-  <li><b>v1.7.0</b>the world, same moment — hover a skill rail and the page recalls what the world was doing when the skill began<span class="d">2026-08-03 · 19:59:48 PT</span></li>
-  <li><b>v1.6.0</b>five clients join the rails: carmelo anthony, ypc of nyc, girl with no job, ray dalio, initialized capital<span class="d">2026-08-03 · 19:15:26 PT</span></li>
-  <li><b>v1.5.0</b>skills rails on the left of the spine — eight skills '09→ . gutter labels skills / clients . skills chip section retired<span class="d">2026-08-03 · 19:12:07 PT</span></li>
-  <li><b>v1.4.0</b>changelog page . version badge in the footer . footer sim links removed . masthead adds new york city<span class="d">2026-08-03 · 18:58:18 PT</span></li>
-  <li><b>v1.3.0</b>client tenure rails on the timeline — nine clients as hairline gantt bars off the spine . clients chip section retired<span class="d">2026-08-03 · 18:23:41 PT</span></li>
-  <li><b>v1.2.0</b>location gutter (nyc / fl / sf) left of the timeline . tenure years interpolated between rows<span class="d">2026-08-03 · 17:49:46 PT</span></li>
-  <li><b>v1.1.0</b>short bio with collapsible long-form . entrepreneur added to the masthead . timeline rewrite: may 2025 sf, december 2025 agi arrives, january 2026 y combinator<span class="d">2026-08-03 · 18:02:15 PT</span></li>
-  <li><b>v1.0.0</b>ink-on-paper rebuild — timeline . clients . skills . the b&amp;w system shared with admin.chall.net<span class="d">2026-08-03 · 17:02:18 PT</span></li>
-  <li><b>v0.x</b>the fleet board era — live sim cards (watchkeeper . kitties . specialops . overworld)<span class="d">2026-07-10 · 15:38:22 PT</span></li>
-</ul>
+<h2>AUGUST 5, 2026</h2>
+
+<article class="rel" id="v1.23.0">
+  <div class="rh"><a class="rv" href="#v1.23.0">v1.23.0</a><span class="tag">improved</span><span class="rt">2:28 pm pt</span></div>
+  <div class="rb"><b>the changelog grows up.</b> this page rebuilt as a real changelog — releases grouped by day, each with a version, a tag (new · improved · fixed), its pacific ship time, and a plain description . unversioned pushes now appear as line items under the release they shipped on . restores v1.6.1, which the old page skipped.</div>
+</article>
+
+<article class="rel" id="v1.22.2">
+  <div class="rh"><a class="rv" href="#v1.22.2">v1.22.2</a><span class="tag">fixed</span><span class="rt">12:07 am pt</span></div>
+  <div class="rb"><b>the page ends quietly.</b> removed the hairline rule above the version badge in the footer.</div>
+</article>
+
+<article class="rel" id="v1.22.1">
+  <div class="rh"><a class="rv" href="#v1.22.1">v1.22.1</a><span class="tag">fixed</span><span class="rt">12:06 am pt</span></div>
+  <div class="rb"><b>timeline, uninterrupted.</b> removed the long horizontal rule after the timeline heading.</div>
+</article>
 </div>
 
+<div class="sec">
+<h2>AUGUST 4, 2026</h2>
+
+<article class="rel" id="v1.22.0">
+  <div class="rh"><a class="rv" href="#v1.22.0">v1.22.0</a><span class="tag">improved</span><span class="rt">11:39 pm pt</span></div>
+  <div class="rb"><b>the paper stands alone.</b> the display selector retires — grunge, crt, and the zen garden come off the public page . the default ink-on-paper look is the only look (the garden is replanted at admin.chall.net).</div>
+</article>
+
+<article class="rel" id="v1.21.0">
+  <div class="rh"><a class="rv" href="#v1.21.0">v1.21.0</a><span class="tag">new</span><span class="rt">11:24 pm pt</span></div>
+  <div class="rb"><b>the zen garden.</b> a sumi-e ink tree takes the third display slot — grows in over nine seconds, cycles through four seasons in seven minutes, sheds leaves that drift down the margins and pile at the foot of the page . reduced motion gets a still summer painting . retired in v1.22.0.</div>
+</article>
+
+<article class="rel" id="v1.20.0">
+  <div class="rh"><a class="rv" href="#v1.20.0">v1.20.0</a><span class="tag">new</span><span class="rt">10:59 pm pt</span></div>
+  <div class="rb"><b>two transmissions.</b> grunge paper and monochrome crt become switchable themes behind a display selector — persists locally, accepts ?theme=grunge|hacker.
+    <ul class="ri">
+      <li><span class="it">11:18 pm</span>fix: keep the selector visible at the top right</li>
+      <li><span class="it">11:24 pm</span>reverted — the original v1.19 paper restored . the selector itself retires in v1.22.0</li>
+    </ul>
+  </div>
+</article>
+
+<article class="rel" id="v1.19.0">
+  <div class="rh"><a class="rv" href="#v1.19.0">v1.19.0</a><span class="tag">improved</span><span class="rt">9:14 pm pt</span></div>
+  <div class="rb"><b>the dot grid, perfected.</b> 20px paper pitch (true 5mm) — dots full-strength in the margins, hushed to 45% behind the text column.
+    <ul class="ri">
+      <li><span class="it">9:26 pm</span>forest hill visual history published at /forest-hill</li>
+      <li><span class="it">10:48 pm</span>changelog rows stamped with exact ship times from git, pacific time</li>
+    </ul>
+  </div>
+</article>
+
+<article class="rel" id="v1.18.0">
+  <div class="rh"><a class="rv" href="#v1.18.0">v1.18.0</a><span class="tag">new</span><span class="rt">8:54 pm pt</span></div>
+  <div class="rb"><b>dot grid.</b> the horizontal scanline grain gives way to a quiet 16px dot lattice — the paper a timeline belongs on.</div>
+</article>
+
+<article class="rel" id="v1.17.2">
+  <div class="rh"><a class="rv" href="#v1.17.2">v1.17.2</a><span class="tag">fixed</span><span class="rt">8:48 pm pt</span></div>
+  <div class="rb"><b>design-review pass.</b> fourteen accessibility and polish fixes land on the new paper, retired features stay retired.
+    <ul class="ri">
+      <li>timeline and essay figures become keyboard-operable</li>
+      <li>visible focus states across all pages</li>
+      <li>muted labels lifted to wcag aa contrast</li>
+      <li>44px touch targets and separated tap zones on the mobile bands</li>
+      <li>prefers-reduced-motion honoured for ambient motion and about-page anchor scrolling</li>
+      <li>essay canvases repaint after resize (including under reduced motion)</li>
+      <li>timeline world-note becomes an in-flow reveal, synced to focus and hover</li>
+      <li>tooltip clears the rail band . essay labels wrap at ≤360px . about contact rows stack on narrow screens</li>
+      <li><span class="it">8:50 pm</span>cleanup: duplicate tooltip declaration removed</li>
+    </ul>
+  </div>
+</article>
+
+<article class="rel" id="v1.17.1">
+  <div class="rh"><a class="rv" href="#v1.17.1">v1.17.1</a><span class="tag">fixed</span><span class="rt">8:34 pm pt</span></div>
+  <div class="rb"><b>audit pass.</b> favicon (inline svg, zero requests) . og + twitter cards . proper h1 . dim ink darkened for wcag contrast, hairlines split to their own token . styled 404 . robots + sitemap.</div>
+</article>
+
+<article class="rel" id="v1.17.0">
+  <div class="rh"><a class="rv" href="#v1.17.0">v1.17.0</a><span class="tag">improved</span><span class="rt">8:17 pm pt</span></div>
+  <div class="rb"><b>back to the paper.</b> the attack-center easter egg, dark mode, aurora wash, lamp, and theme toggle are all retired . no animation, no scroll tricks . white by default — just the ink and the timeline.</div>
+</article>
+
+<article class="rel" id="v1.16.0">
+  <div class="rh"><a class="rv" href="#v1.16.0">v1.16.0</a><span class="tag">improved</span><span class="rt">7:58 pm pt</span></div>
+  <div class="rb"><b>the screen becomes real.</b> the site mapped onto the attack center's display with a true perspective fit (a trapezoid, not a rectangle), photo-registered edge feathering, and the room's optical softness . landing no longer off-center.</div>
+</article>
+
+<article class="rel" id="v1.15.0">
+  <div class="rh"><a class="rv" href="#v1.15.0">v1.15.0</a><span class="tag">improved</span><span class="rt">5:41 pm pt</span></div>
+  <div class="rb"><b>the attack center goes wordless.</b> brand line and scroll hint removed from the easter egg — just the room.</div>
+</article>
+
+<article class="rel" id="v1.14.0">
+  <div class="rh"><a class="rv" href="#v1.14.0">v1.14.0</a><span class="tag">new</span><span class="rt">5:09 pm pt</span></div>
+  <div class="rb"><b>the masthead is gone.</b> the page opens straight on CHRIS HALL . the attack center becomes an easter egg — scroll up past the top and the camera pulls back to the big board . ☾ toggle floats free.</div>
+</article>
+
+<article class="rel" id="v1.13.0">
+  <div class="rh"><a class="rv" href="#v1.13.0">v1.13.0</a><span class="tag">improved</span><span class="rt">4:18 pm pt</span></div>
+  <div class="rb"><b>mobile, reworked.</b> the dual-sided gantt becomes tappable horizontal bands on phones . full-width timeline . stacked masthead.</div>
+</article>
+
+<article class="rel" id="v1.12.0">
+  <div class="rh"><a class="rv" href="#v1.12.0">v1.12.0</a><span class="tag">improved</span><span class="rt">2:10 pm pt</span></div>
+  <div class="rb"><b>lights out.</b> the listening room becomes the default . light mode behind ☀ . ?theme= override for embeds.</div>
+</article>
+</div>
+
+<div class="sec">
+<h2>AUGUST 3, 2026</h2>
+
+<article class="rel" id="v1.11.0">
+  <div class="rh"><a class="rv" href="#v1.11.0">v1.11.0</a><span class="tag">improved</span><span class="rt">11:49 pm pt</span></div>
+  <div class="rb"><b>masthead, one line.</b> chall.net . nyc . sf plus role — CHRIS HALL drops to a hero title above the intro.</div>
+</article>
+
+<article class="rel" id="v1.10.0">
+  <div class="rh"><a class="rv" href="#v1.10.0">v1.10.0</a><span class="tag">new</span><span class="rt">11:43 pm pt</span></div>
+  <div class="rb"><b>morning paper.</b> light-mode aurora wash (peach / blue / lavender, slow drift) . frosted-glass masthead.</div>
+</article>
+
+<article class="rel" id="v1.9.0">
+  <div class="rh"><a class="rv" href="#v1.9.0">v1.9.0</a><span class="tag">new</span><span class="rt">11:29 pm pt</span></div>
+  <div class="rb"><b>the listening room.</b> dark mode — studio black, a warm lamp follows the cursor . ☾ toggle in the masthead, light stays default.</div>
+</article>
+
+<article class="rel" id="v1.8.2">
+  <div class="rh"><a class="rv" href="#v1.8.2">v1.8.2</a><span class="tag">fixed</span><span class="rt">11:20 pm pt</span></div>
+  <div class="rb"><b>rails legibility.</b> thicker rails, larger dots, semibold labels, darker tone.</div>
+</article>
+
+<article class="rel" id="v1.8.1">
+  <div class="rh"><a class="rv" href="#v1.8.1">v1.8.1</a><span class="tag">improved</span><span class="rt">9:34 pm pt</span></div>
+  <div class="rb"><b>essays unlisted.</b> homepage section removed, /essays de-indexed — drafts pending review.</div>
+</article>
+
+<article class="rel" id="v1.8.0">
+  <div class="rh"><a class="rv" href="#v1.8.0">v1.8.0</a><span class="tag">new</span><span class="rt">9:03 pm pt</span></div>
+  <div class="rb"><b>essays.</b> five essays with interactive figures — get in the frame . set the standard . make mistakes . solve the problem . life is like a game — plus an /essays index and a homepage section.</div>
+</article>
+
+<article class="rel" id="v1.7.2">
+  <div class="rh"><a class="rv" href="#v1.7.2">v1.7.2</a><span class="tag">fixed</span><span class="rt">8:42 pm pt</span></div>
+  <div class="rb"><b>skills split.</b> event production '10— and live video production '17— (was live event production '12) . nine rails on the left.
+    <ul class="ri">
+      <li><span class="it">8:44 pm</span>timeline: garry tan — executive producer . jessica livingston — executive producer</li>
+    </ul>
+  </div>
+</article>
+
+<article class="rel" id="v1.7.1">
+  <div class="rh"><a class="rv" href="#v1.7.1">v1.7.1</a><span class="tag">improved</span><span class="rt">8:22 pm pt</span></div>
+  <div class="rb"><b>y combinator joins the client rails</b> '26—.
+    <ul class="ri">
+      <li><span class="it">8:29–8:33 pm</span>masthead copy: CHRIS HALL brand . chall.net . nyc . sf . worldwide sub . role and entrepreneur lines rearranged</li>
+      <li><span class="it">8:37 pm</span>tooltip offset so the highlighted rail label stays readable</li>
+    </ul>
+  </div>
+</article>
+
+<article class="rel" id="v1.7.0">
+  <div class="rh"><a class="rv" href="#v1.7.0">v1.7.0</a><span class="tag">new</span><span class="rt">7:59 pm pt</span></div>
+  <div class="rb"><b>the world, same moment.</b> hover a skill rail and the page recalls what the world was doing when the skill began.
+    <ul class="ri">
+      <li><span class="it">8:19 pm</span>boerum studios reads commercial photo + video studio</li>
+    </ul>
+  </div>
+</article>
+
+<article class="rel" id="v1.6.1">
+  <div class="rh"><a class="rv" href="#v1.6.1">v1.6.1</a><span class="tag">fixed</span><span class="rt">7:17 pm pt</span></div>
+  <div class="rb"><b>rail labels contained.</b> up-labels only for rails ending near the page bottom — fixes the carmelo top spill and the khalid / initialized overlap.</div>
+</article>
+
+<article class="rel" id="v1.6.0">
+  <div class="rh"><a class="rv" href="#v1.6.0">v1.6.0</a><span class="tag">new</span><span class="rt">7:15 pm pt</span></div>
+  <div class="rb"><b>five clients join the rails.</b> carmelo anthony, ypc of nyc, girl with no job, ray dalio, initialized capital.</div>
+</article>
+
+<article class="rel" id="v1.5.0">
+  <div class="rh"><a class="rv" href="#v1.5.0">v1.5.0</a><span class="tag">new</span><span class="rt">7:10 pm pt</span></div>
+  <div class="rb"><b>skills rails.</b> eight skills '09→ on the left of the spine . gutter labels skills / clients . the skills chip section retires.
+    <ul class="ri">
+      <li><span class="it">7:12 pm</span>short-rail labels sit above the dot (software-building overflow fix)</li>
+    </ul>
+  </div>
+</article>
+
+<article class="rel" id="v1.4.0">
+  <div class="rh"><a class="rv" href="#v1.4.0">v1.4.0</a><span class="tag">new</span><span class="rt">6:58 pm pt</span></div>
+  <div class="rb"><b>the version badge era.</b> this changelog page is born, with a version badge in the footer . footer sim links removed . masthead adds new york city.
+    <ul class="ri">
+      <li><span class="it">7:00 pm</span>masthead: entrepreneur moves to the left sub-line</li>
+    </ul>
+  </div>
+</article>
+
+<article class="rel" id="v1.3.0">
+  <div class="rh"><a class="rv" href="#v1.3.0">v1.3.0</a><span class="tag">new</span><span class="rt">6:23 pm pt</span></div>
+  <div class="rb"><b>client tenure rails.</b> clients hang off the timeline spine as hairline gantt bars — khaled, tao, garry, social radars to start.
+    <ul class="ri">
+      <li><span class="it">6:17 pm</span>minimal tenure marks per client chip ('20—, '17–'22)</li>
+      <li><span class="it">6:28 pm</span>jessica livingston leads — rail, chip, and bio</li>
+      <li><span class="it">6:33 pm</span>five more rails: doja, khalid, sony, b&amp;h, sara '17–'20 — nine total, packed columns</li>
+      <li><span class="it">6:35 pm</span>label sized to rail . bottom padding</li>
+      <li><span class="it">6:48 pm</span>clients chip section deleted — the rails carry it now</li>
+    </ul>
+  </div>
+</article>
+
+<article class="rel" id="v1.2.0">
+  <div class="rh"><a class="rv" href="#v1.2.0">v1.2.0</a><span class="tag">new</span><span class="rt">5:49 pm pt</span></div>
+  <div class="rb"><b>location gutter.</b> nyc / fl / sf to the left of the timeline . tenure years interpolated between rows.</div>
+</article>
+
+<article class="rel" id="v1.1.0">
+  <div class="rh"><a class="rv" href="#v1.1.0">v1.1.0</a><span class="tag">improved</span><span class="rt">6:02 pm pt</span></div>
+  <div class="rb"><b>the short bio.</b> short bio by default with a collapsible long form . entrepreneur added to the masthead.
+    <ul class="ri">
+      <li><span class="it">5:47 pm</span>timeline rewrite: may 2025 sf move . december 2025 agi arrives . january 2026 y combinator</li>
+      <li><span class="it">5:48 pm</span>full operator bio — hall media, garry tan, social radars, yc</li>
+      <li><span class="it">6:12 pm</span>masthead: role + company on line one, entrepreneur on line two</li>
+    </ul>
+  </div>
+</article>
+
+<article class="rel" id="v1.0.0">
+  <div class="rh"><a class="rv" href="#v1.0.0">v1.0.0</a><span class="tag">new</span><span class="rt">5:02 pm pt</span></div>
+  <div class="rb"><b>ink on paper.</b> the b&amp;w rebuild — timeline, clients, skills, the system shared with admin.chall.net . the old fleet board preserved at /fleet.html.</div>
+</article>
+</div>
+
+<div class="sec">
+<h2>JULY 27, 2026</h2>
+<article class="rel" id="v0.5">
+  <div class="rh"><a class="rv" href="#v0.5">v0.5</a><span class="tag">improved</span><span class="rt">4:45 pm pt</span></div>
+  <div class="rb"><b>refit underway.</b> the fleet board retires behind a placeholder, pending a unified command deck.</div>
+</article>
+</div>
+
+<div class="sec">
+<h2>JULY 14, 2026</h2>
+<article class="rel" id="v0.4">
+  <div class="rh"><a class="rv" href="#v0.4">v0.4</a><span class="tag">new</span><span class="rt">7:57 pm pt</span></div>
+  <div class="rb"><b>three ships join.</b> overwatch (live station card), elizabeth's dashboard, and duo added to the fleet board.</div>
+</article>
+</div>
+
+<div class="sec">
+<h2>JULY 10, 2026</h2>
+<article class="rel" id="v0.3">
+  <div class="rh"><a class="rv" href="#v0.3">v0.3</a><span class="tag">new</span><span class="rt">3:38 pm pt</span></div>
+  <div class="rb"><b>the fleet.</b> live mission-board homepage — watchkeeper, kitties, specialops, overworld as live sim cards.</div>
+</article>
+</div>
+
+<div class="sec">
+<h2>JUNE 8, 2026</h2>
+<article class="rel" id="v0.2">
+  <div class="rh"><a class="rv" href="#v0.2">v0.2</a><span class="tag">improved</span><span class="rt">11:30 pm pt</span></div>
+  <div class="rb"><b>chall.net.</b> the custom domain repointed to chall.net as canonical.</div>
+</article>
+<article class="rel" id="v0.1">
+  <div class="rh"><a class="rv" href="#v0.1">v0.1</a><span class="tag">new</span><span class="rt">2:17 pm pt</span></div>
+  <div class="rb"><b>first light.</b> chrishall.co homepage — profile + contact.</div>
+</article>
+</div>
+
+<p class="note">v0.1–v1.3 are numbered retroactively — the live version badge first shipped with v1.4.0 . all times pacific, from each release's git commit.</p>
+
 <div class="foot">
-  <hr>
   <a href="/">chall.net</a>
+</div>
 </div>
 </body>
 </html>
