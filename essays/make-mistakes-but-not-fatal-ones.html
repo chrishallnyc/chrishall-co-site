@@ -95,11 +95,32 @@ h1 { font-size: 22px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8p
   var RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   var W,H,dpr=window.devicePixelRatio||1;
   function size(){ W=fig.clientWidth; H=fig.clientHeight; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
-  size(); window.addEventListener('resize',function(){ size(); });
+  size(); window.addEventListener('resize',function(){ size(); if(RM) render(); });
   var N=100, paths=[];
   for(var i=0;i<N;i++) paths.push({y:H*0.55, dead:false, hist:[]});
   var x=0, step=1.6;
   var aliveEl=document.getElementById('alive'), deadEl=document.getElementById('dead');
+  function render(){
+    ctx.clearRect(0,0,W,H);
+    // floor
+    ctx.strokeStyle='rgba(24,24,28,0.5)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(0,H-12); ctx.lineTo(W,H-12); ctx.stroke();
+    ctx.fillStyle='#989690'; ctx.font='9px ui-monospace,monospace';
+    ctx.fillText('RUIN', 8, H-17);
+    paths.forEach(function(p){
+      ctx.strokeStyle=p.dead?'rgba(152,150,144,0.18)':'rgba(24,24,28,0.32)';
+      ctx.lineWidth=0.7;
+      ctx.beginPath();
+      var started=false;
+      for(var j=0;j<p.hist.length;j++){
+        if(p.hist[j]===null) break;
+        var px=j*step;
+        if(!started){ ctx.moveTo(px,p.hist[j]); started=true; }
+        else ctx.lineTo(px,p.hist[j]);
+      }
+      ctx.stroke();
+    });
+  }
   function tick(){
     if(x<W-8){
       x+=step;
@@ -113,25 +134,7 @@ h1 { font-size: 22px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8p
         if(!p.dead) alive++;
       });
       aliveEl.textContent=alive; deadEl.textContent=N-alive;
-      ctx.clearRect(0,0,W,H);
-      // floor
-      ctx.strokeStyle='rgba(24,24,28,0.5)'; ctx.lineWidth=1;
-      ctx.beginPath(); ctx.moveTo(0,H-12); ctx.lineTo(W,H-12); ctx.stroke();
-      ctx.fillStyle='#989690'; ctx.font='9px ui-monospace,monospace';
-      ctx.fillText('RUIN', 8, H-17);
-      paths.forEach(function(p){
-        ctx.strokeStyle=p.dead?'rgba(152,150,144,0.18)':'rgba(24,24,28,0.32)';
-        ctx.lineWidth=0.7;
-        ctx.beginPath();
-        var started=false;
-        for(var j=0;j<p.hist.length;j++){
-          if(p.hist[j]===null) break;
-          var px=j*step;
-          if(!started){ ctx.moveTo(px,p.hist[j]); started=true; }
-          else ctx.lineTo(px,p.hist[j]);
-        }
-        ctx.stroke();
-      });
+      render();
       if(RM) tick(); else requestAnimationFrame(tick);
     }
   }
