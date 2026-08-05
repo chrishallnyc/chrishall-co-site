@@ -366,9 +366,13 @@ the most influential institutions in global technology.</p>
       d.innerHTML='<u class="t"></u>'+(c.t?'<u class="b"></u>':'')+'<span'+sh+'>'+c.n+'</span>';
       if(c.w){
         d.classList.add('tipd');
+        d.tabIndex=0; d.setAttribute('role','button'); d.setAttribute('aria-label',c.n+' — the world, same moment');
         d.addEventListener('mouseenter',function(){showTip(d,c);});
         d.addEventListener('mouseleave',hideTip);
+        d.addEventListener('focus',function(){showTip(d,c);});
+        d.addEventListener('blur',hideTip);
         d.addEventListener('click',function(ev){ev.stopPropagation();showTip(d,c);});
+        d.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); showTip(d,c); } });
       }
       wrap.appendChild(d);
     }
@@ -395,11 +399,15 @@ the most influential institutions in global technology.</p>
           +'<div class="btrack"><i class="bseg'+(c.t?'':' on')+'" style="left:'+x0.toFixed(1)+'%;width:'+Math.max(x1-x0,1.5).toFixed(1)+'%"></i></div>'
           +(c.w?'<div class="bnote"><span class="k">the world, same moment</span>'+c.w+'</div>':'');
         if(c.w){
-          r.querySelector('.bl').addEventListener('click',function(){
+          var bl=r.querySelector('.bl');
+          bl.tabIndex=0; bl.setAttribute('role','button'); bl.setAttribute('aria-expanded','false');
+          var toggle=function(){
             var was=r.classList.contains('open');
-            sec.querySelectorAll('.brow.open').forEach(function(o){o.classList.remove('open');});
-            if(!was) r.classList.add('open');
-          });
+            sec.querySelectorAll('.brow.open').forEach(function(o){o.classList.remove('open');o.querySelector('.bl').setAttribute('aria-expanded','false');});
+            if(!was){ r.classList.add('open'); bl.setAttribute('aria-expanded','true'); }
+          };
+          bl.addEventListener('click',toggle);
+          bl.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); } });
         }
         b.appendChild(r);
       });
