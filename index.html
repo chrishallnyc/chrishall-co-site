@@ -6,9 +6,21 @@
 <title>CHALL.NET — Chris Hall</title>
 <meta name="description" content="Chris Hall — Senior Video Producer at Y Combinator. San Francisco.">
 <link rel="canonical" href="https://chall.net/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f6f4ee'/%3E%3Cg stroke='%2318181c' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M10 5v22'/%3E%3Cpath d='M10 9h7'/%3E%3Cpath d='M10 16h10'/%3E%3Cpath d='M10 23h7'/%3E%3C/g%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="CHALL.NET — Chris Hall">
+<meta property="og:description" content="Chris Hall — Senior Video Producer at Y Combinator. San Francisco.">
+<meta property="og:url" content="https://chall.net/">
+<meta property="og:image" content="https://chall.net/chris-og.jpg">
+<meta property="og:image:width" content="1600">
+<meta property="og:image:height" content="1062">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CHALL.NET — Chris Hall">
+<meta name="twitter:description" content="Chris Hall — Senior Video Producer at Y Combinator. San Francisco.">
+<meta name="twitter:image" content="https://chall.net/chris-og.jpg">
 <meta name="theme-color" content="#f6f4ee">
 <style>
-:root { --bg:#f6f4ee; --tex:#eeebe4; --ink:#18181c; --mid:#56565e; --dim:#989690; }
+:root { --bg:#f6f4ee; --tex:#eeebe4; --ink:#18181c; --mid:#56565e; --dim:#6e6c64; --hair:#989690; }
 * { margin:0; padding:0; box-sizing:border-box; }
 html,body { background:var(--bg); }
 body {
@@ -28,15 +40,15 @@ a:hover { color: var(--ink); text-decoration: underline; }
 .intro .brand { font-weight: 700; color: var(--ink); display:flex; align-items:center; gap:10px; }
 .intro .brand { font-size: clamp(22px, 4.5vw, 34px); letter-spacing: 6px; margin-bottom: 10px; }
 .foot { max-width: 1100px; margin: 26px auto 0; text-align: center; color: var(--mid); }
-.foot hr { border: 0; border-top: 1px solid var(--dim); margin-bottom: 10px; }
+.foot hr { border: 0; border-top: 1px solid var(--hair); margin-bottom: 10px; }
 
 .sec { max-width: 860px; margin: 30px auto 0; }
 .sec h2 { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--ink);
   display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.sec h2::after { content:""; flex: 1; height: 1px; background: var(--dim); }
-.tl { list-style: none; border-left: 1px solid var(--dim); margin-left: 46px; }
+.sec h2::after { content:""; flex: 1; height: 1px; background: var(--hair); }
+.tl { list-style: none; border-left: 1px solid var(--hair); margin-left: 46px; }
 .tl li { position: relative; padding: 4px 0 4px 20px; color: var(--mid); }
-.tl li::before { content:""; position: absolute; left: 0; top: 50%; width: 12px; height: 1px; background: var(--dim); }
+.tl li::before { content:""; position: absolute; left: 0; top: 50%; width: 12px; height: 1px; background: var(--hair); }
 .tl b { color: var(--ink); font-weight: 700; margin-right: 8px; }
 .tl .loc { position: absolute; left: -46px; top: 50%; transform: translateY(-50%); width: 36px; text-align: right; font-size: 10px; letter-spacing: 1px; color: var(--dim); }
 .intro { max-width: 860px; margin: 24px auto 0; color: var(--mid); }
@@ -58,15 +70,15 @@ a:hover { color: var(--ink); text-decoration: underline; }
 @media (max-width: 560px) { .rail span { font-size: 9.5px; } }
 @media (max-width: 560px) { .tlwrap { padding-right: 172px; padding-left: 160px; } }
 .glab { position: absolute; top: 0; font-size: 10.5px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--mid); }
-.glab::after { content:""; display:inline-block; width: 14px; height: 1px; background: var(--dim); vertical-align: 3px; margin-left: 6px; }
-.glab.l::before { content:""; display:inline-block; width: 14px; height: 1px; background: var(--dim); vertical-align: 3px; margin-right: 6px; }
+.glab::after { content:""; display:inline-block; width: 14px; height: 1px; background: var(--hair); vertical-align: 3px; margin-left: 6px; }
+.glab.l::before { content:""; display:inline-block; width: 14px; height: 1px; background: var(--hair); vertical-align: 3px; margin-right: 6px; }
 .rail.tipd { cursor: help; }
 .rail.hl { background: var(--ink); }
 .rail.hl span { color: var(--ink); }
 #tip { position: absolute; z-index: 50; max-width: 280px; background: var(--bg);
   border: 1px solid var(--ink); padding: 9px 12px; font-size: 11px; line-height: 1.6;
   color: var(--mid); display: none; pointer-events: none; }
-#tip::after { content:""; position:absolute; inset:2px; border:1px solid var(--dim); pointer-events:none; }
+#tip::after { content:""; position:absolute; inset:2px; border:1px solid var(--hair); pointer-events:none; }
 #tip .k { display:block; font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase;
   color: var(--dim); margin-bottom: 5px; }
 #tip b { color: var(--ink); }
@@ -90,25 +102,25 @@ a:hover { color: var(--ink); text-decoration: underline; }
   .band { display: block; margin-top: 26px; }
   .band h3 { font-size: 10.5px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
     color: var(--mid); display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-  .band h3::after { content:""; flex:1; height:1px; background: var(--dim); }
+  .band h3::after { content:""; flex:1; height:1px; background: var(--hair); }
   .brow { margin-bottom: 11px; }
   .brow .bl { display: flex; justify-content: space-between; align-items: baseline;
     font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--mid); }
   .brow .bl .byr { font-size: 9.5px; letter-spacing: 1px; color: var(--dim); }
   .brow.tipd .bl { cursor: pointer; }
-  .brow.tipd .bl .nm { border-bottom: 1px dotted var(--dim); padding-bottom: 1px; }
+  .brow.tipd .bl .nm { border-bottom: 1px dotted var(--hair); padding-bottom: 1px; }
   .btrack { position: relative; height: 4px; margin-top: 5px; background:
-    repeating-linear-gradient(90deg, var(--dim) 0 1px, transparent 1px 5px); opacity: 0.9; }
+    repeating-linear-gradient(90deg, var(--hair) 0 1px, transparent 1px 5px); opacity: 0.9; }
   .bseg { position: absolute; top: 0; height: 4px; background: var(--mid); }
   .brow.open .bseg, .brow:active .bseg { background: var(--ink); }
   .bseg.on { background: linear-gradient(90deg, var(--mid) 70%, transparent); }
-  .bnote { display: none; margin: 8px 0 2px; padding: 8px 10px; border: 1px solid var(--dim);
+  .bnote { display: none; margin: 8px 0 2px; padding: 8px 10px; border: 1px solid var(--hair);
     font-size: 11px; line-height: 1.6; color: var(--mid); }
   .bnote .k { display:block; font-size: 8.5px; letter-spacing: 2px; text-transform: uppercase;
     color: var(--dim); margin-bottom: 4px; }
   .brow.open .bnote { display: block; }
   .baxis { display: flex; justify-content: space-between; font-size: 9px; letter-spacing: 1px;
-    color: var(--dim); margin-top: 8px; padding-top: 5px; border-top: 1px solid var(--dim); }
+    color: var(--dim); margin-top: 8px; padding-top: 5px; border-top: 1px solid var(--hair); }
 }
 </style>
 </head>
@@ -116,7 +128,7 @@ a:hover { color: var(--ink); text-decoration: underline; }
 <div id="page">
 
 <div class="intro">
-<div class="brand">CHRIS HALL</div>
+<h1 class="brand">CHRIS HALL</h1>
 NYC-born media operator. <b>~15 years</b> across video, audio, photo and live production —
 now producing flagship content inside <b>Y Combinator</b>.
 <details class="bio">
@@ -154,7 +166,7 @@ the most influential institutions in global technology.</p>
 
 <div class="foot">
   <hr>
-  <a href="/changelog.html" class="ver">v1.17.0</a>
+  <a href="/changelog.html" class="ver">v1.17.1</a>
 </div>
 </div>
 <script>

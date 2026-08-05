@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>404 — CHALL.NET</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f6f4ee'/%3E%3Cg stroke='%2318181c' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M10 5v22'/%3E%3Cpath d='M10 9h7'/%3E%3Cpath d='M10 16h10'/%3E%3Cpath d='M10 23h7'/%3E%3C/g%3E%3C/svg%3E">
+<style>
+:root { --bg:#f6f4ee; --tex:#eeebe4; --ink:#18181c; --mid:#56565e; --dim:#6e6c64; --hair:#989690; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { background:var(--bg); height:100%; }
+body {
+  background: repeating-linear-gradient(0deg, var(--bg) 0px, var(--bg) 3px, var(--tex) 3px, var(--tex) 4px);
+  color: var(--ink);
+  font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px; line-height: 1.5;
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 26px;
+}
+.card { text-align: center; }
+.code { font-size: clamp(40px, 10vw, 72px); font-weight: 700; letter-spacing: 8px; }
+.rule { border: 0; border-top: 1px solid var(--hair); margin: 14px auto; width: 120px; }
+.msg { color: var(--mid); margin-bottom: 18px; }
+a { color: var(--mid); text-decoration: none; }
+a:hover { color: var(--ink); text-decoration: underline; }
+.home { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="code">404</div>
+  <hr class="rule">
+  <div class="msg">this page isn't on the record.</div>
+  <a class="home" href="/">&larr; chall.net</a>
+</div>
+</body>
+</html>
