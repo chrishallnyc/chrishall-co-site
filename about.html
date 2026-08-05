@@ -82,6 +82,12 @@
   .email-row .lbl{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.14em}
   .email-row a{font-family:var(--serif);font-size:18px;color:var(--ink)}
   .email-row a:hover{color:var(--accent)}
+  /* stack label + address on narrow screens so a long email can't collide
+     with its label or push the page into horizontal overflow */
+  @media(max-width:420px){
+    .email-row{flex-direction:column;align-items:flex-start;gap:6px}
+    .email-row a{font-size:16px;overflow-wrap:anywhere}
+  }
 
   /* ── footer ── */
   footer{border-top:1px solid var(--line);margin-top:60px;padding:34px 0 50px;
