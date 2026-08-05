@@ -95,7 +95,7 @@ h1 { font-size: 22px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8p
   var RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   var W,H,dpr=window.devicePixelRatio||1;
   function size(){ W=fig.clientWidth; H=fig.clientHeight; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
-  size(); window.addEventListener('resize',function(){ size(); if(RM) render(); });
+  size(); window.addEventListener('resize',function(){ size(); render(); });
   var N=100, paths=[];
   for(var i=0;i<N;i++) paths.push({y:H*0.55, dead:false, hist:[]});
   var x=0, step=1.6;
