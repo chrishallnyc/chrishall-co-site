@@ -862,9 +862,9 @@ button {
   }
 
   .theme-switcher {
-    top: auto;
+    top: 12px;
     right: 12px;
-    bottom: 12px;
+    bottom: auto;
     min-height: 44px;
     box-shadow: 0 0 0 3px var(--bg);
   }
