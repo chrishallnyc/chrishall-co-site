@@ -15,6 +15,7 @@ body { background: repeating-linear-gradient(0deg, var(--bg) 0px, var(--bg) 3px,
   font-size: 13px; line-height: 1.5; min-height: 100vh; padding: 26px clamp(14px, 4vw, 46px); }
 a { color: var(--mid); text-decoration: none; }
 a:hover { color: var(--ink); text-decoration: underline; }
+a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--acc, var(--ink)); outline-offset: 2px; }
 .mast { border: 1px solid var(--ink); padding: 10px 16px; display: flex; justify-content: space-between;
   align-items: center; gap: 12px; position: relative; max-width: 720px; margin: 0 auto; }
 .mast::after { content:""; position:absolute; inset:2px; border:1px solid var(--dim); pointer-events:none; }
