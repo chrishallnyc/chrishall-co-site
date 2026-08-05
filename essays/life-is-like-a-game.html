@@ -112,6 +112,8 @@ h1 { font-size: 22px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8p
     s.fill=row.querySelector('.skfill'); s.out=row.querySelector('.sklvl');
   });
   var t0=null, ran=false;
+  var RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function finalState(){ SK.forEach(function(s){ s.fill.style.width=(s.lvl*10)+'%'; s.out.textContent=s.lvl+'/10'; }); }
   function animate(ts){
     if(!t0) t0=ts;
     var el=ts-t0, done=true;
@@ -125,7 +127,7 @@ h1 { font-size: 22px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8p
     if(!done) requestAnimationFrame(animate);
   }
   var io=new IntersectionObserver(function(en){
-    if(en[0].isIntersecting && !ran){ ran=true; requestAnimationFrame(animate); }
+    if(en[0].isIntersecting && !ran){ ran=true; if(RM){ finalState(); } else { requestAnimationFrame(animate); } }
   },{threshold:0.4});
   io.observe(document.getElementById('fig5'));
 })();

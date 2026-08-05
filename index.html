@@ -187,6 +187,11 @@ body.dive #lamp, body.dive #aurora { display: none !important; }
   .baxis { display: flex; justify-content: space-between; font-size: 9px; letter-spacing: 1px;
     color: var(--dim); margin-top: 8px; padding-top: 5px; border-top: 1px solid var(--dim); }
 }
+@media (prefers-reduced-motion: reduce) {
+  #aurora { animation: none; }
+  #acglow { animation: none; }
+  body, #page { transition: none; }
+}
 </style>
 </head>
 <body>
@@ -261,11 +266,13 @@ the most influential institutions in global technology.</p>
     label();
   });
   var l=document.getElementById('lamp'),tx=innerWidth/2,ty=innerHeight*.25,x=tx,y=ty;
-  addEventListener('mousemove',function(e){tx=e.clientX;ty=e.clientY;});
-  addEventListener('touchmove',function(e){tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
-  (function a(){ x+=(tx-x)*.07; y+=(ty-y)*.07;
-    l.style.setProperty('--lx',x+'px'); l.style.setProperty('--ly',y+'px');
-    requestAnimationFrame(a); })();
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
+    addEventListener('mousemove',function(e){tx=e.clientX;ty=e.clientY;});
+    addEventListener('touchmove',function(e){tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+    (function a(){ x+=(tx-x)*.07; y+=(ty-y)*.07;
+      l.style.setProperty('--lx',x+'px'); l.style.setProperty('--ly',y+'px');
+      requestAnimationFrame(a); })();
+  }
 })();
 </script>
 <script>

@@ -91,6 +91,7 @@ h1 { font-size: 22px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8p
 (function(){
   var fig=document.getElementById('fig4'), cv=document.getElementById('cv'), lab=document.getElementById('figlab');
   var ctx=cv.getContext('2d'), dpr=window.devicePixelRatio||1, W,H, pressed=false, t=0;
+  var RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   function size(){ W=fig.clientWidth; H=fig.clientHeight; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
   size(); window.addEventListener('resize',size);
   // pre-generate the chaos layer (deterministic per load)
@@ -103,7 +104,7 @@ h1 { font-size: 22px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8p
   }
   var labels=['recorder died — swapped to backup','location fell through 23:40','card full mid-take','re-lit the whole room','drove it there myself','fire truck in the take','no permit — found an angle','client never knew'];
   function draw(){
-    t+=0.016;
+    if(!RM) t+=0.016;
     ctx.clearRect(0,0,W,H);
     var mid=H*0.42;
     if(pressed){
@@ -135,10 +136,10 @@ h1 { font-size: 22px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8p
     ctx.stroke();
     ctx.fillStyle='#989690'; ctx.font='9px ui-monospace,monospace';
     ctx.fillText('VIDEO, DELIVERED', 22, mid-12);
-    requestAnimationFrame(draw);
+    if(!RM) requestAnimationFrame(draw);
   }
-  function down(e){ pressed=true; e.preventDefault(); }
-  function up(){ pressed=false; }
+  function down(e){ pressed=true; e.preventDefault(); if(RM) draw(); }
+  function up(){ pressed=false; if(RM) draw(); }
   fig.addEventListener('mousedown',down); fig.addEventListener('mouseup',up); fig.addEventListener('mouseleave',up);
   fig.addEventListener('touchstart',down,{passive:false}); fig.addEventListener('touchend',up);
   requestAnimationFrame(draw);

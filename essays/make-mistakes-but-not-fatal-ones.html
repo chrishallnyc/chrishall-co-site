@@ -92,6 +92,7 @@ h1 { font-size: 22px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8p
 (function(){
   var cv=document.getElementById('cv'), fig=document.getElementById('fig3');
   var ctx=cv.getContext('2d');
+  var RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   var W,H,dpr=window.devicePixelRatio||1;
   function size(){ W=fig.clientWidth; H=fig.clientHeight; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
   size(); window.addEventListener('resize',function(){ size(); });
@@ -131,10 +132,10 @@ h1 { font-size: 22px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8p
         }
         ctx.stroke();
       });
-      requestAnimationFrame(tick);
+      if(RM) tick(); else requestAnimationFrame(tick);
     }
   }
-  requestAnimationFrame(tick);
+  if(RM) tick(); else requestAnimationFrame(tick);
 })();
 </script>
 </body>
