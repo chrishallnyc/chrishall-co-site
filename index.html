@@ -25,11 +25,11 @@
   var query=new URLSearchParams(window.location.search).get('theme');
   var saved=null;
   try { saved=window.localStorage.getItem(key); } catch(e) {}
-  var theme=(query==='grunge'||query==='hacker')?query:
-    ((saved==='grunge'||saved==='hacker')?saved:'grunge');
+  var theme=(query==='grunge'||query==='hacker'||query==='zen')?query:
+    ((saved==='grunge'||saved==='hacker'||saved==='zen')?saved:'grunge');
   document.documentElement.dataset.theme=theme;
   document.documentElement.style.colorScheme=theme==='hacker'?'dark':'light';
-  document.getElementById('theme-color').setAttribute('content',theme==='hacker'?'#06100a':'#eee9dd');
+  document.getElementById('theme-color').setAttribute('content',theme==='hacker'?'#06100a':(theme==='zen'?'#f2edde':'#eee9dd'));
   window.__CHALL_THEME__=theme;
 })();
 </script>
@@ -147,7 +147,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 }
 .intro,.sec,.foot { position:relative; z-index:1; }
 </style>
-<link rel="stylesheet" href="/chall-themes.css?v=1.20.0">
+<link rel="stylesheet" href="/chall-themes.css?v=1.21.0">
 </head>
 <body class="theme-grunge">
 <script>document.body.className='theme-'+window.__CHALL_THEME__;</script>
@@ -156,6 +156,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
   <span class="theme-switcher__label" aria-hidden="true">DISPLAY</span>
   <button type="button" data-theme-option="grunge" aria-pressed="true"><span>01</span> GRUNGE</button>
   <button type="button" data-theme-option="hacker" aria-pressed="false"><span>02</span> CRT</button>
+  <button type="button" data-theme-option="zen" aria-pressed="false"><span>03</span> ZEN</button>
 </div>
 <p class="sr-only" id="theme-announcer" aria-live="polite"></p>
 
@@ -201,7 +202,7 @@ the most influential institutions in global technology.</p>
 
 <footer class="foot site-footer">
   <hr>
-  <a href="/changelog.html" class="ver">v1.20.0</a>
+  <a href="/changelog.html" class="ver">v1.21.0</a>
 </footer>
 </main>
 <script>
@@ -213,15 +214,15 @@ the most influential institutions in global technology.</p>
   var announcer=document.getElementById('theme-announcer');
   var buttons=[].slice.call(document.querySelectorAll('[data-theme-option]'));
   function applyTheme(theme,persist,announce){
-    if(theme!=='grunge'&&theme!=='hacker') return;
+    if(theme!=='grunge'&&theme!=='hacker'&&theme!=='zen') return;
     html.dataset.theme=theme;
     html.style.colorScheme=theme==='hacker'?'dark':'light';
-    body.classList.remove('theme-grunge','theme-hacker');
+    body.classList.remove('theme-grunge','theme-hacker','theme-zen');
     body.classList.add('theme-'+theme);
     buttons.forEach(function(button){
       button.setAttribute('aria-pressed',String(button.dataset.themeOption===theme));
     });
-    meta.setAttribute('content',theme==='hacker'?'#06100a':'#eee9dd');
+    meta.setAttribute('content',theme==='hacker'?'#06100a':(theme==='zen'?'#f2edde':'#eee9dd'));
     if(persist){
       try { window.localStorage.setItem(key,theme); } catch(e) {}
       if(window.history&&window.history.replaceState&&new URLSearchParams(window.location.search).has('theme')){
@@ -230,7 +231,7 @@ the most influential institutions in global technology.</p>
         window.history.replaceState(null,'',url.pathname+url.search+url.hash);
       }
     }
-    if(announce) announcer.textContent=(theme==='hacker'?'CRT hacker':'Grunge paper')+' theme active';
+    if(announce) announcer.textContent=(theme==='hacker'?'CRT hacker':(theme==='zen'?'Zen garden':'Grunge paper'))+' theme active';
     window.__CHALL_THEME__=theme;
     document.dispatchEvent(new CustomEvent('chall:themechange',{detail:{theme:theme}}));
   }
@@ -386,5 +387,6 @@ the most influential institutions in global technology.</p>
   var to; window.addEventListener('resize',function(){clearTimeout(to);to=setTimeout(build,150);});
 })();
 </script>
+<script src="/chall-zen.js?v=1.21.0" defer></script>
 </body>
 </html>

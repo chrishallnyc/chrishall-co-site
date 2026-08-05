@@ -1,4 +1,4 @@
-/* CHALL.NET v1.20.0 — switchable grunge paper + hacker CRT displays */
+/* CHALL.NET v1.21.0 — switchable displays: grunge paper, hacker CRT, zen garden */
 
 html[data-theme="grunge"] {
   --bg: #eee9dd;
@@ -20,6 +20,17 @@ html[data-theme="hacker"] {
   --hair: #70765d;
   --acc: #f1f4c8;
   background: #010402;
+}
+
+html[data-theme="zen"] {
+  --bg: #f2edde;
+  --tex: #e9e2cf;
+  --ink: #2b2921;
+  --mid: #54503f;
+  --dim: #6b6551;
+  --hair: #a59d88;
+  --acc: #a84b2a;
+  background: #f2edde;
 }
 
 html {
@@ -57,7 +68,7 @@ button {
   top: clamp(12px, 2vw, 26px);
   right: clamp(12px, 2vw, 28px);
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: auto auto auto auto;
   align-items: stretch;
   min-height: 42px;
   font-size: 10px;
@@ -556,7 +567,7 @@ button {
 }
 
 .theme-hacker #page::before {
-  content: "> CHALL.NET\A  v1.20.0";
+  content: "> CHALL.NET\A  v1.21.0";
   position: absolute;
   z-index: 2;
   inset: 25px auto auto 30px;
@@ -836,6 +847,184 @@ button {
   text-decoration: none;
 }
 
+/* ─────────────────────────────────────── ZEN / SUMI-E GARDEN */
+
+#zen-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  pointer-events: none;
+  image-rendering: auto;
+}
+
+.theme-zen {
+  color: var(--mid);
+  background: var(--bg);
+  font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  letter-spacing: 0.02em;
+  image-rendering: auto;
+}
+
+.theme-zen #page {
+  background: transparent;
+  min-height: 100vh;
+  padding: clamp(140px, 18vh, 230px) clamp(20px, 4vw, 52px) clamp(140px, 16vh, 200px);
+}
+
+.theme-zen #page::before {
+  content: none;
+}
+
+.theme-zen .site-header {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.theme-zen .site-kicker {
+  margin: 0 0 30px;
+  color: var(--dim);
+  font-size: 10px;
+  letter-spacing: 0.42em;
+  line-height: 1.9;
+  text-transform: uppercase;
+}
+
+.theme-zen .intro .site-title {
+  display: block;
+  max-width: none;
+  margin: 0;
+  color: var(--ink);
+  font-family: "Iowan Old Style", "Palatino Nova", Palatino, "Book Antiqua", Georgia, serif;
+  font-size: clamp(34px, 4.4vw, 54px);
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  line-height: 1.16;
+  text-transform: uppercase;
+}
+
+.theme-zen .site-intro {
+  max-width: 640px;
+  margin: 20px 0 0;
+  color: var(--mid);
+  font-size: 12.5px;
+  line-height: 1.85;
+}
+
+.theme-zen .intro b,
+.theme-zen .bio b {
+  color: var(--ink);
+}
+
+.theme-zen .bio {
+  margin-top: 14px;
+}
+
+.theme-zen .bio summary {
+  color: var(--dim);
+  font-size: 10.5px;
+  letter-spacing: 0.3em;
+}
+
+.theme-zen .bio summary:hover {
+  color: var(--ink);
+}
+
+.theme-zen .bio p {
+  max-width: 640px;
+  margin-top: 14px;
+  padding-left: 16px;
+  border-left: 1px solid var(--hair);
+  color: var(--mid);
+  line-height: 1.85;
+}
+
+.theme-zen .timeline-layout {
+  margin-top: clamp(44px, 7vh, 84px);
+}
+
+.theme-zen .sec h2 {
+  color: var(--ink);
+  font-weight: 500;
+  letter-spacing: 0.34em;
+}
+
+.theme-zen .sec h2::after {
+  background: var(--hair);
+  opacity: 0.55;
+}
+
+.theme-zen .tl {
+  border-left-color: var(--hair);
+}
+
+.theme-zen .tl li {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  line-height: 1.6;
+}
+
+.theme-zen #tip {
+  border-color: var(--ink);
+  background: var(--bg);
+}
+
+.theme-zen .site-footer {
+  margin-top: clamp(48px, 8vh, 80px);
+}
+
+.theme-zen .site-footer hr {
+  max-width: 120px;
+  margin-right: auto;
+  margin-left: auto;
+  border-top-color: var(--hair);
+  opacity: 0.5;
+}
+
+.theme-zen .site-footer .ver {
+  display: inline-block;
+  margin-top: 2px;
+  padding: 5px 9px;
+  color: var(--acc);
+  border: 1px solid rgba(168, 75, 42, 0.55);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+}
+
+.theme-zen .site-footer .ver:hover {
+  color: #fffdf4;
+  background: var(--acc);
+  text-decoration: none;
+}
+
+.theme-zen .theme-switcher {
+  color: var(--mid);
+  border: 1px solid rgba(43, 41, 33, 0.34);
+  background: rgba(242, 237, 222, 0.88);
+}
+
+.theme-zen .theme-switcher__label {
+  border-right: 1px solid rgba(43, 41, 33, 0.16);
+}
+
+.theme-zen .theme-switcher button {
+  border-left: 1px solid rgba(43, 41, 33, 0.12);
+}
+
+.theme-zen .theme-switcher button:first-of-type {
+  border-left: 0;
+}
+
+.theme-zen .theme-switcher button[aria-pressed="true"] {
+  color: var(--bg);
+  background: var(--ink);
+}
+
+.theme-zen .theme-switcher button:not([aria-pressed="true"]):hover {
+  background: rgba(43, 41, 33, 0.07);
+}
+
 /* ───────────────────────── RESPONSIVE */
 
 @media (max-width: 1120px) and (min-width: 960px) {
@@ -1062,6 +1251,27 @@ button {
   .theme-hacker .baxis {
     color: var(--dim);
   }
+
+  .theme-zen #page {
+    padding: 118px 18px 150px;
+  }
+
+  .theme-zen .site-kicker {
+    margin-bottom: 22px;
+  }
+
+  .theme-zen .intro .site-title {
+    font-size: clamp(25px, 7.4vw, 34px);
+    letter-spacing: 0.24em;
+  }
+
+  .theme-zen .timeline-layout {
+    margin-top: 40px;
+  }
+
+  .theme-zen .site-footer {
+    margin-top: 44px;
+  }
 }
 
 @media (min-width: 720px) and (max-width: 959px) {
@@ -1104,6 +1314,20 @@ button {
   }
 }
 
+@media (max-width: 360px) {
+  .theme-grunge #page {
+    padding-top: 76px;
+  }
+
+  .theme-hacker #page {
+    padding-top: 94px;
+  }
+
+  .theme-hacker #page::before {
+    inset: 62px auto auto 19px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .theme-hacker::after,
   .theme-hacker #page,
@@ -1127,7 +1351,8 @@ button {
   body::after,
   #page::before,
   #page::after,
-  .theme-switcher {
+  .theme-switcher,
+  #zen-canvas {
     display: none !important;
   }
 
