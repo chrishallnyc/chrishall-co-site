@@ -52,8 +52,9 @@ body.dark .rail.hl span { color:var(--acc); }
 body.dark #tip { background:#16171c; border-color:var(--acc); }
 body.dark .foot .ver:hover { color:var(--acc); }
 .intro,.sec,.foot { position:relative; z-index:1; }
-#mode { position:fixed; top:12px; right:14px; z-index:3; cursor:pointer; background:none; border:none;
-  color:var(--dim); font-family:inherit; font-size:15px; padding:6px 8px; line-height:1; }
+#mode { position:fixed; top:4px; right:8px; z-index:3; cursor:pointer; background:none; border:none;
+  color:var(--dim); font-family:inherit; font-size:15px; line-height:1;
+  min-width:44px; min-height:44px; display:flex; align-items:center; justify-content:center; }
 #mode:hover { color:var(--ink); }
 body.dive #mode { display:none; }
 a { color: var(--mid); text-decoration: none; }
@@ -248,11 +249,11 @@ the most influential institutions in global technology.</p>
   <a href="/changelog.html" class="ver">v1.15.0</a>
 </div>
 </div></div><div id="accrt"></div></div>
-<button id="mode" title="lights">☾</button>
+<button id="mode" title="lights" aria-label="Toggle dark mode" aria-pressed="true">☾</button>
 <script>
 (function(){
   var btn=document.getElementById('mode');
-  function label(){ btn.textContent=document.body.classList.contains('dark')?'☀':'☾'; }
+  function label(){ var d=document.body.classList.contains('dark'); btn.textContent=d?'☀':'☾'; btn.setAttribute('aria-pressed', d); }
   label();
   btn.addEventListener('click',function(){
     document.body.classList.toggle('dark');
