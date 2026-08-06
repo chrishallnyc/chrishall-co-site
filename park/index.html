@@ -1,0 +1,2036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CHALL PARK — pocket coaster tycoon</title>
+<meta name="description" content="Build paths, plant oaks, raise roller coasters. A pocket Roller Coaster Tycoon on chall.net — fun mode, money is no object.">
+<link rel="canonical" href="https://park.chall.net/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f6f4ee'/%3E%3Cpath d='M3 25 C8 25 8 9 13 9 C18 9 17 20 21 20 C25 20 25 14 29 14' fill='none' stroke='%2318181c' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='13' cy='9' r='2.4' fill='%23e8b46f'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="CHALL PARK — pocket coaster tycoon">
+<meta property="og:description" content="Build paths, plant oaks, raise roller coasters. A pocket Roller Coaster Tycoon on chall.net — fun mode, money is no object.">
+<meta property="og:url" content="https://park.chall.net/">
+<meta name="theme-color" content="#f6f4ee">
+<style>
+:root { --bg:#f6f4ee; --tex:#eeebe4; --ink:#18181c; --mid:#56565e; --dim:#6e6c64; --hair:#989690; --acc:#e8b46f; --accd:#a97b34; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { background:var(--bg); height:100%; }
+body {
+  color:var(--ink);
+  font-family:"SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size:13px; line-height:1.5;
+  min-height:100vh; min-height:100dvh;
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+#page { position:relative; flex:1; display:flex; flex-direction:column;
+  padding:14px clamp(10px,2.5vw,30px) 10px; min-height:0; }
+#page::before { content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+  background:radial-gradient(circle, #d9d4c4 1.1px, transparent 1.55px) 0 0 / 20px 20px;
+  -webkit-mask-image:linear-gradient(90deg, rgba(0,0,0,1) 0, rgba(0,0,0,1) calc(50% - 620px), rgba(0,0,0,0.4) calc(50% - 540px), rgba(0,0,0,0.4) calc(50% + 540px), rgba(0,0,0,1) calc(50% + 620px), rgba(0,0,0,1) 100%);
+  mask-image:linear-gradient(90deg, rgba(0,0,0,1) 0, rgba(0,0,0,1) calc(50% - 620px), rgba(0,0,0,0.4) calc(50% - 540px), rgba(0,0,0,0.4) calc(50% + 540px), rgba(0,0,0,1) calc(50% + 620px), rgba(0,0,0,1) 100%);
+}
+a { color:var(--mid); text-decoration:none; }
+a:hover { color:var(--ink); text-decoration:underline; }
+a:focus-visible, button:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
+
+/* ── masthead ── */
+.mast { position:relative; z-index:2; border:1px solid var(--ink); padding:8px 14px;
+  display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+  max-width:1240px; width:100%; margin:0 auto; background:var(--bg); }
+.mast::after { content:""; position:absolute; inset:2px; border:1px solid var(--hair); pointer-events:none; }
+.mast .brand { font-weight:700; letter-spacing:4px; font-size:15px; }
+.mast .sub { color:var(--dim); font-size:11px; margin-top:1px; letter-spacing:.5px; }
+.mast .right { display:flex; align-items:center; gap:14px; font-size:11px; letter-spacing:1px; }
+.mast .right button { background:none; border:0; color:var(--mid); font:inherit; font-size:11px;
+  letter-spacing:2px; cursor:pointer; text-transform:lowercase; padding:2px 0; }
+.mast .right button:hover { color:var(--ink); text-decoration:underline; }
+.mast .right button[aria-pressed="true"] { color:var(--ink); border-bottom:1px solid var(--acc); }
+.mast .ver { font-size:10px; letter-spacing:2px; color:var(--dim); }
+
+/* ── sheet: hud + canvas + toolbar ── */
+#sheet { position:relative; z-index:1; max-width:1240px; width:100%; margin:10px auto 0;
+  flex:1; display:flex; flex-direction:column; min-height:0;
+  border:1px solid var(--ink); background:var(--bg); }
+#sheet::after { content:""; position:absolute; inset:2px; border:1px solid var(--hair); pointer-events:none; z-index:5; }
+#hud { display:flex; gap:0; align-items:stretch; border-bottom:1px solid var(--ink);
+  font-size:11px; letter-spacing:1px; flex-wrap:wrap; position:relative; z-index:6; background:var(--bg); }
+#hud .cell { padding:6px 14px; border-right:1px solid var(--hair); display:flex; align-items:baseline; gap:7px; white-space:nowrap; }
+#hud .cell .k { color:var(--dim); font-size:9px; letter-spacing:2px; text-transform:uppercase; }
+#hud .cell .v { color:var(--ink); font-weight:700; font-variant-numeric:tabular-nums; }
+#hud .cell.money .v { color:var(--accd); }
+#hud .cell.money .v.tick { animation:mflash .5s; }
+@keyframes mflash { 0% { color:var(--ink); } 30% { color:var(--accd); } 100% { color:var(--accd); } }
+#hud .spacer { flex:1; }
+#hud .cell.right { border-right:0; border-left:1px solid var(--hair); }
+#hud button.hbtn { background:none; border:0; color:var(--mid); font:inherit; font-size:10px;
+  letter-spacing:2px; cursor:pointer; padding:0; text-transform:uppercase; }
+#hud button.hbtn:hover { color:var(--ink); }
+#hud button.hbtn[aria-pressed="true"] { color:var(--accd); }
+
+#stage { position:relative; flex:1; min-height:0; overflow:hidden; background:#8fb15e; }
+canvas#world { position:absolute; inset:0; width:100%; height:100%; display:block;
+  cursor:crosshair; touch-action:none; image-rendering:pixelated; }
+canvas#world.grabbing { cursor:grabbing; }
+canvas#world.pointer { cursor:default; }
+
+/* ── news ticker ── */
+#news { border-top:1px solid var(--ink); font-size:11px; color:var(--mid); letter-spacing:.5px;
+  padding:4px 14px; white-space:nowrap; overflow:hidden; position:relative; z-index:6; background:var(--bg);
+  display:flex; gap:8px; align-items:baseline; min-height:26px; }
+#news .nk { color:var(--dim); font-size:9px; letter-spacing:2px; text-transform:uppercase; flex:none; }
+#news .nt { overflow:hidden; text-overflow:ellipsis; }
+#news .nt b { color:var(--ink); }
+
+/* ── toolbar ── */
+#bar { border-top:1px solid var(--ink); display:flex; align-items:stretch; gap:0;
+  overflow-x:auto; scrollbar-width:none; position:relative; z-index:6; background:var(--bg); }
+#bar::-webkit-scrollbar { display:none; }
+.tool { flex:none; display:flex; flex-direction:column; align-items:center; gap:3px;
+  background:none; border:0; border-right:1px solid var(--hair); color:var(--mid);
+  font:inherit; font-size:9px; letter-spacing:1.6px; text-transform:uppercase;
+  padding:8px 13px 7px; cursor:pointer; min-width:64px; }
+.tool svg { width:22px; height:22px; display:block; }
+.tool svg * { stroke:currentColor; fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+.tool svg .f { fill:currentColor; stroke:none; }
+.tool:hover { color:var(--ink); background:var(--tex); }
+.tool[aria-pressed="true"] { color:var(--bg); background:var(--ink); }
+.tool[aria-pressed="true"] svg { filter:none; }
+
+/* ── submenu palette ── */
+#sub { border-top:1px solid var(--hair); display:none; flex-wrap:wrap; gap:0; position:relative; z-index:6; background:var(--bg); }
+#sub.open { display:flex; }
+.sopt { background:none; border:0; border-right:1px solid var(--hair); color:var(--mid);
+  font:inherit; font-size:10px; letter-spacing:1.2px; text-transform:lowercase;
+  padding:6px 12px; cursor:pointer; display:flex; align-items:center; gap:7px; }
+.sopt:hover { color:var(--ink); background:var(--tex); }
+.sopt[aria-pressed="true"] { color:var(--bg); background:var(--ink); }
+.sopt .sw { width:10px; height:10px; border:1px solid var(--hair); flex:none; }
+.sopt .pr { color:var(--dim); font-size:9px; }
+.sopt[aria-pressed="true"] .pr { color:var(--bg); opacity:.7; }
+
+/* ── coaster builder panel ── */
+#cpanel { position:absolute; z-index:7; left:12px; top:12px; background:var(--bg);
+  border:1px solid var(--ink); padding:9px 11px 10px; display:none; max-width:270px; }
+#cpanel::after { content:""; position:absolute; inset:2px; border:1px solid var(--hair); pointer-events:none; }
+#cpanel.open { display:block; }
+#cpanel h3 { font-size:10px; letter-spacing:2.5px; text-transform:uppercase; margin-bottom:6px; color:var(--ink); }
+#cpanel .hint { color:var(--dim); font-size:10px; line-height:1.45; margin:5px 0 7px; letter-spacing:.3px; }
+#cpanel .row { display:flex; gap:4px; margin-top:5px; }
+#cpanel button { background:var(--bg); border:1px solid var(--ink); color:var(--ink); font:inherit;
+  font-size:10px; letter-spacing:1px; padding:5px 8px; cursor:pointer; flex:1; text-transform:lowercase; }
+#cpanel button:hover:not(:disabled) { background:var(--ink); color:var(--bg); }
+#cpanel button:disabled { opacity:.32; cursor:default; border-color:var(--hair); }
+#cpanel button.acc { border-color:var(--accd); color:var(--accd); }
+#cpanel button.acc:hover:not(:disabled) { background:var(--accd); color:var(--bg); }
+#cpanel .stat { font-size:10px; color:var(--mid); margin-top:6px; letter-spacing:.5px; }
+#cpanel .stat b { color:var(--ink); }
+
+/* ── windows ── */
+.win { position:absolute; z-index:8; background:var(--bg); border:1px solid var(--ink);
+  min-width:230px; max-width:300px; box-shadow:6px 6px 0 rgba(24,24,28,.08); }
+.win::after { content:""; position:absolute; inset:2px; border:1px solid var(--hair); pointer-events:none; }
+.win .wt { display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:6px 10px; border-bottom:1px solid var(--hair); cursor:grab; user-select:none; }
+.win .wt b { font-size:10px; letter-spacing:2.5px; text-transform:uppercase; font-weight:700; }
+.win .wt .wx { background:none; border:0; color:var(--mid); font:inherit; font-size:12px; cursor:pointer; padding:0 2px; }
+.win .wt .wx:hover { color:var(--ink); }
+.win .wb { padding:9px 11px 11px; font-size:11px; color:var(--mid); }
+.win .wb .r { display:flex; justify-content:space-between; gap:10px; padding:2px 0; }
+.win .wb .r b { color:var(--ink); font-variant-numeric:tabular-nums; text-align:right; }
+.win .wb .bar { height:5px; border:1px solid var(--hair); margin:4px 0 6px; position:relative; }
+.win .wb .bar i { position:absolute; inset:0; right:auto; background:var(--acc); }
+.win .wb .wbtns { display:flex; gap:5px; margin-top:8px; flex-wrap:wrap; }
+.win .wb button { background:var(--bg); border:1px solid var(--ink); color:var(--ink); font:inherit;
+  font-size:10px; letter-spacing:1px; padding:4px 9px; cursor:pointer; text-transform:lowercase; }
+.win .wb button:hover { background:var(--ink); color:var(--bg); }
+.win .wb button.warn:hover { background:#8a3a2e; border-color:#8a3a2e; }
+.win .wb .dots { display:flex; gap:5px; margin-top:8px; align-items:center; }
+.win .wb .dots .d { width:14px; height:14px; border:1px solid var(--ink); cursor:pointer; padding:0; }
+.win .wb .dots .d[aria-pressed="true"] { outline:2px solid var(--accd); outline-offset:1px; }
+.win .wb input[type=text] { background:var(--bg); border:1px solid var(--hair); color:var(--ink);
+  font:inherit; font-size:11px; padding:3px 6px; width:100%; letter-spacing:.5px; }
+.win .wb .thought { color:var(--dim); font-size:10.5px; padding:2px 0; }
+.win .wb .thought::before { content:"“"; color:var(--hair); }
+.win .wb .thought::after { content:"”"; color:var(--hair); }
+.win .wb h4 { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--dim); margin:8px 0 3px; font-weight:700; }
+.win .wb p { margin:4px 0; line-height:1.55; }
+.win .wb kbd { border:1px solid var(--hair); padding:0 4px; font:inherit; font-size:10px; color:var(--ink); }
+.win .wb ul { list-style:none; }
+.win .wb ul li { padding:2px 0; }
+.win .wb ul li b { color:var(--ink); }
+
+/* ── footer ── */
+.foot { position:relative; z-index:1; max-width:1240px; width:100%; margin:8px auto 0; text-align:center;
+  color:var(--dim); font-size:10px; letter-spacing:2px; flex:none; }
+.foot a { color:var(--dim); }
+.foot .sep { margin:0 8px; color:var(--hair); }
+
+@media (max-width:719px) {
+  #page { padding:8px 8px 6px; }
+  .mast { padding:7px 10px; }
+  .mast .brand { letter-spacing:3px; font-size:13px; }
+  .mast .sub { display:none; }
+  .mast .right { gap:10px; }
+  #hud .cell { padding:5px 9px; }
+  .tool { min-width:56px; padding:7px 9px 6px; }
+  .win { left:8px !important; right:8px; top:auto !important; bottom:8px; max-width:none; }
+  .foot .m-hide { display:none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #hud .cell.money .v.tick { animation:none; }
+}
+</style>
+</head>
+<body>
+<div id="page">
+
+<div class="mast">
+  <div>
+    <div class="brand">CHALL PARK</div>
+    <div class="sub">pocket coaster tycoon · fun mode — money is no object</div>
+  </div>
+  <div class="right">
+    <button id="soundBtn" aria-pressed="true" title="toggle sound">sound</button>
+    <button id="helpBtn" title="how to play">help</button>
+    <a href="https://chall.net/" title="back to the paper">← chall.net</a>
+    <span class="ver">V1.0.0</span>
+  </div>
+</div>
+
+<div id="sheet">
+  <div id="hud">
+    <div class="cell money"><span class="k">cash</span><span class="v" id="hMoney">$25,000</span></div>
+    <div class="cell"><span class="k">guests</span><span class="v" id="hGuests">0</span></div>
+    <div class="cell"><span class="k">rating</span><span class="v" id="hRating">500</span></div>
+    <div class="cell"><span class="k">day</span><span class="v" id="hDay">1</span></div>
+    <div class="spacer"></div>
+    <div class="cell right"><button class="hbtn" id="pauseBtn" aria-pressed="false">pause</button></div>
+    <div class="cell right"><button class="hbtn" id="zoomOut" title="zoom out">−</button><button class="hbtn" id="zoomIn" title="zoom in">+</button></div>
+  </div>
+  <div id="stage">
+    <canvas id="world"></canvas>
+    <div id="cpanel">
+      <h3 id="cpTitle">COASTER WORKS</h3>
+      <div class="hint" id="cpHint">click the grass to lay a station, then grow the track piece by piece.</div>
+      <div class="row">
+        <button id="cpL" title="turn left">◀ left</button>
+        <button id="cpS" title="straight ahead">● ahead</button>
+        <button id="cpR" title="turn right">right ▶</button>
+      </div>
+      <div class="row">
+        <button id="cpUp" title="climb">▲ climb</button>
+        <button id="cpDn" title="drop">▼ drop</button>
+        <button id="cpUndo" title="undo last piece">undo</button>
+      </div>
+      <div class="row">
+        <button id="cpAuto" class="acc" title="route the track home automatically">auto-complete</button>
+      </div>
+      <div class="row">
+        <button id="cpDone" title="finish">done</button>
+        <button id="cpScrap" class="warn" title="tear it all out">scrap</button>
+      </div>
+      <div class="stat" id="cpStat"></div>
+    </div>
+  </div>
+  <div id="news"><span class="nk">park news</span><span class="nt" id="newsText">welcome to chall park — everything is free today, and every day.</span></div>
+  <div id="bar" role="toolbar" aria-label="build tools"></div>
+  <div id="sub"></div>
+</div>
+
+<div class="foot">
+  <a href="https://chall.net/">chall.net</a><span class="sep">·</span><a href="https://chall.net/changelog.html">changelog</a><span class="sep">·</span><span class="m-hide">fun mode — the bank never runs dry<span class="sep">·</span></span><span>autosaves in this browser</span>
+</div>
+
+</div>
+<script>
+'use strict';
+/* ================================ CHALL PARK ================================
+   a pocket roller coaster tycoon for chall.net · one self-contained file
+   fun mode: building is free, the bank only goes up.
+   ============================================================================ */
+
+/* ── constants ── */
+const N = 44;                       // map is N x N tiles
+const TW = 64, TH = 32;             // iso tile size in world px (2:1)
+const ZH = 13;                      // world px per unit of track height
+const MAXH = 8;                     // coaster height ceiling
+const ENTR = { x: 22, y: N - 1 };   // park gate tile
+const SAVE_KEY = 'challpark.save.v1';
+const DIRS = [ {dx:1,dy:0}, {dx:0,dy:1}, {dx:-1,dy:0}, {dx:0,dy:-1} ]; // 0 E, 1 S, 2 W, 3 N
+
+/* ── palette: the world is bright (RCT), the chrome is paper (chall.net) ── */
+const C = {
+  grassA:'#8fb15e', grassB:'#86a957',  // rct checker greens
+  grassEdge:'#79994d',
+  sandA:'#d9c184', sandB:'#d2ba7c',
+  waterA:'#4f7ea8', waterB:'#476f97', waterHi:'#7fa8c8',
+  path:'#b9a27c', pathEdge:'#8f7b5a', pathHi:'#c9b28c',
+  dirt:'#a08a66',
+  wood:'#7a5a38', woodD:'#5d4429',
+  leaf:'#4c7a3a', leafD:'#3c6230', leafHi:'#619149',
+  pine:'#39623b', pineD:'#2c4e2e',
+  flower1:'#c9564d', flower2:'#d8a13a', flower3:'#9a6ab8',
+  hedge:'#4e7a40',
+  fountain:'#9fb6c8',
+  iron:'#4a4a52', ironHi:'#6a6a74',
+  canvasRed:'#b8503f', canvasWhite:'#e8e2d2', canvasBlue:'#4a6fa5',
+  peepSkin:'#e5c298',
+  accent:'#e8b46f',
+  shadow:'rgba(30,40,20,.18)',
+};
+const SHIRTS = ['#b8503f','#4a6fa5','#3f8a5a','#c98a2e','#8a5aa5','#c26a8a','#5a8a8a','#a5a53f','#7a5a38','#4a4a52'];
+const TRACKCOLORS = [
+  { rail:'#c0392b', tie:'#7d2418', name:'red' },
+  { rail:'#2d6fb8', tie:'#1c4a7d', name:'blue' },
+  { rail:'#2e8b57', tie:'#1d5c39', name:'green' },
+  { rail:'#d8a13a', tie:'#966d20', name:'gold' },
+  { rail:'#8a5aa5', tie:'#5c3a70', name:'violet' },
+  { rail:'#18181c', tie:'#4a4a52', name:'ink' },
+];
+const COASTER_NAMES = ['chall blaster','paper mountain','ink storm','the graft','final cut','rough cut','jump cut','b-roll baron','golden hour','the masthead','night shift','leaf drop','dot grid dash','the big board','director’s cut','wide shot','match cut','the cold open'];
+const GUEST_THOUGHTS_HAPPY = ['this park is the best!','everything is free — best day ever','i love chall park!','what a lovely dot grid sky','that coaster looks amazing','i could stay here forever','the trees here are beautiful','wheeeee!'];
+const GUEST_THOUGHTS_NEED = { hunger:'i’m hungry','thirst':'i’m thirsty', fun:'i want to ride something thrilling', tired:'my feet hurt — a bench would be nice' };
+const AWARDS = ['most beautiful pocket park','best value park in the world (everything is free)','park with the finest hairline fences','tidiest park award','best coaster names award','the ink-on-paper excellence award'];
+
+/* ── scenery catalog ── */
+const SCEN = {
+  1:{ name:'oak',      price:20, h:44 },
+  2:{ name:'pine',     price:18, h:52 },
+  3:{ name:'flowers',  price:8,  h:8  },
+  4:{ name:'bench',    price:12, h:12 },
+  5:{ name:'lamp',     price:10, h:34 },
+  6:{ name:'fountain', price:60, h:26 },
+  7:{ name:'hedge',    price:9,  h:14 },
+  8:{ name:'bush',     price:9,  h:16 },
+};
+/* ── flat rides & stalls catalog ── */
+const RIDES = {
+  carousel:  { name:'carousel',       w:2,h:2, price:500, fee:4,  dur:6,  cap:8,  ex:2.2, kind:'ride'  },
+  ferris:    { name:'ferris wheel',   w:2,h:2, price:900, fee:5,  dur:9,  cap:12, ex:2.8, kind:'ride'  },
+  teacups:   { name:'spinning teacups',w:2,h:2,price:600, fee:4,  dur:6,  cap:8,  ex:2.5, kind:'ride'  },
+  drop:      { name:'drop tower',     w:1,h:1, price:1100,fee:6,  dur:7,  cap:6,  ex:4.2, kind:'ride'  },
+  haunted:   { name:'haunted house',  w:2,h:2, price:800, fee:5,  dur:8,  cap:10, ex:3.1, kind:'ride'  },
+  swing:     { name:'swinging ship',  w:2,h:2, price:850, fee:5,  dur:7,  cap:10, ex:3.4, kind:'ride'  },
+  burger:    { name:'burger bar',     w:1,h:1, price:150, fee:6,  dur:2,  cap:3,  ex:0,   kind:'food'  },
+  soda:      { name:'soda stand',     w:1,h:1, price:100, fee:3,  dur:2,  cap:3,  ex:0,   kind:'drink' },
+  icecream:  { name:'ice cream hut',  w:1,h:1, price:120, fee:4,  dur:2,  cap:3,  ex:0,   kind:'food'  },
+  balloons:  { name:'balloon stall',  w:1,h:1, price:90,  fee:3,  dur:2,  cap:3,  ex:0,   kind:'shop'  },
+  restroom:  { name:'restroom',       w:1,h:1, price:80,  fee:0,  dur:3,  cap:4,  ex:0,   kind:'loo'   },
+};
+
+/* ── game state ── */
+const G = {
+  ter:new Uint8Array(N*N),          // 0 grass 1 sand 2 water
+  path:new Uint8Array(N*N),
+  scen:new Uint8Array(N*N),
+  occ:new Int16Array(N*N),          // ride id on ground (0 none)
+  rides:[],                          // flat rides + stalls
+  coasters:[],
+  peeps:[],
+  money:25000, spent:0, day:1, dayT:0,
+  rating:500, guestsTotal:0, nextGuest:2,
+  paused:false, soundOn:true,
+  news:[], newsT:0,
+  time:0,
+};
+const idx = (x,y)=> y*N+x;
+const inMap = (x,y)=> x>=0 && y>=0 && x<N && y<N;
+
+/* track occupancy: tile -> array of {c: coaster, p: piece index} (rebuilt on change) */
+let TRACKMAP = new Map();
+function rebuildTrackmap(){
+  TRACKMAP = new Map();
+  for(const c of G.coasters) c.pieces.forEach((p,i)=>{
+    const k = idx(p.x,p.y);
+    if(!TRACKMAP.has(k)) TRACKMAP.set(k,[]);
+    TRACKMAP.get(k).push({c, p, i});
+  });
+}
+const trackAt = (x,y)=> TRACKMAP.get(idx(x,y)) || null;
+
+/* ── money: fun mode — the bank only rises ── */
+function earn(v, wx, wy){
+  if(v<=0) return;
+  G.money += v;
+  hud.money();
+  if(wx!==undefined && FX.length<40) FX.push({t:'cash', x:wx, y:wy, v:'+$'+v, life:1});
+  SND.ching();
+}
+function buy(price){ G.spent += price; return true; }   // everything is free. fun mode.
+
+/* ── news ticker ── */
+function news(msg, important){
+  G.news.push(msg);
+  if(G.news.length>6) G.news.shift();
+  if(important) G.newsT = 0;      // show now
+}
+
+/* ── audio: a tiny paper synth ── */
+const SND = (()=>{
+  let ac=null, master=null, lastWhoosh=0;
+  function ctx(){
+    if(!G.soundOn) return null;
+    if(!ac){
+      try { ac = new (window.AudioContext||window.webkitAudioContext)(); }
+      catch(e){ return null; }
+      master = ac.createGain(); master.gain.value = 0.13; master.connect(ac.destination);
+    }
+    if(ac.state==='suspended') ac.resume();
+    return ac;
+  }
+  function tone(f0,f1,dur,type,vol){
+    const a=ctx(); if(!a) return;
+    const o=a.createOscillator(), g=a.createGain();
+    o.type=type||'square'; o.frequency.setValueAtTime(f0,a.currentTime);
+    if(f1) o.frequency.exponentialRampToValueAtTime(f1,a.currentTime+dur);
+    g.gain.setValueAtTime(vol||.5,a.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,a.currentTime+dur);
+    o.connect(g); g.connect(master); o.start(); o.stop(a.currentTime+dur+.02);
+  }
+  function noise(dur,vol,fq){
+    const a=ctx(); if(!a) return;
+    const n=a.sampleRate*dur, buf=a.createBuffer(1,n,a.sampleRate), d=buf.getChannelData(0);
+    for(let i=0;i<n;i++) d[i]=Math.random()*2-1;
+    const s=a.createBufferSource(); s.buffer=buf;
+    const f=a.createBiquadFilter(); f.type='lowpass'; f.frequency.value=fq||900;
+    const g=a.createGain(); g.gain.setValueAtTime(vol,a.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,a.currentTime+dur);
+    s.connect(f); f.connect(g); g.connect(master); s.start();
+  }
+  return {
+    place(){ tone(520,660,.06,'square',.35); },
+    thud(){ noise(.09,.5,500); },
+    ching(){ tone(880,0,.09,'sine',.3); setTimeout(()=>tone(1318,0,.14,'sine',.25),60); },
+    fanfare(){ [523,659,784].forEach((f,i)=>setTimeout(()=>tone(f,0,.16,'triangle',.4),i*110)); },
+    whoosh(){
+      const t=performance.now(); if(t-lastWhoosh<900) return; lastWhoosh=t;
+      noise(.5,.35,1400);
+    },
+    click(){ tone(300,0,.04,'square',.2); },
+  };
+})();
+
+/* ── save / load ── */
+function saveGame(){
+  try {
+    const s = {
+      v:1, ter:[...G.ter], path:[...G.path], scen:[...G.scen],
+      money:G.money, spent:G.spent, day:G.day, rating:G.rating, guestsTotal:G.guestsTotal,
+      rides:G.rides.map(r=>({t:r.type,x:r.x,y:r.y,name:r.name,open:r.open,rides:r.ridden,col:r.col})),
+      coasters:G.coasters.map(c=>({name:c.name,col:c.col,open:c.open,done:c.done,rides:c.ridden,
+        pieces:c.pieces.map(p=>[p.x,p.y,p.dir,p.slope,p.h,p.station?1:0])})),
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(s));
+  } catch(e){}
+}
+function loadGame(){
+  let s=null;
+  try { s = JSON.parse(localStorage.getItem(SAVE_KEY)||'null'); } catch(e){}
+  if(!s || s.v!==1) return false;
+  G.ter.set(s.ter); G.path.set(s.path); G.scen.set(s.scen); G.occ.fill(0);
+  G.money=s.money; G.spent=s.spent||0; G.day=s.day; G.rating=s.rating; G.guestsTotal=s.guestsTotal;
+  G.rides=[]; G.coasters=[]; G.peeps=[];
+  for(const r of s.rides){ addRide(r.t, r.x, r.y, {name:r.name, open:r.open, ridden:r.rides, col:r.col, silent:true}); }
+  for(const cs of s.coasters){
+    const c = newCoaster({silent:true});
+    c.name=cs.name; c.col=cs.col; c.open=cs.open; c.done=cs.done; c.ridden=cs.rides||0;
+    c.pieces = cs.pieces.map(a=>({x:a[0],y:a[1],dir:a[2],slope:a[3],h:a[4],station:!!a[5]}));
+    if(c.done){ finishCoaster(c, true); }
+  }
+  rebuildTrackmap();
+  return true;
+}
+function newPark(){
+  G.ter.fill(0); G.path.fill(0); G.scen.fill(0); G.occ.fill(0);
+  G.rides=[]; G.coasters=[]; G.peeps=[]; FX.length=0;
+  G.money=25000; G.spent=0; G.day=1; G.dayT=0; G.rating=500; G.guestsTotal=0; G.nextGuest=2;
+  // starter layout: gate, promenade, plaza, a carousel, a burger bar, some green
+  const px = ENTR.x;
+  for(let y=N-1; y>=N-13; y--) G.path[idx(px,y)]=1;
+  for(let x=px-3;x<=px+3;x++) for(let y=N-16;y<=N-13;y++) G.path[idx(x,y)]=1;
+  addRide('carousel', px-3, N-19, {silent:true});
+  addRide('burger',   px+3, N-18, {silent:true});
+  addRide('soda',     px-4, N-15, {silent:true});
+  const trees=[[px-6,N-15],[px+6,N-16],[px-5,N-20],[px+5,N-21],[px-1,N-21],[px+2,N-22],[px-7,N-10],[px+7,N-9],[px-3,N-8],[px+4,N-6]];
+  trees.forEach(([x,y],i)=>{ if(inMap(x,y)) G.scen[idx(x,y)] = (i%3===0)?2:1; });
+  G.scen[idx(px-2,N-14)]=3; G.scen[idx(px+2,N-14)]=3;
+  G.scen[idx(px-1,N-17)]=4; G.scen[idx(px+1,N-17)]=4;
+  G.scen[idx(px,N-18)]=6;
+  rebuildTrackmap();
+  news('welcome to chall park — the gates are open and everything is free.', true);
+}
+
+/* ── rides ── */
+let RIDE_ID = 1;
+function addRide(type, x, y, o){
+  o = o||{};
+  const def = RIDES[type]; if(!def) return null;
+  for(let dy=0;dy<def.h;dy++) for(let dx=0;dx<def.w;dx++){
+    if(!inMap(x+dx,y+dy)) return null;
+    const i = idx(x+dx,y+dy);
+    if(G.path[i]||G.scen[i]||G.occ[i]||G.ter[i]===2||trackAt(x+dx,y+dy)) return null;
+  }
+  const r = { id:RIDE_ID++, type, x, y, w:def.w, h:def.h,
+    name:o.name||def.name, open:o.open!==false, ridden:o.ridden||0,
+    col:(o.col!==undefined)?o.col:(RIDE_ID%TRACKCOLORS.length),
+    riders:[], t:Math.random()*10 };
+  for(let dy=0;dy<def.h;dy++) for(let dx=0;dx<def.w;dx++) G.occ[idx(x+dx,y+dy)] = r.id;
+  G.rides.push(r);
+  if(!o.silent){ buy(def.price); SND.thud(); news(r.name+' has been built — free of charge, of course.'); bakeWorld(); }
+  return r;
+}
+function removeRide(r){
+  for(let i=0;i<N*N;i++) if(G.occ[i]===r.id) G.occ[i]=0;
+  G.rides = G.rides.filter(x=>x!==r);
+  for(const p of G.peeps) if(p.riding===r){ p.riding=null; p.state='walk'; p.hidden=false; }
+  closeWinFor(r);
+  bakeWorld();
+}
+const rideById = id => G.rides.find(r=>r.id===id);
+/* ── iso geometry ── */
+const TW2 = TW/2, TH2 = TH/2;
+const ctr = (x,y)=> [ (x-y)*TW2, (x+y)*TH2 + TH2 ];        // tile center, world px
+function edgeMid(x,y,d){
+  const c = ctr(x,y);
+  const e = [ [TW2/2,TH2/2], [-TW2/2,TH2/2], [-TW2/2,-TH2/2], [TW2/2,-TH2/2] ][d];
+  return [ c[0]+e[0], c[1]+e[1] ];
+}
+
+/* ── coasters ── */
+let CO_ID = 1;
+function newCoaster(o){
+  const c = {
+    id:'c'+(CO_ID++),
+    name:COASTER_NAMES[(CO_ID+G.coasters.length*3)%COASTER_NAMES.length],
+    col:(CO_ID+1)%TRACKCOLORS.length,
+    pieces:[],            // {x,y,dir(entry),turn(-1|0|1),slope(-1|0|1),h(entry),station}
+    done:false, open:false, testing:false,
+    excite:0, intense:0, drops:0, vmax:0, len:0,
+    train:null, queue:[], ridden:0,
+    samples:null, laps:0,
+  };
+  G.coasters.push(c);
+  if(!o||!o.silent) news('coaster works: a new track takes shape…');
+  return c;
+}
+function exitDirOf(p){ return (p.dir + (p.turn||0) + 4) % 4; }
+function exitHOf(p){ return p.h + (p.slope||0); }
+function headOf(c){                    // builder head = exit state of last piece
+  const p = c.pieces[c.pieces.length-1];
+  if(!p) return null;
+  const d = exitDirOf(p);
+  return { x:p.x + DIRS[d].dx, y:p.y + DIRS[d].dy, dir:d, h:exitHOf(p) };
+}
+/* can a piece enter tile (x,y) at height h? */
+function tileOkForTrack(x,y,h,c){
+  if(!inMap(x,y)) return 'edge of the park';
+  const i = idx(x,y);
+  if(G.ter[i]===2) return 'water below';
+  if(G.occ[i]) return 'a ride is in the way';
+  if(G.scen[i] && h<3) return 'scenery in the way';
+  if(h<1 && G.path[i]) return 'a path is in the way';
+  const tr = trackAt(x,y);
+  if(tr) for(const t of tr){
+    if(Math.abs(t.p.h - h) < 2 || Math.abs(exitHOf(t.p) - h) < 2) return 'track already there';
+  }
+  return null;
+}
+/* place next piece from the head: kind = 'S'|'L'|'R'|'U'|'D' */
+function buildPiece(c, kind){
+  const hd = headOf(c);
+  if(!hd) return 'lay a station first';
+  // rolling home? reaching the station tile closes the circuit, whatever the button
+  const st = c.pieces[0];
+  if(st && hd.x===st.x && hd.y===st.y){
+    if(hd.h!==0) return 'come home at ground level';
+    if(hd.dir!==st.dir) return 'come home facing the station';
+    finishCoaster(c);
+    return 'closed';
+  }
+  const turn = kind==='L' ? -1 : kind==='R' ? 1 : 0;
+  const slope = kind==='U' ? 1 : kind==='D' ? -1 : 0;
+  if(hd.h + slope < 0) return 'that would dig into the ground';
+  if(hd.h + slope > MAXH) return 'that’s high enough — the paper has a ceiling';
+  const err = tileOkForTrack(hd.x, hd.y, hd.h, c);
+  if(err) return err;
+  c.pieces.push({ x:hd.x, y:hd.y, dir:hd.dir, turn, slope, h:hd.h, station:false });
+  rebuildTrackmap(); buy(22); SND.place();
+  if(c.pieces.length>140){ undoPiece(c); return 'that’s plenty of track'; }
+  return null;
+}
+function undoPiece(c){
+  if(c.pieces.length<=1){ scrapCoaster(c); return; }
+  c.pieces.pop(); rebuildTrackmap(); SND.click();
+}
+function scrapCoaster(c){
+  G.coasters = G.coasters.filter(x=>x!==c);
+  for(const p of G.peeps) if(p.riding===c){ p.riding=null; p.state='walk'; p.hidden=false; }
+  rebuildTrackmap(); closeWinFor(c);
+  if(BUILD.coaster===c){ BUILD.coaster=null; cpanelSync(); }
+  news('a coaster was scrapped — the lawn recovers instantly.');
+}
+/* auto-complete: descend to the ground, then BFS a route of track back home.
+   BFS nodes are head states (x, y, dir); each tile is used at most once, which
+   is physically required anyway — ground-level track cannot cross itself. */
+function autoComplete(c){
+  const st = c.pieces[0]; if(!st) return 'lay a station first';
+  // 1) come down to earth
+  let guard = 90;
+  while(guard-- > 0){
+    const hd = headOf(c);
+    if(hd.h===0) break;
+    let placed=false;
+    for(const k of ['D','S','R','L']){
+      const r = buildPiece(c,k);
+      if(r===null){ placed=true; break; }
+      if(r==='closed') return 'closed';
+    }
+    if(!placed) return 'auto-complete is boxed in up there — undo a little';
+  }
+  // 2) BFS home at ground level
+  const hd = headOf(c);
+  if(hd.x===st.x && hd.y===st.y){
+    const r=buildPiece(c,'S');
+    return r==='closed' ? r : 'come home facing the station';
+  }
+  const key=(x,y,d)=>(y*N+x)*4+d;
+  const usedTile=new Uint8Array(N*N);
+  const seen=new Map();
+  const q=[{x:hd.x,y:hd.y,d:hd.dir,par:null,k:null}];
+  seen.set(key(hd.x,hd.y,hd.dir), q[0]);
+  let goal=null, steps=0;
+  while(q.length && steps++<9000){
+    const n=q.shift();
+    if(n.x===st.x && n.y===st.y){
+      if(n.d===st.dir){ goal=n; break; }
+      continue;                       // at the station tile but facing wrong — dead branch
+    }
+    if(tileOkForTrack(n.x,n.y,0,c)!==null) continue;   // can't lay a piece here
+    if(usedTile[idx(n.x,n.y)]) continue;
+    usedTile[idx(n.x,n.y)]=1;
+    for(const k of ['S','L','R']){
+      const turn=k==='L'?-1:k==='R'?1:0;
+      const nd=(n.d+turn+4)%4;
+      const nx=n.x+DIRS[nd].dx, ny=n.y+DIRS[nd].dy;
+      if(!inMap(nx,ny)) continue;
+      const kk=key(nx,ny,nd);
+      if(seen.has(kk)) continue;
+      const m={x:nx,y:ny,d:nd,par:n,k};
+      seen.set(kk,m); q.push(m);
+    }
+  }
+  if(!goal) return 'auto-complete can’t find a way home — clear a lane or undo a little';
+  const moves=[];
+  for(let n=goal; n.par; n=n.par) moves.unshift(n.k);
+  for(const k of moves){
+    const r=buildPiece(c,k);
+    if(r==='closed') return 'closed';
+    if(r) return 'auto-complete hit a snag: '+r;
+  }
+  const r=buildPiece(c,'S');            // the closing piece
+  return r==='closed' ? 'closed' : (r||'closed');
+}
+/* finish: sample the circuit, compute stats, hang a train on it */
+function finishCoaster(c, silent){
+  c.done = true;
+  // sample: per piece K points [wx, wy, z, depth]
+  const K = 8, pts = [];
+  for(const p of c.pieces){
+    const din = (p.dir+2)%4, dout = exitDirOf(p);
+    const A = edgeMid(p.x,p.y,din), B = ctr(p.x,p.y), E = edgeMid(p.x,p.y,dout);
+    for(let k=0;k<K;k++){
+      const t=(k+0.5)/K;
+      let wx,wy;
+      if(p.turn){ // quadratic bezier A→B→E
+        const u=1-t;
+        wx = u*u*A[0] + 2*u*t*B[0] + t*t*E[0];
+        wy = u*u*A[1] + 2*u*t*B[1] + t*t*E[1];
+      } else {
+        wx = A[0] + (E[0]-A[0])*t;
+        wy = A[1] + (E[1]-A[1])*t;
+      }
+      const z = (p.h + (p.slope||0) * (1-Math.cos(Math.PI*t))/2) * ZH;
+      pts.push({x:wx, y:wy, z, d:p.x+p.y, st:p.station, ch:p.chain});
+    }
+  }
+  // arclengths
+  let L=0; const seg=[];
+  for(let i=0;i<pts.length;i++){
+    const a=pts[i], b=pts[(i+1)%pts.length];
+    const dl=Math.hypot(b.x-a.x,(b.y-a.y)*2,(b.z-a.z));  // de-squash y for truer speed
+    seg.push(dl); L+=dl;
+  }
+  c.samples = pts; c.seglen = seg; c.len = L;
+  // chain lift: pieces with slope>0 before the first drop
+  let sawDrop=false;
+  for(const p of c.pieces){ if(p.slope<0) sawDrop=true; p.chain = (!sawDrop && p.slope>0); }
+  // silent stat lap
+  let v=3.4, vmax=v, drops=0, lastZ=pts[0].z, turns=c.pieces.filter(p=>p.turn).length;
+  for(let i=0;i<pts.length;i++){
+    const p=pts[i], nz=pts[(i+1)%pts.length].z;
+    const piece = c.pieces[Math.floor(i/K)];
+    if(piece.chain) v = Math.max(v, 2.4);
+    else {
+      const dz = nz-p.z;
+      v = Math.sqrt(Math.max(1.1, v*v - dz*1.9));
+      v = Math.max(1.1, v - 0.008*seg[i]);
+    }
+    vmax = Math.max(vmax, v);
+    if(nz < p.z) drops += (p.z-nz);
+  }
+  c.vmax = vmax; c.drops = drops/ZH;
+  const maxH = Math.max(...c.pieces.map(p=>p.h));
+  c.excite  = Math.min(9.87, 1.4 + c.drops*0.32 + vmax*0.42 + turns*0.11 + maxH*0.12);
+  c.intense = Math.min(9.9,  0.6 + vmax*0.55 + c.drops*0.18);
+  c.train = { s:0, v:3.4, dwell: 2.5, riders:0, lapT:0 };
+  c.open = true;
+  rebuildTrackmap();
+  if(!silent){
+    SND.fanfare();
+    news('<b>'+c.name+'</b> is complete — excitement '+c.excite.toFixed(2)+' · open to guests!', true);
+    if(BUILD.coaster===c){ BUILD.coaster=null; setTool('pointer'); }
+    openCoasterWin(c);
+  }
+}
+/* estimated lap time (for peep ride duration) */
+function lapTime(c){ return Math.max(6, c.len/ (c.vmax*18) ) + 3; }
+
+/* train physics, dt seconds */
+function stepTrain(c, dt){
+  const t = c.train; if(!t || !c.samples) return;
+  if(t.dwell > 0){
+    t.dwell -= dt;
+    if(t.dwell <= 0){
+      t.v = 3.4;
+      // board the queue
+      const take = Math.min(c.queue.length, 12);
+      let fare = 0;
+      for(let i=0;i<take;i++){
+        const p = c.queue.shift();
+        p.riding = c; p.rideT = lapTime(c); p.hidden = true; p.state='ride';
+        fare += 4 + Math.round(c.excite);
+        c.ridden++; t.riders++;
+      }
+      if(fare) earn(fare, ...ctr(c.pieces[0].x, c.pieces[0].y));
+    }
+    return;
+  }
+  const pts=c.samples, seg=c.seglen, n=pts.length;
+  let i = t.i||0;
+  // advance distance
+  let dist = t.v * dt * 26;
+  while(dist > 0){
+    const rem = seg[i]*(1-(t.f||0));
+    if(dist < rem){ t.f = (t.f||0) + dist/seg[i]; dist = 0; }
+    else {
+      dist -= rem; t.f = 0; i=(i+1)%n;
+      const piece = c.pieces[Math.floor(i/8)];
+      const p = pts[i], np = pts[(i+1)%n];
+      if(piece.chain){ t.v = Math.max(t.v*0.99, 1.9); }
+      else {
+        const dz = (np.z-p.z)/Math.max(seg[i],0.001);
+        t.v = Math.sqrt(Math.max(1.0, t.v*t.v - dz*seg[i]*0.145));
+        t.v = Math.max(1.0, t.v - 0.0035*seg[i]);
+        if(t.v < 1.05 && !piece.chain && piece.slope>=0){ t.v = 1.6; } // fun mode: a friendly push
+      }
+      if(np.z < p.z - 2 && t.v > 5.2){ SND.whoosh(); if(Math.random()<.3) FX.push({t:'woo', x:p.x, y:p.y-p.z-26, v:'wheee!', life:1.2}); }
+      if(pts[i].st && !pts[(i-1+n)%n].st){ // rolled back into the station
+        c.laps++; t.dwell = 2.6; t.v = 0; t.riders = 0;
+      }
+    }
+  }
+  t.i = i;
+  t.vmaxSeen = Math.max(t.vmaxSeen||0, t.v);
+}
+/* car positions for rendering: lead at (i,f), followers spaced back */
+function trainCars(c){
+  const t=c.train; if(!t) return [];
+  const pts=c.samples, seg=c.seglen, n=pts.length;
+  const cars=[]; let i=t.i||0, f=t.f||0;
+  for(let k=0;k<4;k++){
+    const a=pts[i], b=pts[(i+1)%n];
+    cars.push({ x:a.x+(b.x-a.x)*f, y:a.y+(b.y-a.y)*f, z:a.z+(b.z-a.z)*f, d:a.d,
+      ang:Math.atan2((b.y-a.y),(b.x-a.x)) });
+    // step back ~15px along track
+    let back=15;
+    while(back>0){
+      const s=seg[(i-1+n)%n];
+      const avail=f*seg[i];
+      if(back<=avail){ f-=back/seg[i]; back=0; }
+      else { back-=avail; i=(i-1+n)%n; f=1; }
+    }
+  }
+  return cars;
+}
+/* ── camera & canvas ── */
+const cv = document.getElementById('world');
+const cx2d = cv.getContext('2d');
+const CAM = { x:0, y:(N*TH2), z:1 };
+const ZOOMS = [.5,.75,1,1.5,2];
+let DPR = 1, VW = 0, VH = 0;
+function resize(){
+  DPR = Math.min(window.devicePixelRatio||1, 2);
+  const st = document.getElementById('stage');
+  VW = st.clientWidth; VH = st.clientHeight;
+  cv.width = Math.max(1, VW*DPR); cv.height = Math.max(1, VH*DPR);
+}
+window.addEventListener('resize', resize);
+const w2sX = wx => (wx - CAM.x)*CAM.z + VW/2;
+const w2sY = wy => (wy - CAM.y)*CAM.z + VH/2;
+function s2w(mx,my){ return [ (mx-VW/2)/CAM.z + CAM.x, (my-VH/2)/CAM.z + CAM.y ]; }
+function s2tile(mx,my){
+  const [wx,wy] = s2w(mx,my);
+  const fx = (wx/TW2 + (wy-TH2)/TH2)/2, fy = ((wy-TH2)/TH2 - wx/TW2)/2;
+  return [Math.round(fx), Math.round(fy)];
+}
+function clampCam(){
+  const m = N*TW2 + 80;
+  CAM.x = Math.max(-m, Math.min(m, CAM.x));
+  CAM.y = Math.max(-80, Math.min(N*TH + 120, CAM.y));
+}
+
+/* ── static bake: terrain + paths (flat ground only) ── */
+const bake = document.createElement('canvas');
+const BOX = N*TW2 + TW2;              // bake x offset so wx>=0
+bake.width = N*TW + TW; bake.height = N*TH + TH*2;
+const bctx = bake.getContext('2d');
+let waterTiles = [];
+function diamond(g, cxp, cyp, w2, h2){
+  g.beginPath();
+  g.moveTo(cxp, cyp-h2); g.lineTo(cxp+w2, cyp); g.lineTo(cxp, cyp+h2); g.lineTo(cxp-w2, cyp);
+  g.closePath();
+}
+function bakeWorld(){
+  const g = bctx;
+  g.clearRect(0,0,bake.width,bake.height);
+  waterTiles = [];
+  for(let y=0;y<N;y++) for(let x=0;x<N;x++){
+    const i = idx(x,y), [wx,wy] = ctr(x,y);
+    const bx = wx+BOX, by = wy;
+    if(G.ter[i]===2){
+      g.fillStyle = ((x+y)&1) ? C.waterA : C.waterB;
+      diamond(g,bx,by,TW2,TH2); g.fill();
+      waterTiles.push([bx,by,x,y]);
+      // banks where water meets land
+      g.strokeStyle = C.grassEdge; g.lineWidth = 1.5;
+      for(let d=0;d<4;d++){
+        const nx=x+DIRS[d].dx, ny=y+DIRS[d].dy;
+        if(inMap(nx,ny) && G.ter[idx(nx,ny)]!==2){
+          const P = [[bx,by-TH2],[bx+TW2,by],[bx,by+TH2],[bx-TW2,by]];
+          const eA = P[(d+3)%4], eB = P[d];
+          g.beginPath(); g.moveTo(eA[0],eA[1]); g.lineTo(eB[0],eB[1]); g.stroke();
+        }
+      }
+      continue;
+    }
+    if(G.ter[i]===1){ g.fillStyle = ((x+y)&1)?C.sandA:C.sandB; }
+    else { g.fillStyle = ((x+y)&1)?C.grassA:C.grassB; }
+    diamond(g,bx,by,TW2,TH2); g.fill();
+    if(G.path[i]){
+      g.fillStyle = C.path;
+      diamond(g,bx,by,TW2-3,TH2-1.5); g.fill();
+      // curbs on sides with no path neighbour
+      g.strokeStyle = C.pathEdge; g.lineWidth=1.2;
+      const P=[[bx,by-TH2+1.5],[bx+TW2-3,by],[bx,by+TH2-1.5],[bx-TW2+3,by]];
+      for(let d=0;d<4;d++){
+        const nx=x+DIRS[d].dx, ny=y+DIRS[d].dy;
+        const open = inMap(nx,ny) && (G.path[idx(nx,ny)] || (G.occ[idx(nx,ny)]) || (nx===ENTR.x&&ny===ENTR.y+0));
+        if(!open){
+          const eA=P[(d+3)%4], eB=P[d];
+          g.beginPath(); g.moveTo(eA[0],eA[1]); g.lineTo(eB[0],eB[1]); g.stroke();
+        }
+      }
+    }
+  }
+}
+
+/* ── little sprite painters (world coords; painter translates & scales) ── */
+function shadow(g,w){ g.fillStyle=C.shadow; g.beginPath(); g.ellipse(0,0,w,w*.45,0,0,7); g.fill(); }
+function drawOak(g,seed){
+  shadow(g,14);
+  g.fillStyle=C.wood; g.fillRect(-2.5,-14,5,14);
+  const r=13+(seed%3)*2;
+  g.fillStyle=C.leafD; g.beginPath(); g.arc(-6,-20,r*.72,0,7); g.arc(7,-19,r*.6,0,7); g.fill();
+  g.fillStyle=C.leaf;  g.beginPath(); g.arc(0,-26,r,0,7); g.fill();
+  g.fillStyle=C.leafHi;g.beginPath(); g.arc(-4,-30,r*.45,0,7); g.fill();
+}
+function drawPine(g){
+  shadow(g,11);
+  g.fillStyle=C.woodD; g.fillRect(-2,-10,4,10);
+  for(let k=0;k<3;k++){
+    g.fillStyle = k===1?C.pine:C.pineD;
+    const w=17-k*4.5, yb=-8-k*11;
+    g.beginPath(); g.moveTo(0,yb-16); g.lineTo(w,yb); g.lineTo(-w,yb); g.closePath(); g.fill();
+  }
+}
+function drawFlowers(g,seed){
+  g.fillStyle=C.leafD; g.beginPath(); g.ellipse(0,0,12,6,0,0,7); g.fill();
+  const cols=[C.flower1,C.flower2,C.flower3];
+  for(let k=0;k<6;k++){
+    const a=(seed*13+k*61)%100/100*6.28, r=2+((seed+k*7)%8);
+    g.fillStyle=cols[(seed+k)%3];
+    g.beginPath(); g.arc(Math.cos(a)*r*1.4, Math.sin(a)*r*.6 - 2, 1.8, 0, 7); g.fill();
+  }
+}
+function drawBench(g){
+  shadow(g,8);
+  g.fillStyle=C.woodD; g.fillRect(-7,-3,2,4); g.fillRect(5,-3,2,4);
+  g.fillStyle=C.wood; g.fillRect(-8,-7,16,3); g.fillRect(-8,-11,16,2);
+}
+function drawLamp(g){
+  g.fillStyle=C.iron; g.fillRect(-1,-26,2,26);
+  g.fillStyle=C.accent; g.beginPath(); g.arc(0,-28,3,0,7); g.fill();
+  g.strokeStyle=C.iron; g.lineWidth=1; g.strokeRect(-3,-31,6,6);
+}
+function drawFountain(g,_s,t){
+  t = t||0;
+  shadow(g,13);
+  g.fillStyle='#9a9a92'; g.beginPath(); g.ellipse(0,-2,13,6.5,0,0,7); g.fill();
+  g.fillStyle=C.waterA; g.beginPath(); g.ellipse(0,-3,10,4.8,0,0,7); g.fill();
+  g.strokeStyle=C.fountain; g.lineWidth=1.6;
+  const h=9+Math.sin(t*3)*2;
+  g.beginPath(); g.moveTo(0,-3); g.quadraticCurveTo(-4,-3-h,-6,-4); g.moveTo(0,-3); g.quadraticCurveTo(4,-3-h,6,-4);
+  g.moveTo(0,-3); g.lineTo(0,-3-h-3); g.stroke();
+  g.fillStyle=C.waterHi; g.beginPath(); g.arc(0,-6-h,1.5,0,7); g.fill();
+}
+function drawHedge(g){
+  g.fillStyle=C.hedge; g.beginPath(); g.ellipse(0,-6,15,8,0,0,7); g.fill();
+  g.fillStyle=C.leafHi; g.beginPath(); g.ellipse(-4,-9,6,3,0,0,7); g.fill();
+}
+function drawBush(g,seed){
+  shadow(g,9);
+  g.fillStyle=C.leafD; g.beginPath(); g.arc(3,-5,7,0,7); g.fill();
+  g.fillStyle=C.leaf; g.beginPath(); g.arc(-3,-7,8,0,7); g.fill();
+  if(seed%2){ g.fillStyle=C.flower1; g.beginPath(); g.arc(-5,-9,1.4,0,7); g.arc(2,-4,1.2,0,7); g.fill(); }
+}
+const SCEN_DRAW = {1:drawOak,2:drawPine,3:drawFlowers,4:drawBench,5:drawLamp,6:drawFountain,7:drawHedge,8:drawBush};
+
+/* ── the park gate ── */
+function drawGate(g){
+  g.fillStyle=C.iron; g.fillRect(-26,-34,5,34); g.fillRect(21,-34,5,34);
+  g.fillStyle='#efe9dc'; g.fillRect(-28,-42,56,10);
+  g.strokeStyle=C.iron; g.lineWidth=1; g.strokeRect(-28,-42,56,10);
+  g.fillStyle=C.ink||'#18181c'; g.font='700 6px "SF Mono",monospace'; g.textAlign='center';
+  g.fillText('C H A L L   P A R K',0,-35);
+  g.fillStyle=C.accent; g.fillRect(-28,-33,56,1.6);
+}
+
+/* ── flat ride painters (t = anim time, r = ride) ── */
+function ridePlatform(g,w2,h2,col){
+  g.fillStyle='#8d8d85'; diamond(g,0,0,w2,h2); g.fill();
+  g.strokeStyle='#6e6e66'; g.lineWidth=1; diamond(g,0,0,w2,h2); g.stroke();
+}
+function drawCarousel(g,t,r){
+  ridePlatform(g,TW-6,TH-3);
+  g.fillStyle='#b09a72'; g.beginPath(); g.ellipse(0,-4,42,20,0,0,7); g.fill();
+  const seats=7;
+  for(let k=0;k<seats;k++){
+    const a=t*1.1+k/seats*6.283;
+    const hx=Math.cos(a)*30, hy=Math.sin(a)*13-10 + Math.sin(t*4+k)*1.6;
+    g.fillStyle=SHIRTS[k%SHIRTS.length]; g.fillRect(hx-2.5,hy-4,5,7);
+  }
+  g.fillStyle=C.iron; g.fillRect(-1.5,-40,3,32);
+  for(let k=0;k<8;k++){
+    const a=k/8*6.283;
+    g.strokeStyle= (k&1)?C.canvasRed:C.canvasWhite; g.lineWidth=3;
+    g.beginPath(); g.moveTo(0,-40); g.lineTo(Math.cos(a)*40, -12+Math.sin(a)*16); g.stroke();
+  }
+  g.fillStyle=C.canvasRed; g.beginPath(); g.moveTo(0,-48); g.lineTo(10,-38); g.lineTo(-10,-38); g.closePath(); g.fill();
+}
+function drawFerris(g,t,r){
+  ridePlatform(g,TW-6,TH-3);
+  const R=34, cy=-44;
+  g.strokeStyle=C.iron; g.lineWidth=2.5;
+  g.beginPath(); g.moveTo(-20,4); g.lineTo(0,cy); g.lineTo(20,4); g.stroke();
+  g.strokeStyle=C.ironHi; g.lineWidth=2;
+  g.beginPath(); g.arc(0,cy,R,0,6.283); g.stroke();
+  g.lineWidth=1;
+  for(let k=0;k<8;k++){
+    const a=t*.5+k/8*6.283;
+    g.beginPath(); g.moveTo(0,cy); g.lineTo(Math.cos(a)*R, cy+Math.sin(a)*R); g.stroke();
+  }
+  for(let k=0;k<8;k++){
+    const a=t*.5+k/8*6.283;
+    g.fillStyle=SHIRTS[k%SHIRTS.length];
+    g.fillRect(Math.cos(a)*R-3.5, cy+Math.sin(a)*R-1, 7, 6);
+  }
+}
+function drawTeacups(g,t,r){
+  ridePlatform(g,TW-6,TH-3);
+  g.fillStyle='#c8bfa8'; g.beginPath(); g.ellipse(0,-2,44,20,0,0,7); g.fill();
+  for(let k=0;k<3;k++){
+    const a=t*.9+k/3*6.283;
+    const cxp=Math.cos(a)*24, cyp=-4+Math.sin(a)*10;
+    g.fillStyle=[C.canvasRed,C.canvasBlue,C.flower2][k];
+    g.beginPath(); g.ellipse(cxp,cyp-4,9,6,0,0,7); g.fill();
+    g.fillStyle=C.canvasWhite; g.beginPath(); g.ellipse(cxp,cyp-7,7,4,0,0,7); g.fill();
+    g.fillStyle=C.peepSkin; g.beginPath(); g.arc(cxp+Math.cos(t*5+k)*3, cyp-9,1.8,0,7); g.fill();
+  }
+}
+function drawDrop(g,t,r){
+  shadow(g,12);
+  g.fillStyle=C.iron; g.fillRect(-2.5,-92,5,92);
+  g.strokeStyle=C.ironHi; g.lineWidth=1;
+  for(let k=0;k<7;k++){ g.beginPath(); g.moveTo(-4,-k*13-6); g.lineTo(4,-k*13-12); g.stroke(); }
+  const p=(t*.35)%1, zz = p<.72 ? (p/.72) : (1-p)/.28;
+  const cy=-8-zz*72;
+  g.fillStyle=TRACKCOLORS[r?r.col:0].rail; g.fillRect(-9,cy-7,18,8);
+  g.fillStyle=C.peepSkin;
+  for(let k=-1;k<=1;k++){ g.beginPath(); g.arc(k*5,cy-9,1.8,0,7); g.fill(); }
+  g.fillStyle=C.iron; g.fillRect(-8,-95,16,5);
+}
+function drawHaunted(g,t,r){
+  shadow(g,26);
+  g.fillStyle='#4a3d52'; g.beginPath();
+  g.moveTo(-34,-4); g.lineTo(0,12); g.lineTo(34,-4); g.lineTo(34,-30); g.lineTo(0,-14); g.lineTo(-34,-30); g.closePath(); g.fill();
+  g.fillStyle='#3a2f40';
+  g.beginPath(); g.moveTo(-34,-30); g.lineTo(0,-14); g.lineTo(0,-46); g.lineTo(-34,-56); g.closePath(); g.fill();
+  g.fillStyle='#2e2533';
+  g.beginPath(); g.moveTo(34,-30); g.lineTo(0,-14); g.lineTo(0,-46); g.lineTo(34,-56); g.closePath(); g.fill();
+  g.fillStyle='#241c28'; g.beginPath(); g.moveTo(0,-46); g.lineTo(-34,-56); g.lineTo(0,-72); g.lineTo(34,-56); g.closePath(); g.fill();
+  const fl = (Math.sin(t*7)+Math.sin(t*13.7))>1.2;
+  g.fillStyle= fl ? '#ffe9a8' : '#5a4a62';
+  g.fillRect(-22,-38,7,8); g.fillRect(13,-40,7,8);
+  g.fillStyle='#241c28'; g.fillRect(-5,-6,10,14);
+  if(Math.sin(t*.7)>0.86){ g.fillStyle='rgba(240,240,255,.8)'; g.beginPath(); g.arc(0,-80,5,0,7); g.fill(); }
+}
+function drawSwing(g,t,r){
+  ridePlatform(g,TW-6,TH-3);
+  g.strokeStyle=C.iron; g.lineWidth=3;
+  g.beginPath(); g.moveTo(-24,2); g.lineTo(0,-44); g.lineTo(24,2); g.stroke();
+  const a=Math.sin(t*1.6)*1.05;
+  const sx=Math.sin(a)*30, sy=-44+Math.cos(a)*30;
+  g.strokeStyle=C.ironHi; g.lineWidth=2;
+  g.beginPath(); g.moveTo(0,-44); g.lineTo(sx,sy); g.stroke();
+  g.save(); g.translate(sx,sy); g.rotate(a*.6);
+  g.fillStyle=TRACKCOLORS[r?r.col:1].rail;
+  g.beginPath(); g.ellipse(0,4,20,7,0,0,7); g.fill();
+  g.fillStyle=C.peepSkin;
+  for(let k=-1;k<=1;k++){ g.beginPath(); g.arc(k*7,0,1.8,0,7); g.fill(); }
+  g.restore();
+}
+function drawStall(g,t,r){
+  shadow(g,15);
+  const type=r.type;
+  const awn = type==='burger'?C.canvasRed : type==='soda'?C.canvasBlue : type==='icecream'?C.flower2 : type==='balloons'?C.flower3 : '#7d8a94';
+  g.fillStyle='#c9b899'; g.fillRect(-14,-22,28,22);
+  g.fillStyle='#8f7b5a'; g.fillRect(-14,-8,28,8);
+  for(let k=0;k<4;k++){
+    g.fillStyle = (k&1)?C.canvasWhite:awn;
+    g.beginPath(); g.moveTo(-16+k*8,-22); g.lineTo(-8+k*8,-22); g.lineTo(-8+k*8,-27); g.lineTo(-16+k*8,-27); g.closePath(); g.fill();
+  }
+  if(type==='burger'){ g.fillStyle='#d8a13a'; g.beginPath(); g.arc(0,-32,5,3.14,0); g.fill(); g.fillStyle='#8a4a2e'; g.fillRect(-5,-32,10,2.5); }
+  else if(type==='soda'){ g.fillStyle=C.canvasWhite; g.fillRect(-3,-38,6,9); g.strokeStyle=C.iron; g.lineWidth=1; g.beginPath(); g.moveTo(1,-38); g.lineTo(4,-43); g.stroke(); }
+  else if(type==='icecream'){ g.fillStyle='#d9c184'; g.beginPath(); g.moveTo(-4,-30); g.lineTo(4,-30); g.lineTo(0,-40); g.closePath(); g.fill(); g.fillStyle='#e8d8e0'; g.beginPath(); g.arc(0,-31,4,0,7); g.fill(); }
+  else if(type==='balloons'){
+    for(let k=0;k<3;k++){
+      const bx=(k-1)*6, by=-36-((t*8+k*20)%6);
+      g.strokeStyle=C.iron; g.lineWidth=.7; g.beginPath(); g.moveTo(bx,-27); g.lineTo(bx,by); g.stroke();
+      g.fillStyle=[C.flower1,C.canvasBlue,C.flower2][k]; g.beginPath(); g.ellipse(bx,by-3,3.4,4.2,0,0,7); g.fill();
+    }
+  }
+  else if(type==='restroom'){ g.fillStyle='#efe9dc'; g.fillRect(-7,-19,14,9); g.fillStyle=C.iron; g.font='700 7px "SF Mono",monospace'; g.textAlign='center'; g.fillText('WC',0,-12); }
+}
+const RIDE_DRAW = { carousel:drawCarousel, ferris:drawFerris, teacups:drawTeacups, drop:drawDrop, haunted:drawHaunted, swing:drawSwing,
+  burger:drawStall, soda:drawStall, icecream:drawStall, balloons:drawStall, restroom:drawStall };
+
+/* ── track painter ── */
+function piecePts(p, K){
+  const din=(p.dir+2)%4, dout=exitDirOf(p);
+  const A=edgeMid(p.x,p.y,din), B=ctr(p.x,p.y), E=edgeMid(p.x,p.y,dout);
+  const out=[];
+  for(let k=0;k<=K;k++){
+    const t=k/K; let wx,wy;
+    if(p.turn){ const u=1-t;
+      wx=u*u*A[0]+2*u*t*B[0]+t*t*E[0]; wy=u*u*A[1]+2*u*t*B[1]+t*t*E[1];
+    } else { wx=A[0]+(E[0]-A[0])*t; wy=A[1]+(E[1]-A[1])*t; }
+    const z=(p.h+(p.slope||0)*(1-Math.cos(Math.PI*t))/2)*ZH;
+    out.push([wx,wy,z]);
+  }
+  return out;
+}
+function drawPiece(g, p, colId, ghost){
+  const col=TRACKCOLORS[colId]||TRACKCOLORS[0];
+  const pts=piecePts(p,6);
+  if(ghost) g.globalAlpha=.55;
+  // supports
+  if(p.h>0||p.slope>0){
+    const m=pts[3];
+    g.strokeStyle=C.iron; g.lineWidth=2;
+    g.beginPath(); g.moveTo(m[0],m[1]); g.lineTo(m[0],m[1]-m[2]+2); g.stroke();
+    g.fillStyle=C.iron; g.fillRect(m[0]-3,m[1]-1,6,2);
+  }
+  // station platform
+  if(p.station){
+    g.fillStyle='#a8a89e';
+    diamond(g, pts[3][0], pts[3][1], TW2-4, TH2-2); g.fill();
+    g.fillStyle='#8d8d85';
+    diamond(g, pts[3][0], pts[3][1], TW2-12, TH2-6); g.fill();
+  }
+  // ties
+  g.strokeStyle=col.tie; g.lineWidth=1.6;
+  for(let k=0;k<pts.length-1;k+=1){
+    const a=pts[k], b=pts[k+1];
+    const dx=b[0]-a[0], dy=b[1]-a[1], L=Math.hypot(dx,dy)||1;
+    const nx=-dy/L*4.6, ny=dx/L*4.6;
+    const mx=(a[0]+b[0])/2, my=(a[1]+b[1])/2 - (a[2]+b[2])/2;
+    g.beginPath(); g.moveTo(mx-nx,my-ny); g.lineTo(mx+nx,my+ny); g.stroke();
+  }
+  // two rails
+  g.strokeStyle=col.rail; g.lineWidth=1.8;
+  for(const s of [-3.4, 3.4]){
+    g.beginPath();
+    for(let k=0;k<pts.length;k++){
+      const a=pts[k];
+      const b=pts[Math.min(k+1,pts.length-1)], pr=pts[Math.max(k-1,0)];
+      const dx=b[0]-pr[0], dy=b[1]-pr[1], L=Math.hypot(dx,dy)||1;
+      const nx=-dy/L*s, ny=dx/L*s;
+      const X=a[0]+nx, Y=a[1]+ny-a[2];
+      k===0 ? g.moveTo(X,Y) : g.lineTo(X,Y);
+    }
+    g.stroke();
+  }
+  // chain lift dashes
+  if(p.chain){
+    g.strokeStyle='#2a2a30'; g.lineWidth=1.2;
+    for(let k=0;k<pts.length-1;k+=2){
+      const a=pts[k], b=pts[k+1];
+      g.beginPath(); g.moveTo(a[0],a[1]-a[2]); g.lineTo((a[0]+b[0])/2,(a[1]+b[1])/2-(a[2]+b[2])/2); g.stroke();
+    }
+  }
+  if(ghost) g.globalAlpha=1;
+}
+/* ── peep painter ── */
+function drawPeep(g, p){
+  const bob = p.state==='walk' ? Math.sin(G.time*9 + p.ph)*0.8 : 0;
+  g.fillStyle=C.shadow; g.beginPath(); g.ellipse(0,0,3.2,1.5,0,0,7); g.fill();
+  const step = p.state==='walk' ? Math.sin(G.time*11 + p.ph)*1.4 : 0;
+  g.fillStyle='#3a3a42';
+  g.fillRect(-1.8+step*.4,-3.5,1.5,3.5); g.fillRect(0.4-step*.4,-3.5,1.5,3.5);
+  g.fillStyle=p.shirt; g.fillRect(-2.4,-8.5+bob,4.8,5.4);
+  g.fillStyle=C.peepSkin; g.beginPath(); g.arc(0,-10.5+bob,2.2,0,7); g.fill();
+  if(p.hat){ g.fillStyle=p.hat; g.fillRect(-2.4,-13.4+bob,4.8,1.8); }
+  if(p.balloon){
+    g.strokeStyle=C.iron; g.lineWidth=.6;
+    g.beginPath(); g.moveTo(2,-8+bob); g.lineTo(4,-18+bob); g.stroke();
+    g.fillStyle=p.balloon; g.beginPath(); g.ellipse(4,-20+bob,2.6,3.2,0,0,7); g.fill();
+  }
+}
+/* ── FX: floating texts & bubbles (world-anchored) ── */
+const FX = [];
+function drawFX(g){
+  for(let i=FX.length-1;i>=0;i--){
+    const f=FX[i];
+    f.life -= 0.016;
+    if(f.life<=0){ FX.splice(i,1); continue; }
+    const sx=w2sX(f.x), sy=w2sY(f.y) - (1-f.life)*26*CAM.z;
+    g.globalAlpha = Math.min(1, f.life*2);
+    if(f.t==='cash'){ g.fillStyle='#3f7a4a'; g.font='700 '+(10*CAM.z)+'px "SF Mono",monospace'; g.textAlign='center'; g.fillText(f.v,sx,sy); }
+    else if(f.t==='woo'){ g.fillStyle='#18181c'; g.font='italic 700 '+(10*CAM.z)+'px "SF Mono",monospace'; g.textAlign='center'; g.fillText(f.v,sx,sy); }
+    else { // thought bubble
+      g.font=(9.5*CAM.z)+'px "SF Mono",monospace'; g.textAlign='center';
+      const w=g.measureText(f.v).width+10*CAM.z;
+      g.fillStyle='rgba(246,244,238,.92)'; g.strokeStyle='#989690'; g.lineWidth=1;
+      g.beginPath(); g.roundRect(sx-w/2, sy-16*CAM.z, w, 13*CAM.z, 3);
+      g.fill(); g.stroke();
+      g.fillStyle='#56565e'; g.fillText(f.v, sx, sy-6.5*CAM.z);
+    }
+    g.globalAlpha=1;
+  }
+}
+
+/* ── build cursor state ── */
+const CUR = { tx:-1, ty:-1, valid:false, mx:0, my:0, over:false };
+const BUILD = { coaster:null };
+
+/* ── the frame ── */
+function draw(){
+  const g=cx2d;
+  g.setTransform(DPR,0,0,DPR,0,0);
+  g.imageSmoothingEnabled=false;
+  g.fillStyle='#e7e2d5';                     // the paper beyond the park
+  g.fillRect(0,0,VW,VH);
+  // dot grid on the void, echoing the site
+  const gs=20*CAM.z;
+  if(gs>=11){
+    g.fillStyle='rgba(150,144,128,.35)';
+    const ox=(-CAM.x*CAM.z+VW/2)%gs, oy=(-CAM.y*CAM.z+VH/2)%gs;
+    for(let yy=oy; yy<VH; yy+=gs) for(let xx=ox; xx<VW; xx+=gs){ g.fillRect(xx,yy,1.2,1.2); }
+  }
+  // static world
+  g.save();
+  g.translate(VW/2 - CAM.x*CAM.z, VH/2 - CAM.y*CAM.z);
+  g.scale(CAM.z, CAM.z);
+  g.drawImage(bake, -BOX, 0);
+  // water shimmer
+  if(!REDUCED){
+    g.strokeStyle=C.waterHi; g.lineWidth=1;
+    for(const [bx,by,x,y] of waterTiles){
+      const ph=Math.sin(G.time*1.8+(x*13+y*7)%10);
+      if(ph>0.2){ g.globalAlpha=ph*.5; g.beginPath(); g.moveTo(bx-BOX-8,by+ph*2); g.lineTo(bx-BOX+6,by+ph*2-2); g.stroke(); }
+    }
+    g.globalAlpha=1;
+  }
+  // ── sortables: everything that stands ──
+  const S=[];
+  for(let y=0;y<N;y++) for(let x=0;x<N;x++){
+    const sc=G.scen[idx(x,y)];
+    if(sc){ const [wx,wy]=ctr(x,y); S.push({d:x+y, z:0, wx, wy, fn:(gg)=>SCEN_DRAW[sc](gg,(x*7+y*13)|0, G.time)}); }
+  }
+  for(const r of G.rides){
+    const ax=r.x+r.w-1, ay=r.y+r.h-1;
+    const [wx1,wy1]=ctr(r.x,r.y), [wx2,wy2]=ctr(ax,ay);
+    const wx=(wx1+wx2)/2, wy=(wy1+wy2)/2;
+    S.push({d:ax+ay, z:1, wx, wy, fn:(gg)=>RIDE_DRAW[r.type](gg, G.time + r.t, r)});
+  }
+  for(const c of G.coasters){
+    c.pieces.forEach((p,i)=>{ S.push({d:p.x+p.y, z:p.h*ZH+2, wx:0, wy:0, raw:true, fn:(gg)=>drawPiece(gg,p,c.col,false)}); });
+  }
+  for(const p of G.peeps){
+    if(p.hidden) continue;
+    S.push({d:p.x+p.y+p.fr, z:1, wx:p.wx, wy:p.wy, fn:(gg)=>drawPeep(gg,p)});
+  }
+  for(const c of G.coasters){
+    if(!c.train||!c.samples) continue;
+    const col=TRACKCOLORS[c.col];
+    for(const car of trainCars(c)){
+      S.push({d:car.d+.6, z:car.z+3, wx:0, wy:0, raw:true, fn:(gg)=>{
+        gg.fillStyle=C.shadow; gg.beginPath(); gg.ellipse(car.x,car.y,6,2.6,0,0,7); gg.fill();
+        gg.save(); gg.translate(car.x, car.y-car.z-3); gg.rotate(car.ang*0.5);
+        gg.fillStyle=col.rail; gg.beginPath(); gg.roundRect(-7,-3.5,14,7,2.5); gg.fill();
+        gg.fillStyle=col.tie; gg.fillRect(-7,2,14,1.5);
+        if(c.train.riders>0){ gg.fillStyle=C.peepSkin; gg.beginPath(); gg.arc(-3,-5,1.7,0,7); gg.arc(2,-5,1.7,0,7); gg.fill(); }
+        gg.restore();
+      }});
+    }
+  }
+  // the gate
+  { const [wx,wy]=ctr(ENTR.x,ENTR.y); S.push({d:ENTR.x+ENTR.y, z:2, wx, wy, fn:drawGate}); }
+  S.sort((a,b)=> (a.d-b.d) || (a.z-b.z));
+  for(const s of S){
+    if(s.raw){ s.fn(g); continue; }
+    g.save(); g.translate(s.wx, s.wy); s.fn(g); g.restore();
+  }
+  // ── builder head marker ──
+  if(BUILD.coaster && !BUILD.coaster.done){
+    const c=BUILD.coaster, hd=headOf(c);
+    if(hd){
+      const [wx,wy]=ctr(hd.x,hd.y);
+      const pulse=.6+Math.sin(G.time*5)*.25;
+      g.globalAlpha=pulse;
+      g.strokeStyle=C.accent; g.lineWidth=2.5;
+      diamond(g,wx,wy-hd.h*ZH,TW2-6,TH2-3); g.stroke();
+      const d=DIRS[hd.dir];
+      const [ex,ey]=[wx+(d.dx-d.dy)*TW2*.6, wy+(d.dx+d.dy)*TH2*.6 - hd.h*ZH];
+      g.fillStyle=C.accent;
+      g.beginPath(); g.arc(ex,ey,3.4,0,7); g.fill();
+      if(hd.h>0){ g.setLineDash([3,3]); g.lineWidth=1; g.beginPath(); g.moveTo(wx,wy); g.lineTo(wx,wy-hd.h*ZH); g.stroke(); g.setLineDash([]); }
+      g.globalAlpha=1;
+    }
+  }
+  // ── cursor tile ──
+  if(CUR.over && inMap(CUR.tx,CUR.ty) && TOOL.id!=='pointer'){
+    const [wx,wy]=ctr(CUR.tx,CUR.ty);
+    g.strokeStyle = CUR.valid ? C.accent : '#c0392b';
+    g.lineWidth=2;
+    diamond(g,wx,wy,TW2-1,TH2-.5); g.stroke();
+    if(!CUR.valid){ g.globalAlpha=.18; g.fillStyle='#c0392b'; diamond(g,wx,wy,TW2-1,TH2-.5); g.fill(); g.globalAlpha=1; }
+    // footprint ghost for rides
+    if(TOOL.id==='ride' && TOOL.sub){
+      const def=RIDES[TOOL.sub];
+      g.globalAlpha=.35; g.strokeStyle=CUR.valid?C.accent:'#c0392b'; g.setLineDash([4,3]);
+      for(let dy=0;dy<def.h;dy++) for(let dx=0;dx<def.w;dx++){
+        if(!inMap(CUR.tx+dx,CUR.ty+dy)) continue;
+        const [gx,gy]=ctr(CUR.tx+dx,CUR.ty+dy);
+        diamond(g,gx,gy,TW2-1,TH2-.5); g.stroke();
+      }
+      g.setLineDash([]); g.globalAlpha=1;
+    }
+  }
+  g.restore();
+  drawFX(g);
+}
+/* ── peeps ── */
+let PEEP_ID = 0;
+const PEEP_CAP = 240;
+function spawnPeep(){
+  if(G.peeps.length >= PEEP_CAP) return;
+  const first = G.guestsTotal === 0;
+  const p = {
+    id:++PEEP_ID,
+    name: first ? 'chris hall' : 'guest '+(G.guestsTotal+1),
+    x:ENTR.x, y:ENTR.y, fx:ENTR.x, fy:ENTR.y, tx:ENTR.x, ty:ENTR.y-1, fr:0,
+    wx:0, wy:0, state:'walk', hidden:false,
+    happiness:70+Math.random()*20|0, hunger:20+Math.random()*25, thirst:20+Math.random()*25,
+    bladder:Math.random()*30, energy:100,
+    shirt: first ? C.accent : SHIRTS[(Math.random()*SHIRTS.length)|0],
+    hat: first ? '#18181c' : (Math.random()<.18 ? SHIRTS[(Math.random()*SHIRTS.length)|0] : null),
+    balloon:null, riding:null, rideT:0, waitT:0,
+    speed:.9+Math.random()*.5, ph:Math.random()*7, cameDir:3,
+    thoughts:['what a nice day for the park'], lastThought:G.time,
+  };
+  G.peeps.push(p); G.guestsTotal++;
+  if(first) news('<b>chris hall</b> is the first through the gate — the accent-gold shirt gives it away.', true);
+  else if(G.guestsTotal % 50 === 0) news('guest '+G.guestsTotal+' has entered chall park!', true);
+}
+function pathNb(x,y){
+  const out=[];
+  for(let d=0;d<4;d++){
+    const nx=x+DIRS[d].dx, ny=y+DIRS[d].dy;
+    if(inMap(nx,ny) && G.path[idx(nx,ny)]) out.push({d,nx,ny});
+  }
+  return out;
+}
+function think(p, msg){
+  if(G.time - p.lastThought < 4) return;
+  p.lastThought = G.time;
+  p.thoughts.push(msg); if(p.thoughts.length>5) p.thoughts.shift();
+  if(FX.length < 26 && !p.hidden && Math.random()<.65)
+    FX.push({t:'th', x:p.wx, y:p.wy-16, v:msg, life:2.2});
+}
+function stepPeep(p, dt){
+  if(p.state==='ride'){
+    p.rideT -= dt;
+    if(p.rideT<=0){
+      const was=p.riding; p.riding=null; p.hidden=false; p.state='walk';
+      const ex = was.excite || (RIDES[was.type] ? RIDES[was.type].ex : 2);
+      p.happiness = Math.min(100, p.happiness + 8 + ex*3);
+      p.energy = Math.max(0, p.energy-8);
+      think(p, ex>3.5 ? 'that was intense!' : GUEST_THOUGHTS_HAPPY[(Math.random()*GUEST_THOUGHTS_HAPPY.length)|0]);
+      // step off wherever the platform/exit is
+      if(was.pieces){ const st=was.pieces[0]; p.x=p.tx=st.x; p.y=p.ty=st.y; }
+      const nb = pathNb(p.x,p.y);
+      if(nb.length){ const n=nb[(Math.random()*nb.length)|0]; p.tx=n.nx; p.ty=n.ny; p.fr=0; }
+    }
+    return;
+  }
+  if(p.state==='queue'){
+    p.waitT += dt;
+    if(p.waitT > 40){ // gave up
+      const c=p.qFor; if(c) c.queue = c.queue.filter(q=>q!==p);
+      p.state='walk'; p.qFor=null;
+      p.happiness=Math.max(0,p.happiness-8); think(p,'i’ve been queuing for ages');
+    }
+    return;
+  }
+  if(p.state==='sit'){
+    p.rideT -= dt;
+    p.energy = Math.min(100, p.energy + dt*9);
+    if(p.rideT<=0) p.state='walk';
+    return;
+  }
+  if(p.state==='buy'){
+    p.rideT -= dt;
+    if(p.rideT<=0) p.state='walk';
+    return;
+  }
+  // needs drift
+  p.hunger  = Math.min(100, p.hunger  + dt*.55);
+  p.thirst  = Math.min(100, p.thirst  + dt*.7);
+  p.bladder = Math.min(100, p.bladder + dt*.4);
+  p.energy  = Math.max(0,   p.energy  - dt*.5);
+  if(p.hunger>75||p.thirst>75) p.happiness=Math.max(0,p.happiness-dt*1.2);
+  // walk between tile centers
+  p.fr += dt * p.speed;
+  const [ax,ay]=ctr(p.x,p.y), [bx,by]=ctr(p.tx,p.ty);
+  p.wx = ax+(bx-ax)*Math.min(1,p.fr);
+  p.wy = ay+(by-ay)*Math.min(1,p.fr);
+  if(p.fr < 1) return;
+  // arrived
+  p.cameDir = (p.tx-p.x===1)?2 : (p.tx-p.x===-1)?0 : (p.ty-p.y===1)?3 : 1; // direction back
+  p.x=p.tx; p.y=p.ty; p.fr=0;
+  // leaving?
+  if(p.state==='leave'){
+    if(p.x===ENTR.x && p.y===ENTR.y){ p.dead=true; return; }
+  } else if(p.happiness < 22){
+    p.state='leave'; think(p,'i’m going home');
+  }
+  // look around this tile
+  const around=[];
+  for(let d=0;d<4;d++){
+    const nx=p.x+DIRS[d].dx, ny=p.y+DIRS[d].dy;
+    if(!inMap(nx,ny)) continue;
+    around.push({nx,ny,i:idx(nx,ny)});
+  }
+  for(const a of around){
+    // stalls & rides
+    const rid=G.occ[a.i];
+    if(rid){
+      const r=rideById(rid);
+      if(r && r.open){
+        const def=RIDES[r.type];
+        if(def.kind==='food' && p.hunger>62){ p.hunger=8; earn(def.fee, p.wx, p.wy-12); r.ridden++; p.state='buy'; p.rideT=1.4; think(p,'that '+def.name.split(' ')[0]+' hit the spot'); return; }
+        if(def.kind==='drink' && p.thirst>58){ p.thirst=6; earn(def.fee, p.wx, p.wy-12); r.ridden++; p.state='buy'; p.rideT=1.2; return; }
+        if(def.kind==='loo' && p.bladder>72){ p.bladder=4; r.ridden++; p.state='buy'; p.rideT=2.2; return; }
+        if(def.kind==='shop' && !p.balloon && Math.random()<.35){ p.balloon=[C.flower1,C.canvasBlue,C.flower2,C.flower3][(Math.random()*4)|0]; earn(def.fee,p.wx,p.wy-12); r.ridden++; think(p,'i bought a balloon!'); }
+        if(def.kind==='ride' && p.state!=='leave' && p.energy>25 && Math.random()<.5){
+          const cap = def.cap, aboard = G.peeps.filter(q=>q.riding===r).length;
+          if(aboard < cap){
+            p.riding=r; p.state='ride'; p.rideT=def.dur; p.hidden=true;
+            earn(def.fee, p.wx, p.wy-12); r.ridden++;
+            return;
+          }
+        }
+      }
+    }
+    // coaster stations
+    const tr=trackAt(a.nx,a.ny);
+    if(tr && p.state!=='leave' && p.energy>20){
+      for(const t of tr){
+        if(t.p.station && t.c.open && t.c.done && t.c.queue.length<16 && Math.random()<.65){
+          t.c.queue.push(p); p.state='queue'; p.qFor=t.c; p.waitT=0;
+          think(p,'ooh, '+t.c.name+'!');
+          return;
+        }
+      }
+    }
+    // benches
+    if(G.scen[a.i]===4 && p.energy<30 && Math.random()<.6){
+      p.state='sit'; p.rideT=4.5; think(p, GUEST_THOUGHTS_NEED.tired); return;
+    }
+  }
+  // idle thoughts
+  if(Math.random()<.02){
+    if(p.hunger>70) think(p, GUEST_THOUGHTS_NEED.hunger);
+    else if(p.thirst>70) think(p, GUEST_THOUGHTS_NEED.thirst);
+    else if(p.happiness>72 && Math.random()<.5) think(p, GUEST_THOUGHTS_HAPPY[(Math.random()*GUEST_THOUGHTS_HAPPY.length)|0]);
+    else if(G.coasters.some(c=>c.open)) think(p, GUEST_THOUGHTS_NEED.fun);
+  }
+  // choose next tile
+  const nb = pathNb(p.x,p.y);
+  if(!nb.length){ // stranded off-path: wander home
+    p.tx=p.x; p.ty=Math.min(N-1,p.y+1); return;
+  }
+  let pick;
+  if(p.state==='leave'){
+    nb.sort((a,b)=> (Math.abs(a.nx-ENTR.x)+Math.abs(a.ny-ENTR.y)) - (Math.abs(b.nx-ENTR.x)+Math.abs(b.ny-ENTR.y)));
+    pick = nb[0];
+  } else {
+    const fwd = nb.filter(n=>n.d!==p.cameDir);
+    pick = (fwd.length?fwd:nb)[(Math.random()*(fwd.length||nb.length))|0];
+  }
+  p.tx=pick.nx; p.ty=pick.ny;
+  // scenery makes people happy as they pass
+  let green=0;
+  for(const a of around) if(G.scen[a.i]) green++;
+  if(green) p.happiness=Math.min(100,p.happiness+green*.35);
+}
+
+/* ── park rating ── */
+function recomputeRating(){
+  const peeps=G.peeps.length;
+  const avgH = peeps ? G.peeps.reduce((s,p)=>s+p.happiness,0)/peeps : 60;
+  let scenery=0; for(let i=0;i<N*N;i++) if(G.scen[i]) scenery++;
+  let water=0; for(let i=0;i<N*N;i++) if(G.ter[i]===2) water++;
+  const rides=G.rides.filter(r=>r.open && RIDES[r.type].kind==='ride').length;
+  const coasterEx = G.coasters.filter(c=>c.open).reduce((s,c)=>Math.max(s,c.excite),0);
+  G.rating = Math.max(0, Math.min(999, Math.round(
+    280 + avgH*3.2 + Math.min(rides*22,132) + coasterEx*26 + Math.min(scenery*1.1,110) + Math.min(water*.8,40)
+  )));
+}
+
+/* ── the clock ── */
+let saveT=0, ratingT=0, hudT=0, fpsT=0, frames=0;
+let REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+matchMedia('(prefers-reduced-motion: reduce)').addEventListener?.('change', e=>REDUCED=e.matches);
+let last=performance.now();
+function simStep(dt){
+  G.time += dt;
+  // day
+  G.dayT += dt;
+  if(G.dayT > 75){
+    G.dayT=0; G.day++;
+    if(G.day%2===0) news('award: <b>'+AWARDS[(G.day/2|0)%AWARDS.length]+'</b>', true);
+    else news('day '+G.day+' — '+G.guestsTotal+' guests so far, rating '+G.rating+'.');
+  }
+  // spawn
+  G.nextGuest -= dt;
+  if(G.nextGuest<=0){
+    spawnPeep();
+    G.nextGuest = Math.max(1.1, 5.5 - G.rating/220) * (.7+Math.random()*.6);
+  }
+  // sims
+  for(const p of G.peeps) stepPeep(p,dt);
+  if(G.peeps.some(p=>p.dead)) G.peeps = G.peeps.filter(p=>!p.dead);
+  for(const c of G.coasters) if(c.done && (c.open||c.testing)) stepTrain(c,dt);
+  ratingT+=dt; if(ratingT>2){ ratingT=0; recomputeRating(); }
+  saveT+=dt; if(saveT>8){ saveT=0; saveGame(); }
+  G.newsT+=dt;
+  if(G.newsT>6 && G.news.length){ G.newsT=0; el.newsText.innerHTML = G.news.shift(); }
+}
+function frame(now){
+  requestAnimationFrame(frame);
+  let dt=(now-last)/1000; last=now;
+  if(dt>0.06) dt=0.06;
+  if(!G.paused) simStep(dt);
+  hudT+=dt; if(hudT>.25){ hudT=0; hud.sync(); }
+  draw();
+}
+
+/* ── hud ── */
+const el = {};
+const hud = {
+  lastMoney:0,
+  money(){
+    el.hMoney.textContent = '$'+G.money.toLocaleString('en-US');
+    el.hMoney.classList.remove('tick'); void el.hMoney.offsetWidth; el.hMoney.classList.add('tick');
+  },
+  sync(){
+    el.hMoney.textContent = '$'+G.money.toLocaleString('en-US');
+    el.hGuests.textContent = G.peeps.length;
+    el.hRating.textContent = G.rating;
+    el.hDay.textContent = G.day;
+  },
+};
+/* ── tools ── */
+const TOOL = { id:'pointer', sub:null };
+const TOOLS = [
+  { id:'pointer', label:'inspect', g:'<circle cx="11" cy="11" r="5"/><path d="M15 15l5 5"/>' },
+  { id:'path',    label:'path',    g:'<path d="M4 18 L11 4 L18 18 Z" transform="rotate(90 11 11)"/><path d="M7 11h8" />' },
+  { id:'terrain', label:'terrain', g:'<path d="M3 16 L9 8 L13 12 L17 6 L21 16"/><path d="M3 19h18"/>' },
+  { id:'scenery', label:'scenery', g:'<path d="M11 20v-6"/><circle cx="11" cy="9" r="5"/><circle cx="7" cy="12" r="3"/><circle cx="15" cy="12" r="3"/>' },
+  { id:'ride',    label:'rides',   g:'<circle cx="11" cy="11" r="8"/><circle cx="11" cy="11" r="1.5" class="f"/><path d="M11 3v4M11 15v4M3 11h4M15 11h4"/>' },
+  { id:'stall',   label:'stalls',  g:'<path d="M4 9h14v10h-14z"/><path d="M3 9l2-4h12l2 4"/><path d="M4 9v2h14V9"/>' },
+  { id:'coaster', label:'coaster', g:'<path d="M2 19 C6 19 6 6 10 6 C14 6 13 14 16 14 C19 14 19 10 21 10"/><circle cx="10" cy="6" r="1.8" class="f"/>' },
+  { id:'doze',    label:'bulldoze',g:'<path d="M4 16l12-12M8 4l8 8"/><path d="M3 20h16"/>' },
+];
+const SUBS = {
+  terrain: [ {k:'grass',label:'grass',sw:'#8fb15e'}, {k:'sand',label:'sand',sw:'#d9c184'}, {k:'water',label:'water',sw:'#4f7ea8'} ],
+  scenery: Object.entries(SCEN).map(([k,v])=>({k, label:v.name, pr:'$'+v.price})),
+  ride:  ['carousel','ferris','teacups','drop','haunted','swing'].map(k=>({k, label:RIDES[k].name, pr:'$'+RIDES[k].price})),
+  stall: ['burger','soda','icecream','balloons','restroom'].map(k=>({k, label:RIDES[k].name, pr:'$'+RIDES[k].price})),
+};
+function setTool(id, sub){
+  TOOL.id=id;
+  TOOL.sub = sub!==undefined ? sub : (SUBS[id] ? SUBS[id][0].k : null);
+  document.querySelectorAll('.tool').forEach(b=>b.setAttribute('aria-pressed', b.dataset.id===id ? 'true':'false'));
+  buildSub();
+  cv.classList.toggle('pointer', id==='pointer');
+  const cp=document.getElementById('cpanel');
+  if(id==='coaster'){ cp.classList.add('open'); cpanelSync(); }
+  else { cp.classList.remove('open'); }
+  SND.click();
+}
+function buildSub(){
+  const sub=document.getElementById('sub');
+  sub.innerHTML='';
+  const list=SUBS[TOOL.id];
+  sub.classList.toggle('open', !!list);
+  if(!list) return;
+  for(const o of list){
+    const b=document.createElement('button');
+    b.className='sopt'; b.setAttribute('aria-pressed', TOOL.sub===o.k?'true':'false');
+    if(o.sw){ const s=document.createElement('span'); s.className='sw'; s.style.background=o.sw; b.appendChild(s); }
+    b.appendChild(document.createTextNode(o.label));
+    if(o.pr){ const s=document.createElement('span'); s.className='pr'; s.textContent=o.pr+' · free'; b.appendChild(s); }
+    b.addEventListener('click',()=>{ TOOL.sub=o.k; buildSub(); SND.click(); });
+    sub.appendChild(b);
+  }
+}
+
+/* ── placement validity (for cursor + click) ── */
+function canPlaceRide(type,x,y){
+  const def=RIDES[type];
+  for(let dy=0;dy<def.h;dy++) for(let dx=0;dx<def.w;dx++){
+    if(!inMap(x+dx,y+dy)) return false;
+    const i=idx(x+dx,y+dy);
+    if(G.path[i]||G.scen[i]||G.occ[i]||G.ter[i]===2||trackAt(x+dx,y+dy)) return false;
+  }
+  return true;
+}
+function validAt(tx,ty){
+  if(!inMap(tx,ty)) return false;
+  const i=idx(tx,ty);
+  switch(TOOL.id){
+    case 'path': return G.ter[i]!==2 && !G.occ[i] && !G.scen[i];
+    case 'terrain':
+      if(TOOL.sub==='water') return !G.path[i] && !G.occ[i] && !G.scen[i] && !trackAt(tx,ty);
+      return true;
+    case 'scenery': return G.ter[i]!==2 && !G.path[i] && !G.occ[i] && !G.scen[i] && !trackAt(tx,ty);
+    case 'ride': case 'stall': return canPlaceRide(TOOL.sub,tx,ty);
+    case 'coaster': {
+      if(BUILD.coaster && !BUILD.coaster.done) return true;
+      return G.ter[i]!==2 && !G.path[i] && !G.occ[i] && !G.scen[i] && !trackAt(tx,ty);
+    }
+    case 'doze': return !!(G.path[i]||G.scen[i]||G.occ[i]||trackAt(tx,ty)||G.ter[i]===2);
+  }
+  return true;
+}
+function applyTool(tx,ty){
+  if(!inMap(tx,ty)) return;
+  const i=idx(tx,ty);
+  switch(TOOL.id){
+    case 'pointer': inspect(tx,ty); break;
+    case 'path':
+      if(validAt(tx,ty) && !G.path[i]){ G.path[i]=1; G.ter[i]=G.ter[i]===2?0:G.ter[i]; buy(10); SND.place(); bakeWorld(); }
+      break;
+    case 'terrain': {
+      const want = TOOL.sub==='grass'?0 : TOOL.sub==='sand'?1 : 2;
+      if(!validAt(tx,ty)) break;
+      if(G.ter[i]!==want){ G.ter[i]=want; buy(want===2?15:5); SND.place(); bakeWorld(); }
+      break;
+    }
+    case 'scenery': {
+      const id = +TOOL.sub;   // scenery sub keys are the SCEN ids
+      if(validAt(tx,ty) && SCEN[id]){ G.scen[i]=id; buy(SCEN[id].price); SND.place(); }
+      break;
+    }
+    case 'ride': case 'stall':
+      if(canPlaceRide(TOOL.sub,tx,ty)) addRide(TOOL.sub,tx,ty);
+      break;
+    case 'coaster': coasterClick(tx,ty); break;
+    case 'doze': {
+      if(G.scen[i]){ G.scen[i]=0; SND.thud(); break; }
+      if(G.path[i]){ G.path[i]=0; SND.thud(); bakeWorld(); break; }
+      if(G.occ[i]){ const r=rideById(G.occ[i]); if(r){ news(r.name+' was demolished — the lawn forgives.'); removeRide(r); SND.thud(); } break; }
+      const tr=trackAt(tx,ty);
+      if(tr){ openCoasterWin(tr[0].c); break; }
+      if(G.ter[i]===2){ G.ter[i]=0; SND.thud(); bakeWorld(); }
+      break;
+    }
+  }
+}
+function inspect(tx,ty){
+  // nearest peep within reach?
+  const [wx,wy]=ctr(tx,ty);
+  let best=null,bd=18;
+  for(const p of G.peeps){
+    if(p.hidden) continue;
+    const d=Math.hypot(p.wx-wx,(p.wy-wy)*1.6);
+    if(d<bd){ bd=d; best=p; }
+  }
+  if(best){ openGuestWin(best); return; }
+  const i=idx(tx,ty);
+  if(G.occ[i]){ const r=rideById(G.occ[i]); if(r) openRideWin(r); return; }
+  const tr=trackAt(tx,ty);
+  if(tr){ openCoasterWin(tr[0].c); return; }
+  if(tx===ENTR.x&&ty===ENTR.y) openParkWin();
+}
+/* coaster tool clicks: station first, then click-to-extend toward the head */
+function coasterClick(tx,ty){
+  let c=BUILD.coaster;
+  if(!c || c.done){
+    if(!validAt(tx,ty)){ cpanelHint('that ground won’t hold a station.'); return; }
+    // face the direction with the most open run
+    let bestD=0,bestRun=-1;
+    for(let d=0;d<4;d++){
+      let run=0;
+      for(let k=1;k<=4;k++){
+        const nx=tx+DIRS[d].dx*k, ny=ty+DIRS[d].dy*k;
+        if(inMap(nx,ny) && !tileOkForTrack(nx,ny,0,null)) run++;
+        else break;
+      }
+      if(run>bestRun){ bestRun=run; bestD=d; }
+    }
+    c = newCoaster();
+    c.pieces.push({x:tx,y:ty,dir:bestD,turn:0,slope:0,h:0,station:true});
+    rebuildTrackmap(); buy(160); SND.thud();
+    BUILD.coaster=c; cpanelSync();
+    return;
+  }
+  const hd=headOf(c);
+  if(!hd) return;
+  if(tx===hd.x&&ty===hd.y){ tryBuild('S'); return; }
+  // clicked a tile adjacent to the head tile? steer toward it
+  for(const kind of ['S','L','R']){
+    const turn = kind==='L'?-1:kind==='R'?1:0;
+    const nd=(hd.dir+turn+4)%4;
+    if(hd.x+DIRS[nd].dx===tx && hd.y+DIRS[nd].dy===ty){
+      // the piece sits on hd tile and exits toward the click — but the click IS the next tile
+      tryBuild(kind);
+      return;
+    }
+  }
+  cpanelHint('grow from the gold marker — or use the buttons.');
+}
+function tryBuild(kind){
+  const c=BUILD.coaster; if(!c||c.done) return;
+  const r=buildPiece(c,kind);
+  if(r && r!=='closed') cpanelHint(r);
+  else cpanelSync();
+}
+
+/* ── pointer input ── */
+let panPtr=null, pinch=null, spaceHeld=false;
+const ptrs=new Map();
+cv.addEventListener('contextmenu', e=>e.preventDefault());
+cv.addEventListener('pointerdown', e=>{
+  cv.setPointerCapture(e.pointerId);
+  ptrs.set(e.pointerId, {x:e.offsetX,y:e.offsetY,sx:e.offsetX,sy:e.offsetY,t:performance.now(),moved:false,btn:e.button,type:e.pointerType});
+  if(ptrs.size===2){
+    const [a,b]=[...ptrs.values()];
+    pinch={d:Math.hypot(a.x-b.x,a.y-b.y), z:CAM.z}; panPtr=null;
+  }
+});
+cv.addEventListener('pointermove', e=>{
+  const P=ptrs.get(e.pointerId);
+  CUR.mx=e.offsetX; CUR.my=e.offsetY; CUR.over=true;
+  [CUR.tx,CUR.ty]=s2tile(e.offsetX,e.offsetY);
+  CUR.valid=validAt(CUR.tx,CUR.ty);
+  if(!P) return;
+  const dx=e.offsetX-P.x, dy=e.offsetY-P.y;
+  if(Math.hypot(e.offsetX-P.sx,e.offsetY-P.sy)>7) P.moved=true;
+  P.x=e.offsetX; P.y=e.offsetY;
+  if(pinch && ptrs.size===2){
+    const [a,b]=[...ptrs.values()];
+    const d=Math.hypot(a.x-b.x,a.y-b.y);
+    setZoom(pinch.z * d/pinch.d, (a.x+b.x)/2, (a.y+b.y)/2, true);
+    return;
+  }
+  const panning = P.btn===2 || P.btn===1 || spaceHeld || TOOL.id==='pointer' || P.type==='touch';
+  if(P.moved && panning){
+    CAM.x -= dx/CAM.z; CAM.y -= dy/CAM.z; clampCam();
+    cv.classList.add('grabbing');
+  } else if(P.moved && P.btn===0 && P.type!=='touch' && (TOOL.id==='path'||TOOL.id==='terrain'||TOOL.id==='doze')){
+    applyTool(CUR.tx,CUR.ty);   // paint-drag
+  }
+});
+function endPtr(e){
+  const P=ptrs.get(e.pointerId);
+  ptrs.delete(e.pointerId);
+  if(ptrs.size<2) pinch=null;
+  cv.classList.remove('grabbing');
+  if(!P) return;
+  const quick = performance.now()-P.t < 450 && !P.moved;
+  if(quick && P.btn===0){
+    const [tx,ty]=s2tile(P.x,P.y);
+    applyTool(tx,ty);
+  }
+}
+cv.addEventListener('pointerup', endPtr);
+cv.addEventListener('pointercancel', endPtr);
+cv.addEventListener('pointerleave', ()=>{ CUR.over=false; });
+function setZoom(z, mx, my, exact){
+  const zs = exact ? Math.max(.4, Math.min(2.4, z)) : ZOOMS.reduce((a,b)=>Math.abs(b-z)<Math.abs(a-z)?b:a);
+  const [wx,wy]=s2w(mx??VW/2,my??VH/2);
+  CAM.z=zs;
+  CAM.x = wx - ((mx??VW/2)-VW/2)/CAM.z;
+  CAM.y = wy - ((my??VH/2)-VH/2)/CAM.z;
+  clampCam();
+}
+cv.addEventListener('wheel', e=>{
+  e.preventDefault();
+  if(e.ctrlKey){ setZoom(CAM.z*(1-e.deltaY*.01), e.offsetX, e.offsetY, true); }
+  else if(Math.abs(e.deltaY)>Math.abs(e.deltaX) && !e.shiftKey && Math.abs(e.deltaY)>=40){
+    setZoom(CAM.z*(e.deltaY<0?1.34:0.75), e.offsetX, e.offsetY);
+  } else { CAM.x += e.deltaX/CAM.z; CAM.y += e.deltaY/CAM.z; clampCam(); }
+}, {passive:false});
+window.addEventListener('keydown', e=>{
+  if(e.target.tagName==='INPUT') return;
+  if(e.code==='Space'){ spaceHeld=true; e.preventDefault(); }
+  const st=18/CAM.z;
+  if(e.key==='ArrowLeft') CAM.x-=st; if(e.key==='ArrowRight') CAM.x+=st;
+  if(e.key==='ArrowUp') CAM.y-=st; if(e.key==='ArrowDown') CAM.y+=st;
+  if(e.key==='+'||e.key==='=') setZoom(CAM.z*1.25);
+  if(e.key==='-') setZoom(CAM.z*0.8);
+  if(e.key==='p'||e.key==='P') togglePause();
+  if(e.key==='Escape'){ setTool('pointer'); }
+  clampCam();
+});
+window.addEventListener('keyup', e=>{ if(e.code==='Space') spaceHeld=false; });
+/* ── toolbar DOM ── */
+function buildBar(){
+  const bar=document.getElementById('bar');
+  for(const t of TOOLS){
+    const b=document.createElement('button');
+    b.className='tool'; b.dataset.id=t.id;
+    b.setAttribute('aria-pressed', t.id===TOOL.id?'true':'false');
+    b.innerHTML='<svg viewBox="0 0 22 22" aria-hidden="true">'+t.g+'</svg>'+t.label;
+    b.addEventListener('click',()=>setTool(t.id));
+    bar.appendChild(b);
+  }
+}
+
+/* ── coaster panel ── */
+const cpEls={};
+function cpanelHint(msg){ cpEls.hint.textContent=msg; }
+function cpanelSync(){
+  const c=BUILD.coaster;
+  const has = !!(c && !c.done);
+  ['L','S','R','Up','Dn','Undo','Auto'].forEach(k=>{ cpEls[k].disabled=!has; });
+  cpEls.Done.disabled=false; cpEls.Scrap.disabled=!has;
+  if(!has){
+    cpEls.title.textContent='COASTER WORKS';
+    cpanelHint('click the grass to lay a station, then grow the track piece by piece. close the loop back at the station.');
+    cpEls.stat.innerHTML='';
+    return;
+  }
+  const hd=headOf(c);
+  cpEls.title.textContent=c.name.toUpperCase();
+  cpanelHint('grow toward the gold marker — click the next tile, or use the buttons. climb, drop, and come home at ground level.');
+  cpEls.stat.innerHTML='pieces <b>'+c.pieces.length+'</b> · height <b>'+(hd?hd.h:0)+'</b>/'+MAXH+
+    (hd&&hd.h>0?' · <span style="color:var(--dim)">come home at 0</span>':'');
+}
+function bindCpanel(){
+  const $=id=>document.getElementById(id);
+  cpEls.title=$('cpTitle'); cpEls.hint=$('cpHint'); cpEls.stat=$('cpStat');
+  cpEls.L=$('cpL'); cpEls.S=$('cpS'); cpEls.R=$('cpR');
+  cpEls.Up=$('cpUp'); cpEls.Dn=$('cpDn'); cpEls.Undo=$('cpUndo');
+  cpEls.Auto=$('cpAuto'); cpEls.Done=$('cpDone'); cpEls.Scrap=$('cpScrap');
+  cpEls.L.onclick=()=>tryBuild('L'); cpEls.S.onclick=()=>tryBuild('S'); cpEls.R.onclick=()=>tryBuild('R');
+  cpEls.Up.onclick=()=>tryBuild('U'); cpEls.Dn.onclick=()=>tryBuild('D');
+  cpEls.Undo.onclick=()=>{ const c=BUILD.coaster; if(c) { undoPiece(c); cpanelSync(); } };
+  cpEls.Auto.onclick=()=>{ const c=BUILD.coaster; if(c){ const r=autoComplete(c); if(r&&r!=='closed') cpanelHint(r); } };
+  cpEls.Done.onclick=()=>{ setTool('pointer'); };
+  cpEls.Scrap.onclick=()=>{ const c=BUILD.coaster; if(c) scrapCoaster(c); cpanelSync(); };
+}
+
+/* ── windows ── */
+const WINS=[];
+let winZ=20;
+function closeWinFor(obj){ const w=WINS.find(w=>w.obj===obj); if(w) closeWin(w); }
+function closeWin(w){
+  w.el.remove();
+  const ix=WINS.indexOf(w); if(ix>=0) WINS.splice(ix,1);
+}
+function openWin(obj, title, render){
+  let w=WINS.find(w=>w.obj===obj);
+  if(w){ w.el.style.zIndex=++winZ; w.render(); return w; }
+  if(WINS.length>=3) closeWin(WINS[0]);
+  const el=document.createElement('div');
+  el.className='win';
+  el.style.left=(46+WINS.length*26)+'px';
+  el.style.top=(46+WINS.length*26)+'px';
+  el.style.zIndex=++winZ;
+  const stage=document.getElementById('stage');
+  stage.appendChild(el);
+  w={ el, obj, title, upd:null };
+  w.render=()=>{
+    el.innerHTML='<div class="wt"><b>'+w.title+'</b><button class="wx" aria-label="close">×</button></div><div class="wb"></div>';
+    el.querySelector('.wx').addEventListener('click',()=>closeWin(w));
+    render(el.querySelector('.wb'), w);
+    dragify(w);
+  };
+  w.render();
+  WINS.push(w);
+  return w;
+}
+function dragify(w){
+  const t=w.el.querySelector('.wt');
+  let sx=0,sy=0,ox=0,oy=0,drag=false;
+  t.addEventListener('pointerdown',e=>{
+    if(e.target.classList.contains('wx')) return;
+    drag=true; t.setPointerCapture(e.pointerId);
+    sx=e.clientX; sy=e.clientY;
+    ox=w.el.offsetLeft; oy=w.el.offsetTop;
+    w.el.style.zIndex=++winZ;
+  });
+  t.addEventListener('pointermove',e=>{
+    if(!drag) return;
+    w.el.style.left=Math.max(2,ox+e.clientX-sx)+'px';
+    w.el.style.top=Math.max(2,oy+e.clientY-sy)+'px';
+    w.el.style.bottom='auto'; w.el.style.right='auto';
+  });
+  t.addEventListener('pointerup',()=>{ drag=false; });
+}
+function statRow(k,v){ return '<div class="r"><span>'+k+'</span><b>'+v+'</b></div>'; }
+function colorDots(wb, cur, onpick){
+  const d=document.createElement('div'); d.className='dots';
+  d.innerHTML='<span style="font-size:9px;letter-spacing:2px;color:var(--dim)">LIVERY</span>';
+  TRACKCOLORS.forEach((c,i)=>{
+    const b=document.createElement('button'); b.className='d';
+    b.style.background=c.rail; b.title=c.name;
+    b.setAttribute('aria-pressed', i===cur?'true':'false');
+    b.addEventListener('click',()=>onpick(i));
+    d.appendChild(b);
+  });
+  wb.appendChild(d);
+}
+
+function openRideWin(r){
+  const def=RIDES[r.type];
+  openWin(r, def.kind==='ride'?'RIDE':'STALL', (wb,w)=>{
+    const nm=document.createElement('input');
+    nm.type='text'; nm.value=r.name; nm.maxLength=28;
+    nm.addEventListener('change',()=>{ r.name=(nm.value||def.name).replace(/[<>&]/g,''); });
+    wb.appendChild(nm);
+    const s=document.createElement('div');
+    s.innerHTML =
+      statRow('type', def.name) +
+      statRow(def.kind==='ride'?'riders so far':'customers', '<span data-u="rid">'+r.ridden+'</span>') +
+      (def.fee?statRow('price', '$'+def.fee):'') +
+      (def.kind==='ride'?statRow('excitement', def.ex.toFixed(2)):'') +
+      statRow('status','<span data-u="st">'+(r.open?'open':'closed')+'</span>');
+    wb.appendChild(s);
+    colorDots(wb, r.col, i=>{ r.col=i; w.render(); });
+    const btns=document.createElement('div'); btns.className='wbtns';
+    const tg=document.createElement('button');
+    tg.textContent=r.open?'close '+def.kind:'open '+def.kind;
+    tg.addEventListener('click',()=>{ r.open=!r.open; news(r.name+(r.open?' has reopened.':' is closed for a lie-down.')); w.render(); });
+    const dz=document.createElement('button'); dz.className='warn'; dz.textContent='demolish';
+    dz.addEventListener('click',()=>{ news(r.name+' was demolished — free, like everything else.'); removeRide(r); SND.thud(); });
+    btns.appendChild(tg); btns.appendChild(dz);
+    wb.appendChild(btns);
+    w.upd=()=>{ const a=wb.querySelector('[data-u="rid"]'); if(a) a.textContent=r.ridden; };
+  });
+}
+function openCoasterWin(c){
+  openWin(c,'COASTER',(wb,w)=>{
+    const nm=document.createElement('input');
+    nm.type='text'; nm.value=c.name; nm.maxLength=28;
+    nm.addEventListener('change',()=>{ c.name=(nm.value||c.name).replace(/[<>&]/g,''); });
+    wb.appendChild(nm);
+    const s=document.createElement('div');
+    s.innerHTML = c.done ?
+      '<div class="r"><span>excitement</span><b style="color:var(--accd)">'+c.excite.toFixed(2)+' ('+exciteWord(c.excite)+')</b></div>' +
+      statRow('intensity', c.intense.toFixed(2)) +
+      statRow('top speed', Math.round(c.vmax*7)+' mph') +
+      statRow('biggest drops', c.drops.toFixed(0)+' units') +
+      statRow('track pieces', c.pieces.length) +
+      statRow('riders so far','<span data-u="rid">'+c.ridden+'</span>') +
+      statRow('queue','<span data-u="q">'+c.queue.length+'</span>') +
+      statRow('status','<span data-u="st">'+(c.open?'open':'closed')+'</span>')
+      : statRow('track pieces', c.pieces.length) + statRow('status','under construction');
+    wb.appendChild(s);
+    colorDots(wb, c.col, i=>{ c.col=i; w.render(); });
+    const btns=document.createElement('div'); btns.className='wbtns';
+    if(c.done){
+      const tg=document.createElement('button');
+      tg.textContent=c.open?'close ride':'open ride';
+      tg.addEventListener('click',()=>{ c.open=!c.open; news('<b>'+c.name+'</b>'+(c.open?' has reopened!':' is closed.')); w.render(); });
+      btns.appendChild(tg);
+    } else {
+      const rs=document.createElement('button'); rs.textContent='resume building';
+      rs.addEventListener('click',()=>{ BUILD.coaster=c; setTool('coaster'); });
+      btns.appendChild(rs);
+    }
+    const dz=document.createElement('button'); dz.className='warn'; dz.textContent='demolish';
+    dz.addEventListener('click',()=>{ scrapCoaster(c); });
+    btns.appendChild(dz);
+    wb.appendChild(btns);
+    w.upd=()=>{
+      const a=wb.querySelector('[data-u="rid"]'); if(a) a.textContent=c.ridden;
+      const q=wb.querySelector('[data-u="q"]'); if(q) q.textContent=c.queue.length;
+    };
+  });
+}
+function exciteWord(x){ return x>7?'extreme':x>5.5?'very high':x>4?'high':x>2.5?'medium':'gentle'; }
+function needBar(label,val,inv){
+  const pct=Math.round(inv?100-val:val);
+  return '<div class="r"><span>'+label+'</span><b>'+pct+'%</b></div><div class="bar"><i style="width:'+pct+'%"></i></div>';
+}
+function openGuestWin(p){
+  openWin(p,'GUEST',(wb,w)=>{
+    wb.innerHTML='<div class="r"><span>name</span><b>'+p.name+'</b></div>'+
+      '<div data-u="bars">'+needBar('happiness',p.happiness)+needBar('energy',p.energy)+needBar('hunger',p.hunger,false)+'</div>'+
+      '<h4>recent thoughts</h4><div data-u="th">'+p.thoughts.slice(-4).map(t=>'<div class="thought">'+t+'</div>').join('')+'</div>';
+    w.upd=()=>{
+      const b=wb.querySelector('[data-u="bars"]');
+      if(b) b.innerHTML=needBar('happiness',p.happiness)+needBar('energy',p.energy)+needBar('hunger',p.hunger,false);
+      const t=wb.querySelector('[data-u="th"]');
+      if(t) t.innerHTML=p.thoughts.slice(-4).map(x=>'<div class="thought">'+x+'</div>').join('');
+    };
+  });
+}
+function openParkWin(){
+  openWin(G,'CHALL PARK',(wb,w)=>{
+    wb.innerHTML=
+      statRow('park rating','<span data-u="rt">'+G.rating+'</span> / 999')+
+      statRow('guests in park','<span data-u="gs">'+G.peeps.length+'</span>')+
+      statRow('guests all-time','<span data-u="gt">'+G.guestsTotal+'</span>')+
+      statRow('day','<span data-u="dy">'+G.day+'</span>')+
+      statRow('cash','$<span data-u="mn">'+G.money.toLocaleString('en-US')+'</span>')+
+      statRow('splurged so far','$'+G.spent.toLocaleString('en-US')+' — on the house')+
+      '<p style="color:var(--dim);font-size:10px">fun mode: the bank never runs dry. build big.</p>';
+    const btns=document.createElement('div'); btns.className='wbtns';
+    const np=document.createElement('button'); np.className='warn'; np.textContent='new park';
+    np.addEventListener('click',()=>{
+      if(np.dataset.arm){ newPark(); bakeWorld(); saveGame(); closeWin(w); }
+      else { np.dataset.arm='1'; np.textContent='really start over?'; setTimeout(()=>{ np.dataset.arm=''; np.textContent='new park'; },2500); }
+    });
+    btns.appendChild(np);
+    wb.appendChild(btns);
+    w.upd=()=>{
+      const set=(k,v)=>{ const n=wb.querySelector('[data-u="'+k+'"]'); if(n) n.textContent=v; };
+      set('rt',G.rating); set('gs',G.peeps.length); set('gt',G.guestsTotal); set('dy',G.day); set('mn',G.money.toLocaleString('en-US'));
+    };
+  });
+}
+function openHelpWin(){
+  openWin('help','HOW TO PLAY',(wb)=>{
+    wb.innerHTML=
+      '<p><b>chall park</b> is a pocket roller coaster tycoon. money is infinite — just build.</p>'+
+      '<ul>'+
+      '<li><b>look around</b> — drag with the inspect tool, right-drag anywhere, or hold <kbd>space</kbd>. scroll or <kbd>+</kbd>/<kbd>−</kbd> to zoom. arrows pan.</li>'+
+      '<li><b>build</b> — pick a tool below, click the ground. drag to paint paths &amp; terrain. everything is free.</li>'+
+      '<li><b>coaster</b> — click grass for a station, then grow the track: click the tile ahead of the gold marker, or use the panel. climb with ▲, drop with ▼, and close the loop back home at ground level — or press <b>auto-complete</b>.</li>'+
+      '<li><b>guests</b> — they arrive on their own. paths bring them in, rides make them happy, stalls keep them fed. click a guest to hear their thoughts.</li>'+
+      '<li><b>inspect</b> — click rides or track to open, close, recolor, rename, or demolish them.</li>'+
+      '<li><kbd>p</kbd> pauses · <kbd>esc</kbd> drops the tool · the park autosaves in this browser.</li>'+
+      '</ul>'+
+      '<p style="color:var(--dim);font-size:10px;margin-top:8px">an ink-and-paper tribute to rollercoaster tycoon 2 · lives on the chall.net tree at park.chall.net</p>';
+  });
+}
+
+/* ── header buttons ── */
+function togglePause(){
+  G.paused=!G.paused;
+  const b=document.getElementById('pauseBtn');
+  b.setAttribute('aria-pressed', G.paused?'true':'false');
+  b.textContent=G.paused?'paused':'pause';
+}
+function bindChrome(){
+  document.getElementById('pauseBtn').addEventListener('click',togglePause);
+  document.getElementById('zoomIn').addEventListener('click',()=>setZoom(CAM.z*1.34));
+  document.getElementById('zoomOut').addEventListener('click',()=>setZoom(CAM.z*0.75));
+  document.getElementById('helpBtn').addEventListener('click',openHelpWin);
+  const sb=document.getElementById('soundBtn');
+  const saved=localStorage.getItem('challpark.sound');
+  G.soundOn = saved===null ? true : saved==='1';
+  sb.setAttribute('aria-pressed', G.soundOn?'true':'false');
+  sb.addEventListener('click',()=>{
+    G.soundOn=!G.soundOn;
+    localStorage.setItem('challpark.sound', G.soundOn?'1':'0');
+    sb.setAttribute('aria-pressed', G.soundOn?'true':'false');
+    if(G.soundOn) SND.click();
+  });
+}
+/* ── boot ── */
+function boot(){
+  el.hMoney=document.getElementById('hMoney');
+  el.hGuests=document.getElementById('hGuests');
+  el.hRating=document.getElementById('hRating');
+  el.hDay=document.getElementById('hDay');
+  el.newsText=document.getElementById('newsText');
+  bindChrome(); buildBar(); bindCpanel(); buildSub();
+  resize();
+  if(!loadGame()) newPark();
+  bakeWorld();
+  // open on the gate
+  const [gx,gy]=ctr(ENTR.x, ENTR.y-6);
+  CAM.x=gx; CAM.y=gy; CAM.z = window.innerWidth<720 ? .75 : 1;
+  hud.sync();
+  // window stat refresher
+  setInterval(()=>{ for(const w of WINS) if(w.upd) w.upd(); }, 600);
+  // first visit: how to play
+  if(!localStorage.getItem('challpark.seen')){
+    localStorage.setItem('challpark.seen','1');
+    setTimeout(openHelpWin, 400);
+  }
+  window.addEventListener('beforeunload', saveGame);
+  requestAnimationFrame(t=>{ last=t; requestAnimationFrame(frame); });
+}
+document.readyState==='loading' ? document.addEventListener('DOMContentLoaded',boot) : boot();
+
+/* ── QA hooks (used by the sim-lab battery; not part of play) ── */
+window.__PARK = {
+  G, CAM, FX, TOOL, BUILD, WINS,
+  setTool, applyTool, addRide, spawnPeep, newCoaster, buildPiece, autoComplete,
+  saveGame, loadGame, newPark, bakeWorld, recomputeRating,
+  tick(seconds){ const step=1/30; for(let t=0;t<seconds;t+=step) simStep(step); recomputeRating(); hud.sync(); },
+  stats(){ return { money:G.money, peeps:G.peeps.length, rating:G.rating, day:G.day,
+    rides:G.rides.length, coasters:G.coasters.map(c=>({name:c.name,done:c.done,open:c.open,excite:+c.excite.toFixed(2),pieces:c.pieces.length})) }; },
+  demoCoaster(x,y){ // build a complete little coaster for QA
+    setTool('coaster'); coasterClick(x,y);
+    const c=BUILD.coaster; if(!c) return null;
+    ['S','U','U','S','D','D','S'].forEach(k=>buildPiece(c,k));
+    const r=autoComplete(c);
+    return { result:r, coaster:c && { done:c.done, pieces:c.pieces.length, excite:c.excite } };
+  },
+  version:'1.0.0',
+};
+</script>
+</body>
+</html>
