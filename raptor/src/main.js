@@ -213,6 +213,7 @@ async function boot() {
   if (flags.get("demo") !== "1") {
     world.playerMode = true;
     world.trailMesh.visible = false; // FM-driven trail is a polish item
+    world.pylons.visible = false; // phase-1 scale pylons — PASS-1 item 8: they render as needle spikes at distance (and stand ON the ocean)
     player = new Player(scene, {
       jet: world.jet, terrain, battlefield,
       spawn: { x: 0, y: -6000, alt: (fg?.baseAlt || 3400) + 200, headingRad: 0, speed: 200 },
