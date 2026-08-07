@@ -1,11 +1,12 @@
 {
-  "updated": "2026-08-07T02:55:00-07:00",
-  "version": "v0.8.0",
-  "now": "the AAA pass — rebuilding the render pipeline to the M4 Max ceiling (research fleet reported)",
+  "updated": "2026-08-07T02:45:00-07:00",
+  "version": "v0.9.0",
+  "now": "AAA pass: real satellite-photo terrain (NAIP bakery) — next after tonight's new render pipeline",
   "nowPhase": 14,
   "paused": false,
-  "pushes": 24,
+  "pushes": 25,
   "ledger": [
+    "2026-08-07 v0.9.0 — THE AAA PASS BEGINS: rebuilt render pipeline — temporal anti-aliasing, HDR bloom (sun halo + water-glint sparkle), lens ghosts. 121fps with it all on. 51/51 tests.",
     "2026-08-07 THE MANDATE — new goal: the most beautiful game possible in a browser, built for the most powerful Macs. An 8-agent research fleet mapped the ceiling; the AAA rebuild starts now, then three full 10%-better passes.",
     "2026-08-07 v0.8.0 — TARGETS ON THE GROUND: 29 units across the three fronts (convoy + SAM site in Nevada, ships in the Alaska Sound, a carrier group off Saipan). Shoot them, they burn. Kills score on screen.",
     "2026-08-07 v0.7.0 — THE GUN WORKS: 6000-rounds-a-minute cannon with honest ballistics (bullets slow down and drop like real ones), glowing tracers, dust where they hit the desert, engine + gun sound. 11/11 tests.",
@@ -104,8 +105,8 @@
     {
       "n": 14,
       "name": "Max fidelity pass",
-      "pct": 12,
-      "note": "ceiling research done: TAA/bloom, real satellite imagery, FFT ocean, volumetric clouds"
+      "pct": 25,
+      "note": "TAA + HDR bloom + lens flare LIVE; satellite terrain, FFT ocean, volumetric clouds next"
     },
     {
       "n": 15,
@@ -116,7 +117,7 @@
     {
       "n": 16,
       "name": "QA hardening",
-      "pct": 36,
+      "pct": 38,
       "note": "10 batteries, forensic judges standing"
     },
     {

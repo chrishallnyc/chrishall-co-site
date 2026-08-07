@@ -16,8 +16,8 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.8.0";
-const PHASE = 9;
+const VERSION = "0.9.0";
+const PHASE = 14;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
 // (phase 7, FM-PLAN.md) is wired into gameplay. Fields not derivable from
@@ -66,7 +66,13 @@ async function makeRenderer(canvas) {
   }
   if (adapter) {
     try {
-      const r = new THREE.WebGPURenderer({ canvas, antialias: true });
+      // antialias off: TRAA replaces MSAA (the TRAA node requires it off).
+      // 16k texture limit is the A2 NAIP-drape prereq — clamped to what the
+      // adapter actually offers so SwiftShader/low-end never fails init.
+      const r = new THREE.WebGPURenderer({
+        canvas, antialias: false,
+        requiredLimits: { maxTextureDimension2D: Math.min(adapter.limits.maxTextureDimension2D, 16384) },
+      });
       await r.init();
       return { renderer: r, backend: "webgpu", canvas };
     } catch (err) {
@@ -240,6 +246,17 @@ async function boot() {
       audio = new AudioBus(); // builds engine/gun/lock voices itself
     } catch (err) { console.warn("audio unavailable:", err && err.message); }
   }
+  // MAXFI A1: TRAA + bloom + flare post chain (WebGPU only; ?post=0 keeps
+  // the plain pipe for QA baselines and numeric oracles)
+  let post = null;
+  if (backend === "webgpu" && flags.get("post") !== "0") {
+    try {
+      const { buildPost } = await import("./engine/post.js");
+      post = buildPost(renderer, scene, camera, { flare: flags.get("flare") !== "0", chain: flags.get("chain") || "full" });
+    } catch (err) { console.warn("post chain unavailable, plain render:", err && err.message); }
+  }
+  state.post = !!post;
+
   document.getElementById("controlsLink")?.addEventListener("click", (e) => { e.preventDefault(); controls.show(); });
 
   window.addEventListener("resize", () => {
@@ -324,7 +341,8 @@ async function boot() {
     hud.update(player ? player.hudState() : testworldHudState(world, alpha));
     atmosphere.update(camera);
     renderer.toneMappingExposure = atmosphere.exposure;
-    renderer.render(scene, camera);
+    if (post) post.post.render();
+    else renderer.render(scene, camera);
     dbg.frame(dtMs, { backend: state.backend, tier: state.tier, sim });
     input.consumeFrame();
     if (firstFrame) {

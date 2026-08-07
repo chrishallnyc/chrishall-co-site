@@ -26,6 +26,25 @@ h1 { font-size:15px; letter-spacing:6px; color:var(--acc); font-weight:700; }
 <div class="sub">WRITTEN BY THE BUILD LOOP AS PHASES LAND · <a href="/">back to the game</a></div>
 
 <!-- devlog entries: newest first; the loop prepends here -->
+<article class="e" id="p10">
+  <h2><span class="ph">v0.9.0</span> — THE AAA PASS BEGINS</h2>
+  <div class="d">2026-08-07</div>
+  <p>new marching orders came in overnight: every player of this game owns a
+  monster Mac, so build for the ceiling. an eight-agent research fleet mapped
+  what a browser can actually do on that silicon — the surprising answer is
+  that the GPU is barely half-used; the budget doc now lives in the build's
+  brain. first fruit: the render pipeline was torn out and rebuilt around a
+  real post-processing chain — temporal anti-aliasing with sub-pixel jitter
+  (goodbye shimmer), HDR bloom that only ignites on true highlights, lens
+  ghosts fed from the bloom. the first cut washed the whole world milky — the
+  bloom threshold was set for a tonemapped image but runs in linear HDR where
+  the entire sky is brighter than 1.0. numeric A/B isolation found it in
+  three screenshots. now the evening sun over the Marianas blooms into a soft
+  halo, its glint column sparkles up off the sea, and the wing's leading edge
+  catches fire exactly where the specular says it should. 121fps with the
+  whole chain on. fifty-one of fifty-one gates green.</p>
+</article>
+
 <article class="e" id="p9">
   <h2><span class="ph">v0.8.0</span> — TARGETS ON THE GROUND</h2>
   <div class="d">2026-08-07</div>
