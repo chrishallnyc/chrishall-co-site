@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAPTOR — build progress</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23101014'/%3E%3Cpath d='M16 4 L19 12 L27 17 L19 19 L18 24 L21 27 L16 25 L11 27 L14 24 L13 19 L5 17 L13 12 Z' fill='%23e8b46f'/%3E%3C/svg%3E">
+<style>
+:root { --bg:#101014; --panel:#16161c; --ink:#e8e6df; --mid:#9a988f; --dim:#6e6c64;
+  --hair:#2e2e36; --acc:#e8b46f; --hud:#9be89b; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--ink); font-family:"SF Mono", ui-monospace, Menlo, monospace;
+  font-size:13px; line-height:1.55; padding:44px clamp(14px,4vw,60px) 60px; max-width:860px; margin:0 auto; }
+a { color:var(--mid); text-decoration:none; } a:hover { color:var(--ink); }
+h1 { font-size:15px; letter-spacing:6px; color:var(--acc); font-weight:700; }
+.sub { color:var(--dim); font-size:10px; letter-spacing:2px; margin-bottom:30px; }
+
+.big { display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; margin-bottom:8px; }
+.pct { font-size:64px; font-weight:700; color:var(--hud); letter-spacing:2px; line-height:1; }
+.big .of { color:var(--dim); font-size:11px; letter-spacing:2px; }
+.masterbar { height:14px; border:1px solid var(--hair); position:relative; margin:10px 0 6px; background:var(--panel); }
+.masterbar .fill { position:absolute; inset:2px auto 2px 2px; width:0; background:linear-gradient(90deg, #4a7a4c, var(--hud));
+  transition:width 1.6s cubic-bezier(.2,.7,.2,1); }
+.now { color:var(--mid); font-size:11px; letter-spacing:1.5px; margin-bottom:34px; }
+.now b { color:var(--hud); font-weight:400; }
+
+.phase { display:grid; grid-template-columns: 30px 1fr 54px; gap:12px; align-items:center; padding:7px 0;
+  border-top:1px solid var(--hair); }
+.phase .n { color:var(--dim); font-size:10px; letter-spacing:1px; }
+.phase .name { color:var(--ink); font-size:12px; }
+.phase .note { color:var(--dim); font-size:10px; letter-spacing:.4px; margin-top:2px; }
+.bar { height:7px; border:1px solid var(--hair); background:var(--panel); position:relative; margin-top:6px; }
+.bar .fill { position:absolute; inset:1px auto 1px 1px; width:0; background:var(--hud); opacity:.85;
+  transition:width 1.2s cubic-bezier(.2,.7,.2,1); }
+.bar .fill.done { background:var(--acc); }
+.phase .val { text-align:right; font-size:11px; color:var(--mid); }
+.phase .val.done { color:var(--acc); }
+.foot { margin-top:34px; color:var(--dim); font-size:10px; letter-spacing:2px; display:flex; gap:18px; flex-wrap:wrap; }
+@media (prefers-reduced-motion: reduce) { .fill { transition:none !important; } }
+</style>
+</head>
+<body>
+<h1>RAPTOR — BUILD PROGRESS</h1>
+<div class="sub">AN F-22 SIM BUILDING ITSELF · UPDATED BY THE LOOP AS PHASES LAND · <a href="/">the game</a> · <a href="/devlog.html">devlog</a></div>
+
+<div class="big"><div class="pct" id="pct">…</div><div class="of">OF THE FULL 21-PHASE PLAN</div></div>
+<div class="masterbar"><div class="fill" id="masterfill"></div></div>
+<div class="now" id="now"></div>
+
+<div id="phases"></div>
+
+<div class="foot"><span id="ver"></span><span id="pushes"></span><span id="updated"></span></div>
+
+<script>
+async function load() {
+  const d = await (await fetch("/progress.json?cb=" + Date.now())).json();
+  const overall = d.phases.reduce((s, p) => s + p.pct, 0) / d.phases.length;
+  document.getElementById("pct").textContent = overall.toFixed(0) + "%";
+  document.getElementById("now").innerHTML = "NOW BUILDING · <b>" + d.now + "</b>";
+  document.getElementById("ver").textContent = d.version + " LIVE";
+  document.getElementById("pushes").textContent = d.pushes + " VERIFIED PUSHES";
+  document.getElementById("updated").textContent = "UPDATED " + new Date(d.updated).toLocaleString();
+  const wrap = document.getElementById("phases");
+  wrap.innerHTML = "";
+  for (const p of d.phases) {
+    const row = document.createElement("div");
+    row.className = "phase";
+    const done = p.pct >= 100;
+    row.innerHTML =
+      `<div class="n">${String(p.n).padStart(2, "0")}</div>
+       <div><div class="name">${p.name}</div>
+         ${p.note ? `<div class="note">${p.note}</div>` : ""}
+         <div class="bar"><div class="fill${done ? " done" : ""}" data-w="${p.pct}"></div></div></div>
+       <div class="val${done ? " done" : ""}">${done ? "DONE" : p.pct + "%"}</div>`;
+    wrap.appendChild(row);
+  }
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.getElementById("masterfill").style.width = "calc(" + overall + "% - 4px)";
+    document.querySelectorAll(".bar .fill").forEach((f) => { f.style.width = "calc(" + f.dataset.w + "% - 2px)"; });
+  }));
+}
+load();
+setInterval(load, 60000); // the loop updates progress.json as it works
+</script>
+</body>
+</html>

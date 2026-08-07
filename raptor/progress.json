@@ -1,0 +1,29 @@
+{
+  "updated": "2026-08-07T00:20:00-07:00",
+  "version": "v0.6.0",
+  "now": "phase 8 — the M61 cannon: tracers, ballistics, terrain impacts",
+  "pushes": 22,
+  "phases": [
+    { "n": 0,  "name": "Berth & deploy pipe",            "pct": 100, "note": "raptor.chall.net live, push-to-deploy" },
+    { "n": 1,  "name": "Engine core",                     "pct": 100, "note": "WebGPU+WebGL2, deterministic 120Hz sim, controls" },
+    { "n": 2,  "name": "Atmosphere & time-of-day",        "pct": 100, "note": "physical sky, real sun, stars, judged 3 rounds" },
+    { "n": 3,  "name": "Real-Earth terrain",              "pct": 100, "note": "USGS data: Nevada, Prince William Sound, Marianas" },
+    { "n": 4,  "name": "Water",                           "pct": 100, "note": "Gerstner seas, fjord + reef, forensics-gated" },
+    { "n": 5,  "name": "Clouds & weather",                "pct": 45,  "note": "billboards + shadows + climates live; volumetrics later" },
+    { "n": 6,  "name": "The F-22 airframe",               "pct": 70,  "note": "v2 procedural model, 15 rig parts; bakery hi-poly later" },
+    { "n": 7,  "name": "Flight model & controls",         "pct": 75,  "note": "you fly: mouse-aim + 6-DOF physics, 13/13 gates" },
+    { "n": 8,  "name": "Sensors & weapons",                "pct": 15,  "note": "data tables verified; gun going in now" },
+    { "n": 9,  "name": "AI & ground war",                  "pct": 12,  "note": "7 unit models built; brains pending" },
+    { "n": 10, "name": "Match modes & dynamic campaign",   "pct": 0,   "note": "" },
+    { "n": 11, "name": "Authored campaign (30+ sorties)",  "pct": 0,   "note": "" },
+    { "n": 12, "name": "Presentation (hangar, replays)",   "pct": 20,  "note": "HUD live; hangar, kill cam, war room pending" },
+    { "n": 13, "name": "Audio & voice",                    "pct": 35,  "note": "F119 synth + gun + lock tones built, wiring pending" },
+    { "n": 14, "name": "Max fidelity pass",                "pct": 8,   "note": "" },
+    { "n": 15, "name": "Settings, accessibility, PWA",     "pct": 10,  "note": "rebind menu live" },
+    { "n": 16, "name": "QA hardening",                     "pct": 30,  "note": "8 batteries, forensic judges standing" },
+    { "n": 17, "name": "Ship v1.0",                        "pct": 0,   "note": "" },
+    { "n": 18, "name": "Multiplayer duels (P2P)",          "pct": 5,   "note": "determinism foundation ready" },
+    { "n": 19, "name": "16-player server battles",         "pct": 0,   "note": "" },
+    { "n": 20, "name": "Live-ops era",                     "pct": 0,   "note": "" }
+  ]
+}
