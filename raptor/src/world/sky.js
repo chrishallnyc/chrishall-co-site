@@ -16,7 +16,9 @@ const UP = new THREE.Vector3(0, 1, 0);
 const TOTAL_RAYLEIGH = new THREE.Vector3(5.804542996261093e-6, 1.3562911419845635e-5, 3.0265902468824876e-5);
 const MIE_CONST = new THREE.Vector3(1.8399918514433978e14, 2.7798023919660528e14, 4.0790479543861094e14);
 const SUN_E_MAX = 1000.0, EE = 1000.0;
-const CUTOFF = Math.PI / 1.95;
+// π/1.95 zeroed scatter at sun −2.3° — no civil-twilight wedge (judge round 2).
+// π/1.82 carries fading energy to ~−8°, matching real twilight extent.
+const CUTOFF = Math.PI / 1.82;
 const STEEPNESS = 1.5;
 
 function sunIntensity(zenithCos) {
@@ -104,10 +106,10 @@ export class Sky {
 
       // zenith depth assist (judge round 2): single-scatter + grade undersells
       // overhead saturation — deepen with view elevation, daylight only
-      const upness = smoothstep(0.08, 0.85, upDot).mul(this.uAmbFade);
+      const upness = smoothstep(0.05, 0.8, upDot).mul(this.uAmbFade);
       const lum = dot(graded, vec3(0.2126, 0.7152, 0.0722));
-      const saturated = vec3(lum).add(graded.sub(vec3(lum)).mul(1.65));
-      graded = mix(graded, saturated.mul(0.8), upness);
+      const saturated = vec3(lum).add(graded.sub(vec3(lum)).mul(1.9));
+      graded = mix(graded, saturated.mul(0.78), upness);
 
       // blue-noise-ish dither kills 8-bit gradient banding (judge finding)
       const dither = fract(sin(dot(screenUV.mul(vec2(12.9898, 78.233)), vec2(1.0, 1.0))).mul(43758.5453))

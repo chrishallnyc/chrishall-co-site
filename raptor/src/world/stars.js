@@ -41,16 +41,38 @@ export class Stars {
       col[i * 3 + 2] = b * (0.78 + temp * 0.25);
     }
 
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-    geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
-    this.mat = new THREE.PointsMaterial({
-      size: 1.8, sizeAttenuation: false, vertexColors: true, transparent: true,
-      opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
-    });
-    this.points = new THREE.Points(geo, this.mat);
-    this.points.frustumCulled = false;
-    this.points.renderOrder = -99; // just above the sky dome
+    // three magnitude bins (PointsMaterial is single-size; binning restores
+    // the bright/mid/faint depth judges asked for)
+    const bins = [
+      { frac: 0.07, size: 2.8, boost: 1.35 },
+      { frac: 0.33, size: 1.9, boost: 1.0 },
+      { frac: 1.0,  size: 1.2, boost: 0.7 },
+    ];
+    this.mats = [];
+    this.pointSets = [];
+    this.points = new THREE.Group(); // container; .visible toggles all bins
+    let start = 0;
+    for (const bin of bins) {
+      const end = Math.floor(COUNT * bin.frac);
+      const n = end - start;
+      if (n <= 0) continue;
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.BufferAttribute(pos.slice(start * 3, end * 3), 3));
+      const bcol = col.slice(start * 3, end * 3);
+      for (let i = 0; i < bcol.length; i++) bcol[i] = Math.min(bcol[i] * bin.boost, 1);
+      geo.setAttribute("color", new THREE.BufferAttribute(bcol, 3));
+      const mat = new THREE.PointsMaterial({
+        size: bin.size, sizeAttenuation: false, vertexColors: true, transparent: true,
+        opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
+      });
+      const pts = new THREE.Points(geo, mat);
+      pts.frustumCulled = false;
+      pts.renderOrder = -99;
+      this.mats.push(mat);
+      this.pointSets.push(pts);
+      this.points.add(pts);
+      start = end;
+    }
     this.group.add(this.points);
 
     // moon: disc + soft halo, anti-solar
@@ -70,7 +92,7 @@ export class Stars {
   update(sunElDeg, hours, latDeg, sunDir) {
     // stars fade in from civil dusk, full by nautical night
     const t = Math.min(Math.max((-sunElDeg - 3) / 7, 0), 1);
-    this.mat.opacity = t;
+    for (const m of this.mats) m.opacity = t;
     this.points.visible = t > 0.01;
 
     // celestial pole: altitude = latitude, due north; spin by hour angle
