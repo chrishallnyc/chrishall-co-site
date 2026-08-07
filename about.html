@@ -113,7 +113,14 @@
 
   <header class="hero" id="top">
     <div class="portrait">
-      <img src="chris-hero.jpg" alt="Chris Hall" width="2000" height="1328">
+      <picture>
+        <source type="image/avif" srcset="chris-hero-1200.avif 1200w, chris-hero-2000.avif 2000w"
+                sizes="(max-width:860px) calc(100vw - 56px), 516px">
+        <source type="image/webp" srcset="chris-hero-1200.webp 1200w, chris-hero-2000.webp 2000w"
+                sizes="(max-width:860px) calc(100vw - 56px), 516px">
+        <img src="chris-1200.jpg" alt="Chris Hall" width="2000" height="1328"
+             fetchpriority="high" decoding="async">
+      </picture>
     </div>
     <div class="lede">
       <div class="eyebrow">Media Operator</div>
