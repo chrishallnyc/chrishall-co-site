@@ -66,7 +66,7 @@ export class Atmosphere {
     this.hemi = new THREE.HemisphereLight(0x9db8d6, 0x2a2622, 0.9);
     scene.add(this.hemi);
 
-    scene.fog = new THREE.Fog(0xcfdcea, 4000, 30000);
+    scene.fog = new THREE.Fog(0xcfdcea, 7000, 46000); // aerial haze starts past close terrain
     this.scene = scene;
 
     this._sunDir = new THREE.Vector3(0, 1, 0);

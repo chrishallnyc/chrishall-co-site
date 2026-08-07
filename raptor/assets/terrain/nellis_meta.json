@@ -1,0 +1,10 @@
+{
+ "sizeM": 65536.0,
+ "grid": 4096,
+ "minH": 657.4,
+ "maxH": 3453.9,
+ "centerLat": 36.6,
+ "centerLon": -115.4,
+ "mPerPx": 16.0,
+ "source": "USGS 3DEP 1/3 arc-second (public domain)"
+}

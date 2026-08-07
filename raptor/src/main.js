@@ -9,6 +9,7 @@ import { DebugOverlay } from "./engine/debug.js";
 import { TestWorld } from "./game/testworld.js";
 import { ControlsMenu } from "./game/controlsmenu.js";
 import { Atmosphere } from "./world/daycycle.js";
+import { Terrain } from "./world/terrain.js";
 
 const VERSION = "0.3.0";
 const PHASE = 2;
@@ -72,6 +73,22 @@ async function boot() {
   const world = new TestWorld(scene);
   sim.addSystem(world);
 
+  // real-Earth ground (NELLIS baked; other fronts arrive in later blocks).
+  // ?noterrain=1 = QA flag: sky/boot batteries skip the 21MB ground so
+  // SwiftShader timings measure what they intend to.
+  let terrain = null;
+  if (atmosphere.frontName === "NELLIS" && flags.get("noterrain") !== "1") {
+    const vs = document.querySelector("#veil .status");
+    if (vs) vs.innerHTML = "<b>LOADING NEVADA</b> — real USGS terrain";
+    try {
+      terrain = await Terrain.load("/assets/terrain/nellis");
+      scene.add(terrain.mesh);
+      world.setGround(terrain);
+    } catch (err) {
+      console.warn("terrain unavailable, flying over water:", err && err.message);
+    }
+  }
+
   const input = new Input(window);
   const gamepad = new GamepadInput();
   const controls = new ControlsMenu(input);
@@ -86,7 +103,7 @@ async function boot() {
 
   // public hooks (QA + future phases)
   Object.assign(state, {
-    sim, input, gamepad, controls, dbg, atmosphere,
+    sim, input, gamepad, controls, dbg, atmosphere, terrain,
     setTimeOfDay: (h) => atmosphere.setTime(h),
     setFront: (f) => atmosphere.setFront(String(f).toUpperCase()),
     hash: () => sim.stateHash(),

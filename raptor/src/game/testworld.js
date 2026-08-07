@@ -21,6 +21,7 @@ export class TestWorld {
     );
     sea.rotation.x = -Math.PI / 2;
     scene.add(sea);
+    this.sea = sea;
 
     // distance pylons every 500m on a 4km ring — scale reference
     const pylonGeo = new THREE.ConeGeometry(18, 160, 6);
@@ -33,6 +34,7 @@ export class TestWorld {
       pylons.setMatrixAt(i, m4);
     }
     scene.add(pylons);
+    this.pylons = pylons;
 
     // placeholder jet: fuselage + wing slab (the real F-22 arrives in phase 6)
     this.jet = new THREE.Group();
@@ -58,9 +60,10 @@ export class TestWorld {
     this.trail = new Pool(TRAIL_N, () => ({ x: 0, y: 0, z: 0, age: 1e9 }));
 
     // sim-owned state: [angle, radius, alt, speed, bank] + prev copy for lerp
+    this.baseAlt = 900;
     this.state = new Float64Array(5);
     this.prev = new Float64Array(5);
-    this.state[0] = 0; this.state[1] = 2600; this.state[2] = 900; this.state[3] = 240;
+    this.state[0] = 0; this.state[1] = 2600; this.state[2] = this.baseAlt; this.state[3] = 240;
     this.prev.set(this.state);
     this._puffCooldown = 0;
     // QA/judge framing: ?pitch=deg tilts the chase view; ?yaw=deg parks the
@@ -70,9 +73,26 @@ export class TestWorld {
     this.fixYaw = q.has("yaw") ? parseFloat(q.get("yaw")) * Math.PI / 180 : null;
   }
 
+  // terrain arrived: hide the sea, perch the pylons on the ground, fly higher
+  setGround(terrain) {
+    this.terrain = terrain;
+    this.sea.visible = false;
+    this.baseAlt = 3400; // clears every ridge under the proving circle
+    this.state[2] = this.baseAlt;
+    this.prev.set(this.state);
+    const m4 = new THREE.Matrix4();
+    for (let i = 0; i < 24; i++) {
+      const a = (i / 24) * Math.PI * 2;
+      const x = Math.cos(a) * 4000, z = Math.sin(a) * 4000;
+      m4.setPosition(x, terrain.heightAt(x, z) + 80, z);
+      this.pylons.setMatrixAt(i, m4);
+    }
+    this.pylons.instanceMatrix.needsUpdate = true;
+  }
+
   // ---- sim side (fixed step, deterministic) ----
   reset() {
-    this.state[0] = 0; this.state[1] = 2600; this.state[2] = 900; this.state[3] = 240; this.state[4] = 0;
+    this.state[0] = 0; this.state[1] = 2600; this.state[2] = this.baseAlt; this.state[3] = 240; this.state[4] = 0;
     this.prev.set(this.state);
   }
 
@@ -81,7 +101,7 @@ export class TestWorld {
     const s = this.state;
     const omega = s[3] / s[1];               // rad/s around the circle
     s[0] += omega * dt;
-    s[2] = 900 + Math.sin(s[0] * 2.0) * 140; // gentle altitude weave
+    s[2] = this.baseAlt + Math.sin(s[0] * 2.0) * 140; // gentle altitude weave
     s[4] = Math.atan((s[3] * omega) / 9.81); // coordinated bank angle
     this._puffCooldown -= dt;
     if (this._puffCooldown <= 0) {
@@ -127,9 +147,11 @@ export class TestWorld {
     this.trailMesh.instanceMatrix.needsUpdate = true;
 
     if (this.fixYaw !== null) {
-      // parked sky camera: +X east, +Z north; yaw = azimuth from north
-      camera.position.set(0, 900, 0);
-      camera.lookAt(Math.sin(this.fixYaw) * 1000, 900 + Math.tan(this.pitchBias) * 1000, Math.cos(this.fixYaw) * 1000);
+      // parked camera: +X east, +Z north; terrain-aware altitude (a fixed
+      // 900m sat UNDERGROUND in the 1266m Nevada basin)
+      const camY = (this.terrain ? this.terrain.heightAt(0, 0) : 0) + 600;
+      camera.position.set(0, camY, 0);
+      camera.lookAt(Math.sin(this.fixYaw) * 1000, camY + Math.tan(this.pitchBias) * 1000, Math.cos(this.fixYaw) * 1000);
       return;
     }
     // chase camera, behind along heading
