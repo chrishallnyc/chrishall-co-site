@@ -16,6 +16,15 @@ a { color:var(--mid); text-decoration:none; } a:hover { color:var(--ink); }
 h1 { font-size:15px; letter-spacing:6px; color:var(--acc); font-weight:700; }
 .sub { color:var(--dim); font-size:10px; letter-spacing:2px; margin-bottom:30px; }
 
+.intro { border:1px solid var(--hair); background:var(--panel); padding:18px 20px 16px; margin-bottom:32px; }
+.intro p { color:var(--mid); font-size:12.5px; margin-bottom:10px; max-width:64ch; }
+.intro p b { color:var(--ink); }
+.intro .play { display:inline-block; border:1px solid var(--hud); color:var(--hud); padding:10px 22px;
+  letter-spacing:3px; font-size:13px; margin:4px 0 10px; }
+.intro .play:hover { background:rgba(155,232,155,.08); color:var(--hud); }
+.intro .keys { font-size:11px; color:var(--dim); margin-bottom:0; }
+.intro .keys b { color:var(--hud); }
+
 .big { display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; margin-bottom:8px; }
 .pct { font-size:64px; font-weight:700; color:var(--hud); letter-spacing:2px; line-height:1; }
 .big .of { color:var(--dim); font-size:11px; letter-spacing:2px; }
@@ -42,9 +51,22 @@ h1 { font-size:15px; letter-spacing:6px; color:var(--acc); font-weight:700; }
 </head>
 <body>
 <h1>RAPTOR — BUILD PROGRESS</h1>
-<div class="sub">AN F-22 SIM BUILDING ITSELF · UPDATED BY THE LOOP AS PHASES LAND · <a href="/">the game</a> · <a href="/devlog.html">devlog</a></div>
+<div class="sub">A GAME THAT IS BUILDING ITSELF · <a href="/devlog.html">build diary</a></div>
 
-<div class="big"><div class="pct" id="pct">…</div><div class="of">OF THE FULL 21-PHASE PLAN</div></div>
+<div class="intro">
+  <p><b>What is this?</b> An AI is building a complete fighter-jet game from scratch —
+  you fly an F-22 Raptor over real places on Earth (Nevada, Alaska, the Pacific),
+  right in your web browser. Nothing to download or install.</p>
+  <p><b>How does it work?</b> The game gets built in 21 parts, like chapters. Each bar
+  below fills up as that part gets done. Gold bar = finished. Green bar = in progress.
+  The big number is how much of the whole game exists so far.</p>
+  <p><b>Can I try it?</b> Yes — the parts that are done are already playable, right now:</p>
+  <a class="play" href="/">▶ &nbsp;FLY IT NOW</a>
+  <p class="keys">move your mouse to steer · <b>W</b>/<b>S</b> throttle · <b>A</b>/<b>D</b> roll ·
+  <b>Q</b>/<b>E</b> rudder · <b>Esc</b> for all controls</p>
+</div>
+
+<div class="big"><div class="pct" id="pct">…</div><div class="of">OF THE WHOLE GAME, BUILT</div></div>
 <div class="masterbar"><div class="fill" id="masterfill"></div></div>
 <div class="now" id="now"></div>
 
