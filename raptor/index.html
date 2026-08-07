@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RAPTOR — F-22 air combat</title>
+<meta name="description" content="One aircraft, three real fronts. An F-22 air combat sim built for the browser — War Thunder controls, real-Earth terrain, no install.">
+<link rel="canonical" href="https://raptor.chall.net/">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23101014'/%3E%3Cpath d='M16 4 L19 12 L27 17 L19 19 L18 24 L21 27 L16 25 L11 27 L14 24 L13 19 L5 17 L13 12 Z' fill='%23e8b46f'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="RAPTOR — F-22 air combat">
+<meta property="og:description" content="One aircraft, three real fronts. Built for the browser.">
+<meta property="og:url" content="https://raptor.chall.net/">
+<meta name="theme-color" content="#101014">
+<style>
+:root { --bg:#101014; --panel:#16161c; --ink:#e8e6df; --mid:#9a988f; --dim:#6e6c64; --hair:#2e2e36; --acc:#e8b46f; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { background:var(--bg); height:100%; }
+body {
+  color:var(--ink);
+  font-family:"SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size:13px; line-height:1.5;
+  min-height:100vh; min-height:100dvh;
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+#page { position:relative; flex:1; display:flex; flex-direction:column;
+  padding:14px clamp(10px,2.5vw,30px) 10px; min-height:0; }
+#page::before { content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+  background:radial-gradient(circle, #1d1d24 1.1px, transparent 1.55px) 0 0 / 20px 20px; }
+a { color:var(--mid); text-decoration:none; }
+a:hover { color:var(--ink); text-decoration:underline; }
+
+.mast { position:relative; z-index:2; border:1px solid var(--hair); padding:8px 14px;
+  display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+  max-width:1240px; width:100%; margin:0 auto; background:var(--panel); }
+.mast::after { content:""; position:absolute; inset:2px; border:1px solid var(--hair); pointer-events:none; }
+.brand { font-weight:700; letter-spacing:6px; font-size:15px; color:var(--acc); }
+.sub { color:var(--dim); font-size:10px; margin-top:1px; letter-spacing:2px; }
+.right { display:flex; align-items:center; gap:14px; font-size:10px; letter-spacing:2px; color:var(--dim); }
+
+#stage { position:relative; z-index:1; flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:22px; min-height:0; }
+#plan { display:block; }
+.status { text-align:center; letter-spacing:3px; font-size:11px; color:var(--mid); }
+.status b { color:var(--ink); font-weight:700; }
+.status .ph { color:var(--acc); }
+.whisper { text-align:center; font-size:10px; letter-spacing:1.5px; color:var(--dim); max-width:52ch; }
+
+.foot { position:relative; z-index:2; display:flex; justify-content:space-between;
+  max-width:1240px; width:100%; margin:0 auto; padding:6px 2px 0;
+  font-size:10px; letter-spacing:2px; color:var(--dim); }
+</style>
+</head>
+<body>
+<div id="page">
+  <div class="mast">
+    <div>
+      <div class="brand">RAPTOR</div>
+      <div class="sub">F-22 AIR COMBAT — THREE FRONTS</div>
+    </div>
+    <div class="right">
+      <a href="/devlog.html">devlog</a>
+      <span class="ver">v0.0.1</span>
+    </div>
+  </div>
+
+  <div id="stage">
+    <canvas id="plan" width="420" height="420" aria-label="rotating F-22 planform"></canvas>
+    <div class="status"><span class="ph">PHASE 0</span> — <b>BERTH ESTABLISHED</b></div>
+    <div class="whisper">the autonomous build is running · this page rebuilds itself as phases land
+      · valdez — nellis — marianas</div>
+  </div>
+
+  <div class="foot">
+    <span>ONE AIRCRAFT · THREE FRONTS · NO INSTALL</span>
+    <a href="https://chall.net">CHALL.NET</a>
+  </div>
+</div>
+
+<script>
+window.__RAPTOR = { version: "0.0.1", phase: 0, status: "berth" };
+
+(function () {
+  const cv = document.getElementById("plan");
+  const cx = cv.getContext("2d");
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = 420 * DPR; cv.height = 420 * DPR;
+  cv.style.width = "420px"; cv.style.height = "420px";
+
+  // F-22 planform, top view: [x half-span, y nose→tail], mirrored at draw time.
+  const R = [
+    [0.000, 0.000], [0.045, 0.060], [0.085, 0.150], [0.130, 0.270],
+    [0.150, 0.360], [0.500, 0.610], [0.465, 0.700], [0.185, 0.660],
+    [0.170, 0.760], [0.310, 0.845], [0.285, 0.930], [0.095, 0.905],
+    [0.070, 0.975], [0.030, 1.000], [0.000, 1.000]
+  ];
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let t = 0;
+
+  function draw() {
+    const w = cv.width, h = cv.height, S = w * 0.62;
+    cx.clearRect(0, 0, w, h);
+    cx.save();
+    cx.translate(w / 2, h / 2);
+
+    cx.strokeStyle = "#2e2e36"; cx.lineWidth = 1 * DPR;
+    cx.beginPath(); cx.arc(0, 0, w * 0.44, 0, Math.PI * 2); cx.stroke();
+    cx.beginPath(); cx.arc(0, 0, w * 0.30, 0, Math.PI * 2); cx.stroke();
+
+    cx.rotate(t);
+    cx.translate(0, -S / 2);
+    cx.beginPath();
+    for (let i = 0; i < R.length; i++) {
+      const [x, y] = R[i];
+      i ? cx.lineTo(x * S, y * S) : cx.moveTo(x * S, y * S);
+    }
+    for (let i = R.length - 1; i >= 0; i--) {
+      const [x, y] = R[i];
+      cx.lineTo(-x * S, y * S);
+    }
+    cx.closePath();
+    cx.fillStyle = "#16161c";
+    cx.strokeStyle = "#e8b46f";
+    cx.lineWidth = 1.4 * DPR;
+    cx.fill(); cx.stroke();
+
+    // canopy + intake hints
+    cx.strokeStyle = "#6e6c64";
+    cx.lineWidth = 1 * DPR;
+    cx.beginPath(); cx.ellipse(0, 0.20 * S, 0.028 * S, 0.075 * S, 0, 0, Math.PI * 2); cx.stroke();
+    cx.beginPath(); cx.moveTo(0.13 * S, 0.30 * S); cx.lineTo(0.15 * S, 0.62 * S);
+    cx.moveTo(-0.13 * S, 0.30 * S); cx.lineTo(-0.15 * S, 0.62 * S); cx.stroke();
+
+    cx.restore();
+    if (!reduced) { t += 0.0035; requestAnimationFrame(draw); }
+  }
+  draw();
+})();
+</script>
+</body>
+</html>
