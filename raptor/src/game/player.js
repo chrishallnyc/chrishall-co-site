@@ -35,6 +35,8 @@ export class Player {
     this._mouseDx = 0; this._mouseDy = 0;
     this._live = { rollL: 0, rollR: 0, yawL: 0, yawR: 0, thrUp: 0, thrDn: 0, pitchUp: 0, pitchDn: 0, brake: 0, wheel: 0, gearEdge: 0, fire: 0 };
     this.crashes = 0;
+    this.hp = 100;
+    this.hitFlash = 0; // render-side: seconds of damage flash remaining
 
     // render-side scratch
     this._prev = new Float64Array(this.fm.state);
@@ -87,8 +89,15 @@ export class Player {
     }
   }
 
+  // AAA/weapon damage; shot down = same respawn path as a crash
+  takeHit(dmg) {
+    this.hp -= dmg;
+    this.hitFlash = 0.5;
+    if (this.hp <= 0) { this.crashes++; this.reset(); }
+  }
+
   // ---- sim side ----
-  reset() { this._doSpawn(); this.aimPitch = 0; this.aimHeading = this.spawn.headingRad; }
+  reset() { this._doSpawn(); this.aimPitch = 0; this.aimHeading = this.spawn.headingRad; this.hp = 100; }
 
   tick(sim, dt) {
     this._prev.set(this.fm.state);
@@ -187,6 +196,7 @@ export class Player {
       aoa: out.alphaDeg,
       throttle: Math.round(this.throttleCmd * 100),
       ammo: this.gun.ammo,
+      hp: this.hp,
     };
   }
 }

@@ -1,11 +1,12 @@
 {
-  "updated": "2026-08-07T03:55:00-07:00",
-  "version": "v0.10.0",
-  "now": "AAA pass: Nevada satellite imagery finishing, then FFT ocean + volumetric clouds",
+  "updated": "2026-08-07T11:20:00-07:00",
+  "version": "v0.11.0",
+  "now": "AAA pass: physically-real atmosphere (LUTs baking now), then FFT ocean + volumetric clouds",
   "nowPhase": 14,
   "paused": false,
-  "pushes": 26,
+  "pushes": 27,
   "ledger": [
+    "2026-08-07 v0.11.0 — THE WAR SHOOTS BACK: anti-aircraft guns track you and fire leaded bursts (red tracers). Hull damage, red-flash hits, shot down = respawn. Nevada's real satellite imagery also landed — all three fronts are photographic now. 65/65 tests.",
     "2026-08-07 v0.10.0 — THE REAL EARTH: actual aerial photography draped over Alaska and the Marianas (sub-meter USGS source), plus laser-scan normal maps and baked ambient shadows on all three fronts. The fjords look like the real fjords now.",
     "2026-08-07 v0.9.0 — THE AAA PASS BEGINS: rebuilt render pipeline — temporal anti-aliasing, HDR bloom (sun halo + water-glint sparkle), lens ghosts. 121fps with it all on. 51/51 tests.",
     "2026-08-07 THE MANDATE — new goal: the most beautiful game possible in a browser, built for the most powerful Macs. An 8-agent research fleet mapped the ceiling; the AAA rebuild starts now, then three full 10%-better passes.",
@@ -76,8 +77,8 @@
     {
       "n": 9,
       "name": "AI & ground war",
-      "pct": 30,
-      "note": "29 targets placed + destructible; AI brains + return fire next"
+      "pct": 45,
+      "note": "29 destructible targets + ZSU return fire live; vehicle movement + SAM launches next"
     },
     {
       "n": 10,
@@ -106,8 +107,8 @@
     {
       "n": 14,
       "name": "Max fidelity pass",
-      "pct": 40,
-      "note": "TAA/bloom/flare + real-imagery terrain LIVE; Nevada imagery, FFT ocean, volumetrics next"
+      "pct": 45,
+      "note": "TAA/bloom/flare + real imagery on ALL fronts; atmosphere LUTs baking, FFT ocean next"
     },
     {
       "n": 15,
@@ -118,8 +119,8 @@
     {
       "n": 16,
       "name": "QA hardening",
-      "pct": 40,
-      "note": "10 batteries, forensic judges standing"
+      "pct": 44,
+      "note": "11 batteries, forensic judges standing"
     },
     {
       "n": 17,

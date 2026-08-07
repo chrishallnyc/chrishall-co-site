@@ -54,14 +54,31 @@ const FRONTS = {
 
 const MAX_SMOKE = 64; // instanced billboard quads shared by all plumes
 
+// ZSU-23-4 return fire (phase 9 "the war shoots back"): lead-predicted
+// bursts with seeded dispersion + skill wobble — low passes are dangerous,
+// not lethal. All state deterministic; rounds are honest ballistic objects.
+const AAA = {
+  range: 2600, muzzle: 970, rps: 20, burstS: 1.6, cooldownS: 2.8,
+  dispersionMrad: 9, dmg: 12, dragK: 0.0005, life: 3.2,
+};
+const MAX_ER = 240; // enemy rounds pool: rps 20 x life 3.2 x ~3 guns
+
 export class Battlefield {
-  constructor(scene, terrain, front) {
+  constructor(scene, terrain, front, player = null) {
     this.name = "battlefield";
     this.kills = 0;
+    this.player = player; // set post-construction by main.js (build order)
     const table = FRONTS[front] || [];
     this.n = table.length;
-    this.state = new Float64Array(this.n * 5); // auto-hashed by SimCore
+    this.state = new Float64Array(this.n * 5); // hashed via hash() below
     this.types = []; this.groups = []; this.parts = [];
+    this.zsus = []; // unit indices that shoot back
+    // per-zsu fire state: [phase timer, spool] — phase>0 bursting, <0 cooling
+    this.aaa = new Float64Array(0);
+    // enemy rounds (ENU): x,y,z, vx,vy,vz, age
+    this.er = new Float64Array(MAX_ER * 7);
+    this.erLive = new Uint8Array(MAX_ER);
+    this.playerHits = 0;
 
     this.root = new THREE.Group();
     this.root.name = "battlefield";
@@ -79,7 +96,10 @@ export class Battlefield {
       group.rotation.y = yaw;
       this.root.add(group);
       this.types.push(type); this.groups.push(group); this.parts.push(parts);
+      if (type === "zsu") this.zsus.push(i);
     });
+    this.aaa = new Float64Array(this.zsus.length * 2);
+    for (let k = 0; k < this.zsus.length; k++) this.aaa[k * 2] = -1.0 - k * 0.9; // staggered first bursts
 
     // destruction visuals: one shared wreck material + instanced smoke quads
     this._wreck = new THREE.MeshStandardMaterial({ color: 0x1a1714, roughness: 0.95, metalness: 0.08 });
@@ -90,15 +110,122 @@ export class Battlefield {
     this.smoke.count = 0;
     this.root.add(this.smoke);
     this.plumes = []; // {i} per dead unit — render-side, looped forever
+
+    // enemy tracers: hot red streaks, unmistakably not yours
+    const eGeo = new THREE.BoxGeometry(0.4, 0.4, 6.0);
+    const eMat = new THREE.MeshBasicMaterial({ color: 0xff5a3c, transparent: true, opacity: 1.0, blending: THREE.AdditiveBlending, depthWrite: false });
+    this.erMesh = new THREE.InstancedMesh(eGeo, eMat, MAX_ER);
+    this.erMesh.frustumCulled = false;
+    this.erMesh.count = 0;
+    this.root.add(this.erMesh);
+
     this._m4 = new THREE.Matrix4();
+    this._q = new THREE.Quaternion();
+    this._dir = new THREE.Vector3();
     this._clock = 0;
+    this.terrain = terrain;
   }
 
   alive(i) { return this.state[i * 5 + 4] > 0; }
   aliveCount() { let c = 0; for (let i = 0; i < this.n; i++) if (this.alive(i)) c++; return c; }
 
   // ---- sim side ----
-  tick(sim, dt) { /* static targets for now — AAA return fire is the next rung */ }
+  tick(sim, dt) {
+    const P = this.player;
+    if (P) {
+      const ps = P.fm.state; // previous-tick pos is fine (battlefield ticks first)
+      const px = ps[0], py = ps[1], pz = ps[2];
+      const pvx = ps[7], pvy = ps[8], pvz = ps[9];
+      for (let k = 0; k < this.zsus.length; k++) {
+        const i = this.zsus[k], o = i * 5, a = k * 2;
+        if (this.state[o + 4] <= 0) continue; // dead guns don't shoot
+        const dx = px - this.state[o], dy = py - this.state[o + 1], dz = pz - this.state[o + 2];
+        const dist = Math.hypot(dx, dy, dz);
+        if (dist > AAA.range || dist < 60) { this.aaa[a] = Math.min(this.aaa[a], -0.4); this.aaa[a + 1] = 0; continue; }
+        this.aaa[a] += dt;
+        if (this.aaa[a] < 0) continue;               // cooling down
+        if (this.aaa[a] > AAA.burstS) { this.aaa[a] = -AAA.cooldownS; this.aaa[a + 1] = 0; continue; }
+        // bursting: spool rounds with a lead-predicted, gravity-compensated solution
+        this.aaa[a + 1] += AAA.rps * dt;
+        while (this.aaa[a + 1] >= 1) {
+          this.aaa[a + 1] -= 1;
+          this._aaaFire(sim, i, px, py, pz, pvx, pvy, pvz);
+        }
+      }
+    }
+    // integrate enemy rounds; hit-test the player sphere segment-wise
+    const pr = 7.0;
+    const ps = P ? P.fm.state : null;
+    for (let j = 0; j < MAX_ER; j++) {
+      if (!this.erLive[j]) continue;
+      const o = j * 7, r = this.er;
+      const v = Math.hypot(r[o + 3], r[o + 4], r[o + 5]);
+      const k = 1 - AAA.dragK * dt * v;
+      r[o + 3] *= k; r[o + 4] *= k; r[o + 5] = r[o + 5] * k - 9.81 * dt;
+      const x0 = r[o], y0 = r[o + 1], z0 = r[o + 2];
+      r[o] += r[o + 3] * dt; r[o + 1] += r[o + 4] * dt; r[o + 2] += r[o + 5] * dt;
+      r[o + 6] += dt;
+      if (P) {
+        const cx = ps[0] - x0, cy = ps[1] - y0, cz = ps[2] - z0;
+        const sx = r[o] - x0, sy = r[o + 1] - y0, sz = r[o + 2] - z0;
+        const l2 = sx * sx + sy * sy + sz * sz;
+        let t = l2 > 0 ? (cx * sx + cy * sy + cz * sz) / l2 : 0;
+        t = t < 0 ? 0 : t > 1 ? 1 : t;
+        const qx = cx - sx * t, qy = cy - sy * t, qz = cz - sz * t;
+        if (qx * qx + qy * qy + qz * qz <= pr * pr) {
+          this.erLive[j] = 0;
+          this.playerHits++;
+          P.takeHit(AAA.dmg);
+          continue;
+        }
+      }
+      const gh = this.terrain ? this.terrain.heightAt(r[o], r[o + 1]) : 0;
+      if (r[o + 2] <= Math.max(gh, 0) || r[o + 6] > AAA.life) this.erLive[j] = 0;
+    }
+  }
+
+  _aaaFire(sim, i, px, py, pz, pvx, pvy, pvz) {
+    let slot = -1;
+    for (let j = 0; j < MAX_ER; j++) if (!this.erLive[j]) { slot = j; break; }
+    if (slot < 0) return;
+    const o5 = i * 5;
+    const gx = this.state[o5], gy = this.state[o5 + 1], gz = this.state[o5 + 2] + 1.5;
+    // two-pass lead: time of flight from current range, aim at predicted pos
+    const d0 = Math.hypot(px - gx, py - gy, pz - gz);
+    const tof = d0 / AAA.muzzle;
+    const lead = 0.95 + (sim.rng.f() - 0.5) * 0.18; // good gunner, human wobble — straight flight gets punished, jinking evades
+    let tx = px + pvx * tof * lead, ty = py + pvy * tof * lead, tz = pz + pvz * tof * lead;
+    tz += 4.9 * tof * tof; // gravity drop compensation (aim high)
+    let fx = tx - gx, fy = ty - gy, fz = tz - gz;
+    const fl = Math.hypot(fx, fy, fz); fx /= fl; fy /= fl; fz /= fl;
+    // dispersion in the plane perpendicular to fire dir (the D-040 lesson);
+    // close overhead passes strain the mount's tracking rate — fast movers
+    // at point-blank are HARDER to hit, not free kills
+    const strain = d0 < 900 ? 1 + (900 - d0) / 900 * 1.4 : 1;
+    const mrad = AAA.dispersionMrad / 1000 * strain;
+    const g1 = (sim.rng.f() + sim.rng.f() + sim.rng.f() - 1.5) * mrad;
+    const g2 = (sim.rng.f() + sim.rng.f() + sim.rng.f() - 1.5) * mrad;
+    let rx = fy, ry = -fx;
+    const rl = Math.hypot(rx, ry);
+    if (rl > 1e-4) { rx /= rl; ry /= rl; } else { rx = 1; ry = 0; }
+    const ux = ry * fz, uy = -rx * fz, uz = rx * fy - ry * fx;
+    fx += g1 * rx + g2 * ux; fy += g1 * ry + g2 * uy; fz += g2 * uz;
+    const fn = Math.hypot(fx, fy, fz); fx /= fn; fy /= fn; fz /= fn;
+    const o = slot * 7, r = this.er;
+    r[o] = gx + fx * 4; r[o + 1] = gy + fy * 4; r[o + 2] = gz + fz * 4;
+    r[o + 3] = fx * AAA.muzzle; r[o + 4] = fy * AAA.muzzle; r[o + 5] = fz * AAA.muzzle;
+    r[o + 6] = 0;
+    this.erLive[slot] = 1;
+  }
+
+  // replaces the SimCore auto-hash (state alone no longer covers the war)
+  hash(h) {
+    const H = (v) => { h = (Math.imul(h ^ ((v * 1e3) | 0), 0x01000193)) >>> 0; };
+    for (let i = 0; i < this.state.length; i++) H(this.state[i]);
+    for (let i = 0; i < this.aaa.length; i++) H(this.aaa[i]);
+    H(this.kills); H(this.playerHits);
+    return h;
+  }
 
   // segment p0->p1 vs live unit hit-spheres; first hit index or -1
   testSegment(x0, y0, z0, x1, y1, z1) {
@@ -139,13 +266,43 @@ export class Battlefield {
   // ---- render side ----
   render(dt, camera) {
     this._clock += dt;
-    // idle life: spin live radar dishes
+    // idle life: spin live radar dishes; live ZSU turrets track the player
     for (let i = 0; i < this.n; i++) {
       if (!this.alive(i)) continue;
       const p = this.parts[i];
       if (p.dish) p.dish.rotation.y += dt * 1.4;
       if (p.radarDish) p.radarDish.rotation.y += dt * 2.2;
     }
+    if (this.player) {
+      const ps = this.player.fm.state;
+      for (const i of this.zsus) {
+        if (!this.alive(i)) continue;
+        const p = this.parts[i], g = this.groups[i], o = i * 5;
+        const dx = ps[0] - this.state[o], dyN = ps[1] - this.state[o + 1];
+        const dist = Math.hypot(dx, dyN);
+        if (dist > AAA.range * 1.3) continue;
+        if (p.turret) {
+          // ENU bearing -> three yaw, minus the unit's own base yaw
+          p.turret.rotation.y = Math.atan2(dx, dyN) - g.rotation.y;
+        }
+        if (p.barrels) {
+          p.barrels.rotation.x = -Math.atan2(ps[2] - this.state[o + 2], dist);
+        }
+      }
+    }
+    // enemy tracer streaks along velocity
+    let ne = 0;
+    for (let j = 0; j < MAX_ER; j++) {
+      if (!this.erLive[j]) continue;
+      const o = j * 7, r = this.er;
+      this._dir.set(r[o + 3], r[o + 5], r[o + 4]).normalize();
+      this._q.setFromUnitVectors(new THREE.Vector3(0, 0, 1), this._dir);
+      this._m4.makeRotationFromQuaternion(this._q);
+      this._m4.setPosition(r[o], r[o + 2], r[o + 1]);
+      this.erMesh.setMatrixAt(ne++, this._m4);
+    }
+    this.erMesh.count = ne;
+    this.erMesh.instanceMatrix.needsUpdate = true;
     // smoke: 4 rising billboard quads per plume, looped
     let n = 0;
     for (const pl of this.plumes) {

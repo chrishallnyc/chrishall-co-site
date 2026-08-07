@@ -16,7 +16,7 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.10.0";
+const VERSION = "0.11.0";
 const PHASE = 14;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
@@ -168,6 +168,8 @@ async function boot() {
       spawn: { x: 0, y: -6000, alt: (fg?.baseAlt || 3400) + 200, headingRad: 0, speed: 200 },
     });
     sim.addSystem(player);
+    // the war shoots back (?noaaa=1 for scenery QA — no player ref, guns idle)
+    if (battlefield && flags.get("noaaa") !== "1") battlefield.player = player;
   }
   // AB plume + wingtip vortices (nests under jetGroup — post-boot top-level
   // scene.add is silently dropped by this renderer build; see flightfx.js)
@@ -230,13 +232,26 @@ async function boot() {
       ctx.strokeStyle = "#9be89b"; ctx.lineWidth = 1.6; ctx.globalAlpha = 0.95;
       ctx.beginPath(); ctx.arc(sx, sy, 9, 0, Math.PI * 2); ctx.stroke();
       ctx.beginPath(); ctx.arc(sx, sy, 1.4, 0, Math.PI * 2); ctx.fillStyle = "#9be89b"; ctx.fill();
-      // ammo + score readout, WT-style bottom-center
+      // ammo + score + airframe readout, WT-style bottom-center
       ctx.font = "12px ui-monospace, Menlo, monospace";
       ctx.fillStyle = player.gun.ammo > 0 ? "#9be89b" : "#d08770";
       ctx.textAlign = "center";
       const score = battlefield && battlefield.kills > 0 ? "   KILLS " + battlefield.kills : "";
-      ctx.fillText("GUN " + player.gun.ammo + score, w / 2, h - 34);
+      const dmg = player.hp < 100 ? "   HULL " + Math.max(player.hp, 0) + "%" : "";
+      ctx.fillText("GUN " + player.gun.ammo + score + dmg, w / 2, h - 34);
       ctx.restore();
+      // taking fire: red vignette pulse
+      if (player.hitFlash > 0) {
+        player.hitFlash = Math.max(0, player.hitFlash - 1 / 60);
+        ctx.save();
+        const a = Math.min(player.hitFlash * 0.9, 0.4);
+        const grad = ctx.createRadialGradient(w / 2, h / 2, h * 0.42, w / 2, h / 2, h * 0.75);
+        grad.addColorStop(0, "rgba(200,40,20,0)");
+        grad.addColorStop(1, `rgba(200,40,20,${a})`);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+        ctx.restore();
+      }
     };
   }
 
