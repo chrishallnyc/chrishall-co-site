@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F-22 LAB</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23303338'/%3E%3C/svg%3E">
+<style>
+  html,body { margin:0; height:100%; background:#303338; overflow:hidden; }
+  canvas { display:block; width:100%; height:100%; }
+  #tag { position:fixed; left:10px; top:8px; color:#9aa0a8; font:11px/1.4 ui-monospace,monospace;
+         letter-spacing:2px; pointer-events:none; }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="tag">F-22 LAB</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "/vendor/three.webgpu.min.js",
+    "three/webgpu": "/vendor/three.webgpu.min.js",
+    "three/tsl": "/vendor/three.tsl.min.js"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from "three";
+import { buildF22 } from "/src/aircraft/f22.js";
+
+const q = new URLSearchParams(location.search);
+const VIEW = q.get("view");                 // top | side | front | three-quarter
+const SPIN = q.get("spin") !== "0" && !VIEW;
+
+const lab = { ready: false, tris: 0, snap: null };
+window.__F22LAB = lab;
+
+// same one-context-forever caution as main.js: probe before construction
+async function makeRenderer(canvas) {
+  let adapter = null;
+  if (navigator.gpu && q.get("gl") !== "1") {
+    try { adapter = await navigator.gpu.requestAdapter(); } catch (_) { adapter = null; }
+  }
+  if (adapter) {
+    try {
+      const r = new THREE.WebGPURenderer({ canvas, antialias: true });
+      await r.init();
+      return r;
+    } catch (err) {
+      const c = canvas.cloneNode(false); canvas.replaceWith(c); canvas = c;
+    }
+  }
+  const r = new THREE.WebGPURenderer({ canvas, antialias: true, forceWebGL: true });
+  await r.init();
+  return r;
+}
+
+const renderer = await makeRenderer(document.getElementById("cv"));
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+renderer.setSize(innerWidth, innerHeight);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x303338);       // hangar gray
+
+// three-light setup: warm key, cool fill, top rim
+const key = new THREE.DirectionalLight(0xfff1dd, 2.4);
+key.position.set(7, 9, -6);
+const fill = new THREE.DirectionalLight(0xbfd0e6, 0.9);
+fill.position.set(-8, 3, 5);
+const rim = new THREE.DirectionalLight(0xffffff, 1.1);
+rim.position.set(0, 5, 11);
+scene.add(key, fill, rim,
+  new THREE.HemisphereLight(0x9aa3ad, 0x5a5e66, 0.7),
+  new THREE.AmbientLight(0x888e96, 0.25));
+
+const { group, parts } = buildF22();
+scene.add(group);
+window.__F22PARTS = parts;
+
+let tris = 0;
+group.traverse((o) => {
+  if (o.isMesh) {
+    const p = o.geometry.getAttribute("position");
+    tris += (o.geometry.index ? o.geometry.index.count : p.count) / 3;
+  }
+});
+lab.tris = Math.round(tris);
+console.log("[f22lab] tris:", lab.tris);
+
+const cam = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.1, 500);
+
+function park(view) {
+  cam.up.set(0, 1, 0);
+  if (view === "top")        { cam.fov = 18; cam.position.set(0, 62, 0); cam.up.set(0, 0, -1); }
+  else if (view === "side")  { cam.fov = 18; cam.position.set(62, 0.4, 0); }
+  else if (view === "front") { cam.fov = 18; cam.position.set(0, 0.6, -62); }
+  else                       { cam.fov = 32; cam.position.set(15.5, 7.5, -18); }
+  cam.lookAt(0, 0, 0.8);
+  cam.updateProjectionMatrix();
+}
+
+let t = 0;
+function orbit() {
+  t += 0.0035;
+  cam.fov = 30;
+  cam.position.set(Math.sin(t) * 24, 7.5, Math.cos(t) * 24);
+  cam.lookAt(0, 0.3, 0);
+  cam.updateProjectionMatrix();
+}
+
+if (VIEW) park(VIEW); else orbit();
+
+lab.snap = (name) => {                 // render + return PNG data-url
+  renderer.render(scene, cam);
+  const url = renderer.domElement.toDataURL("image/png");
+  if (name) console.log("[f22lab] snap:", name, url.length, "bytes");
+  return url;
+};
+
+addEventListener("resize", () => {
+  renderer.setSize(innerWidth, innerHeight);
+  cam.aspect = innerWidth / innerHeight;
+  cam.updateProjectionMatrix();
+});
+
+renderer.setAnimationLoop(() => {
+  if (SPIN) orbit();
+  renderer.render(scene, cam);
+  if (!lab.ready) { lab.ready = true; console.log("[f22lab] ready"); }
+});
+</script>
+</body>
+</html>
