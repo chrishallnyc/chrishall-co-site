@@ -1,19 +1,59 @@
-// Terrain v1 — real-Earth heightfield from the bakery (16-bit PNG R/G packed).
-// One 512x512 displaced mesh over the full AOI proves the pipeline end-to-end;
-// the CDLOD quadtree replaces the single mesh in the next block. Keeps the
-// full-resolution decoded field for collision/AI height queries.
+// Terrain v2 — chunked-LOD quadtree over the baked real-Earth heightfield.
+//
+// One shared 128x128 grid (with a skirt ring) is displaced in the VERTEX
+// SHADER from the 16-bit R/G-packed height texture; each quadtree node is a
+// Mesh whose position/scale carry the node transform, so a single TSL
+// material serves every node with zero per-node compiles. Selection walks
+// the tree each frame (render if dist > size*K, else recurse), culls against
+// a precomputed min/max height pyramid, and syncs to a mesh pool. Skirts
+// hide LOD-seam cracks. The decoded Float32 field stays CPU-side for
+// collision/AI height queries (bilinear heightAt).
 
 import * as THREE from "three";
+import {
+  Fn, uniform, texture, vec2, vec3, vec4, float, positionLocal, positionWorld,
+  modelWorldMatrix, attribute, normalize, clamp, smoothstep, mix, max,
+} from "three/tsl";
 
-const MESH_VERTS = 512;
+const GRID = 128;           // interior verts per node edge
+const LOD_K = 2.2;          // render node when dist > size * K
+const MAX_LEVEL = 5;        // 65536m root → 2048m leaves = 16m/vert at GRID=128
+const POOL = 260;
 
-// altitude/slope desert ramp (NELLIS palette; per-front palettes later)
+// ---------- shared skirted grid: interior [-0.5..0.5], skirt ring flagged ----------
+function buildGrid() {
+  const n = GRID + 2; // + skirt ring on each side handled by clamping uv
+  const verts = [], skirtFlag = [], index = [];
+  for (let j = 0; j < n; j++) {
+    for (let i = 0; i < n; i++) {
+      // clamp skirt ring onto the edge in XZ; flag it for the shader push-down
+      const ci = Math.min(Math.max(i - 1, 0), GRID - 1);
+      const cj = Math.min(Math.max(j - 1, 0), GRID - 1);
+      verts.push(ci / (GRID - 1) - 0.5, 0, cj / (GRID - 1) - 0.5);
+      skirtFlag.push(i === 0 || j === 0 || i === n - 1 || j === n - 1 ? 1 : 0);
+    }
+  }
+  for (let j = 0; j < n - 1; j++) {
+    for (let i = 0; i < n - 1; i++) {
+      const a = j * n + i, b = a + 1, c = a + n, d = c + 1;
+      index.push(a, c, b, b, c, d);
+    }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(verts, 3));
+  geo.setAttribute("skirt", new THREE.Float32BufferAttribute(skirtFlag, 1));
+  geo.setIndex(index);
+  // culling is manual (quadtree AABBs); keep three from using shared bounds
+  geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1e9);
+  return geo;
+}
+
 const RAMP = {
-  playa: new THREE.Color(0xbfae8e),
-  bajada: new THREE.Color(0xa08a6c),
-  scrub: new THREE.Color(0x7d6d55),
-  rock: new THREE.Color(0x6b5d50),
-  crest: new THREE.Color(0x8d8274),
+  playa: [0.749, 0.682, 0.557],
+  bajada: [0.627, 0.541, 0.424],
+  scrub: [0.49, 0.427, 0.333],
+  rock: [0.42, 0.365, 0.314],
+  crest: [0.553, 0.51, 0.455],
 };
 
 export class Terrain {
@@ -32,53 +72,180 @@ export class Terrain {
     for (let i = 0; i < heights.length; i++) {
       heights[i] = meta.minH + ((px[i * 4] << 8) | px[i * 4 + 1]) / 65535 * span;
     }
-    return new Terrain(meta, heights);
+    return new Terrain(meta, heights, img);
   }
 
-  constructor(meta, heights) {
+  constructor(meta, heights, img) {
     this.meta = meta;
     this.heights = heights;
     this.size = meta.sizeM;
+    this.group = new THREE.Group();
 
-    const geo = new THREE.PlaneGeometry(this.size, this.size, MESH_VERTS - 1, MESH_VERTS - 1);
-    geo.rotateX(-Math.PI / 2); // plane XZ, +Y up
-    // after rotateX, vertex row 0 sits at world -Z (south in the solar frame);
-    // bake row 0 is the NORTH edge — index bake rows flipped (no scale hacks,
-    // they invert winding)
-    const pos = geo.attributes.position;
-    const stride = (meta.grid - 1) / (MESH_VERTS - 1);
-    for (let vy = 0; vy < MESH_VERTS; vy++) {
-      const bakeRow = Math.round((MESH_VERTS - 1 - vy) * stride);
-      for (let vx = 0; vx < MESH_VERTS; vx++) {
-        const gi = bakeRow * meta.grid + Math.round(vx * stride);
-        pos.setY(vy * MESH_VERTS + vx, heights[gi]);
+    // height texture: R/G byte-packed; decode is linear in (R,G) so LINEAR
+    // filtering interpolates true heights
+    this.tex = new THREE.Texture(img);
+    this.tex.colorSpace = THREE.NoColorSpace;
+    this.tex.wrapS = this.tex.wrapT = THREE.ClampToEdgeWrapping;
+    this.tex.minFilter = THREE.LinearMipmapLinearFilter;
+    this.tex.magFilter = THREE.LinearFilter;
+    this.tex.generateMipmaps = true;
+    this.tex.needsUpdate = true;
+
+    // min/max pyramid at leaf granularity (32x32 nodes) for culling AABBs
+    const NB = 1 << MAX_LEVEL;
+    this.leafMin = new Float32Array(NB * NB).fill(Infinity);
+    this.leafMax = new Float32Array(NB * NB).fill(-Infinity);
+    const per = meta.grid / NB;
+    for (let gy = 0; gy < meta.grid; gy++) {
+      const by = Math.min(Math.floor(gy / per), NB - 1);
+      for (let gx = 0; gx < meta.grid; gx++) {
+        const bx = Math.min(Math.floor(gx / per), NB - 1);
+        const h = heights[gy * meta.grid + gx];
+        const bi = by * NB + bx;
+        if (h < this.leafMin[bi]) this.leafMin[bi] = h;
+        if (h > this.leafMax[bi]) this.leafMax[bi] = h;
       }
     }
-    geo.computeVertexNormals();
 
-    // vertex colors: altitude + slope ramps
-    const colors = new Float32Array(pos.count * 3);
-    const nrm = geo.attributes.normal;
-    const c = new THREE.Color();
-    for (let i = 0; i < pos.count; i++) {
-      const h = pos.getY(i);
-      const slope = 1 - nrm.getY(i); // 0 flat → 1 cliff
-      const tAlt = Math.min(Math.max((h - this.meta.minH) / (this.meta.maxH - this.meta.minH), 0), 1);
-      if (slope < 0.04 && tAlt < 0.1) c.copy(RAMP.playa);
-      else if (tAlt < 0.3) c.copy(RAMP.bajada).lerp(RAMP.scrub, tAlt / 0.3);
-      else if (tAlt < 0.65) c.copy(RAMP.scrub).lerp(RAMP.rock, (tAlt - 0.3) / 0.35);
-      else c.copy(RAMP.rock).lerp(RAMP.crest, (tAlt - 0.65) / 0.35);
-      if (slope > 0.25) c.lerp(RAMP.rock, Math.min((slope - 0.25) * 2, 0.7));
-      colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;
+    this.material = this._buildMaterial();
+    this.grid = buildGrid();
+    this.pool = [];
+    for (let i = 0; i < POOL; i++) {
+      const m = new THREE.Mesh(this.grid, this.material);
+      m.frustumCulled = false;
+      m.visible = false;
+      this.pool.push(m);
+      this.group.add(m);
     }
-    geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-
-    this.mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
-      vertexColors: true, roughness: 0.96, metalness: 0.0,
-    }));
+    this._frustum = new THREE.Frustum();
+    this._proj = new THREE.Matrix4();
+    this._box = new THREE.Box3();
+    this.stats = { nodes: 0, minLevel: 0, maxLevel: 0 };
   }
 
-  // bilinear height at world x (east) / z (north); world origin = AOI center
+  _buildMaterial() {
+    const uMin = uniform(this.meta.minH), uSpan = uniform(this.meta.maxH - this.meta.minH);
+    const uSize = uniform(this.size);
+    const hTex = this.tex;
+
+    const worldUV = (wp) => vec2(
+      wp.x.div(uSize).add(0.5),
+      float(0.5).sub(wp.z.div(uSize)) // bake row 0 = north (+Z)
+    );
+    const sampleH = (wp) => {
+      const t = texture(hTex, worldUV(wp));
+      return uMin.add(t.r.mul(255 * 256).add(t.g.mul(255)).div(65535).mul(uSpan));
+    };
+
+    const mat = new THREE.MeshStandardNodeMaterial({ roughness: 0.96, metalness: 0 });
+
+    // vertex: displace by sampled height; push skirt ring down.
+    // positionWorld derives FROM positionNode (chicken-egg), so world XZ is
+    // computed explicitly via the model matrix. Node meshes use scaleY=1 and
+    // posY=0, so local Y == world Y and the height lands directly.
+    mat.positionNode = Fn(() => {
+      const wp = modelWorldMatrix.mul(vec4(positionLocal, 1.0)).xyz;
+      const h = sampleH(wp);
+      const skirtDrop = attribute("skirt", "float").mul(60.0);
+      return vec3(positionLocal.x, h.sub(skirtDrop), positionLocal.z);
+    })();
+
+    // normals: central differences at ~16m spacing in world units
+    const eps = 16.0;
+    mat.normalNode = Fn(() => {
+      const wp = positionWorld;
+      const hx1 = sampleH(vec3(wp.x.add(eps), wp.y, wp.z));
+      const hx0 = sampleH(vec3(wp.x.sub(eps), wp.y, wp.z));
+      const hz1 = sampleH(vec3(wp.x, wp.y, wp.z.add(eps)));
+      const hz0 = sampleH(vec3(wp.x, wp.y, wp.z.sub(eps)));
+      return normalize(vec3(hx0.sub(hx1), float(eps * 2), hz0.sub(hz1)));
+    })();
+
+    // color: altitude/slope desert ramp (mirrors the v1 CPU ramp)
+    mat.colorNode = Fn(() => {
+      const wp = positionWorld;
+      const h = sampleH(wp);
+      const tAlt = clamp(h.sub(uMin).div(uSpan), 0, 1);
+      const hx1 = sampleH(vec3(wp.x.add(eps), wp.y, wp.z));
+      const hz1 = sampleH(vec3(wp.x, wp.y, wp.z.add(eps)));
+      const slope = clamp(h.sub(hx1).abs().add(h.sub(hz1).abs()).div(eps), 0, 1);
+
+      const playa = vec3(...RAMP.playa), bajada = vec3(...RAMP.bajada);
+      const scrub = vec3(...RAMP.scrub), rock = vec3(...RAMP.rock), crest = vec3(...RAMP.crest);
+      let c = mix(bajada, scrub, clamp(tAlt.div(0.3), 0, 1));
+      c = mix(c, rock, smoothstep(0.3, 0.65, tAlt));
+      c = mix(c, crest, smoothstep(0.65, 1.0, tAlt));
+      c = mix(playa, c, smoothstep(0.06, 0.12, max(tAlt, slope.mul(0.5))));
+      c = mix(c, rock, smoothstep(0.35, 0.9, slope).mul(0.7));
+      return c;
+    })();
+
+    return mat;
+  }
+
+  // quadtree selection → pool sync; call once per frame
+  update(camera) {
+    camera.updateMatrixWorld();
+    this._proj.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+    this._frustum.setFromProjectionMatrix(this._proj);
+    const cam = camera.position;
+    const out = [];
+    const NB = 1 << MAX_LEVEL;
+
+    const nodeMinMax = (level, ix, iz) => {
+      // aggregate leaf pyramid over this node's leaf span
+      const span = NB >> level;
+      let mn = Infinity, mx = -Infinity;
+      for (let z = iz * span; z < (iz + 1) * span; z++) {
+        for (let x = ix * span; x < (ix + 1) * span; x++) {
+          const v = z * NB + x;
+          if (this.leafMin[v] < mn) mn = this.leafMin[v];
+          if (this.leafMax[v] > mx) mx = this.leafMax[v];
+        }
+      }
+      return [mn, mx];
+    };
+
+    const visit = (level, ix, iz) => {
+      const size = this.size / (1 << level);
+      const cx = -this.size / 2 + (ix + 0.5) * size;
+      // leaf z index 0 = north = +Z half
+      const cz = this.size / 2 - (iz + 0.5) * size;
+      const [mn, mx] = nodeMinMax(level, ix, iz);
+      this._box.min.set(cx - size / 2, mn - 70, cz - size / 2);
+      this._box.max.set(cx + size / 2, mx + 10, cz + size / 2);
+      if (!this._frustum.intersectsBox(this._box)) return;
+      const dx = Math.max(Math.abs(cam.x - cx) - size / 2, 0);
+      const dz = Math.max(Math.abs(cam.z - cz) - size / 2, 0);
+      const dy = Math.max(cam.y - mx, mn - cam.y, 0);
+      const dist = Math.hypot(dx, dy, dz);
+      if (level >= MAX_LEVEL || dist > size * LOD_K) {
+        out.push({ cx, cz, size, level });
+        return;
+      }
+      visit(level + 1, ix * 2, iz * 2);
+      visit(level + 1, ix * 2 + 1, iz * 2);
+      visit(level + 1, ix * 2, iz * 2 + 1);
+      visit(level + 1, ix * 2 + 1, iz * 2 + 1);
+    };
+    visit(0, 0, 0);
+
+    const n = Math.min(out.length, this.pool.length);
+    let minL = 99, maxL = 0;
+    for (let i = 0; i < n; i++) {
+      const m = this.pool[i], nd = out[i];
+      m.position.set(nd.cx, 0, nd.cz);
+      m.scale.set(nd.size, 1, nd.size);
+      m.updateMatrixWorld();
+      m.visible = true;
+      if (nd.level < minL) minL = nd.level;
+      if (nd.level > maxL) maxL = nd.level;
+    }
+    for (let i = n; i < this.pool.length; i++) this.pool[i].visible = false;
+    this.stats = { nodes: n, minLevel: minL, maxLevel: maxL, overflow: out.length - n };
+  }
+
+  // bilinear height at world x (east) / z (north); origin = AOI center
   heightAt(x, z) {
     const g = this.meta.grid, half = this.size / 2;
     const u = (x + half) / this.size * (g - 1);

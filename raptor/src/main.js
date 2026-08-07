@@ -82,7 +82,7 @@ async function boot() {
     if (vs) vs.innerHTML = "<b>LOADING NEVADA</b> — real USGS terrain";
     try {
       terrain = await Terrain.load("/assets/terrain/nellis");
-      scene.add(terrain.mesh);
+      scene.add(terrain.group);
       world.setGround(terrain);
     } catch (err) {
       console.warn("terrain unavailable, flying over water:", err && err.message);
@@ -149,6 +149,7 @@ async function boot() {
     if (input.pressed("debug")) dbg.toggle();
     const alpha = sim.advance(dtMs / 1000);
     world.render(alpha, camera);
+    terrain?.update(camera);
     atmosphere.update(camera);
     renderer.toneMappingExposure = atmosphere.exposure;
     renderer.render(scene, camera);
