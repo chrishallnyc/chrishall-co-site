@@ -8,6 +8,7 @@
 import * as THREE from "three";
 import { AIM9X } from "../sim/weapondata.js";
 import { S } from "../sim/flight.js";
+import { softDiscTexture } from "../engine/sprites.js";
 
 const LOADOUT = 4;
 const SLOTS = 9; // x,y,z, vx,vy,vz, massKg, age, targetIdx
@@ -44,7 +45,7 @@ export class Missiles {
     scene.add(this.bodies); // boot-time add — safe
 
     const pGeo = new THREE.PlaneGeometry(2.2, 2.2);
-    const pMat = new THREE.MeshBasicMaterial({ color: 0xcfd2d6, transparent: true, opacity: 0.34, depthWrite: false });
+    const pMat = new THREE.MeshBasicMaterial({ color: 0xcfd2d6, map: softDiscTexture(), transparent: true, opacity: 0.4, depthWrite: false });
     this.trail = new THREE.InstancedMesh(pGeo, pMat, MAX_PUFF);
     this.trail.frustumCulled = false;
     this.trail.count = 0;

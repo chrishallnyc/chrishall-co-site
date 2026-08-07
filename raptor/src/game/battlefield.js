@@ -7,6 +7,7 @@
 
 import * as THREE from "three";
 import { UNITS } from "../world/groundunits.js";
+import { softDiscTexture } from "../engine/sprites.js";
 
 // hp in M61 rounds absorbed; r = hit-sphere radius (m); cz = sphere center
 // height above the unit's base (ground/waterline)
@@ -182,7 +183,7 @@ export class Battlefield {
     // destruction visuals: one shared wreck material + instanced smoke quads
     this._wreck = new THREE.MeshStandardMaterial({ color: 0x1a1714, roughness: 0.95, metalness: 0.08 });
     const sGeo = new THREE.PlaneGeometry(9, 12);
-    this._smokeMat = new THREE.MeshBasicMaterial({ color: 0x232019, transparent: true, opacity: 0.42, depthWrite: false });
+    this._smokeMat = new THREE.MeshBasicMaterial({ color: 0x232019, map: softDiscTexture(), transparent: true, opacity: 0.5, depthWrite: false });
     this.smoke = new THREE.InstancedMesh(sGeo, this._smokeMat, MAX_SMOKE);
     this.smoke.frustumCulled = false;
     this.smoke.count = 0;
@@ -205,7 +206,7 @@ export class Battlefield {
     this.samMesh.count = 0;
     this.root.add(this.samMesh);
     const tGeo2 = new THREE.PlaneGeometry(2.6, 2.6);
-    const tMat2 = new THREE.MeshBasicMaterial({ color: 0xe6e2da, transparent: true, opacity: 0.4, depthWrite: false });
+    const tMat2 = new THREE.MeshBasicMaterial({ color: 0xe6e2da, map: softDiscTexture(), transparent: true, opacity: 0.5, depthWrite: false });
     this.samTrail = new THREE.InstancedMesh(tGeo2, tMat2, 220);
     this.samTrail.frustumCulled = false;
     this.samTrail.count = 0;
