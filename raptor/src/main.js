@@ -158,6 +158,29 @@ async function boot() {
   const dbg = new DebugOverlay();
   const hud = new HUD({ parent: document.body });
   hud.setMode("arcade");
+  if (flags.get("hud") === "0") hud.canvas ? (hud.canvas.style.display = "none") : hud.svg && (hud.svg.style.display = "none"); // QA: clean scenery shots
+
+  // WT-style mouse-aim marker: where the instructor is being told to fly.
+  // FM heading convention: 0 = east (+x ENU), measured toward north (+y).
+  if (player) {
+    const aimV = new THREE.Vector3();
+    hud.arcadeLayer = (ctx) => {
+      const cp = Math.cos(player.aimPitch), sp = Math.sin(player.aimPitch);
+      aimV.set(Math.cos(player.aimHeading) * cp, sp, Math.sin(player.aimHeading) * cp)
+        .multiplyScalar(6000).add(camera.position);
+      const v = aimV.project(camera);
+      if (v.z > 1 || v.z < -1) return; // behind the camera
+      const w = ctx.canvas.width / (window.devicePixelRatio || 1);
+      const h = ctx.canvas.height / (window.devicePixelRatio || 1);
+      const sx = (v.x * 0.5 + 0.5) * w, sy = (1 - (v.y * 0.5 + 0.5)) * h;
+      if (sx < 8 || sy < 8 || sx > w - 8 || sy > h - 8) return;
+      ctx.save();
+      ctx.strokeStyle = "#9be89b"; ctx.lineWidth = 1.6; ctx.globalAlpha = 0.95;
+      ctx.beginPath(); ctx.arc(sx, sy, 9, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(sx, sy, 1.4, 0, Math.PI * 2); ctx.fillStyle = "#9be89b"; ctx.fill();
+      ctx.restore();
+    };
+  }
   document.getElementById("controlsLink")?.addEventListener("click", (e) => { e.preventDefault(); controls.show(); });
 
   window.addEventListener("resize", () => {

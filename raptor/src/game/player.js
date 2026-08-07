@@ -81,7 +81,7 @@ export class Player {
     const L = this._live;
 
     // aim from accumulated mouse travel
-    this.aimHeading += this._mouseDx * MOUSE_SENS;
+    this.aimHeading -= this._mouseDx * MOUSE_SENS; // FM heading is CCW-from-east: mouse-right must decrease it
     this.aimPitch = Math.max(-AIM_PITCH_LIM, Math.min(AIM_PITCH_LIM, this.aimPitch - this._mouseDy * MOUSE_SENS));
     this._mouseDx = 0; this._mouseDy = 0;
     // arrow-key manual pitch nudges the aim
