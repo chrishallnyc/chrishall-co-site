@@ -13,7 +13,7 @@ import { bloom } from "../../vendor/display/BloomNode.js";
 import { lensflare } from "../../vendor/display/LensflareNode.js";
 import { ao } from "../../vendor/display/GTAONode.js";
 
-export function buildPost(renderer, scene, camera, { flare = true, gtao = false, chain: chainSel = "full" } = {}) {
+export function buildPost(renderer, scene, camera, { flare = true, gtao = false, chain: chainSel = "full", makeClouds = null } = {}) {
   const scenePass = pass(scene, camera);
   scenePass.setMRT(mrt({ output, velocity }));
 
@@ -21,7 +21,17 @@ export function buildPost(renderer, scene, camera, { flare = true, gtao = false,
   const depth = scenePass.getTextureNode("depth");
   const vel = scenePass.getTextureNode("velocity");
 
-  let taa = traa(beauty, depth, vel, camera);
+  // volumetric clouds composite BEFORE TRAA — the temporal pass integrates
+  // the jittered raymarch (free denoise, per MAXFI research)
+  let base = beauty;
+  if (makeClouds) {
+    try {
+      const n = makeClouds({ beauty, depth });
+      if (n) base = n;
+    } catch (err) { console.warn("volumetric clouds node failed, billboards stay:", err && err.message); }
+  }
+
+  let taa = traa(base, depth, vel, camera);
   // GTAO (?ao=1, eyeball-gated): normals reconstructed from depth (null),
   // occlusion multiplied into the lit scene before bloom picks highlights
   let aoPass = null;

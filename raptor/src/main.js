@@ -337,15 +337,37 @@ async function boot() {
   // MAXFI A1: TRAA + bloom + flare post chain (WebGPU only; ?post=0 keeps
   // the plain pipe for QA baselines and numeric oracles)
   let post = null;
+  let vol = null;
   if (backend === "webgpu" && flags.get("post") !== "0") {
+    // volumetric clouds ride the post chain (?vclouds=0 keeps billboards)
+    if (flags.get("vclouds") !== "0") {
+      try {
+        const VC = await import("./world/volclouds.js");
+        vol = {
+          VC,
+          noise: VC.makeCloudNoise(1337),
+          uTime: uniform(0),
+          uCamPos: atmoH ? atmoH.uCamPos : uniform(new THREE.Vector3(0, 3400, 0)),
+        };
+      } catch (err) { vol = null; console.warn("volumetric clouds unavailable, billboards stay:", err && err.message); }
+    }
     try {
       const { buildPost } = await import("./engine/post.js");
       post = buildPost(renderer, scene, camera, {
         flare: flags.get("flare") !== "0",
         gtao: flags.get("ao") === "1", // default off until eyeball-passed
         chain: flags.get("chain") || "full",
+        makeClouds: vol ? ({ beauty, depth }) => vol.VC.volCloudsNode({
+          beauty, depth, camera,
+          uSunDir: atmosphere.sky.uSunDir, uCamPos: vol.uCamPos, uTime: vol.uTime,
+          front: atmosphere.frontName, noise: vol.noise, aerial: atmoH?.aerial ?? null,
+        }) : null,
       });
     } catch (err) { console.warn("post chain unavailable, plain render:", err && err.message); }
+    // billboards hide when the volumetrics own the sky; their shadow field
+    // stays live (clouds.update keeps feeding the shared shadow uniforms)
+    if (vol && post) clouds.group.visible = false;
+    state.volClouds = !!(vol && post);
   }
   state.post = !!post;
 
@@ -434,6 +456,7 @@ async function boot() {
     water?.update(camera, waterClock);
     cloudClock += dtMs / 1000;
     clouds.update(camera, cloudClock);
+    if (vol) { vol.uTime.value = cloudClock; vol.VC.updateCamera?.(camera); }
     hud.update(player ? player.hudState() : testworldHudState(world, alpha));
     atmosphere.update(camera);
     if (atmoH) atmoH.uCamPos.value.copy(camera.position);
