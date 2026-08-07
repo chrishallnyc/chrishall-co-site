@@ -12,33 +12,60 @@ No GDAL: pure numpy + tifffile. USGS 13 tiles are EPSG:4269 geographic,
 float32 meters, 10812x10812 incl. 6-px collar. Local flat-earth meters are
 fine at 65 km extents (distortion << mesh LOD error).
 
-Usage: bake_terrain.py <tile.tif> <centerLat> <centerLon> <sizeKm> <grid> <outdir>/<name>
+Usage:
+  bake_terrain.py <tile.tif>[,tile2.tif,...] <centerLat> <centerLon> <sizeKm>
+                  <grid> <outdir>/<name> [--sea]
+Multiple tiles mosaic (each carries its own geo transform; the sampler picks
+the covering tile per output row band). --sea fills nodata with 0m (ocean
+fronts); default fills with the local median (land voids).
 """
 import json, sys
 import numpy as np
 import tifffile
 from PIL import Image
 
+class Tile:
+    def __init__(self, path):
+        with tifffile.TiffFile(path) as tf:
+            page = tf.pages[0]
+            self.dem = page.asarray().astype(np.float32)
+            tags = {t.name: t.value for t in page.tags.values()}
+            tie = tags["ModelTiepointTag"]     # (i,j,k, lon0, lat0, 0)
+            scale = tags["ModelPixelScaleTag"] # (dLon, dLat, 0)
+            self.lon0, self.lat0 = tie[3], tie[4]
+            self.d_lon, self.d_lat = scale[0], scale[1]
+        self.h, self.w = self.dem.shape
+        self.dem[self.dem < -1000] = np.nan
+        # interior extent (with a 1px guard for bilinear)
+        self.lat_min = self.lat0 - (self.h - 1) * self.d_lat
+        self.lon_max = self.lon0 + (self.w - 1) * self.d_lon
+        print(f"tile {path.split('/')[-1]}: {self.w}x{self.h} "
+              f"lat {self.lat_min:.4f}..{self.lat0:.4f} lon {self.lon0:.4f}..{self.lon_max:.4f}")
+
+    def covers(self, lat, lon):
+        return self.lat_min <= lat <= self.lat0 and self.lon0 <= lon <= self.lon_max
+
+    def sample_rows(self, lats, lons):
+        rows = (self.lat0 - lats) / self.d_lat
+        cols = (lons - self.lon0) / self.d_lon
+        r0 = np.clip(np.floor(rows).astype(int), 0, self.h - 1)
+        c0 = np.clip(np.floor(cols).astype(int), 0, self.w - 1)
+        fr = np.clip(rows - r0, 0, 1)[:, None]
+        fc = np.clip(cols - c0, 0, 1)[None, :]
+        r1 = np.clip(r0 + 1, 0, self.h - 1); c1 = np.clip(c0 + 1, 0, self.w - 1)
+        d = self.dem
+        return ((d[np.ix_(r0, c0)] * (1 - fr) * (1 - fc)) +
+                (d[np.ix_(r0, c1)] * (1 - fr) * fc) +
+                (d[np.ix_(r1, c0)] * fr * (1 - fc)) +
+                (d[np.ix_(r1, c1)] * fr * fc))
+
 def main():
-    tif_path, lat_c, lon_c, size_km, grid, out = (
-        sys.argv[1], float(sys.argv[2]), float(sys.argv[3]),
+    tif_paths, lat_c, lon_c, size_km, grid, out = (
+        sys.argv[1].split(","), float(sys.argv[2]), float(sys.argv[3]),
         float(sys.argv[4]), int(sys.argv[5]), sys.argv[6])
+    sea = "--sea" in sys.argv
 
-    with tifffile.TiffFile(tif_path) as tf:
-        page = tf.pages[0]
-        dem = page.asarray().astype(np.float32)
-        # ModelTiepoint + ModelPixelScale give the geo transform
-        tags = {t.name: t.value for t in page.tags.values()}
-        tie = tags["ModelTiepointTag"]     # (i,j,k, lon0, lat0, 0)
-        scale = tags["ModelPixelScaleTag"] # (dLon, dLat, 0)
-        lon0, lat0 = tie[3], tie[4]
-        d_lon, d_lat = scale[0], scale[1]
-
-    h, w = dem.shape
-    print(f"tile {w}x{h} origin ({lat0:.4f},{lon0:.4f}) step ({d_lat:.6f},{d_lon:.6f})")
-
-    # nodata: USGS uses large negative sentinel
-    dem[dem < -1000] = np.nan
+    tiles = [Tile(p) for p in tif_paths]
 
     size_m = size_km * 1000.0
     m_per_deg_lat = 111132.0
@@ -46,29 +73,32 @@ def main():
     half_lat = (size_m / 2) / m_per_deg_lat
     half_lon = (size_m / 2) / m_per_deg_lon
 
-    # sample grid: row 0 = NORTH edge (v grows southward = +Z north flip later)
+    # sample grid: row 0 = NORTH edge
     lats = np.linspace(lat_c + half_lat, lat_c - half_lat, grid)
     lons = np.linspace(lon_c - half_lon, lon_c + half_lon, grid)
 
-    # fractional pixel coords into the tile (row 0 = lat0 at top)
-    rows = (lat0 - lats) / d_lat
-    cols = (lons - lon0) / d_lon
-    if rows.min() < 0 or rows.max() >= h or cols.min() < 0 or cols.max() >= w:
-        sys.exit(f"AOI leaves tile bounds: rows {rows.min():.0f}..{rows.max():.0f} cols {cols.min():.0f}..{cols.max():.0f}")
+    # mosaic: fill from each tile where it covers; later tiles only fill gaps
+    hgt = np.full((grid, grid), np.nan, dtype=np.float32)
+    for tile in tiles:
+        got = tile.sample_rows(lats, lons)
+        # mask samples outside this tile's true extent
+        lat_ok = (lats <= tile.lat0) & (lats >= tile.lat_min)
+        lon_ok = (lons >= tile.lon0) & (lons <= tile.lon_max)
+        m = lat_ok[:, None] & lon_ok[None, :]
+        take = m & np.isnan(hgt) & ~np.isnan(got)
+        hgt[take] = got[take]
 
-    r0 = np.floor(rows).astype(int); c0 = np.floor(cols).astype(int)
-    fr = (rows - r0)[:, None]; fc = (cols - c0)[None, :]
-    r1 = np.clip(r0 + 1, 0, h - 1); c1 = np.clip(c0 + 1, 0, w - 1)
-    # bilinear gather
-    hgt = ((dem[np.ix_(r0, c0)] * (1 - fr) * (1 - fc)) +
-           (dem[np.ix_(r0, c1)] * (1 - fr) * fc) +
-           (dem[np.ix_(r1, c0)] * fr * (1 - fc)) +
-           (dem[np.ix_(r1, c1)] * fr * fc))
-
-    n_nan = int(np.isnan(hgt).sum())
-    if n_nan:
-        print(f"WARNING: {n_nan} nan samples — filling with local median")
-        hgt = np.where(np.isnan(hgt), np.nanmedian(hgt), hgt)
+    uncovered = int((~np.isfinite(hgt)).sum())
+    if uncovered:
+        frac = uncovered / hgt.size
+        fill = 0.0 if sea else float(np.nanmedian(hgt))
+        kind = "sea level (0m)" if sea else f"median {fill:.0f}m"
+        print(f"nodata/uncovered: {uncovered} px ({frac*100:.1f}%) -> {kind}")
+        if frac > 0.02 and not sea:
+            sys.exit("more than 2% uncovered on a land bake — check tile set / AOI")
+        hgt = np.where(np.isfinite(hgt), hgt, fill)
+    if sea:
+        hgt = np.maximum(hgt, 0.0)  # bathymetry-below-zero clamps to sea level
 
     mn, mx = float(hgt.min()), float(hgt.max())
     print(f"heights {mn:.1f}..{mx:.1f} m over {size_km:.1f} km ({size_m/grid:.1f} m/px)")

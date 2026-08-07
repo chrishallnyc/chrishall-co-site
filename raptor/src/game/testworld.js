@@ -73,11 +73,12 @@ export class TestWorld {
     this.fixYaw = q.has("yaw") ? parseFloat(q.get("yaw")) * Math.PI / 180 : null;
   }
 
-  // terrain arrived: hide the sea, perch the pylons on the ground, fly higher
-  setGround(terrain) {
+  // terrain arrived: sea stays only on ocean fronts (y=0 = real sea level),
+  // pylons perch on the ground, circle altitude clears the local ridges
+  setGround(terrain, opts = {}) {
     this.terrain = terrain;
-    this.sea.visible = false;
-    this.baseAlt = 3400; // clears every ridge under the proving circle
+    this.sea.visible = !!opts.ocean;
+    this.baseAlt = opts.baseAlt || 3400;
     this.state[2] = this.baseAlt;
     this.prev.set(this.state);
     const m4 = new THREE.Matrix4();

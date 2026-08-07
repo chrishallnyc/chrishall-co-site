@@ -73,17 +73,22 @@ async function boot() {
   const world = new TestWorld(scene);
   sim.addSystem(world);
 
-  // real-Earth ground (NELLIS baked; other fronts arrive in later blocks).
-  // ?noterrain=1 = QA flag: sky/boot batteries skip the 21MB ground so
-  // SwiftShader timings measure what they intend to.
+  // real-Earth ground for all three fronts. ?noterrain=1 = QA flag: sky/boot
+  // batteries skip the ground so SwiftShader timings measure what they intend.
+  const FRONT_GROUND = {
+    NELLIS: { asset: "nellis", ocean: false, baseAlt: 3400, label: "NEVADA" },
+    VALDEZ: { asset: "valdez", ocean: true, baseAlt: 2800, label: "PRINCE WILLIAM SOUND" },
+    MARIANAS: { asset: "marianas", ocean: true, baseAlt: 1400, label: "THE MARIANAS" },
+  };
   let terrain = null;
-  if (atmosphere.frontName === "NELLIS" && flags.get("noterrain") !== "1") {
+  const fg = FRONT_GROUND[atmosphere.frontName];
+  if (fg && flags.get("noterrain") !== "1") {
     const vs = document.querySelector("#veil .status");
-    if (vs) vs.innerHTML = "<b>LOADING NEVADA</b> — real USGS terrain";
+    if (vs) vs.innerHTML = `<b>LOADING ${fg.label}</b> — real USGS terrain`;
     try {
-      terrain = await Terrain.load("/assets/terrain/nellis");
+      terrain = await Terrain.load("/assets/terrain/" + fg.asset, atmosphere.frontName);
       scene.add(terrain.group);
-      world.setGround(terrain);
+      world.setGround(terrain, fg);
     } catch (err) {
       console.warn("terrain unavailable, flying over water:", err && err.message);
     }

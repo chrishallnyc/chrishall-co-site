@@ -55,16 +55,32 @@ function srgbLin(hex) {
   const f = (c) => (c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
   return [f(((hex >> 16) & 255) / 255), f(((hex >> 8) & 255) / 255), f((hex & 255) / 255)];
 }
-const RAMP = {
-  playa: srgbLin(0xcbb794),
-  bajada: srgbLin(0xa88a64),
-  scrub: srgbLin(0x83704f),
-  rock: srgbLin(0x6d5c4c),
-  crest: srgbLin(0x93866f),
+const RAMPS = {
+  NELLIS: {
+    playa: srgbLin(0xcbb794),
+    bajada: srgbLin(0xa88a64),
+    scrub: srgbLin(0x83704f),
+    rock: srgbLin(0x6d5c4c),
+    crest: srgbLin(0x93866f),
+  },
+  VALDEZ: {
+    shore: srgbLin(0x4a4740),   // tide-scoured rock
+    forest: srgbLin(0x2e4430),  // spruce to ~450m
+    tundra: srgbLin(0x6b6b52),  // alpine scrub band
+    rock: srgbLin(0x5c5a56),
+    snow: srgbLin(0xe8ecef),    // above ~1100m, gentler slopes
+  },
+  MARIANAS: {
+    beach: srgbLin(0xd9c9a3),
+    jungle: srgbLin(0x33552f),  // limestone forest
+    scrubland: srgbLin(0x5d7040),
+    soil: srgbLin(0x8a5f42),    // the red volcanic soil patches
+    cliff: srgbLin(0x8f8a7e),
+  },
 };
 
 export class Terrain {
-  static async load(baseUrl) {
+  static async load(baseUrl, front = "NELLIS") {
     const meta = await (await fetch(`${baseUrl}_meta.json`)).json();
     const img = new Image();
     img.src = `${baseUrl}_h.png`;
@@ -79,10 +95,11 @@ export class Terrain {
     for (let i = 0; i < heights.length; i++) {
       heights[i] = meta.minH + ((px[i * 4] << 8) | px[i * 4 + 1]) / 65535 * span;
     }
-    return new Terrain(meta, heights, img);
+    return new Terrain(meta, heights, img, front);
   }
 
-  constructor(meta, heights, img) {
+  constructor(meta, heights, img, front = "NELLIS") {
+    this.front = front;
     this.meta = meta;
     this.heights = heights;
     this.size = meta.sizeM;
@@ -178,7 +195,8 @@ export class Terrain {
       return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
     };
 
-    // color: altitude/slope desert ramp + noise variation
+    // color: per-front altitude/slope ramps + shared noise variation
+    const front = this.front;
     mat.colorNode = Fn(() => {
       const wp = positionWorld;
       const h = sampleH(wp);
@@ -186,21 +204,41 @@ export class Terrain {
       const hx1 = sampleH(vec3(wp.x.add(eps), wp.y, wp.z));
       const hz1 = sampleH(vec3(wp.x, wp.y, wp.z.add(eps)));
       const slope = clamp(h.sub(hx1).abs().add(h.sub(hz1).abs()).div(eps), 0, 1);
-
-      const playa = vec3(...RAMP.playa), bajada = vec3(...RAMP.bajada);
-      const scrub = vec3(...RAMP.scrub), rock = vec3(...RAMP.rock), crest = vec3(...RAMP.crest);
-      let c = mix(bajada, scrub, clamp(tAlt.div(0.3), 0, 1));
-      c = mix(c, rock, smoothstep(0.3, 0.65, tAlt));
-      c = mix(c, crest, smoothstep(0.65, 1.0, tAlt));
-      c = mix(playa, c, smoothstep(0.06, 0.12, max(tAlt, slope.mul(0.5))));
-      c = mix(c, rock, smoothstep(0.35, 0.9, slope).mul(0.7));
-
-      // macro: 2-octave patchiness (vegetation/soil mottling at 1.8km + 240m)
       const macro = vnoise(wp.xz.div(1800.0)).mul(0.6).add(vnoise(wp.xz.div(240.0)).mul(0.4));
+
+      let c;
+      if (front === "VALDEZ") {
+        const R = RAMPS.VALDEZ;
+        const shore = vec3(...R.shore), forest = vec3(...R.forest), tundra = vec3(...R.tundra);
+        const rock = vec3(...R.rock), snow = vec3(...R.snow);
+        c = mix(shore, forest, smoothstep(2.0, 30.0, h));          // treeline starts fast
+        c = mix(c, tundra, smoothstep(380.0, 520.0, h));
+        c = mix(c, rock, smoothstep(650.0, 900.0, h));
+        // snow: altitude-gated, avoids the steepest faces, macro-raggedy line
+        const snowLine = macro.mul(220.0).add(1000.0);
+        c = mix(c, snow, smoothstep(snowLine, snowLine.add(180.0), h).mul(smoothstep(0.85, 0.45, slope)));
+      } else if (front === "MARIANAS") {
+        const R = RAMPS.MARIANAS;
+        const beach = vec3(...R.beach), jungle = vec3(...R.jungle), scrubl = vec3(...R.scrubland);
+        const soil = vec3(...R.soil), cliff = vec3(...R.cliff);
+        c = mix(beach, jungle, smoothstep(2.5, 14.0, h));
+        c = mix(c, scrubl, smoothstep(0.35, 0.75, macro));          // savanna patches
+        c = mix(c, soil, smoothstep(0.72, 0.95, vnoise(wp.xz.div(420.0))).mul(0.7));
+        c = mix(c, cliff, smoothstep(0.3, 0.75, slope));
+      } else {
+        const R = RAMPS.NELLIS;
+        const playa = vec3(...R.playa), bajada = vec3(...R.bajada);
+        const scrub = vec3(...R.scrub), rock = vec3(...R.rock), crest = vec3(...R.crest);
+        c = mix(bajada, scrub, clamp(tAlt.div(0.3), 0, 1));
+        c = mix(c, rock, smoothstep(0.3, 0.65, tAlt));
+        c = mix(c, crest, smoothstep(0.65, 1.0, tAlt));
+        c = mix(playa, c, smoothstep(0.06, 0.12, max(tAlt, slope.mul(0.5))));
+        c = mix(c, rock, smoothstep(0.35, 0.9, slope).mul(0.7));
+      }
+
+      // shared variation: macro brightness + hue drift, 45m micro grain
       c = c.mul(macro.sub(0.5).mul(0.34).add(1.0));
-      // warm/cool hue drift with the macro patches (subtle)
       c = c.mul(mix(vec3(1.05, 1.0, 0.93), vec3(0.96, 1.0, 1.05), macro));
-      // micro grain at 45m
       const micro = vnoise(wp.xz.div(45.0));
       c = c.mul(micro.sub(0.5).mul(0.12).add(1.0));
       return c;
