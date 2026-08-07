@@ -13,6 +13,7 @@ import * as THREE from "three";
 import {
   Fn, uniform, texture, vec2, vec3, vec4, float, positionLocal, positionWorld,
   modelWorldMatrix, attribute, normalize, clamp, smoothstep, mix, max,
+  floor, fract, sin, dot,
 } from "three/tsl";
 
 const GRID = 128;           // interior verts per node edge
@@ -48,12 +49,18 @@ function buildGrid() {
   return geo;
 }
 
+// Ramp authored in sRGB hex, converted to LINEAR for the shader — feeding
+// sRGB bytes into linear lighting was washing the whole ground pale.
+function srgbLin(hex) {
+  const f = (c) => (c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+  return [f(((hex >> 16) & 255) / 255), f(((hex >> 8) & 255) / 255), f((hex & 255) / 255)];
+}
 const RAMP = {
-  playa: [0.749, 0.682, 0.557],
-  bajada: [0.627, 0.541, 0.424],
-  scrub: [0.49, 0.427, 0.333],
-  rock: [0.42, 0.365, 0.314],
-  crest: [0.553, 0.51, 0.455],
+  playa: srgbLin(0xcbb794),
+  bajada: srgbLin(0xa88a64),
+  scrub: srgbLin(0x83704f),
+  rock: srgbLin(0x6d5c4c),
+  crest: srgbLin(0x93866f),
 };
 
 export class Terrain {
@@ -161,7 +168,17 @@ export class Terrain {
       return normalize(vec3(hx0.sub(hx1), float(eps * 2), hz0.sub(hz1)));
     })();
 
-    // color: altitude/slope desert ramp (mirrors the v1 CPU ramp)
+    // value noise for ground variation (macro patchiness + micro grain)
+    const hash2 = (p) => fract(sin(dot(p, vec2(127.1, 311.7))).mul(43758.5453));
+    const vnoise = (p) => {
+      const i = floor(p), f = fract(p);
+      const u = f.mul(f).mul(f.mul(-2.0).add(3.0)); // smoothstep fade
+      const a = hash2(i), b = hash2(i.add(vec2(1, 0)));
+      const c = hash2(i.add(vec2(0, 1))), d = hash2(i.add(vec2(1, 1)));
+      return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+    };
+
+    // color: altitude/slope desert ramp + noise variation
     mat.colorNode = Fn(() => {
       const wp = positionWorld;
       const h = sampleH(wp);
@@ -177,6 +194,15 @@ export class Terrain {
       c = mix(c, crest, smoothstep(0.65, 1.0, tAlt));
       c = mix(playa, c, smoothstep(0.06, 0.12, max(tAlt, slope.mul(0.5))));
       c = mix(c, rock, smoothstep(0.35, 0.9, slope).mul(0.7));
+
+      // macro: 2-octave patchiness (vegetation/soil mottling at 1.8km + 240m)
+      const macro = vnoise(wp.xz.div(1800.0)).mul(0.6).add(vnoise(wp.xz.div(240.0)).mul(0.4));
+      c = c.mul(macro.sub(0.5).mul(0.34).add(1.0));
+      // warm/cool hue drift with the macro patches (subtle)
+      c = c.mul(mix(vec3(1.05, 1.0, 0.93), vec3(0.96, 1.0, 1.05), macro));
+      // micro grain at 45m
+      const micro = vnoise(wp.xz.div(45.0));
+      c = c.mul(micro.sub(0.5).mul(0.12).add(1.0));
       return c;
     })();
 
