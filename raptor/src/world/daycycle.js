@@ -113,6 +113,7 @@ export class Atmosphere {
     _fogC.setRGB(Math.min(r, 1.6), Math.min(g, 1.6), Math.min(b, 1.6));
     const nightFloor = paletteAt(el, "fog", true);
     this.scene.fog.color.copy(el < -2 ? nightFloor : _fogC);
+    this.sky.uFog.value.copy(this.scene.fog.color); // dome fades into this
     this.exposure = paletteAt(el, "exp", false);
 
     this.stars.update(el, this.hours, this.front.lat, this._sunDir);

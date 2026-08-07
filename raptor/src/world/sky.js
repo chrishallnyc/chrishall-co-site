@@ -48,6 +48,10 @@ export class Sky {
     this.uSunfade = uniform(1.0);
     this.uMieG = uniform(this.mieDirectionalG);
     this.uNight = uniform(new THREE.Color(0x05070f)); // cool near-black floor
+    this.uFog = uniform(new THREE.Color(0xcfdcea));   // scene fog — the dome
+    // fades into it across the horizon so dome and fogged ground meet on the
+    // SAME color at every azimuth (fog is single-color, dome varies with
+    // azimuth: under the sun they disagreed by Δ143 in one scanline)
     this.uAmbFade = uniform(1.0); // fades the 0.1·Fex airglow with sun energy
                                   // (it's scattered sunlight — judges caught it
                                   // painting the night sky warm brown)
@@ -115,8 +119,12 @@ export class Sky {
       const dither = fract(sin(dot(screenUV.mul(vec2(12.9898, 78.233)), vec2(1.0, 1.0))).mul(43758.5453))
         .sub(0.5).mul(2.0 / 255.0);
 
-      // never fully black: deep-night floor (stars live above this)
-      return max(graded, uNight).add(dither);
+      // horizon handoff: fade into the scene fog color — asymmetric, fully
+      // fog just below the horizon (the far-clipped ground edge sits at a
+      // small depression angle and must land on pure fog), full sky by +1.4°
+      const horizonBlend = smoothstep(-0.002, 0.024, upDot);
+      const withFloor = max(graded, uNight);
+      return mix(this.uFog, withFloor, horizonBlend).add(dither);
     })();
   }
 
