@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAPTOR — clouds lab</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23101014'/%3E%3Cellipse cx='16' cy='18' rx='11' ry='6' fill='%23e8e6df'/%3E%3C/svg%3E">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { background:#101014; height:100%; overflow:hidden; }
+#lab { position:fixed; inset:0; width:100%; height:100%; display:block; }
+#hud { position:fixed; top:12px; left:14px; z-index:5; pointer-events:none;
+  color:#e8b46f; font:11px "SF Mono", ui-monospace, Menlo, monospace;
+  letter-spacing:2px; text-shadow:0 1px 2px rgba(0,0,0,.5); }
+#hud .sub { color:#9a988f; margin-top:3px; font-size:9px; }
+</style>
+</head>
+<body>
+<canvas id="lab" aria-label="clouds lab"></canvas>
+<div id="hud">CLOUDS LAB<div class="sub" id="hudSub">booting…</div></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "/vendor/three.webgpu.min.js",
+    "three/webgpu": "/vendor/three.webgpu.min.js",
+    "three/tsl": "/vendor/three.tsl.min.js"
+  }
+}
+</script>
+<script type="module">
+// Standalone viewer for src/world/clouds.js: flat ground plane with the cloud
+// shadow node applied, billboard field above, ?front= climate selector,
+// ?tod= sun angle via a plain directional light, ?cam=orbit|level|above.
+import * as THREE from "three";
+import { Fn, positionWorld, vec3, floor, fract } from "three/tsl";
+import { Clouds, makeCloudShadowNode, CLOUD_CLIMATES } from "/src/world/clouds.js";
+
+const LAB = { ready: false, errors: [] };
+window.__CLOUDSLAB = LAB;
+window.addEventListener("error", (e) => LAB.errors.push(String(e.message)));
+window.addEventListener("unhandledrejection", (e) => LAB.errors.push(String(e.reason)));
+
+const q = new URLSearchParams(location.search);
+const front = (q.get("front") || "NELLIS").toUpperCase();
+const tod = parseFloat(q.get("tod") || "14");
+const camMode = q.get("cam") || "orbit";
+
+// same canvas-poisoning-safe probe as src/main.js
+function freshCanvas(old) { const c = old.cloneNode(false); old.replaceWith(c); return c; }
+async function makeRenderer(canvas) {
+  let adapter = null;
+  if (navigator.gpu && q.get("gl") !== "1") {
+    try { adapter = await navigator.gpu.requestAdapter(); } catch (_) { adapter = null; }
+  }
+  if (adapter) {
+    try {
+      const r = new THREE.WebGPURenderer({ canvas, antialias: true });
+      await r.init();
+      return { renderer: r, backend: "webgpu" };
+    } catch (err) {
+      console.warn("WebGPU init failed, falling back to WebGL2:", err && err.message);
+      canvas = freshCanvas(canvas);
+    }
+  }
+  const r = new THREE.WebGPURenderer({ canvas, antialias: true, forceWebGL: true });
+  await r.init();
+  return { renderer: r, backend: "webgl" };
+}
+
+const { renderer, backend } = await makeRenderer(document.getElementById("lab"));
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.55;
+
+const scene = new THREE.Scene();
+
+// sun from ?tod — a simple daylight arc, not the solar model
+const elDeg = Math.max((1 - Math.abs(tod - 12) / 7.2) * 75, -6);
+const el = elDeg * Math.PI / 180;
+const az = ((tod - 12) * 15 + 170) * Math.PI / 180;
+const sunDir = new THREE.Vector3(
+  Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el)
+).normalize();
+
+const dayness = Math.min(Math.max(elDeg / 25, 0), 1);
+scene.background = new THREE.Color(0xd8b98a).lerp(new THREE.Color(0x87b1dd), dayness);
+scene.fog = new THREE.Fog(scene.background.clone(), 7000, 46000);
+
+const sun = new THREE.DirectionalLight(0xfff2dd, 2.6 + dayness);
+sun.position.copy(sunDir).multiplyScalar(20000);
+scene.add(sun, sun.target);
+scene.add(new THREE.HemisphereLight(0x9db8d6, 0x55514a, 1.0));
+
+// clouds + THE shared-uniform shadow node (one {uWindVel,uTime} pair)
+const clouds = new Clouds(front, "billboard");
+clouds.shared.uSunDir.value.copy(sunDir);
+scene.add(clouds.group);
+const cloudShadow = makeCloudShadowNode(clouds.shared);
+
+// flat ground with the shadow node multiplied into its colorNode —
+// the exact wiring terrain.js gets per CLOUDS-INTEGRATION.patch.md
+const GROUND = { NELLIS: 0xb59a72, VALDEZ: 0x6d7f5e, MARIANAS: 0x3f948c };
+const gcol = new THREE.Color(GROUND[clouds.front]).convertSRGBToLinear();
+const gmat = new THREE.MeshStandardNodeMaterial({ roughness: 0.95, metalness: 0 });
+gmat.colorNode = Fn(() => {
+  const wp = positionWorld;
+  // faint 2km checker so wind motion is legible against the flat ground
+  const g = floor(wp.xz.div(2000.0));
+  const check = fract(g.x.add(g.y).mul(0.5)).mul(2.0);
+  const base = vec3(gcol.r, gcol.g, gcol.b).mul(check.mul(0.06).add(0.97));
+  return base.mul(cloudShadow(wp));
+})();
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(160000, 160000, 1, 1).rotateX(-Math.PI / 2), gmat
+);
+scene.add(ground);
+
+const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 1, 200000);
+const baseAlt = CLOUD_CLIMATES[clouds.front].baseAlt;
+
+function placeCamera(tSec) {
+  if (camMode === "level") {           // level flight at deck altitude
+    camera.position.set(-12000, baseAlt + 500, 8000);
+    camera.lookAt(2000, baseAlt + 100, -2000);
+  } else if (camMode === "above") {    // 30° above the layer — the swim test
+    camera.position.set(-11000, baseAlt + 6350, 0);
+    camera.lookAt(0, baseAlt, 0);
+  } else {                             // slow orbit
+    const a = tSec * 0.03;
+    camera.position.set(Math.sin(a) * 13000, baseAlt + 4200, Math.cos(a) * 13000);
+    camera.lookAt(0, baseAlt + 200, 0);
+  }
+}
+
+window.addEventListener("resize", () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+let clock = 0, timeOffset = 0, last = performance.now();
+LAB.setTime = (s) => { timeOffset = s; };            // jump the shared cloud clock
+LAB.snap = async () => {
+  await renderer.renderAsync(scene, camera);
+  return renderer.domElement.toDataURL("image/png");
+};
+Object.assign(LAB, { clouds, scene, camera, front: clouds.front, backend });
+
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dt = Math.min(now - last, 100) / 1000;
+  last = now;
+  clock += dt;
+  placeCamera(clock);
+  clouds.update(camera, clock + timeOffset);
+  renderer.render(scene, camera);
+  if (!LAB.ready) {
+    LAB.ready = true;
+    document.getElementById("hudSub").textContent =
+      `${clouds.front} · cam ${camMode} · tod ${tod} · ${backend} · ${clouds.puffs.length} puffs`;
+  }
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

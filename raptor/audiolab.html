@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>RAPTOR — audio lab</title>
+<style>
+:root { --bg:#101014; --panel:#16161c; --ink:#e8e6df; --mid:#9a988f; --dim:#6e6c64; --hair:#2e2e36; --acc:#e8b46f; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--ink); font-family:"SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size:13px; padding:20px; }
+h1 { color:var(--acc); letter-spacing:4px; font-size:15px; margin-bottom:4px; }
+.sub { color:var(--dim); font-size:10px; letter-spacing:1.5px; margin-bottom:20px; }
+.panel { background:var(--panel); border:1px solid var(--hair); padding:14px 16px; margin-bottom:14px; max-width:640px; }
+.panel h2 { font-size:10px; letter-spacing:2px; color:var(--dim); margin-bottom:10px; }
+.row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.row label { width:90px; color:var(--mid); font-size:11px; }
+.row input[type=range] { flex:1; }
+.row .val { width:60px; text-align:right; color:var(--ink); font-size:11px; }
+button { background:none; border:1px solid var(--hair); color:var(--mid); font:inherit; font-size:11px;
+  letter-spacing:1px; padding:7px 12px; cursor:pointer; margin-right:8px; margin-bottom:8px; }
+button:hover { color:var(--ink); border-color:var(--mid); }
+button.live { color:var(--acc); border-color:var(--acc); }
+#spectrum { display:block; width:100%; height:140px; background:#0a0a0d; border:1px solid var(--hair); }
+#readout { color:var(--dim); font-size:10px; letter-spacing:.5px; line-height:1.7; white-space:pre; }
+</style>
+</head>
+<body>
+<h1>RAPTOR AUDIO LAB</h1>
+<div class="sub">PHASE 13 GROUNDWORK — SYNTH-FIRST WEB AUDIO · engine / gun / lock tones</div>
+
+<div class="panel">
+  <h2>ENGINE (F119 SYNTH)</h2>
+  <div class="row"><label>THROTTLE</label><input type="range" id="throttle" min="0" max="100" value="0"><span class="val" id="throttleVal">0%</span></div>
+  <div class="row"><label>AFTERBURNER</label><input type="checkbox" id="ab"><span class="val" id="abVal">off</span></div>
+  <div class="row"><label>IAS</label><input type="range" id="ias" min="0" max="800" value="0"><span class="val" id="iasVal">0kt</span></div>
+</div>
+
+<div class="panel">
+  <h2>M61 GUN</h2>
+  <button id="gunBurst">GUN BURST</button>
+</div>
+
+<div class="panel">
+  <h2>RWR / SEEKER TONES</h2>
+  <button id="scanBtn">SCAN</button>
+  <button id="lockBtn">LOCK</button>
+  <button id="launchBtn">LAUNCH WARBLE</button>
+  <button id="offBtn">OFF</button>
+</div>
+
+<div class="panel">
+  <h2>MASTER</h2>
+  <button id="muteBtn">MUTE</button>
+</div>
+
+<div class="panel" style="max-width:900px;">
+  <h2>SPECTRUM (post-limiter, pre-destination)</h2>
+  <canvas id="spectrum" width="880" height="140"></canvas>
+  <div id="readout"></div>
+</div>
+
+<script type="module">
+import { AudioBus } from "/src/engine/audio.js";
+
+const bus = new AudioBus();
+
+// QA + dogfooding hooks
+window.__AUDIOLAB = {
+  bus,
+  engine: bus.engine,
+  gun: bus.gun,
+  locks: bus.locks,
+  getSpectrum: () => bus.getFrequencyData(),
+  getTimeDomain: () => bus.getTimeDomainData(),
+  bandEnergyHz: (lo, hi) => bus.bandEnergyHz(lo, hi),
+  totalEnergy: () => bus.totalEnergy(),
+  rms: () => bus.rms(),
+  ready: true,
+};
+
+const $ = (id) => document.getElementById(id);
+
+function updateEngine() {
+  const throttle = +$("throttle").value / 100;
+  const ab = $("ab").checked ? 1 : 0;
+  const ias = +$("ias").value;
+  bus.engine.setState({ throttle, ab, ias });
+  $("throttleVal").textContent = $("throttle").value + "%";
+  $("abVal").textContent = ab ? "ON" : "off";
+  $("iasVal").textContent = $("ias").value + "kt";
+}
+$("throttle").addEventListener("input", updateEngine);
+$("ab").addEventListener("change", updateEngine);
+$("ias").addEventListener("input", updateEngine);
+updateEngine();
+
+$("gunBurst").addEventListener("click", () => bus.gun.burst(0.6));
+
+function setLockMode(mode) {
+  bus.locks.setMode(mode);
+  for (const [id, m] of [["scanBtn", "scan"], ["lockBtn", "lock"], ["launchBtn", "launch"], ["offBtn", "off"]]) {
+    $(id).classList.toggle("live", m === mode);
+  }
+}
+$("scanBtn").addEventListener("click", () => setLockMode("scan"));
+$("lockBtn").addEventListener("click", () => setLockMode("lock"));
+$("launchBtn").addEventListener("click", () => setLockMode("launch"));
+$("offBtn").addEventListener("click", () => setLockMode("off"));
+setLockMode("off");
+
+function refreshMuteBtn() {
+  $("muteBtn").textContent = bus.muted ? "UNMUTE" : "MUTE";
+  $("muteBtn").classList.toggle("live", bus.muted);
+}
+$("muteBtn").addEventListener("click", () => { bus.toggleMute(); refreshMuteBtn(); });
+refreshMuteBtn();
+
+const cv = $("spectrum"), cx = cv.getContext("2d");
+const readout = $("readout");
+function draw() {
+  requestAnimationFrame(draw);
+  const data = bus.getFrequencyData();
+  cx.clearRect(0, 0, cv.width, cv.height);
+  cx.fillStyle = "#e8b46f";
+  const w = cv.width / data.length;
+  for (let i = 0; i < data.length; i++) {
+    const h = (data[i] / 255) * cv.height;
+    cx.fillRect(i * w, cv.height - h, Math.max(1, w), h);
+  }
+  readout.textContent =
+    `ctx: ${bus.ctx.state}  ·  muted: ${bus.muted}  ·  rms: ${bus.rms().toFixed(3)}\n` +
+    `gun firing: ${bus.gun.firing}  ·  lock mode: ${bus.locks.mode}`;
+}
+draw();
+</script>
+</body>
+</html>
