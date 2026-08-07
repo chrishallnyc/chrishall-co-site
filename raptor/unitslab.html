@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAPTOR — units lab</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23101014'/%3E%3Cpath d='M16 4 L19 12 L27 17 L19 19 L18 24 L21 27 L16 25 L11 27 L14 24 L13 19 L5 17 L13 12 Z' fill='%23e8b46f'/%3E%3C/svg%3E">
+<style>
+  :root { --bg:#101014; --panel:#16161c; --ink:#e8e6df; --mid:#9a988f; --dim:#6e6c64; --hair:#2e2e36; --acc:#e8b46f; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { background:var(--bg); height:100%; overflow:hidden; }
+  body { color:var(--ink); font-family:"SF Mono", ui-monospace, Menlo, Consolas, monospace; font-size:12px; }
+  #game { position:fixed; inset:0; width:100%; height:100%; display:block; touch-action:none; }
+  #hud { position:fixed; top:12px; left:14px; z-index:5; background:rgba(16,16,20,.82);
+    border:1px solid var(--hair); padding:10px 12px; max-width:640px; }
+  #hud .brand { font-weight:700; letter-spacing:5px; font-size:12px; color:var(--acc); margin-bottom:6px; }
+  #hud .row { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px; }
+  #hud button { font:inherit; font-size:10px; letter-spacing:.5px; color:var(--mid); background:none;
+    border:1px solid var(--hair); padding:4px 8px; cursor:pointer; }
+  #hud button:hover { color:var(--ink); border-color:var(--mid); }
+  #hud button.active { color:var(--acc); border-color:var(--acc); }
+  #hud .info { color:var(--ink); font-size:11px; line-height:1.6; }
+  #hud .info b { color:var(--acc); }
+  #hud .hint { color:var(--dim); font-size:9px; letter-spacing:1px; margin-top:8px; }
+  #hud.hidden { display:none; }
+  #err { position:fixed; inset:0; z-index:9; background:var(--bg); color:#d08770; display:none;
+    align-items:center; justify-content:center; padding:20px; text-align:center; font-size:13px; }
+</style>
+</head>
+<body>
+<canvas id="game" aria-label="RAPTOR units lab viewer"></canvas>
+<div id="hud">
+  <div class="brand">UNITS LAB</div>
+  <div class="row" id="unitButtons"></div>
+  <div class="info" id="infoText">loading…</div>
+  <div class="hint">drag = orbit · wheel = zoom · ?unit=&lt;name|all&gt;&amp;az=&amp;el=&amp;dist=&amp;hud=0</div>
+</div>
+<div id="err"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "/vendor/three.webgpu.min.js",
+    "three/webgpu": "/vendor/three.webgpu.min.js",
+    "three/tsl": "/vendor/three.tsl.min.js"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from "three";
+import { UNITS, triCount } from "/src/world/groundunits.js";
+
+const q = new URLSearchParams(location.search);
+if (q.get("hud") === "0") document.getElementById("hud").classList.add("hidden");
+
+// a plain gray/blue blocky reference — NOT the real F-22 (built separately on
+// port 8890); this exists only to eyeball scale against a known 19m length.
+function buildF22Ref() {
+  const g = new THREE.Group(); g.name = "f22ref";
+  const mat = new THREE.MeshStandardMaterial({ color: 0x808892, roughness: 0.55, metalness: 0.3 });
+  const fuse = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.8, 19.0), mat);
+  fuse.position.y = 1.4;
+  const wing = new THREE.Mesh(new THREE.BoxGeometry(13.6, 0.5, 6.5), mat);
+  wing.position.set(0, 1.1, -2.0);
+  const tailL = new THREE.Mesh(new THREE.BoxGeometry(0.4, 2.4, 3.0), mat);
+  tailL.position.set(-1.7, 2.6, -7.5);
+  const tailR = tailL.clone(); tailR.position.x = 1.7;
+  g.add(fuse, wing, tailL, tailR);
+  return g;
+}
+
+// ---- renderer bootstrap (WebGPU with WebGL2 fallback; canvas is
+// one-context-forever so a failed webgpu probe must re-canvas) ----
+function freshCanvas(old) { const c = old.cloneNode(false); old.replaceWith(c); return c; }
+
+async function makeRenderer(canvas) {
+  let adapter = null;
+  if (navigator.gpu && q.get("gl") !== "1") {
+    try { adapter = await navigator.gpu.requestAdapter(); } catch (_) { adapter = null; }
+  }
+  if (adapter) {
+    try {
+      const r = new THREE.WebGPURenderer({ canvas, antialias: true });
+      await r.init();
+      return r;
+    } catch (err) {
+      console.warn("WebGPU init failed, falling back to WebGL2:", err && err.message);
+      canvas = freshCanvas(canvas);
+    }
+  }
+  const r = new THREE.WebGPURenderer({ canvas, antialias: true, forceWebGL: true });
+  await r.init();
+  return r;
+}
+
+async function boot() {
+  const canvas = document.getElementById("game");
+  const renderer = await makeRenderer(canvas);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0;
+  renderer.setClearColor(0x87a0ad, 1);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.5, 6000);
+
+  scene.add(new THREE.HemisphereLight(0xcfe0e8, 0x30302a, 1.4));
+  const sun = new THREE.DirectionalLight(0xfff3dd, 3.0);
+  sun.position.set(300, 500, 220);
+  scene.add(sun);
+
+  // ---- build the full line-up: every registry unit + an F-22 ref block
+  // next to each one, placed left-to-right along X on a shared y=0 plane ----
+  const order = Object.keys(UNITS);
+  const built = {};      // name -> { group, parts, tris }
+  const unitBoxes = {};  // name -> world Box3
+  const fleetBox = new THREE.Box3();
+  let cursorX = 0;
+  const GAP = 18, REF_GAP = 5;
+
+  for (const key of order) {
+    const { group, parts } = UNITS[key]();
+    const localBox = new THREE.Box3().setFromObject(group);
+    cursorX += -localBox.min.x;
+    group.position.x = cursorX;
+    cursorX += localBox.max.x;
+    scene.add(group);
+    const worldBox = new THREE.Box3().setFromObject(group);
+    built[key] = { group, parts, tris: triCount(group), size: worldBox.getSize(new THREE.Vector3()) };
+    unitBoxes[key] = worldBox;
+    fleetBox.union(worldBox);
+
+    const ref = buildF22Ref();
+    const refBox = new THREE.Box3().setFromObject(ref);
+    cursorX += REF_GAP - refBox.min.x;
+    ref.position.x = cursorX;
+    cursorX += refBox.max.x;
+    scene.add(ref);
+    built[key].ref = ref;
+    built[key].refBox = new THREE.Box3().setFromObject(ref);
+    fleetBox.union(built[key].refBox);
+
+    cursorX += GAP;
+  }
+
+  // reference grid on the shared ground/waterline plane
+  const totalW = cursorX + 40;
+  const grid = new THREE.GridHelper(totalW, Math.round(totalW / 20), 0x445055, 0x2c3438);
+  grid.position.set(totalW / 2 - 20, 0, 0);
+  scene.add(grid);
+  scene.add(new THREE.Mesh(
+    new THREE.PlaneGeometry(totalW + 200, 1200).rotateX(-Math.PI / 2).translate(totalW / 2 - 20, 0, 0),
+    new THREE.MeshStandardMaterial({ color: 0x3a4448, roughness: 0.95 })
+  ));
+
+  // ---- orbit camera (custom — no addons in this vendor bundle) ----
+  let unitKey = order.includes(q.get("unit")) ? q.get("unit") : "all";
+  let az = THREE.MathUtils.degToRad(parseFloat(q.get("az") ?? "40"));
+  let el = THREE.MathUtils.degToRad(parseFloat(q.get("el") ?? "18"));
+  let camDist = q.has("dist") ? parseFloat(q.get("dist")) : null;
+  const target = new THREE.Vector3();
+
+  function autofitDist(box) {
+    const s = box.getSize(new THREE.Vector3());
+    return Math.max(Math.sqrt(s.x * s.x + s.y * s.y + s.z * s.z) * 1.15, 8);
+  }
+  function updateCamera() {
+    const x = target.x + camDist * Math.cos(el) * Math.sin(az);
+    const y = target.y + camDist * Math.sin(el);
+    const z = target.z + camDist * Math.cos(el) * Math.cos(az);
+    camera.position.set(x, y, z);
+    camera.lookAt(target);
+  }
+  function updateHUD() {
+    const info = document.getElementById("infoText");
+    document.querySelectorAll("#unitButtons button").forEach((b) => b.classList.toggle("active", b.dataset.key === unitKey));
+    if (unitKey === "all") {
+      const s = fleetBox.getSize(new THREE.Vector3());
+      const total = order.reduce((n, k) => n + built[k].tris, 0);
+      info.innerHTML = `<b>ALL UNITS</b> · lineup span ${s.x.toFixed(0)}m · units: ${order.length} · total tris: ${total}`;
+    } else {
+      const u = built[unitKey];
+      info.innerHTML = `<b>${unitKey}</b> · ${u.size.x.toFixed(1)}w × ${u.size.y.toFixed(1)}h × ${u.size.z.toFixed(1)}L m · tris: ${u.tris} · parts: ${Object.keys(u.parts).join(", ") || "—"}`;
+    }
+  }
+  function focusOn(key) {
+    unitKey = key;
+    // isolate the focused unit (+ its own scale-ref block) so a gameplay-
+    // distance shot reads against open ground, not the rest of the lineup
+    for (const k of order) {
+      const solo = key === "all" || k === key;
+      built[k].group.visible = solo;
+      built[k].ref.visible = solo;
+    }
+    const box = key === "all" ? fleetBox : unitBoxes[key];
+    target.copy(box.getCenter(new THREE.Vector3()));
+    // autofit (no explicit ?dist=) widens to include the unit's own F-22 ref
+    // block so the scale comparison stays in frame; target stays on the unit
+    const fitBox = (key !== "all" && !q.has("dist")) ? box.clone().union(built[key].refBox) : box;
+    camDist = q.has("dist") ? parseFloat(q.get("dist")) : autofitDist(fitBox);
+    updateHUD();
+    updateCamera();
+  }
+
+  const buttonRow = document.getElementById("unitButtons");
+  for (const key of ["all", ...order]) {
+    const b = document.createElement("button");
+    b.textContent = key;
+    b.dataset.key = key;
+    b.addEventListener("click", () => {
+      const u = new URLSearchParams(location.search);
+      u.set("unit", key);
+      history.replaceState(null, "", "?" + u.toString());
+      focusOn(key);
+    });
+    buttonRow.appendChild(b);
+  }
+
+  let dragging = false, lastX = 0, lastY = 0;
+  canvas.addEventListener("pointerdown", (e) => { dragging = true; lastX = e.clientX; lastY = e.clientY; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointerup", () => { dragging = false; });
+  canvas.addEventListener("pointercancel", () => { dragging = false; });
+  canvas.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - lastX, dy = e.clientY - lastY;
+    lastX = e.clientX; lastY = e.clientY;
+    az -= dx * 0.006;
+    el = THREE.MathUtils.clamp(el + dy * 0.006, -0.1, 1.45);
+    updateCamera();
+  });
+  canvas.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    camDist = THREE.MathUtils.clamp(camDist * (1 + Math.sign(e.deltaY) * 0.08), 3, 4000);
+    updateCamera();
+  }, { passive: false });
+
+  window.addEventListener("resize", () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  focusOn(unitKey);
+  renderer.render(scene, camera);
+
+  window.__UNITSLAB = {
+    ready: true,
+    units: order,
+    current: () => unitKey,
+    focus: (name) => {
+      const u = new URLSearchParams(location.search);
+      u.set("unit", name);
+      history.replaceState(null, "", "?" + u.toString());
+      focusOn(name);
+      renderer.render(scene, camera);
+    },
+    setView: (azDeg, elDeg, d) => {
+      az = THREE.MathUtils.degToRad(azDeg);
+      el = THREE.MathUtils.degToRad(elDeg);
+      if (d != null) camDist = d;
+      updateCamera();
+      renderer.render(scene, camera);
+    },
+    stats: () => (unitKey === "all"
+      ? { unit: "all", tris: order.reduce((n, k) => n + built[k].tris, 0), units: order.length }
+      : { unit: unitKey, tris: built[unitKey].tris, size: built[unitKey].size, parts: Object.keys(built[unitKey].parts) }),
+    snap: () => renderer.domElement.toDataURL("image/png"),
+  };
+
+  function frame() {
+    requestAnimationFrame(frame);
+    renderer.render(scene, camera);
+  }
+  requestAnimationFrame(frame);
+}
+
+boot().catch((err) => {
+  console.error("unitslab boot failure:", err);
+  const e = document.getElementById("err");
+  e.style.display = "flex";
+  e.textContent = "BOOT FAILURE — " + (err && err.message || err);
+});
+</script>
+</body>
+</html>
