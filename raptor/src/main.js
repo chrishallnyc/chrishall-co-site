@@ -17,7 +17,7 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.12.0";
+const VERSION = "0.13.0";
 const PHASE = 14;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
@@ -72,7 +72,12 @@ async function makeRenderer(canvas) {
       // adapter actually offers so SwiftShader/low-end never fails init.
       const r = new THREE.WebGPURenderer({
         canvas, antialias: false,
-        requiredLimits: { maxTextureDimension2D: Math.min(adapter.limits.maxTextureDimension2D, 16384) },
+        requiredLimits: {
+          maxTextureDimension2D: Math.min(adapter.limits.maxTextureDimension2D, 16384),
+          // the 16k albedo upload stages through a 1GB buffer — the default
+          // 256MB cap rejects it (adapter-clamped so init never fails)
+          maxBufferSize: Math.min(adapter.limits.maxBufferSize, 4294967296),
+        },
       });
       await r.init();
       return { renderer: r, backend: "webgpu", canvas };
@@ -171,6 +176,7 @@ async function boot() {
             } catch (err) { console.warn("fft ocean unavailable, Gerstner stays:", err && err.message); }
           }
           state.fftOcean = !!fft;
+          if (fft) fft.update(0); // pre-compile the 19 compute pipelines behind the veil
           water = new Water(atmosphere.frontName, terrain, atmoH?.aerial, fft);
           scene.add(water.group);
         } catch (err) {
