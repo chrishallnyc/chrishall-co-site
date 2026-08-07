@@ -6,7 +6,7 @@
 
 import * as THREE from "three";
 import { Pool } from "../engine/pools.js";
-import { buildF22 } from "../aircraft/f22.js";
+import { buildF22 } from "../aircraft/f22v3.js";
 
 const TRAIL_N = 240;
 

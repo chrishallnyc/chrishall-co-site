@@ -1,11 +1,12 @@
 {
-  "updated": "2026-08-07T13:55:00-07:00",
-  "version": "v0.16.0",
-  "now": "new hi-poly F-22 airframe landing, then three full 10%-better polish passes",
+  "updated": "2026-08-07T14:25:00-07:00",
+  "version": "v0.16.1",
+  "now": "three full 10%-better polish passes begin — judge panels over every front and hour",
   "nowPhase": 14,
   "paused": false,
-  "pushes": 34,
+  "pushes": 35,
   "ledger": [
+    "2026-08-07 v0.16.1 — NEW AIRFRAME: the F-22 rebuilt at 4x the detail — smooth blended fuselage, real chines, gold bubble canopy, thrust-vectoring nozzles. The builder critiqued its own screenshots through six rounds before showing it.",
     "2026-08-07 v0.16.0 — REAL SKIES: the clouds are volumes now — the GPU marches rays through 3D cloud fields with real light scattering. Towering Pacific cumulus, Alaska overcast decks, Nevada fair-weather puffs — and you can fly through them. Still 121fps.",
     "2026-08-07 v0.15.0 — SAM CITY: the missile sites launch back. Launch warning tone + flashing MISSILE alert, then physics decides: fly straight and it connects; turn away on the warning and run, and it dies chasing you. Every counter-tactic works because the physics is real, not scripted.",
     "2026-08-07 v0.14.0 — FOX TWO: AIM-9X Sidewinders. The seeker locks onto targets (box + growl tone), the missile launches with real rocket physics — boost, sustain, burnout — and steers itself in with the same guidance law real missiles use. First test flight missed forever because one minus sign was flipped; the test caught it.",
@@ -64,8 +65,8 @@
     {
       "n": 6,
       "name": "The F-22 airframe",
-      "pct": 70,
-      "note": "v2 procedural model, 15 rig parts; bakery hi-poly later"
+      "pct": 88,
+      "note": "v3 lofted airframe (41k tris, 6 self-review rounds); cockpit interior later"
     },
     {
       "n": 7,

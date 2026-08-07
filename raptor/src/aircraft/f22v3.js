@@ -214,9 +214,9 @@ function bakeFuselageColors(geom) {
       const d = Math.abs(z - b);
       if (d < 0.06) v = Math.min(v, 0.91 + 0.09 * (d / 0.06));
     }
-    if (z > 6.0) {
-      const f = Math.min(1, (z - 6.0) / 2.6);
-      v *= 1 - f * (y < -0.1 ? 0.45 : 0.3);
+    if (z > 5.5) {
+      const f = Math.min(1, (z - 5.5) / 2.8);
+      v *= 1 - f * (y < -0.1 ? 0.62 : 0.42);
     }
     col[i * 3] = v; col[i * 3 + 1] = v; col[i * 3 + 2] = v;
   }
@@ -708,15 +708,20 @@ export function buildF22() {
 
   // ---- weapons bays (placeholder doors at true hinge lines; same
   // hinge conventions as v2)
+  // keel dips to -0.964 at the door edge — park the closed door fully
+  // inside the hull (it emerges when swung open on its -Z hinge line)
   parts.bayMain = new THREE.Group();
-  parts.bayMain.position.set(-0.62, -0.96, 0.55);
+  parts.bayMain.position.set(-0.62, -0.90, 0.55);
   const mainDoor = doorSlab(mats, 1.24, 0.03, 3.5);
   mainDoor.position.x = 0.62;
   parts.bayMain.add(mainDoor);
   add(parts.bayMain, "bayMain");
   const mkSideBay = (sideSign) => {
     const pv = new THREE.Group();
-    pv.position.set(1.92 * sideSign, -0.12, 0.45);   // flush in the wall
+    // buried inside the lower hull bevel (the loft tucks in fast below the
+    // chine); the pivot sits at the hinge line and the door emerges when
+    // swung outboard — closed, it stays hidden like the real flush panel.
+    pv.position.set(1.70 * sideSign, -0.10, 0.45);
     pv.rotation.z = 0.35 * sideSign;                 // lean with the side
     const door = doorSlab(mats, 0.04, 0.72, 1.9);
     door.position.y = -0.36;
