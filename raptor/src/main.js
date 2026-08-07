@@ -89,7 +89,7 @@ async function boot() {
     try {
       terrain = await Terrain.load("/assets/terrain/" + fg.asset, atmosphere.frontName);
       scene.add(terrain.group);
-      if (fg.ocean) {
+      if (fg.ocean && flags.get("nowater") !== "1") {
         try {
           water = new Water(atmosphere.frontName, terrain);
           scene.add(water.group);
