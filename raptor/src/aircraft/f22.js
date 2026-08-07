@@ -170,22 +170,27 @@ function mirrorGeom(geom) {
 }
 
 // ------------------------------------------------------------- fuselage
-// Station table nose->tail. NARROW chined diamond forebody (the real jet's
-// forebody is much slimmer than the mid-body); the intake nacelles jump the
-// planform to full width at z~-3.9, the loft catches up UNDER the intake
-// boxes, then the mid-body runs nearly straight-sided (w ~2.25, boxy
-// exponents = flat lifting body) before boat-tailing into the nozzles.
+// Station table nose->tail. Narrow chined diamond forebody; the chine edge
+// then flares outboard along a straight ~35-deg plan diagonal (the LERX /
+// intake-lip line, z -3.6 -> -2.4) to full width, and the mid-body runs
+// nearly straight-sided (w ~2.25, boxy exponents = broad flat lifting body)
+// before boat-tailing into the nozzles. The top-view silhouette lives
+// entirely in this loft; the intake wedges tuck just under the chine.
 const FUS = [
   { z: -9.46, w: 0.02, yt: 0.14, yb: 0.10, yc: 0.12, nu: 1.8, nl: 1.8 },
   { z: -8.60, w: 0.28, yt: 0.28, yb: -0.06, yc: 0.11, nu: 1.8, nl: 1.8 },
   { z: -7.60, w: 0.60, yt: 0.40, yb: -0.28, yc: 0.09, nu: 1.7, nl: 1.9 },
   { z: -6.80, w: 0.84, yt: 0.48, yb: -0.44, yc: 0.08, nu: 1.8, nl: 2.0 },
   { z: -5.60, w: 1.06, yt: 0.58, yb: -0.58, yc: 0.10, nu: 2.0, nl: 2.2 },
-  { z: -4.40, w: 1.22, yt: 0.64, yb: -0.70, yc: 0.11, nu: 2.2, nl: 2.4 },
-  { z: -3.60, w: 1.30, yt: 0.68, yb: -0.78, yc: 0.11, nu: 2.4, nl: 2.6 },
-  { z: -2.60, w: 1.78, yt: 0.76, yb: -0.88, yc: 0.12, nu: 3.6, nl: 3.0 },
-  { z: -1.60, w: 2.16, yt: 0.83, yb: -0.94, yc: 0.12, nu: 4.8, nl: 3.5 },
-  { z: -0.80, w: 2.24, yt: 0.86, yb: -0.96, yc: 0.11, nu: 5.4, nl: 3.7 },
+  { z: -4.40, w: 1.24, yt: 0.64, yb: -0.70, yc: 0.11, nu: 2.3, nl: 2.4 },
+  { z: -4.00, w: 1.31, yt: 0.66, yb: -0.75, yc: 0.11, nu: 2.4, nl: 2.5 },
+  { z: -3.60, w: 1.36, yt: 0.68, yb: -0.80, yc: 0.10, nu: 2.6, nl: 2.6 },
+  { z: -3.20, w: 1.48, yt: 0.71, yb: -0.83, yc: 0.09, nu: 2.9, nl: 2.8 },
+  { z: -2.80, w: 1.70, yt: 0.77, yb: -0.89, yc: 0.09, nu: 3.6, nl: 3.1 },
+  { z: -2.40, w: 1.98, yt: 0.80, yb: -0.92, yc: 0.09, nu: 4.2, nl: 3.4 },
+  { z: -2.00, w: 2.20, yt: 0.82, yb: -0.94, yc: 0.10, nu: 4.6, nl: 3.5 },
+  { z: -1.60, w: 2.25, yt: 0.84, yb: -0.95, yc: 0.12, nu: 5.0, nl: 3.6 },
+  { z: -0.80, w: 2.25, yt: 0.86, yb: -0.96, yc: 0.11, nu: 5.4, nl: 3.7 },
   { z:  0.00, w: 2.25, yt: 0.88, yb: -0.97, yc: 0.10, nu: 5.6, nl: 3.8 },
   { z:  1.60, w: 2.24, yt: 0.87, yb: -0.97, yc: 0.08, nu: 5.6, nl: 3.8 },
   { z:  3.20, w: 2.22, yt: 0.80, yb: -0.94, yc: 0.06, nu: 5.4, nl: 3.6 },
@@ -367,12 +372,13 @@ function stingGeometry() {
 }
 
 // -------------------------------------------------------- intake (right)
-// Big canted parallelogram nacelle: it IS the planform's forward corner
-// (the loft is still narrow forebody here). Lip raked hard — top edge
-// leads, bottom trails — and swept in plan (inboard-top corner leads).
-// Crisp lip = thin skin rim band between the outer edge and the dark
-// cavity. The diverter step is a dark splitter plate just inboard of the
-// duct wall, in the gap off the forebody skin.
+// Swept caret wedge under the chine flare: the lip's top edge rides just
+// beneath (and a hair proud of) the loft's LERX diagonal, so the plan
+// silhouette stays one continuous line. Lip raked — inboard-top corner
+// leads, outboard corners trail far aft along the diagonal. Crisp lip =
+// thin skin rim band between the outer edge and the dark cavity. The
+// diverter step is a dark splitter plate just inboard of the duct wall,
+// in the gap off the forebody skin.
 function quadRing(corners, n) {                 // corners [OT,OB,IB,IT] xyz
   const pts = [];
   for (let s = 0; s < 4; s++) {
@@ -393,31 +399,27 @@ function shrinkRing(corners, k, dz) {           // toward centroid, pushed aft
                              cz + (c[2] - cz) * k + dz]);
 }
 const INT_F = [                                 // front lip  [OT,OB,IB,IT]
-  [2.26,  0.02, -3.55], [2.06, -0.88, -3.15], [1.34, -0.86, -3.50], [1.66, 0.14, -3.95],
+  [2.16, -0.02, -2.75], [2.12, -0.95, -2.55], [1.44, -0.88, -3.45], [1.36, 0.09, -3.75],
 ];
 const INT_B = [                                 // back ring (sinks into loft)
-  [2.24,  0.12, -1.35], [2.10, -0.96, -1.35], [1.38, -0.92, -1.35], [1.78, 0.20, -1.35],
+  [2.20,  0.06, -1.95], [2.14, -0.92, -1.95], [1.50, -0.86, -1.95], [1.86, 0.14, -1.95],
 ];
 function intakeGeometry() {
   const N = 4;
   const front = quadRing(INT_F, N);
   const back = quadRing(INT_B, N);
-  const rim = quadRing(shrinkRing(INT_F, 0.88, 0.05), N);
-  const throat = quadRing(shrinkRing(INT_F, 0.55, 0.55), N);
+  const rim = quadRing(shrinkRing(INT_F, 0.97, 0.01), N);
+  // shallow dark base right behind the lip plane — deep recess would let the
+  // flaring loft skin poke through the aperture and wash it out
+  const throat = quadRing(shrinkRing(INT_F, 0.85, 0.12), N);
+  // NB ring order: lip band + duct must WIND toward -z (viewed from ahead,
+  // looking into the opening) — [outer,inner] order winds aft and gets culled.
   return {
-    body: loft([front, back], false, false),
-    lip: loft([front, rim], false, false),      // thin bright lip band
-    cap: loft([rim, throat], false, true),      // dark duct cavity
+    body: loft([front, back], false, true),     // capped: rear sinks into loft
+    lip: loft([rim, front], false, false),      // hairline bright lip edge
+    cap: loft([throat, rim], true, false),      // dark duct aperture + base
   };
 }
-// LERX/chine shelf: thin slab bridging the narrow forebody chine out over
-// the intake top edge (inboard edge stays buried in the loft).
-function chineShelfOutline() {
-  return [
-    [0.95, -3.55], [1.63, -3.93], [1.75, -1.30], [0.95, -1.30],
-  ];
-}
-const chineThick = (p) => 0.05 - 0.03 * ((p[0] - 0.95) / 0.8);
 
 // -------------------------------------------------------- placeholder bits
 function gearLeg(mats, strutLen, wheelR, wheelW) {
@@ -547,8 +549,8 @@ export function buildF22() {
   parts.nozzleR = mkNozzle(0.75); add(parts.nozzleR, "nozzleR");
   parts.nozzleL = mkNozzle(-0.75); add(parts.nozzleL, "nozzleL");
 
-  // ---- intakes: nacelle box + crisp lip band + dark cavity + diverter
-  // splitter plate (dark, just inboard of the duct wall) + LERX chine shelf.
+  // ---- intakes: caret wedge + crisp lip band + dark cavity + diverter
+  // splitter plate (dark, just inboard of the duct wall).
   const intk = intakeGeometry();
   add(new THREE.Mesh(intk.body, mats.skin), "intakeR");
   add(new THREE.Mesh(intk.lip, mats.skin), "intakeLipR");
@@ -557,20 +559,14 @@ export function buildF22() {
   add(new THREE.Mesh(mirrorGeom(intk.lip), mats.skin), "intakeLipL");
   add(new THREE.Mesh(mirrorGeom(intk.cap), mats.inlet), "intakeCapL");
   const mkDiverter = (sideSign) => {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.0, 2.3), mats.inlet);
-    m.position.set(1.42 * sideSign, -0.35, -2.45);
-    m.rotation.z = -0.31 * sideSign;            // lean matches the duct wall
+    const m = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.05, 1.5), mats.inlet);
+    m.position.set(1.33 * sideSign, -0.35, -3.05);
+    m.rotation.z = -0.10 * sideSign;            // lean matches the duct wall
+    m.rotation.y = 0.14 * sideSign;             // splay follows the wall aft
     return m;
   };
   add(mkDiverter(1), "diverterR");
   add(mkDiverter(-1), "diverterL");
-  const shelfGeom = slab(chineShelfOutline(), chineThick);
-  const shelfR = new THREE.Mesh(shelfGeom, mats.skin);
-  shelfR.position.y = 0.13;
-  add(shelfR, "chineR");
-  const shelfL = new THREE.Mesh(mirrorGeom(shelfGeom), mats.skin);
-  shelfL.position.y = 0.13;
-  add(shelfL, "chineL");
 
   // ---- weapons bays (placeholder doors at true hinge lines)
   // bayMain: ventral centerline bay. Hinge along -Z-axis line at the LEFT
