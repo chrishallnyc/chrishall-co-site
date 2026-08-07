@@ -114,9 +114,14 @@ export class Atmosphere {
     const [r, g, b] = this.sky.sampleDirection(_hdir);
     _fogC.setRGB(Math.min(r, 1.6), Math.min(g, 1.6), Math.min(b, 1.6));
     const nightFloor = paletteAt(el, "fog", true);
-    this.scene.fog.color.copy(el < -2 ? nightFloor : _fogC);
-    this.sky.uFog.value.copy(this.scene.fog.color); // dome fades into this
+    if (this.scene.fog) { // null when Hillaire aerial perspective owns the air (A3)
+      this.scene.fog.color.copy(el < -2 ? nightFloor : _fogC);
+      this.sky.uFog.value.copy(this.scene.fog.color); // dome fades into this
+    }
     this.exposure = paletteAt(el, "exp", false);
+    // Hillaire twilight: the physical arch lives at radiances the
+    // Preetham-tuned exposure curve crushes to black — floor it through dusk
+    if (this.hillaire && el < 4 && el > -10) this.exposure = Math.max(this.exposure, 0.34);
 
     this.stars.update(el, this.hours, this.front.lat, this._sunDir);
     if (Math.abs(this.hours - this._iblHours) > 0.2) this._iblDirty = true;

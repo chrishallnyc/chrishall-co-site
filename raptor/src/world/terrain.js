@@ -106,7 +106,7 @@ export class Terrain {
     } catch (_) { return null; }
   }
 
-  static async load(baseUrl, front = "NELLIS", cloudShadow = null, { drape = "16k" } = {}) {
+  static async load(baseUrl, front = "NELLIS", cloudShadow = null, { drape = "16k", aerial = null } = {}) {
     const meta = await (await fetch(`${baseUrl}_meta.json`)).json();
     const img = new Image();
     img.src = `${baseUrl}_h.png`;
@@ -135,11 +135,12 @@ export class Terrain {
       heights[i] = meta.minH + ((px[i * 4] << 8) | px[i * 4 + 1]) / 65535 * span;
     }
     const [albedo, cover, nrm, ao] = await Promise.all([albedoP, coverP, nrmP, aoP]);
-    return new Terrain(meta, heights, img, front, cloudShadow, { albedo, cover, nrm, ao });
+    return new Terrain(meta, heights, img, front, cloudShadow, { albedo, cover, nrm, ao }, aerial);
   }
 
-  constructor(meta, heights, img, front = "NELLIS", cloudShadow = null, drape = {}) {
+  constructor(meta, heights, img, front = "NELLIS", cloudShadow = null, drape = {}, aerial = null) {
     this.drape = drape;
+    this.aerial = aerial; // MAXFI A3: { trans(wp), ins(wp), uSunI } or null
     this.front = front;
     this.cloudShadow = cloudShadow; // TSL fn (wp)=>node from clouds.js, or null
     this.meta = meta;
@@ -319,8 +320,16 @@ export class Terrain {
       }
       if (aoTex) c = c.mul(mix(float(1.0), texture(aoTex, worldUV(wp)).r, 0.75)); // baked multi-scale AO
       if (cloudShadow) c = c.mul(cloudShadow(wp)); // cloud shadows (phase 5a)
+      // MAXFI A3: transmittance through the albedo — lighting is linear in
+      // base color, so the lit result extinguishes correctly (diffuse-only
+      // surface, roughness .96). Inscatter adds post-lighting via emissive.
+      if (this.aerial) c = c.mul(this.aerial.trans(wp));
       return c;
     })();
+    if (this.aerial) {
+      const aerial = this.aerial;
+      mat.emissiveNode = Fn(() => aerial.ins(positionWorld).mul(aerial.uSunI))();
+    }
 
     return mat;
   }

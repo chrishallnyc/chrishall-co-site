@@ -38,7 +38,7 @@ const SEA_STATES = {
 };
 
 export class Water {
-  constructor(front, terrain) {
+  constructor(front, terrain, aerial = null) {
     const S = SEA_STATES[front] || SEA_STATES.MARIANAS;
     this.state = S;
     this.uTime = uniform(0);
@@ -117,8 +117,10 @@ export class Water {
       const shoreFoam = smoothstep(this.state.foamShore, 8.0, sd).mul(hash.mul(0.5).add(0.5));
       const crest = smoothstep(0.55, 0.95, g.nyAcc).mul(0.6);
       c = mix(c, vec3(0.92, 0.95, 0.96), clamp(shoreFoam.add(crest), 0.0, 0.85).mul(edgeFadeC));
+      if (aerial) c = c.mul(aerial.trans(wp)); // MAXFI A3 (see terrain.js note)
       return c;
     })();
+    if (aerial) mat.emissiveNode = Fn(() => aerial.ins(positionWorld).mul(aerial.uSunI))();
 
     // near animated sheet + flat far skirt to the horizon
     this.mesh = new THREE.Mesh(
@@ -126,9 +128,18 @@ export class Water {
       mat
     );
     this.mesh.frustumCulled = false;
+    let farMat;
+    if (aerial) {
+      // the skirt must wear the same air as the sheet or they seam at the rim
+      farMat = new THREE.MeshStandardNodeMaterial({ roughness: S.roughness + 0.04, metalness: 0 });
+      farMat.colorNode = Fn(() => vec3(deepC.r, deepC.g, deepC.b).mul(aerial.trans(positionWorld)))();
+      farMat.emissiveNode = Fn(() => aerial.ins(positionWorld).mul(aerial.uSunI))();
+    } else {
+      farMat = new THREE.MeshStandardMaterial({ color: S.deep, roughness: S.roughness + 0.04, metalness: 0 });
+    }
     this.far = new THREE.Mesh(
       new THREE.PlaneGeometry(FAR_SPAN, FAR_SPAN, 1, 1).rotateX(-Math.PI / 2),
-      new THREE.MeshStandardMaterial({ color: S.deep, roughness: S.roughness + 0.04, metalness: 0 })
+      farMat
     );
     this.far.position.y = -0.4; // tucked under the animated sheet
     this.group = new THREE.Group();

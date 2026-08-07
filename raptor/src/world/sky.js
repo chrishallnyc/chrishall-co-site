@@ -65,6 +65,25 @@ export class Sky {
     this.sunDir = new THREE.Vector3(0, 1, 0);
   }
 
+  // MAXFI A3: swap the dome to the Hillaire march (called during boot,
+  // before first compile). skyFn(viewDir)->radiance; uSunI scales unit-sun
+  // radiance into the scene's lighting range. Keeps an analytic sun disc —
+  // the march integrates the atmosphere only.
+  setHillaire(skyFn, uSunI) {
+    const uSunDir = this.uSunDir;
+    this.mesh.material.colorNode = Fn(() => {
+      const dir = normalize(positionWorld.sub(cameraPosition));
+      const L = skyFn(dir).mul(uSunI).toVar();
+      // sun disc: ~0.53° half-angle 0.0047 rad, transmittance-tinted by the
+      // march's own horizon extinction via the radiance already in L
+      const cosSun = dot(dir, uSunDir);
+      const disc = smoothstep(float(0.99996), float(0.999989), cosSun);
+      L.addAssign(vec3(1.0, 0.96, 0.9).mul(disc).mul(uSunI).mul(0.25).mul(smoothstep(float(-0.06), float(0.0), uSunDir.y)));
+      return L;
+    })();
+    this.mesh.material.needsUpdate = true;
+  }
+
   _buildColorNode() {
     const uSunDir = this.uSunDir, uBetaR = this.uBetaR, uBetaM = this.uBetaM;
     const uSunE = this.uSunE, uSunfade = this.uSunfade, uMieG = this.uMieG, uNight = this.uNight;

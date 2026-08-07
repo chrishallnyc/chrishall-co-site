@@ -1,0 +1,342 @@
+{
+  "convention": "y-up, sunDir toward sun, sun azimuth +z; altitudes/distances in meters; sun irradiance 1/channel at TOA; 32-step midpoint march per spec.json raymarch_recipe; LUTs decoded from the 16-bit split PNGs (quantization included)",
+  "tolerance_hint": "TSL port should match within ~1e-3 relative (float32 + GPU bilinear)",
+  "vectors": [
+    {
+      "name": "sky_noon_zenith",
+      "type": "sky",
+      "description": "noon sun at zenith, looking straight up",
+      "input": {
+        "cameraAltitude_m": 2.0,
+        "viewDir": [
+          0.0,
+          1.0,
+          6.123233995736766e-17
+        ],
+        "sunDir": [
+          0.0,
+          1.0,
+          6.123233995736766e-17
+        ]
+      },
+      "output": {
+        "radiance_rgb": [
+          0.021690306845745768,
+          0.029807860916983467,
+          0.05074643818970586
+        ]
+      }
+    },
+    {
+      "name": "sky_noon_horizon",
+      "type": "sky",
+      "description": "noon sun at zenith, looking at the horizon",
+      "input": {
+        "cameraAltitude_m": 2.0,
+        "viewDir": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "sunDir": [
+          0.0,
+          1.0,
+          6.123233995736766e-17
+        ]
+      },
+      "output": {
+        "radiance_rgb": [
+          0.08154171985780805,
+          0.09943057074516473,
+          0.11081959378951302
+        ]
+      }
+    },
+    {
+      "name": "sky_sunset_toward",
+      "type": "sky",
+      "description": "sun on the horizon, looking toward it",
+      "input": {
+        "cameraAltitude_m": 2.0,
+        "viewDir": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "sunDir": [
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "output": {
+        "radiance_rgb": [
+          0.21564523699860844,
+          0.02439320245726137,
+          0.0023664924765958786
+        ]
+      }
+    },
+    {
+      "name": "sky_sunset_away",
+      "type": "sky",
+      "description": "sun on the horizon, looking away (azimuth 180)",
+      "input": {
+        "cameraAltitude_m": 2.0,
+        "viewDir": [
+          1.2246467991473532e-16,
+          0.0,
+          -1.0
+        ],
+        "sunDir": [
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "output": {
+        "radiance_rgb": [
+          0.0015465698950594554,
+          0.0015243563619756805,
+          0.0017703932350344941
+        ]
+      }
+    },
+    {
+      "name": "sky_twilight_toward",
+      "type": "sky",
+      "description": "civil twilight, sun 4 deg below horizon, looking toward it",
+      "input": {
+        "cameraAltitude_m": 2.0,
+        "viewDir": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "sunDir": [
+          0.0,
+          -0.0697564737441253,
+          0.9975640502598242
+        ]
+      },
+      "output": {
+        "radiance_rgb": [
+          0.004045786964527924,
+          0.0006760164275099468,
+          0.00032370665279060536
+        ]
+      }
+    },
+    {
+      "name": "sky_highalt_side",
+      "type": "sky",
+      "description": "10km altitude, sun 20 deg up, looking at horizon 90 deg off-sun",
+      "input": {
+        "cameraAltitude_m": 10000.0,
+        "viewDir": [
+          1.0,
+          0.0,
+          6.123233995736766e-17
+        ],
+        "sunDir": [
+          0.0,
+          0.3420201433256687,
+          0.9396926207859084
+        ]
+      },
+      "output": {
+        "radiance_rgb": [
+          0.027968365416331256,
+          0.047094112170705735,
+          0.07501689028794148
+        ]
+      }
+    },
+    {
+      "name": "aer_noon_downrange",
+      "type": "aerial",
+      "description": "noon, 1km up, 2 deg below horizon, target 20km out",
+      "input": {
+        "cameraAltitude_m": 1000.0,
+        "viewDir": [
+          0.0,
+          -0.03489949670250097,
+          0.9993908270190958
+        ],
+        "sunDir": [
+          0.0,
+          1.0,
+          6.123233995736766e-17
+        ],
+        "distance_m": 20000.0
+      },
+      "output": {
+        "transmittance_rgb": [
+          0.8536582301341274,
+          0.7400217940336115,
+          0.5163329876382274
+        ],
+        "inscatter_rgb": [
+          0.013521710547378041,
+          0.02663659701784787,
+          0.05484453159070911
+        ]
+      }
+    },
+    {
+      "name": "aer_noon_near",
+      "type": "aerial",
+      "description": "noon, near-ground horizontal haze, target 5km out",
+      "input": {
+        "cameraAltitude_m": 2.0,
+        "viewDir": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "sunDir": [
+          0.0,
+          1.0,
+          6.123233995736766e-17
+        ],
+        "distance_m": 5000.0
+      },
+      "output": {
+        "transmittance_rgb": [
+          0.9503245169520432,
+          0.9141881382541337,
+          0.8291149548289752
+        ],
+        "inscatter_rgb": [
+          0.0025853759497317204,
+          0.0049934692805319435,
+          0.011902568018973533
+        ]
+      }
+    },
+    {
+      "name": "aer_sunset_toward",
+      "type": "aerial",
+      "description": "sunset, 100m up, toward the sun, target 30km out",
+      "input": {
+        "cameraAltitude_m": 100.0,
+        "viewDir": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "sunDir": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "distance_m": 30000.0
+      },
+      "output": {
+        "transmittance_rgb": [
+          0.747894259451309,
+          0.5947537630601596,
+          0.3339101821209716
+        ],
+        "inscatter_rgb": [
+          0.05292167887274295,
+          0.00595933770306064,
+          0.0014095518553732414
+        ]
+      }
+    },
+    {
+      "name": "aer_sunset_away",
+      "type": "aerial",
+      "description": "sunset, 100m up, away from the sun, target 30km out",
+      "input": {
+        "cameraAltitude_m": 100.0,
+        "viewDir": [
+          1.2246467991473532e-16,
+          0.0,
+          -1.0
+        ],
+        "sunDir": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "distance_m": 30000.0
+      },
+      "output": {
+        "transmittance_rgb": [
+          0.747894259451309,
+          0.5947537630601596,
+          0.3339101821209716
+        ],
+        "inscatter_rgb": [
+          0.0023692770728362188,
+          0.0010599975744757855,
+          0.0012679783799533415
+        ]
+      }
+    },
+    {
+      "name": "aer_twilight_toward",
+      "type": "aerial",
+      "description": "twilight (sun -4 deg), 500m up, toward sun azimuth, 20km out",
+      "input": {
+        "cameraAltitude_m": 500.0,
+        "viewDir": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "sunDir": [
+          0.0,
+          -0.0697564737441253,
+          0.9975640502598242
+        ],
+        "distance_m": 20000.0
+      },
+      "output": {
+        "transmittance_rgb": [
+          0.8467266062282451,
+          0.732048492148596,
+          0.5073326557268213
+        ],
+        "inscatter_rgb": [
+          6.325007245094384e-05,
+          6.54925097160966e-05,
+          0.0001496848272503826
+        ]
+      }
+    },
+    {
+      "name": "aer_highalt_lookdown",
+      "type": "aerial",
+      "description": "10km altitude, sun 45 deg up, looking 30 deg down, 15km slant",
+      "input": {
+        "cameraAltitude_m": 10000.0,
+        "viewDir": [
+          0.0,
+          -0.49999999999999994,
+          0.8660254037844387
+        ],
+        "sunDir": [
+          0.0,
+          0.7071067811865475,
+          0.7071067811865476
+        ],
+        "distance_m": 15000.0
+      },
+      "output": {
+        "transmittance_rgb": [
+          0.9583037141609136,
+          0.90684179008828,
+          0.7891010497761485
+        ],
+        "inscatter_rgb": [
+          0.004017394520736854,
+          0.00901762950388442,
+          0.02232687367011375
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,159 @@
+{
+  "name": "RAPTOR Hillaire-2020 atmosphere LUTs",
+  "reference": "Hillaire, 'A Scalable and Production Ready Sky and Atmosphere Rendering Technique', EGSR 2020",
+  "units": {
+    "internal": "kilometers (all LUT parameterizations, coefficients below given per km AND per m)",
+    "game_api": "meters (reference.py converts: km = m / 1000)",
+    "radiometric": "sun irradiance = 1 per channel at top of atmosphere; game applies its own sun intensity + exposure"
+  },
+  "constants": {
+    "R_ground_km": 6360.0,
+    "R_top_km": 6460.0,
+    "rayleigh_scattering_per_m": [
+      5.802e-06,
+      1.3558e-05,
+      3.31e-05
+    ],
+    "rayleigh_scattering_per_km": [
+      0.005802,
+      0.013558,
+      0.0331
+    ],
+    "rayleigh_scale_height_km": 8.0,
+    "rayleigh_absorption": 0.0,
+    "mie_scattering_per_m": 3.996e-06,
+    "mie_extinction_per_m": 4.4e-06,
+    "mie_absorption_per_m": 4.04e-07,
+    "mie_scale_height_km": 1.2,
+    "mie_phase_g": 0.8,
+    "ozone_absorption_per_m": [
+      6.5e-07,
+      1.881e-06,
+      8.5e-08
+    ],
+    "ozone_profile": "tent: density(h) = clamp(1 - abs(h_km - 25.0) / 15.0, 0, 1)  (zero at 10km and 40km, peak 1 at 25km)",
+    "planet_radius_offset_km": 0.01,
+    "ms_bake_ground_albedo": 0.3
+  },
+  "medium": {
+    "density_rayleigh": "exp(-h_km / 8.0)",
+    "density_mie": "exp(-h_km / 1.2)",
+    "density_ozone": "clamp(1 - abs(h_km - 25) / 15, 0, 1)",
+    "sigma_s_rayleigh": "rayleigh_scattering_per_km * density_rayleigh   (rgb)",
+    "sigma_s_mie": "3.996e-3 * density_mie   (scalar, same all channels)",
+    "sigma_t": "sigma_s_rayleigh + (3.996e-3 + 0.404e-3) * density_mie + ozone_absorption_per_km * density_ozone"
+  },
+  "phase_functions": {
+    "convention": "cos_theta = dot(sunDir, viewDir); sunDir points TOWARD the sun, viewDir along the view ray away from camera; forward-scatter peak at cos_theta = +1",
+    "rayleigh": "3/(16*pi) * (1 + cos_theta^2)",
+    "mie_cornette_shanks": "3*(1-g^2)*(1+cos_theta^2) / (8*pi*(2+g^2)*(1+g^2-2*g*cos_theta)^1.5), g = 0.8"
+  },
+  "transmittance_lut": {
+    "size": [
+      256,
+      64
+    ],
+    "axes": "x (256) = view-zenith mapping x_mu; y (64) = altitude mapping x_r; PNG row 0 (top) = x_r ~ 0 (ground) -> texture.flipY = false",
+    "content": "transmittance to the TOP of atmosphere along the ray (r, mu), rgb",
+    "encode": "linear 16-bit split: value16 = round(T * 65535); *_msb.png = value16 >> 8, *_lsb.png = value16 & 255 (both 8-bit RGB PNG)",
+    "decode": "T = (msb * 256 + lsb) / 65535   -- with unorm8 texture samples t_msb,t_lsb in [0,1]: T = t_msb*(65280/65535) + t_lsb*(255/65535). Recommended: decode once at load time (JS) into a single rgba16float texture.",
+    "sampling": "bilinear, clamp-to-edge, uv computed by params_to_uv below (no sub-texel remap; bake evaluated at texel centers uv = (i+0.5)/256, (j+0.5)/64 through uv_to_params)",
+    "params_to_uv": [
+      "H   = sqrt(Rtop^2 - Rground^2)                    // 1132.2497 km",
+      "rho = sqrt(max(r^2 - Rground^2, 0))",
+      "d   = max(0, -r*mu + sqrt(r^2*(mu^2 - 1) + Rtop^2))   // distance to top boundary; discriminant always >= 0 for r <= Rtop",
+      "d_min = Rtop - r",
+      "d_max = rho + H",
+      "uv.x = clamp((d - d_min) / (d_max - d_min), 0, 1)",
+      "uv.y = rho / H"
+    ],
+    "uv_to_params": [
+      "H   = sqrt(Rtop^2 - Rground^2)",
+      "rho = H * uv.y",
+      "r   = sqrt(rho^2 + Rground^2)",
+      "d   = (Rtop - r) + uv.x * (rho + H - (Rtop - r))",
+      "mu  = (d == 0) ? 1 : clamp((H^2 - rho^2 - d^2) / (2*r*d), -1, 1)"
+    ],
+    "bake_integration": "4096 uniform midpoint samples of sigma_t along [0, d]; T = exp(-sum(sigma_t)*d/N)",
+    "stats": {
+      "min": [
+        0.01486213051133565,
+        0.0001376590452224254,
+        5.439875240894853e-09
+      ],
+      "max": [
+        0.9999998581517593,
+        0.99999966853184,
+        0.9999991907660808
+      ],
+      "mean": [
+        0.7300529468064995,
+        0.578971001090782,
+        0.5428780789679076
+      ]
+    }
+  },
+  "multiscatter_lut": {
+    "size": [
+      32,
+      32
+    ],
+    "axes": "x (32) = sun cos zenith mu_s in [-1,1]; y (32) = altitude in [0, Rtop-Rground]; PNG row 0 (top) = altitude 0 (ground) -> texture.flipY = false",
+    "content": "psi_ms (rgb): total multiple-scattered luminance transfer, Hillaire eq. 10: psi = L_2ndOrder / (1 - f_ms)",
+    "encode": "sqrt-encoded 16-bit split: e = sqrt(psi / 0.125); value16 = round(clamp(e,0,1) * 65535); split msb/lsb as transmittance",
+    "decode": "psi = ((msb*256 + lsb) / 65535)^2 * 0.125   -- decode at load time into a float texture; do NOT bilinear-filter the sqrt-encoded bytes directly",
+    "params_to_uv": [
+      "unit.x = mu_s * 0.5 + 0.5              // mu_s = dot(normalize(P), sunDir)",
+      "unit.y = clamp(h_km / 100.0, 0, 1)     // altitude above ground / (Rtop - Rground)",
+      "uv = (unit * 31.0 + 0.5) / 32.0        // exact texel-center mapping: unit 0 -> texel 0 center, unit 1 -> texel 31 center",
+      "// NOTE: exact inverse pair; replaces Hillaire's approximate fromUnitToSubUvs/fromSubUvsToUnit"
+    ],
+    "bake_params_at_texel": [
+      "mu_s = (i / 31) * 2 - 1     // i = column 0..31",
+      "h    = (j / 31) * 100 km    // j = row 0..31; r clamped to [Rground+0.01, Rtop-0.01]"
+    ],
+    "usage": "inside the sky/aerial raymarch, per sample at (P, h): S += psi_ms(mu_s, h) * (sigma_s_rayleigh + sigma_s_mie); psi already contains the isotropic phase and the infinite-bounce series",
+    "bake_integration": "64 uniform sphere directions (theta = 2pi*(i+0.5)/8, phi = acos(1 - 2*(j+0.5)/8)), 40-step raymarch each, uniform phase 1/4pi, ground albedo 0.3 Lambertian bounce, sun transmittance from the (float, pre-quantization) transmittance LUT",
+    "stats": {
+      "min": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max": [
+        0.05418958048172819,
+        0.05953092019145341,
+        0.07127171571770723
+      ],
+      "mean": [
+        0.011968466095247592,
+        0.011795786366144718,
+        0.015303295004414168
+      ]
+    }
+  },
+  "raymarch_recipe": {
+    "description": "the reference (and the TSL port) march used for sky-view LUT / aerial perspective",
+    "steps": [
+      "tBottom = raySphereNearest(pos, dir, Rground); tTop = raySphereNearest(pos, dir, Rtop)",
+      "tMax = tBottom >= 0 ? tBottom : tTop; aerial perspective: tMax = min(tMax, surfaceDistance)",
+      "dt = tMax / N; N = 32; sample at midpoints t_i = (i + 0.5) * dt",
+      "per sample: h = length(P) - Rground; sigma_s_ray/sigma_s_mie/sigma_t from medium()",
+      "mu_s = dot(normalize(P), sunDir); T_sun = transmittanceLUT(r, mu_s)",
+      "earthShadow = raySphereNearest(P, sunDir, Rground, center = 0.01 * normalize(P)) < 0 ? 1 : 0",
+      "S = earthShadow * T_sun * (sigma_s_ray * phaseR + sigma_s_mie * phaseM) + psi_ms(mu_s, h) * (sigma_s_ray + sigma_s_mie)",
+      "L += throughput * (S - S * exp(-sigma_t * dt)) / sigma_t      // guard sigma_t < 1e-12: use S * dt",
+      "throughput *= exp(-sigma_t * dt)"
+    ],
+    "sky_output": "L (rgb radiance, sun irradiance 1 at TOA); no ground albedo term, no sun disc",
+    "aerial_output": "transmittance = throughput (rgb), inscatter = L (rgb); apply in-material as color * transmittance + inscatter * sunIntensity"
+  },
+  "coordinate_convention_reference_api": "y-up; planet center at (0, -Rground, 0) relative to a camera at altitude alt: internally pos = (0, Rground + alt_km, 0); sunDir/viewDir unit vectors, sun azimuth +z in the test vectors",
+  "bake_info": {
+    "baked_by": "bake_atmosphere.py (numpy, float64)",
+    "timings_s": {
+      "transmittance": 2.8,
+      "multiscatter": 0.86
+    }
+  }
+}

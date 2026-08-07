@@ -1,6 +1,7 @@
 // RAPTOR boot: renderer (WebGPU with WebGL2 fallback), sim, input, debug, hooks.
 
 import * as THREE from "three";
+import { uniform } from "three/tsl";
 import { SimCore, determinismProbe, DT } from "./engine/sim.js";
 import { Input } from "./engine/input.js";
 import { GamepadInput } from "./engine/gamepad.js";
@@ -16,7 +17,7 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.11.0";
+const VERSION = "0.12.0";
 const PHASE = 14;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
@@ -106,6 +107,30 @@ async function boot() {
   atmosphere.initIBL(renderer);
   if (flags.get("tod")) atmosphere.setTime(parseFloat(flags.get("tod")));
 
+  // MAXFI A3: Hillaire physical atmosphere — LUT-driven sky march + in-material
+  // aerial perspective replacing FogExp2. WebGPU only; ?atmo=preetham reverts.
+  let atmoH = null;
+  if (backend === "webgpu" && flags.get("atmo") !== "preetham") {
+    try {
+      const H = await import("./world/hillaire.js");
+      const luts = await H.loadAtmo("/assets/atmo");
+      if (luts) {
+        const uSunI = uniform(36.0);
+        const uCamPos = uniform(new THREE.Vector3(0, 3400, 0));
+        const nodeArgs = { tTex: luts.tTex, msTex: luts.msTex, uSunDir: atmosphere.sky.uSunDir, uCamPos };
+        atmoH = {
+          uCamPos, uSunI,
+          aerial: { trans: H.aerialTransNode(nodeArgs), ins: H.aerialInscatterNode(nodeArgs), uSunI },
+        };
+        atmosphere.sky.setHillaire(H.skySkyNode(nodeArgs), uSunI);
+        scene.fog = null; // per-pixel aerial perspective replaces the single-color fog
+        atmosphere.hillaire = true; // exposure palette gets a twilight floor (tuned for Preetham otherwise)
+        atmosphere.setTime(atmosphere.hours); // re-derive with the floor active
+      }
+    } catch (err) { console.warn("hillaire atmosphere unavailable, Preetham stays:", err && err.message); }
+  }
+  state.hillaire = !!atmoH;
+
   // clouds (phase 5a/5b/5c): coverage + shadows on every tier; billboard
   // field past LOW. atmosphere.sky.uSunDir is passed BY REFERENCE so sky,
   // clouds, and ground shadows share one sun uniform — zero-copy, no drift.
@@ -133,11 +158,11 @@ async function boot() {
       // tops out at 8192); ?drape=0 keeps the procedural ramps for QA
       const drape = flags.get("drape") === "0" ? null : (backend === "webgpu" ? "16k" : "4k");
       terrain = await Terrain.load("/assets/terrain/" + fg.asset, atmosphere.frontName,
-        makeCloudShadowNode(clouds.shared), { drape });
+        makeCloudShadowNode(clouds.shared), { drape, aerial: atmoH?.aerial });
       scene.add(terrain.group);
       if (fg.ocean && flags.get("nowater") !== "1") {
         try {
-          water = new Water(atmosphere.frontName, terrain);
+          water = new Water(atmosphere.frontName, terrain, atmoH?.aerial);
           scene.add(water.group);
         } catch (err) {
           console.warn("water unavailable, placeholder sea stays:", err && err.message);
@@ -362,6 +387,7 @@ async function boot() {
     clouds.update(camera, cloudClock);
     hud.update(player ? player.hudState() : testworldHudState(world, alpha));
     atmosphere.update(camera);
+    if (atmoH) atmoH.uCamPos.value.copy(camera.position);
     renderer.toneMappingExposure = atmosphere.exposure;
     if (post) post.post.render();
     else renderer.render(scene, camera);

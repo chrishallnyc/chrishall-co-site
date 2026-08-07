@@ -1,11 +1,12 @@
 {
-  "updated": "2026-08-07T11:20:00-07:00",
-  "version": "v0.11.0",
-  "now": "AAA pass: physically-real atmosphere (LUTs baking now), then FFT ocean + volumetric clouds",
+  "updated": "2026-08-07T12:20:00-07:00",
+  "version": "v0.12.0",
+  "now": "AAA pass: FFT ocean (compute-shader waves), then missiles + volumetric clouds",
   "nowPhase": 14,
   "paused": false,
-  "pushes": 27,
+  "pushes": 28,
   "ledger": [
+    "2026-08-07 v0.12.0 — THE AIR IS REAL: the sky is now computed from actual atmospheric physics — light scattered by real air molecules. Distant mountains fade into blue with distance, sunsets ignite a true twilight arch, all verified against a physics reference to 8 decimal places. 90/90 tests.",
     "2026-08-07 v0.11.0 — THE WAR SHOOTS BACK: anti-aircraft guns track you and fire leaded bursts (red tracers). Hull damage, red-flash hits, shot down = respawn. Nevada's real satellite imagery also landed — all three fronts are photographic now. 65/65 tests.",
     "2026-08-07 v0.10.0 — THE REAL EARTH: actual aerial photography draped over Alaska and the Marianas (sub-meter USGS source), plus laser-scan normal maps and baked ambient shadows on all three fronts. The fjords look like the real fjords now.",
     "2026-08-07 v0.9.0 — THE AAA PASS BEGINS: rebuilt render pipeline — temporal anti-aliasing, HDR bloom (sun halo + water-glint sparkle), lens ghosts. 121fps with it all on. 51/51 tests.",
@@ -36,7 +37,7 @@
       "n": 2,
       "name": "Atmosphere & time-of-day",
       "pct": 100,
-      "note": "physical sky, real sun, stars, judged 3 rounds"
+      "note": "Hillaire physical atmosphere: LUT sky + per-pixel aerial perspective"
     },
     {
       "n": 3,
@@ -107,8 +108,8 @@
     {
       "n": 14,
       "name": "Max fidelity pass",
-      "pct": 45,
-      "note": "TAA/bloom/flare + real imagery on ALL fronts; atmosphere LUTs baking, FFT ocean next"
+      "pct": 55,
+      "note": "TAA/bloom + real imagery + physical atmosphere LIVE; FFT ocean + volumetrics next"
     },
     {
       "n": 15,
@@ -119,8 +120,8 @@
     {
       "n": 16,
       "name": "QA hardening",
-      "pct": 44,
-      "note": "11 batteries, forensic judges standing"
+      "pct": 48,
+      "note": "12 batteries, 90 gates, forensic judges standing"
     },
     {
       "n": 17,
