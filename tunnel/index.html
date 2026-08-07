@@ -9,6 +9,7 @@
 <link rel="canonical" href="https://tunnel.chall.net/">
 <meta name="theme-color" content="#f6f4ee">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f6f4ee'/%3E%3Cpath d='M1.5 19.4 L30.5 16.4' stroke='%23989690' stroke-width='1'/%3E%3Cpath d='M3.5 19 C6.5 12.6 13.5 10.6 19.5 12 C24.5 13.2 28 15.4 29 16.6 C26 18.2 18.5 20.6 11.5 20.9 C7.5 21 4.5 20.3 3.5 19 Z' fill='%2318181c'/%3E%3Ccircle cx='4.2' cy='19' r='2.4' fill='%23e8b46f'/%3E%3C/svg%3E">
+<!-- CHALL TUNNEL v0.1.0 · first air — webgpu d2q9 in-place solver, cylinder specimen -->
 <style>
 :root { --bg:#f6f4ee; --ink:#18181c; --mid:#56565e; --dim:#69675f; --hair:#989690; --acc:#e8b46f; }
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -19,7 +20,7 @@ body {
   font-size:13px; line-height:1.6;
   min-height:100vh; min-height:100dvh;
   display:flex; align-items:center; justify-content:center;
-  padding:24px;
+  padding:24px; overflow:hidden;
 }
 a { color:var(--mid); text-decoration:none; }
 a:hover { color:var(--ink); text-decoration:underline; }
@@ -27,19 +28,53 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 .sheet {
   position:relative; width:100%; max-width:560px;
   border:1px solid var(--ink); background:var(--bg);
-  padding:44px clamp(24px,6vw,56px) 40px;
+  padding:44px clamp(24px,6vw,56px) 40px; z-index:3;
 }
 .sheet::after { content:""; position:absolute; inset:2px; border:1px solid var(--hair); pointer-events:none; }
 .glyph { display:block; width:44px; height:44px; margin-bottom:26px; }
 .brand { font-weight:700; letter-spacing:4px; font-size:15px; }
 .rule { border:0; border-top:1px solid var(--hair); margin:20px 0; }
 .line { color:var(--ink); max-width:42ch; }
+.grow { margin-top:14px; color:var(--dim); }
 .watch { display:inline-block; margin-top:22px; font-size:12px; letter-spacing:.5px; }
 .foot { margin-top:36px; font-size:10px; letter-spacing:2px; color:var(--dim); }
+#paper { position:fixed; inset:0; z-index:0; pointer-events:none; }
+#stage {
+  position:fixed; z-index:1;
+  left:50%; top:50%; transform:translate(-50%,-50%);
+}
+#gpu { position:absolute; inset:0; width:100%; height:100%; }
+#specimen { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+#card {
+  position:fixed; left:20px; bottom:20px; z-index:2;
+  max-width:360px; border:1px solid var(--ink); background:var(--bg);
+  padding:16px 18px 14px; font-size:11px; line-height:1.7;
+  opacity:0; transition:opacity .4s ease;
+}
+#card.on { opacity:1; }
+#card::after { content:""; position:absolute; inset:2px; border:1px solid var(--hair); pointer-events:none; }
+.cbrand { font-weight:700; letter-spacing:3px; font-size:11px; margin-bottom:8px; }
+.cline { color:var(--ink); }
+.cread { margin-top:8px; color:var(--dim); letter-spacing:.5px; }
+.cwatch { display:inline-block; margin-top:8px; font-size:10px; letter-spacing:.5px; }
+[hidden] { display:none !important; }
+@media (prefers-reduced-motion: reduce) { #card { transition:none; } }
+@media (max-width:600px) { #card { left:12px; bottom:12px; right:12px; max-width:none; } }
 </style>
 </head>
 <body>
-<main class="sheet">
+<canvas id="paper" aria-hidden="true"></canvas>
+<div id="stage" hidden>
+  <canvas id="gpu"></canvas>
+  <svg id="specimen" aria-hidden="true"><circle id="body" fill="#18181c"/></svg>
+</div>
+<aside id="card" hidden>
+  <div class="cbrand">CHALL TUNNEL</div>
+  <p class="cline">first air . a real solver is running — TEST ARTICLE: CYLINDER (the calibration body) . the instrument grows here in the open</p>
+  <p class="cread" id="readout">spooling up —</p>
+  <a class="cwatch" href="https://admin.chall.net/tunnel-mission">watch it being built → admin.chall.net/tunnel-mission</a>
+</aside>
+<main class="sheet" id="sheet">
   <svg class="glyph" viewBox="0 0 32 32" aria-hidden="true">
     <rect width="32" height="32" fill="#f6f4ee"/>
     <path d="M1.5 19.4 L30.5 16.4" stroke="#989690" stroke-width="1"/>
@@ -49,8 +84,1038 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
   <div class="brand">CHALL TUNNEL</div>
   <hr class="rule">
   <p class="line">a live wind tunnel is being built here — by a machine, in the open</p>
+  <p class="line grow" id="growline" hidden>the live tunnel needs webgpu — chrome on an apple-silicon mac . the build continues</p>
   <a class="watch" href="https://admin.chall.net/tunnel-mission">watch it being built → admin.chall.net/tunnel-mission</a>
   <p class="foot">tunnel.chall.net</p>
 </main>
+<script type="module">
+'use strict';
+// ============================================================================
+// CHALL TUNNEL — phase 1 "first air"
+// WebGPU D2Q9 LBM, FP16S storage / FP32 math, IN-PLACE single-buffer streaming
+// (the AA-pattern / esoteric-pull family, the measured spike scheme), with the
+// full oracle physics: Smagorinsky LES (plain-Frobenius |Q|), smoothstep inflow
+// ramp + deterministic transverse kick, ρ-ANCHORED zero-gradient outflow,
+// quadratic-τ sponge, free-slip walls, half-way bounce-back cylinder.
+// CONSTANTS below mirror ~/.chall/tunnel-mission/qa/oracle.mjs EXACTLY — the
+// shared-constants law. Shaders interpolate these values; they are never
+// retyped in a shader string.
+// ============================================================================
+
+// ---------- THE SHARED-CONSTANTS OBJECT (mirror of qa/oracle.mjs CONSTANTS) ----------
+const C = Object.freeze({
+  W9: Object.freeze([4 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 36, 1 / 36, 1 / 36, 1 / 36]),
+  EX: Object.freeze([0, 1, 0, -1, 0, 1, -1, -1, 1]),
+  EY: Object.freeze([0, 0, 1, 0, -1, 1, 1, -1, -1]),
+  OPP: Object.freeze([0, 3, 4, 1, 2, 7, 8, 5, 6]),
+  CS2: 1 / 3,
+  TAU0: 0.53,
+  U0: 0.10,
+  SMAG_CS: 0.1,
+  TAU_FLOOR: 0.5005,
+  RAMP_STEPS: 300,
+  KICK_START: 400, KICK_END: 700, KICK_FRAC: 0.02,
+  RHO_OUTLET: 1,
+  SPONGE_FLOOR: 48, SPONGE_FRAC: 0.075, TAU_SPONGE: 1.6,
+  RHO_WALL: 1,
+  UMAX_CLAMP: 0.35,
+});
+const REFL = [0, 1, 4, 3, 2, 8, 7, 6, 5]; // y-mirror of EX/EY (free-slip specular)
+function spongeCols(W) { return Math.max(C.SPONGE_FLOOR, Math.round(C.SPONGE_FRAC * W)); }
+function f(x) { let s = Number(x).toPrecision(10); if (!/[.e]/.test(s)) s += '.0'; return s; }
+
+// ---------- WGSL generation (all constants interpolated from C) ----------
+function commonWGSL(W, H, geom, nSponge) {
+  const xs = W - 1 - nSponge;
+  return `
+enable f16;
+const W = ${W}u; const H = ${H}u; const NC = ${W * H}u;
+@group(0) @binding(0) var<storage, read_write> fbuf: array<f16>;
+@group(0) @binding(1) var<storage, read_write> misc: array<atomic<u32>>;
+fn is_solid_i(x: u32, y: u32) -> bool {
+  let dx = f32(x) - ${f(geom.cx)}; let dy = f32(y) - ${f(geom.cy)};
+  return dx*dx + dy*dy <= ${f(geom.r * geom.r)};
+}
+fn tau0_col(x: u32) -> f32 {
+  if (x < ${xs}u) { return ${f(C.TAU0)}; }
+  let s = (f32(x) - ${f(xs)}) / ${f(nSponge)};
+  return ${f(C.TAU0)} + ${f(C.TAU_SPONGE - C.TAU0)} * s * s;
+}
+fn ramp_u(t: u32) -> vec2f {
+  let r = select(1.0, f32(t) / ${f(C.RAMP_STEPS)}, t < ${C.RAMP_STEPS}u);
+  let uin = ${f(C.U0)} * (r * r * (3.0 - 2.0 * r));
+  let vin = select(0.0, ${f(C.KICK_FRAC * C.U0)}, t >= ${C.KICK_START}u && t < ${C.KICK_END}u);
+  return vec2f(uin, vin);
+}
+`;
+}
+// collision: shifted storage s_i = f_i - w_i; identical arithmetic to oracle step()
+function collideWGSL() {
+  return `
+  let rho = 1.0 + s0 + s1 + s2 + s3 + s4 + s5 + s6 + s7 + s8;
+  let invR = 1.0 / rho;
+  var ux = (s1 - s3 + s5 - s6 - s7 + s8) * invR;
+  var uy = (s2 - s4 + s5 + s6 - s7 - s8) * invR;
+  let uu = ux * ux + uy * uy;
+  if (uu > ${f(C.UMAX_CLAMP * C.UMAX_CLAMP)}) {
+    let sc = ${f(C.UMAX_CLAMP)} / sqrt(uu); ux *= sc; uy *= sc;
+    atomicAdd(&misc[1], 1u);
+  }
+  let u2 = 1.5 * (ux * ux + uy * uy);
+  let c1 = 1.0 - u2;
+  let ux3 = 3.0 * ux; let uy3 = 3.0 * uy;
+  let uxx = 4.5 * ux * ux; let uyy = 4.5 * uy * uy; let uxy = 9.0 * ux * uy;
+  let fes0 = ${f(C.W9[0])} * (rho * c1 - 1.0);
+  let fes1 = ${f(C.W9[1])} * (rho * (c1 + ux3 + uxx) - 1.0);
+  let fes2 = ${f(C.W9[2])} * (rho * (c1 + uy3 + uyy) - 1.0);
+  let fes3 = ${f(C.W9[3])} * (rho * (c1 - ux3 + uxx) - 1.0);
+  let fes4 = ${f(C.W9[4])} * (rho * (c1 - uy3 + uyy) - 1.0);
+  let fes5 = ${f(C.W9[5])} * (rho * (c1 + ux3 + uy3 + uxx + uyy + uxy) - 1.0);
+  let fes6 = ${f(C.W9[6])} * (rho * (c1 - ux3 + uy3 + uxx + uyy - uxy) - 1.0);
+  let fes7 = ${f(C.W9[7])} * (rho * (c1 - ux3 - uy3 + uxx + uyy + uxy) - 1.0);
+  let fes8 = ${f(C.W9[8])} * (rho * (c1 + ux3 - uy3 + uxx + uyy - uxy) - 1.0);
+  let n0 = s0 - fes0; let n1 = s1 - fes1; let n2 = s2 - fes2; let n3 = s3 - fes3;
+  let n4 = s4 - fes4; let n5 = s5 - fes5; let n6 = s6 - fes6; let n7 = s7 - fes7; let n8 = s8 - fes8;
+  let qxx = n1 + n3 + n5 + n6 + n7 + n8;
+  let qyy = n2 + n4 + n5 + n6 + n7 + n8;
+  let qxy = n5 - n6 + n7 - n8;
+  let qn = sqrt(qxx * qxx + qyy * qyy + 2.0 * qxy * qxy);
+  let t0 = tau0_col(x);
+  var tau = 0.5 * (t0 + sqrt(t0 * t0 + ${f(18 * C.SMAG_CS * C.SMAG_CS)} * qn * invR));
+  if (tau < ${f(C.TAU_FLOOR)}) { tau = ${f(C.TAU_FLOOR)}; }
+  let omg = 1.0 / tau;
+  let out0 = s0 - omg * n0; let out1 = s1 - omg * n1; let out2 = s2 - omg * n2;
+  let out3 = s3 - omg * n3; let out4 = s4 - omg * n4; let out5 = s5 - omg * n5;
+  let out6 = s6 - omg * n6; let out7 = s7 - omg * n7; let out8 = s8 - omg * n8;
+`;
+}
+// equilibrium at rho=1, u=(uv.x, uv.y), shifted by w_i — for the inflow column
+function eqWGSL() {
+  return `
+  let eux = uv.x; let euy = uv.y;
+  let eu2 = 1.5 * (eux * eux + euy * euy);
+  let ec1 = 1.0 - eu2;
+  let ex3 = 3.0 * eux; let ey3 = 3.0 * euy;
+  let exx = 4.5 * eux * eux; let eyy = 4.5 * euy * euy; let exy = 9.0 * eux * euy;
+  let e0 = ${f(C.W9[0])} * (ec1 - 1.0);
+  let e1 = ${f(C.W9[1])} * (ec1 + ex3 + exx - 1.0);
+  let e2 = ${f(C.W9[2])} * (ec1 + ey3 + eyy - 1.0);
+  let e3 = ${f(C.W9[3])} * (ec1 - ex3 + exx - 1.0);
+  let e4 = ${f(C.W9[4])} * (ec1 - ey3 + eyy - 1.0);
+  let e5 = ${f(C.W9[5])} * (ec1 + ex3 + ey3 + exx + eyy + exy - 1.0);
+  let e6 = ${f(C.W9[6])} * (ec1 - ex3 + ey3 + exx + eyy - exy - 1.0);
+  let e7 = ${f(C.W9[7])} * (ec1 - ex3 - ey3 + exx + eyy + exy - 1.0);
+  let e8 = ${f(C.W9[8])} * (ec1 + ex3 - ey3 + exx + eyy - exy - 1.0);
+`;
+}
+// AA-pattern odd-step gather/scatter with free-slip specular + bounce-back redirects
+function oddGatherWGSL(H) {
+  let s = '';
+  for (let i = 1; i < 9; i++) {
+    const ex = C.EX[i], ey = C.EY[i];
+    const sx = ex === 0 ? 'xi' : `xi - ${ex > 0 ? '1' : '(-1)'}`;
+    if (ey === 0) {
+      s += `  { let j = u32(yi) * W + u32(${sx});
+    if (is_solid_i(u32(${sx}), u32(yi))) { s${i} = f32(fbuf[${i}u*NC + idx]); } else { s${i} = f32(fbuf[${C.OPP[i]}u*NC + j]); } }
+`;
+    } else {
+      s += `  { let sy = yi - ${ey > 0 ? '1' : '(-1)'};
+    if (sy < 0 || sy > ${H - 1}) { s${i} = f32(fbuf[${C.OPP[REFL[i]]}u*NC + u32(yi) * W + u32(${sx})]); }
+    else if (is_solid_i(u32(${sx}), u32(sy))) { s${i} = f32(fbuf[${i}u*NC + idx]); }
+    else { s${i} = f32(fbuf[${C.OPP[i]}u*NC + u32(sy) * W + u32(${sx})]); } }
+`;
+    }
+  }
+  return s;
+}
+function oddScatterWGSL(H) {
+  let s = '';
+  for (let i = 1; i < 9; i++) {
+    const ex = C.EX[i], ey = C.EY[i];
+    const tx = ex === 0 ? 'xi' : `xi + ${ex > 0 ? '1' : '(-1)'}`;
+    if (ey === 0) {
+      s += `  { if (is_solid_i(u32(${tx}), u32(yi))) { fbuf[${C.OPP[i]}u*NC + idx] = f16(out${i}); } else { fbuf[${i}u*NC + u32(yi) * W + u32(${tx})] = f16(out${i}); } }
+`;
+    } else {
+      s += `  { let ty = yi + ${ey > 0 ? '1' : '(-1)'};
+    if (ty < 0 || ty > ${H - 1}) { fbuf[${REFL[i]}u*NC + u32(yi) * W + u32(${tx})] = f16(out${i}); }
+    else if (is_solid_i(u32(${tx}), u32(ty))) { fbuf[${C.OPP[i]}u*NC + idx] = f16(out${i}); }
+    else { fbuf[${i}u*NC + u32(ty) * W + u32(${tx})] = f16(out${i}); } }
+`;
+    }
+  }
+  return s;
+}
+// inverse of the odd scatter: recover post-collision f*(x,y) from the scattered layout
+function unscatterWGSL(H) {
+  let s = `fn unscatter(xu: u32, yu: u32) -> array<f32, 9> {
+  var sa: array<f32, 9>;
+  let xi = i32(xu); let yi = i32(yu);
+  sa[0] = f32(fbuf[yu * W + xu]);
+`;
+  for (let i = 1; i < 9; i++) {
+    const ex = C.EX[i], ey = C.EY[i];
+    const tx = ex === 0 ? 'xi' : `xi + ${ex > 0 ? '1' : '(-1)'}`;
+    if (ey === 0) {
+      s += `  { if (is_solid_i(u32(${tx}), yu)) { sa[${i}] = f32(fbuf[${C.OPP[i]}u*NC + yu * W + xu]); } else { sa[${i}] = f32(fbuf[${i}u*NC + yu * W + u32(${tx})]); } }
+`;
+    } else {
+      s += `  { let ty = yi + ${ey > 0 ? '1' : '(-1)'};
+    if (ty < 0 || ty > ${H - 1}) { sa[${i}] = f32(fbuf[${REFL[i]}u*NC + yu * W + u32(${tx})]); }
+    else if (is_solid_i(u32(${tx}), u32(ty))) { sa[${i}] = f32(fbuf[${C.OPP[i]}u*NC + yu * W + xu]); }
+    else { sa[${i}] = f32(fbuf[${i}u*NC + u32(ty) * W + u32(${tx})]); } }
+`;
+    }
+  }
+  return s + '  return sa;\n}\n';
+}
+
+function solverWGSL(W, H, geom, nSponge) {
+  const evenGather = Array.from({ length: 9 }, (_, i) => `    s${i} = f32(fbuf[${i}u*NC + idx]);`).join('\n');
+  const evenScatter = Array.from({ length: 9 }, (_, i) => `    fbuf[${C.OPP[i]}u*NC + idx] = f16(out${i});`).join('\n');
+  const inflowEven = Array.from({ length: 9 }, (_, i) => `    fbuf[${C.OPP[i]}u*NC + row] = f16(e${i});`).join('\n');
+  const outEvenR = Array.from({ length: 9 }, (_, i) => `    let s${i} = f32(fbuf[${C.OPP[i]}u*NC + a]);`).join('\n');
+  const outEvenW = Array.from({ length: 9 }, (_, i) => `    fbuf[${C.OPP[i]}u*NC + b] = f16(sc * (s${i} + ${f(C.W9[i])}) - ${f(C.W9[i])});`).join('\n');
+  const outOddR = Array.from({ length: 9 }, (_, i) => `    let s${i} = sarr[${i}];`).join('\n');
+  return `
+${commonWGSL(W, H, geom, nSponge)}
+${unscatterWGSL(H)}
+@compute @workgroup_size(256)
+fn main_step(@builtin(global_invocation_id) gid: vec3<u32>) {
+  let idx = gid.x;
+  if (idx >= NC) { return; }
+  let y = idx / W;
+  let x = idx - y * W;
+  if (x == 0u || x == W - 1u) { return; }
+  if (is_solid_i(x, y)) { return; }
+  let par = atomicLoad(&misc[0]) & 1u;
+  let xi = i32(x); let yi = i32(y);
+  var s0: f32; var s1: f32; var s2: f32; var s3: f32; var s4: f32;
+  var s5: f32; var s6: f32; var s7: f32; var s8: f32;
+  if (par == 0u) {
+${evenGather}
+  } else {
+  s0 = f32(fbuf[idx]);
+${oddGatherWGSL(H)}
+  }
+${collideWGSL()}
+  if (par == 0u) {
+${evenScatter}
+  } else {
+  fbuf[idx] = f16(out0);
+${oddScatterWGSL(H)}
+  }
+}
+@compute @workgroup_size(64)
+fn boundary(@builtin(global_invocation_id) gid: vec3<u32>) {
+  let y = gid.x;
+  if (y >= H) { return; }
+  let t = atomicLoad(&misc[0]);
+  let par = t & 1u;
+  let uv = ramp_u(t);
+${eqWGSL()}
+  let row = y * W;
+  if (par == 0u) {
+    // post-collision values live at own-cell swapped slots
+${inflowEven}
+    let a = row + W - 2u; let b = a + 1u;
+${outEvenR}
+    let rho = 1.0 + s0 + s1 + s2 + s3 + s4 + s5 + s6 + s7 + s8;
+    let sc = ${f(C.RHO_OUTLET)} / rho;
+${outEvenW}
+  } else {
+    // post-collision values are scattered; place BC values where the next
+    // even step will read them (streamed positions, specular at the walls)
+    fbuf[1u*NC + row + 1u] = f16(e1);
+    if (y < H - 1u) { fbuf[5u*NC + row + W + 1u] = f16(e5); } else { fbuf[8u*NC + row + 1u] = f16(e5); }
+    if (y > 0u)     { fbuf[8u*NC + row - W + 1u] = f16(e8); } else { fbuf[5u*NC + row + 1u] = f16(e8); }
+    let sarr = unscatter(W - 2u, y);
+${outOddR}
+    let rho = 1.0 + s0 + s1 + s2 + s3 + s4 + s5 + s6 + s7 + s8;
+    let sc = ${f(C.RHO_OUTLET)} / rho;
+    let o3 = sc * (s3 + ${f(C.W9[3])}) - ${f(C.W9[3])};
+    let o6 = sc * (s6 + ${f(C.W9[6])}) - ${f(C.W9[6])};
+    let o7 = sc * (s7 + ${f(C.W9[7])}) - ${f(C.W9[7])};
+    fbuf[3u*NC + row + W - 2u] = f16(o3);
+    if (y < H - 1u) { fbuf[6u*NC + row + W + W - 2u] = f16(o6); } else { fbuf[7u*NC + row + W - 2u] = f16(o6); }
+    if (y > 0u)     { fbuf[7u*NC + row - W + W - 2u] = f16(o7); } else { fbuf[6u*NC + row + W - 2u] = f16(o7); }
+  }
+}
+@compute @workgroup_size(1)
+fn tick_step() {
+  atomicAdd(&misc[0], 1u);
+}
+`;
+}
+// fields / velocity-texture / wake-probe module (checkpoints land after odd
+// substeps: even step-counts — the scattered natural layout, hence unscatter)
+function fieldsWGSL(W, H, geom, nSponge, probe, ringLen) {
+  return `
+${commonWGSL(W, H, geom, nSponge)}
+@group(0) @binding(2) var<storage, read_write> fieldsOut: array<f32>;
+@group(0) @binding(3) var velOut: texture_storage_2d<rgba16float, write>;
+@group(0) @binding(4) var<storage, read_write> ring: array<f32>;
+${unscatterWGSL(H)}
+fn cell_m(x: u32, y: u32) -> vec3f { // (rho, ux, uy), oracle getFields convention
+  if (is_solid_i(x, y)) { return vec3f(0.0, 0.0, 0.0); }
+  if (x == 0u) {
+    let cnt = atomicLoad(&misc[0]);
+    let uv = ramp_u(select(cnt - 1u, 0u, cnt == 0u));
+    return vec3f(1.0, uv.x, uv.y);
+  }
+  var xx = x;
+  if (x == W - 1u) { xx = W - 2u; } // rho-anchored copy: rho=RHO_OUTLET, u = u(W-2)
+  let sa = unscatter(xx, y);
+  let rho = 1.0 + sa[0] + sa[1] + sa[2] + sa[3] + sa[4] + sa[5] + sa[6] + sa[7] + sa[8];
+  let iv = 1.0 / rho;
+  let ux = (sa[1] - sa[3] + sa[5] - sa[6] - sa[7] + sa[8]) * iv;
+  let uy = (sa[2] - sa[4] + sa[5] + sa[6] - sa[7] - sa[8]) * iv;
+  return vec3f(select(rho, ${f(C.RHO_OUTLET)}, x == W - 1u), ux, uy);
+}
+@compute @workgroup_size(256)
+fn fields(@builtin(global_invocation_id) gid: vec3<u32>) {
+  let idx = gid.x;
+  if (idx >= NC) { return; }
+  let y = idx / W;
+  let x = idx - y * W;
+  let m = cell_m(x, y);
+  fieldsOut[idx * 3u] = m.x; fieldsOut[idx * 3u + 1u] = m.y; fieldsOut[idx * 3u + 2u] = m.z;
+}
+@compute @workgroup_size(16, 16)
+fn veltex(@builtin(global_invocation_id) gid: vec3<u32>) {
+  if (gid.x >= W || gid.y >= H) { return; }
+  let m = cell_m(gid.x, gid.y);
+  textureStore(velOut, vec2<i32>(gid.xy), vec4f(m.y, m.z, m.x, 1.0));
+}
+@compute @workgroup_size(1)
+fn probe() {
+  let sa = unscatter(${probe.x}u, ${probe.y}u);
+  let rho = 1.0 + sa[0] + sa[1] + sa[2] + sa[3] + sa[4] + sa[5] + sa[6] + sa[7] + sa[8];
+  let uy = (sa[2] - sa[4] + sa[5] + sa[6] - sa[7] - sa[8]) / rho;
+  let cur = atomicLoad(&misc[2]);
+  ring[cur % ${ringLen}u] = uy;
+  atomicStore(&misc[2], cur + 1u);
+}
+`;
+}
+
+// ---------- solver ----------
+class Solver {
+  constructor(device, { W, H, geom, sponge, probe }) {
+    this.device = device;
+    this.W = W; this.H = H; this.NC = W * H;
+    this.geom = geom;
+    this.nSponge = sponge ?? spongeCols(W);
+    this.probe = probe || { x: Math.round(geom.cx + 6 * geom.r), y: Math.floor(geom.cy) };
+    this.ringLen = 2048;
+    this.t = 0; // CPU mirror of misc[0]
+    const d = device;
+    this.fbuf = d.createBuffer({ size: 9 * this.NC * 2, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
+    this.misc = d.createBuffer({ size: 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST });
+    this.ring = d.createBuffer({ size: this.ringLen * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
+    this.fieldsBuf = d.createBuffer({ size: this.NC * 3 * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
+    this.velTex = d.createTexture({ size: [W, H], format: 'rgba16float', usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING });
+    const solverMod = d.createShaderModule({ code: solverWGSL(W, H, geom, this.nSponge) });
+    const fieldsMod = d.createShaderModule({ code: fieldsWGSL(W, H, geom, this.nSponge, this.probe, this.ringLen) });
+    const cp = (mod, entry) => d.createComputePipeline({ layout: 'auto', compute: { module: mod, entryPoint: entry } });
+    this.pMain = cp(solverMod, 'main_step');
+    this.pBoundary = cp(solverMod, 'boundary');
+    this.pTick = cp(solverMod, 'tick_step');
+    this.pFields = cp(fieldsMod, 'fields');
+    this.pVelTex = cp(fieldsMod, 'veltex');
+    this.pProbe = cp(fieldsMod, 'probe');
+    const bg = (pipe, entries) => d.createBindGroup({
+      layout: pipe.getBindGroupLayout(0),
+      entries: entries.map(([binding, resource]) => ({ binding, resource })),
+    });
+    const fb = { buffer: this.fbuf }, ms = { buffer: this.misc };
+    this.bgMain = bg(this.pMain, [[0, fb], [1, ms]]);
+    this.bgBoundary = bg(this.pBoundary, [[0, fb], [1, ms]]);
+    this.bgTick = bg(this.pTick, [[1, ms]]);
+    this.bgFields = bg(this.pFields, [[0, fb], [1, ms], [2, { buffer: this.fieldsBuf }]]);
+    this.bgVelTex = bg(this.pVelTex, [[0, fb], [1, ms], [3, this.velTex.createView()]]);
+    this.bgProbe = bg(this.pProbe, [[0, fb], [1, ms], [4, { buffer: this.ring }]]);
+    this.wgMain = Math.ceil(this.NC / 256);
+    this.wgBoundary = Math.ceil(H / 64);
+  }
+  encodeSubstep(pass) {
+    pass.setPipeline(this.pMain); pass.setBindGroup(0, this.bgMain); pass.dispatchWorkgroups(this.wgMain);
+    pass.setPipeline(this.pBoundary); pass.setBindGroup(0, this.bgBoundary); pass.dispatchWorkgroups(this.wgBoundary);
+    pass.setPipeline(this.pTick); pass.setBindGroup(0, this.bgTick); pass.dispatchWorkgroups(1);
+    this.t++;
+  }
+  encodeVelTex(pass) {
+    pass.setPipeline(this.pVelTex); pass.setBindGroup(0, this.bgVelTex);
+    pass.dispatchWorkgroups(Math.ceil(this.W / 16), Math.ceil(this.H / 16));
+  }
+  encodeProbe(pass) {
+    pass.setPipeline(this.pProbe); pass.setBindGroup(0, this.bgProbe); pass.dispatchWorkgroups(1);
+  }
+  async stepN(n, probeEvery) { // n even (checkpoints only after odd substeps)
+    let left = n;
+    while (left > 0) {
+      const k = Math.min(left, 512);
+      const enc = this.device.createCommandEncoder();
+      const pass = enc.beginComputePass();
+      for (let i = 0; i < k; i++) {
+        this.encodeSubstep(pass);
+        if (probeEvery && this.t % probeEvery === 0) this.encodeProbe(pass);
+      }
+      pass.end();
+      this.device.queue.submit([enc.finish()]);
+      left -= k;
+      if (left > 0) await this.device.queue.onSubmittedWorkDone();
+    }
+    await this.device.queue.onSubmittedWorkDone();
+  }
+  async readBuf(buf, size) {
+    const st = this.device.createBuffer({ size, usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST });
+    const enc = this.device.createCommandEncoder();
+    enc.copyBufferToBuffer(buf, 0, st, 0, size);
+    this.device.queue.submit([enc.finish()]);
+    await st.mapAsync(GPUMapMode.READ);
+    const out = st.getMappedRange().slice(0);
+    st.unmap(); st.destroy();
+    return out;
+  }
+  async readFields() {
+    const enc = this.device.createCommandEncoder();
+    const pass = enc.beginComputePass();
+    pass.setPipeline(this.pFields); pass.setBindGroup(0, this.bgFields); pass.dispatchWorkgroups(this.wgMain);
+    pass.end();
+    this.device.queue.submit([enc.finish()]);
+    return new Float32Array(await this.readBuf(this.fieldsBuf, this.NC * 3 * 4)); // [rho,ux,uy] interleaved
+  }
+  async readMisc() {
+    const m = new Uint32Array(await this.readBuf(this.misc, 16));
+    return { steps: m[0], clamps: m[1], probeCursor: m[2] };
+  }
+  async readRing() {
+    return new Float32Array(await this.readBuf(this.ring, this.ringLen * 4));
+  }
+  destroy() {
+    for (const b of [this.fbuf, this.misc, this.ring, this.fieldsBuf]) b.destroy();
+    this.velTex.destroy();
+  }
+}
+
+// ---------- ink (SPECKS, minimal-lawful: LAW 0/1/2/5) ----------
+// 2^18 tracers, all advected every frame; a governed FRACTION is inked per
+// frame (seeded hash cull) and the deposit target carries a short absorption
+// afterglow. Both are LAW 5 measured facts: a 1.5 s stroke-class fade pools
+// 262k tracers into a 98.8%-coverage wash, and at small stages the raw speck
+// count alone exceeds the 22% ink budget — the governor holds the budget by
+// drawing less ink, never by lightening existing ink. Specks stay in the
+// LAW 1 band (fresh 0.28, cap 0.55); slow/old ink dies fast, never pools.
+const NP = 262144; // 2^18 tracers
+const INK = { speck: 0.28, cap: 0.55, absorbS: 0.012, covLo: 0.08, covHi: 0.18, covCap: 0.22, covThresh: 0.06 };
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+class Ink {
+  constructor(device, solver, R0, canvasFormat) {
+    this.device = device; this.solver = solver;
+    const { W, H, geom } = solver;
+    this.gain = INK.speck;
+    this.q = 0.5; // governed draw fraction (LAW 5 lever)
+    this.frame = 0;
+    this.seed = 1;
+    this.parts = device.createBuffer({ size: NP * 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+    this.inkU = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+    this.covCnt = device.createBuffer({ size: 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST });
+    this.sampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear' });
+    this.seedParticles(1);
+    const adv = `
+struct U { seed: u32, gain: f32, q: f32, frame: u32 }
+@group(0) @binding(0) var<storage, read_write> parts: array<vec4f>;
+@group(0) @binding(1) var vel: texture_2d<f32>;
+@group(0) @binding(2) var samp: sampler;
+@group(0) @binding(3) var<uniform> u: U;
+fn pcg(v0: u32) -> u32 {
+  var v = v0 * 747796405u + 2891336453u;
+  v = ((v >> ((v >> 28u) + 4u)) ^ v) * 277803737u;
+  return (v >> 22u) ^ v;
+}
+@compute @workgroup_size(256)
+fn advect(@builtin(global_invocation_id) gid: vec3<u32>) {
+  let i = gid.x;
+  if (i >= ${NP}u) { return; }
+  var p = parts[i];
+  var pos = p.xy;
+  let inv = vec2f(${f(1 / W)}, ${f(1 / H)});
+  let v1 = textureSampleLevel(vel, samp, (pos + vec2f(0.5)) * inv, 0.0).xy;
+  let v2 = textureSampleLevel(vel, samp, (pos + vec2f(0.5) + 0.5 * ${f(R0)} * v1) * inv, 0.0).xy;
+  pos += ${f(R0)} * v2;
+  let dx = pos.x - ${f(geom.cx)}; let dy = pos.y - ${f(geom.cy)};
+  let dead = pos.x > ${f(W - 2)} || pos.x < 0.0 || pos.y != pos.y || pos.x != pos.x
+    || dx * dx + dy * dy <= ${f((geom.r + 0.5) * (geom.r + 0.5))};
+  if (dead) {
+    let rs = u32(p.z) + 1u;
+    let h = pcg(i ^ pcg(rs * 2654435761u + u.seed));
+    pos = vec2f(0.5 + 2.5 * f32(h & 0xffffu) / 65535.0, 1.0 + ${f(H - 3)} * f32(h >> 16u) / 65535.0);
+    p.z = f32(rs);
+  }
+  parts[i] = vec4f(pos, p.z, 0.0);
+}`;
+    const draw = `
+struct U { seed: u32, gain: f32, q: f32, frame: u32 }
+@group(0) @binding(0) var<storage, read> parts: array<vec4f>;
+@group(0) @binding(3) var<uniform> u: U;
+fn pcg(v0: u32) -> u32 {
+  var v = v0 * 747796405u + 2891336453u;
+  v = ((v >> ((v >> 28u) + 4u)) ^ v) * 277803737u;
+  return (v >> 22u) ^ v;
+}
+@vertex
+fn vmain(@builtin(vertex_index) vi: u32) -> @builtin(position) vec4f {
+  // governed subset: seeded hash cull to the LAW 5 ink budget
+  let h = f32(pcg(vi ^ pcg(u.frame * 2654435761u + u.seed)) & 0xffffffu) / 16777216.0;
+  if (h > u.q) { return vec4f(2.0, 2.0, 0.0, 1.0); } // off-clip
+  let p = parts[vi].xy;
+  let xn = (p.x + 0.5) * ${f(2 / W)} - 1.0;
+  let yn = 1.0 - (p.y + 0.5) * ${f(2 / H)};
+  return vec4f(xn, yn, 0.0, 1.0);
+}
+@fragment
+fn fmain() -> @location(0) vec4f { return vec4f(u.gain, 0.0, 0.0, 1.0); }`;
+    const fade = `
+@vertex
+fn vmain(@builtin(vertex_index) vi: u32) -> @builtin(position) vec4f {
+  let xy = vec2f(f32((vi << 1u) & 2u), f32(vi & 2u));
+  return vec4f(xy * 2.0 - 1.0, 0.0, 1.0);
+}
+@fragment
+fn fmain() -> @location(0) vec4f { return vec4f(0.0); }`;
+    const comp = `
+@group(0) @binding(0) var dep: texture_2d<f32>;
+@vertex
+fn vmain(@builtin(vertex_index) vi: u32) -> @builtin(position) vec4f {
+  let xy = vec2f(f32((vi << 1u) & 2u), f32(vi & 2u));
+  return vec4f(xy * 2.0 - 1.0, 0.0, 1.0);
+}
+@fragment
+fn fmain(@builtin(position) fc: vec4f) -> @location(0) vec4f {
+  let d = textureLoad(dep, vec2<i32>(fc.xy), 0).r;
+  let a = min(d, ${f(INK.cap)}); // LAW 1 band cap; under LAW 0's 0.62 by construction
+  return vec4f(${f(0x18 / 255)} * a, ${f(0x18 / 255)} * a, ${f(0x1c / 255)} * a, a);
+}`;
+    const cover = `
+@group(0) @binding(0) var dep: texture_2d<f32>;
+@group(0) @binding(1) var<storage, read_write> cnt: array<atomic<u32>>;
+@compute @workgroup_size(16, 16)
+fn cover(@builtin(global_invocation_id) gid: vec3<u32>) {
+  let dim = textureDimensions(dep);
+  if (gid.x >= dim.x || gid.y >= dim.y) { return; }
+  if (textureLoad(dep, vec2<i32>(gid.xy), 0).r > ${f(INK.covThresh)}) { atomicAdd(&cnt[0], 1u); }
+}`;
+    const d = device;
+    this.pAdvect = d.createComputePipeline({ layout: 'auto', compute: { module: d.createShaderModule({ code: adv }), entryPoint: 'advect' } });
+    const drawMod = d.createShaderModule({ code: draw });
+    this.pPoints = d.createRenderPipeline({
+      layout: 'auto',
+      vertex: { module: drawMod, entryPoint: 'vmain' },
+      fragment: {
+        module: drawMod, entryPoint: 'fmain',
+        targets: [{ format: 'r16float', blend: { color: { srcFactor: 'one', dstFactor: 'one' }, alpha: { srcFactor: 'one', dstFactor: 'one' } } }],
+      },
+      primitive: { topology: 'point-list' },
+    });
+    const fadeMod = d.createShaderModule({ code: fade });
+    this.pFade = d.createRenderPipeline({
+      layout: 'auto',
+      vertex: { module: fadeMod, entryPoint: 'vmain' },
+      fragment: {
+        module: fadeMod, entryPoint: 'fmain',
+        targets: [{ format: 'r16float', blend: { color: { srcFactor: 'zero', dstFactor: 'constant' }, alpha: { srcFactor: 'zero', dstFactor: 'constant' } } }],
+      },
+    });
+    const compMod = d.createShaderModule({ code: comp });
+    this.pComp = d.createRenderPipeline({
+      layout: 'auto',
+      vertex: { module: compMod, entryPoint: 'vmain' },
+      fragment: { module: compMod, entryPoint: 'fmain', targets: [{ format: canvasFormat }] },
+    });
+    this.pCover = d.createComputePipeline({ layout: 'auto', compute: { module: d.createShaderModule({ code: cover }), entryPoint: 'cover' } });
+    this.bgAdvect = d.createBindGroup({
+      layout: this.pAdvect.getBindGroupLayout(0),
+      entries: [
+        { binding: 0, resource: { buffer: this.parts } },
+        { binding: 1, resource: solver.velTex.createView() },
+        { binding: 2, resource: this.sampler },
+        { binding: 3, resource: { buffer: this.inkU } },
+      ],
+    });
+    this.bgPoints = d.createBindGroup({
+      layout: this.pPoints.getBindGroupLayout(0),
+      entries: [{ binding: 0, resource: { buffer: this.parts } }, { binding: 3, resource: { buffer: this.inkU } }],
+    });
+    this.deposit = null;
+  }
+  seedParticles(seed) {
+    this.seed = seed >>> 0;
+    const rnd = mulberry32(this.seed || 1);
+    const { W, H, geom } = this.solver;
+    const a = new Float32Array(NP * 4);
+    const r2 = (geom.r + 0.5) * (geom.r + 0.5);
+    for (let i = 0; i < NP; i++) {
+      let x = 0, y = 0;
+      do { x = rnd() * (W - 2); y = 1 + rnd() * (H - 3); }
+      while ((x - geom.cx) ** 2 + (y - geom.cy) ** 2 <= r2);
+      a[i * 4] = x; a[i * 4 + 1] = y;
+    }
+    this.device.queue.writeBuffer(this.parts, 0, a);
+    this.writeU();
+  }
+  writeU() {
+    const b = new ArrayBuffer(16);
+    const u = new Uint32Array(b), fl = new Float32Array(b);
+    u[0] = this.seed; fl[1] = this.gain; fl[2] = this.q; u[3] = this.frame;
+    this.device.queue.writeBuffer(this.inkU, 0, b);
+  }
+  resize(w, h) {
+    if (this.deposit) this.deposit.destroy();
+    this.deposit = this.device.createTexture({
+      size: [w, h], format: 'r16float',
+      usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
+    });
+    this.depView = this.deposit.createView();
+    this.bgComp = this.device.createBindGroup({
+      layout: this.pComp.getBindGroupLayout(0),
+      entries: [{ binding: 0, resource: this.depView }],
+    });
+    this.bgCover = this.device.createBindGroup({
+      layout: this.pCover.getBindGroupLayout(0),
+      entries: [{ binding: 0, resource: this.depView }, { binding: 1, resource: { buffer: this.covCnt } }],
+    });
+    this.depW = w; this.depH = h;
+  }
+  encodeFrame(enc, canvasView, dtS) {
+    this.frame++; this.writeU();
+    { const p = enc.beginComputePass(); p.setPipeline(this.pAdvect); p.setBindGroup(0, this.bgAdvect); p.dispatchWorkgroups(NP / 256); p.end(); }
+    const decay = Math.exp(-dtS / INK.absorbS); // absorption fade (LAW 2 minimal: slow ink dies, never pools)
+    {
+      const p = enc.beginRenderPass({ colorAttachments: [{ view: this.depView, loadOp: 'load', storeOp: 'store' }] });
+      p.setPipeline(this.pFade); p.setBlendConstant({ r: decay, g: decay, b: decay, a: decay }); p.draw(3);
+      p.setPipeline(this.pPoints); p.setBindGroup(0, this.bgPoints); p.draw(NP);
+      p.end();
+    }
+    {
+      const p = enc.beginRenderPass({
+        colorAttachments: [{ view: canvasView, loadOp: 'clear', storeOp: 'store', clearValue: { r: 0, g: 0, b: 0, a: 0 } }],
+      });
+      p.setPipeline(this.pComp); p.setBindGroup(0, this.bgComp); p.draw(3);
+      p.end();
+    }
+  }
+  async coverage(readBuf) {
+    this.device.queue.writeBuffer(this.covCnt, 0, new Uint32Array([0]));
+    const enc = this.device.createCommandEncoder();
+    const p = enc.beginComputePass();
+    p.setPipeline(this.pCover); p.setBindGroup(0, this.bgCover);
+    p.dispatchWorkgroups(Math.ceil(this.depW / 16), Math.ceil(this.depH / 16));
+    p.end();
+    this.device.queue.submit([enc.finish()]);
+    const n = new Uint32Array(await readBuf(this.covCnt, 4))[0];
+    return n / (this.depW * this.depH);
+  }
+  govern(cov) { // LAW 5: over cap, scale the global deposit down (never lighten existing ink)
+    if (cov > INK.covCap) this.q *= 0.6;
+    else if (cov > INK.covHi) this.q *= 0.88;
+    else if (cov < INK.covLo) this.q *= 1.1;
+    this.q = Math.min(1, Math.max(0.02, this.q));
+  }
+}
+
+// ---------- page plumbing ----------
+const Q = new URLSearchParams(location.search);
+const dom = {
+  paper: document.getElementById('paper'),
+  stage: document.getElementById('stage'),
+  gpu: document.getElementById('gpu'),
+  specimen: document.getElementById('specimen'),
+  body: document.getElementById('body'),
+  card: document.getElementById('card'),
+  readout: document.getElementById('readout'),
+  sheet: document.getElementById('sheet'),
+  growline: document.getElementById('growline'),
+};
+function drawPaper() {
+  const c = dom.paper, dpr = Math.min(devicePixelRatio || 1, 2);
+  c.width = Math.round(innerWidth * dpr); c.height = Math.round(innerHeight * dpr);
+  c.style.width = innerWidth + 'px'; c.style.height = innerHeight + 'px';
+  const g = c.getContext('2d');
+  g.clearRect(0, 0, c.width, c.height);
+  g.fillStyle = '#989690';
+  g.globalAlpha = 0.5;
+  const step = 20 * dpr, r = 0.75 * dpr;
+  for (let y = step; y < c.height; y += step)
+    for (let x = step; x < c.width; x += step) {
+      g.beginPath(); g.arc(x, y, r, 0, 6.2832); g.fill();
+    }
+  g.globalAlpha = 1;
+}
+function pctile(a, p) {
+  if (!a.length) return 0;
+  const s = [...a].sort((x, y) => x - y);
+  return s[Math.min(s.length - 1, Math.floor(p * s.length))];
+}
+function crossHz(samples, dts) { // upward mean-crossings; 0 until a real, regular street
+  if (samples.length < 16) return 0;
+  let mean = 0;
+  for (const v of samples) mean += v;
+  mean /= samples.length;
+  let rms = 0;
+  for (const v of samples) rms += (v - mean) * (v - mean);
+  rms = Math.sqrt(rms / samples.length);
+  if (rms < 0.005) return 0; // established street: uy′ RMS ~0.7·u₀ at the probe; noise is ~1e-4
+  const idx = [];
+  for (let k = 1; k < samples.length; k++) {
+    if (samples[k - 1] - mean < 0 && samples[k] - mean >= 0) idx.push(k);
+  }
+  if (idx.length < 4) return 0;
+  const frames = (idx[idx.length - 1] - idx[0]) / (idx.length - 1);
+  let v = 0;
+  for (let i = 1; i < idx.length; i++) { const d = (idx[i] - idx[i - 1]) - frames; v += d * d; }
+  if (Math.sqrt(v / (idx.length - 1)) > 0.25 * frames) return 0; // periodic, not jitter
+  return 1 / (frames * dts);
+}
+
+const T = { // __TUNNEL — the __PARK contract lineage
+  version: '0.1.0',
+  tier: 'boot',
+  grid: null,
+  constants: C,
+  qaResult: null,
+  qaProgress: '',
+  ready: false,
+  _err: null,
+  stats: async () => ({}),
+  tick: async () => {},
+  fastBoot: () => {},
+  seedRNG: () => {},
+  forceTier: () => {},
+  qaStepN: async () => {},
+  qaDumpFields: async () => null,
+};
+window.__TUNNEL = T;
+
+function stills() {
+  T.tier = 'stills'; T.grid = null; T.ready = true;
+  dom.stage.hidden = true; dom.card.hidden = true;
+  dom.sheet.hidden = false; dom.growline.hidden = false;
+}
+
+async function gpuProbe() {
+  if (!navigator.gpu) return null;
+  const adapter = await navigator.gpu.requestAdapter();
+  if (!adapter) return null;
+  if (adapter.isFallbackAdapter) return null;
+  if (!adapter.features.has('shader-f16')) return null; // the FP16S path is required
+  const feats = ['shader-f16'];
+  if (adapter.features.has('timestamp-query')) feats.push('timestamp-query');
+  const device = await adapter.requestDevice({ requiredFeatures: feats });
+  device.addEventListener('uncapturederror', (e) => {
+    e.preventDefault();
+    T._err = String((e.error && e.error.message) || e.error);
+  });
+  return { adapter, device, hasTS: feats.includes('timestamp-query') };
+}
+
+async function measureTau(device, W, H) {
+  const geom = { cx: W / 4 + 0.5, cy: H / 2 + 0.5, r: Math.round(H / 14) };
+  const s = new Solver(device, { W, H, geom });
+  await s.stepN(134); // warmup — real steps, kept (doubles as spool-up)
+  const t0 = performance.now();
+  await s.stepN(268);
+  const tau = (performance.now() - t0) / 268;
+  return { solver: s, tau };
+}
+
+// ---------- live mode ----------
+async function bootLive(g) {
+  const { device, hasTS } = g;
+  const SETTLE = 1.2245; // measured boost→plateau thermal ratio (SPIKE-REPORT §5) — pin R₀ at plateau
+  const budgetMs = 10.4;
+  let rung = null;
+  {
+    const { solver, tau } = await measureTau(device, 1792, 896);
+    if (tau <= 0.150) {
+      const r0 = Math.min(66, Math.max(62, Math.floor(budgetMs / (tau * SETTLE)) & ~1));
+      rung = { name: 'H1', solver, tau, R0: r0 };
+    } else {
+      solver.destroy();
+      const m = await measureTau(device, 1280, 640);
+      if (m.tau <= 0.150) {
+        rung = { name: 'W2', solver: m.solver, tau: m.tau, R0: 48 };
+      } else {
+        m.solver.destroy();
+        device.destroy();
+        return stills();
+      }
+    }
+  }
+  const S = rung.solver, R0 = rung.R0;
+  T.tier = rung.name;
+  T.grid = `${S.W}×${S.H}`;
+  const ctx = dom.gpu.getContext('webgpu');
+  if (!ctx) { S.destroy(); device.destroy(); return stills(); }
+  const format = navigator.gpu.getPreferredCanvasFormat();
+  ctx.configure({ device, format, alphaMode: 'premultiplied' });
+  const ink = new Ink(device, S, R0, format);
+
+  // layout
+  const aspect = S.W / S.H;
+  function layout() {
+    const pad = 24;
+    const availW = innerWidth - 2 * pad, availH = innerHeight - 2 * pad;
+    let w = availW, h = w / aspect;
+    if (h > availH) { h = availH; w = h * aspect; }
+    dom.stage.style.width = w + 'px'; dom.stage.style.height = h + 'px';
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    dom.gpu.width = Math.min(3584, Math.max(2, Math.round(w * dpr)));
+    dom.gpu.height = Math.min(1792, Math.max(2, Math.round(h * dpr)));
+    dom.specimen.setAttribute('viewBox', `0 0 ${S.W} ${S.H}`);
+    dom.specimen.setAttribute('preserveAspectRatio', 'none');
+    dom.body.setAttribute('cx', S.geom.cx); dom.body.setAttribute('cy', S.geom.cy);
+    dom.body.setAttribute('r', S.geom.r);
+    ink.resize(dom.gpu.width, dom.gpu.height);
+    drawPaper();
+  }
+  layout();
+  addEventListener('resize', () => layout());
+  dom.sheet.hidden = true;
+  dom.stage.hidden = false;
+  dom.card.hidden = false;
+  requestAnimationFrame(() => dom.card.classList.add('on'));
+
+  // timestamp-query τ instrument (falls back to the boot-probe value)
+  const taus = [rung.tau];
+  let tsq = null;
+  if (hasTS) {
+    tsq = {
+      qs: device.createQuerySet({ type: 'timestamp', count: 2 }),
+      resolve: device.createBuffer({ size: 16, usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC }),
+      staging: device.createBuffer({ size: 16, usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST }),
+      busy: false,
+    };
+  }
+
+  const frameDts = [];
+  let frames = 0, lastT = performance.now(), running = true, ticking = false;
+  const reNum = C.U0 * (2 * S.geom.r) / ((C.TAU0 - 0.5) / 3);
+  const reTxt = `re ~${(reNum / 1000).toFixed(1)}k (chord)`;
+  let lastReadout = 0;
+
+  function encodeFrame(dtS, timed) {
+    const enc = device.createCommandEncoder();
+    const pd = (timed && tsq && !tsq.busy)
+      ? { timestampWrites: { querySet: tsq.qs, beginningOfPassWriteIndex: 0, endOfPassWriteIndex: 1 } }
+      : {};
+    const pass = enc.beginComputePass(pd);
+    for (let i = 0; i < R0; i++) S.encodeSubstep(pass);
+    S.encodeVelTex(pass);
+    S.encodeProbe(pass);
+    pass.end();
+    if (pd.timestampWrites) {
+      enc.resolveQuerySet(tsq.qs, 0, 2, tsq.resolve, 0);
+      enc.copyBufferToBuffer(tsq.resolve, 0, tsq.staging, 0, 16);
+    }
+    ink.encodeFrame(enc, ctx.getCurrentTexture().createView(), dtS);
+    device.queue.submit([enc.finish()]);
+    if (pd.timestampWrites) {
+      tsq.busy = true;
+      tsq.staging.mapAsync(GPUMapMode.READ).then(() => {
+        const t = new BigUint64Array(tsq.staging.getMappedRange());
+        const ms = Number(t[1] - t[0]) / 1e6;
+        tsq.staging.unmap(); tsq.busy = false;
+        if (ms > 0) { taus.push(ms / R0); if (taus.length > 40) taus.shift(); }
+      }).catch(() => { tsq.busy = false; });
+    }
+  }
+
+  let covBusy = false;
+  function frame(now) {
+    if (!running) return;
+    if (!ticking) {
+      const dt = Math.min(0.1, Math.max(0.001, (now - lastT) / 1000));
+      lastT = now;
+      frameDts.push(dt); if (frameDts.length > 240) frameDts.shift();
+      try {
+        encodeFrame(dt, frames % 8 === 0);
+      } catch (e) { T._err = String(e); }
+      frames++;
+      if (frames % 90 === 0 && !covBusy) {
+        covBusy = true;
+        ink.coverage((b, n) => S.readBuf(b, n))
+          .then((cov) => { ink.govern(cov); covBusy = false; })
+          .catch(() => { covBusy = false; });
+      }
+      if (now - lastReadout > 1000) {
+        lastReadout = now;
+        const p50 = pctile(frameDts, 0.5);
+        const fps = p50 > 0 ? Math.round(1 / p50) : 0;
+        dom.readout.textContent = `${reTxt} · ${S.W}×${S.H} · ${fps}fps`;
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  T.stats = async () => {
+    const misc = await S.readMisc();
+    const ring = await S.readRing();
+    const n = Math.min(misc.probeCursor, S.ringLen);
+    const start = misc.probeCursor % S.ringLen;
+    const samples = [];
+    for (let k = 0; k < n; k++) samples.push(ring[(start + k) % S.ringLen]);
+    const p50 = pctile(frameDts, 0.5);
+    const fields = await S.readFields();
+    let rhoSum = 0, nf = 0;
+    for (let i = 0; i < S.NC; i++) {
+      const r = fields[i * 3];
+      if (r !== 0) { rhoSum += r; nf++; }
+    }
+    let cov = null;
+    try { cov = await ink.coverage((b, sz) => S.readBuf(b, sz)); } catch { cov = null; }
+    return {
+      fps: p50 > 0 ? 1 / p50 : 0,
+      tau: pctile(taus, 0.5),
+      rhoMean: nf ? rhoSum / nf : 0,
+      sheddingHz: crossHz(samples, p50 || 1 / 60),
+      inkCoverage: cov,
+      inkGain: ink.gain,
+      clamps: misc.clamps,
+      steps: misc.steps,
+    };
+  };
+  T.tick = async (s) => {
+    ticking = true;
+    const n = Math.round(s * 60);
+    for (let i = 0; i < n; i++) encodeFrame(1 / 60, false);
+    await device.queue.onSubmittedWorkDone();
+    ticking = false;
+  };
+  T.fastBoot = () => { dom.card.classList.add('on'); };
+  T.seedRNG = (n) => { ink.seedParticles(n >>> 0); };
+  T.forceTier = (t) => {
+    if (t !== 'stills') return;
+    running = false;
+    try { device.destroy(); } catch { /* device may already be lost */ }
+    stills();
+  };
+  T.qaStepN = async (n) => { await S.stepN(n - (n % 2)); };
+  T.qaDumpFields = async () => {
+    const d = await S.readFields();
+    const NCC = S.NC, rho = new Array(NCC), ux = new Array(NCC), uy = new Array(NCC);
+    for (let i = 0; i < NCC; i++) { rho[i] = d[i * 3]; ux[i] = d[i * 3 + 1]; uy[i] = d[i * 3 + 2]; }
+    return { W: S.W, H: S.H, rho, ux, uy };
+  };
+  T.ready = true;
+}
+
+// ---------- QA: L0-DIFF lane (?qa=diff) — the pinned 128×64 MIN-DIFF geometry ----------
+async function bootDiff(g) {
+  const S = new Solver(g.device, {
+    W: 128, H: 64,
+    geom: { cx: 32.5, cy: 32.5, r: 4 }, // D=8 body — oracle l0.mjs ORC-RHO geometry
+    sponge: 16, // pinned
+  });
+  T.tier = 'qa-diff'; T.grid = '128×64';
+  T.qaStepN = async (n) => { await S.stepN(n - (n % 2)); };
+  T.qaDumpFields = async () => {
+    const d = await S.readFields();
+    const NCC = S.NC, rho = new Array(NCC), ux = new Array(NCC), uy = new Array(NCC);
+    for (let i = 0; i < NCC; i++) { rho[i] = d[i * 3]; ux[i] = d[i * 3 + 1]; uy[i] = d[i * 3 + 2]; }
+    return { W: S.W, H: S.H, rho, ux, uy };
+  };
+  T.stats = async () => {
+    const misc = await S.readMisc();
+    return { steps: misc.steps, clamps: misc.clamps };
+  };
+  T.ready = true;
+}
+
+// ---------- QA: the frozen St fixture (?qa=st) — 400×160, D=24 @ (100.5, 80.5) ----------
+async function bootSt(g) {
+  const S = new Solver(g.device, {
+    W: 400, H: 160,
+    geom: { cx: 100.5, cy: 80.5, r: 12 },
+    probe: { x: 173, y: 80 }, // 3D downstream centerline — fixture verbatim
+  });
+  T.tier = 'qa-st'; T.grid = '400×160';
+  T.ready = true;
+  const STEPS = 40000, EVERY = 20, D = 24;
+  const t0 = performance.now();
+  for (let done = 0; done < STEPS; done += 500) {
+    await S.stepN(500, EVERY);
+    T.qaProgress = `st ${done + 500}/${STEPS}`;
+  }
+  const misc = await S.readMisc();
+  const ring = await S.readRing();
+  const nS = misc.probeCursor; // 2000 samples; ring (len 2048) holds them all
+  const series = Array.from({ length: nS }, (_, k) => ring[k]);
+  // fixture window: last 25k steps = last 1250 samples
+  const start = Math.max(0, nS - Math.floor(25000 / EVERY));
+  const win = series.slice(start);
+  let mean = 0;
+  for (const v of win) mean += v;
+  mean /= win.length;
+  const cross = [];
+  for (let k = 1; k < win.length; k++) {
+    const a = win[k - 1] - mean, b = win[k] - mean;
+    if (a < 0 && b >= 0) cross.push((k - 1) + (-a) / (b - a));
+  }
+  let period = NaN, periodStd = NaN;
+  if (cross.length >= 3) {
+    period = (cross[cross.length - 1] - cross[0]) / (cross.length - 1) * EVERY;
+    let v = 0;
+    for (let i = 1; i < cross.length; i++) {
+      const d = (cross[i] - cross[i - 1]) * EVERY - period;
+      v += d * d;
+    }
+    periodStd = Math.sqrt(v / (cross.length - 1));
+  }
+  const st = (1 / period) * D / C.U0;
+  const fields = await S.readFields();
+  let finite = true, maxU = 0;
+  for (let i = 0; i < S.NC; i++) {
+    const ux = fields[i * 3 + 1], uy = fields[i * 3 + 2];
+    if (!Number.isFinite(ux) || !Number.isFinite(uy)) { finite = false; break; }
+    const m = Math.hypot(ux, uy);
+    if (m > maxU) maxU = m;
+  }
+  T.qaResult = {
+    st, periodSteps: period, periodStd, nCross: cross.length,
+    steps: misc.steps, clamps: misc.clamps, finite, maxU,
+    wallMs: Math.round(performance.now() - t0),
+  };
+}
+
+// ---------- boot ----------
+(async () => {
+  drawPaper();
+  addEventListener('resize', () => { if (T.tier === 'stills' || T.tier === 'boot') drawPaper(); });
+  if (Q.get('tier') === 'stills') return stills();
+  let g = null;
+  try { g = await gpuProbe(); } catch (e) { T._err = String(e); g = null; }
+  if (!g) return stills();
+  g.device.lost.then(() => { if (T.tier !== 'stills') stills(); }).catch(() => {});
+  try {
+    const qa = Q.get('qa');
+    if (qa === 'diff') await bootDiff(g);
+    else if (qa === 'st') await bootSt(g);
+    else await bootLive(g);
+  } catch (e) {
+    T._err = String((e && e.stack) || e);
+    try { g.device.destroy(); } catch { /* already gone */ }
+    stills();
+  }
+})();
+</script>
 </body>
 </html>
