@@ -17,8 +17,8 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.14.0";
-const PHASE = 8;
+const VERSION = "0.15.0";
+const PHASE = 9;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
 // (phase 7, FM-PLAN.md) is wired into gameplay. Fields not derivable from
@@ -299,6 +299,17 @@ async function boot() {
           ctx.restore();
         }
       }
+      // SAM inbound: flashing MISSILE warning (readable panic, WT-style)
+      if (battlefield && battlefield.samInbound()) {
+        ctx.save();
+        if (Math.floor(performance.now() / 250) % 2 === 0) {
+          ctx.font = "bold 16px ui-monospace, Menlo, monospace";
+          ctx.fillStyle = "#ff5a3c";
+          ctx.textAlign = "center";
+          ctx.fillText("MISSILE", w / 2, h * 0.3);
+        }
+        ctx.restore();
+      }
       // taking fire: red vignette pulse
       if (player.hitFlash > 0) {
         player.hitFlash = Math.max(0, player.hitFlash - 1 / 60);
@@ -409,7 +420,9 @@ async function boot() {
           ias: player.fm.out.V * 1.94384,
         });
         if (player.gun.firing !== audio.gun.firing) audio.gun.fire(player.gun.firing);
-        const seekMode = player.missiles.locked() ? "lock" : (player.missiles.lockTarget >= 0 ? "scan" : "off");
+        // launch warning owns the tones over the seeker
+        const seekMode = battlefield && battlefield.samInbound() ? "launch"
+          : player.missiles.locked() ? "lock" : (player.missiles.lockTarget >= 0 ? "scan" : "off");
         if (audio.locks.mode !== seekMode) audio.locks.setMode(seekMode);
       }
     } else {

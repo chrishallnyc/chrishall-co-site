@@ -139,6 +139,12 @@ export class Missiles {
         const am = Math.hypot(ax, ay, az);
         if (am > gCap) { ax *= gCap / am; ay *= gCap / am; az *= gCap / am; }
         vx += ax * dt; vy += ay * dt; vz += az * dt;
+        // induced drag (L/D ~4): hard corrections bleed speed — honesty
+        // applies to our own missiles too
+        const aL = Math.min(Math.hypot(ax, ay, az), gCap);
+        const vb = Math.hypot(vx, vy, vz) || 1;
+        const bleed = (aL / 4) * dt / vb;
+        vx -= vx * bleed; vy -= vy * bleed; vz -= vz * bleed;
         // proximity fuse
         if (Rm < PROX_M) {
           battlefield.damage(tgt, DMG);

@@ -1,11 +1,12 @@
 {
-  "updated": "2026-08-07T13:35:00-07:00",
-  "version": "v0.14.0",
-  "now": "SAM sites learning to fire back, volumetric clouds, then the three 10%-better polish passes",
+  "updated": "2026-08-07T13:20:00-07:00",
+  "version": "v0.15.0",
+  "now": "volumetric clouds next, then three full 10%-better polish passes over everything",
   "nowPhase": 9,
   "paused": false,
-  "pushes": 31,
+  "pushes": 32,
   "ledger": [
+    "2026-08-07 v0.15.0 — SAM CITY: the missile sites launch back. Launch warning tone + flashing MISSILE alert, then physics decides: fly straight and it connects; turn away on the warning and run, and it dies chasing you. Every counter-tactic works because the physics is real, not scripted.",
     "2026-08-07 v0.14.0 — FOX TWO: AIM-9X Sidewinders. The seeker locks onto targets (box + growl tone), the missile launches with real rocket physics — boost, sustain, burnout — and steers itself in with the same guidance law real missiles use. First test flight missed forever because one minus sign was flipped; the test caught it.",
     "2026-08-07 v0.13.0 — THE SEA COMPUTES: the ocean is now a real physics simulation running on your GPU — thousands of waves computed 120 times a second (verified against textbook math to 14 decimal places), with foam that forms where waves actually break. Alaska chop and Pacific swell are physically different seas now. Plus: ground units render 6x leaner.",
     "2026-08-07 v0.12.0 — THE AIR IS REAL: the sky is now computed from actual atmospheric physics — light scattered by real air molecules. Distant mountains fade into blue with distance, sunsets ignite a true twilight arch, all verified against a physics reference to 8 decimal places. 90/90 tests.",
@@ -80,8 +81,8 @@
     {
       "n": 9,
       "name": "AI & ground war",
-      "pct": 45,
-      "note": "29 destructible targets + ZSU return fire live; vehicle movement + SAM launches next"
+      "pct": 60,
+      "note": "AAA + SAM return fire live with real evasion doctrine; vehicle movement + bandits next"
     },
     {
       "n": 10,
@@ -122,8 +123,8 @@
     {
       "n": 16,
       "name": "QA hardening",
-      "pct": 55,
-      "note": "14 batteries, 110+ gates, forensic judges standing"
+      "pct": 58,
+      "note": "15 batteries, 125+ gates, forensic judges standing"
     },
     {
       "n": 17,

@@ -118,6 +118,21 @@ const AAA = {
 };
 const MAX_ER = 240; // enemy rounds pool: rps 20 x life 3.2 x ~3 guns
 
+// SA-8/Roland-class TEL missiles (phase 9: the sites launch). Same honest
+// pattern as the AIM-9X: real-ish motor burning mass, true prop-nav against
+// a MOVING target (dR/dt = v_player − v_sam), authority tapering with
+// dynamic pressure — which is exactly why a hard break at the right moment
+// defeats it. One in the air per TEL, long reload, loud warning: scary,
+// survivable, fair.
+const SAM = {
+  envMin: 1000, envMax: 6000, reloadS: 12,
+  massKg: 126, propKg: 40, thrustN: 17000, burnS: 2.2,
+  dragCd: 0.4, refAreaM2: 0.049, N: 4, maxG: 16, qRef: 9000,
+  guideTau: 0.35, // autopilot+airframe response lag — the physics that makes a LATE break work
+  proxM: 10, dmg: 45, lifeS: 6.5, // self-destruct: a launch-warning runner outlives it, a straight-liner never does
+};
+const MAX_SAM = 4;
+
 export class Battlefield {
   constructor(scene, terrain, front, player = null) {
     this.name = "battlefield";
@@ -156,6 +171,13 @@ export class Battlefield {
     });
     this.aaa = new Float64Array(this.zsus.length * 2);
     for (let k = 0; k < this.zsus.length; k++) this.aaa[k * 2] = -1.0 - k * 0.9; // staggered first bursts
+    this.tels = [];
+    for (let i = 0; i < this.n; i++) if (this.types[i] === "sam_tel") this.tels.push(i);
+    this.telCool = new Float64Array(this.tels.length).fill(3); // grace at spawn
+    // SAM pool: x,y,z, vx,vy,vz, age, massKg, axS,ayS,azS (lagged accel)
+    this.sam = new Float64Array(MAX_SAM * 11);
+    this.samLive = new Uint8Array(MAX_SAM);
+    this.samHits = 0;
 
     // destruction visuals: one shared wreck material + instanced smoke quads
     this._wreck = new THREE.MeshStandardMaterial({ color: 0x1a1714, roughness: 0.95, metalness: 0.08 });
@@ -175,6 +197,22 @@ export class Battlefield {
     this.erMesh.count = 0;
     this.root.add(this.erMesh);
 
+    // SAM bodies + trail smoke
+    const sGeo2 = new THREE.BoxGeometry(0.3, 0.3, 3.2);
+    const sMat2 = new THREE.MeshBasicMaterial({ color: 0xf2ede2 });
+    this.samMesh = new THREE.InstancedMesh(sGeo2, sMat2, MAX_SAM);
+    this.samMesh.frustumCulled = false;
+    this.samMesh.count = 0;
+    this.root.add(this.samMesh);
+    const tGeo2 = new THREE.PlaneGeometry(2.6, 2.6);
+    const tMat2 = new THREE.MeshBasicMaterial({ color: 0xe6e2da, transparent: true, opacity: 0.4, depthWrite: false });
+    this.samTrail = new THREE.InstancedMesh(tGeo2, tMat2, 220);
+    this.samTrail.frustumCulled = false;
+    this.samTrail.count = 0;
+    this.root.add(this.samTrail);
+    this.samPuffs = [];
+    this._samLastPuff = new Float64Array(MAX_SAM * 3);
+
     this._m4 = new THREE.Matrix4();
     this._q = new THREE.Quaternion();
     this._dir = new THREE.Vector3();
@@ -184,6 +222,7 @@ export class Battlefield {
 
   alive(i) { return this.state[i * 5 + 4] > 0; }
   aliveCount() { let c = 0; for (let i = 0; i < this.n; i++) if (this.alive(i)) c++; return c; }
+  samInbound() { for (let s = 0; s < MAX_SAM; s++) if (this.samLive[s]) return true; return false; }
 
   // ---- sim side ----
   tick(sim, dt) {
@@ -209,6 +248,84 @@ export class Battlefield {
         }
       }
     }
+    // ---- SAM launch + guidance ----
+    if (P) {
+      const ps = P.fm.state;
+      for (let k = 0; k < this.tels.length; k++) {
+        this.telCool[k] -= dt;
+        const i = this.tels[k], o = i * 5;
+        if (this.state[o + 4] <= 0 || this.telCool[k] > 0) continue;
+        const dx = ps[0] - this.state[o], dy = ps[1] - this.state[o + 1], dz = ps[2] - this.state[o + 2];
+        const dist = Math.hypot(dx, dy, dz);
+        if (dist < SAM.envMin || dist > SAM.envMax || dz < 50) continue; // envelope + no ground-hugging shots
+        let slot = -1;
+        for (let s = 0; s < MAX_SAM; s++) if (!this.samLive[s]) { slot = s; break; }
+        if (slot < 0) continue;
+        const so = slot * 11, r = this.sam;
+        r[so] = this.state[o]; r[so + 1] = this.state[o + 1]; r[so + 2] = this.state[o + 2] + 3;
+        // booster kick: up and toward the target
+        const n = Math.hypot(dx, dy, dz);
+        r[so + 3] = (dx / n) * 45; r[so + 4] = (dy / n) * 45; r[so + 5] = (dz / n) * 45 + 30;
+        r[so + 6] = 0; r[so + 7] = SAM.massKg;
+        r[so + 8] = 0; r[so + 9] = 0; r[so + 10] = 0;
+        this.samLive[slot] = 1;
+        this.telCool[k] = SAM.reloadS;
+      }
+      const mdot = SAM.propKg / SAM.burnS;
+      for (let s = 0; s < MAX_SAM; s++) {
+        if (!this.samLive[s]) continue;
+        const so = s * 11, r = this.sam;
+        const age = r[so + 6];
+        const thrust = age < SAM.burnS ? SAM.thrustN : 0;
+        if (age < SAM.burnS) r[so + 7] = Math.max(r[so + 7] - mdot * dt, SAM.massKg - SAM.propKg);
+        const mass = r[so + 7];
+        let vx = r[so + 3], vy = r[so + 4], vz = r[so + 5];
+        const v = Math.hypot(vx, vy, vz) || 1;
+        const rho = 1.225 * Math.exp(-Math.max(r[so + 2], 0) / 8500);
+        const acc = thrust / mass - 0.5 * rho * v * v * SAM.dragCd * SAM.refAreaM2 / mass;
+        vx += (vx / v) * acc * dt; vy += (vy / v) * acc * dt; vz += (vz / v) * acc * dt - 9.81 * dt;
+        // prop-nav vs the MOVING jet: dR/dt = v_player - v_sam
+        const Rx = ps[0] - r[so], Ry = ps[1] - r[so + 1], Rz = ps[2] - r[so + 2];
+        const Rm = Math.hypot(Rx, Ry, Rz) || 1;
+        const dRx = ps[7] - vx, dRy = ps[8] - vy, dRz = ps[9] - vz;
+        const Vc = -(Rx * dRx + Ry * dRy + Rz * dRz) / Rm;
+        const wx = (Ry * dRz - Rz * dRy) / (Rm * Rm);
+        const wy = (Rz * dRx - Rx * dRz) / (Rm * Rm);
+        const wz = (Rx * dRy - Ry * dRx) / (Rm * Rm);
+        let ax = SAM.N * Vc * (wy * vz - wz * vy) / v;
+        let ay = SAM.N * Vc * (wz * vx - wx * vz) / v;
+        let az = SAM.N * Vc * (wx * vy - wy * vx) / v;
+        const qbar = 0.5 * rho * v * v;
+        const gCap = SAM.maxG * 9.81 * Math.min(1, qbar / SAM.qRef + (age < SAM.burnS ? 0.5 : 0.05));
+        const am = Math.hypot(ax, ay, az);
+        if (am > gCap) { ax *= gCap / am; ay *= gCap / am; az *= gCap / am; }
+        // first-order guidance lag: the commanded turn arrives late — a
+        // last-ditch break outruns the correction, a straight target never does
+        const k = Math.min(dt / SAM.guideTau, 1);
+        r[so + 8] += (ax - r[so + 8]) * k;
+        r[so + 9] += (ay - r[so + 9]) * k;
+        r[so + 10] += (az - r[so + 10]) * k;
+        vx += r[so + 8] * dt; vy += r[so + 9] * dt; vz += r[so + 10] * dt;
+        // induced drag: lift costs speed (missile L/D ~4) — sustained
+        // corrections bleed the closing energy that makes late breaks work
+        const aLat = Math.hypot(r[so + 8], r[so + 9], r[so + 10]);
+        const v2 = Math.hypot(vx, vy, vz) || 1;
+        const bleed = (aLat / 4) * dt / v2;
+        vx -= vx * bleed; vy -= vy * bleed; vz -= vz * bleed;
+        r[so + 3] = vx; r[so + 4] = vy; r[so + 5] = vz;
+        r[so] += vx * dt; r[so + 1] += vy * dt; r[so + 2] += vz * dt;
+        r[so + 6] = age + dt;
+        if (Rm < SAM.proxM) {
+          this.samLive[s] = 0;
+          this.samHits++;
+          P.takeHit(SAM.dmg);
+          continue;
+        }
+        const gh = this.terrain ? this.terrain.heightAt(r[so], r[so + 1]) : 0;
+        if (r[so + 2] <= Math.max(gh, 0) || age > SAM.lifeS) this.samLive[s] = 0;
+      }
+    }
+
     // integrate enemy rounds; hit-test the player sphere segment-wise
     const pr = 7.0;
     const ps = P ? P.fm.state : null;
@@ -279,7 +396,9 @@ export class Battlefield {
     const H = (v) => { h = (Math.imul(h ^ ((v * 1e3) | 0), 0x01000193)) >>> 0; };
     for (let i = 0; i < this.state.length; i++) H(this.state[i]);
     for (let i = 0; i < this.aaa.length; i++) H(this.aaa[i]);
-    H(this.kills); H(this.playerHits);
+    for (let i = 0; i < this.sam.length; i++) H(this.sam[i]);
+    for (let i = 0; i < this.telCool.length; i++) H(this.telCool[i]);
+    H(this.kills); H(this.playerHits); H(this.samHits);
     return h;
   }
 
@@ -346,6 +465,39 @@ export class Battlefield {
         }
       }
     }
+    // SAM bodies + trail (puffs spawned render-side at distance spacing)
+    let ns = 0;
+    for (let s = 0; s < MAX_SAM; s++) {
+      if (!this.samLive[s]) continue;
+      const so = s * 11, r = this.sam;
+      this._dir.set(r[so + 3], r[so + 5], r[so + 4]).normalize();
+      this._q.setFromUnitVectors(new THREE.Vector3(0, 0, 1), this._dir);
+      this._m4.makeRotationFromQuaternion(this._q);
+      this._m4.setPosition(r[so], r[so + 2], r[so + 1]);
+      this.samMesh.setMatrixAt(ns++, this._m4);
+      const l3 = s * 3, lp = this._samLastPuff;
+      const pd = Math.hypot(r[so] - lp[l3], r[so + 1] - lp[l3 + 1], r[so + 2] - lp[l3 + 2]);
+      if (pd > 14 && this.samPuffs.length < 220) {
+        this.samPuffs.push({ x: r[so], y: r[so + 1], z: r[so + 2], age: 0 });
+        lp.set([r[so], r[so + 1], r[so + 2]], l3);
+      }
+    }
+    this.samMesh.count = ns;
+    this.samMesh.instanceMatrix.needsUpdate = true;
+    let np = 0;
+    for (const pf of this.samPuffs) {
+      pf.age += dt;
+      if (pf.age > 5.0) continue;
+      const sc = 0.6 + pf.age * 0.7;
+      this._m4.makeRotationFromQuaternion(camera.quaternion);
+      this._m4.scale(new THREE.Vector3(sc, sc, sc));
+      this._m4.setPosition(pf.x, pf.z, pf.y);
+      if (np < 220) this.samTrail.setMatrixAt(np++, this._m4);
+    }
+    this.samTrail.count = np;
+    this.samTrail.instanceMatrix.needsUpdate = true;
+    while (this.samPuffs.length && this.samPuffs[0].age > 5.0) this.samPuffs.shift();
+
     // enemy tracer streaks along velocity
     let ne = 0;
     for (let j = 0; j < MAX_ER; j++) {
