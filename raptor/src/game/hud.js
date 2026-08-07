@@ -206,6 +206,8 @@ export class HUD {
     ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     ctx.clearRect(0, 0, this.W, this.H); // clearRect ignores composite op
     ctx.globalCompositeOperation = this.composite;
+    // (PASS-1 item 4: canvas shadowBlur halo measured -3fps headless — the
+    // systemic halo moved to targeted plates; see _plate + deferred list)
     ctx.strokeStyle = GREEN;
     ctx.fillStyle = GREEN;
 
@@ -374,6 +376,7 @@ export class HUD {
     }
 
     ctx.lineWidth = 1.6;
+    ctx.save(); ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = "rgba(0,12,0,0.55)"; ctx.fillRect(x - boxW / 2, cy - boxH / 2, boxW, boxH); ctx.restore(); // PASS-1: plate keeps the value >=3:1 over bright cloud (additive dark = no-op, hence source-over)
     ctx.strokeRect(x - boxW / 2, cy - boxH / 2, boxW, boxH);
     ctx.font = font(15, 700);
     ctx.textAlign = "center";
@@ -420,6 +423,7 @@ export class HUD {
     ctx.lineTo(cx + 6, hdgY + 26);
     ctx.stroke();
     const boxW = 44, boxH = 20, by = hdgY + 30;
+    ctx.save(); ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = "rgba(0,12,0,0.55)"; ctx.fillRect(cx - boxW / 2, by, boxW, boxH); ctx.restore();
     ctx.strokeRect(cx - boxW / 2, by, boxW, boxH);
     ctx.font = font(13, 700);
     ctx.textBaseline = "middle";

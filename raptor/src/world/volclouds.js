@@ -521,7 +521,7 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
       // TRAA downstream integrates the march noise away
       const ign = fract(fract(screenCoordinate.x.mul(0.06711056)
         .add(screenCoordinate.y.mul(0.00583715))).mul(52.9829189));
-      const jit = fract(ign.add(fract(uTime.mul(74.1638))));
+      const jit = fract(ign.add(fract(uTime.mul(74.1638)))).mul(0.4).add(0.3);
 
       // 40-56 steps scaled by slab length (~STEP_TARGET m per step)
       const nSteps = clamp(tOut.sub(tIn).div(STEP_TARGET), STEPS_MIN, STEPS_MAX).floor().toVar();

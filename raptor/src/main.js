@@ -250,12 +250,12 @@ async function boot() {
         const px = (pv.x * 0.5 + 0.5) * w, py = (1 - (pv.y * 0.5 + 0.5)) * h;
         if (px > 8 && py > 8 && px < w - 8 && py < h - 8) {
           ctx.save();
-          ctx.strokeStyle = "#ffd27a"; ctx.lineWidth = 1.4; ctx.globalAlpha = 0.9;
+          ctx.strokeStyle = "#ffb000"; ctx.lineWidth = 2.2; ctx.globalAlpha = 0.95; // saturated pipper (panel: 1.06:1 amber was invisible)
           ctx.beginPath();
-          ctx.moveTo(px - 7, py); ctx.lineTo(px - 2.5, py);
-          ctx.moveTo(px + 2.5, py); ctx.lineTo(px + 7, py);
-          ctx.moveTo(px, py - 7); ctx.lineTo(px, py - 2.5);
-          ctx.moveTo(px, py + 2.5); ctx.lineTo(px, py + 7);
+          ctx.moveTo(px - 8, py); ctx.lineTo(px - 3, py);
+          ctx.moveTo(px + 3, py); ctx.lineTo(px + 8, py);
+          ctx.moveTo(px, py - 8); ctx.lineTo(px, py - 3);
+          ctx.moveTo(px, py + 3); ctx.lineTo(px, py + 8);
           ctx.stroke();
           ctx.restore();
         }
@@ -299,15 +299,20 @@ async function boot() {
           ctx.restore();
         }
       }
-      // SAM inbound: flashing MISSILE warning (readable panic, WT-style)
+      // SAM inbound: MISSILE warning — alpha-modulated blink (never fully
+      // absent from a frame; the panel found 0 warning pixels in a frozen
+      // combat still) with a hard black outline for contrast anywhere
       if (battlefield && battlefield.samInbound()) {
         ctx.save();
-        if (Math.floor(performance.now() / 250) % 2 === 0) {
-          ctx.font = "bold 16px ui-monospace, Menlo, monospace";
-          ctx.fillStyle = "#ff5a3c";
-          ctx.textAlign = "center";
-          ctx.fillText("MISSILE", w / 2, h * 0.3);
-        }
+        const pulse = Math.floor(performance.now() / 250) % 2 === 0 ? 1.0 : 0.35;
+        ctx.globalAlpha = pulse;
+        ctx.font = "bold 30px ui-monospace, Menlo, monospace";
+        ctx.textAlign = "center";
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "rgba(0,0,0,0.85)";
+        ctx.strokeText("MISSILE", w / 2, h * 0.3);
+        ctx.fillStyle = "#ff5a3c";
+        ctx.fillText("MISSILE", w / 2, h * 0.3);
         ctx.restore();
       }
       // taking fire: red vignette pulse
