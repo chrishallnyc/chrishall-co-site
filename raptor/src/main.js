@@ -17,8 +17,8 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.13.0";
-const PHASE = 14;
+const VERSION = "0.14.0";
+const PHASE = 8;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
 // (phase 7, FM-PLAN.md) is wired into gameplay. Fields not derivable from
@@ -278,8 +278,27 @@ async function boot() {
       ctx.textAlign = "center";
       const score = battlefield && battlefield.kills > 0 ? "   KILLS " + battlefield.kills : "";
       const dmg = player.hp < 100 ? "   HULL " + Math.max(player.hp, 0) + "%" : "";
-      ctx.fillText("GUN " + player.gun.ammo + score + dmg, w / 2, h - 34);
+      ctx.fillText("GUN " + player.gun.ammo + "   AAM " + player.missiles.ammo + score + dmg, w / 2, h - 34);
       ctx.restore();
+
+      // seeker box on the IR target: dashed while acquiring, solid when locked
+      const MS = player.missiles;
+      if (battlefield && MS.lockTarget >= 0) {
+        const to = MS.lockTarget * 5;
+        pipV.set(battlefield.state[to], battlefield.state[to + 2], battlefield.state[to + 1]);
+        const tv = pipV.project(camera);
+        if (tv.z < 1 && tv.z > -1) {
+          const tx = (tv.x * 0.5 + 0.5) * w, ty = (1 - (tv.y * 0.5 + 0.5)) * h;
+          ctx.save();
+          const locked = MS.locked();
+          ctx.strokeStyle = locked ? "#ffd27a" : "#9be89b";
+          ctx.lineWidth = locked ? 2 : 1.2;
+          if (!locked) ctx.setLineDash([4, 4]);
+          ctx.strokeRect(tx - 14, ty - 14, 28, 28);
+          if (locked) { ctx.font = "10px ui-monospace, Menlo, monospace"; ctx.textAlign = "center"; ctx.fillStyle = "#ffd27a"; ctx.fillText("LOCK", tx, ty - 20); }
+          ctx.restore();
+        }
+      }
       // taking fire: red vignette pulse
       if (player.hitFlash > 0) {
         player.hitFlash = Math.max(0, player.hitFlash - 1 / 60);
@@ -390,6 +409,8 @@ async function boot() {
           ias: player.fm.out.V * 1.94384,
         });
         if (player.gun.firing !== audio.gun.firing) audio.gun.fire(player.gun.firing);
+        const seekMode = player.missiles.locked() ? "lock" : (player.missiles.lockTarget >= 0 ? "scan" : "off");
+        if (audio.locks.mode !== seekMode) audio.locks.setMode(seekMode);
       }
     } else {
       world.render(alpha, camera);

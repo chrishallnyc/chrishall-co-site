@@ -1,11 +1,12 @@
 {
-  "updated": "2026-08-07T12:55:00-07:00",
-  "version": "v0.13.0",
-  "now": "AAA pass: AIM-9X missiles next, then volumetric clouds + the three 10%-better passes",
-  "nowPhase": 14,
+  "updated": "2026-08-07T13:35:00-07:00",
+  "version": "v0.14.0",
+  "now": "SAM sites learning to fire back, volumetric clouds, then the three 10%-better polish passes",
+  "nowPhase": 9,
   "paused": false,
-  "pushes": 30,
+  "pushes": 31,
   "ledger": [
+    "2026-08-07 v0.14.0 — FOX TWO: AIM-9X Sidewinders. The seeker locks onto targets (box + growl tone), the missile launches with real rocket physics — boost, sustain, burnout — and steers itself in with the same guidance law real missiles use. First test flight missed forever because one minus sign was flipped; the test caught it.",
     "2026-08-07 v0.13.0 — THE SEA COMPUTES: the ocean is now a real physics simulation running on your GPU — thousands of waves computed 120 times a second (verified against textbook math to 14 decimal places), with foam that forms where waves actually break. Alaska chop and Pacific swell are physically different seas now. Plus: ground units render 6x leaner.",
     "2026-08-07 v0.12.0 — THE AIR IS REAL: the sky is now computed from actual atmospheric physics — light scattered by real air molecules. Distant mountains fade into blue with distance, sunsets ignite a true twilight arch, all verified against a physics reference to 8 decimal places. 90/90 tests.",
     "2026-08-07 v0.11.0 — THE WAR SHOOTS BACK: anti-aircraft guns track you and fire leaded bursts (red tracers). Hull damage, red-flash hits, shot down = respawn. Nevada's real satellite imagery also landed — all three fronts are photographic now. 65/65 tests.",
@@ -73,8 +74,8 @@
     {
       "n": 8,
       "name": "Sensors & weapons",
-      "pct": 40,
-      "note": "cannon + ballistic pipper live; missiles next"
+      "pct": 60,
+      "note": "cannon + pipper + AIM-9X with seeker lock live; AIM-120 + radar later"
     },
     {
       "n": 9,
@@ -103,8 +104,8 @@
     {
       "n": 13,
       "name": "Audio & voice",
-      "pct": 45,
-      "note": "engine + gun sound live in-game; radio voice later"
+      "pct": 55,
+      "note": "engine, gun, seeker growl + lock tones live in-game"
     },
     {
       "n": 14,
@@ -121,8 +122,8 @@
     {
       "n": 16,
       "name": "QA hardening",
-      "pct": 52,
-      "note": "13 batteries, 100+ gates, forensic judges standing"
+      "pct": 55,
+      "note": "14 batteries, 110+ gates, forensic judges standing"
     },
     {
       "n": 17,

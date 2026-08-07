@@ -9,6 +9,7 @@
 import * as THREE from "three";
 import { FlightModel, S } from "../sim/flight.js";
 import { Gun } from "./gun.js";
+import { Missiles } from "./missiles.js";
 
 const MOUSE_SENS = 0.0028;      // rad of aim per px of mouse travel
 const THROTTLE_RATE = 0.45;     // per second held
@@ -22,6 +23,7 @@ export class Player {
     this.battlefield = battlefield || null;
     this.spawn = spawn;
     this.gun = new Gun(scene);  // boot-time scene.add — safe
+    this.missiles = new Missiles(scene);
 
     this.fm = new FlightModel();
     this._doSpawn();
@@ -33,7 +35,7 @@ export class Player {
     this.throttleCmd = 0.8;
     this.gearDown = false;
     this._mouseDx = 0; this._mouseDy = 0;
-    this._live = { rollL: 0, rollR: 0, yawL: 0, yawR: 0, thrUp: 0, thrDn: 0, pitchUp: 0, pitchDn: 0, brake: 0, wheel: 0, gearEdge: 0, fire: 0 };
+    this._live = { rollL: 0, rollR: 0, yawL: 0, yawR: 0, thrUp: 0, thrDn: 0, pitchUp: 0, pitchDn: 0, brake: 0, wheel: 0, gearEdge: 0, fire: 0, aamEdge: 0 };
     this.crashes = 0;
     this.hp = 100;
     this.hitFlash = 0; // render-side: seconds of damage flash remaining
@@ -70,6 +72,7 @@ export class Player {
     L.wheel += input.wheelDelta();
     if (input.pressed("gear")) L.gearEdge = 1;
     L.fire = (input.held("fire_mguns") || input.held("fire_cannons")) ? 1 : 0;
+    if (input.pressed("fire_aam")) L.aamEdge = 1;
   }
 
   // QA hook: drive the aim/throttle directly (batteries can't move a mouse);
@@ -131,6 +134,8 @@ export class Player {
     }, { groundH: Math.max(groundH, 0) });
 
     this.gun.tick(sim, dt, this.fm, L.fire === 1, this.terrain, this.battlefield);
+    this.missiles.tick(sim, dt, this.fm, this.battlefield, L.aamEdge === 1);
+    L.aamEdge = 0;
 
     // gear-up terrain/water contact = crash → respawn (proper damage phase 8)
     const agl = st[S.PZ] - Math.max(groundH, 0);
@@ -140,7 +145,7 @@ export class Player {
   hash(h) {
     const st = this.fm.state;
     for (let i = 0; i < 14; i++) h = (Math.imul(h ^ ((st[i] * 1e5) | 0), 0x01000193)) >>> 0;
-    return h;
+    return this.missiles.hash(h);
   }
 
   // ---- render side ----
@@ -163,6 +168,7 @@ export class Player {
     this.jet.quaternion.setFromRotationMatrix(this._m);
 
     this.gun.render(1 / 60); // visual aging; cheap approximation of dt
+    this.missiles.render(1 / 60, camera);
 
     if (parked) return; // QA parked-camera owns the view
     // chase camera behind the flight path, mild smoothing
@@ -196,6 +202,7 @@ export class Player {
       aoa: out.alphaDeg,
       throttle: Math.round(this.throttleCmd * 100),
       ammo: this.gun.ammo,
+      aam: this.missiles.ammo,
       hp: this.hp,
     };
   }
