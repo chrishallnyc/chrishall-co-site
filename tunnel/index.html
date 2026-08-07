@@ -9,9 +9,9 @@
 <link rel="canonical" href="https://tunnel.chall.net/">
 <meta name="theme-color" content="#f6f4ee">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f6f4ee'/%3E%3Cpath d='M1.5 19.4 L30.5 16.4' stroke='%23989690' stroke-width='1'/%3E%3Cpath d='M3.5 19 C6.5 12.6 13.5 10.6 19.5 12 C24.5 13.2 28 15.4 29 16.6 C26 18.2 18.5 20.6 11.5 20.9 C7.5 21 4.5 20.3 3.5 19 Z' fill='%2318181c'/%3E%3Ccircle cx='4.2' cy='19' r='2.4' fill='%23e8b46f'/%3E%3C/svg%3E">
-<!-- CHALL TUNNEL v0.1.0 · first air — webgpu d2q9 in-place solver, cylinder specimen -->
+<!-- CHALL TUNNEL v0.2.0 · the hand — drag-to-pitch flat plate, etched protractor, measured captions, moving-wall+refill live -->
 <style>
-:root { --bg:#f6f4ee; --ink:#18181c; --mid:#56565e; --dim:#69675f; --hair:#989690; --acc:#e8b46f; }
+:root { --bg:#f6f4ee; --ink:#18181c; --mid:#56565e; --dim:#69675f; --hair:#989690; --acc:#e8b46f; --accd:#8a5d0c; }
 * { margin:0; padding:0; box-sizing:border-box; }
 html,body { background:var(--bg); height:100%; }
 body {
@@ -42,9 +42,17 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 #stage {
   position:fixed; z-index:1;
   left:50%; top:50%; transform:translate(-50%,-50%);
+  touch-action:none;
 }
 #gpu { position:absolute; inset:0; width:100%; height:100%; }
 #specimen { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+#etch { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+#caption {
+  position:fixed; z-index:2; left:50%; transform:translateX(-50%);
+  font-size:11px; letter-spacing:.5px; color:var(--mid); white-space:nowrap;
+}
+#caption .kw { font-weight:700; color:var(--ink); }
+#caption.broke .kw { color:var(--accd); }
 #card {
   position:fixed; left:20px; bottom:20px; z-index:2;
   max-width:360px; border:1px solid var(--ink); background:var(--bg);
@@ -66,11 +74,17 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 <canvas id="paper" aria-hidden="true"></canvas>
 <div id="stage" hidden>
   <canvas id="gpu"></canvas>
-  <svg id="specimen" aria-hidden="true"><circle id="body" fill="#18181c"/></svg>
+  <svg id="specimen" aria-hidden="true">
+    <circle id="body" fill="#18181c" hidden/>
+    <rect id="plate" fill="#18181c" hidden/>
+  </svg>
+  <canvas id="etch" aria-hidden="true" hidden></canvas>
 </div>
+<p id="caption" hidden><span id="capbase"></span><span class="kw" id="capkw"></span></p>
 <aside id="card" hidden>
   <div class="cbrand">CHALL TUNNEL</div>
-  <p class="cline">first air . a real solver is running — TEST ARTICLE: CYLINDER (the calibration body) . the instrument grows here in the open</p>
+  <p class="cline" id="cline">first air . a real solver is running — TEST ARTICLE: CYLINDER (the calibration body) . the instrument grows here in the open</p>
+  <p class="cread" id="alphaline" hidden>α 0.0°</p>
   <p class="cread" id="readout">spooling up —</p>
   <a class="cwatch" href="https://admin.chall.net/tunnel-mission">watch it being built → admin.chall.net/tunnel-mission</a>
 </aside>
@@ -91,15 +105,27 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 <script type="module">
 'use strict';
 // ============================================================================
-// CHALL TUNNEL — phase 1 "first air"
+// CHALL TUNNEL — phase 2 "the hand"
 // WebGPU D2Q9 LBM, FP16S storage / FP32 math, IN-PLACE single-buffer streaming
-// (the AA-pattern / esoteric-pull family, the measured spike scheme), with the
-// full oracle physics: Smagorinsky LES (plain-Frobenius |Q|), smoothstep inflow
-// ramp + deterministic transverse kick, ρ-ANCHORED zero-gradient outflow,
-// quadratic-τ sponge, free-slip walls, half-way bounce-back cylinder.
+// (AA-pattern), full oracle physics: Smagorinsky LES (plain-Frobenius |Q|),
+// smoothstep inflow ramp + deterministic kick, ρ-ANCHORED zero-gradient
+// outflow, quadratic-τ sponge, free-slip walls. Phase 2 adds the HAND:
+//   - buffer-driven solid mask (analytic FLAT PLATE re-rasterized per α change;
+//     cylinder stays reachable via ?article=cyl — same predicate as phase 1)
+//   - half-way bounce-back MOVING-WALL term (oracle pull form,
+//     f_i = f*_opp + 6·w_i·ρ_w·(e_i·u_w) at link x−e_i/2, u_w = ω×(x−pivot));
+//     ω is the grid-frame rad/substep from the frame's Δα spread across substeps
+//   - fresh-cell REFILL on mask swap (equilibrium at neighbor-ρ + wall u_w) —
+//     mirrors oracle setMask(); swaps land at ODD parity (own-cell swapped
+//     layout: refill writes are per-cell, race-free, and the following odd
+//     gather applies the new mask + ω exactly like the oracle's next step()
+//   - separation detector (reversed tangential velocity on the suction-side
+//     sample line vs the α≈0 post-spool baseline) → measured-voice captions
 // CONSTANTS below mirror ~/.chall/tunnel-mission/qa/oracle.mjs EXACTLY — the
 // shared-constants law. Shaders interpolate these values; they are never
 // retyped in a shader string.
+// α convention (this page): +α = nose UP on screen (grid y is down; the plate
+// chord LE→TE direction is (cosα, sinα) in grid coords) ⇒ ω_grid = +dα_rad/dt.
 // ============================================================================
 
 // ---------- THE SHARED-CONSTANTS OBJECT (mirror of qa/oracle.mjs CONSTANTS) ----------
@@ -125,16 +151,25 @@ function spongeCols(W) { return Math.max(C.SPONGE_FLOOR, Math.round(C.SPONGE_FRA
 function f(x) { let s = Number(x).toPrecision(10); if (!/[.e]/.test(s)) s += '.0'; return s; }
 
 // ---------- WGSL generation (all constants interpolated from C) ----------
-function commonWGSL(W, H, geom, nSponge) {
+function commonWGSL(W, H, nSponge) {
   const xs = W - 1 - nSponge;
   return `
 enable f16;
 const W = ${W}u; const H = ${H}u; const NC = ${W * H}u;
+struct SimU { om: f32, px: f32, py: f32, pad: f32 }
 @group(0) @binding(0) var<storage, read_write> fbuf: array<f16>;
 @group(0) @binding(1) var<storage, read_write> misc: array<atomic<u32>>;
+@group(0) @binding(5) var<storage, read> mask: array<u32>;
+@group(0) @binding(6) var<uniform> su: SimU;
 fn is_solid_i(x: u32, y: u32) -> bool {
-  let dx = f32(x) - ${f(geom.cx)}; let dy = f32(y) - ${f(geom.cy)};
-  return dx*dx + dy*dy <= ${f(geom.r * geom.r)};
+  return mask[y * W + x] != 0u;
+}
+// moving-wall bounce-back term (oracle pull form): + 6·w_i·ρ_w·(e_i·u_w),
+// u_w = ω×(link−pivot) at the half-way link x − e_i/2. Zero when ω = 0.
+fn mw(ex: f32, ey: f32, w: f32, x: f32, y: f32) -> f32 {
+  let lx = x - ex * 0.5 - su.px;
+  let ly = y - ey * 0.5 - su.py;
+  return ${f(6 * C.RHO_WALL)} * w * (ex * (-su.om * ly) + ey * (su.om * lx));
 }
 fn tau0_col(x: u32) -> f32 {
   if (x < ${xs}u) { return ${f(C.TAU0)}; }
@@ -208,7 +243,12 @@ function eqWGSL() {
   let e8 = ${f(C.W9[8])} * (ec1 + ex3 - ey3 + exx + eyy - exy - 1.0);
 `;
 }
-// AA-pattern odd-step gather/scatter with free-slip specular + bounce-back redirects
+// AA-pattern odd-step gather/scatter with free-slip specular + bounce-back redirects.
+// Moving wall: the odd gather streams the odd substep (pull form, + mw(i, x, y));
+// the odd scatter streams the NEXT even substep (push form: the reflected
+// population arriving back at x along OPP[i] gets + mw(OPP[i], x, y) — same
+// oracle formula, opposite direction, identical link point x + e_i/2).
+const mwCall = (i) => `mw(${f(C.EX[i])}, ${f(C.EY[i])}, ${f(C.W9[i])}, f32(xi), f32(yi))`;
 function oddGatherWGSL(H) {
   let s = '';
   for (let i = 1; i < 9; i++) {
@@ -216,12 +256,12 @@ function oddGatherWGSL(H) {
     const sx = ex === 0 ? 'xi' : `xi - ${ex > 0 ? '1' : '(-1)'}`;
     if (ey === 0) {
       s += `  { let j = u32(yi) * W + u32(${sx});
-    if (is_solid_i(u32(${sx}), u32(yi))) { s${i} = f32(fbuf[${i}u*NC + idx]); } else { s${i} = f32(fbuf[${C.OPP[i]}u*NC + j]); } }
+    if (is_solid_i(u32(${sx}), u32(yi))) { s${i} = f32(fbuf[${i}u*NC + idx]) + ${mwCall(i)}; } else { s${i} = f32(fbuf[${C.OPP[i]}u*NC + j]); } }
 `;
     } else {
       s += `  { let sy = yi - ${ey > 0 ? '1' : '(-1)'};
     if (sy < 0 || sy > ${H - 1}) { s${i} = f32(fbuf[${C.OPP[REFL[i]]}u*NC + u32(yi) * W + u32(${sx})]); }
-    else if (is_solid_i(u32(${sx}), u32(sy))) { s${i} = f32(fbuf[${i}u*NC + idx]); }
+    else if (is_solid_i(u32(${sx}), u32(sy))) { s${i} = f32(fbuf[${i}u*NC + idx]) + ${mwCall(i)}; }
     else { s${i} = f32(fbuf[${C.OPP[i]}u*NC + u32(sy) * W + u32(${sx})]); } }
 `;
     }
@@ -234,19 +274,21 @@ function oddScatterWGSL(H) {
     const ex = C.EX[i], ey = C.EY[i];
     const tx = ex === 0 ? 'xi' : `xi + ${ex > 0 ? '1' : '(-1)'}`;
     if (ey === 0) {
-      s += `  { if (is_solid_i(u32(${tx}), u32(yi))) { fbuf[${C.OPP[i]}u*NC + idx] = f16(out${i}); } else { fbuf[${i}u*NC + u32(yi) * W + u32(${tx})] = f16(out${i}); } }
+      s += `  { if (is_solid_i(u32(${tx}), u32(yi))) { fbuf[${C.OPP[i]}u*NC + idx] = f16(out${i} + ${mwCall(C.OPP[i])}); } else { fbuf[${i}u*NC + u32(yi) * W + u32(${tx})] = f16(out${i}); } }
 `;
     } else {
       s += `  { let ty = yi + ${ey > 0 ? '1' : '(-1)'};
     if (ty < 0 || ty > ${H - 1}) { fbuf[${REFL[i]}u*NC + u32(yi) * W + u32(${tx})] = f16(out${i}); }
-    else if (is_solid_i(u32(${tx}), u32(ty))) { fbuf[${C.OPP[i]}u*NC + idx] = f16(out${i}); }
+    else if (is_solid_i(u32(${tx}), u32(ty))) { fbuf[${C.OPP[i]}u*NC + idx] = f16(out${i} + ${mwCall(C.OPP[i])}); }
     else { fbuf[${i}u*NC + u32(ty) * W + u32(${tx})] = f16(out${i}); } }
 `;
     }
   }
   return s;
 }
-// inverse of the odd scatter: recover post-collision f*(x,y) from the scattered layout
+// inverse of the odd scatter: recover post-collision f*(x,y) from the scattered
+// layout (solid-target slots carry the push-form mw term — subtract it back out;
+// exact zero at ω=0, honest fields during rotation)
 function unscatterWGSL(H) {
   let s = `fn unscatter(xu: u32, yu: u32) -> array<f32, 9> {
   var sa: array<f32, 9>;
@@ -257,12 +299,12 @@ function unscatterWGSL(H) {
     const ex = C.EX[i], ey = C.EY[i];
     const tx = ex === 0 ? 'xi' : `xi + ${ex > 0 ? '1' : '(-1)'}`;
     if (ey === 0) {
-      s += `  { if (is_solid_i(u32(${tx}), yu)) { sa[${i}] = f32(fbuf[${C.OPP[i]}u*NC + yu * W + xu]); } else { sa[${i}] = f32(fbuf[${i}u*NC + yu * W + u32(${tx})]); } }
+      s += `  { if (is_solid_i(u32(${tx}), yu)) { sa[${i}] = f32(fbuf[${C.OPP[i]}u*NC + yu * W + xu]) - ${mwCall(C.OPP[i])}; } else { sa[${i}] = f32(fbuf[${i}u*NC + yu * W + u32(${tx})]); } }
 `;
     } else {
       s += `  { let ty = yi + ${ey > 0 ? '1' : '(-1)'};
     if (ty < 0 || ty > ${H - 1}) { sa[${i}] = f32(fbuf[${REFL[i]}u*NC + yu * W + u32(${tx})]); }
-    else if (is_solid_i(u32(${tx}), u32(ty))) { sa[${i}] = f32(fbuf[${C.OPP[i]}u*NC + yu * W + xu]); }
+    else if (is_solid_i(u32(${tx}), u32(ty))) { sa[${i}] = f32(fbuf[${C.OPP[i]}u*NC + yu * W + xu]) - ${mwCall(C.OPP[i])}; }
     else { sa[${i}] = f32(fbuf[${i}u*NC + u32(ty) * W + u32(${tx})]); } }
 `;
     }
@@ -270,7 +312,56 @@ function unscatterWGSL(H) {
   return s + '  return sa;\n}\n';
 }
 
-function solverWGSL(W, H, geom, nSponge) {
+// fresh-cell refill (oracle setMask mirror): runs at ODD parity (own-cell
+// swapped layout — post-collision f*_i(x) sits at slot OPP[i] of x). For each
+// solid→fluid cell: feq at (mean ρ of neighbors fluid in BOTH masks, else 1)
+// + local wall velocity u_w = ω×(cell−pivot), written to own swapped slots.
+// Fresh cells and both-mask-fluid neighbors are disjoint sets — race-free.
+function refillWGSL(W, H) {
+  let nbr = '';
+  for (let i = 1; i < 9; i++) {
+    nbr += `  { let nx = xi + ${C.EX[i]}; let ny = yi + ${C.EY[i]};
+    if (nx >= 0 && nx < ${W} && ny >= 0 && ny < ${H}) {
+      let j = u32(ny) * W + u32(nx);
+      if (maskPrev[j] == 0u && mask[j] == 0u) { rs += rho_at(j); n += 1.0; }
+    } }
+`;
+  }
+  const writes = Array.from({ length: 9 }, (_, i) => {
+    const terms = ['c1',
+      'c1 + ux3 + uxx', 'c1 + uy3 + uyy', 'c1 - ux3 + uxx', 'c1 - uy3 + uyy',
+      'c1 + ux3 + uy3 + uxx + uyy + uxy', 'c1 - ux3 + uy3 + uxx + uyy - uxy',
+      'c1 - ux3 - uy3 + uxx + uyy + uxy', 'c1 + ux3 - uy3 + uxx + uyy - uxy'][i];
+    return `  fbuf[${C.OPP[i]}u*NC + idx] = f16(${f(C.W9[i])} * (rho * (${terms}) - 1.0));`;
+  }).join('\n');
+  return `
+@group(0) @binding(7) var<storage, read> maskPrev: array<u32>;
+fn rho_at(j: u32) -> f32 {
+  return 1.0 ${Array.from({ length: 9 }, (_, i) => `+ f32(fbuf[${i}u*NC + j])`).join(' ')};
+}
+@compute @workgroup_size(256)
+fn refill(@builtin(global_invocation_id) gid: vec3<u32>) {
+  let idx = gid.x;
+  if (idx >= NC) { return; }
+  if (!(maskPrev[idx] != 0u && mask[idx] == 0u)) { return; }
+  let y = idx / W;
+  let x = idx - y * W;
+  let xi = i32(x); let yi = i32(y);
+  var rs = 0.0; var n = 0.0;
+${nbr}
+  let rho = select(1.0, rs / n, n > 0.0);
+  let uwx = -su.om * (f32(y) - su.py);
+  let uwy = su.om * (f32(x) - su.px);
+  let u2 = 1.5 * (uwx * uwx + uwy * uwy);
+  let c1 = 1.0 - u2;
+  let ux3 = 3.0 * uwx; let uy3 = 3.0 * uwy;
+  let uxx = 4.5 * uwx * uwx; let uyy = 4.5 * uwy * uwy; let uxy = 9.0 * uwx * uwy;
+${writes}
+}
+`;
+}
+
+function solverWGSL(W, H, nSponge) {
   const evenGather = Array.from({ length: 9 }, (_, i) => `    s${i} = f32(fbuf[${i}u*NC + idx]);`).join('\n');
   const evenScatter = Array.from({ length: 9 }, (_, i) => `    fbuf[${C.OPP[i]}u*NC + idx] = f16(out${i});`).join('\n');
   const inflowEven = Array.from({ length: 9 }, (_, i) => `    fbuf[${C.OPP[i]}u*NC + row] = f16(e${i});`).join('\n');
@@ -278,8 +369,9 @@ function solverWGSL(W, H, geom, nSponge) {
   const outEvenW = Array.from({ length: 9 }, (_, i) => `    fbuf[${C.OPP[i]}u*NC + b] = f16(sc * (s${i} + ${f(C.W9[i])}) - ${f(C.W9[i])});`).join('\n');
   const outOddR = Array.from({ length: 9 }, (_, i) => `    let s${i} = sarr[${i}];`).join('\n');
   return `
-${commonWGSL(W, H, geom, nSponge)}
+${commonWGSL(W, H, nSponge)}
 ${unscatterWGSL(H)}
+${refillWGSL(W, H)}
 @compute @workgroup_size(256)
 fn main_step(@builtin(global_invocation_id) gid: vec3<u32>) {
   let idx = gid.x;
@@ -349,9 +441,35 @@ fn tick_step() {
 }
 // fields / velocity-texture / wake-probe module (checkpoints land after odd
 // substeps: even step-counts — the scattered natural layout, hence unscatter)
-function fieldsWGSL(W, H, geom, nSponge, probe, ringLen) {
+// + the SEPARATION DETECTOR (plate only): 64 taps along a sample line 2.5 cells
+// off the suction surface; a tap is REVERSED when the chordwise-tangential
+// velocity u·t̂ < −0.02·u₀ (t̂ = LE→TE). Counters land in misc[3]/misc[4];
+// the α≈0 post-spool baseline + hysteresis live CPU-side.
+function fieldsWGSL(W, H, nSponge, probe, ringLen, plate) {
+  const sep = plate ? `
+struct SepU { ca: f32, sa: f32, side: f32, pad: f32 }
+@group(0) @binding(7) var<uniform> sepu: SepU;
+@compute @workgroup_size(64)
+fn sep(@builtin(global_invocation_id) gid: vec3<u32>) {
+  let k = gid.x;
+  if (k >= 64u) { return; }
+  let s = (f32(k) + 0.5) / 64.0;
+  let xi = ${f(-0.25 * plate.chord)} + s * ${f(plate.chord)};
+  let eta = sepu.side * ${f(plate.halfTh + 2.5)};
+  let gx = su.px + xi * sepu.ca - eta * sepu.sa;
+  let gy = su.py + xi * sepu.sa + eta * sepu.ca;
+  if (gx < 1.0 || gx > ${f(W - 2)} || gy < 1.0 || gy > ${f(H - 2)}) { return; }
+  let x = u32(round(gx)); let y = u32(round(gy));
+  if (mask[y * W + x] != 0u) { return; }
+  let m = cell_m(x, y);
+  let ut = m.y * sepu.ca + m.z * sepu.sa;
+  atomicAdd(&misc[4], 1u);
+  if (ut < ${f(-0.02 * C.U0)}) { atomicAdd(&misc[3], 1u); }
+}
+` : '';
   return `
-${commonWGSL(W, H, geom, nSponge)}
+${commonWGSL(W, H, nSponge)}
+${sep}
 @group(0) @binding(2) var<storage, read_write> fieldsOut: array<f32>;
 @group(0) @binding(3) var velOut: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(4) var<storage, read_write> ring: array<f32>;
@@ -400,27 +518,49 @@ fn probe() {
 }
 
 // ---------- solver ----------
+// article: { type:'cyl', cx, cy, r } | { type:'plate', px, py, chord, halfTh }
+// (plate pivot at quarter-chord: ξ ∈ [−c/4, 3c/4] in the plate frame)
 class Solver {
-  constructor(device, { W, H, geom, sponge, probe }) {
+  constructor(device, { W, H, article, sponge, probe }) {
     this.device = device;
     this.W = W; this.H = H; this.NC = W * H;
-    this.geom = geom;
+    this.article = article;
     this.nSponge = sponge ?? spongeCols(W);
-    this.probe = probe || { x: Math.round(geom.cx + 6 * geom.r), y: Math.floor(geom.cy) };
+    this.probe = probe || (article.type === 'cyl'
+      ? { x: Math.round(article.cx + 6 * article.r), y: Math.floor(article.cy) }
+      : { x: Math.round(article.px + article.chord), y: Math.round(article.py) });
     this.ringLen = 2048;
     this.t = 0; // CPU mirror of misc[0]
+    this.alphaApplied = 0; this.omCur = 0;
+    this.maskArr = new Uint32Array(this.NC);
+    this.plateBand = null;
+    if (article.type === 'cyl') {
+      const r2 = article.r * article.r;
+      for (let y = 0; y < H; y++)
+        for (let x = 0; x < W; x++)
+          if ((x - article.cx) * (x - article.cx) + (y - article.cy) * (y - article.cy) <= r2) this.maskArr[y * W + x] = 1;
+    } else {
+      this.rasterPlate(0);
+    }
     const d = device;
     this.fbuf = d.createBuffer({ size: 9 * this.NC * 2, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
-    this.misc = d.createBuffer({ size: 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST });
+    this.misc = d.createBuffer({ size: 32, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST });
     this.ring = d.createBuffer({ size: this.ringLen * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
     this.fieldsBuf = d.createBuffer({ size: this.NC * 3 * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
+    this.mask = d.createBuffer({ size: this.NC * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST });
+    this.maskPrev = d.createBuffer({ size: this.NC * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+    this.simU = d.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+    d.queue.writeBuffer(this.mask, 0, this.maskArr);
+    this.writeSimU(0);
     this.velTex = d.createTexture({ size: [W, H], format: 'rgba16float', usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING });
-    const solverMod = d.createShaderModule({ code: solverWGSL(W, H, geom, this.nSponge) });
-    const fieldsMod = d.createShaderModule({ code: fieldsWGSL(W, H, geom, this.nSponge, this.probe, this.ringLen) });
+    const plate = article.type === 'plate' ? { chord: article.chord, halfTh: article.halfTh } : null;
+    const solverMod = d.createShaderModule({ code: solverWGSL(W, H, this.nSponge) });
+    const fieldsMod = d.createShaderModule({ code: fieldsWGSL(W, H, this.nSponge, this.probe, this.ringLen, plate) });
     const cp = (mod, entry) => d.createComputePipeline({ layout: 'auto', compute: { module: mod, entryPoint: entry } });
     this.pMain = cp(solverMod, 'main_step');
     this.pBoundary = cp(solverMod, 'boundary');
     this.pTick = cp(solverMod, 'tick_step');
+    this.pRefill = cp(solverMod, 'refill');
     this.pFields = cp(fieldsMod, 'fields');
     this.pVelTex = cp(fieldsMod, 'veltex');
     this.pProbe = cp(fieldsMod, 'probe');
@@ -429,14 +569,94 @@ class Solver {
       entries: entries.map(([binding, resource]) => ({ binding, resource })),
     });
     const fb = { buffer: this.fbuf }, ms = { buffer: this.misc };
-    this.bgMain = bg(this.pMain, [[0, fb], [1, ms]]);
-    this.bgBoundary = bg(this.pBoundary, [[0, fb], [1, ms]]);
+    const mk = { buffer: this.mask }, un = { buffer: this.simU };
+    this.bgMain = bg(this.pMain, [[0, fb], [1, ms], [5, mk], [6, un]]);
+    this.bgBoundary = bg(this.pBoundary, [[0, fb], [1, ms], [5, mk], [6, un]]);
     this.bgTick = bg(this.pTick, [[1, ms]]);
-    this.bgFields = bg(this.pFields, [[0, fb], [1, ms], [2, { buffer: this.fieldsBuf }]]);
-    this.bgVelTex = bg(this.pVelTex, [[0, fb], [1, ms], [3, this.velTex.createView()]]);
-    this.bgProbe = bg(this.pProbe, [[0, fb], [1, ms], [4, { buffer: this.ring }]]);
+    this.bgRefill = bg(this.pRefill, [[0, fb], [5, mk], [6, un], [7, { buffer: this.maskPrev }]]);
+    this.bgFields = bg(this.pFields, [[0, fb], [1, ms], [2, { buffer: this.fieldsBuf }], [5, mk], [6, un]]);
+    this.bgVelTex = bg(this.pVelTex, [[0, fb], [1, ms], [3, this.velTex.createView()], [5, mk], [6, un]]);
+    this.bgProbe = bg(this.pProbe, [[0, fb], [1, ms], [4, { buffer: this.ring }], [5, mk], [6, un]]);
+    if (plate) {
+      this.sepU = d.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+      this.pSep = cp(fieldsMod, 'sep');
+      this.bgSep = bg(this.pSep, [[0, fb], [1, ms], [5, mk], [6, un], [7, { buffer: this.sepU }]]);
+    }
     this.wgMain = Math.ceil(this.NC / 256);
     this.wgBoundary = Math.ceil(H / 64);
+  }
+  writeSimU(om) {
+    const a = this.article;
+    const px = a.type === 'plate' ? a.px : 0, py = a.type === 'plate' ? a.py : 0;
+    this.device.queue.writeBuffer(this.simU, 0, new Float32Array([om, px, py, 0]));
+  }
+  // rasterize the analytic flat plate at α (deg) into maskArr; returns the
+  // full-width row band {y0,y1} covering old∪new plate cells (the upload span)
+  rasterPlate(aDeg) {
+    const { px, py, chord, halfTh } = this.article;
+    const W = this.W, H = this.H, m = this.maskArr;
+    const a = aDeg * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a);
+    const prev = this.plateBand;
+    if (prev) m.fill(0, prev.y0 * W, (prev.y1 + 1) * W);
+    let gx0 = Infinity, gx1 = -Infinity, gy0 = Infinity, gy1 = -Infinity;
+    for (const xi of [-0.25 * chord, 0.75 * chord])
+      for (const eta of [-halfTh, halfTh]) {
+        const gx = px + xi * ca - eta * sa, gy = py + xi * sa + eta * ca;
+        gx0 = Math.min(gx0, gx); gx1 = Math.max(gx1, gx);
+        gy0 = Math.min(gy0, gy); gy1 = Math.max(gy1, gy);
+      }
+    const x0 = Math.max(1, Math.floor(gx0) - 1), x1 = Math.min(W - 2, Math.ceil(gx1) + 1);
+    const y0 = Math.max(1, Math.floor(gy0) - 1), y1 = Math.min(H - 2, Math.ceil(gy1) + 1);
+    for (let y = y0; y <= y1; y++) {
+      const rb = y * W, dy = y - py;
+      for (let x = x0; x <= x1; x++) {
+        const dx = x - px;
+        const xi = dx * ca + dy * sa, eta = -dx * sa + dy * ca;
+        if (xi >= -0.25 * chord && xi <= 0.75 * chord && Math.abs(eta) <= halfTh) m[rb + x] = 1;
+      }
+    }
+    const band = prev ? { y0: Math.min(y0, prev.y0), y1: Math.max(y1, prev.y1) } : { y0, y1 };
+    this.plateBand = { y0, y1 };
+    return band;
+  }
+  // the α swap — call ONLY between frames (even parity). Runs ONE even substep
+  // (even substeps never touch the mask), snapshots mask→maskPrev, uploads the
+  // new mask + ω uniform, so the swap lands at ODD parity where the refill and
+  // every following gather/scatter mirror the oracle's setMask→step sequence.
+  // ω = Δα_rad spread across the frame's substeps (rad/substep, grid frame).
+  // The caller must encode refill (if mask changed) + substeps−1 more substeps.
+  beginAlphaSwap(aNew, substeps) {
+    const enc = this.device.createCommandEncoder();
+    const pass = enc.beginComputePass();
+    this.encodeSubstep(pass);
+    pass.end();
+    const maskChange = aNew !== this.alphaApplied;
+    if (maskChange) enc.copyBufferToBuffer(this.mask, 0, this.maskPrev, 0, this.NC * 4);
+    this.device.queue.submit([enc.finish()]);
+    if (maskChange) {
+      const band = this.rasterPlate(aNew);
+      this.device.queue.writeBuffer(this.mask, band.y0 * this.W * 4, this.maskArr, band.y0 * this.W, (band.y1 - band.y0 + 1) * this.W);
+    }
+    const om = (aNew - this.alphaApplied) * Math.PI / 180 / substeps;
+    this.writeSimU(om);
+    this.alphaApplied = aNew; this.omCur = om;
+    return maskChange;
+  }
+  encodeRefill(pass) {
+    pass.setPipeline(this.pRefill); pass.setBindGroup(0, this.bgRefill); pass.dispatchWorkgroups(this.wgMain);
+  }
+  writeSep(aDeg) { // suction side: −η for α ≥ 0 (nose up on screen), +η below
+    const a = aDeg * Math.PI / 180;
+    const side = aDeg >= 0 ? -1 : 1;
+    this.device.queue.writeBuffer(this.sepU, 0, new Float32Array([Math.cos(a), Math.sin(a), side, 0]));
+  }
+  encodeSep(pass) {
+    pass.setPipeline(this.pSep); pass.setBindGroup(0, this.bgSep); pass.dispatchWorkgroups(1);
+  }
+  isSolidCPU(x, y) {
+    const xi = Math.round(x), yi = Math.round(y);
+    if (xi < 0 || xi >= this.W || yi < 0 || yi >= this.H) return false;
+    return this.maskArr[yi * this.W + xi] !== 0;
   }
   encodeSubstep(pass) {
     pass.setPipeline(this.pMain); pass.setBindGroup(0, this.bgMain); pass.dispatchWorkgroups(this.wgMain);
@@ -487,14 +707,18 @@ class Solver {
     return new Float32Array(await this.readBuf(this.fieldsBuf, this.NC * 3 * 4)); // [rho,ux,uy] interleaved
   }
   async readMisc() {
-    const m = new Uint32Array(await this.readBuf(this.misc, 16));
-    return { steps: m[0], clamps: m[1], probeCursor: m[2] };
+    const m = new Uint32Array(await this.readBuf(this.misc, 32));
+    return { steps: m[0], clamps: m[1], probeCursor: m[2], sepRev: m[3], sepTot: m[4] };
+  }
+  resetSepCounters() {
+    this.device.queue.writeBuffer(this.misc, 12, new Uint32Array([0, 0]));
   }
   async readRing() {
     return new Float32Array(await this.readBuf(this.ring, this.ringLen * 4));
   }
   destroy() {
-    for (const b of [this.fbuf, this.misc, this.ring, this.fieldsBuf]) b.destroy();
+    for (const b of [this.fbuf, this.misc, this.ring, this.fieldsBuf, this.mask, this.maskPrev, this.simU]) b.destroy();
+    if (this.sepU) this.sepU.destroy();
     this.velTex.destroy();
   }
 }
@@ -520,7 +744,7 @@ function mulberry32(a) {
 class Ink {
   constructor(device, solver, R0, canvasFormat) {
     this.device = device; this.solver = solver;
-    const { W, H, geom } = solver;
+    const { W, H } = solver;
     this.gain = INK.speck;
     this.q = 0.5; // governed draw fraction (LAW 5 lever)
     this.frame = 0;
@@ -536,6 +760,7 @@ struct U { seed: u32, gain: f32, q: f32, frame: u32 }
 @group(0) @binding(1) var vel: texture_2d<f32>;
 @group(0) @binding(2) var samp: sampler;
 @group(0) @binding(3) var<uniform> u: U;
+@group(0) @binding(4) var<storage, read> mask: array<u32>;
 fn pcg(v0: u32) -> u32 {
   var v = v0 * 747796405u + 2891336453u;
   v = ((v >> ((v >> 28u) + 4u)) ^ v) * 277803737u;
@@ -551,9 +776,11 @@ fn advect(@builtin(global_invocation_id) gid: vec3<u32>) {
   let v1 = textureSampleLevel(vel, samp, (pos + vec2f(0.5)) * inv, 0.0).xy;
   let v2 = textureSampleLevel(vel, samp, (pos + vec2f(0.5) + 0.5 * ${f(R0)} * v1) * inv, 0.0).xy;
   pos += ${f(R0)} * v2;
-  let dx = pos.x - ${f(geom.cx)}; let dy = pos.y - ${f(geom.cy)};
+  var solidHit = false;
+  { let cx = i32(round(pos.x)); let cy = i32(round(pos.y));
+    if (cx >= 0 && cx < ${W} && cy >= 0 && cy < ${H}) { solidHit = mask[u32(cy) * ${W}u + u32(cx)] != 0u; } }
   let dead = pos.x > ${f(W - 2)} || pos.x < 0.0 || pos.y != pos.y || pos.x != pos.x
-    || dx * dx + dy * dy <= ${f((geom.r + 0.5) * (geom.r + 0.5))};
+    || solidHit;
   if (dead) {
     let rs = u32(p.z) + 1u;
     let h = pcg(i ^ pcg(rs * 2654435761u + u.seed));
@@ -648,6 +875,7 @@ fn cover(@builtin(global_invocation_id) gid: vec3<u32>) {
         { binding: 1, resource: solver.velTex.createView() },
         { binding: 2, resource: this.sampler },
         { binding: 3, resource: { buffer: this.inkU } },
+        { binding: 4, resource: { buffer: solver.mask } },
       ],
     });
     this.bgPoints = d.createBindGroup({
@@ -659,13 +887,12 @@ fn cover(@builtin(global_invocation_id) gid: vec3<u32>) {
   seedParticles(seed) {
     this.seed = seed >>> 0;
     const rnd = mulberry32(this.seed || 1);
-    const { W, H, geom } = this.solver;
+    const { W, H } = this.solver;
     const a = new Float32Array(NP * 4);
-    const r2 = (geom.r + 0.5) * (geom.r + 0.5);
     for (let i = 0; i < NP; i++) {
       let x = 0, y = 0;
       do { x = rnd() * (W - 2); y = 1 + rnd() * (H - 3); }
-      while ((x - geom.cx) ** 2 + (y - geom.cy) ** 2 <= r2);
+      while (this.solver.isSolidCPU(x, y));
       a[i * 4] = x; a[i * 4 + 1] = y;
     }
     this.device.queue.writeBuffer(this.parts, 0, a);
@@ -739,7 +966,14 @@ const dom = {
   gpu: document.getElementById('gpu'),
   specimen: document.getElementById('specimen'),
   body: document.getElementById('body'),
+  plate: document.getElementById('plate'),
+  etch: document.getElementById('etch'),
+  caption: document.getElementById('caption'),
+  capbase: document.getElementById('capbase'),
+  capkw: document.getElementById('capkw'),
   card: document.getElementById('card'),
+  cline: document.getElementById('cline'),
+  alphaline: document.getElementById('alphaline'),
   readout: document.getElementById('readout'),
   sheet: document.getElementById('sheet'),
   growline: document.getElementById('growline'),
@@ -786,21 +1020,25 @@ function crossHz(samples, dts) { // upward mean-crossings; 0 until a real, regul
 }
 
 const T = { // __TUNNEL — the __PARK contract lineage
-  version: '0.1.0',
+  version: '0.2.0',
   tier: 'boot',
   grid: null,
+  article: null, // {type, ...geometry, alpha} — set by the live boot
   constants: C,
   qaResult: null,
   qaProgress: '',
   ready: false,
   _err: null,
+  capLog: [], // [{t, s}] caption-state transitions (QA: hysteresis, no flicker)
   stats: async () => ({}),
   tick: async () => {},
+  setAlpha: () => {},
   fastBoot: () => {},
   seedRNG: () => {},
   forceTier: () => {},
   qaStepN: async () => {},
   qaDumpFields: async () => null,
+  qaProbeTail: async () => null,
 };
 window.__TUNNEL = T;
 
@@ -826,9 +1064,15 @@ async function gpuProbe() {
   return { adapter, device, hasTS: feats.includes('timestamp-query') };
 }
 
-async function measureTau(device, W, H) {
-  const geom = { cx: W / 4 + 0.5, cy: H / 2 + 0.5, r: Math.round(H / 14) };
-  const s = new Solver(device, { W, H, geom });
+// article factories (LAYOUT law: LE at 0.22·W, chord 0.17·W, pivot quarter-chord;
+// plate half-thickness 2 cells ⇒ ≥3-cell minimum feature at every α)
+function makeArticle(kind, W, H) {
+  if (kind === 'cyl') return { type: 'cyl', cx: W / 4 + 0.5, cy: H / 2 + 0.5, r: Math.round(H / 14) };
+  const chord = Math.round(0.17 * W);
+  return { type: 'plate', px: Math.round(0.22 * W + 0.25 * chord) + 0.5, py: H / 2 + 0.5, chord, halfTh: 2 };
+}
+async function measureTau(device, W, H, kind) {
+  const s = new Solver(device, { W, H, article: makeArticle(kind, W, H) });
   await s.stepN(134); // warmup — real steps, kept (doubles as spool-up)
   const t0 = performance.now();
   await s.stepN(268);
@@ -841,15 +1085,16 @@ async function bootLive(g) {
   const { device, hasTS } = g;
   const SETTLE = 1.2245; // measured boost→plateau thermal ratio (SPIKE-REPORT §5) — pin R₀ at plateau
   const budgetMs = 10.4;
+  const kind = Q.get('article') === 'cyl' ? 'cyl' : 'plate'; // FLAT PLATE is the phase-2 default; cylinder kept for QA + continuity
   let rung = null;
   {
-    const { solver, tau } = await measureTau(device, 1792, 896);
+    const { solver, tau } = await measureTau(device, 1792, 896, kind);
     if (tau <= 0.150) {
       const r0 = Math.min(66, Math.max(62, Math.floor(budgetMs / (tau * SETTLE)) & ~1));
       rung = { name: 'H1', solver, tau, R0: r0 };
     } else {
       solver.destroy();
-      const m = await measureTau(device, 1280, 640);
+      const m = await measureTau(device, 1280, 640, kind);
       if (m.tau <= 0.150) {
         rung = { name: 'W2', solver: m.solver, tau: m.tau, R0: 48 };
       } else {
@@ -860,8 +1105,10 @@ async function bootLive(g) {
     }
   }
   const S = rung.solver, R0 = rung.R0;
+  const A = S.article;
   T.tier = rung.name;
   T.grid = `${S.W}×${S.H}`;
+  T.article = kind;
   const ctx = dom.gpu.getContext('webgpu');
   if (!ctx) { S.destroy(); device.destroy(); return stills(); }
   const format = navigator.gpu.getPreferredCanvasFormat();
@@ -870,19 +1117,33 @@ async function bootLive(g) {
 
   // layout
   const aspect = S.W / S.H;
+  let stageW = 0, stageH = 0, etchOn = false;
   function layout() {
     const pad = 24;
     const availW = innerWidth - 2 * pad, availH = innerHeight - 2 * pad;
     let w = availW, h = w / aspect;
     if (h > availH) { h = availH; w = h * aspect; }
+    stageW = w; stageH = h;
     dom.stage.style.width = w + 'px'; dom.stage.style.height = h + 'px';
     const dpr = Math.min(devicePixelRatio || 1, 2);
     dom.gpu.width = Math.min(3584, Math.max(2, Math.round(w * dpr)));
     dom.gpu.height = Math.min(1792, Math.max(2, Math.round(h * dpr)));
     dom.specimen.setAttribute('viewBox', `0 0 ${S.W} ${S.H}`);
     dom.specimen.setAttribute('preserveAspectRatio', 'none');
-    dom.body.setAttribute('cx', S.geom.cx); dom.body.setAttribute('cy', S.geom.cy);
-    dom.body.setAttribute('r', S.geom.r);
+    if (A.type === 'cyl') {
+      dom.body.removeAttribute('hidden'); // SVG el: the hidden PROPERTY is HTML-only
+      dom.body.setAttribute('cx', A.cx); dom.body.setAttribute('cy', A.cy);
+      dom.body.setAttribute('r', A.r);
+    } else {
+      dom.plate.removeAttribute('hidden');
+      dom.plate.setAttribute('x', A.px - 0.25 * A.chord);
+      dom.plate.setAttribute('y', A.py - A.halfTh);
+      dom.plate.setAttribute('width', A.chord);
+      dom.plate.setAttribute('height', 2 * A.halfTh);
+      dom.etch.width = Math.max(2, Math.round(w * dpr));
+      dom.etch.height = Math.max(2, Math.round(h * dpr));
+      dom.caption.style.top = Math.round((innerHeight + h) / 2 + 10) + 'px';
+    }
     ink.resize(dom.gpu.width, dom.gpu.height);
     drawPaper();
   }
@@ -891,6 +1152,10 @@ async function bootLive(g) {
   dom.sheet.hidden = true;
   dom.stage.hidden = false;
   dom.card.hidden = false;
+  if (A.type === 'plate') {
+    dom.cline.textContent = 'TEST ARTICLE: FLAT PLATE (the honest first wing) . drag it — find where the air lets go';
+    dom.alphaline.hidden = false;
+  }
   requestAnimationFrame(() => dom.card.classList.add('on'));
 
   // timestamp-query τ instrument (falls back to the boot-probe value)
@@ -907,26 +1172,111 @@ async function bootLive(g) {
 
   const frameDts = [];
   let frames = 0, lastT = performance.now(), running = true, ticking = false;
-  const reNum = C.U0 * (2 * S.geom.r) / ((C.TAU0 - 0.5) / 3);
+  const reNum = C.U0 * (A.type === 'cyl' ? 2 * A.r : A.chord) / ((C.TAU0 - 0.5) / 3);
   const reTxt = `re ~${(reNum / 1000).toFixed(1)}k (chord)`;
   let lastReadout = 0;
 
-  function encodeFrame(dtS, timed) {
-    const enc = device.createCommandEncoder();
-    const pd = (timed && tsq && !tsq.busy)
-      ? { timestampWrites: { querySet: tsq.qs, beginningOfPassWriteIndex: 0, endOfPassWriteIndex: 1 } }
-      : {};
-    const pass = enc.beginComputePass(pd);
-    for (let i = 0; i < R0; i++) S.encodeSubstep(pass);
-    S.encodeVelTex(pass);
-    S.encodeProbe(pass);
-    pass.end();
-    if (pd.timestampWrites) {
-      enc.resolveQuerySet(tsq.qs, 0, 2, tsq.resolve, 0);
-      enc.copyBufferToBuffer(tsq.resolve, 0, tsq.staging, 0, 16);
+  // ---- the HAND: α state (plate) — raw command, ±32° hard, blow-up guard ----
+  const clampA = (v) => Math.max(-32, Math.min(32, v)); // α limits ±32° hard
+  // per-frame Δα cap keeping wall-tip speed ≤ 0.08 lattice u — the MEASURED
+  // stability envelope (oracle protocol, this build: tip 0.10 clean, 0.15
+  // clamp-dirty, 0.20 NaN; 0.08 carries FP16 margin). ≈1.3°/frame ≈ 80°/s —
+  // above any deliberate drag, and 2× the sting-motor law (40°/s, 200°/s²)
+  // that arrives with ZERO-slew in a later phase, so it never masks it.
+  const DA_MAX = A.type === 'plate' ? (0.08 * R0 / (0.75 * A.chord)) * 180 / Math.PI : 0;
+  let alphaTarget = 0;
+  let needle = 0, needleV = 0; // damped DISPLAY needle (M2: ζ=1.0, ωn=56) — the mask uses raw α
+
+  // ---- separation detector state (measured voice ONLY at phase 2) ----
+  const POWER = 1; // no power control yet — POWER-GATE (<15% holds the detector) wired for when it exists
+  let sepFrac = 0, sepBase = null, sepBusy = false, sepEvery = 0;
+  let capState = null, capCand = null, capCandT = 0;
+  const CAPS = {
+    attached: ['the air follows the skin — ', 'FLOW ATTACHED'],
+    spreading: ['the air starts letting go — ', 'SEPARATION SPREADING'],
+    separated: ['the air lets go — ', 'FLOW SEPARATED'],
+  };
+  function setCap(s) { // arbitration: latest-wins, no queue
+    capState = s;
+    T.capLog.push({ t: performance.now(), s });
+    dom.capbase.textContent = CAPS[s][0];
+    dom.capkw.textContent = CAPS[s][1];
+    dom.caption.classList.toggle('broke', s === 'separated');
+    dom.caption.hidden = false;
+  }
+  function detectorUpdate(m) {
+    if (POWER < 0.15) return; // POWER-GATE: the detector HOLDS below 15% power
+    if (!m.sepTot) return;
+    const frac = m.sepRev / m.sepTot;
+    if (sepBase === null) {
+      // the α≈0 post-spool baseline; if the hand got there first, baseline 0
+      sepBase = Math.abs(S.alphaApplied) < 2 ? frac : 0;
+      sepFrac = Math.max(0, frac - sepBase);
+      setCap('attached'); // one clean arrival — no flicker at boot
+      return;
     }
+    // instrument damping: EMA over the shedding fluctuation (the instantaneous
+    // reversed fraction bounces 0.4–0.7 in a separated wake; measured 2026-08-07)
+    sepFrac = 0.75 * sepFrac + 0.25 * Math.max(0, frac - sepBase);
+    // Schmitt bands calibrated against the measured α-curve (0→32° sweep, W2
+    // rig: 0–2° ≈ 0 · 4° ≈ 0.19–0.27 · ≥6° ≈ 0.32–0.66 — the plate breaks
+    // EARLY, honestly): enter spreading ≥0.12 (exit <0.08), separated ≥0.38
+    // (exit <0.24) — level hysteresis under the 300ms-in/800ms-out temporal law
+    const rank = { attached: 0, spreading: 1, separated: 2 };
+    const cur = capState ? rank[capState] : 0;
+    let target;
+    if (sepFrac >= (cur >= 2 ? 0.24 : 0.38)) target = 'separated';
+    else if (sepFrac >= (cur >= 1 ? 0.08 : 0.12)) target = 'spreading';
+    else target = 'attached';
+    if (target === capState) { capCand = null; return; }
+    const now = performance.now();
+    if (target !== capCand) { capCand = target; capCandT = now; return; }
+    const hold = rank[target] > rank[capState] ? 300 : 800; // hysteresis: 300ms in / 800ms out
+    if (now - capCandT >= hold) { capCand = null; setCap(target); }
+  }
+
+  function encodeFrame(dtS, timed) {
+    const wantSep = A.type === 'plate' && ++sepEvery >= 6 && !sepBusy && S.t >= 2400;
+    if (wantSep) sepEvery = 0;
+    const swap = A.type === 'plate' && (alphaTarget !== S.alphaApplied || S.omCur !== 0);
+    const enc0 = () => device.createCommandEncoder();
+    let enc, pd = {};
+    if (swap) {
+      // the split frame: 1 even substep → mask+ω land at ODD parity (+refill) →
+      // R0−1 substeps. ω = this frame's Δα spread across its R0 substeps.
+      const da = Math.max(-DA_MAX, Math.min(DA_MAX, alphaTarget - S.alphaApplied));
+      const changed = S.beginAlphaSwap(S.alphaApplied + da, R0);
+      enc = enc0();
+      const pass = enc.beginComputePass();
+      if (changed) S.encodeRefill(pass);
+      for (let i = 0; i < R0 - 1; i++) S.encodeSubstep(pass);
+      S.encodeVelTex(pass);
+      S.encodeProbe(pass);
+      if (wantSep) S.encodeSep(pass);
+      pass.end();
+    } else {
+      enc = enc0();
+      pd = (timed && tsq && !tsq.busy)
+        ? { timestampWrites: { querySet: tsq.qs, beginningOfPassWriteIndex: 0, endOfPassWriteIndex: 1 } }
+        : {};
+      const pass = enc.beginComputePass(pd);
+      for (let i = 0; i < R0; i++) S.encodeSubstep(pass);
+      S.encodeVelTex(pass);
+      S.encodeProbe(pass);
+      if (wantSep) S.encodeSep(pass);
+      pass.end();
+      if (pd.timestampWrites) {
+        enc.resolveQuerySet(tsq.qs, 0, 2, tsq.resolve, 0);
+        enc.copyBufferToBuffer(tsq.resolve, 0, tsq.staging, 0, 16);
+      }
+    }
+    if (wantSep) { S.resetSepCounters(); S.writeSep(S.alphaApplied); }
     ink.encodeFrame(enc, ctx.getCurrentTexture().createView(), dtS);
     device.queue.submit([enc.finish()]);
+    if (wantSep) {
+      sepBusy = true;
+      S.readMisc().then((m) => { sepBusy = false; detectorUpdate(m); }).catch(() => { sepBusy = false; });
+    }
     if (pd.timestampWrites) {
       tsq.busy = true;
       tsq.staging.mapAsync(GPUMapMode.READ).then(() => {
@@ -949,6 +1299,16 @@ async function bootLive(g) {
         encodeFrame(dt, frames % 8 === 0);
       } catch (e) { T._err = String(e); }
       frames++;
+      if (A.type === 'plate') {
+        // needle: dt-exact critically-damped tracker (ζ=1.0, ωn=56) — display only
+        const wn = 56, dx0 = needle - alphaTarget, B = needleV + wn * dx0, ee = Math.exp(-wn * dt);
+        needle = alphaTarget + (dx0 + B * dt) * ee;
+        needleV = (needleV - wn * B * dt) * ee;
+        dom.plate.setAttribute('transform', `rotate(${S.alphaApplied.toFixed(3)} ${A.px} ${A.py})`);
+        const av = Math.abs(alphaTarget) < 0.05 ? 0 : alphaTarget;
+        dom.alphaline.textContent = `α ${av.toFixed(1)}°`; // values snap same-frame; the needle is physical
+        if (etchOn) drawEtch();
+      }
       if (frames % 90 === 0 && !covBusy) {
         covBusy = true;
         ink.coverage((b, n) => S.readBuf(b, n))
@@ -965,6 +1325,79 @@ async function bootLive(g) {
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
+
+  // ---- drag-to-pitch (plate): 1:1 positional about the pivot, raw, no easing;
+  // silhouette + ~44px halo grabs; mobile: vertical pan ANYWHERE = α at ~0.15°/px ----
+  function drawEtch() {
+    const c = dom.etch, g = c.getContext('2d');
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.clearRect(0, 0, c.width, c.height);
+    const s = c.width / S.W;
+    const px = A.px * s, py = A.py * s;
+    const r = Math.min(180, 0.42 * stageH) * dpr; // r≈180 desktop, scaled on small stages
+    g.strokeStyle = '#989690'; g.lineWidth = 1;
+    g.beginPath(); g.arc(px, py, r, -32 * Math.PI / 180, 32 * Math.PI / 180); g.stroke();
+    for (let d = -30; d <= 30; d += 5) { // 5° hair ticks, 10° ink ticks
+      const ink10 = d % 10 === 0;
+      const a = d * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a);
+      const l = (ink10 ? 10 : 6) * dpr;
+      g.strokeStyle = ink10 ? '#18181c' : '#989690';
+      g.beginPath();
+      g.moveTo(px + (r - l) * ca, py + (r - l) * sa);
+      g.lineTo(px + r * ca, py + r * sa);
+      g.stroke();
+    }
+    g.fillStyle = '#56565e'; // 9px numerals, snapped
+    g.font = `${Math.round(9 * dpr)}px "SF Mono", ui-monospace, Menlo, Consolas, monospace`;
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    for (let d = -30; d <= 30; d += 10) {
+      const a = d * Math.PI / 180;
+      g.fillText(String(d), Math.round(px + (r + 14 * dpr) * Math.cos(a)), Math.round(py + (r + 14 * dpr) * Math.sin(a)));
+    }
+    const na = needle * Math.PI / 180; // the 1px needle — damped display
+    g.strokeStyle = '#18181c'; g.lineWidth = 1;
+    g.beginPath();
+    g.moveTo(px + 0.35 * r * Math.cos(na), py + 0.35 * r * Math.sin(na));
+    g.lineTo(px + (r - 3) * Math.cos(na), py + (r - 3) * Math.sin(na));
+    g.stroke();
+  }
+  if (A.type === 'plate') {
+    const grid = (e) => {
+      const rc = dom.stage.getBoundingClientRect();
+      return { x: (e.clientX - rc.left) * S.W / rc.width, y: (e.clientY - rc.top) * S.H / rc.height };
+    };
+    let drag = null;
+    dom.stage.addEventListener('pointerdown', (e) => {
+      if (!etchOn) { etchOn = true; dom.etch.hidden = false; } // the protractor appears at first touch
+      const gp = grid(e);
+      const halo = 44 * S.W / Math.max(1, stageW);
+      const a = S.alphaApplied * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a);
+      const dx = gp.x - A.px, dy = gp.y - A.py;
+      const xi = dx * ca + dy * sa, eta = -dx * sa + dy * ca;
+      const onPlate = xi >= -0.25 * A.chord - halo && xi <= 0.75 * A.chord + halo && Math.abs(eta) <= A.halfTh + halo;
+      if (onPlate) drag = { mode: 'rot', th0: Math.atan2(dy, dx), a0: alphaTarget };
+      else if (e.pointerType === 'touch') drag = { mode: 'pan', y0: e.clientY, a0: alphaTarget };
+      else return;
+      dom.stage.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    dom.stage.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      if (drag.mode === 'pan') {
+        alphaTarget = clampA(drag.a0 - 0.15 * (e.clientY - drag.y0)); // pan up = nose up
+      } else {
+        const gp = grid(e);
+        let d = Math.atan2(gp.y - A.py, gp.x - A.px) - drag.th0;
+        while (d > Math.PI) d -= 2 * Math.PI;
+        while (d < -Math.PI) d += 2 * Math.PI;
+        alphaTarget = clampA(drag.a0 + d * 180 / Math.PI);
+      }
+    });
+    const endDrag = () => { drag = null; };
+    dom.stage.addEventListener('pointerup', endDrag);
+    dom.stage.addEventListener('pointercancel', endDrag);
+  }
 
   T.stats = async () => {
     const misc = await S.readMisc();
@@ -991,7 +1424,24 @@ async function bootLive(g) {
       inkGain: ink.gain,
       clamps: misc.clamps,
       steps: misc.steps,
+      alpha: alphaTarget,
+      alphaApplied: S.alphaApplied,
+      separationFraction: sepFrac,
+      captionState: capState,
     };
+  };
+  T.article = A.type === 'plate'
+    ? { type: 'plate', px: A.px, py: A.py, chord: A.chord, halfTh: A.halfTh }
+    : { type: 'cyl', cx: A.cx, cy: A.cy, r: A.r };
+  T.setAlpha = (v) => { if (A.type === 'plate' && Number.isFinite(v)) alphaTarget = clampA(v); };
+  T.qaProbeTail = async (k) => {
+    const misc = await S.readMisc();
+    const ring = await S.readRing();
+    const n = Math.min(k || 32, misc.probeCursor, S.ringLen);
+    const samples = [];
+    for (let i = misc.probeCursor - n; i < misc.probeCursor; i++)
+      samples.push(ring[((i % S.ringLen) + S.ringLen) % S.ringLen]);
+    return { cursor: misc.probeCursor, samples };
   };
   T.tick = async (s) => {
     ticking = true;
@@ -1022,7 +1472,7 @@ async function bootLive(g) {
 async function bootDiff(g) {
   const S = new Solver(g.device, {
     W: 128, H: 64,
-    geom: { cx: 32.5, cy: 32.5, r: 4 }, // D=8 body — oracle l0.mjs ORC-RHO geometry
+    article: { type: 'cyl', cx: 32.5, cy: 32.5, r: 4 }, // D=8 body — oracle l0.mjs ORC-RHO geometry
     sponge: 16, // pinned
   });
   T.tier = 'qa-diff'; T.grid = '128×64';
@@ -1044,7 +1494,7 @@ async function bootDiff(g) {
 async function bootSt(g) {
   const S = new Solver(g.device, {
     W: 400, H: 160,
-    geom: { cx: 100.5, cy: 80.5, r: 12 },
+    article: { type: 'cyl', cx: 100.5, cy: 80.5, r: 12 },
     probe: { x: 173, y: 80 }, // 3D downstream centerline — fixture verbatim
   });
   T.tier = 'qa-st'; T.grid = '400×160';
