@@ -91,14 +91,19 @@ def main():
     uncovered = int((~np.isfinite(hgt)).sum())
     if uncovered:
         frac = uncovered / hgt.size
-        fill = 0.0 if sea else float(np.nanmedian(hgt))
-        kind = "sea level (0m)" if sea else f"median {fill:.0f}m"
+        # ocean cells sit at -15m — BELOW any wave trough, or the seafloor
+        # z-fights up through the animated surface (learned the hard way)
+        fill = -15.0 if sea else float(np.nanmedian(hgt))
+        kind = "sea floor (-15m)" if sea else f"median {fill:.0f}m"
         print(f"nodata/uncovered: {uncovered} px ({frac*100:.1f}%) -> {kind}")
         if frac > 0.02 and not sea:
             sys.exit("more than 2% uncovered on a land bake — check tile set / AOI")
         hgt = np.where(np.isfinite(hgt), hgt, fill)
     if sea:
-        hgt = np.maximum(hgt, 0.0)  # bathymetry-below-zero clamps to sea level
+        # some tiles chart the water SURFACE near 0m (Alaska fjords) — those
+        # cells must also sink to the floor or wave troughs expose them
+        hgt = np.where(hgt < 0.4, -15.0, hgt)
+        hgt = np.maximum(hgt, -15.0)
 
     mn, mx = float(hgt.min()), float(hgt.max())
     print(f"heights {mn:.1f}..{mx:.1f} m over {size_km:.1f} km ({size_m/grid:.1f} m/px)")

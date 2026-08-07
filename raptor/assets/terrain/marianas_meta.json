@@ -1,7 +1,7 @@
 {
  "sizeM": 65536.0,
  "grid": 4096,
- "minH": 0.0,
+ "minH": -15.0,
  "maxH": 468.84,
  "centerLat": 15.05,
  "centerLon": 145.68,

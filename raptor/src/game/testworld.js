@@ -71,6 +71,9 @@ export class TestWorld {
     const q = new URLSearchParams(location.search);
     this.pitchBias = parseFloat(q.get("pitch") || "0") * Math.PI / 180;
     this.fixYaw = q.has("yaw") ? parseFloat(q.get("yaw")) * Math.PI / 180 : null;
+    this.camX = parseFloat(q.get("camx") || "0");
+    this.camZ = parseFloat(q.get("camz") || "0");
+    this.camH = q.has("camh") ? parseFloat(q.get("camh")) : null;
   }
 
   // terrain arrived: sea stays only on ocean fronts (y=0 = real sea level),
@@ -148,11 +151,13 @@ export class TestWorld {
     this.trailMesh.instanceMatrix.needsUpdate = true;
 
     if (this.fixYaw !== null) {
-      // parked camera: +X east, +Z north; terrain-aware altitude (a fixed
-      // 900m sat UNDERGROUND in the 1266m Nevada basin)
-      const camY = (this.terrain ? this.terrain.heightAt(0, 0) : 0) + 600;
-      camera.position.set(0, camY, 0);
-      camera.lookAt(Math.sin(this.fixYaw) * 1000, camY + Math.tan(this.pitchBias) * 1000, Math.cos(this.fixYaw) * 1000);
+      // parked camera: +X east, +Z north; terrain-aware altitude, offsettable
+      // via ?camx/?camz (meters from AOI center) and ?camh (height AGL)
+      const gx = this.camX, gz = this.camZ;
+      const ground = Math.max(this.terrain ? this.terrain.heightAt(gx, gz) : 0, 0);
+      const camY = ground + (this.camH ?? 600);
+      camera.position.set(gx, camY, gz);
+      camera.lookAt(gx + Math.sin(this.fixYaw) * 1000, camY + Math.tan(this.pitchBias) * 1000, gz + Math.cos(this.fixYaw) * 1000);
       return;
     }
     // chase camera, behind along heading

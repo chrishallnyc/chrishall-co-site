@@ -309,6 +309,50 @@ export class Terrain {
     this.stats = { nodes: n, minLevel: minL, maxLevel: maxL, overflow: out.length - n };
   }
 
+  // Shore-distance field (meters from land, sea cells only) — the bake clamps
+  // bathymetry to 0, so water depth is proxied by distance-to-shore. 1024²
+  // two-pass chamfer transform (~50ms), lazily built, uploaded as a texture.
+  getShoreField() {
+    if (this._shore) return this._shore;
+    const N = 1024, g = this.meta.grid, step = this.size / N;
+    const d = new Float32Array(N * N);
+    const stride = g / N;
+    const BIG = 1e9;
+    for (let j = 0; j < N; j++)
+      for (let i = 0; i < N; i++)
+        d[j * N + i] = this.heights[Math.floor(j * stride) * g + Math.floor(i * stride)] > 0.5 ? 0 : BIG;
+    const D1 = step, D2 = step * 1.4142;
+    for (let j = 0; j < N; j++)         // forward pass
+      for (let i = 0; i < N; i++) {
+        const k = j * N + i;
+        if (i > 0) d[k] = Math.min(d[k], d[k - 1] + D1);
+        if (j > 0) {
+          d[k] = Math.min(d[k], d[k - N] + D1);
+          if (i > 0) d[k] = Math.min(d[k], d[k - N - 1] + D2);
+          if (i < N - 1) d[k] = Math.min(d[k], d[k - N + 1] + D2);
+        }
+      }
+    for (let j = N - 1; j >= 0; j--)    // backward pass
+      for (let i = N - 1; i >= 0; i--) {
+        const k = j * N + i;
+        if (i < N - 1) d[k] = Math.min(d[k], d[k + 1] + D1);
+        if (j < N - 1) {
+          d[k] = Math.min(d[k], d[k + N] + D1);
+          if (i < N - 1) d[k] = Math.min(d[k], d[k + N + 1] + D2);
+          if (i > 0) d[k] = Math.min(d[k], d[k + N - 1] + D2);
+        }
+      }
+    const MAXD = 1400;
+    const bytes = new Uint8Array(N * N);
+    for (let k = 0; k < d.length; k++) bytes[k] = Math.min(d[k] / MAXD, 1) * 255;
+    const tex = new THREE.DataTexture(bytes, N, N, THREE.RedFormat, THREE.UnsignedByteType);
+    tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+    tex.minFilter = tex.magFilter = THREE.LinearFilter;
+    tex.needsUpdate = true;
+    this._shore = { tex, maxDist: MAXD };
+    return this._shore;
+  }
+
   // bilinear height at world x (east) / z (north); origin = AOI center
   heightAt(x, z) {
     const g = this.meta.grid, half = this.size / 2;

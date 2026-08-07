@@ -10,6 +10,7 @@ import { TestWorld } from "./game/testworld.js";
 import { ControlsMenu } from "./game/controlsmenu.js";
 import { Atmosphere } from "./world/daycycle.js";
 import { Terrain } from "./world/terrain.js";
+import { Water } from "./world/water.js";
 
 const VERSION = "0.4.0";
 const PHASE = 3;
@@ -80,7 +81,7 @@ async function boot() {
     VALDEZ: { asset: "valdez", ocean: true, baseAlt: 2800, label: "PRINCE WILLIAM SOUND" },
     MARIANAS: { asset: "marianas", ocean: true, baseAlt: 1400, label: "THE MARIANAS" },
   };
-  let terrain = null;
+  let terrain = null, water = null;
   const fg = FRONT_GROUND[atmosphere.frontName];
   if (fg && flags.get("noterrain") !== "1") {
     const vs = document.querySelector("#veil .status");
@@ -88,7 +89,16 @@ async function boot() {
     try {
       terrain = await Terrain.load("/assets/terrain/" + fg.asset, atmosphere.frontName);
       scene.add(terrain.group);
-      world.setGround(terrain, fg);
+      if (fg.ocean) {
+        try {
+          water = new Water(atmosphere.frontName, terrain);
+          scene.add(water.group);
+        } catch (err) {
+          console.warn("water unavailable, placeholder sea stays:", err && err.message);
+        }
+      }
+      // the placeholder sea survives only if the real water failed
+      world.setGround(terrain, { ...fg, ocean: fg.ocean && !water });
     } catch (err) {
       console.warn("terrain unavailable, flying over water:", err && err.message);
     }
@@ -108,7 +118,7 @@ async function boot() {
 
   // public hooks (QA + future phases)
   Object.assign(state, {
-    sim, input, gamepad, controls, dbg, atmosphere, terrain,
+    sim, input, gamepad, controls, dbg, atmosphere, terrain, water,
     setTimeOfDay: (h) => atmosphere.setTime(h),
     setFront: (f) => atmosphere.setFront(String(f).toUpperCase()),
     hash: () => sim.stateHash(),
@@ -128,6 +138,7 @@ async function boot() {
 
   let last = performance.now();
   let firstFrame = true;
+  let waterClock = 0; // render-side only — the sim never reads water
   function frame(now) {
     requestAnimationFrame(frame);
     const dtMs = Math.min(now - last, 250);
@@ -155,6 +166,8 @@ async function boot() {
     const alpha = sim.advance(dtMs / 1000);
     world.render(alpha, camera);
     terrain?.update(camera);
+    waterClock += dtMs / 1000;
+    water?.update(camera, waterClock);
     atmosphere.update(camera);
     renderer.toneMappingExposure = atmosphere.exposure;
     renderer.render(scene, camera);
