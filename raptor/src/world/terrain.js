@@ -80,11 +80,50 @@ const RAMPS = {
 };
 
 export class Terrain {
-  static async load(baseUrl, front = "NELLIS", cloudShadow = null) {
+  // drape texture loader: any missing/broken file resolves null and the
+  // shader falls back to the procedural ramps. fetch-based: a 404 through
+  // fetch stays out of the console (an <img> 404 fails the console-clean QA
+  // gates), and createImageBitmap avoids Chrome's decoder-abort flakiness
+  // when several 8-16k decodes race.
+  static async _imgTex(url, srgb) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      const blob = await res.blob();
+      // imageOrientation "none": rows stay as-baked (row 0 = north) — the
+      // same mirror guard as the height texture's flipY=false
+      const bmp = await createImageBitmap(blob, { colorSpaceConversion: "none", imageOrientation: "none" });
+      const t = new THREE.Texture(bmp);
+      t.flipY = false;
+      t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
+      t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
+      t.minFilter = THREE.LinearMipmapLinearFilter;
+      t.magFilter = THREE.LinearFilter;
+      t.generateMipmaps = true;
+      t.anisotropy = 8; // the whole game is grazing angles
+      t.needsUpdate = true;
+      return t;
+    } catch (_) { return null; }
+  }
+
+  static async load(baseUrl, front = "NELLIS", cloudShadow = null, { drape = "16k" } = {}) {
     const meta = await (await fetch(`${baseUrl}_meta.json`)).json();
     const img = new Image();
     img.src = `${baseUrl}_h.png`;
+    // the height decode must NOT race the 8-16k drape decodes — Chrome's
+    // image decoder can abort it under that load ("cannot be decoded" on a
+    // perfectly good PNG); drape fetches start after it lands
     await img.decode();
+    // MAXFI A2: real-imagery albedo + coverage mask + baked normals/AO.
+    // meta.drape declares what exists — requesting a missing file would log
+    // a console 404 and fail the console-clean QA gates.
+    const has = (k) => drape && (meta.drape || []).includes(k);
+    const [albedoP, coverP, nrmP, aoP] = [
+      has(`albedo_${drape}`) ? this._imgTex(`${baseUrl}_albedo_${drape}.jpg`, true) : null,
+      has("cover") ? this._imgTex(`${baseUrl}_cover.png`, false) : null,
+      has("n_8k") ? this._imgTex(`${baseUrl}_n_8k.jpg`, false) : null,
+      has("ao_8k") ? this._imgTex(`${baseUrl}_ao_8k.jpg`, false) : null,
+    ];
     const cv = document.createElement("canvas");
     cv.width = meta.grid; cv.height = meta.grid;
     const cx = cv.getContext("2d", { willReadFrequently: true });
@@ -95,10 +134,12 @@ export class Terrain {
     for (let i = 0; i < heights.length; i++) {
       heights[i] = meta.minH + ((px[i * 4] << 8) | px[i * 4 + 1]) / 65535 * span;
     }
-    return new Terrain(meta, heights, img, front, cloudShadow);
+    const [albedo, cover, nrm, ao] = await Promise.all([albedoP, coverP, nrmP, aoP]);
+    return new Terrain(meta, heights, img, front, cloudShadow, { albedo, cover, nrm, ao });
   }
 
-  constructor(meta, heights, img, front = "NELLIS", cloudShadow = null) {
+  constructor(meta, heights, img, front = "NELLIS", cloudShadow = null, drape = {}) {
+    this.drape = drape;
     this.front = front;
     this.cloudShadow = cloudShadow; // TSL fn (wp)=>node from clouds.js, or null
     this.meta = meta;
@@ -180,10 +221,17 @@ export class Terrain {
       return vec3(positionLocal.x, h.sub(skirtDrop), positionLocal.z);
     })();
 
-    // normals: central differences at ~16m spacing in world units
+    // normals: baked 8k lidar-derived map when present (1 tap replaces 4);
+    // bake is (R=east, G=north, B=up), this material's frame is x=east,
+    // y=up, z=north — so (r, b, g). Fallback: central differences.
     const eps = 16.0;
+    const nrmTex = this.drape.nrm;
     mat.normalNode = Fn(() => {
       const wp = positionWorld;
+      if (nrmTex) {
+        const n = texture(nrmTex, worldUV(wp)).rgb.mul(2.0).sub(1.0);
+        return normalize(vec3(n.r, n.b, n.g));
+      }
       const hx1 = sampleH(vec3(wp.x.add(eps), wp.y, wp.z));
       const hx0 = sampleH(vec3(wp.x.sub(eps), wp.y, wp.z));
       const hz1 = sampleH(vec3(wp.x, wp.y, wp.z.add(eps)));
@@ -201,16 +249,26 @@ export class Terrain {
       return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
     };
 
-    // color: per-front altitude/slope ramps + shared noise variation
+    // color: real-imagery drape crossfaded over the per-front procedural
+    // ramps by the coverage mask (imagery holes fall back seamlessly)
     const front = this.front;
     const cloudShadow = this.cloudShadow;
+    const albedoTex = this.drape.albedo, coverTex = this.drape.cover, aoTex = this.drape.ao;
     mat.colorNode = Fn(() => {
       const wp = positionWorld;
       const h = sampleH(wp);
       const tAlt = clamp(h.sub(uMin).div(uSpan), 0, 1);
-      const hx1 = sampleH(vec3(wp.x.add(eps), wp.y, wp.z));
-      const hz1 = sampleH(vec3(wp.x, wp.y, wp.z.add(eps)));
-      const slope = clamp(h.sub(hx1).abs().add(h.sub(hz1).abs()).div(eps), 0, 1);
+      let slope;
+      if (nrmTex) {
+        // same semantics as the tap-based estimate: (|dh/dx|+|dh/dz|), from
+        // the baked normal (dh/dx = -nx/ny in this frame)
+        const n = texture(nrmTex, worldUV(wp)).rgb.mul(2.0).sub(1.0);
+        slope = clamp(n.r.abs().add(n.g.abs()).div(max(n.b, 0.15)), 0, 1);
+      } else {
+        const hx1 = sampleH(vec3(wp.x.add(eps), wp.y, wp.z));
+        const hz1 = sampleH(vec3(wp.x, wp.y, wp.z.add(eps)));
+        slope = clamp(h.sub(hx1).abs().add(h.sub(hz1).abs()).div(eps), 0, 1);
+      }
       const macro = vnoise(wp.xz.div(1800.0)).mul(0.6).add(vnoise(wp.xz.div(240.0)).mul(0.4));
 
       let c;
@@ -243,11 +301,23 @@ export class Terrain {
         c = mix(c, rock, smoothstep(0.35, 0.9, slope).mul(0.7));
       }
 
-      // shared variation: macro brightness + hue drift, 45m micro grain
+      // procedural branch gets the synthetic variation (macro brightness +
+      // hue drift); real imagery carries its own macro truth
       c = c.mul(macro.sub(0.5).mul(0.34).add(1.0));
       c = c.mul(mix(vec3(1.05, 1.0, 0.93), vec3(0.96, 1.0, 1.05), macro));
       const micro = vnoise(wp.xz.div(45.0));
       c = c.mul(micro.sub(0.5).mul(0.12).add(1.0));
+
+      if (albedoTex) {
+        // MAXFI A2: the real Earth. Micro grain (light) de-flattens the
+        // 4m/px imagery up close; coverage mask crossfades imagery holes
+        // back to the ramps.
+        let ci = texture(albedoTex, worldUV(wp)).rgb;
+        ci = ci.mul(micro.sub(0.5).mul(0.08).add(1.0));
+        const cov = coverTex ? texture(coverTex, worldUV(wp)).r : float(1.0);
+        c = mix(c, ci, cov);
+      }
+      if (aoTex) c = c.mul(mix(float(1.0), texture(aoTex, worldUV(wp)).r, 0.75)); // baked multi-scale AO
       if (cloudShadow) c = c.mul(cloudShadow(wp)); // cloud shadows (phase 5a)
       return c;
     })();

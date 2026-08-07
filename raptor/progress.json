@@ -1,11 +1,12 @@
 {
-  "updated": "2026-08-07T02:45:00-07:00",
-  "version": "v0.9.0",
-  "now": "AAA pass: real satellite-photo terrain (NAIP bakery) — next after tonight's new render pipeline",
+  "updated": "2026-08-07T03:55:00-07:00",
+  "version": "v0.10.0",
+  "now": "AAA pass: Nevada satellite imagery finishing, then FFT ocean + volumetric clouds",
   "nowPhase": 14,
   "paused": false,
-  "pushes": 25,
+  "pushes": 26,
   "ledger": [
+    "2026-08-07 v0.10.0 — THE REAL EARTH: actual aerial photography draped over Alaska and the Marianas (sub-meter USGS source), plus laser-scan normal maps and baked ambient shadows on all three fronts. The fjords look like the real fjords now.",
     "2026-08-07 v0.9.0 — THE AAA PASS BEGINS: rebuilt render pipeline — temporal anti-aliasing, HDR bloom (sun halo + water-glint sparkle), lens ghosts. 121fps with it all on. 51/51 tests.",
     "2026-08-07 THE MANDATE — new goal: the most beautiful game possible in a browser, built for the most powerful Macs. An 8-agent research fleet mapped the ceiling; the AAA rebuild starts now, then three full 10%-better passes.",
     "2026-08-07 v0.8.0 — TARGETS ON THE GROUND: 29 units across the three fronts (convoy + SAM site in Nevada, ships in the Alaska Sound, a carrier group off Saipan). Shoot them, they burn. Kills score on screen.",
@@ -40,7 +41,7 @@
       "n": 3,
       "name": "Real-Earth terrain",
       "pct": 100,
-      "note": "USGS data: Nevada, Prince William Sound, Marianas"
+      "note": "USGS heights + real NAIP/Sentinel-2 imagery drape"
     },
     {
       "n": 4,
@@ -105,8 +106,8 @@
     {
       "n": 14,
       "name": "Max fidelity pass",
-      "pct": 25,
-      "note": "TAA + HDR bloom + lens flare LIVE; satellite terrain, FFT ocean, volumetric clouds next"
+      "pct": 40,
+      "note": "TAA/bloom/flare + real-imagery terrain LIVE; Nevada imagery, FFT ocean, volumetrics next"
     },
     {
       "n": 15,
@@ -117,7 +118,7 @@
     {
       "n": 16,
       "name": "QA hardening",
-      "pct": 38,
+      "pct": 40,
       "note": "10 batteries, forensic judges standing"
     },
     {

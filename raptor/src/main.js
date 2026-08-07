@@ -16,7 +16,7 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.9.0";
+const VERSION = "0.10.0";
 const PHASE = 14;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
@@ -129,8 +129,11 @@ async function boot() {
     const vs = document.querySelector("#veil .status");
     if (vs) vs.innerHTML = `<b>LOADING ${fg.label}</b> — real USGS terrain`;
     try {
+      // drape: 16k imagery on webgpu; 4k on the webgl fallback (SwiftShader
+      // tops out at 8192); ?drape=0 keeps the procedural ramps for QA
+      const drape = flags.get("drape") === "0" ? null : (backend === "webgpu" ? "16k" : "4k");
       terrain = await Terrain.load("/assets/terrain/" + fg.asset, atmosphere.frontName,
-        makeCloudShadowNode(clouds.shared));
+        makeCloudShadowNode(clouds.shared), { drape });
       scene.add(terrain.group);
       if (fg.ocean && flags.get("nowater") !== "1") {
         try {
