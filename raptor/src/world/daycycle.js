@@ -15,13 +15,16 @@ export const FRONTS = {
 };
 
 // palette stops by sun elevation (degrees); lerped between neighbors
+// High-sun exposure drops hard (judge round 2: pale zenith = ACES compressing
+// hot sky values to white; deep blue lives at low exposure) — sun/hemi
+// intensities rise to keep the GROUND read constant.
 const STOPS = [
   { el: -18, fog: 0x0a0e18, hemiSky: 0x141c2a, sun: 0x000000, sunI: 0.0, hemiI: 0.25, exp: 0.62 },
-  { el: -6,  fog: 0x1a1f30, hemiSky: 0x232c40, sun: 0xff7038, sunI: 0.0, hemiI: 0.3,  exp: 0.6 },
-  { el: 0,   fog: 0xd67d4e, hemiSky: 0x54566a, sun: 0xff8844, sunI: 0.9, hemiI: 0.42, exp: 0.55 },
-  { el: 8,   fog: 0xe8c9a0, hemiSky: 0x8aa3c4, sun: 0xffc487, sunI: 2.2, hemiI: 0.62, exp: 0.5 },
-  { el: 25,  fog: 0xcfdcea, hemiSky: 0x9db8d6, sun: 0xfff2dd, sunI: 3.0, hemiI: 0.85, exp: 0.5 },
-  { el: 90,  fog: 0xc2d4e6, hemiSky: 0xa7c0dc, sun: 0xffffff, sunI: 3.2, hemiI: 0.95, exp: 0.5 },
+  { el: -6,  fog: 0x1a1f30, hemiSky: 0x232c40, sun: 0xff7038, sunI: 0.0, hemiI: 0.3,  exp: 0.58 },
+  { el: 0,   fog: 0xd67d4e, hemiSky: 0x54566a, sun: 0xff8844, sunI: 1.1, hemiI: 0.5,  exp: 0.5 },
+  { el: 8,   fog: 0xe8c9a0, hemiSky: 0x8aa3c4, sun: 0xffc487, sunI: 2.8, hemiI: 0.8,  exp: 0.42 },
+  { el: 25,  fog: 0xcfdcea, hemiSky: 0x9db8d6, sun: 0xfff2dd, sunI: 4.0, hemiI: 1.15, exp: 0.32 },
+  { el: 90,  fog: 0xc2d4e6, hemiSky: 0xa7c0dc, sun: 0xffffff, sunI: 4.4, hemiI: 1.25, exp: 0.30 },
 ];
 
 const _c1 = new THREE.Color(), _c2 = new THREE.Color();

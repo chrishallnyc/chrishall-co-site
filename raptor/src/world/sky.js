@@ -100,7 +100,14 @@ export class Sky {
       const L0 = vec3(0.1).mul(Fex).mul(this.uAmbFade).add(uSunE.mul(19000.0).mul(Fex).mul(sundisk));
 
       const texColor = Lin.add(L0).mul(0.04).add(vec3(0.0, 0.0003, 0.00075).mul(this.uAmbFade));
-      const graded = pow(texColor, vec3(float(1.0).div(uSunfade.mul(1.2).add(1.2))));
+      let graded = pow(texColor, vec3(float(1.0).div(uSunfade.mul(1.2).add(1.2))));
+
+      // zenith depth assist (judge round 2): single-scatter + grade undersells
+      // overhead saturation — deepen with view elevation, daylight only
+      const upness = smoothstep(0.08, 0.85, upDot).mul(this.uAmbFade);
+      const lum = dot(graded, vec3(0.2126, 0.7152, 0.0722));
+      const saturated = vec3(lum).add(graded.sub(vec3(lum)).mul(1.65));
+      graded = mix(graded, saturated.mul(0.8), upness);
 
       // blue-noise-ish dither kills 8-bit gradient banding (judge finding)
       const dither = fract(sin(dot(screenUV.mul(vec2(12.9898, 78.233)), vec2(1.0, 1.0))).mul(43758.5453))
