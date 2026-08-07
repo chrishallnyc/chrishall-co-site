@@ -162,7 +162,16 @@ async function boot() {
       scene.add(terrain.group);
       if (fg.ocean && flags.get("nowater") !== "1") {
         try {
-          water = new Water(atmosphere.frontName, terrain, atmoH?.aerial);
+          // MAXFI A4: FFT ocean on webgpu (?ocean=gerstner reverts)
+          let fft = null;
+          if (backend === "webgpu" && flags.get("ocean") !== "gerstner") {
+            try {
+              const { createFFTOcean } = await import("./world/fftocean.js");
+              fft = createFFTOcean(renderer, { front: atmosphere.frontName });
+            } catch (err) { console.warn("fft ocean unavailable, Gerstner stays:", err && err.message); }
+          }
+          state.fftOcean = !!fft;
+          water = new Water(atmosphere.frontName, terrain, atmoH?.aerial, fft);
           scene.add(water.group);
         } catch (err) {
           console.warn("water unavailable, placeholder sea stays:", err && err.message);

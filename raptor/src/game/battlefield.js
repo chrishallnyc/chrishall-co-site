@@ -54,6 +54,61 @@ const FRONTS = {
 
 const MAX_SMOKE = 64; // instanced billboard quads shared by all plumes
 
+// Merge a unit's STATIC meshes into one mesh per material — three.js
+// WebGPURenderer pays ~3µs CPU per render item per frame (the MAXFI wall),
+// and 29 units × ~35 parts was ~30% of the headless frame. Meshes under
+// animated part roots (turret/dish/launcher…) stay live; the merged meshes
+// sit directly under the group so the wreck material swap still catches
+// everything. Position+normal only (procedural units carry no uvs).
+const ANIM_PARTS = ["turret", "barrels", "dish", "radarDish", "launcher", "tubes"];
+function batchStatics(group, parts) {
+  group.updateMatrixWorld(true);
+  const animRoots = ANIM_PARTS.map((k) => parts[k]).filter(Boolean);
+  const underAnim = (o) => { for (let p = o; p; p = p.parent) if (animRoots.includes(p)) return true; return false; };
+  const buckets = new Map(); // material -> [{geo, matrix}]
+  const doomed = [];
+  group.traverse((m) => {
+    if (!m.isMesh || underAnim(m)) return;
+    if (!buckets.has(m.material)) buckets.set(m.material, []);
+    buckets.get(m.material).push({ geo: m.geometry, matrix: m.matrixWorld.clone() });
+    doomed.push(m);
+  });
+  const nrmM = new THREE.Matrix3();
+  for (const [material, items] of buckets) {
+    let nV = 0, nI = 0;
+    for (const it of items) {
+      nV += it.geo.attributes.position.count;
+      nI += it.geo.index ? it.geo.index.count : it.geo.attributes.position.count;
+    }
+    const pos = new Float32Array(nV * 3), nor = new Float32Array(nV * 3);
+    const idx = new Uint32Array(nI);
+    let vo = 0, io = 0;
+    const v = new THREE.Vector3();
+    for (const it of items) {
+      const p = it.geo.attributes.position, n = it.geo.attributes.normal;
+      nrmM.getNormalMatrix(it.matrix);
+      for (let k = 0; k < p.count; k++) {
+        v.fromBufferAttribute(p, k).applyMatrix4(it.matrix);
+        pos.set([v.x, v.y, v.z], (vo + k) * 3);
+        v.fromBufferAttribute(n, k).applyMatrix3(nrmM).normalize();
+        nor.set([v.x, v.y, v.z], (vo + k) * 3);
+      }
+      if (it.geo.index) {
+        for (let k = 0; k < it.geo.index.count; k++) idx[io++] = it.geo.index.getX(k) + vo;
+      } else {
+        for (let k = 0; k < p.count; k++) idx[io++] = vo + k;
+      }
+      vo += p.count;
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    g.setAttribute("normal", new THREE.BufferAttribute(nor, 3));
+    g.setIndex(new THREE.BufferAttribute(idx, 1));
+    group.add(new THREE.Mesh(g, material));
+  }
+  for (const m of doomed) m.removeFromParent();
+}
+
 // ZSU-23-4 return fire (phase 9 "the war shoots back"): lead-predicted
 // bursts with seeded dispersion + skill wobble — low passes are dangerous,
 // not lethal. All state deterministic; rounds are honest ballistic objects.
@@ -92,6 +147,7 @@ export class Battlefield {
       this.state[o] = x; this.state[o + 1] = y; this.state[o + 2] = base + spec.cz;
       this.state[o + 3] = spec.r; this.state[o + 4] = spec.hp;
       const { group, parts } = UNITS[type]();
+      batchStatics(group, parts); // ~35 meshes -> ~5 per unit (MAXFI item-budget rule)
       group.position.set(x, base, y); // ENU -> three: (east, up, north)
       group.rotation.y = yaw;
       this.root.add(group);

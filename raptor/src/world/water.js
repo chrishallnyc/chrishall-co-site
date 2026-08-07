@@ -38,7 +38,17 @@ const SEA_STATES = {
 };
 
 export class Water {
-  constructor(front, terrain, aerial = null) {
+  constructor(front, terrain, aerial = null, fft = null) {
+    this.fft = fft; // MAXFI A4: createFFTOcean result, or null = Gerstner
+    if (fft) {
+      // world-tiled sampling needs repeat wrapping (set defensively here)
+      for (const t of [fft.dispTex, fft.normTex]) {
+        t.wrapS = t.wrapT = THREE.RepeatWrapping;
+        t.minFilter = THREE.LinearFilter;
+        t.magFilter = THREE.LinearFilter;
+        t.generateMipmaps = false;
+      }
+    }
     const S = SEA_STATES[front] || SEA_STATES.MARIANAS;
     this.state = S;
     this.uTime = uniform(0);
@@ -79,14 +89,24 @@ export class Water {
       return { dispX, dispY, dispZ, nx, nz, nyAcc };
     };
 
+    // FFT mode samples the compute-generated maps at world-tiled UV; the
+    // shore damp + edge fades apply identically in both modes (hard-won —
+    // the rim energy cliff and beach flattening were forensics findings)
+    const fftUV = fft ? (wp) => fract(wp.xz.div(fft.tileM)) : null;
+
     mat.positionNode = Fn(() => {
       const wp = modelWorldMatrix.mul(vec4(positionLocal, 1.0)).xyz;
-      const g = gerstner(wp);
-      // waves flatten right at the beach so foam sits on still water; the
-      // radial edge fade flattens the sheet's rim so the far-skirt hand-off
-      // is seamless (forensics judge measured a single-row energy cliff)
       const edgeFade = smoothstep(15800.0, 9000.0, positionLocal.xz.length());
       const damp = smoothstep(0.0, 120.0, shoreDist(wp)).mul(edgeFade);
+      if (fft) {
+        const d = texture(fft.dispTex, fftUV(wp)).xyz;
+        return vec3(
+          positionLocal.x.add(d.x.mul(damp)),
+          d.y.mul(damp),
+          positionLocal.z.add(d.z.mul(damp))
+        );
+      }
+      const g = gerstner(wp);
       return vec3(
         positionLocal.x.add(g.dispX.mul(damp)),
         g.dispY.mul(damp),
@@ -96,9 +116,14 @@ export class Water {
 
     mat.normalNode = Fn(() => {
       const wp = positionWorld;
-      const g = gerstner(wp);
       const edgeFadeN = smoothstep(15800.0, 9000.0, positionLocal.xz.length());
       const damp = smoothstep(0.0, 120.0, shoreDist(wp)).mul(S.normalK).mul(edgeFadeN);
+      if (fft) {
+        const n = texture(fft.normTex, fftUV(wp)).xyz;
+        // lerp toward flat by the same damp field (shore + rim)
+        return normalize(mix(vec3(0, 1, 0), n, clamp(damp, 0.0, 1.0)));
+      }
+      const g = gerstner(wp);
       return normalize(vec3(g.nx.negate().mul(damp), float(1.0).sub(g.nyAcc.mul(damp).mul(0.8)), g.nz.negate().mul(damp)));
     })();
 
@@ -106,7 +131,6 @@ export class Water {
     mat.colorNode = Fn(() => {
       const wp = positionWorld;
       const sd = shoreDist(wp);
-      const g = gerstner(wp);
       let c = mix(vec3(shallowC.r, shallowC.g, shallowC.b), vec3(deepC.r, deepC.g, deepC.b),
                   smoothstep(20.0, 520.0, sd));
       // shore foam band, broken up by a drifting hash; crest foam on steep sums
@@ -115,7 +139,10 @@ export class Water {
       // speckle pattern hard-stops at the sheet rim (measured energy cliff)
       const edgeFadeC = smoothstep(15800.0, 9000.0, positionLocal.xz.length());
       const shoreFoam = smoothstep(this.state.foamShore, 8.0, sd).mul(hash.mul(0.5).add(0.5));
-      const crest = smoothstep(0.55, 0.95, g.nyAcc).mul(0.6);
+      // crest foam: FFT mode uses the compute-side Jacobian accumulation
+      const crest = fft
+        ? texture(fft.normTex, fftUV(wp)).a.mul(0.75)
+        : smoothstep(0.55, 0.95, gerstner(wp).nyAcc).mul(0.6);
       c = mix(c, vec3(0.92, 0.95, 0.96), clamp(shoreFoam.add(crest), 0.0, 0.85).mul(edgeFadeC));
       if (aerial) c = c.mul(aerial.trans(wp)); // MAXFI A3 (see terrain.js note)
       return c;
@@ -149,6 +176,7 @@ export class Water {
   // follow the camera in whole-quad snaps so the grid never swims
   update(camera, timeSec) {
     this.uTime.value = timeSec;
+    if (this.fft) this.fft.update(timeSec); // per-frame compute dispatch
     const quad = NEAR_SPAN / (NEAR_VERTS - 1);
     this.mesh.position.x = Math.round(camera.position.x / quad) * quad;
     this.mesh.position.z = Math.round(camera.position.z / quad) * quad;
