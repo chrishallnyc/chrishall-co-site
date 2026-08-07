@@ -16,9 +16,10 @@ const WHEEL_THROTTLE = 0.05;    // per wheel tick
 const AIM_PITCH_LIM = 80 * Math.PI / 180;
 
 export class Player {
-  constructor(scene, { jet, terrain, spawn }) {
+  constructor(scene, { jet, terrain, spawn, battlefield }) {
     this.jet = jet;             // the F-22 group (taken over from TestWorld)
     this.terrain = terrain || null;
+    this.battlefield = battlefield || null;
     this.spawn = spawn;
     this.gun = new Gun(scene);  // boot-time scene.add — safe
 
@@ -69,11 +70,21 @@ export class Player {
     L.fire = (input.held("fire_mguns") || input.held("fire_cannons")) ? 1 : 0;
   }
 
-  // QA hook: drive the aim/throttle directly (batteries can't move a mouse)
-  debugCommand({ aimPitchDeg, aimHeadingDeg, throttle } = {}) {
+  // QA hook: drive the aim/throttle directly (batteries can't move a mouse);
+  // pos teleports the FM (batteries can't fly 20km to a target either)
+  debugCommand({ aimPitchDeg, aimHeadingDeg, throttle, pos } = {}) {
     if (aimPitchDeg !== undefined) this.aimPitch = aimPitchDeg * Math.PI / 180;
     if (aimHeadingDeg !== undefined) this.aimHeading = aimHeadingDeg * Math.PI / 180;
     if (throttle !== undefined) this.throttleCmd = throttle;
+    if (pos) {
+      this.fm.initFlight({
+        x: pos.x, y: pos.y, alt: pos.alt,
+        headingRad: (pos.headingDeg || 0) * Math.PI / 180,
+        speed: pos.speed || 200, throttle: this.throttleCmd,
+      });
+      this.aimHeading = (pos.headingDeg || 0) * Math.PI / 180;
+      this._prev.set(this.fm.state);
+    }
   }
 
   // ---- sim side ----
@@ -110,7 +121,7 @@ export class Player {
       gearDown: this.gearDown,
     }, { groundH: Math.max(groundH, 0) });
 
-    this.gun.tick(sim, dt, this.fm, L.fire === 1, this.terrain);
+    this.gun.tick(sim, dt, this.fm, L.fire === 1, this.terrain, this.battlefield);
 
     // gear-up terrain/water contact = crash → respawn (proper damage phase 8)
     const agl = st[S.PZ] - Math.max(groundH, 0);

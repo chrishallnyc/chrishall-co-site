@@ -16,8 +16,8 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.7.0";
-const PHASE = 8;
+const VERSION = "0.8.0";
+const PHASE = 9;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
 // (phase 7, FM-PLAN.md) is wired into gameplay. Fields not derivable from
@@ -141,13 +141,21 @@ async function boot() {
     }
   }
 
+  // PHASE 9: targets on the ground. ?nobattle=1 for clean scenery QA shots.
+  let battlefield = null;
+  if (flags.get("nobattle") !== "1") {
+    const { Battlefield } = await import("./game/battlefield.js");
+    battlefield = new Battlefield(scene, terrain, (flags.get("front") || "NELLIS").toUpperCase());
+    sim.addSystem(battlefield);
+  }
+
   // PHASE 7: you fly. ?demo=1 keeps the old scripted circle for QA baselines.
   let player = null;
   if (flags.get("demo") !== "1") {
     world.playerMode = true;
     world.trailMesh.visible = false; // FM-driven trail is a polish item
     player = new Player(scene, {
-      jet: world.jet, terrain,
+      jet: world.jet, terrain, battlefield,
       spawn: { x: 0, y: -6000, alt: (fg?.baseAlt || 3400) + 200, headingRad: 0, speed: 200 },
     });
     sim.addSystem(player);
@@ -168,25 +176,57 @@ async function boot() {
   // FM heading convention: 0 = east (+x ENU), measured toward north (+y).
   if (player) {
     const aimV = new THREE.Vector3();
+    const pipV = new THREE.Vector3();
+    const pipQ = new THREE.Quaternion();
     hud.arcadeLayer = (ctx) => {
+      const w = ctx.canvas.width / (window.devicePixelRatio || 1);
+      const h = ctx.canvas.height / (window.devicePixelRatio || 1);
+
+      // gun pipper: where rounds actually go — boresight (nose) + ballistic
+      // drop at 900m convergence. The stream rides above the aim circle
+      // (instructor droop + alpha); this cross is the honest firing solution.
+      const st = player.fm.state;
+      pipQ.set(st[4], st[5], st[6], st[3]); // (x,y,z,w)
+      pipV.set(1, 0, 0).applyQuaternion(pipQ); // nose in ENU
+      const CONV = 900;
+      const v0 = player.fm.out.V + 1050, sK = CONV * 0.00035;
+      const tof = (Math.exp(sK) - 1) / (0.00035 * v0);
+      const drop = 4.9 * tof * tof;
+      // ENU -> three (east, up, north)
+      pipV.set(st[0] + pipV.x * CONV, st[2] + pipV.z * CONV - drop, st[1] + pipV.y * CONV);
+      const pv = pipV.project(camera);
+      if (pv.z < 1 && pv.z > -1) {
+        const px = (pv.x * 0.5 + 0.5) * w, py = (1 - (pv.y * 0.5 + 0.5)) * h;
+        if (px > 8 && py > 8 && px < w - 8 && py < h - 8) {
+          ctx.save();
+          ctx.strokeStyle = "#ffd27a"; ctx.lineWidth = 1.4; ctx.globalAlpha = 0.9;
+          ctx.beginPath();
+          ctx.moveTo(px - 7, py); ctx.lineTo(px - 2.5, py);
+          ctx.moveTo(px + 2.5, py); ctx.lineTo(px + 7, py);
+          ctx.moveTo(px, py - 7); ctx.lineTo(px, py - 2.5);
+          ctx.moveTo(px, py + 2.5); ctx.lineTo(px, py + 7);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
       const cp = Math.cos(player.aimPitch), sp = Math.sin(player.aimPitch);
       aimV.set(Math.cos(player.aimHeading) * cp, sp, Math.sin(player.aimHeading) * cp)
         .multiplyScalar(6000).add(camera.position);
       const v = aimV.project(camera);
       if (v.z > 1 || v.z < -1) return; // behind the camera
-      const w = ctx.canvas.width / (window.devicePixelRatio || 1);
-      const h = ctx.canvas.height / (window.devicePixelRatio || 1);
       const sx = (v.x * 0.5 + 0.5) * w, sy = (1 - (v.y * 0.5 + 0.5)) * h;
       if (sx < 8 || sy < 8 || sx > w - 8 || sy > h - 8) return;
       ctx.save();
       ctx.strokeStyle = "#9be89b"; ctx.lineWidth = 1.6; ctx.globalAlpha = 0.95;
       ctx.beginPath(); ctx.arc(sx, sy, 9, 0, Math.PI * 2); ctx.stroke();
       ctx.beginPath(); ctx.arc(sx, sy, 1.4, 0, Math.PI * 2); ctx.fillStyle = "#9be89b"; ctx.fill();
-      // ammo readout, WT-style bottom-center
+      // ammo + score readout, WT-style bottom-center
       ctx.font = "12px ui-monospace, Menlo, monospace";
       ctx.fillStyle = player.gun.ammo > 0 ? "#9be89b" : "#d08770";
       ctx.textAlign = "center";
-      ctx.fillText("GUN " + player.gun.ammo, w / 2, h - 34);
+      const score = battlefield && battlefield.kills > 0 ? "   KILLS " + battlefield.kills : "";
+      ctx.fillText("GUN " + player.gun.ammo + score, w / 2, h - 34);
       ctx.restore();
     };
   }
@@ -210,7 +250,7 @@ async function boot() {
 
   // public hooks (QA + future phases)
   Object.assign(state, {
-    sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud, player,
+    sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud, player, battlefield,
     cloudImmersion: () => clouds.immersion,
     setTimeOfDay: (h) => atmosphere.setTime(h),
     setFront: (f) => atmosphere.setFront(String(f).toUpperCase()),
@@ -275,6 +315,7 @@ async function boot() {
     } else {
       world.render(alpha, camera);
     }
+    battlefield?.render(dtMs / 1000, camera);
     terrain?.update(camera);
     waterClock += dtMs / 1000;
     water?.update(camera, waterClock);

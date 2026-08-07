@@ -1,11 +1,13 @@
 {
-  "updated": "2026-08-07T01:25:00-07:00",
-  "version": "v0.7.0",
-  "now": "phase 9 — targets on the ground: units placed in the world, hit detection",
-  "nowPhase": 9,
+  "updated": "2026-08-07T02:55:00-07:00",
+  "version": "v0.8.0",
+  "now": "the AAA pass — rebuilding the render pipeline to the M4 Max ceiling (research fleet reported)",
+  "nowPhase": 14,
   "paused": false,
-  "pushes": 23,
+  "pushes": 24,
   "ledger": [
+    "2026-08-07 THE MANDATE — new goal: the most beautiful game possible in a browser, built for the most powerful Macs. An 8-agent research fleet mapped the ceiling; the AAA rebuild starts now, then three full 10%-better passes.",
+    "2026-08-07 v0.8.0 — TARGETS ON THE GROUND: 29 units across the three fronts (convoy + SAM site in Nevada, ships in the Alaska Sound, a carrier group off Saipan). Shoot them, they burn. Kills score on screen.",
     "2026-08-07 v0.7.0 — THE GUN WORKS: 6000-rounds-a-minute cannon with honest ballistics (bullets slow down and drop like real ones), glowing tracers, dust where they hit the desert, engine + gun sound. 11/11 tests.",
     "2026-08-06 v0.6.0 — YOU FLY: mouse steers the jet, W/S throttle, real physics, crash and respawn. The game became a game.",
     "2026-08-06 v0.5.0 — the sea is real: waves that match each place — glassy fjords in Alaska, Pacific swell over the reef.",
@@ -15,26 +17,131 @@
     "2026-08-06 day zero — plan approved: 21 phases, one F-22, three real battlefields."
   ],
   "phases": [
-    { "n": 0,  "name": "Berth & deploy pipe",            "pct": 100, "note": "raptor.chall.net live, push-to-deploy" },
-    { "n": 1,  "name": "Engine core",                     "pct": 100, "note": "WebGPU+WebGL2, deterministic 120Hz sim, controls" },
-    { "n": 2,  "name": "Atmosphere & time-of-day",        "pct": 100, "note": "physical sky, real sun, stars, judged 3 rounds" },
-    { "n": 3,  "name": "Real-Earth terrain",              "pct": 100, "note": "USGS data: Nevada, Prince William Sound, Marianas" },
-    { "n": 4,  "name": "Water",                           "pct": 100, "note": "Gerstner seas, fjord + reef, forensics-gated" },
-    { "n": 5,  "name": "Clouds & weather",                "pct": 45,  "note": "billboards + shadows + climates live; volumetrics later" },
-    { "n": 6,  "name": "The F-22 airframe",               "pct": 70,  "note": "v2 procedural model, 15 rig parts; bakery hi-poly later" },
-    { "n": 7,  "name": "Flight model & controls",         "pct": 75,  "note": "you fly: mouse-aim + 6-DOF physics, 13/13 gates" },
-    { "n": 8,  "name": "Sensors & weapons",                "pct": 30,  "note": "the cannon fires: real ballistics, tracers, impacts" },
-    { "n": 9,  "name": "AI & ground war",                  "pct": 12,  "note": "7 unit models built; placement + brains going in now" },
-    { "n": 10, "name": "Match modes & dynamic campaign",   "pct": 0,   "note": "" },
-    { "n": 11, "name": "Authored campaign (30+ sorties)",  "pct": 0,   "note": "" },
-    { "n": 12, "name": "Presentation (hangar, replays)",   "pct": 20,  "note": "HUD live; hangar, kill cam, war room pending" },
-    { "n": 13, "name": "Audio & voice",                    "pct": 45,  "note": "engine + gun sound live in-game; radio voice later" },
-    { "n": 14, "name": "Max fidelity pass",                "pct": 8,   "note": "" },
-    { "n": 15, "name": "Settings, accessibility, PWA",     "pct": 10,  "note": "rebind menu live" },
-    { "n": 16, "name": "QA hardening",                     "pct": 33,  "note": "9 batteries, forensic judges standing" },
-    { "n": 17, "name": "Ship v1.0",                        "pct": 0,   "note": "" },
-    { "n": 18, "name": "Multiplayer duels (P2P)",          "pct": 5,   "note": "determinism foundation ready" },
-    { "n": 19, "name": "16-player server battles",         "pct": 0,   "note": "" },
-    { "n": 20, "name": "Live-ops era",                     "pct": 0,   "note": "" }
+    {
+      "n": 0,
+      "name": "Berth & deploy pipe",
+      "pct": 100,
+      "note": "raptor.chall.net live, push-to-deploy"
+    },
+    {
+      "n": 1,
+      "name": "Engine core",
+      "pct": 100,
+      "note": "WebGPU+WebGL2, deterministic 120Hz sim, controls"
+    },
+    {
+      "n": 2,
+      "name": "Atmosphere & time-of-day",
+      "pct": 100,
+      "note": "physical sky, real sun, stars, judged 3 rounds"
+    },
+    {
+      "n": 3,
+      "name": "Real-Earth terrain",
+      "pct": 100,
+      "note": "USGS data: Nevada, Prince William Sound, Marianas"
+    },
+    {
+      "n": 4,
+      "name": "Water",
+      "pct": 100,
+      "note": "Gerstner seas, fjord + reef, forensics-gated"
+    },
+    {
+      "n": 5,
+      "name": "Clouds & weather",
+      "pct": 45,
+      "note": "billboards + shadows + climates live; volumetrics later"
+    },
+    {
+      "n": 6,
+      "name": "The F-22 airframe",
+      "pct": 70,
+      "note": "v2 procedural model, 15 rig parts; bakery hi-poly later"
+    },
+    {
+      "n": 7,
+      "name": "Flight model & controls",
+      "pct": 75,
+      "note": "you fly: mouse-aim + 6-DOF physics, 13/13 gates"
+    },
+    {
+      "n": 8,
+      "name": "Sensors & weapons",
+      "pct": 40,
+      "note": "cannon + ballistic pipper live; missiles next"
+    },
+    {
+      "n": 9,
+      "name": "AI & ground war",
+      "pct": 30,
+      "note": "29 targets placed + destructible; AI brains + return fire next"
+    },
+    {
+      "n": 10,
+      "name": "Match modes & dynamic campaign",
+      "pct": 0,
+      "note": ""
+    },
+    {
+      "n": 11,
+      "name": "Authored campaign (30+ sorties)",
+      "pct": 0,
+      "note": ""
+    },
+    {
+      "n": 12,
+      "name": "Presentation (hangar, replays)",
+      "pct": 20,
+      "note": "HUD live; hangar, kill cam, war room pending"
+    },
+    {
+      "n": 13,
+      "name": "Audio & voice",
+      "pct": 45,
+      "note": "engine + gun sound live in-game; radio voice later"
+    },
+    {
+      "n": 14,
+      "name": "Max fidelity pass",
+      "pct": 12,
+      "note": "ceiling research done: TAA/bloom, real satellite imagery, FFT ocean, volumetric clouds"
+    },
+    {
+      "n": 15,
+      "name": "Settings, accessibility, PWA",
+      "pct": 10,
+      "note": "rebind menu live"
+    },
+    {
+      "n": 16,
+      "name": "QA hardening",
+      "pct": 36,
+      "note": "10 batteries, forensic judges standing"
+    },
+    {
+      "n": 17,
+      "name": "Ship v1.0",
+      "pct": 0,
+      "note": ""
+    },
+    {
+      "n": 18,
+      "name": "Multiplayer duels (P2P)",
+      "pct": 5,
+      "note": "determinism foundation ready"
+    },
+    {
+      "n": 19,
+      "name": "16-player server battles",
+      "pct": 0,
+      "note": ""
+    },
+    {
+      "n": 20,
+      "name": "Live-ops era",
+      "pct": 0,
+      "note": ""
+    }
   ]
 }

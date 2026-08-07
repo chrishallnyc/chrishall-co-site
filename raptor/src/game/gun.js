@@ -46,8 +46,9 @@ export class Gun {
     this._dir = new THREE.Vector3();
   }
 
-  // trigger held? fm supplies position/velocity/attitude (ENU/FRD)
-  tick(sim, dt, fm, trigger, terrain) {
+  // trigger held? fm supplies position/velocity/attitude (ENU/FRD);
+  // battlefield (optional) takes segment hit-tests against unit spheres
+  tick(sim, dt, fm, trigger, terrain, battlefield) {
     const st = fm.state;
     // fire
     if (trigger && this.ammo > 0) {
@@ -69,8 +70,20 @@ export class Gun {
       r[o + 3] *= 1 - DRAG_K * dt * Math.hypot(r[o + 3], r[o + 4], r[o + 5]);
       r[o + 4] *= 1 - DRAG_K * dt * Math.hypot(r[o + 3], r[o + 4], r[o + 5]);
       r[o + 5] = r[o + 5] * (1 - DRAG_K * dt * Math.hypot(r[o + 3], r[o + 4], r[o + 5])) - 9.81 * dt;
+      const x0 = r[o], y0 = r[o + 1], z0 = r[o + 2]; // pre-move (rounds cover ~10m/tick — point tests tunnel)
       r[o] += r[o + 3] * dt; r[o + 1] += r[o + 4] * dt; r[o + 2] += r[o + 5] * dt;
       r[o + 6] += dt;
+      if (battlefield) {
+        const hit = battlefield.testSegment(x0, y0, z0, r[o], r[o + 1], r[o + 2]);
+        if (hit >= 0) {
+          this.live[i] = 0;
+          this.impacts++;
+          battlefield.damage(hit, 1);
+          this.puffs.push({ x: r[o], y: r[o + 2], z: r[o + 1], age: 0 });
+          if (this.puffs.length > MAX_PUFFS) this.puffs.shift();
+          continue;
+        }
+      }
       const groundH = terrain ? terrain.heightAt(r[o], r[o + 1]) : 0;
       if (r[o + 2] <= Math.max(groundH, 0)) {
         this.live[i] = 0;
@@ -94,11 +107,18 @@ export class Gun {
     let fx = 1 - 2 * (qy * qy + qz * qz);
     let fy = 2 * (qx * qy + qw * qz);
     let fz = 2 * (qx * qz - qw * qy);
-    // dispersion: 2 seeded gaussian-ish angles (sum of 3 uniforms)
+    // dispersion: 2 seeded gaussian-ish angles (sum of 3 uniforms), applied
+    // in the plane PERPENDICULAR to the fire direction — world-axis offsets
+    // rotate the scatter pattern with heading (east-flyers got zero vertical
+    // spread; D-040)
     const mrad = M61A2.dispersionMrad / 1000;
     const g1 = (sim.rng.f() + sim.rng.f() + sim.rng.f() - 1.5) * mrad;
     const g2 = (sim.rng.f() + sim.rng.f() + sim.rng.f() - 1.5) * mrad;
-    fx += g1; fy += g2; // small-angle approximation
+    let rx = fy, ry = -fx, rz = 0; // right = f x worldUp
+    const rl = Math.hypot(rx, ry, rz);
+    if (rl > 1e-4) { rx /= rl; ry /= rl; } else { rx = 1; ry = 0; }
+    const ux = ry * fz - rz * fy, uy = rz * fx - rx * fz, uz = rx * fy - ry * fx; // up = right x f
+    fx += g1 * rx + g2 * ux; fy += g1 * ry + g2 * uy; fz += g1 * rz + g2 * uz;
     const n = Math.hypot(fx, fy, fz); fx /= n; fy /= n; fz /= n;
     const o = slot * 7, r = this.r, mv = M61A2.muzzleVelocityMs;
     r[o] = st[S.PX] + fx * 8; r[o + 1] = st[S.PY] + fy * 8; r[o + 2] = st[S.PZ] + fz * 8;
