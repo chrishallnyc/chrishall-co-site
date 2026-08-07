@@ -68,7 +68,7 @@ const SMOKE_CAP = 48;
 const SMOKE_SIZE = 0.9;
 const SMOKE_ALPHA_MAX = 0.09;
 
-const WINGTIP = { x: 6.6, y: 0.7, z: 4.2 }; // f22-model-local, mirrored for the L side
+const WINGTIP = { x: 6.6, y: 0.35, z: 4.2 }; // f22-model-local, mirrored for the L side (y re-anchored to v3's drooped tip, D-052)
 const NOZZLE_EXIT_Z = 1.36;                 // nozzle-pivot-local, aft along the pivot's +Z
 
 function radialTexture(stops, size = 64) {
