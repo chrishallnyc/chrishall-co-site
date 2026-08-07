@@ -8,6 +8,7 @@
 
 import * as THREE from "three";
 import { FlightModel, S } from "../sim/flight.js";
+import { Gun } from "./gun.js";
 
 const MOUSE_SENS = 0.0028;      // rad of aim per px of mouse travel
 const THROTTLE_RATE = 0.45;     // per second held
@@ -19,6 +20,7 @@ export class Player {
     this.jet = jet;             // the F-22 group (taken over from TestWorld)
     this.terrain = terrain || null;
     this.spawn = spawn;
+    this.gun = new Gun(scene);  // boot-time scene.add — safe
 
     this.fm = new FlightModel();
     this._doSpawn();
@@ -30,7 +32,7 @@ export class Player {
     this.throttleCmd = 0.8;
     this.gearDown = false;
     this._mouseDx = 0; this._mouseDy = 0;
-    this._live = { rollL: 0, rollR: 0, yawL: 0, yawR: 0, thrUp: 0, thrDn: 0, pitchUp: 0, pitchDn: 0, brake: 0, wheel: 0, gearEdge: 0 };
+    this._live = { rollL: 0, rollR: 0, yawL: 0, yawR: 0, thrUp: 0, thrDn: 0, pitchUp: 0, pitchDn: 0, brake: 0, wheel: 0, gearEdge: 0, fire: 0 };
     this.crashes = 0;
 
     // render-side scratch
@@ -64,6 +66,7 @@ export class Player {
     L.brake = input.held("wheel_brakes") ? 1 : 0;
     L.wheel += input.wheelDelta();
     if (input.pressed("gear")) L.gearEdge = 1;
+    L.fire = (input.held("fire_mguns") || input.held("fire_cannons")) ? 1 : 0;
   }
 
   // QA hook: drive the aim/throttle directly (batteries can't move a mouse)
@@ -107,6 +110,8 @@ export class Player {
       gearDown: this.gearDown,
     }, { groundH: Math.max(groundH, 0) });
 
+    this.gun.tick(sim, dt, this.fm, L.fire === 1, this.terrain);
+
     // gear-up terrain/water contact = crash → respawn (proper damage phase 8)
     const agl = st[S.PZ] - Math.max(groundH, 0);
     if (agl < 1.5 && !this.gearDown) { this.crashes++; this.reset(); }
@@ -136,6 +141,8 @@ export class Player {
     u.crossVectors(f, r).normalize();
     this._m.makeBasis(r, u, f);
     this.jet.quaternion.setFromRotationMatrix(this._m);
+
+    this.gun.render(1 / 60); // visual aging; cheap approximation of dt
 
     if (parked) return; // QA parked-camera owns the view
     // chase camera behind the flight path, mild smoothing
@@ -168,6 +175,7 @@ export class Player {
       mach: out.mach,
       aoa: out.alphaDeg,
       throttle: Math.round(this.throttleCmd * 100),
+      ammo: this.gun.ammo,
     };
   }
 }

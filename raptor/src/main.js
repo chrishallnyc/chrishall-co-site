@@ -16,8 +16,8 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.6.0";
-const PHASE = 7;
+const VERSION = "0.7.0";
+const PHASE = 8;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
 // (phase 7, FM-PLAN.md) is wired into gameplay. Fields not derivable from
@@ -182,8 +182,23 @@ async function boot() {
       ctx.strokeStyle = "#9be89b"; ctx.lineWidth = 1.6; ctx.globalAlpha = 0.95;
       ctx.beginPath(); ctx.arc(sx, sy, 9, 0, Math.PI * 2); ctx.stroke();
       ctx.beginPath(); ctx.arc(sx, sy, 1.4, 0, Math.PI * 2); ctx.fillStyle = "#9be89b"; ctx.fill();
+      // ammo readout, WT-style bottom-center
+      ctx.font = "12px ui-monospace, Menlo, monospace";
+      ctx.fillStyle = player.gun.ammo > 0 ? "#9be89b" : "#d08770";
+      ctx.textAlign = "center";
+      ctx.fillText("GUN " + player.gun.ammo, w / 2, h - 34);
       ctx.restore();
     };
+  }
+
+  // audio: F119 engine tracks the throttle, M61 gates on firing (phase 13
+  // first wiring; gesture-gated resume inside AudioBus)
+  let audio = null;
+  if (player && flags.get("audio") !== "0") {
+    try {
+      const { AudioBus } = await import("./engine/audio.js");
+      audio = new AudioBus(); // builds engine/gun/lock voices itself
+    } catch (err) { console.warn("audio unavailable:", err && err.message); }
   }
   document.getElementById("controlsLink")?.addEventListener("click", (e) => { e.preventDefault(); controls.show(); });
 
@@ -249,6 +264,14 @@ async function boot() {
       if (parked) world.renderParkedCamera(camera);
       player.render(alpha, camera, parked);
       flightfx?.update(player.fm.out, player.throttleCmd, dtMs / 1000, camera);
+      if (audio) {
+        audio.engine.setState({
+          throttle: Math.min(player.throttleCmd, 1),
+          ab: Math.max(0, (player.throttleCmd - 1) / 0.1),
+          ias: player.fm.out.V * 1.94384,
+        });
+        if (player.gun.firing !== audio.gun.firing) audio.gun.fire(player.gun.firing);
+      }
     } else {
       world.render(alpha, camera);
     }
