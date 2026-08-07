@@ -12,14 +12,7 @@ const TRAIL_N = 240;
 export class TestWorld {
   constructor(scene) {
     this.scene = scene;
-
-    scene.background = new THREE.Color(0x8fb4d6);
-    scene.fog = new THREE.Fog(0x8fb4d6, 4000, 26000);
-
-    const sun = new THREE.DirectionalLight(0xfff2dd, 2.6);
-    sun.position.set(-6000, 9000, 4000);
-    scene.add(sun);
-    scene.add(new THREE.HemisphereLight(0xbfd6ec, 0x24384a, 0.9));
+    // sky, fog, and lights are owned by Atmosphere (world/daycycle.js)
 
     const sea = new THREE.Mesh(
       new THREE.PlaneGeometry(60000, 60000, 1, 1),
@@ -69,6 +62,11 @@ export class TestWorld {
     this.state[0] = 0; this.state[1] = 2600; this.state[2] = 900; this.state[3] = 240;
     this.prev.set(this.state);
     this._puffCooldown = 0;
+    // QA/judge framing: ?pitch=deg tilts the chase view; ?yaw=deg parks the
+    // camera at altitude looking along a fixed azimuth (sun-aware sky shots)
+    const q = new URLSearchParams(location.search);
+    this.pitchBias = parseFloat(q.get("pitch") || "0") * Math.PI / 180;
+    this.fixYaw = q.has("yaw") ? parseFloat(q.get("yaw")) * Math.PI / 180 : null;
   }
 
   // ---- sim side (fixed step, deterministic) ----
@@ -127,9 +125,15 @@ export class TestWorld {
     this.trailMesh.count = n;
     this.trailMesh.instanceMatrix.needsUpdate = true;
 
+    if (this.fixYaw !== null) {
+      // parked sky camera: +X east, +Z north; yaw = azimuth from north
+      camera.position.set(0, 900, 0);
+      camera.lookAt(Math.sin(this.fixYaw) * 1000, 900 + Math.tan(this.pitchBias) * 1000, Math.cos(this.fixYaw) * 1000);
+      return;
+    }
     // chase camera, behind along heading
     const back = 190, up = 60;
     camera.position.set(px - Math.sin(heading) * back, alt + up, pz - Math.cos(heading) * back);
-    camera.lookAt(px, alt, pz);
+    camera.lookAt(px, alt + back * Math.tan(this.pitchBias), pz);
   }
 }

@@ -8,6 +8,7 @@ import { detectTier, tierParams, setTier, TIERS, savedBench, saveBench, benchPic
 import { DebugOverlay } from "./engine/debug.js";
 import { TestWorld } from "./game/testworld.js";
 import { ControlsMenu } from "./game/controlsmenu.js";
+import { Atmosphere } from "./world/daycycle.js";
 
 const VERSION = "0.2.0";
 const PHASE = 1;
@@ -57,7 +58,14 @@ async function boot() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 80000);
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 120000);
+
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.5;
+
+  const flags = new URLSearchParams(location.search);
+  const atmosphere = new Atmosphere(scene, (flags.get("front") || "NELLIS").toUpperCase());
+  if (flags.get("tod")) atmosphere.setTime(parseFloat(flags.get("tod")));
 
   const sim = new SimCore(1);
   const world = new TestWorld(scene);
@@ -77,7 +85,9 @@ async function boot() {
 
   // public hooks (QA + future phases)
   Object.assign(state, {
-    sim, input, gamepad, controls, dbg,
+    sim, input, gamepad, controls, dbg, atmosphere,
+    setTimeOfDay: (h) => atmosphere.setTime(h),
+    setFront: (f) => atmosphere.setFront(String(f).toUpperCase()),
     hash: () => sim.stateHash(),
     determinismProbe,
     setSeed: (s) => sim.reset(s),
@@ -121,6 +131,8 @@ async function boot() {
     if (input.pressed("debug")) dbg.toggle();
     const alpha = sim.advance(dtMs / 1000);
     world.render(alpha, camera);
+    atmosphere.update(camera);
+    renderer.toneMappingExposure = atmosphere.exposure;
     renderer.render(scene, camera);
     dbg.frame(dtMs, { backend: state.backend, tier: state.tier, sim });
     input.consumeFrame();
