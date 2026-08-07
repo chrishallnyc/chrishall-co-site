@@ -17,8 +17,8 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.15.0";
-const PHASE = 9;
+const VERSION = "0.16.0";
+const PHASE = 14;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
 // (phase 7, FM-PLAN.md) is wired into gameplay. Fields not derivable from

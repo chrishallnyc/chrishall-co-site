@@ -1,11 +1,12 @@
 {
-  "updated": "2026-08-07T13:20:00-07:00",
-  "version": "v0.15.0",
-  "now": "volumetric clouds next, then three full 10%-better polish passes over everything",
-  "nowPhase": 9,
+  "updated": "2026-08-07T13:55:00-07:00",
+  "version": "v0.16.0",
+  "now": "new hi-poly F-22 airframe landing, then three full 10%-better polish passes",
+  "nowPhase": 14,
   "paused": false,
-  "pushes": 32,
+  "pushes": 34,
   "ledger": [
+    "2026-08-07 v0.16.0 — REAL SKIES: the clouds are volumes now — the GPU marches rays through 3D cloud fields with real light scattering. Towering Pacific cumulus, Alaska overcast decks, Nevada fair-weather puffs — and you can fly through them. Still 121fps.",
     "2026-08-07 v0.15.0 — SAM CITY: the missile sites launch back. Launch warning tone + flashing MISSILE alert, then physics decides: fly straight and it connects; turn away on the warning and run, and it dies chasing you. Every counter-tactic works because the physics is real, not scripted.",
     "2026-08-07 v0.14.0 — FOX TWO: AIM-9X Sidewinders. The seeker locks onto targets (box + growl tone), the missile launches with real rocket physics — boost, sustain, burnout — and steers itself in with the same guidance law real missiles use. First test flight missed forever because one minus sign was flipped; the test caught it.",
     "2026-08-07 v0.13.0 — THE SEA COMPUTES: the ocean is now a real physics simulation running on your GPU — thousands of waves computed 120 times a second (verified against textbook math to 14 decimal places), with foam that forms where waves actually break. Alaska chop and Pacific swell are physically different seas now. Plus: ground units render 6x leaner.",
@@ -57,8 +58,8 @@
     {
       "n": 5,
       "name": "Clouds & weather",
-      "pct": 45,
-      "note": "billboards + shadows + climates live; volumetrics later"
+      "pct": 85,
+      "note": "volumetric raymarched clouds on all fronts + fly-through; weather fronts later"
     },
     {
       "n": 6,
@@ -111,8 +112,8 @@
     {
       "n": 14,
       "name": "Max fidelity pass",
-      "pct": 65,
-      "note": "TAA/bloom + real imagery + physical atmosphere + FFT ocean LIVE; volumetrics + 10% passes next"
+      "pct": 78,
+      "note": "TAA/bloom + real imagery + physical atmosphere + FFT ocean + volumetric clouds ALL LIVE"
     },
     {
       "n": 15,
@@ -123,8 +124,8 @@
     {
       "n": 16,
       "name": "QA hardening",
-      "pct": 58,
-      "note": "15 batteries, 125+ gates, forensic judges standing"
+      "pct": 62,
+      "note": "16 batteries, 145+ gates, forensic judges standing"
     },
     {
       "n": 17,

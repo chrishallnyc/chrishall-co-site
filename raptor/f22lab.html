@@ -28,9 +28,10 @@
 </script>
 <script type="module">
 import * as THREE from "three";
-import { buildF22 } from "/src/aircraft/f22.js";
 
 const q = new URLSearchParams(location.search);
+const { buildF22 } = await import(
+  q.get("v") === "3" ? "/src/aircraft/f22v3.js" : "/src/aircraft/f22.js");
 const VIEW = q.get("view");                 // top | side | front | three-quarter
 const SPIN = q.get("spin") !== "0" && !VIEW;
 
