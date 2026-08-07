@@ -10,8 +10,8 @@ import { TestWorld } from "./game/testworld.js";
 import { ControlsMenu } from "./game/controlsmenu.js";
 import { Atmosphere } from "./world/daycycle.js";
 
-const VERSION = "0.2.0";
-const PHASE = 1;
+const VERSION = "0.3.0";
+const PHASE = 2;
 
 const state = {
   version: VERSION, phase: PHASE, ready: false, backend: null, tier: null,
