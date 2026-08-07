@@ -123,7 +123,11 @@
   .sw-cl-panel { width: min(560px, calc(100vw - 40px)); max-height: 72vh; overflow-y: auto;
     background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
     padding: 16px 18px; backdrop-filter: blur(10px); box-shadow: 0 12px 48px rgba(0,0,0,.6); }
-  .sw-cl-panel h2 { color: var(--gold); font-size: 13px; letter-spacing: .12em; margin-bottom: 12px; }
+  .sw-cl-panel h2 { color: var(--gold); font-size: 13px; letter-spacing: .12em; margin-bottom: 12px;
+    display: flex; align-items: center; }
+  .sw-cl-close { margin-left: auto; background: none; border: 0; color: var(--dim);
+    font: 18px ui-monospace, monospace; cursor: pointer; padding: 0 2px; }
+  .sw-cl-close:hover { color: var(--gold); }
   .sw-cl-rel { padding: 8px 0; border-bottom: 1px solid rgba(29,44,74,.5); }
   .sw-cl-rel b { color: var(--ink); font-size: 11px; }
   .sw-cl-rel span { color: #5a73a0; font-size: 9px; margin-left: 8px; }
@@ -171,6 +175,12 @@
   }
   @media (prefers-reduced-motion: reduce) {
     #sw-mission-log, .sw-controls { transition: none; }
+  }
+  /* touch devices have no hover — controls rest visible, the admin corner
+     button stays out of the way entirely */
+  @media (hover: none) {
+    .sw-controls { opacity: .55; }
+    #sw-adminbtn { display: none; }
   }
 </style>
 </head>
@@ -378,28 +388,28 @@ const ACTIONS = [
   { id: "ambient-sweep", name: "Sensor Sweep", tier: "ambient", weight: 0, cat: "flight", blurb: "A faint glint runs the leading edge of the wing." },
 
   /* ───────── COMMON · ~55% (quiet cockpit life, the texture of the sortie) ───────── */
-  { id: "fuel-check", name: "Fuel Check", tier: "common", weight: 46, cat: "life", blurb: "Tanks balanced, burn on plan — the long legs are won with arithmetic." },
-  { id: "ins-fix", name: "Nav Fix", tier: "common", weight: 46, cat: "life", blurb: "Position confirmed; the INS agrees with the stars." },
-  { id: "wingman-checkin", name: "Wingman Check-In", tier: "common", weight: 46, cat: "escort", blurb: "RAPTOR 1-1 rocks her wings — visual, holding station." },
-  { id: "oxygen-check", name: "Oxygen Check", tier: "common", weight: 46, cat: "life", blurb: "Crew checks in on oxygen — all sweet, all steady." },
-  { id: "fence-check", name: "Fence Check", tier: "common", weight: 46, cat: "life", blurb: "Systems set for the line — the escorts tuck in close." },
-  { id: "hf-radio", name: "HF Radio Check", tier: "common", weight: 46, cat: "life", blurb: "A long-haul frequency crackles its answer through the static." },
-  { id: "pilot-swap", name: "Pilot Swap", tier: "common", weight: 46, cat: "life", blurb: "The mission commander takes the jet; the pilot unclips for rest." },
-  { id: "contrail-check", name: "Contrail Check", tier: "common", weight: 46, cat: "weather", blurb: "Escort confirms: no cons — the layer sits above the flight." },
-  { id: "sea-note", name: "Sea State Note", tier: "common", weight: 46, cat: "weather", blurb: "Seven miles down, the Pacific files its endless report." },
-  { id: "autopilot-leg", name: "Steering Point", tier: "common", weight: 46, cat: "life", blurb: "The autopilot takes the next leg — a degree of drift, corrected." },
+  { id: "fuel-check", name: "Fuel Check", tier: "common", weight: 37, cat: "life", blurb: "Tanks balanced, burn on plan — the long legs are won with arithmetic." },
+  { id: "ins-fix", name: "Nav Fix", tier: "common", weight: 37, cat: "life", blurb: "Position confirmed; the INS agrees with the stars." },
+  { id: "wingman-checkin", name: "Wingman Check-In", tier: "common", weight: 37, cat: "escort", blurb: "RAPTOR 1-1 rocks her wings — visual, holding station." },
+  { id: "oxygen-check", name: "Oxygen Check", tier: "common", weight: 37, cat: "life", blurb: "Crew checks in on oxygen — all sweet, all steady." },
+  { id: "fence-check", name: "Fence Check", tier: "common", weight: 37, cat: "life", blurb: "Systems set for the line — the escorts tuck in close." },
+  { id: "hf-radio", name: "HF Radio Check", tier: "common", weight: 37, cat: "life", blurb: "A long-haul frequency crackles its answer through the static." },
+  { id: "pilot-swap", name: "Pilot Swap", tier: "common", weight: 37, cat: "life", blurb: "The mission commander takes the jet; the pilot unclips for rest." },
+  { id: "contrail-check", name: "Contrail Check", tier: "common", weight: 37, cat: "weather", blurb: "Escort confirms: no cons — the layer sits above the flight." },
+  { id: "sea-note", name: "Sea State Note", tier: "common", weight: 37, cat: "weather", blurb: "Seven miles down, the Pacific files its endless report." },
+  { id: "autopilot-leg", name: "Steering Point", tier: "common", weight: 37, cat: "life", blurb: "The autopilot takes the next leg — a degree of drift, corrected." },
 
   /* ───────── UNCOMMON · ~26% (small beats around the formation) ───────── */
-  { id: "crossunder", name: "Escort Crossunder", tier: "uncommon", weight: 19, cat: "escort", blurb: "RAPTOR 1-1 slides beneath the Spirit and takes the far wing." },
+  { id: "crossunder", name: "Escort Crossunder", tier: "uncommon", weight: 19, cat: "escort", blurb: "The Raptors trade wings — one slides beneath the Spirit's tail, the other steps across the top." },
   { id: "burner-sprint", name: "Raptor Sprint", tier: "uncommon", weight: 15, cat: "escort", almanac: "f-22", blurb: "The far escort runs ahead supersonic — no burner needed — then arcs home." },
   { id: "airliner-above", name: "Heavy Above", tier: "uncommon", weight: 19, cat: "traffic", blurb: "An airliner crosses the flight levels above, westbound and oblivious." },
-  { id: "c130-below", name: "C-130 Below", tier: "uncommon", weight: 15, cat: "traffic", almanac: "c-130", blurb: "A Hercules drones across the low sky on a logistics run." },
-  { id: "p8-line", name: "P-8 Patrol Line", tier: "uncommon", weight: 15, cat: "traffic", blurb: "A Poseidon works a maritime patrol track along the horizon." },
-  { id: "mq9-loiter", name: "MQ-9 Below", tier: "uncommon", weight: 15, cat: "traffic", blurb: "A Reaper loiters beneath the flight, slow and patient." },
-  { id: "jetstream", name: "Jet Stream", tier: "uncommon", weight: 12, cat: "weather", blurb: "The flight rides into the core — groundspeed climbs for nothing." },
-  { id: "wx-deviate", name: "Weather Deviation", tier: "uncommon", weight: 12, cat: "weather", blurb: "Twenty degrees right around the buildups, then back on course." },
-  { id: "satcom", name: "SATCOM Tasking", tier: "uncommon", weight: 15, cat: "life", blurb: "The mission update comes down from orbit — the watch continues." },
-  { id: "undercast-break", name: "Undercast Break", tier: "uncommon", weight: 12, cat: "weather", blurb: "The deck opens; the ocean shows its blue through the hole." },
+  { id: "c130-below", name: "C-130 Below", tier: "uncommon", weight: 17, cat: "traffic", almanac: "c-130", blurb: "A Hercules drones across the low sky on a logistics run." },
+  { id: "p8-line", name: "P-8 Patrol Line", tier: "uncommon", weight: 17, cat: "traffic", blurb: "A Poseidon works a maritime patrol track along the horizon." },
+  { id: "mq9-loiter", name: "MQ-9 Below", tier: "uncommon", weight: 17, cat: "traffic", blurb: "A Reaper loiters beneath the flight, slow and patient." },
+  { id: "jetstream", name: "Jet Stream", tier: "uncommon", weight: 14, cat: "weather", blurb: "The flight rides into the core — groundspeed climbs for nothing." },
+  { id: "wx-deviate", name: "Weather Deviation", tier: "uncommon", weight: 14, cat: "weather", blurb: "Twenty degrees right around the buildups, then back on course." },
+  { id: "satcom", name: "SATCOM Tasking", tier: "uncommon", weight: 17, cat: "life", blurb: "The mission update comes down from orbit — the watch continues." },
+  { id: "undercast-break", name: "Undercast Break", tier: "uncommon", weight: 14, cat: "weather", blurb: "The deck opens; the ocean shows its blue through the hole." },
 
   /* ───────── RARE · ~13% (set-pieces + the supporting cast) ───────── */
   { id: "kc46-join", name: "Tanker Rendezvous", tier: "rare", weight: 10, cat: "tanker", almanac: "kc-46", blurb: "A Pegasus slides down the anchor track and takes the lead — the escorts cycle for gas." },
@@ -417,7 +427,7 @@ const ACTIONS = [
 
   /* ───────── EPIC · ~5% (long tableaux) ───────── */
   { id: "boom-refuel", name: "Boom Refueling", tier: "epic", weight: 6, cat: "tanker", almanac: "kc-46", blurb: "The Pegasus takes the lead; the boom reaches back; the Spirit drinks eighty thousand pounds." },
-  { id: "bandit-intercept", name: "Bandit Intercept", tier: "epic", weight: 6, cat: "threat", almanac: "f-22", blurb: "A fast mover closes unannounced — RAPTOR 1-1 breaks out to meet it." },
+  { id: "bandit-intercept", name: "Bandit Intercept", tier: "epic", weight: 6, cat: "threat", almanac: "f-22", blurb: "A fast mover closes unannounced — the escorts answer." },
   { id: "sam-launch", name: "SAM Launch", tier: "epic", weight: 5, cat: "threat", almanac: "b-2", blurb: "A launch flash through the undercast — the track climbs, searches, and loses the ghost." },
   { id: "storm-passage", name: "Storm Cells", tier: "epic", weight: 6, cat: "weather", blurb: "Towering cells walk the horizon, lightning stitching the sea beneath them." },
   { id: "aurora", name: "Aurora", tier: "epic", weight: 5, cat: "weather", night: true, blurb: "The aurora unfurls across the night in green and violet." },
@@ -425,7 +435,7 @@ const ACTIONS = [
 
   /* ───────── LEGENDARY · ~1% (showstoppers) ───────── */
   { id: "csg-below", name: "The Fleet Below", tier: "legendary", weight: 2, cat: "traffic", blurb: "The deck parts — seven miles down, a carrier group steams west. Someone keeps the other watch." },
-  { id: "second-spirit", name: "Two Ghosts", tier: "legendary", weight: 2, cat: "flight", night: true, almanac: "b-2", blurb: "Another Spirit crosses the dark — no lights, no words, two ghosts passing." },
+  { id: "second-spirit", name: "Two Ghosts", tier: "legendary", weight: 2, cat: "flight", night: true, almanac: "b-2", blurb: "Another Spirit slides past in the dark — no lights, no words, two ghosts passing." },
   { id: "meteor-shower", name: "Meteor Shower", tier: "legendary", weight: 2, cat: "weather", night: true, blurb: "For a few minutes the sky falls — streak after streak after streak." },
   { id: "green-flash", name: "The Green Flash", tier: "legendary", weight: 2, cat: "weather", night: true, blurb: "At the sun's last sliver, one emerald breath on the horizon." },
   { id: "fireworks-below", name: "Fireworks Over the Horizon", tier: "legendary", weight: 2, cat: "weather", night: true, blurb: "Some port over the curve celebrates — colored blooms shimmer under the night." },
@@ -435,7 +445,7 @@ const actionById = (id) => ACTIONS.find((a) => a.id === id);
 
 /* ── hover facts (almanac-grade; public, well-established figures only) ── */
 const FACTS = {
-  "spirit": { name: "B-2A Spirit · SPIRIT 01", desc: "Northrop Grumman flying wing, 172 ft span, crew of two. First flight 17 July 1989; the fleet flies from Whiteman AFB, Missouri. Missions have run beyond 40 hours — the longest watches ever kept from a cockpit." },
+  "spirit": { name: "B-2A Spirit · SPIRIT 01", desc: "Northrop Grumman flying wing, 172 ft span, crew of two. First flight 17 July 1989; the fleet flies from Whiteman AFB, Missouri. Missions have run beyond 40 hours — the longest combat sorties ever flown." },
   "raptor-near": { name: "F-22A Raptor · RAPTOR 1-1", desc: "Lockheed Martin air-dominance fighter. Two F119 engines with thrust vectoring; supercruises above Mach 1.5 without afterburner. Flying the close wing." },
   "raptor-far": { name: "F-22A Raptor · RAPTOR 1-2", desc: "Second escort, holding the far wing. First operational squadron stood up at Langley AFB in 2005." },
   "kc46": { name: "KC-46A Pegasus", desc: "Boeing 767-based tanker. Refuels through a fly-by-wire boom at up to 1,200 gallons a minute — the gas station of the long watch." },
@@ -447,7 +457,7 @@ const FACTS = {
   "rq4": { name: "RQ-4 Global Hawk", desc: "High-altitude endurance drone — 30+ hours aloft, no one aboard." },
   "mq9": { name: "MQ-9 Reaper", desc: "Remotely piloted hunter-killer; a turboprop heart, a day's endurance." },
   "p8": { name: "P-8A Poseidon", desc: "737 airframe hunting submarines — sonobuoys, torpedoes, and patience." },
-  "growler": { name: "EA-18G Growler", desc: "Electronic attack Hornet — it wins arguments by ending the conversation." },
+  "growler": { name: "EA-18G Growler", desc: "Electronic attack on the Super Hornet airframe — jamming pods where others carry tanks. It blinds radars rather than fighting them." },
   "tbird": { name: "Thunderbirds F-16", desc: "The USAF demonstration squadron, flying since 1953." },
   "fa18": { name: "Unflagged fast mover", desc: "Type unconfirmed. Closing without a squawk — the escorts are watching." },
   "missile": { name: "Cruise missile (test track)", desc: "Sea-skimming test article on an instrumented range, holding fifty feet like a rail." },
@@ -535,9 +545,11 @@ function runSpiritwatch(cvs, opts) {
 
   /* ---- sprite atlas: base64 house art, decoded once ---- */
   const SPR_IMG = {}, SPR_READY = {};
+  let artErrors = 0;
   for (const name in SPRITES) {
     const img = new Image();
     img.onload = function () { SPR_READY[name] = true; };
+    img.onerror = function () { artErrors++; }; // callers fall back procedurally
     img.src = SPRITES[name];
     SPR_IMG[name] = img;
   }
@@ -545,7 +557,9 @@ function runSpiritwatch(cvs, opts) {
   // draw sprite centered at (x,y), canvas height px, alpha a, night-tint nt (0..1),
   // flat (a color) = solid silhouette override. Art is nose-RIGHT; never rotated,
   // never mirrored (house doctrine). Returns false → caller draws a fallback.
-  let tintBuf = null;
+  // tinted/flat sprite variants are cached per (name, flat | quantized veil) —
+  // recompositing every sprite every frame at night was measurable churn.
+  const spriteTintCache = new Map();
   function drawSprite(name, x, y, px, a, nt, flat) {
     if (!SPR_READY[name]) return false;
     const img = SPR_IMG[name];
@@ -559,27 +573,32 @@ function runSpiritwatch(cvs, opts) {
     C.imageSmoothingEnabled = false;
     if (flat || (nt && nt > 0.05)) {
       const iw = img.width, ih = img.height;
-      if (!tintBuf) tintBuf = document.createElement("canvas");
-      if (tintBuf.width !== iw || tintBuf.height !== ih) { tintBuf.width = iw; tintBuf.height = ih; }
-      const tg = tintBuf.getContext("2d");
-      tg.setTransform(1, 0, 0, 1, 0, 0);
-      tg.clearRect(0, 0, iw, ih);
-      tg.globalAlpha = 1;
-      tg.globalCompositeOperation = "source-over";
-      tg.imageSmoothingEnabled = false;
-      tg.drawImage(img, 0, 0);
-      if (flat) { // solid recolor, clipped to the sprite's own alpha
-        tg.globalCompositeOperation = "source-in";
-        tg.fillStyle = flat;
-        tg.fillRect(0, 0, iw, ih);
-      } else { // night veil OVER the art — detail survives after dark
-        tg.globalCompositeOperation = "source-atop";
-        tg.globalAlpha = nt * lerp(0.42, 0.8, deepNight());
-        tg.fillStyle = PAL.nightSea;
-        tg.fillRect(0, 0, iw, ih);
+      // quantize the night veil to 16 buckets — it moves on the 2400s day curve,
+      // so a bucket holds for many seconds and the cache hit rate is ~100%.
+      const veil = flat ? -1 : Math.round(clamp(nt * lerp(0.42, 0.8, deepNight()), 0, 1) * 16);
+      const key = name + "|" + (flat || veil);
+      let buf = spriteTintCache.get(key);
+      if (!buf) {
+        if (spriteTintCache.size > 220) spriteTintCache.clear();
+        buf = document.createElement("canvas");
+        buf.width = iw; buf.height = ih;
+        const tg = buf.getContext("2d");
+        tg.imageSmoothingEnabled = false;
+        tg.drawImage(img, 0, 0);
+        if (flat) { // solid recolor, clipped to the sprite's own alpha
+          tg.globalCompositeOperation = "source-in";
+          tg.fillStyle = flat;
+          tg.fillRect(0, 0, iw, ih);
+        } else { // night veil OVER the art — detail survives after dark
+          tg.globalCompositeOperation = "source-atop";
+          tg.globalAlpha = veil / 16;
+          tg.fillStyle = PAL.nightSea;
+          tg.fillRect(0, 0, iw, ih);
+        }
+        tg.globalCompositeOperation = "source-over";
+        spriteTintCache.set(key, buf);
       }
-      tg.globalCompositeOperation = "source-over";
-      C.drawImage(tintBuf, -w / 2, -h / 2, w, h);
+      C.drawImage(buf, -w / 2, -h / 2, w, h);
     } else {
       C.drawImage(img, -w / 2, -h / 2, w, h);
     }
@@ -706,18 +725,16 @@ function runSpiritwatch(cvs, opts) {
         tx = B2.x + e.ox * 0.72 + drift * 0.3; ty = B2.y + e.oy * 0.72;
         e.tt -= dt; if (e.tt <= 0) e.task = "station";
       } else if (e.task === "cross") {
-        // crossunder: dip beneath the Spirit's tail, rise to the opposite wing
+        // crossunder: dip beneath the Spirit's tail, rise to the opposite wing.
+        // Role/offsets were already committed at fire time (interruption-safe) —
+        // this task only animates from the captured old seat to the new one.
         e.tt += dt;
         const p = clamp(e.tt / 12, 0, 1);
-        const nx = e.td.ox, ny = e.td.oy;
         const dip = Math.sin(p * Math.PI) * 30;
-        tx = B2.x + lerp(e.td.fx, nx, smooth01(p));
-        ty = B2.y + lerp(e.td.fy, ny, smooth01(p)) + dip;
-        th = lerp(e.td.fh, e.td.nh, smooth01(p));
-        if (p >= 1) {
-          e.task = "station"; e.ox = nx; e.oy = ny; e.hh = e.td.nh;
-          e.role = e.td.role;
-        }
+        tx = B2.x + lerp(e.td.fx, e.ox, smooth01(p));
+        ty = B2.y + lerp(e.td.fy, e.oy, smooth01(p)) + dip;
+        th = lerp(e.td.fh, e.hh, smooth01(p));
+        if (p >= 1) e.task = "station";
       } else if (e.task === "sprint") {
         // run ahead off the right edge, arc back in from astern
         e.tt += dt;
@@ -750,10 +767,20 @@ function runSpiritwatch(cvs, opts) {
 
   function fireCrossunder() {
     const a = ESC[0], b = ESC[1];
-    a.task = "cross"; a.tt = 0;
-    a.td = { fx: a.ox, fy: a.oy, fh: a.h, ox: b.ox, oy: b.oy, nh: b.hh, role: b.role };
-    b.task = "cross"; b.tt = 0;
-    b.td = { fx: b.ox, fy: b.oy, fh: b.h, ox: a.ox, oy: a.oy, nh: a.hh, role: a.role };
+    // both escorts must be free — a crossunder never interrupts a tasked jet
+    if (a.task !== "station" && a.task !== "tight") return false;
+    if (b.task !== "station" && b.task !== "tight") return false;
+    // COMMIT the seat swap immediately (roles, offsets, sizes) so an interrupting
+    // task can never leave the pair wedged on one seat; the cross task just
+    // animates each jet from its captured old seat into the already-new one.
+    const aFrom = { fx: a.ox, fy: a.oy, fh: a.h };
+    const bFrom = { fx: b.ox, fy: b.oy, fh: b.h };
+    const aSeat = { ox: a.ox, oy: a.oy, hh: a.hh, role: a.role };
+    a.ox = b.ox; a.oy = b.oy; a.hh = b.hh; a.role = b.role;
+    b.ox = aSeat.ox; b.oy = aSeat.oy; b.hh = aSeat.hh; b.role = aSeat.role;
+    a.task = "cross"; a.tt = 0; a.td = aFrom;
+    b.task = "cross"; b.tt = 0; b.td = bFrom;
+    return true;
   }
 
   // wing-rock: brief roll wiggle on one escort (drawn as a 1-2px vertical shimmy
@@ -780,8 +807,15 @@ function runSpiritwatch(cvs, opts) {
       // she flies dark, the moon reveals her.
       addGlow(bx, by, RENDER_H.own_b2 * 0.85, "#9fb8e6", 0.06 + deepNight() * 0.12);
       drawSprite("night_bomber_b2", bx, by, RENDER_H.own_b2_night, 1, 0);
-    } else {
-      drawSprite("sky_bomber_b2", bx, by, RENDER_H.own_b2, 1, nt);
+    } else if (!drawSprite("sky_bomber_b2", bx, by, RENDER_H.own_b2, 1, nt)) {
+      // art not decoded (blocked data: URIs, first frames) — a dark chevron
+      // holds the hero's place so the board is never an empty sea.
+      C.save();
+      C.fillStyle = "#232a38"; C.globalAlpha = 0.9;
+      C.beginPath();
+      C.moveTo(bx + 60, by - 8); C.lineTo(bx - 52, by - 22); C.lineTo(bx - 22, by - 4);
+      C.lineTo(bx - 52, by + 16); C.lineTo(bx + 10, by + 10); C.closePath(); C.fill();
+      C.restore();
     }
     // ── near wing (in front of the lead) ──
     for (const e of [escortByRole("near")]) {
@@ -848,32 +882,35 @@ function runSpiritwatch(cvs, opts) {
   }
   const PUFFS = [];
   for (let i = 0; i < 7; i++) PUFFS.push(bakePuff(46 + i * 12, 16 + (i % 3) * 6, 0xC10D + i * 977));
-  let puffTint = null;
+  // tinted puffs are cached per (puff, quantized night, quantized golden) bucket —
+  // recompositing every puff every frame was the one real per-frame heavy.
+  const puffCache = new Map();
   function drawPuff(idx, x, y, sc, a) {
     const img = PUFFS[idx % PUFFS.length];
-    const n = night();
+    const n = night(), g = goldenNow();
     C.save();
     C.imageSmoothingEnabled = false;
     C.globalAlpha = a;
-    if (n > 0.05 || goldenNow() > 0.05) {
-      if (!puffTint) puffTint = document.createElement("canvas");
-      if (puffTint.width !== img.width || puffTint.height !== img.height) { puffTint.width = img.width; puffTint.height = img.height; }
-      const tg = puffTint.getContext("2d");
-      tg.setTransform(1, 0, 0, 1, 0, 0);
-      tg.clearRect(0, 0, img.width, img.height);
-      tg.imageSmoothingEnabled = false;
-      tg.globalCompositeOperation = "source-over";
-      tg.globalAlpha = 1;
-      tg.drawImage(img, 0, 0);
-      tg.globalCompositeOperation = "source-atop";
-      const g = goldenNow();
-      if (g > 0.05) { tg.globalAlpha = g * 0.45; tg.fillStyle = "#ffb367"; tg.fillRect(0, 0, img.width, img.height); }
-      if (n > 0.05) {
-        tg.globalAlpha = n * (0.55 + 0.35 * deepNight());
-        tg.fillStyle = "#0d1830"; tg.fillRect(0, 0, img.width, img.height);
+    if (n > 0.05 || g > 0.05) {
+      const nb = Math.round(n * 8), gb = Math.round(g * 6), db = Math.round(deepNight() * 4);
+      const key = idx % PUFFS.length + ":" + nb + ":" + gb + ":" + db;
+      let tinted = puffCache.get(key);
+      if (!tinted) {
+        if (puffCache.size > 90) puffCache.clear();
+        tinted = document.createElement("canvas");
+        tinted.width = img.width; tinted.height = img.height;
+        const tg = tinted.getContext("2d");
+        tg.imageSmoothingEnabled = false;
+        tg.drawImage(img, 0, 0);
+        tg.globalCompositeOperation = "source-atop";
+        if (gb > 0) { tg.globalAlpha = (gb / 6) * 0.45; tg.fillStyle = "#ffb367"; tg.fillRect(0, 0, img.width, img.height); }
+        if (nb > 0) {
+          tg.globalAlpha = (nb / 8) * (0.55 + 0.35 * (db / 4));
+          tg.fillStyle = "#0d1830"; tg.fillRect(0, 0, img.width, img.height);
+        }
+        puffCache.set(key, tinted);
       }
-      tg.globalCompositeOperation = "source-over";
-      C.drawImage(puffTint, x - (img.width * sc) / 2, y - (img.height * sc) / 2, img.width * sc, img.height * sc);
+      C.drawImage(tinted, x - (img.width * sc) / 2, y - (img.height * sc) / 2, img.width * sc, img.height * sc);
     } else {
       C.drawImage(img, x - (img.width * sc) / 2, y - (img.height * sc) / 2, img.width * sc, img.height * sc);
     }
@@ -953,8 +990,12 @@ function runSpiritwatch(cvs, opts) {
     seaImg[k] = im;
   }
   const SEA_LADDER = [["calm", 0.0], ["calm", 0.10], ["swell", 0.5], ["storm", 1.0]];
-  let seaBuf = null, seaTileOne = null;
+  let seaBuf = null, seaTileOne = null, seaBufKey = "";
   function seaStateTile() {
+    // memoized on the quantized chop bucket — the blend recomposites only when
+    // the energy actually moves a step, not every frame.
+    const key = ((clamp(S.chop, 0, 1) * 64) | 0) + ":" + !!seaReady.calm + ":" + !!seaReady.swell + ":" + !!seaReady.storm;
+    if (seaBuf && key === seaBufKey) return seaBuf;
     if (!seaTileOne) { seaTileOne = document.createElement("canvas"); seaTileOne.width = TILE; seaTileOne.height = TILE; }
     if (!seaBuf) { seaBuf = document.createElement("canvas"); seaBuf.width = TILE; seaBuf.height = TILE * 2; }
     const g = seaTileOne.getContext("2d");
@@ -971,6 +1012,7 @@ function runSpiritwatch(cvs, opts) {
     gb.globalAlpha = 1; gb.globalCompositeOperation = "source-over"; gb.imageSmoothingEnabled = false;
     gb.drawImage(seaTileOne, 0, 0);
     gb.drawImage(seaTileOne, 0, TILE);
+    seaBufKey = key;
     return seaBuf;
   }
 
@@ -1177,20 +1219,23 @@ function runSpiritwatch(cvs, opts) {
       }
     }
     // meteors + satellites
+    const shower = meteorShowerT > 0;
     for (const m of meteors) {
       const k = clamp(1 - m.t / m.life, 0, 1);
-      const len = m.fireball ? 26 : 14;
+      const len = (m.fireball ? 26 : 14) + (shower ? 5 : 0);
       const sp = Math.hypot(m.vx, m.vy) || 1;
       const nx = m.vx / sp, ny = m.vy / sp;
       C.globalCompositeOperation = "lighter";
       for (let i = 0; i < len; i++) {
-        const a = k * (1 - i / len) * (m.fireball ? 0.9 : 0.7) * Math.max(starA, 0.25);
+        // a legendary shower earns brighter streaks — the sky must visibly fall
+        const a = k * (1 - i / len) * (m.fireball ? 0.9 : shower ? 0.95 : 0.7) * Math.max(starA, shower ? 0.6 : 0.25);
         if (a <= 0.01) continue;
         C.globalAlpha = a;
         C.fillStyle = m.fireball ? (i < 4 ? "#fff6e0" : "#ffd9a0") : "#eaf2ff";
-        C.fillRect((m.x - nx * i * 2) | 0, (m.y - ny * i * 2) | 0, m.fireball && i < 5 ? 2 : 1, 1);
+        C.fillRect((m.x - nx * i * 2) | 0, (m.y - ny * i * 2) | 0, (m.fireball && i < 5) || (shower && i < 3) ? 2 : 1, 1);
       }
       if (m.fireball) addGlow(m.x, m.y, 9, "#ffe9c0", k * 0.5);
+      else if (shower) addGlow(m.x, m.y, 4, "#dfe8ff", k * 0.3);
       C.globalCompositeOperation = "source-over";
     }
     for (const s of sats) {
@@ -1374,8 +1419,13 @@ function runSpiritwatch(cvs, opts) {
     return flyers[flyers.length - 1];
   }
   function updateFlyers(dt) {
-    for (const f of flyers) { f.x += f.vx * dt; f.y += f.vy * dt; f.t += dt; }
-    flyers = flyers.filter((f) => f.t < f.life && f.x > -160 && f.x < VW + 160);
+    for (const f of flyers) {
+      f.x += f.vx * dt; f.y += f.vy * dt; f.t += dt;
+      // past its loiter life an aircraft DEPARTS — it accelerates off-screen
+      // instead of blinking out of the sky mid-orbit.
+      if (f.t > f.life) f.vx += (f.vx >= 0 ? 55 : -55) * dt;
+    }
+    flyers = flyers.filter((f) => f.x > -160 && f.x < VW + 160 && f.t < f.life + 30);
   }
   // multi-ship arrangements: leader front (right), wingmen stacked behind-abeam.
   function flyerOffsets(n, s) {
@@ -1552,10 +1602,12 @@ function runSpiritwatch(cvs, opts) {
     const meta = SPRITE_META.sky_rainbow_arc;
     if (!SPR_READY.sky_rainbow_arc) return;
     const yH = VH * PCFG.horizon;
-    const w = VW * 0.5, h = w * (meta.h / meta.w);
+    // size the arc to FIT the sky band — the apex must clear the top of frame
+    // so the full bow stands on the water (was clipped at VW*0.5 wide).
+    let h = yH + 2, w = h * (meta.w / meta.h);
     C.save();
     C.globalAlpha = fade * 0.55;
-    C.drawImage(SPR_IMG.sky_rainbow_arc, VW * 0.6 - w / 2, yH - h + 8, w, h);
+    C.drawImage(SPR_IMG.sky_rainbow_arc, VW * 0.62 - w / 2, yH - h + 6, w, h);
     C.restore();
   }
   // the fleet below — tiny hulls through a break in the world
@@ -1635,7 +1687,7 @@ function runSpiritwatch(cvs, opts) {
 
   /* ── KC-46 tableau: join → (escort cycle | boom refuel) → depart ── */
   function startTanker(mode) {
-    const meta = RENDER_H.sky_tanker_kc46;
+    if (tanker) return; // one Pegasus at a time — a re-fire joins the one already here
     tanker = {
       mode: mode, phase: "join", t: 0,
       x: VW + 130, y: B2.y - 70,
@@ -1657,18 +1709,22 @@ function runSpiritwatch(cvs, opts) {
         if (K.mode === "boom") logAction(actionById("boom-refuel"), "Pre-contact. The boom swims down through the slipstream toward the Spirit's spine.");
         else {
           const e = escortByRole("far");
-          e.task = "toTanker"; e.tt = 0;
-          e.td = { x: K.x, y: K.y, ox: -46, oy: 26, hold: 9 };
-          logAction(actionById("kc46-join"), "RAPTOR 1-2 slides to pre-contact behind the Pegasus.");
+          if (e.task === "station") {
+            e.task = "toTanker"; e.tt = 0;
+            e.td = { x: K.x, y: K.y, ox: -46, oy: 26, hold: 9 };
+            logAction(actionById("kc46-join"), "RAPTOR 1-2 slides to pre-contact behind the Pegasus.");
+          }
         }
       }
     } else if (K.phase === "cycle") {
       if (K.t > 10 && K.cycleIdx === 0) {
         K.cycleIdx = 1;
         const e = escortByRole("near");
-        e.task = "toTanker"; e.tt = 0;
-        e.td = { x: K.x, y: K.y, ox: -46, oy: 26, hold: 9 };
-        logAction(actionById("kc46-join"), "RAPTOR 1-1 cycles to the boom; her wingman falls back to the Spirit.");
+        if (e.task === "station") {
+          e.task = "toTanker"; e.tt = 0;
+          e.td = { x: K.x, y: K.y, ox: -46, oy: 26, hold: 9 };
+          logAction(actionById("kc46-join"), "RAPTOR 1-1 cycles to the boom; her wingman falls back to the Spirit.");
+        }
       }
       if (K.t > 21) { K.phase = "depart"; K.t = 0; }
     } else if (K.phase === "boom-out") {
@@ -1701,8 +1757,11 @@ function runSpiritwatch(cvs, opts) {
       // during AR the tanker shows soft formation lighting (doctrine: the
       // receiver must see the boom envelope; fixed-wing otherwise flies dark)
       drawSprite("sky_tanker_kc46", K.x, y, RENDER_H.sky_tanker_kc46, 1, 0, "#0d1524");
-      addGlow(K.x - 20, y + 4, 10, PAL.warm, 0.25);
-      addGlow(K.x + 24, y - 2, 6, PAL.warm, 0.18);
+      const refueling = K.phase === "boom-out" || K.phase === "fuel" || K.phase === "boom-in" || K.phase === "cycle";
+      if (refueling) {
+        addGlow(K.x - 20, y + 4, 10, PAL.warm, 0.25);
+        addGlow(K.x + 24, y - 2, 6, PAL.warm, 0.18);
+      }
     } else {
       drawSprite("sky_tanker_kc46", K.x, y, RENDER_H.sky_tanker_kc46, 1, n * 0.6);
     }
@@ -1729,7 +1788,12 @@ function runSpiritwatch(cvs, opts) {
 
   /* ── bandit intercept tableau ── */
   function startBandit() {
-    const e = escortByRole("near");
+    if (bandit) return; // one intercept at a time
+    // take whichever Raptor is free; if both are tasked the section holds
+    // formation and the contact is merely watched (still a valid tableau).
+    let e = escortByRole("near");
+    if (e.task !== "station" && e.task !== "tight") e = escortByRole("far");
+    if (e.task !== "station" && e.task !== "tight") e = null;
     bandit = {
       x: -70, y: rnd(VH * 0.3, VH * 0.36), vx: rnd(30, 36), phase: "inbound", t: 0,
       escort: e,
@@ -1746,19 +1810,26 @@ function runSpiritwatch(cvs, opts) {
     if (Bn.phase === "inbound" && Bn.x > VW * 0.3) {
       Bn.phase = "met"; Bn.vx *= 0.4;
       const e = Bn.escort;
-      e.task = "intercept"; e.tt = 0;
-      e.td = {
-        phase: "out",
-        x: () => bandit ? bandit.x - 34 : B2.x, y: () => bandit ? bandit.y + 10 : B2.y,
-        scale: () => 0.85,
-      };
-      logAction(actionById("bandit-intercept"), "RAPTOR 1-1 breaks off the wing — merging with the unknown, guns cold, eyes open.");
+      if (e && (e.task === "station" || e.task === "tight")) {
+        e.task = "intercept"; e.tt = 0;
+        e.td = {
+          phase: "out",
+          x: () => bandit ? bandit.x - 34 : B2.x, y: () => bandit ? bandit.y + 10 : B2.y,
+          scale: () => 0.85,
+        };
+        logAction(actionById("bandit-intercept"), "A Raptor breaks off the wing — merging with the unknown, guns cold, eyes open.");
+      } else {
+        Bn.escort = null;
+        logAction(actionById("bandit-intercept"), "Both Raptors hold the wing — the section watches the unknown all the way past.");
+      }
     } else if (Bn.phase === "met" && Bn.x > VW * 0.72) {
       Bn.phase = "out"; Bn.vx = 40;
-      if (Bn.escort.td) Bn.escort.td.phase = "escortOut";
+      if (Bn.escort && Bn.escort.task === "intercept" && Bn.escort.td) Bn.escort.td.phase = "escortOut";
     } else if (Bn.phase === "out" && Bn.x > VW + 90) {
-      if (Bn.escort.td) Bn.escort.td.phase = "rejoin";
-      logAction(actionById("bandit-intercept"), "The contact turns cold and runs the way it came. RAPTOR 1-1 swings back for the flight.");
+      if (Bn.escort && Bn.escort.task === "intercept" && Bn.escort.td) {
+        Bn.escort.td.phase = "rejoin";
+        logAction(actionById("bandit-intercept"), "The contact opens ahead of the flight and runs. The Raptor swings back for the wing.");
+      }
       bandit = null;
     }
   }
@@ -1773,17 +1844,26 @@ function runSpiritwatch(cvs, opts) {
      subject × verb × detail × qualifier ≈ 60,000 lines of cockpit
      texture; a fraction add a whisper of a visual cue.
      ============================================================ */
+  // partitioned so a subject only meets details it could plausibly report:
+  // crews notice the world, systems hold numbers, the radio passes traffic.
   const MICRO = {
-    subject: ["The mission commander", "The pilot", "RAPTOR 1-1", "RAPTOR 1-2", "DARKSTAR",
-      "The tanker cell", "Guard", "The plot", "Whiteman ops", "The autopilot", "The nav panel"],
-    verb: ["logs", "notes", "marks", "reports", "calls", "confirms", "reads", "passes", "checks", "copies"],
-    detail: ["fuel state on plan", "a quiet band on guard", "INS drift inside a mile",
-      "stars steady through the canopy", "winds aloft holding at altitude", "a contact squawking friendly",
-      "the autopilot smooth on the leg", "cabin altitude steady", "a satcom sync, five by five",
-      "the escorts holding sweet formation", "a moonlit cloud floor below", "the oxygen panel green",
-      "the range clear below", "another hour onto the watch", "a heavy on TCAS, high and opposite",
-      "the sea state easing seven miles down", "a distant storm flickering off the nose",
-      "the next steering point accepted", "St. Elmo's fire ghosting the windscreen", "coffee at altitude"],
+    groups: [
+      { subject: ["The mission commander", "The pilot", "RAPTOR 1-1", "RAPTOR 1-2"],
+        verb: ["logs", "notes", "marks", "reports", "confirms", "checks"],
+        detail: ["fuel state on plan", "stars steady through the canopy", "the escorts holding sweet formation",
+          "a moonlit cloud floor below", "the oxygen panel green", "another hour onto the watch",
+          "the sea state easing seven miles down", "a distant storm flickering off the nose",
+          "St. Elmo's fire ghosting the windscreen", "a heavy on TCAS, high and opposite",
+          "the range clear below", "winds aloft holding at altitude"] },
+      { subject: ["The autopilot", "The nav panel", "The plot"],
+        verb: ["holds", "shows", "carries", "accepts", "keeps"],
+        detail: ["the leg smooth and level", "INS drift inside a mile", "cabin altitude steady",
+          "the next steering point", "groundspeed against the plan", "the course a hair off, corrected"] },
+      { subject: ["Guard", "DARKSTAR", "The tanker cell", "Whiteman ops"],
+        verb: ["passes", "calls", "copies", "reads"],
+        detail: ["a quiet band, nothing moving", "a contact, squawking friendly", "a satcom sync, five by five",
+          "the picture clean out to the edge", "winds for the next leg", "nothing further for the flight"] },
+    ],
     qualifier: ["nothing further", "routine", "no change", "all quiet", "steady on",
       "copied and logged", "watch informed", "no action required", "holding course and speed",
       "conditions fair", "noted in the log", "all secure"],
@@ -1795,7 +1875,8 @@ function runSpiritwatch(cvs, opts) {
     else if (k < 0.62) pulse("glint", B2.x + rnd(-30, 30), B2.y + rnd(-6, 6), PAL.search, 1.2);
   }
   function rollMicro() {
-    const line = pick(MICRO.subject) + " " + pick(MICRO.verb) + " " + pick(MICRO.detail) + " — " + pick(MICRO.qualifier) + ".";
+    const g = pick(MICRO.groups);
+    const line = pick(g.subject) + " " + pick(g.verb) + " " + pick(g.detail) + " — " + pick(MICRO.qualifier) + ".";
     opts.onLog && opts.onLog({ id: "micro", text: line, tier: "ambient", name: "Watch", at: Date.now() });
     if (srandom() < 0.4) microVisual();
   }
@@ -1829,21 +1910,26 @@ function runSpiritwatch(cvs, opts) {
     else pendingEvent = { id: id, eta: rnd(20, 90), bearing: 0, cls: "unknown", hidden: true };
   }
 
-  function ensureNight(def) {
-    if (def && def.night && night() < 0.5) S.day = 0.5; // admin manual-fire jumps to darkness
-  }
-
-  /* ---- fire(id): every catalog action's visual ---- */
-  function fire(id) {
+  /* ---- fire(id): every catalog action's visual ----
+     manual=true (the admin panel) may jump the clock so night events preview;
+     the scheduler NEVER yanks the sky — a night event that rolls in too much
+     light is quietly requeued (the house "wait for darkness" doctrine). */
+  function fire(id, manual) {
     const def = actionById(id);
     if (!def) return;
-    ensureNight(def);
+    if (def.night && night() < 0.5) {
+      if (manual) S.day = id === "green-flash" ? 0.335 : 0.5; // admin preview jumps
+      else { queueEvent(); return; }                            // scheduler waits
+    }
+    // the green flash only exists at the sun's last sliver — scheduled fires
+    // outside the dusk window go back in the queue for another evening.
+    if (id === "green-flash" && !manual && (S.day < 0.30 || S.day > 0.37)) { queueEvent(); return; }
     if (def.tier === "rare" || def.tier === "epic" || def.tier === "legendary")
       announce = { tier: def.tier, name: def.name, t: 0 };
     let prose = null;
     switch (id) {
       /* ambient */
-      case "ambient-trim": B2.bob = 2.2; setTimeout(() => { B2.bob = 1; }, 6000); break;
+      case "ambient-trim": B2.bob = 2.2; B2.bobT = 6; break;
       case "ambient-sweep": pulse("glint", B2.x - 30, B2.y - 4, PAL.search, 1.6); break;
       /* common — quiet cues */
       case "fuel-check": pulse("glint", B2.x + rnd(-20, 20), B2.y, PAL.search, 1.2); break;
@@ -1859,12 +1945,12 @@ function runSpiritwatch(cvs, opts) {
       case "autopilot-leg": S.heading += rnd(-0.06, 0.06); break;
       /* uncommon */
       case "crossunder": fireCrossunder(); break;
-      case "burner-sprint": { const e = escortByRole("far"); e.task = "sprint"; e.tt = 0; break; }
+      case "burner-sprint": { const e = escortByRole("far"); if (e.task === "station" || e.task === "tight") { e.task = "sprint"; e.tt = 0; } break; }
       case "airliner-above": spawnDot({ y: rnd(6, VH * 0.1), vx: chance(0.5) ? -9 : 9, glint: true, fact: null }); break;
       case "c130-below": spawnFlyer("c130", "sky_cargo_c130", { y: rnd(VH * 0.56, VH * 0.66), slow: true, fact: "c130" }); break;
       case "p8-line": spawnFlyer("p8", "sky_patrol_p8", { y: rnd(VH * 0.24, VH * 0.3), slow: true, fact: "p8" }); break;
       case "mq9-loiter": spawnFlyer("mq9", "sky_drone_mq9", { y: rnd(VH * 0.58, VH * 0.68), vx: -6, fact: "mq9", life: 90 }); break;
-      case "jetstream": S.gsJet = rnd(38, 62); setTimeout(() => { S.gsJet = 0; }, 90000); break;
+      case "jetstream": S.gsJet = rnd(38, 62); S.gsJetT = 90; break;
       case "wx-deviate": S.heading += rnd(0.1, 0.2) * (chance(0.5) ? 1 : -1); break;
       case "undercast-break": if (S.cloud > 0.5) { deckBreak = { x: rnd(VW * 0.3, VW * 0.7), w: rnd(120, 200), t: 0, life: 30 }; } else { S.cloudTarget = rnd(0.15, 0.3); prose = "The deck thins ahead — blue water shows through the seams."; } break;
       /* rare */
@@ -1879,7 +1965,7 @@ function runSpiritwatch(cvs, opts) {
       case "radar-spike": for (const e of ESC) { e.task = "tight"; e.tt = 18; } scopeSpike = 12; break;
       case "rain-squall": spawnCell("squall"); break;
       case "rainbow": rainbowT = 26; break;
-      case "fishing-lights": for (let i = 0; i < 6; i++) spawnSpeck({ y: VH * PCFG.horizon + rnd(8, 40), vx: rnd(-1.5, 1.5) || 0.8, lit: true, life: 120 }); break;
+      case "fishing-lights": for (let i = 0; i < 6; i++) spawnSpeck({ x: rnd(VW * 0.12, VW * 0.88), y: VH * PCFG.horizon + rnd(8, 40), vx: rnd(-1.5, 1.5) || 0.8, lit: true, life: 120 }); break;
       /* epic */
       case "boom-refuel": startTanker("boom"); break;
       case "bandit-intercept": startBandit(); break;
@@ -1902,7 +1988,7 @@ function runSpiritwatch(cvs, opts) {
           : "Hulls on the open water — a carrier group steams west, seven miles down. Someone keeps the other watch.";
         break;
       }
-      case "second-spirit": ghost = { x: VW * 0.68, y: VH * 0.3, t: 0, life: 30 }; break;
+      case "second-spirit": ghost = { x: VW * 0.74, y: VH * 0.3, vx: -3.2, t: 0, life: 30 }; break;
       case "meteor-shower": meteorShowerT = 120; break;
       case "green-flash": S.day = 0.335; greenFlashT = 2.2; break;
       case "fireworks-below": fireworksShow = { t: 0, life: rnd(18, 26), nextT: 0.4, x0: chance(0.5) ? rnd(0.16, 0.38) : rnd(0.62, 0.84), bursts: [] };
@@ -1943,8 +2029,11 @@ function runSpiritwatch(cvs, opts) {
     if (rainbowT > 0) rainbowT -= dt;
     if (aurora) { aurora.t += dt; if (aurora.t >= aurora.life) aurora = null; }
     if (csg) { csg.t += dt; if (csg.t >= csg.life) csg = null; }
-    if (ghost) { ghost.t += dt; if (ghost.t >= ghost.life) ghost = null; }
+    if (ghost) { ghost.t += dt; ghost.x += (ghost.vx || 0) * dt; if (ghost.t >= ghost.life) ghost = null; }
     if (wingRock) { wingRock.t += dt; if (wingRock.t > 2.4) wingRock = null; }
+    // sim-time effect countdowns (never wall-clock: pause and seed-replay safe)
+    if (S.gsJetT > 0) { S.gsJetT -= dt; if (S.gsJetT <= 0) S.gsJet = 0; }
+    if (B2.bobT > 0) { B2.bobT -= dt; if (B2.bobT <= 0) B2.bob = 1; }
   }
 
   /* ============================================================
@@ -1957,7 +2046,9 @@ function runSpiritwatch(cvs, opts) {
     if (paused) return;
     S.t += dt;
     S.day = (S.day + dt / 2400) % 1; // ~40 min day, the house cadence
-    if (NIGHT_LOCK && (S.day < 0.27 || S.day > 0.73)) S.day = 0.27;
+    // night lock loops inside true darkness: night(0.32)≈0.71 keeps the night
+    // art doctrine engaged for the whole cycle (0.27 leaked ~2 min of day art)
+    if (NIGHT_LOCK && (S.day < 0.32 || S.day > 0.68)) S.day = 0.32;
     S.scroll += S.spd * dt * 0.14;
     S.miles += (S.gsBase + S.gsJet) * dt / 3600;
     S.regionDist += S.spd * dt;
@@ -2033,8 +2124,9 @@ function runSpiritwatch(cvs, opts) {
     if (announce.t > life) { announce = null; return; }
     const p = announce.t / life;
     const fade = clamp(Math.min(p / 0.12, (1 - p) / 0.2), 0, 1);
-    const x = VW * (0.2 + p * 0.6);
-    const y = VH * 0.09;
+    // glide band ends before the top-right HUD block so they never overlap
+    const x = VW * (0.16 + p * 0.5);
+    const y = VH * 0.135;
     C.save();
     C.globalAlpha = fade * 0.9;
     C.font = "7px ui-monospace, monospace";
@@ -2094,7 +2186,7 @@ function runSpiritwatch(cvs, opts) {
     }
     if (night() > 0.5) {
       for (const ch of constHits) if (near(ch.x, ch.y, 22)) return CONST_NAME[ch.key];
-      if (moonVis > 0.1 && near(moonScrX, moonScrY, 14)) return { name: "The Moon — " + moonPhaseName(), desc: "Tonight's real phase — the wall keeps the actual almanac." };
+      if (moonVis > 0.1 && near(moonScrX, moonScrY, 14)) return { name: "The Moon — " + moonPhaseName(), desc: "Tonight's real phase — the watch keeps the actual almanac." };
     }
     return null;
   }
@@ -2134,7 +2226,7 @@ function runSpiritwatch(cvs, opts) {
     const dt = Math.min(0.1, last ? (now - last) / 1000 : 0.016);
     last = now;
     update(dt);
-    render(dt);
+    render(paused ? 0 : dt); // pause freezes render-side timelines (sam/announce/pulses) too
     rafId = requestAnimationFrame(frame);
   }
   rafId = requestAnimationFrame(frame);
@@ -2142,7 +2234,7 @@ function runSpiritwatch(cvs, opts) {
   window.addEventListener("resize", onResize);
 
   const api = {
-    fire: fire,
+    fire: (id) => fire(id, true), // the admin path may jump the clock to preview
     setPaused: (b) => { paused = !!b; },
     isPaused: () => paused,
     setDay: (v) => { S.day = clamp(v, 0, 1); },
@@ -2203,11 +2295,25 @@ const RELEASES = [
     this.audio = new Audio();
     this.queue = []; this.qpos = 0;
     this.playing = false; this.muted = false;
+    this.errors = 0; // consecutive failures — a dead stream must not retry forever
     this.cell = cell; this.title = title; this.icon = icon;
     this.audio.volume = 0.55;
     this.audio.crossOrigin = "anonymous";
     this.audio.addEventListener("ended", () => this.next());
-    this.audio.addEventListener("error", () => { if (this.playing) { this.title.textContent = "track unavailable…"; setTimeout(() => this.next(), 600); } });
+    this.audio.addEventListener("playing", () => { this.errors = 0; });
+    this.audio.addEventListener("error", () => {
+      if (!this.playing) return;
+      this.errors++;
+      if (this.errors >= PLAYLIST.length) { // one full cycle of failures → give up quietly
+        this.playing = false;
+        this.title.textContent = "stream unavailable";
+        this.icon.textContent = "►";
+        this.cell.classList.remove("sw-playing");
+        return;
+      }
+      this.title.textContent = "track unavailable…";
+      setTimeout(() => { if (this.playing) this.next(); }, 600);
+    });
     this.reshuffle(); this.render();
   }
   Music.prototype.reshuffle = function () {
@@ -2254,6 +2360,7 @@ const RELEASES = [
     const d = new Date(at);
     return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
   }
+  const logBox = $("#sw-mission-log");
   function renderLog() {
     compactFeed.innerHTML = "";
     let shown = 0;
@@ -2268,7 +2375,11 @@ const RELEASES = [
       compactFeed.appendChild(row);
       shown++;
     }
-    // expanded history
+    // the expanded history (up to ~220 rows) only rebuilds while it's on screen;
+    // hidden/compact states skip the DOM churn entirely.
+    if (logBox.classList.contains("sw-expanded")) renderHistory();
+  }
+  function renderHistory() {
     logFeed.innerHTML = "";
     let count = 0;
     for (const L of allLogs) {
@@ -2290,21 +2401,24 @@ const RELEASES = [
     if (!count) logFeed.appendChild(el("div", "sw-log-empty", "nothing in the log yet — the watch is young"));
     logCount.textContent = count + " ENTRIES · SEED WATCH";
   }
-  const logBox = $("#sw-mission-log");
   $("#sw-log-title").addEventListener("click", () => {
     if (logBox.classList.contains("sw-hidden")) { logBox.classList.remove("sw-hidden"); }
     else if (logBox.classList.contains("sw-expanded")) { logBox.classList.remove("sw-expanded"); }
-    else logBox.classList.add("sw-expanded");
+    else { logBox.classList.add("sw-expanded"); renderHistory(); }
   });
-  $("#sw-log-expand").addEventListener("click", () => logBox.classList.toggle("sw-expanded"));
+  $("#sw-log-expand").addEventListener("click", () => {
+    logBox.classList.toggle("sw-expanded");
+    if (logBox.classList.contains("sw-expanded")) renderHistory();
+  });
   $("#sw-log-hide").addEventListener("click", () => { logBox.classList.remove("sw-expanded"); logBox.classList.add("sw-hidden"); });
-  $("#sw-log-routine").addEventListener("change", (e) => { showRoutine = e.target.checked; renderLog(); });
+  $("#sw-log-routine").addEventListener("change", (e) => { showRoutine = e.target.checked; renderHistory(); });
 
   /* ── RWR scope ── */
   const scope = $("#sw-scope");
   const sg = scope.getContext("2d");
   let sweep = 0;
-  function drawScope() {
+  function drawScope(now) {
+    requestAnimationFrame(drawScope);
     if (!api) return;
     const W = scope.width, H = scope.height, cx = W / 2, cy = H / 2, R = W / 2 - 3;
     sg.clearRect(0, 0, W, H);
@@ -2315,14 +2429,20 @@ const RELEASES = [
     sg.fillStyle = "rgba(8,16,32,0.55)";
     sg.beginPath(); sg.arc(cx, cy, R, 0, 6.283); sg.fill(); sg.stroke();
     sg.beginPath(); sg.arc(cx, cy, R * 0.55, 0, 6.283); sg.stroke();
-    // jam static
+    // jam static — deterministic hash, not Math.random (seed-purity doctrine)
     if (env.jam) {
       sg.fillStyle = "#7fe09a";
-      for (let i = 0; i < 26; i++) { sg.globalAlpha = Math.random() * 0.35; sg.fillRect(cx - R + Math.random() * R * 2, cy - R + Math.random() * R * 2, 1, 1); }
+      for (let i = 0; i < 26; i++) {
+        const h1 = Math.sin(i * 127.1 + sweep * 311.7) * 43758.5453;
+        const h2 = Math.sin(i * 269.5 + sweep * 183.3) * 28001.8384;
+        const f1 = h1 - Math.floor(h1), f2 = h2 - Math.floor(h2);
+        sg.globalAlpha = f1 * 0.35;
+        sg.fillRect(cx - R + f2 * R * 2, cy - R + f1 * R * 2, 1, 1);
+      }
       sg.globalAlpha = 0.85;
     }
-    // sweep arm
-    sweep += 0.03;
+    // sweep arm — time-based, refresh-rate independent
+    sweep = (now || 0) * 0.0018;
     sg.strokeStyle = "rgba(127,224,154,0.5)";
     sg.beginPath(); sg.moveTo(cx, cy);
     sg.lineTo(cx + Math.sin(sweep) * R, cy - Math.cos(sweep) * R); sg.stroke();
@@ -2346,7 +2466,6 @@ const RELEASES = [
       sg.beginPath(); sg.arc(cx, cy, R, 0, 6.283); sg.fill();
     }
     sg.restore();
-    requestAnimationFrame(drawScope);
   }
 
   /* ── hover tooltip ── */
@@ -2367,10 +2486,18 @@ const RELEASES = [
 
   /* ── version badge + changelog ── */
   $("#sw-ver").textContent = "SPIRITWATCH v" + VERSION;
+  const clBox = $("#sw-changelog");
+  clBox.setAttribute("role", "dialog");
+  clBox.setAttribute("aria-modal", "true");
   $("#sw-ver").addEventListener("click", () => {
     const panel = $("#sw-cl-panel");
     panel.innerHTML = "";
-    panel.appendChild(el("h2", null, "SPIRITWATCH — CHANGELOG"));
+    const head = el("h2", null, "SPIRITWATCH — CHANGELOG");
+    const x = el("button", "sw-cl-close", "×");
+    x.setAttribute("aria-label", "Close");
+    x.addEventListener("click", () => clBox.classList.remove("sw-open"));
+    head.appendChild(x);
+    panel.appendChild(head);
     for (const r of RELEASES) {
       const div = el("div", "sw-cl-rel");
       div.appendChild(el("b", null, "v" + r.v + " — " + r.title));
@@ -2378,7 +2505,8 @@ const RELEASES = [
       const p = el("p"); p.textContent = r.notes; div.appendChild(p);
       panel.appendChild(div);
     }
-    $("#sw-changelog").classList.add("sw-open");
+    clBox.classList.add("sw-open");
+    x.focus(); // keyboard users can Escape or activate × to leave
   });
   $("#sw-changelog").addEventListener("click", (e) => {
     if (e.target === $("#sw-changelog")) $("#sw-changelog").classList.remove("sw-open");
@@ -2436,13 +2564,19 @@ const RELEASES = [
   });
   function fullscreen() {
     const stage = $("#sw-stage");
-    if (document.fullscreenElement) document.exitFullscreen();
-    else (stage.requestFullscreen || stage.webkitRequestFullscreen).call(stage);
+    if (document.fullscreenElement) { document.exitFullscreen(); return; }
+    const fn = stage.requestFullscreen || stage.webkitRequestFullscreen;
+    if (fn) fn.call(stage); // iPhone Safari has neither on a div — quietly no-op
   }
   $("#sw-fs").addEventListener("click", fullscreen);
   let spaceClicks = 0, spaceTimer = null;
   window.addEventListener("keydown", (e) => {
-    if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+    if (e.key === "Escape") { $("#sw-changelog").classList.remove("sw-open"); return; }
+    // never shadow browser chords (Cmd/Ctrl+F = find), key repeat, or a focused
+    // button's own Space/Enter activation
+    if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+    const tag = e.target && e.target.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "BUTTON") return;
     if (e.code === "Space") {
       e.preventDefault();
       spaceClicks++;
