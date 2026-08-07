@@ -255,6 +255,11 @@ export class Terrain {
     const front = this.front;
     const cloudShadow = this.cloudShadow;
     const albedoTex = this.drape.albedo, coverTex = this.drape.cover, aoTex = this.drape.ao;
+    // PASS-1 item 6a: on ocean fronts, classified water must never wear the
+    // ortho's baked sea surface — static photo glints against the live ocean
+    // read as confetti wherever the terrain shows around/through the sheet.
+    // Lazily built here (water fronts only), same field the water shader uses.
+    const shore = this.meta.minH < -0.5 ? this.getShoreField() : null;
     mat.colorNode = Fn(() => {
       const wp = positionWorld;
       const h = sampleH(wp);
@@ -318,7 +323,27 @@ export class Terrain {
         const cov = coverTex ? texture(coverTex, worldUV(wp)).r : float(1.0);
         c = mix(c, ci, cov);
       }
-      if (aoTex) c = c.mul(mix(float(1.0), texture(aoTex, worldUV(wp)).r, 0.75)); // baked multi-scale AO
+      let waterK = null;
+      if (shore) {
+        // item 6a: fade imagery AND ramps to the water shader's own color
+        // ramp where the seafloor drops away. Height feather (-1 → -3m)
+        // keeps the prized 0..-1m reef/beach shallows (Saipan's turquoise
+        // ring); the shore-distance feather keeps the surf strip and kills
+        // any straight tile/cover seam over open water.
+        const sd = texture(shore.tex, worldUV(wp)).r.mul(shore.maxDist);
+        const wDeep = float(1.0).sub(smoothstep(-3.0, -1.0, h));
+        waterK = wDeep.mul(smoothstep(40.0, 220.0, sd));
+        const deepW = front === "VALDEZ" ? srgbLin(0x0e2e33) : srgbLin(0x06334e);
+        const shalW = front === "VALDEZ" ? srgbLin(0x2e6b66) : srgbLin(0x2ba098);
+        const waterC = mix(vec3(...shalW), vec3(...deepW), smoothstep(20.0, 520.0, sd));
+        c = mix(c, waterC, waterK);
+      }
+      if (aoTex) {
+        // baked multi-scale AO (bypassed on classified water — bake artifacts
+        // over the sea would texture the flat water color)
+        const ao = mix(float(1.0), texture(aoTex, worldUV(wp)).r, 0.75);
+        c = c.mul(waterK ? mix(ao, float(1.0), waterK) : ao);
+      }
       if (cloudShadow) c = c.mul(cloudShadow(wp)); // cloud shadows (phase 5a)
       // MAXFI A3: transmittance through the albedo — lighting is linear in
       // base color, so the lit result extinguishes correctly (diffuse-only
@@ -397,11 +422,13 @@ export class Terrain {
   }
 
   // Shore-distance field (meters from land, sea cells only) — the bake clamps
-  // bathymetry to 0, so water depth is proxied by distance-to-shore. 1024²
-  // two-pass chamfer transform (~50ms), lazily built, uploaded as a texture.
+  // bathymetry to 0, so water depth is proxied by distance-to-shore. 2048²
+  // two-pass chamfer transform (~200ms), lazily built, uploaded as a texture.
+  // (PASS-1 item 7: 1024 = 64m texels — the foam band consumed the field at
+  // sub-texel width and drew its bilinear diamonds as a coastline staircase.)
   getShoreField() {
     if (this._shore) return this._shore;
-    const N = 1024, g = this.meta.grid, step = this.size / N;
+    const N = 2048, g = this.meta.grid, step = this.size / N;
     const d = new Float32Array(N * N);
     const stride = g / N;
     const BIG = 1e9;
