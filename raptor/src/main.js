@@ -11,9 +11,37 @@ import { ControlsMenu } from "./game/controlsmenu.js";
 import { Atmosphere } from "./world/daycycle.js";
 import { Terrain } from "./world/terrain.js";
 import { Water } from "./world/water.js";
+import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
+import { HUD } from "./game/hud.js";
 
-const VERSION = "0.4.0";
-const PHASE = 3;
+const VERSION = "0.5.0";
+const PHASE = 5;
+
+// HUD placeholder feed for TestWorld — replace wholesale once flight.js
+// (phase 7, FM-PLAN.md) is wired into gameplay. Fields not derivable from
+// testworld's own kinematics are marked PLACEHOLDER.
+function testworldHudState(world, alpha) {
+  const a = world.prev, b = world.state;
+  const ang = a[0] + (b[0] - a[0]) * alpha;
+  const radius = a[1] + (b[1] - a[1]) * alpha;
+  const alt = a[2] + (b[2] - a[2]) * alpha;
+  const speed = a[3] + (b[3] - a[3]) * alpha; // m/s
+  const bank = a[4] + (b[4] - a[4]) * alpha;  // rad, magnitude-only
+  const omega = speed / radius;
+  const climbRate = 280 * omega * Math.cos(2 * ang); // exact d/dt of the weave
+  const heading = Math.atan2(-Math.cos(ang), Math.sin(ang));
+  return {
+    speedKt: speed * 1.94384,
+    altFt: alt * 3.28084,
+    heading: (heading * 180 / Math.PI + 360) % 360,
+    pitch: Math.atan2(climbRate, speed) * 180 / Math.PI,
+    roll: bank * 180 / Math.PI,
+    g: 1 / Math.cos(bank),
+    mach: speed / 340, // PLACEHOLDER: no ISA here
+    aoa: 2.5,          // PLACEHOLDER
+    throttle: 60,      // PLACEHOLDER
+  };
+}
 
 const state = {
   version: VERSION, phase: PHASE, ready: false, backend: null, tier: null,
@@ -70,6 +98,12 @@ async function boot() {
   atmosphere.initIBL(renderer);
   if (flags.get("tod")) atmosphere.setTime(parseFloat(flags.get("tod")));
 
+  // clouds (phase 5a/5b/5c): coverage + shadows on every tier; billboard
+  // field past LOW. atmosphere.sky.uSunDir is passed BY REFERENCE so sky,
+  // clouds, and ground shadows share one sun uniform — zero-copy, no drift.
+  const clouds = new Clouds(atmosphere.frontName, params, atmosphere.sky.uSunDir);
+  scene.add(clouds.group);
+
   const sim = new SimCore(1);
   const world = new TestWorld(scene);
   sim.addSystem(world);
@@ -87,7 +121,8 @@ async function boot() {
     const vs = document.querySelector("#veil .status");
     if (vs) vs.innerHTML = `<b>LOADING ${fg.label}</b> — real USGS terrain`;
     try {
-      terrain = await Terrain.load("/assets/terrain/" + fg.asset, atmosphere.frontName);
+      terrain = await Terrain.load("/assets/terrain/" + fg.asset, atmosphere.frontName,
+        makeCloudShadowNode(clouds.shared));
       scene.add(terrain.group);
       if (fg.ocean && flags.get("nowater") !== "1") {
         try {
@@ -108,6 +143,8 @@ async function boot() {
   const gamepad = new GamepadInput();
   const controls = new ControlsMenu(input);
   const dbg = new DebugOverlay();
+  const hud = new HUD({ parent: document.body });
+  hud.setMode("arcade");
   document.getElementById("controlsLink")?.addEventListener("click", (e) => { e.preventDefault(); controls.show(); });
 
   window.addEventListener("resize", () => {
@@ -118,7 +155,8 @@ async function boot() {
 
   // public hooks (QA + future phases)
   Object.assign(state, {
-    sim, input, gamepad, controls, dbg, atmosphere, terrain, water,
+    sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud,
+    cloudImmersion: () => clouds.immersion,
     setTimeOfDay: (h) => atmosphere.setTime(h),
     setFront: (f) => atmosphere.setFront(String(f).toUpperCase()),
     hash: () => sim.stateHash(),
@@ -139,6 +177,8 @@ async function boot() {
   let last = performance.now();
   let firstFrame = true;
   let waterClock = 0; // render-side only — the sim never reads water
+  let cloudClock = 0; // same convention; drives clouds AND their shadows
+  let hudClock = 999; // forces an immediate first HUD paint
   function frame(now) {
     requestAnimationFrame(frame);
     const dtMs = Math.min(now - last, 250);
@@ -168,6 +208,12 @@ async function boot() {
     terrain?.update(camera);
     waterClock += dtMs / 1000;
     water?.update(camera, waterClock);
+    cloudClock += dtMs / 1000;
+    clouds.update(camera, cloudClock);
+    // INTERIM: SVG-DOM HUD updates throttled to 15Hz — per-frame updates cost
+    // ~80fps (measured); a canvas-2D HUD rewrite is in flight to remove this
+    hudClock += dtMs;
+    if (hudClock >= 66) { hudClock = 0; hud.update(testworldHudState(world, alpha)); }
     atmosphere.update(camera);
     renderer.toneMappingExposure = atmosphere.exposure;
     renderer.render(scene, camera);

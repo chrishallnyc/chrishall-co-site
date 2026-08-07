@@ -6,6 +6,7 @@
 
 import * as THREE from "three";
 import { Pool } from "../engine/pools.js";
+import { buildF22 } from "../aircraft/f22.js";
 
 const TRAIL_N = 240;
 
@@ -36,24 +37,21 @@ export class TestWorld {
     scene.add(pylons);
     this.pylons = pylons;
 
-    // placeholder jet: fuselage + wing slab (the real F-22 arrives in phase 6)
+    // the real F-22 (phase 6 v1). Model forward = -Z; testworld's heading
+    // math points the jet along +Z, so an inner yaw flip aligns the nose.
     this.jet = new THREE.Group();
-    const fuse = new THREE.Mesh(
-      new THREE.ConeGeometry(9, 62, 8),
-      new THREE.MeshStandardMaterial({ color: 0x3c4048, roughness: 0.5, metalness: 0.6 })
-    );
-    fuse.rotation.x = Math.PI / 2;
-    const wing = new THREE.Mesh(
-      new THREE.BoxGeometry(64, 2.2, 20),
-      new THREE.MeshStandardMaterial({ color: 0x34383f, roughness: 0.55, metalness: 0.6 })
-    );
-    wing.position.z = 6;
-    this.jet.add(fuse, wing);
+    const f22 = buildF22();
+    f22.group.rotation.y = Math.PI;
+    for (const g of ["gearNose", "gearL", "gearR"]) {
+      if (f22.parts[g]) f22.parts[g].visible = false; // clean in-flight config
+    }
+    this.jet.add(f22.group);
+    this.f22parts = f22.parts;
     this.scene.add(this.jet);
 
     // instanced contrail fed by a Pool ring
-    const puffGeo = new THREE.SphereGeometry(2.4, 6, 5);
-    const puffMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 });
+    const puffGeo = new THREE.SphereGeometry(1.0, 6, 5);
+    const puffMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.28 });
     this.trailMesh = new THREE.InstancedMesh(puffGeo, puffMat, TRAIL_N);
     this.trailMesh.frustumCulled = false;
     scene.add(this.trailMesh);
@@ -160,8 +158,8 @@ export class TestWorld {
       camera.lookAt(gx + Math.sin(this.fixYaw) * 1000, camY + Math.tan(this.pitchBias) * 1000, gz + Math.cos(this.fixYaw) * 1000);
       return;
     }
-    // chase camera, behind along heading
-    const back = 190, up = 60;
+    // chase camera, behind along heading (tuned for the real 19m airframe)
+    const back = 55, up = 16;
     camera.position.set(px - Math.sin(heading) * back, alt + up, pz - Math.cos(heading) * back);
     camera.lookAt(px, alt + back * Math.tan(this.pitchBias), pz);
   }

@@ -80,7 +80,7 @@ const RAMPS = {
 };
 
 export class Terrain {
-  static async load(baseUrl, front = "NELLIS") {
+  static async load(baseUrl, front = "NELLIS", cloudShadow = null) {
     const meta = await (await fetch(`${baseUrl}_meta.json`)).json();
     const img = new Image();
     img.src = `${baseUrl}_h.png`;
@@ -95,11 +95,12 @@ export class Terrain {
     for (let i = 0; i < heights.length; i++) {
       heights[i] = meta.minH + ((px[i * 4] << 8) | px[i * 4 + 1]) / 65535 * span;
     }
-    return new Terrain(meta, heights, img, front);
+    return new Terrain(meta, heights, img, front, cloudShadow);
   }
 
-  constructor(meta, heights, img, front = "NELLIS") {
+  constructor(meta, heights, img, front = "NELLIS", cloudShadow = null) {
     this.front = front;
+    this.cloudShadow = cloudShadow; // TSL fn (wp)=>node from clouds.js, or null
     this.meta = meta;
     this.heights = heights;
     this.size = meta.sizeM;
@@ -202,6 +203,7 @@ export class Terrain {
 
     // color: per-front altitude/slope ramps + shared noise variation
     const front = this.front;
+    const cloudShadow = this.cloudShadow;
     mat.colorNode = Fn(() => {
       const wp = positionWorld;
       const h = sampleH(wp);
@@ -246,6 +248,7 @@ export class Terrain {
       c = c.mul(mix(vec3(1.05, 1.0, 0.93), vec3(0.96, 1.0, 1.05), macro));
       const micro = vnoise(wp.xz.div(45.0));
       c = c.mul(micro.sub(0.5).mul(0.12).add(1.0));
+      if (cloudShadow) c = c.mul(cloudShadow(wp)); // cloud shadows (phase 5a)
       return c;
     })();
 

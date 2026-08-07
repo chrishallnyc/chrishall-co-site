@@ -118,7 +118,7 @@ export class HUD {
       // z-index:3 is explicit on purpose — sits above #game (implicit 0) and
       // below index.html's #chrome(5)/#dbg(6)/#controls(8)/#veil(10), without
       // depending on DOM insertion order. See HUD-INTEGRATION.md.
-      style: "position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:screen;z-index:3;",
+      style: "position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;",
     });
 
     const defs = el("defs", {});
