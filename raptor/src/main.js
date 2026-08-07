@@ -14,6 +14,7 @@ import { Terrain } from "./world/terrain.js";
 import { Water } from "./world/water.js";
 import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
+import { FlightFX } from "./game/flightfx.js";
 
 const VERSION = "0.6.0";
 const PHASE = 7;
@@ -151,6 +152,9 @@ async function boot() {
     });
     sim.addSystem(player);
   }
+  // AB plume + wingtip vortices (nests under jetGroup — post-boot top-level
+  // scene.add is silently dropped by this renderer build; see flightfx.js)
+  const flightfx = player ? new FlightFX(scene, { jetGroup: world.jet, parts: world.f22parts }) : null;
 
   const input = new Input(window);
   const gamepad = new GamepadInput();
@@ -244,6 +248,7 @@ async function boot() {
       const parked = world.fixYaw !== null;
       if (parked) world.renderParkedCamera(camera);
       player.render(alpha, camera, parked);
+      flightfx?.update(player.fm.out, player.throttleCmd, dtMs / 1000, camera);
     } else {
       world.render(alpha, camera);
     }

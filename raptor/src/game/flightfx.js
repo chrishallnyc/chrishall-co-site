@@ -11,11 +11,23 @@
 // scene graph — as children of the nose-flipped "f22" group and the two
 // nozzle pivot groups — so they inherit every transform (current jet
 // attitude, testworld's Math.PI nose flip, any future TVC nozzle animation)
-// for free via the normal parent/child matrix cascade. The visible effect
-// geometry (discs/puffs) lives in its own group parented directly to
-// `scene`, repositioned from those anchors each frame — same shape as
-// testworld.js's retired contrail (Pool-backed InstancedMesh, positions
-// resolved once per frame, no per-frame allocation past construction).
+// for free via the normal parent/child matrix cascade.
+//
+// IMPORTANT — everything VISIBLE this class creates is parented somewhere
+// inside jetGroup's existing subtree too, NEVER added straight to `scene`.
+// Verified empirically (see devlog): this build's renderer only draws
+// objects that live under something that was already in the scene graph
+// when the render loop started — a brand-new top-level `scene.add(x)` after
+// boot silently never renders (confirmed with plain, untextured, non-
+// transparent test meshes; mutating an EXISTING object's material updates
+// instantly). So: the AB discs/shimmer are children of `parts.nozzleL/R`
+// directly (plain local coordinates — no manual world-space placement
+// needed). The vortex/smoke InstancedMeshes need to stay put in WORLD space
+// while the jet flies on, so they live under a `_worldFixed` group that IS
+// a child of jetGroup (satisfying "already in the tree") but whose local
+// matrix is reset every frame to jetGroup.matrixWorld's inverse — the two
+// cancel, so instance matrices set in absolute world coordinates (exactly
+// as before) land in the right place regardless of where the jet is.
 //
 // Wingtip offset is EST from f22.js's WING table (root x=1.60, half-span
 // 5.18, LE sweep 42deg / TE sweep 17deg -> tip mid-chord sits at local
@@ -28,10 +40,12 @@ import { Pool } from "../engine/pools.js";
 
 // ---- wingtip condensation vortex ----
 const VORT_LIFE = 1.2;         // s — spec: fades over ~1.2s
-const VORT_INTERVAL = 0.03;    // s between spawns per side while gated on
-const VORT_CAP = 200;          // pool capacity, both wingtips combined
-const VORT_SIZE = 0.55;        // m, peak puff radius
-const VORT_ALPHA = 0.24;       // subtle white, not a ribbon of paper
+const VORT_INTERVAL = 0.009;   // s between spawns per side while gated on — dense
+                                // enough that puffs overlap into a streak at
+                                // typical corner speeds instead of reading as dots
+const VORT_CAP = 320;          // pool capacity, both wingtips combined
+const VORT_SIZE = 1.0;         // m, peak puff radius
+const VORT_ALPHA = 0.32;       // subtle white, not a ribbon of paper
 const VORT_NZ_GATE = 4;        // |nz| >
 const VORT_AOA_GATE = 15;      // alphaDeg >
 
@@ -39,12 +53,12 @@ const VORT_AOA_GATE = 15;      // alphaDeg >
 const AB_SPOOL_TAU = 0.4;      // s, EST light-off feel (f22data ENGINE.spoolTauAbS ~0.5)
 const AB_STACK = [
   // distance fraction along the plume length, disc radius (m), tint, base opacity
-  { d: 0.06, r: 0.60, color: 0xfff3d8, op: 0.95 }, // white-hot core at the nozzle lip
-  { d: 0.32, r: 0.95, color: 0xffb058, op: 0.70 }, // orange mid
-  { d: 0.72, r: 1.35, color: 0xff5a24, op: 0.42 }, // diffuse red-orange tail
+  { d: 0.05, r: 1.05, color: 0xfff7e6, op: 1.00 }, // white-hot core at the nozzle lip
+  { d: 0.28, r: 1.60, color: 0xffaa4a, op: 0.78 }, // orange mid
+  { d: 0.65, r: 2.30, color: 0xff5010, op: 0.50 }, // diffuse red-orange tail
 ];
-const AB_LEN_BASE = 2.4, AB_LEN_AB = 3.6; // m, plume length at abStage 0 -> 1
-const SHIMMER_D = 0.14, SHIMMER_R = 1.55; // heat-shimmer-suggestion quad
+const AB_LEN_BASE = 4.2, AB_LEN_AB = 7.5; // m, plume length at abStage 0 -> 1
+const SHIMMER_D = 0.14, SHIMMER_R = 2.0;  // heat-shimmer-suggestion quad
 
 // ---- mil-power haze (very faint — F119 is smokeless-ish) ----
 const SMOKE_TAU = 0.6;
@@ -94,6 +108,15 @@ export class FlightFX {
     parts.nozzleL.add(this._nozL);
     parts.nozzleR.add(this._nozR);
 
+    // world-fixed anchor for the vortex/smoke trails — see file header. A
+    // child of jetGroup (so the renderer picks it up) whose local matrix is
+    // overwritten every update() with jetGroup's inverse world matrix, so
+    // its own children's absolute-world instance transforms are unaffected
+    // by where the jet actually is.
+    this._worldFixed = new THREE.Group();
+    this._worldFixed.matrixAutoUpdate = false;
+    jetGroup.add(this._worldFixed);
+
     // scratch — allocated once, mutated per frame, never replaced
     this._pTipL = new THREE.Vector3(); this._pTipR = new THREE.Vector3();
     this._pNozL = new THREE.Vector3(); this._pNozR = new THREE.Vector3();
@@ -101,10 +124,7 @@ export class FlightFX {
     this._viewTmp = new THREE.Vector3();
     this._mid = new THREE.Vector3();
     this._m4 = new THREE.Matrix4();
-
-    this.group = new THREE.Group();
-    this.group.name = "flightfx";
-    scene.add(this.group);
+    this._invWorld = new THREE.Matrix4();
 
     // ---- 1. wingtip vortex: instanced puffs, Pool-backed (testworld's
     // retired-contrail pattern — sphere geometry so no billboard bookkeeping
@@ -116,7 +136,7 @@ export class FlightFX {
     );
     this._vortMesh.frustumCulled = false;
     this._vortMesh.count = 0;
-    this.group.add(this._vortMesh);
+    this._worldFixed.add(this._vortMesh);
     this._vortPool = new Pool(VORT_CAP, () => ({ x: 0, y: 0, z: 0, age: 1e9 }));
     this._vortCooldown = 0;
 
@@ -128,13 +148,16 @@ export class FlightFX {
     );
     this._smokeMesh.frustumCulled = false;
     this._smokeMesh.count = 0;
-    this.group.add(this._smokeMesh);
+    this._worldFixed.add(this._smokeMesh);
     this._smokePool = new Pool(SMOKE_CAP, () => ({ x: 0, y: 0, z: 0, age: 1e9 }));
     this._smokeCooldown = 0;
 
-    // ---- 2. AB plume: fixed disc stack + heat-shimmer per nozzle, each a
-    // camera-billboarded Mesh (lookAt each frame — same trick stars.js uses
-    // for its moon/halo discs), additive for the hot core/mid/tail ----
+    // ---- 2. AB plume: fixed disc stack + heat-shimmer per nozzle, parented
+    // directly to that nozzle (plain LOCAL z-offset along its own aft axis —
+    // no world-space math needed for position); each is still a camera-
+    // billboarded Mesh (lookAt each frame — same trick stars.js uses for its
+    // moon/halo discs, and lookAt() resolves correctly through the nozzle's
+    // own parent chain), additive for the hot core/mid/tail ----
     const abTex = radialTexture([[0, "rgba(255,255,255,1)"], [0.4, "rgba(255,255,255,0.6)"], [1, "rgba(255,255,255,0)"]]);
     const mkDisc = (color) => new THREE.Mesh(
       new THREE.CircleGeometry(1, 16),
@@ -152,7 +175,10 @@ export class FlightFX {
     this._plumeR = AB_STACK.map((s) => mkDisc(s.color));
     this._shimmerL = mkShimmer();
     this._shimmerR = mkShimmer();
-    for (const m of [...this._plumeL, ...this._plumeR, this._shimmerL, this._shimmerR]) this.group.add(m);
+    for (const m of this._plumeL) parts.nozzleL.add(m);
+    for (const m of this._plumeR) parts.nozzleR.add(m);
+    parts.nozzleL.add(this._shimmerL);
+    parts.nozzleR.add(this._shimmerR);
 
     this._t = 0;
     this._abStage = 0;
@@ -167,6 +193,12 @@ export class FlightFX {
     // moved jetGroup; the renderer's own cascade hasn't run yet) so anchors
     // read the current position, not last frame's.
     this.jetGroup.updateMatrixWorld(true);
+
+    // re-cancel jetGroup's (now-fresh) world transform on the vortex/smoke
+    // anchor, then push that fix down into its own subtree.
+    this._invWorld.copy(this.jetGroup.matrixWorld).invert();
+    this._worldFixed.matrix.copy(this._invWorld);
+    this._worldFixed.updateMatrixWorld(true);
 
     this._tipL.getWorldPosition(this._pTipL);
     this._tipR.getWorldPosition(this._pTipR);
@@ -230,14 +262,15 @@ export class FlightFX {
     return this._viewTmp.dot(aft);
   }
 
+  // discs are children of the nozzle pivot: NOZZLE_EXIT_Z + d*len is a plain
+  // local z-offset along the pivot's own aft axis, no world-space math.
   _placeStack(discs, nozPos, aft, len, stage, camera, side) {
     const boost = 0.75 + 0.5 * Math.max(0, this._viewFacing(nozPos, aft, camera));
     for (let i = 0; i < discs.length; i++) {
       const spec = AB_STACK[i], mesh = discs[i];
       if (stage < 0.01) { mesh.material.opacity = 0; continue; }
       const flick = 1 + 0.10 * Math.sin(this._t * 41 + i * 2.3 + side * 5) + 0.06 * Math.sin(this._t * 97 + i * 4.1);
-      const dist = spec.d * len;
-      mesh.position.set(nozPos.x + aft.x * dist, nozPos.y + aft.y * dist, nozPos.z + aft.z * dist);
+      mesh.position.set(0, 0, NOZZLE_EXIT_Z + spec.d * len);
       mesh.lookAt(camera.position);
       const r = spec.r * (0.55 + 0.45 * stage) * flick;
       mesh.scale.set(r, r, r);
@@ -247,9 +280,8 @@ export class FlightFX {
 
   _placeShimmer(mesh, nozPos, aft, len, stage, camera, side) {
     if (stage < 0.01) { mesh.material.opacity = 0; return; }
-    const dist = SHIMMER_D * len;
     const wob = 1 + 0.08 * Math.sin(this._t * 17 + side * 3);
-    mesh.position.set(nozPos.x + aft.x * dist, nozPos.y + aft.y * dist, nozPos.z + aft.z * dist);
+    mesh.position.set(0, 0, NOZZLE_EXIT_Z + SHIMMER_D * len);
     mesh.lookAt(camera.position);
     const r = SHIMMER_R * (0.7 + 0.3 * stage) * wob;
     mesh.scale.set(r, r, r);
