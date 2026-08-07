@@ -83,8 +83,8 @@ const FRONTS = {
   },
   VALDEZ: {   // broken stratocumulus deck: thin, flat, wide cells
     coverage: 0.55, base: 1100, top: 2400,
-    covRepeat: 30000, baseRepeat: 11000, detailRepeat: 1500,
-    covSharp: 2.5, baseRound: 0.16, topSoft: 0.40, erode: 0.20,
+    covRepeat: 14000, baseRepeat: 7000, detailRepeat: 1050,
+    covSharp: 1.9, baseRound: 0.16, topSoft: 0.40, erode: 0.34,
     sigma: 0.05, maxLen: 16000, shadow3D: false,
   },
   MARIANAS: { // trade cumulus deck + isolated towers to 5200 (tower mask ch.)

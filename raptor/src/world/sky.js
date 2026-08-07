@@ -74,11 +74,14 @@ export class Sky {
     this.mesh.material.colorNode = Fn(() => {
       const dir = normalize(positionWorld.sub(cameraPosition));
       const L = skyFn(dir).mul(uSunI).toVar();
-      // sun disc: ~0.53° half-angle 0.0047 rad, transmittance-tinted by the
-      // march's own horizon extinction via the radiance already in L
+      // sun disc: ~0.53° half-angle; elevation-keyed reddening + enough HDR
+      // overshoot to catch the bloom threshold consistently (PASS-1 item 3:
+      // the disc read as "the moon" — dim, never warm)
       const cosSun = dot(dir, uSunDir);
       const disc = smoothstep(float(0.99996), float(0.999989), cosSun);
-      L.addAssign(vec3(1.0, 0.96, 0.9).mul(disc).mul(uSunI).mul(0.25).mul(smoothstep(float(-0.06), float(0.0), uSunDir.y)));
+      const lowSun = smoothstep(float(0.35), float(0.02), uSunDir.y);
+      const discCol = mix(vec3(1.0, 0.97, 0.92), vec3(1.0, 0.52, 0.22), lowSun);
+      L.addAssign(discCol.mul(disc).mul(uSunI).mul(0.4).mul(smoothstep(float(-0.06), float(0.0), uSunDir.y)));
       return L;
     })();
     this.mesh.material.needsUpdate = true;
