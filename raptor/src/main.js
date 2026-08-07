@@ -178,7 +178,6 @@ async function boot() {
   let firstFrame = true;
   let waterClock = 0; // render-side only — the sim never reads water
   let cloudClock = 0; // same convention; drives clouds AND their shadows
-  let hudClock = 999; // forces an immediate first HUD paint
   function frame(now) {
     requestAnimationFrame(frame);
     const dtMs = Math.min(now - last, 250);
@@ -210,10 +209,7 @@ async function boot() {
     water?.update(camera, waterClock);
     cloudClock += dtMs / 1000;
     clouds.update(camera, cloudClock);
-    // INTERIM: SVG-DOM HUD updates throttled to 15Hz — per-frame updates cost
-    // ~80fps (measured); a canvas-2D HUD rewrite is in flight to remove this
-    hudClock += dtMs;
-    if (hudClock >= 66) { hudClock = 0; hud.update(testworldHudState(world, alpha)); }
+    hud.update(testworldHudState(world, alpha)); // canvas HUD: ~0.02ms/update
     atmosphere.update(camera);
     renderer.toneMappingExposure = atmosphere.exposure;
     renderer.render(scene, camera);
