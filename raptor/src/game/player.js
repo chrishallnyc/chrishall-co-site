@@ -1,0 +1,173 @@
+// Player flight (phase 7): mouse-aim + Chris's control scheme (W/S throttle,
+// A/D flaperon roll, Q/E rudder, arrows manual pitch) driving the validated
+// FlightModel through the WT-style instructor. Runs as a SimCore system —
+// inputs are sampled per TICK (the replay/netcode boundary), rendering only
+// interpolates. Frames: FM world is ENU (+x east, +y north, +z up); the game
+// renders x=east, y=up, z=north — an improper axis swap, so orientation
+// crosses via basis vectors (makeBasis re-orthogonalizes handedness).
+
+import * as THREE from "three";
+import { FlightModel, S } from "../sim/flight.js";
+
+const MOUSE_SENS = 0.0028;      // rad of aim per px of mouse travel
+const THROTTLE_RATE = 0.45;     // per second held
+const WHEEL_THROTTLE = 0.05;    // per wheel tick
+const AIM_PITCH_LIM = 80 * Math.PI / 180;
+
+export class Player {
+  constructor(scene, { jet, terrain, spawn }) {
+    this.jet = jet;             // the F-22 group (taken over from TestWorld)
+    this.terrain = terrain || null;
+    this.spawn = spawn;
+
+    this.fm = new FlightModel();
+    this._doSpawn();
+
+    // aim state (deterministic sim inputs; mouse deltas accumulate render-side
+    // and are consumed per tick)
+    this.aimHeading = spawn.headingRad;
+    this.aimPitch = 0;
+    this.throttleCmd = 0.8;
+    this.gearDown = false;
+    this._mouseDx = 0; this._mouseDy = 0;
+    this._live = { rollL: 0, rollR: 0, yawL: 0, yawR: 0, thrUp: 0, thrDn: 0, pitchUp: 0, pitchDn: 0, brake: 0, wheel: 0, gearEdge: 0 };
+    this.crashes = 0;
+
+    // render-side scratch
+    this._prev = new Float64Array(this.fm.state);
+    this._q = new THREE.Quaternion();
+    this._f = new THREE.Vector3(); this._u = new THREE.Vector3(); this._r = new THREE.Vector3();
+    this._m = new THREE.Matrix4();
+    this._camPos = new THREE.Vector3();
+  }
+
+  _doSpawn() {
+    this.fm.initFlight({
+      x: this.spawn.x, y: this.spawn.y, alt: this.spawn.alt,
+      headingRad: this.spawn.headingRad, speed: this.spawn.speed, throttle: 0.8,
+    });
+  }
+
+  // called by the render loop every frame — accumulates until the next tick
+  feedInput(input) {
+    this._mouseDx += input.mouse.dx;
+    this._mouseDy += input.mouse.dy;
+    const L = this._live;
+    L.rollL = input.held("roll_left") ? 1 : 0;
+    L.rollR = input.held("roll_right") ? 1 : 0;
+    L.yawL = input.held("yaw_left") ? 1 : 0;
+    L.yawR = input.held("yaw_right") ? 1 : 0;
+    L.thrUp = input.held("throttle_up") ? 1 : 0;
+    L.thrDn = input.held("throttle_down") ? 1 : 0;
+    L.pitchUp = input.held("pitch_up") ? 1 : 0;
+    L.pitchDn = input.held("pitch_down") ? 1 : 0;
+    L.brake = input.held("wheel_brakes") ? 1 : 0;
+    L.wheel += input.wheelDelta();
+    if (input.pressed("gear")) L.gearEdge = 1;
+  }
+
+  // QA hook: drive the aim/throttle directly (batteries can't move a mouse)
+  debugCommand({ aimPitchDeg, aimHeadingDeg, throttle } = {}) {
+    if (aimPitchDeg !== undefined) this.aimPitch = aimPitchDeg * Math.PI / 180;
+    if (aimHeadingDeg !== undefined) this.aimHeading = aimHeadingDeg * Math.PI / 180;
+    if (throttle !== undefined) this.throttleCmd = throttle;
+  }
+
+  // ---- sim side ----
+  reset() { this._doSpawn(); this.aimPitch = 0; this.aimHeading = this.spawn.headingRad; }
+
+  tick(sim, dt) {
+    this._prev.set(this.fm.state);
+    const L = this._live;
+
+    // aim from accumulated mouse travel
+    this.aimHeading += this._mouseDx * MOUSE_SENS;
+    this.aimPitch = Math.max(-AIM_PITCH_LIM, Math.min(AIM_PITCH_LIM, this.aimPitch - this._mouseDy * MOUSE_SENS));
+    this._mouseDx = 0; this._mouseDy = 0;
+    // arrow-key manual pitch nudges the aim
+    this.aimPitch += (L.pitchUp - L.pitchDn) * 0.9 * dt;
+
+    // throttle: W/S held + wheel steps; 0..1.1 (past 1.0 = afterburner)
+    this.throttleCmd += (L.thrUp - L.thrDn) * THROTTLE_RATE * dt + L.wheel * WHEEL_THROTTLE;
+    this.throttleCmd = Math.max(0, Math.min(1.1, this.throttleCmd));
+    L.wheel = 0;
+
+    if (L.gearEdge) { this.gearDown = !this.gearDown; L.gearEdge = 0; }
+
+    const st = this.fm.state;
+    const groundH = this.terrain ? this.terrain.heightAt(st[S.PX], st[S.PY]) : 0;
+    this.fm.tick(dt, {
+      aimPitch: this.aimPitch,
+      aimYaw: this.aimHeading,
+      throttle: this.throttleCmd,
+      rudder: L.yawR - L.yawL,
+      rollOverride: L.rollR - L.rollL,
+      mode: "arcade",
+      brake: L.brake,
+      gearDown: this.gearDown,
+    }, { groundH: Math.max(groundH, 0) });
+
+    // gear-up terrain/water contact = crash → respawn (proper damage phase 8)
+    const agl = st[S.PZ] - Math.max(groundH, 0);
+    if (agl < 1.5 && !this.gearDown) { this.crashes++; this.reset(); }
+  }
+
+  hash(h) {
+    const st = this.fm.state;
+    for (let i = 0; i < 14; i++) h = (Math.imul(h ^ ((st[i] * 1e5) | 0), 0x01000193)) >>> 0;
+    return h;
+  }
+
+  // ---- render side ----
+  render(alpha, camera, parked) {
+    const a = this._prev, b = this.fm.state;
+    const lp = (i) => a[i] + (b[i] - a[i]) * alpha;
+    // FM ENU -> three (x=east stays, y=up from ENU z, z=north from ENU y)
+    const px = lp(S.PX), py = lp(S.PZ), pz = lp(S.PY);
+    this.jet.position.set(px, py, pz);
+
+    // orientation via basis vectors (quat can't cross an improper swap)
+    this._q.set(b[S.QX], b[S.QY], b[S.QZ], b[S.QW]);
+    this._f.set(1, 0, 0).applyQuaternion(this._q);   // body fwd in ENU
+    this._u.set(0, 0, -1).applyQuaternion(this._q);  // body up (FRD +z is down)
+    const f = new THREE.Vector3(this._f.x, this._f.z, this._f.y); // ENU->three
+    const u = new THREE.Vector3(this._u.x, this._u.z, this._u.y);
+    const r = new THREE.Vector3().crossVectors(u, f).normalize();
+    u.crossVectors(f, r).normalize();
+    this._m.makeBasis(r, u, f);
+    this.jet.quaternion.setFromRotationMatrix(this._m);
+
+    if (parked) return; // QA parked-camera owns the view
+    // chase camera behind the flight path, mild smoothing
+    const back = 55, up = 16;
+    this._camPos.set(px - f.x * back + u.x * up, py - f.y * back + u.y * up, pz - f.z * back + u.z * up);
+    // snap on spawn/respawn (a slow lerp from the origin drags the camera
+    // underground through the basin); smooth only when already close
+    if (camera.position.distanceTo(this._camPos) > 400) camera.position.copy(this._camPos);
+    else camera.position.lerp(this._camPos, 0.35);
+    camera.up.set(u.x * 0.35, 1, u.z * 0.35).normalize();
+    camera.lookAt(px + f.x * 120, py + f.y * 120, pz + f.z * 120);
+  }
+
+  hudState() {
+    const st = this.fm.state, out = this.fm.out;
+    // heading/pitch/roll from the body basis in ENU
+    this._q.set(st[S.QX], st[S.QY], st[S.QZ], st[S.QW]);
+    this._f.set(1, 0, 0).applyQuaternion(this._q);
+    this._r.set(0, 1, 0).applyQuaternion(this._q); // body right wing in ENU
+    const heading = Math.atan2(this._f.x, this._f.y) * 180 / Math.PI; // from north, eastward
+    const pitch = Math.asin(Math.max(-1, Math.min(1, this._f.z))) * 180 / Math.PI;
+    // +roll = right bank: right wing dips → its ENU z goes negative
+    const roll = Math.atan2(-this._r.z, Math.hypot(this._r.x, this._r.y)) * 180 / Math.PI;
+    return {
+      speedKt: out.V * 1.94384,
+      altFt: st[S.PZ] * 3.28084,
+      heading: (heading + 360) % 360,
+      pitch, roll,
+      g: out.nz,
+      mach: out.mach,
+      aoa: out.alphaDeg,
+      throttle: Math.round(this.throttleCmd * 100),
+    };
+  }
+}

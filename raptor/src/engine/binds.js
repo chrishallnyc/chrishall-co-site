@@ -8,14 +8,17 @@
 
 export const ACTIONS = {
   // ── flight ──────────────────────────────────────────────────────────────
-  pitch_down:      { cat: "flight", label: "pitch: nose down", binds: [["KeyW"], ["ArrowUp"]], hold: true },
-  pitch_up:        { cat: "flight", label: "pitch: nose up", binds: [["KeyS"], ["ArrowDown"]], hold: true },
-  roll_left:       { cat: "flight", label: "roll left", binds: [["KeyA"], ["ArrowLeft"]], hold: true },
-  roll_right:      { cat: "flight", label: "roll right", binds: [["KeyD"], ["ArrowRight"]], hold: true },
-  yaw_left:        { cat: "flight", label: "yaw left", binds: [["KeyQ"]], hold: true },
-  yaw_right:       { cat: "flight", label: "yaw right", binds: [["KeyE"]], hold: true },
-  throttle_up:     { cat: "flight", label: "throttle up (past 100% = WEP)", binds: [["ShiftLeft"], ["NumpadAdd"], ["Equal"]], hold: true },
-  throttle_down:   { cat: "flight", label: "throttle down", binds: [["ControlLeft"], ["NumpadSubtract"], ["Minus"]], hold: true },
+  // CHRIS'S SCHEME (2026-08-06, overrides the datamined WT throttle keys):
+  // W/S = throttle, mouse = aim, A/D = flaperon roll, Q/E = rudder.
+  // Arrows keep manual pitch override since the mouse owns pitch.
+  pitch_down:      { cat: "flight", label: "pitch: nose down (manual)", binds: [["ArrowUp"]], hold: true },
+  pitch_up:        { cat: "flight", label: "pitch: nose up (manual)", binds: [["ArrowDown"]], hold: true },
+  roll_left:       { cat: "flight", label: "roll left (flaperons)", binds: [["KeyA"], ["ArrowLeft"]], hold: true },
+  roll_right:      { cat: "flight", label: "roll right (flaperons)", binds: [["KeyD"], ["ArrowRight"]], hold: true },
+  yaw_left:        { cat: "flight", label: "rudder left", binds: [["KeyQ"]], hold: true },
+  yaw_right:       { cat: "flight", label: "rudder right", binds: [["KeyE"]], hold: true },
+  throttle_up:     { cat: "flight", label: "throttle up (past 100% = AB)", binds: [["KeyW"], ["NumpadAdd"], ["Equal"]], hold: true },
+  throttle_down:   { cat: "flight", label: "throttle down", binds: [["KeyS"], ["NumpadSubtract"], ["Minus"]], hold: true },
   trim_toggle:     { cat: "flight", label: "trim aircraft (toggle)", binds: [["PageUp"], ["KeyT"]] },
   waim_yaw_left:   { cat: "flight", label: "weapon aim: yaw left", binds: [["AltLeft", "KeyA"]], hold: true },
   waim_yaw_right:  { cat: "flight", label: "weapon aim: yaw right", binds: [["AltLeft", "KeyD"]], hold: true },

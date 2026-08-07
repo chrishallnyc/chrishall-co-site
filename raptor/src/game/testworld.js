@@ -99,6 +99,7 @@ export class TestWorld {
   }
 
   tick(sim, dt) {
+    if (this.playerMode) return; // Player system owns the jet + trail is off
     this.prev.set(this.state);
     const s = this.state;
     const omega = s[3] / s[1];               // rad/s around the circle
@@ -121,6 +122,16 @@ export class TestWorld {
     // fold flight state; trail is cosmetic but ages deterministically anyway
     for (let i = 0; i < this.state.length; i++) h = (Math.imul(h ^ ((this.state[i] * 1e6) | 0), 0x01000193)) >>> 0;
     return h;
+  }
+
+  // parked QA camera (shared by demo + player modes)
+  renderParkedCamera(camera) {
+    const gx = this.camX, gz = this.camZ;
+    const ground = Math.max(this.terrain ? this.terrain.heightAt(gx, gz) : 0, 0);
+    const camY = ground + (this.camH ?? 600);
+    camera.position.set(gx, camY, gz);
+    camera.up.set(0, 1, 0);
+    camera.lookAt(gx + Math.sin(this.fixYaw) * 1000, camY + Math.tan(this.pitchBias) * 1000, gz + Math.cos(this.fixYaw) * 1000);
   }
 
   // ---- render side (interpolated) ----
@@ -148,16 +159,7 @@ export class TestWorld {
     this.trailMesh.count = n;
     this.trailMesh.instanceMatrix.needsUpdate = true;
 
-    if (this.fixYaw !== null) {
-      // parked camera: +X east, +Z north; terrain-aware altitude, offsettable
-      // via ?camx/?camz (meters from AOI center) and ?camh (height AGL)
-      const gx = this.camX, gz = this.camZ;
-      const ground = Math.max(this.terrain ? this.terrain.heightAt(gx, gz) : 0, 0);
-      const camY = ground + (this.camH ?? 600);
-      camera.position.set(gx, camY, gz);
-      camera.lookAt(gx + Math.sin(this.fixYaw) * 1000, camY + Math.tan(this.pitchBias) * 1000, gz + Math.cos(this.fixYaw) * 1000);
-      return;
-    }
+    if (this.fixYaw !== null) { this.renderParkedCamera(camera); return; }
     // chase camera, behind along heading (tuned for the real 19m airframe)
     const back = 55, up = 16;
     camera.position.set(px - Math.sin(heading) * back, alt + up, pz - Math.cos(heading) * back);

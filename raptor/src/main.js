@@ -7,6 +7,7 @@ import { GamepadInput } from "./engine/gamepad.js";
 import { detectTier, tierParams, setTier, TIERS, savedBench, saveBench, benchPick, clearBench, hasManualTier } from "./engine/quality.js";
 import { DebugOverlay } from "./engine/debug.js";
 import { TestWorld } from "./game/testworld.js";
+import { Player } from "./game/player.js";
 import { ControlsMenu } from "./game/controlsmenu.js";
 import { Atmosphere } from "./world/daycycle.js";
 import { Terrain } from "./world/terrain.js";
@@ -14,8 +15,8 @@ import { Water } from "./world/water.js";
 import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 
-const VERSION = "0.5.0";
-const PHASE = 5;
+const VERSION = "0.6.0";
+const PHASE = 7;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
 // (phase 7, FM-PLAN.md) is wired into gameplay. Fields not derivable from
@@ -139,6 +140,18 @@ async function boot() {
     }
   }
 
+  // PHASE 7: you fly. ?demo=1 keeps the old scripted circle for QA baselines.
+  let player = null;
+  if (flags.get("demo") !== "1") {
+    world.playerMode = true;
+    world.trailMesh.visible = false; // FM-driven trail is a polish item
+    player = new Player(scene, {
+      jet: world.jet, terrain,
+      spawn: { x: 0, y: -6000, alt: (fg?.baseAlt || 3400) + 200, headingRad: 0, speed: 200 },
+    });
+    sim.addSystem(player);
+  }
+
   const input = new Input(window);
   const gamepad = new GamepadInput();
   const controls = new ControlsMenu(input);
@@ -155,7 +168,7 @@ async function boot() {
 
   // public hooks (QA + future phases)
   Object.assign(state, {
-    sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud,
+    sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud, player,
     cloudImmersion: () => clouds.immersion,
     setTimeOfDay: (h) => atmosphere.setTime(h),
     setFront: (f) => atmosphere.setFront(String(f).toUpperCase()),
@@ -202,14 +215,21 @@ async function boot() {
     gamepad.update();
     if (input.pressed("menu")) controls.toggle();
     if (input.pressed("debug")) dbg.toggle();
+    player?.feedInput(input);
     const alpha = sim.advance(dtMs / 1000);
-    world.render(alpha, camera);
+    if (player) {
+      const parked = world.fixYaw !== null;
+      if (parked) world.renderParkedCamera(camera);
+      player.render(alpha, camera, parked);
+    } else {
+      world.render(alpha, camera);
+    }
     terrain?.update(camera);
     waterClock += dtMs / 1000;
     water?.update(camera, waterClock);
     cloudClock += dtMs / 1000;
     clouds.update(camera, cloudClock);
-    hud.update(testworldHudState(world, alpha)); // canvas HUD: ~0.02ms/update
+    hud.update(player ? player.hudState() : testworldHudState(world, alpha));
     atmosphere.update(camera);
     renderer.toneMappingExposure = atmosphere.exposure;
     renderer.render(scene, camera);
