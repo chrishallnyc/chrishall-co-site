@@ -11,8 +11,8 @@ import { ControlsMenu } from "./game/controlsmenu.js";
 import { Atmosphere } from "./world/daycycle.js";
 import { Terrain } from "./world/terrain.js";
 
-const VERSION = "0.3.0";
-const PHASE = 2;
+const VERSION = "0.4.0";
+const PHASE = 3;
 
 const state = {
   version: VERSION, phase: PHASE, ready: false, backend: null, tier: null,
