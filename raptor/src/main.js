@@ -1,7 +1,7 @@
 // RAPTOR boot: renderer (WebGPU with WebGL2 fallback), sim, input, debug, hooks.
 
 import * as THREE from "three";
-import { uniform } from "three/tsl";
+import { uniform, pow, vec3, Fn } from "three/tsl";
 import { SimCore, determinismProbe, DT } from "./engine/sim.js";
 import { Input } from "./engine/input.js";
 import { GamepadInput } from "./engine/gamepad.js";
@@ -123,9 +123,19 @@ async function boot() {
         const uSunI = uniform(36.0);
         const uCamPos = uniform(new THREE.Vector3(0, 3400, 0));
         const nodeArgs = { tTex: luts.tTex, msTex: luts.msTex, uSunDir: atmosphere.sky.uSunDir, uCamPos };
+        // per-front air mass: the LUTs bake a STANDARD atmosphere; Nevada's
+        // dry desert air scatters far less (PASS-1 item 2: foreground desert
+        // measured B−R +44 — blue wash with zero depth grading). trans^k with
+        // k<1 = optically thinner air; ins scales with it.
+        const airK = { NELLIS: 0.42, VALDEZ: 0.8, MARIANAS: 1.0 }[atmosphere.frontName] ?? 1.0;
+        const baseTrans = H.aerialTransNode(nodeArgs), baseIns = H.aerialInscatterNode(nodeArgs);
         atmoH = {
           uCamPos, uSunI,
-          aerial: { trans: H.aerialTransNode(nodeArgs), ins: H.aerialInscatterNode(nodeArgs), uSunI },
+          aerial: {
+            trans: airK === 1.0 ? baseTrans : (wp) => pow(baseTrans(wp), vec3(airK, airK, airK)),
+            ins: airK === 1.0 ? baseIns : (wp) => baseIns(wp).mul(airK),
+            uSunI,
+          },
         };
         atmosphere.sky.setHillaire(H.skySkyNode(nodeArgs), uSunI);
         scene.fog = null; // per-pixel aerial perspective replaces the single-color fog

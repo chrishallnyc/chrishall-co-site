@@ -521,7 +521,7 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
       // TRAA downstream integrates the march noise away
       const ign = fract(fract(screenCoordinate.x.mul(0.06711056)
         .add(screenCoordinate.y.mul(0.00583715))).mul(52.9829189));
-      const jit = fract(ign.add(fract(uTime.mul(74.1638)))).mul(0.4).add(0.3);
+      const jit = fract(ign.add(fract(uTime.mul(74.1638))));
 
       // 40-56 steps scaled by slab length (~STEP_TARGET m per step)
       const nSteps = clamp(tOut.sub(tIn).div(STEP_TARGET), STEPS_MIN, STEPS_MAX).floor().toVar();
@@ -555,18 +555,36 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
             If(dens.greaterThan(0.002), () => {
               const sigma = dens.mul(P.sigma);
               const stepT = exp(sigma.mul(dt).negate()).toVar();
-              // Beer-Lambert shadow march toward the sun. Approximation: the
-              // taps reuse the anchor's coverage field (covRepeat >> tap
-              // reach) so each tap is ONE base-shape fetch; the erosion skip
-              // over-estimates OD, compensated by SUN_SHADOW_K.
+              // Beer-Lambert shadow march toward the sun — from the SMOOTH
+              // staged fields only (coverage x height-gradient), anchored at
+              // the step's DE-JITTERED midpoint (t - dt*(jit-0.5)).
+              // PASS-1 #1 (stipple root cause): with per-step OD >> 1 the
+              // energy weight w = T*(1-stepT) collapses onto the first dense
+              // step, and the jitter dithers WHICH step that is — so acc
+              // flips between S_k and S_{k+1} every frame. The old 5-tap
+              // shape6 shadow read baseTex (~115m texels at baseRepeat), so
+              // S swung full-range between adjacent steps; TRAA's history
+              // clamp on the moving scene rejects that flicker and the
+              // residue was the 2x2 stipple in the fog-terrain interface
+              // bands. Measured: stipple survived jit*0.4 AND a de-jittered
+              // 5-tap shape6 anchor unchanged (~8.6 worst-window energy),
+              // vanished with tSun held flat (0.9). Fix: keep the taps but
+              // integrate the coverage-field density (field() texels ~300m,
+              // gradAt pure ALU) so S varies over >=300m along the ray —
+              // adjacent steps now agree and the jittered weight selection
+              // stops mattering. Erosion AND base-shape skip over-estimate
+              // OD, compensated by SUN_SHADOW_K (retuned 0.8 -> 0.55 to hold
+              // the pre-fix cloud-face brightness). Bonus: 5 base fetches
+              // per cloudy step become 1 coverage fetch.
+              const pS = uCamPos.add(dir.mul(t.add(dt.mul(float(0.5).sub(jit))))).toVar();
+              const fS = density.field(pS).toVar();
               const od = float(0.0).toVar();
               let prev = 0;
               for (const sd of SUN_TAPS) {
-                const sp = p.add(sunN.mul(sd));
-                od.addAssign(density.shape6(sp, covAmt, density.gradAt(sp.y, topL))
-                  .mul(sd - prev));
+                od.addAssign(density.gradAt(pS.y.add(sunN.y * sd), fS.y).mul(sd - prev));
                 prev = sd;
               }
+              od.mulAssign(fS.x);
               const tSun = exp(od.mul(-P.sigma * SUN_SHADOW_K));
               const hfA = clamp(p.y.sub(P.base).div(P.top - P.base), 0.0, 1.0);
               const S = sunCol.mul(tSun).mul(phaseV).add(ambCol.mul(mix(0.35, 1.0, hfA)));

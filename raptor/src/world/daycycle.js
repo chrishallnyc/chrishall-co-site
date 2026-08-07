@@ -106,6 +106,13 @@ export class Atmosphere {
 
     this.hemi.intensity = paletteAt(el, "hemiI", false);
     this.hemi.color.copy(paletteAt(el, "hemiSky", true));
+    // PASS-1 item 2 (with the airK aerial thinning): Nevada's cool sky-blue
+    // ambient was flooding the tan desert (B−R +44 measured) — dry-front
+    // rebalance toward direct sun
+    if (this.hillaire && this.frontName === "NELLIS" && el > 10) {
+      this.hemi.intensity *= 0.55;
+      this.sun.intensity *= 1.15;
+    }
 
     // fog color derived from the sky model itself (horizon, 60° off-sun) so
     // aerial haze and sky always agree; palette only floors the deep night
@@ -145,7 +152,9 @@ export class Atmosphere {
       if (this._envRT) this._envRT.dispose();
       this._envRT = rt;
       this.scene.environment = rt.texture;
-      this.scene.environmentIntensity = 0.45;
+      // dry-front IBL trim rides with the item-2 rebalance (blue sky dome
+      // reflections were the third ambient source washing the desert)
+      this.scene.environmentIntensity = this.hillaire && this.frontName === "NELLIS" ? 0.28 : 0.45;
       this.envReady = true;
       this._iblHours = this.hours;
       this._iblDirty = false;
