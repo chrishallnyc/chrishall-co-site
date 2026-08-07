@@ -82,8 +82,11 @@ export class Water {
     mat.positionNode = Fn(() => {
       const wp = modelWorldMatrix.mul(vec4(positionLocal, 1.0)).xyz;
       const g = gerstner(wp);
-      // waves flatten right at the beach so foam sits on still water
-      const damp = smoothstep(0.0, 120.0, shoreDist(wp));
+      // waves flatten right at the beach so foam sits on still water; the
+      // radial edge fade flattens the sheet's rim so the far-skirt hand-off
+      // is seamless (forensics judge measured a single-row energy cliff)
+      const edgeFade = smoothstep(15800.0, 9000.0, positionLocal.xz.length());
+      const damp = smoothstep(0.0, 120.0, shoreDist(wp)).mul(edgeFade);
       return vec3(
         positionLocal.x.add(g.dispX.mul(damp)),
         g.dispY.mul(damp),
@@ -94,7 +97,8 @@ export class Water {
     mat.normalNode = Fn(() => {
       const wp = positionWorld;
       const g = gerstner(wp);
-      const damp = smoothstep(0.0, 120.0, shoreDist(wp)).mul(S.normalK);
+      const edgeFadeN = smoothstep(15800.0, 9000.0, positionLocal.xz.length());
+      const damp = smoothstep(0.0, 120.0, shoreDist(wp)).mul(S.normalK).mul(edgeFadeN);
       return normalize(vec3(g.nx.negate().mul(damp), float(1.0).sub(g.nyAcc.mul(damp).mul(0.8)), g.nz.negate().mul(damp)));
     })();
 
@@ -107,9 +111,12 @@ export class Water {
                   smoothstep(20.0, 520.0, sd));
       // shore foam band, broken up by a drifting hash; crest foam on steep sums
       const hash = fract(sin(dot(floor(wp.xz.mul(0.15)), vec2(127.1, 311.7))).mul(43758.5453));
+      // foam terms wear the same radial edge fade as the displacement, or the
+      // speckle pattern hard-stops at the sheet rim (measured energy cliff)
+      const edgeFadeC = smoothstep(15800.0, 9000.0, positionLocal.xz.length());
       const shoreFoam = smoothstep(this.state.foamShore, 8.0, sd).mul(hash.mul(0.5).add(0.5));
       const crest = smoothstep(0.55, 0.95, g.nyAcc).mul(0.6);
-      c = mix(c, vec3(0.92, 0.95, 0.96), clamp(shoreFoam.add(crest), 0.0, 0.85));
+      c = mix(c, vec3(0.92, 0.95, 0.96), clamp(shoreFoam.add(crest), 0.0, 0.85).mul(edgeFadeC));
       return c;
     })();
 
@@ -121,7 +128,7 @@ export class Water {
     this.mesh.frustumCulled = false;
     this.far = new THREE.Mesh(
       new THREE.PlaneGeometry(FAR_SPAN, FAR_SPAN, 1, 1).rotateX(-Math.PI / 2),
-      new THREE.MeshStandardMaterial({ color: S.deep, roughness: 0.25, metalness: 0 })
+      new THREE.MeshStandardMaterial({ color: S.deep, roughness: S.roughness + 0.04, metalness: 0 })
     );
     this.far.position.y = -0.4; // tucked under the animated sheet
     this.group = new THREE.Group();

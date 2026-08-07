@@ -66,7 +66,9 @@ export class Atmosphere {
     this.hemi = new THREE.HemisphereLight(0x9db8d6, 0x2a2622, 0.9);
     scene.add(this.hemi);
 
-    scene.fog = new THREE.Fog(0xcfdcea, 7000, 46000); // aerial haze starts past close terrain
+    // FogExp2: no C1 kink at a "near" boundary — linear fog's near=7km edge
+    // measured as a one-row ripple-contrast cliff on open water (water gate)
+    scene.fog = new THREE.FogExp2(0xcfdcea, 3.4e-5);
     this.scene = scene;
 
     this._sunDir = new THREE.Vector3(0, 1, 0);

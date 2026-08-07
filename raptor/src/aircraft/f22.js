@@ -1,7 +1,8 @@
 // F-22 Raptor — procedural lofted model.
 //
 // AXIS CONVENTION (documented for the whole sim):
-//   forward = -Z  (nose tip at z = -9.46, nozzle exits at z = +9.46)
+//   forward = -Z  (nose tip at z = -9.46, nozzle exits at z = +9.46;
+//   the aft sting fairing tapers out slightly beyond, to z = +9.62)
 //   +X = starboard (pilot's right), +Y = up.
 //   Origin: mid-length, fuselage waterline (y=0 ~ fuselage centerline).
 //   Length 18.92 m, wingspan 13.56 m, height ~5.08 m (fin tips to wheel bottoms).
@@ -26,8 +27,11 @@ function makeMaterials() {
       color: 0xa8adb5, roughness: 0.5, metalness: 0.35,
     }),
     canopy: new THREE.MeshStandardMaterial({
-      color: 0xe3b54f, roughness: 0.06, metalness: 0.92,
-      transparent: true, opacity: 0.5, side: THREE.DoubleSide,
+      // gold reads via vertex colors (fresnel-ish rim gradient baked per-vertex)
+      // + a faint emissive so it stays gold with no env map.
+      color: 0xffffff, vertexColors: true, roughness: 0.16, metalness: 0.55,
+      emissive: 0x7a5514, emissiveIntensity: 0.35,
+      transparent: true, opacity: 0.62, side: THREE.DoubleSide,
     }),
     dark: new THREE.MeshStandardMaterial({      // nozzle / exhaust metal
       color: 0x26282c, roughness: 0.38, metalness: 0.85,
@@ -166,27 +170,30 @@ function mirrorGeom(geom) {
 }
 
 // ------------------------------------------------------------- fuselage
-// Station table nose->tail. Chined diamond forebody blending into a wide,
-// flat-topped/flat-bellied center body (LERX = the widening chine shelf),
-// boat-tailing into the nozzle interfairing.
+// Station table nose->tail. NARROW chined diamond forebody (the real jet's
+// forebody is much slimmer than the mid-body); the intake nacelles jump the
+// planform to full width at z~-3.9, the loft catches up UNDER the intake
+// boxes, then the mid-body runs nearly straight-sided (w ~2.25, boxy
+// exponents = flat lifting body) before boat-tailing into the nozzles.
 const FUS = [
   { z: -9.46, w: 0.02, yt: 0.14, yb: 0.10, yc: 0.12, nu: 1.8, nl: 1.8 },
-  { z: -8.60, w: 0.30, yt: 0.28, yb: -0.06, yc: 0.11, nu: 1.8, nl: 1.8 },
-  { z: -7.60, w: 0.66, yt: 0.40, yb: -0.28, yc: 0.09, nu: 1.7, nl: 1.9 },
-  { z: -6.80, w: 0.92, yt: 0.48, yb: -0.44, yc: 0.08, nu: 1.8, nl: 2.0 },
-  { z: -5.60, w: 1.24, yt: 0.58, yb: -0.60, yc: 0.10, nu: 2.0, nl: 2.2 },
-  { z: -4.40, w: 1.56, yt: 0.66, yb: -0.74, yc: 0.11, nu: 2.3, nl: 2.5 },
-  { z: -3.40, w: 1.82, yt: 0.74, yb: -0.84, yc: 0.11, nu: 2.7, nl: 2.8 },
-  { z: -2.40, w: 2.04, yt: 0.82, yb: -0.93, yc: 0.12, nu: 3.2, nl: 3.1 },
-  { z: -1.20, w: 2.14, yt: 0.86, yb: -0.96, yc: 0.12, nu: 3.7, nl: 3.4 },
-  { z:  0.00, w: 2.16, yt: 0.88, yb: -0.97, yc: 0.10, nu: 4.1, nl: 3.5 },
-  { z:  1.60, w: 2.17, yt: 0.87, yb: -0.97, yc: 0.08, nu: 4.3, nl: 3.5 },
-  { z:  3.20, w: 2.17, yt: 0.80, yb: -0.94, yc: 0.06, nu: 4.3, nl: 3.4 },
-  { z:  4.80, w: 2.12, yt: 0.72, yb: -0.86, yc: 0.04, nu: 4.0, nl: 3.1 },
-  { z:  6.40, w: 1.98, yt: 0.58, yb: -0.66, yc: 0.02, nu: 3.4, nl: 2.7 },
-  { z:  7.60, w: 1.78, yt: 0.46, yb: -0.42, yc: 0.00, nu: 2.9, nl: 2.3 },
-  { z:  8.20, w: 1.62, yt: 0.40, yb: -0.30, yc: 0.00, nu: 2.6, nl: 2.1 },
-  { z:  8.60, w: 1.52, yt: 0.42, yb: -0.30, yc: 0.00, nu: 2.5, nl: 2.0 },
+  { z: -8.60, w: 0.28, yt: 0.28, yb: -0.06, yc: 0.11, nu: 1.8, nl: 1.8 },
+  { z: -7.60, w: 0.60, yt: 0.40, yb: -0.28, yc: 0.09, nu: 1.7, nl: 1.9 },
+  { z: -6.80, w: 0.84, yt: 0.48, yb: -0.44, yc: 0.08, nu: 1.8, nl: 2.0 },
+  { z: -5.60, w: 1.06, yt: 0.58, yb: -0.58, yc: 0.10, nu: 2.0, nl: 2.2 },
+  { z: -4.40, w: 1.22, yt: 0.64, yb: -0.70, yc: 0.11, nu: 2.2, nl: 2.4 },
+  { z: -3.60, w: 1.30, yt: 0.68, yb: -0.78, yc: 0.11, nu: 2.4, nl: 2.6 },
+  { z: -2.60, w: 1.78, yt: 0.76, yb: -0.88, yc: 0.12, nu: 3.6, nl: 3.0 },
+  { z: -1.60, w: 2.16, yt: 0.83, yb: -0.94, yc: 0.12, nu: 4.8, nl: 3.5 },
+  { z: -0.80, w: 2.24, yt: 0.86, yb: -0.96, yc: 0.11, nu: 5.4, nl: 3.7 },
+  { z:  0.00, w: 2.25, yt: 0.88, yb: -0.97, yc: 0.10, nu: 5.6, nl: 3.8 },
+  { z:  1.60, w: 2.24, yt: 0.87, yb: -0.97, yc: 0.08, nu: 5.6, nl: 3.8 },
+  { z:  3.20, w: 2.22, yt: 0.80, yb: -0.94, yc: 0.06, nu: 5.4, nl: 3.6 },
+  { z:  4.80, w: 2.17, yt: 0.72, yb: -0.86, yc: 0.04, nu: 5.0, nl: 3.3 },
+  { z:  6.40, w: 2.00, yt: 0.58, yb: -0.66, yc: 0.02, nu: 4.0, nl: 2.8 },
+  { z:  7.60, w: 1.74, yt: 0.46, yb: -0.42, yc: 0.00, nu: 3.2, nl: 2.3 },
+  { z:  8.20, w: 1.60, yt: 0.40, yb: -0.30, yc: 0.00, nu: 2.8, nl: 2.1 },
+  { z:  8.60, w: 1.50, yt: 0.42, yb: -0.30, yc: 0.00, nu: 2.6, nl: 2.0 },
 ];
 
 function fuselageGeometry() {
@@ -232,6 +239,23 @@ function canopyGeometry() {
     rings.push(fullRing(halfSection(s, 8, 4)).map((p) => [p[0], p[1], z]));
   }
   return loft(rings, true, true);
+}
+
+// Bake a fresnel-ish gold gradient into vertex colors: grazing surfaces
+// (|normal.y| small = sills/rim) go hot gold, the crown stays deep amber.
+// View-independent approximation — good enough with no env map.
+function tintCanopy(geom) {
+  const p = geom.getAttribute("position"), n = geom.getAttribute("normal");
+  const col = new Float32Array(p.count * 3);
+  const deep = [0.76, 0.54, 0.20], hot = [1.0, 0.88, 0.48];
+  for (let i = 0; i < p.count; i++) {
+    const f = Math.pow(1 - Math.min(1, Math.abs(n.getY(i))), 1.5);
+    const t = Math.min(1, 0.35 + 0.65 * f);
+    col[i * 3]     = deep[0] + (hot[0] - deep[0]) * t;
+    col[i * 3 + 1] = deep[1] + (hot[1] - deep[1]) * t;
+    col[i * 3 + 2] = deep[2] + (hot[2] - deep[2]) * t;
+  }
+  geom.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
 }
 
 // ------------------------------------------------------------- wing (right)
@@ -308,10 +332,10 @@ const finThick = (p) => 0.055 - 0.035 * (p[0] / FIN_SPAN);
 // Twin rectangular 2D thrust-vectoring nozzles. Local +z aft, 0 at pivot.
 function nozzleGeometry() {
   const secs = [
-    { z: 0.00, w: 0.60, yt: 0.50, yb: -0.50, nu: 2.2 },
-    { z: 0.55, w: 0.58, yt: 0.42, yb: -0.42, nu: 3.0 },
-    { z: 1.00, w: 0.56, yt: 0.34, yb: -0.34, nu: 3.6 }, // throat
-    { z: 1.36, w: 0.57, yt: 0.42, yb: -0.42, nu: 4.0 }, // divergent exit
+    { z: 0.00, w: 0.53, yt: 0.50, yb: -0.50, nu: 2.2 },
+    { z: 0.55, w: 0.51, yt: 0.42, yb: -0.42, nu: 3.0 },
+    { z: 1.00, w: 0.49, yt: 0.34, yb: -0.34, nu: 3.6 }, // throat
+    { z: 1.36, w: 0.50, yt: 0.42, yb: -0.42, nu: 4.0 }, // divergent exit
   ];
   const rings = secs.map((s) =>
     fullRing(halfSection({ w: s.w, yt: s.yt, yb: s.yb, yc: 0, nu: s.nu, nl: s.nu }, 6, 6))
@@ -319,43 +343,81 @@ function nozzleGeometry() {
   return loft(rings, false, false);
 }
 function nozzleCapGeometry() {                  // dark cavity disc, recessed
-  const s = { w: 0.50, yt: 0.34, yb: -0.34, yc: 0, nu: 3.4, nl: 3.4 };
+  const s = { w: 0.44, yt: 0.34, yb: -0.34, yc: 0, nu: 3.4, nl: 3.4 };
   const ring = fullRing(halfSection(s, 6, 6)).map((p) => [p[0], p[1], 1.18]);
   return loft([ring, ring.map((p) => [p[0] * 0.02, p[1] * 0.02, 1.18])], false, true);
 }
 
+// -------------------------------------------------------- aft sting
+// Centerline interfairing between/behind the nozzles ("beaver tail"):
+// flattened wedge lofted from inside the boat-tail to a near-point aft
+// of the nozzle exit plane.
+const STING = [
+  { z: 7.30, w: 0.58, yt: 0.34, yb: -0.34 },
+  { z: 8.30, w: 0.46, yt: 0.27, yb: -0.26 },
+  { z: 9.10, w: 0.30, yt: 0.17, yb: -0.14 },
+  { z: 9.62, w: 0.05, yt: 0.05, yb: -0.01 },
+];
+function stingGeometry() {
+  const rings = STING.map((s) =>
+    fullRing(halfSection({ w: s.w, yt: s.yt, yb: s.yb, yc: (s.yt + s.yb) * 0.5,
+                           nu: 2.6, nl: 2.4 }, 5, 5))
+      .map((p) => [p[0], p[1], s.z]));
+  return loft(rings, false, true);
+}
+
 // -------------------------------------------------------- intake (right)
-// Shallow caret-ish cheek intake under the LERX shelf, held 6 cm off the
-// forebody wall (diverter gap hint). Lip raked: top leads, bottom trails.
-function intakeGeometry() {
-  const ring = (x0, x1, y0, y1, zTop, zBot, zOut) => {
-    const pts = [];
-    const n = 6;
-    // rounded-rect ring, 4 sides x n pts; z sheared by height + outboard-ness
-    const corner = [[x1, y1], [x1, y0], [x0, y0], [x0, y1]];
-    for (let sIdx = 0; sIdx < 4; sIdx++) {
-      const a = corner[sIdx], b = corner[(sIdx + 1) % 4];
-      for (let i = 0; i < n; i++) {
-        const t = i / n;
-        const x = a[0] + (b[0] - a[0]) * t, y = a[1] + (b[1] - a[1]) * t;
-        const fy = (y - y0) / (y1 - y0);                 // 0 bottom, 1 top
-        const fx = (x - x0) / (x1 - x0);                 // 0 inboard, 1 out
-        pts.push([x, y, zTop * fy + zBot * (1 - fy) + zOut * fx]);
-      }
+// Big canted parallelogram nacelle: it IS the planform's forward corner
+// (the loft is still narrow forebody here). Lip raked hard — top edge
+// leads, bottom trails — and swept in plan (inboard-top corner leads).
+// Crisp lip = thin skin rim band between the outer edge and the dark
+// cavity. The diverter step is a dark splitter plate just inboard of the
+// duct wall, in the gap off the forebody skin.
+function quadRing(corners, n) {                 // corners [OT,OB,IB,IT] xyz
+  const pts = [];
+  for (let s = 0; s < 4; s++) {
+    const a = corners[s], b = corners[(s + 1) % 4];
+    for (let i = 0; i < n; i++) {
+      const t = i / n;
+      pts.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t,
+                a[2] + (b[2] - a[2]) * t]);
     }
-    return pts;
-  };
-  const front = ring(1.55, 2.10, -0.78, 0.14, -3.45, -2.88, 0.22);
-  const back  = ring(1.60, 2.18, -0.92, 0.22, -1.55, -1.55, 0.0);
-  const inset = front.map((p) => {              // recessed dark throat ring
-    const cx = 1.82, cy = -0.32;
-    return [cx + (p[0] - cx) * 0.72, cy + (p[1] - cy) * 0.72, p[2] + 0.30];
-  });
+  }
+  return pts;
+}
+function shrinkRing(corners, k, dz) {           // toward centroid, pushed aft
+  let cx = 0, cy = 0, cz = 0;
+  for (const c of corners) { cx += c[0]; cy += c[1]; cz += c[2]; }
+  cx /= 4; cy /= 4; cz /= 4;
+  return corners.map((c) => [cx + (c[0] - cx) * k, cy + (c[1] - cy) * k,
+                             cz + (c[2] - cz) * k + dz]);
+}
+const INT_F = [                                 // front lip  [OT,OB,IB,IT]
+  [2.26,  0.02, -3.55], [2.06, -0.88, -3.15], [1.34, -0.86, -3.50], [1.66, 0.14, -3.95],
+];
+const INT_B = [                                 // back ring (sinks into loft)
+  [2.24,  0.12, -1.35], [2.10, -0.96, -1.35], [1.38, -0.92, -1.35], [1.78, 0.20, -1.35],
+];
+function intakeGeometry() {
+  const N = 4;
+  const front = quadRing(INT_F, N);
+  const back = quadRing(INT_B, N);
+  const rim = quadRing(shrinkRing(INT_F, 0.88, 0.05), N);
+  const throat = quadRing(shrinkRing(INT_F, 0.55, 0.55), N);
   return {
     body: loft([front, back], false, false),
-    cap: loft([front, inset], false, true),     // lip ring -> dark cavity
+    lip: loft([front, rim], false, false),      // thin bright lip band
+    cap: loft([rim, throat], false, true),      // dark duct cavity
   };
 }
+// LERX/chine shelf: thin slab bridging the narrow forebody chine out over
+// the intake top edge (inboard edge stays buried in the loft).
+function chineShelfOutline() {
+  return [
+    [0.95, -3.55], [1.63, -3.93], [1.75, -1.30], [0.95, -1.30],
+  ];
+}
+const chineThick = (p) => 0.05 - 0.03 * ((p[0] - 0.95) / 0.8);
 
 // -------------------------------------------------------- placeholder bits
 function gearLeg(mats, strutLen, wheelR, wheelW) {
@@ -384,14 +446,16 @@ export function buildF22() {
   const parts = {};
   const add = (mesh, name) => { mesh.name = name; group.add(mesh); return mesh; };
 
-  // ---- fuselage + canopy
+  // ---- fuselage + aft sting + canopy
   add(new THREE.Mesh(fuselageGeometry(), mats.skin), "fuselage");
+  add(new THREE.Mesh(stingGeometry(), mats.skin), "sting");
 
   // canopy: pivot at REAR sill (hinge axis = X). rotation.x < 0 lifts the
   // front edge (opens). Bubble is well forward: z -6.95 .. -3.72.
   const canPivot = new THREE.Group();
   canPivot.position.set(0, 0.5, -3.72);
   const canGeom = canopyGeometry();
+  tintCanopy(canGeom);
   canGeom.translate(0, -0.5, 3.72);             // into pivot-local space
   canPivot.add(new THREE.Mesh(canGeom, mats.canopy));
   add(canPivot, "canopy");
@@ -480,15 +544,33 @@ export function buildF22() {
     pv.add(new THREE.Mesh(nozCap, mats.inlet));
     return pv;
   };
-  parts.nozzleR = mkNozzle(0.66); add(parts.nozzleR, "nozzleR");
-  parts.nozzleL = mkNozzle(-0.66); add(parts.nozzleL, "nozzleL");
+  parts.nozzleR = mkNozzle(0.75); add(parts.nozzleR, "nozzleR");
+  parts.nozzleL = mkNozzle(-0.75); add(parts.nozzleL, "nozzleL");
 
-  // ---- intakes (fixed geometry; diverter gap is baked into the offset)
+  // ---- intakes: nacelle box + crisp lip band + dark cavity + diverter
+  // splitter plate (dark, just inboard of the duct wall) + LERX chine shelf.
   const intk = intakeGeometry();
   add(new THREE.Mesh(intk.body, mats.skin), "intakeR");
+  add(new THREE.Mesh(intk.lip, mats.skin), "intakeLipR");
   add(new THREE.Mesh(intk.cap, mats.inlet), "intakeCapR");
   add(new THREE.Mesh(mirrorGeom(intk.body), mats.skin), "intakeL");
+  add(new THREE.Mesh(mirrorGeom(intk.lip), mats.skin), "intakeLipL");
   add(new THREE.Mesh(mirrorGeom(intk.cap), mats.inlet), "intakeCapL");
+  const mkDiverter = (sideSign) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.0, 2.3), mats.inlet);
+    m.position.set(1.42 * sideSign, -0.35, -2.45);
+    m.rotation.z = -0.31 * sideSign;            // lean matches the duct wall
+    return m;
+  };
+  add(mkDiverter(1), "diverterR");
+  add(mkDiverter(-1), "diverterL");
+  const shelfGeom = slab(chineShelfOutline(), chineThick);
+  const shelfR = new THREE.Mesh(shelfGeom, mats.skin);
+  shelfR.position.y = 0.13;
+  add(shelfR, "chineR");
+  const shelfL = new THREE.Mesh(mirrorGeom(shelfGeom), mats.skin);
+  shelfL.position.y = 0.13;
+  add(shelfL, "chineL");
 
   // ---- weapons bays (placeholder doors at true hinge lines)
   // bayMain: ventral centerline bay. Hinge along -Z-axis line at the LEFT
@@ -504,7 +586,7 @@ export function buildF22() {
   // edge (axis = Z). rotation.z > 0 (R) / < 0 (L) swings the door outboard.
   const mkSideBay = (sideSign) => {
     const pv = new THREE.Group();
-    pv.position.set(2.06 * sideSign, -0.10, 0.45);
+    pv.position.set(2.19 * sideSign, -0.10, 0.45);   // flush on the wider body
     const door = doorSlab(mats, 0.04, 0.72, 1.9);
     door.position.y = -0.36;
     pv.add(door);
