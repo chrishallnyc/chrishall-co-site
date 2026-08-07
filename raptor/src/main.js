@@ -65,6 +65,7 @@ async function boot() {
 
   const flags = new URLSearchParams(location.search);
   const atmosphere = new Atmosphere(scene, (flags.get("front") || "NELLIS").toUpperCase());
+  atmosphere.initIBL(renderer);
   if (flags.get("tod")) atmosphere.setTime(parseFloat(flags.get("tod")));
 
   const sim = new SimCore(1);

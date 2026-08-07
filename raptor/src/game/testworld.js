@@ -14,8 +14,9 @@ export class TestWorld {
     this.scene = scene;
     // sky, fog, and lights are owned by Atmosphere (world/daycycle.js)
 
+    // plane edge must sit far beyond fog saturation or it draws a seam line
     const sea = new THREE.Mesh(
-      new THREE.PlaneGeometry(60000, 60000, 1, 1),
+      new THREE.PlaneGeometry(240000, 240000, 1, 1),
       new THREE.MeshStandardMaterial({ color: 0x18354a, roughness: 0.82, metalness: 0.05 })
     );
     sea.rotation.x = -Math.PI / 2;
