@@ -12,8 +12,8 @@ import { Gun } from "./gun.js";
 import { Missiles } from "./missiles.js";
 
 const MOUSE_SENS = 0.0028;      // rad of aim per px of mouse travel
-const THROTTLE_RATE = 0.45;     // per second held
-const WHEEL_THROTTLE = 0.05;    // per wheel tick
+const THROTTLE_RATE = 0.45;     // per second held (0 -> 100% in ~2.2s)
+const AB_PUSH_RATE = 0.125;     // slower shove through the AB detent (~0.8s of deliberate holding)
 const AIM_PITCH_LIM = 80 * Math.PI / 180;
 
 export class Player {
@@ -113,8 +113,14 @@ export class Player {
     // arrow-key manual pitch nudges the aim
     this.aimPitch += (L.pitchUp - L.pitchDn) * 0.9 * dt;
 
-    // throttle: W/S held + wheel steps; 0..1.1 (past 1.0 = afterburner)
-    this.throttleCmd += (L.thrUp - L.thrDn) * THROTTLE_RATE * dt + L.wheel * WHEEL_THROTTLE;
+    // throttle: W/S ONLY (Chris's spec — the mouse never accelerates).
+    // WT behavior: hold W → 100% in ~a second, KEEP holding → pushes into
+    // afterburner; release → settles back to MIL (100%) and stays. AB is
+    // hold-to-keep; S backs out of everything.
+    const inAB = this.throttleCmd >= 1.0;
+    const rate = inAB && L.thrUp ? AB_PUSH_RATE : THROTTLE_RATE;
+    this.throttleCmd += (L.thrUp - L.thrDn) * rate * dt;
+    if (!L.thrUp && this.throttleCmd > 1.0) this.throttleCmd = 1.0; // W released in AB -> MIL latch
     this.throttleCmd = Math.max(0, Math.min(1.1, this.throttleCmd));
     L.wheel = 0;
 
