@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hudlab — RAPTOR HUD v1</title>
+<meta name="robots" content="noindex">
+<style>
+  :root { --bg:#0e1420; --panel:#16161c; --ink:#e8e6df; --mid:#9a988f; --dim:#6e6c64; --hair:#2e2e36; --acc:#e8b46f; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { height:100%; background:#000; overflow:hidden; }
+  body { font-family:"SF Mono", ui-monospace, Menlo, Consolas, monospace; font-size:12px; color:var(--ink); }
+
+  /* static sky-gradient background — decorative context for the HUD only,
+     NOT tied to pitch/roll (that would be the 3D game's job, not this lab's) */
+  #sky { position:fixed; inset:0;
+    background: linear-gradient(to bottom,
+      #1c3a63 0%, #3f6ea3 22%, #86aed0 42%, #cfe0e6 49%, #d8d6bd 51%,
+      #8a8768 58%, #5c6a49 75%, #3a4530 100%); }
+
+  #hudRoot { position:fixed; inset:0; }
+
+  /* lab control panel — hide for clean captures with ?panel=0 */
+  #panel { position:fixed; top:0; right:0; bottom:0; width:236px; overflow-y:auto;
+    background:rgba(16,16,20,.88); border-left:1px solid var(--hair); padding:14px 14px 30px; z-index:20; }
+  body.nopanel #panel { display:none; }
+  #panel h1 { font-size:12px; letter-spacing:4px; color:var(--acc); margin-bottom:2px; }
+  #panel .sub { color:var(--dim); font-size:9px; letter-spacing:1.5px; margin-bottom:14px; }
+  #panel .row { margin-bottom:10px; }
+  #panel label { display:flex; justify-content:space-between; color:var(--mid); font-size:10px; letter-spacing:.5px; margin-bottom:3px; }
+  #panel label b { color:var(--ink); font-weight:600; }
+  #panel input[type=range] { width:100%; accent-color:var(--acc); }
+  #panel .toggle { display:flex; align-items:center; gap:8px; margin:14px 0; cursor:pointer; user-select:none; }
+  #panel .toggle input { accent-color:var(--acc); }
+  #panel .modebtns { display:flex; gap:6px; margin-bottom:14px; }
+  #panel .modebtns button { flex:1; background:none; border:1px solid var(--hair); color:var(--mid);
+    font:inherit; font-size:10px; letter-spacing:1px; padding:6px 4px; cursor:pointer; }
+  #panel .modebtns button.on { color:var(--acc); border-color:var(--acc); }
+  #panel .sec { color:var(--dim); letter-spacing:2px; font-size:9px; border-bottom:1px solid var(--hair);
+    padding-bottom:4px; margin:14px 0 8px; }
+</style>
+</head>
+<body>
+<div id="sky"></div>
+<div id="hudRoot"></div>
+
+<div id="panel">
+  <h1>HUDLAB</h1>
+  <div class="sub">RAPTOR HUD v1 · port 8893</div>
+
+  <div class="modebtns">
+    <button id="modeArcade" class="on">ARCADE</button>
+    <button id="modeRealistic">REALISTIC</button>
+  </div>
+  <label class="toggle"><input type="checkbox" id="autoFly"> auto-fly (lazy loop + roll)</label>
+
+  <div class="sec">flight state</div>
+  <div id="sliders"></div>
+</div>
+
+<script type="module">
+import { HUD } from "./src/game/hud.js";
+
+const hud = new HUD({ parent: document.getElementById("hudRoot") });
+
+const FIELDS = [
+  { key: "speedKt",  label: "airspeed (kt)", min: 0,    max: 900,  step: 1,   def: 420 },
+  { key: "altFt",    label: "altitude (ft)", min: -500, max: 65000, step: 10, def: 15000 },
+  { key: "heading",  label: "heading (deg)", min: 0,    max: 359.9, step: 0.5, def: 90 },
+  { key: "pitch",    label: "pitch (deg)",   min: -90,  max: 90,   step: 0.5, def: 0 },
+  { key: "roll",     label: "roll/bank (deg)", min: -180, max: 180, step: 0.5, def: 0 },
+  { key: "g",        label: "G",             min: -3,   max: 9,    step: 0.1, def: 1 },
+  { key: "mach",     label: "mach",          min: 0,    max: 2.5,  step: 0.01, def: 0.6 },
+  { key: "aoa",      label: "AoA (deg)",     min: -20,  max: 60,   step: 0.1, def: 3 },
+  { key: "throttle", label: "throttle (%)",  min: 0,    max: 130,  step: 1,   def: 65 },
+];
+
+const state = {};
+for (const f of FIELDS) state[f.key] = f.def;
+
+const sliders = {};
+const slidersEl = document.getElementById("sliders");
+for (const f of FIELDS) {
+  const row = document.createElement("div");
+  row.className = "row";
+  const label = document.createElement("label");
+  const valSpan = document.createElement("b");
+  valSpan.textContent = f.def;
+  label.append(f.label + " ", valSpan);
+  const input = document.createElement("input");
+  Object.assign(input, { type: "range", min: f.min, max: f.max, step: f.step, value: f.def });
+  input.addEventListener("input", () => {
+    state[f.key] = +input.value;
+    valSpan.textContent = state[f.key].toFixed(f.step < 1 ? 2 : 0);
+    if (autoFly.checked) autoFly.checked = false; // manual override stops the animation
+    hud.update(state);
+  });
+  row.append(label, input);
+  slidersEl.appendChild(row);
+  sliders[f.key] = { input, valSpan, def: f.def, step: f.step };
+}
+
+function setState(partial) {
+  Object.assign(state, partial);
+  for (const k in partial) {
+    const s = sliders[k];
+    if (!s) continue;
+    s.input.value = state[k];
+    s.valSpan.textContent = state[k].toFixed(s.step < 1 ? 2 : 0);
+  }
+  hud.update(state);
+}
+
+const modeArcade = document.getElementById("modeArcade");
+const modeRealistic = document.getElementById("modeRealistic");
+function setMode(m) {
+  hud.setMode(m);
+  modeArcade.classList.toggle("on", m === "arcade");
+  modeRealistic.classList.toggle("on", m === "realistic");
+}
+modeArcade.addEventListener("click", () => setMode("arcade"));
+modeRealistic.addEventListener("click", () => setMode("realistic"));
+
+// auto-fly: a lazy loop + roll so the ladder/tapes/FPM all exercise
+const autoFly = document.getElementById("autoFly");
+let t0 = performance.now();
+function tick(now) {
+  requestAnimationFrame(tick);
+  if (!autoFly.checked) return;
+  const t = (now - t0) / 1000;
+  const roll = 55 * Math.sin(t * 0.17);
+  const pitch = 22 * Math.sin(t * 0.29 + 1) - 4;
+  const g = Math.max(-2, Math.min(8.5, 1 / Math.cos(roll * Math.PI / 180)));
+  const speedKt = 430 + 70 * Math.sin(t * 0.23);
+  const throttle = 75 + 55 * Math.sin(t * 0.31); // periodically crosses 100% -> AB
+  setState({
+    heading: (state.heading + 8 / 60) % 360,
+    pitch, roll, g,
+    speedKt,
+    altFt: 16000 + 5000 * Math.sin(t * 0.11),
+    mach: speedKt / 660,
+    aoa: 4 + 7 * Math.sin(t * 0.29 + 1) * (pitch >= 0 ? 1 : 0.4),
+    throttle: Math.max(0, throttle),
+  });
+}
+requestAnimationFrame(tick);
+
+hud.update(state);
+
+if (new URLSearchParams(location.search).get("panel") === "0") document.body.classList.add("nopanel");
+
+window.__HUDLAB = { hud, state, setState, setMode, autoFly, FIELDS };
+</script>
+</body>
+</html>
