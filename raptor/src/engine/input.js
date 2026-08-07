@@ -22,14 +22,15 @@ export class Input {
     this._byTrigger = new Map();    // trigger code -> [{id, chord}]
     this._rebuildIndex();
 
+    this.suspended = false; // controls menu owns input while open
     this._kd = (e) => {
-      if (e.repeat) return;
+      if (e.repeat || this.suspended) return;
       this.down.add(e.code);
       this._resolveEdge(e.code);
       if (PREVENT.has(e.code)) e.preventDefault();
     };
     this._ku = (e) => this.down.delete(e.code);
-    this._md = (e) => { const c = "Mouse" + e.button; this.down.add(c); this._resolveEdge(c); };
+    this._md = (e) => { if (this.suspended) return; const c = "Mouse" + e.button; this.down.add(c); this._resolveEdge(c); };
     this._mu = (e) => this.down.delete("Mouse" + e.button);
     this._mm = (e) => {
       this.mouse.x = e.clientX; this.mouse.y = e.clientY;
@@ -37,7 +38,7 @@ export class Input {
       this.mouse.ny = -((e.clientY / window.innerHeight) * 2 - 1);
       this.mouse.dx += e.movementX || 0; this.mouse.dy += e.movementY || 0;
     };
-    this._wh = (e) => { this.mouse.wheel += -Math.sign(e.deltaY); }; // up = +throttle, WT wheel-throttle
+    this._wh = (e) => { if (this.suspended) return; this.mouse.wheel += -Math.sign(e.deltaY); }; // up = +throttle, WT wheel-throttle
     this._cm = (e) => e.preventDefault();                            // RMB is a game control
     this._bl = () => this.down.clear();
 

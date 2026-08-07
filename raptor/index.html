@@ -40,6 +40,31 @@ body { color:var(--ink); font-family:"SF Mono", ui-monospace, Menlo, Consolas, m
   border:1px solid var(--hair); padding:8px 10px; font-size:10px; letter-spacing:1px;
   color:var(--mid); }
 #dbg #dbgTxt { margin-bottom:6px; color:var(--ink); }
+
+/* controls screen */
+#controls { display:none; position:fixed; inset:0; z-index:8; background:rgba(16,16,20,.94);
+  overflow-y:auto; }
+#controls.open { display:block; }
+#controls .cwrap { max-width:860px; margin:40px auto 60px; padding:0 20px; }
+#controls .chead { display:flex; align-items:baseline; gap:16px; flex-wrap:wrap;
+  border-bottom:1px solid var(--hair); padding-bottom:10px; margin-bottom:8px; }
+#controls .ctitle { font-weight:700; letter-spacing:6px; color:var(--acc); font-size:14px; }
+#controls .cnote { color:var(--dim); font-size:10px; letter-spacing:1.5px; flex:1; }
+#controls .creset { background:none; border:1px solid var(--hair); color:var(--mid);
+  font:inherit; font-size:10px; letter-spacing:1.5px; padding:4px 10px; cursor:pointer; }
+#controls .creset:hover { color:var(--ink); border-color:var(--mid); }
+#controls .csec { margin:20px 0 6px; color:var(--dim); letter-spacing:3px; font-size:10px;
+  border-bottom:1px solid var(--hair); padding-bottom:4px; }
+#controls .row { display:flex; justify-content:space-between; align-items:center; gap:12px;
+  padding:5px 6px; cursor:pointer; }
+#controls .row:hover { background:rgba(232,180,111,.06); }
+#controls .row.cap { background:rgba(232,180,111,.12); }
+#controls .rlabel { color:var(--ink); font-size:11px; letter-spacing:.5px; }
+#controls .rbinds { display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
+#controls .chip { border:1px solid var(--hair); color:var(--mid); font-size:9px;
+  letter-spacing:1.5px; padding:2px 7px; white-space:nowrap; }
+#controls .chip.live { color:var(--acc); border-color:var(--acc); }
+#controls .chip.warn { color:#d08770; border-color:#d08770; }
 </style>
 </head>
 <body>
@@ -47,7 +72,7 @@ body { color:var(--ink); font-family:"SF Mono", ui-monospace, Menlo, Consolas, m
 
 <div id="chrome">
   <div class="brand">RAPTOR</div>
-  <div class="sub">PHASE 1 · ENGINE CORE · <a href="/devlog.html">devlog</a> · v0.1.0</div>
+  <div class="sub">ENGINE CORE COMPLETE · <a href="#" id="controlsLink">controls</a> · <a href="/devlog.html">devlog</a> · v0.2.0</div>
 </div>
 
 <div id="veil">

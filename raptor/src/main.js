@@ -4,11 +4,12 @@ import * as THREE from "three";
 import { SimCore, determinismProbe, DT } from "./engine/sim.js";
 import { Input } from "./engine/input.js";
 import { GamepadInput } from "./engine/gamepad.js";
-import { detectTier, tierParams, setTier, TIERS } from "./engine/quality.js";
+import { detectTier, tierParams, setTier, TIERS, savedBench, saveBench, benchPick, clearBench, hasManualTier } from "./engine/quality.js";
 import { DebugOverlay } from "./engine/debug.js";
 import { TestWorld } from "./game/testworld.js";
+import { ControlsMenu } from "./game/controlsmenu.js";
 
-const VERSION = "0.1.0";
+const VERSION = "0.2.0";
 const PHASE = 1;
 
 const state = {
@@ -64,7 +65,9 @@ async function boot() {
 
   const input = new Input(window);
   const gamepad = new GamepadInput();
+  const controls = new ControlsMenu(input);
   const dbg = new DebugOverlay();
+  document.getElementById("controlsLink")?.addEventListener("click", (e) => { e.preventDefault(); controls.show(); });
 
   window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -74,15 +77,21 @@ async function boot() {
 
   // public hooks (QA + future phases)
   Object.assign(state, {
-    sim, input, gamepad, dbg,
+    sim, input, gamepad, controls, dbg,
     hash: () => sim.stateHash(),
     determinismProbe,
     setSeed: (s) => sim.reset(s),
     setTimescale: (t) => { sim.timescale = t; },
     setTier: (t) => setTier(t) && location.reload(),
+    rebench: () => { clearBench(); location.reload(); },
+    bench: savedBench(),
     tiers: Object.keys(TIERS),
     dt: DT,
   });
+
+  // measured auto-bench: first run only — sample the live scene, pick the tier
+  let benchSamples = (!hasManualTier() && !savedBench()) ? [] : null;
+  let frameNo = 0;
 
   let last = performance.now();
   let firstFrame = true;
@@ -90,7 +99,25 @@ async function boot() {
     requestAnimationFrame(frame);
     const dtMs = Math.min(now - last, 250);
     last = now;
+    frameNo++;
+    if (benchSamples && frameNo > 20) {
+      benchSamples.push(dtMs);
+      if (benchSamples.length >= 80) {
+        const sorted = [...benchSamples].sort((a, b) => a - b);
+        const median = sorted[sorted.length >> 1];
+        const tier = benchPick(median, state.backend);
+        const rec = { ms: +median.toFixed(2), backend: state.backend, tier };
+        saveBench(rec);
+        state.bench = rec;
+        if (tier !== state.tier) {
+          state.tier = tier;
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2) * tierParams(tier).renderScale);
+        }
+        benchSamples = null;
+      }
+    }
     gamepad.update();
+    if (input.pressed("menu")) controls.toggle();
     if (input.pressed("debug")) dbg.toggle();
     const alpha = sim.advance(dtMs / 1000);
     world.render(alpha, camera);
