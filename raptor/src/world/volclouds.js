@@ -36,11 +36,17 @@
 //     clamp turns it into a 2x2 stipple — see the notes in volCloudsNode).
 //     Cumulus fronts anchor at the interpolated cloud-entry gate crossing
 //     and tap the real shape6 column; stratiform fronts anchor mid-slab and
-//     tap a mean-field column (FRONTS.shadow3D selects). Over-estimates are
-//     compensated by SUN_SHADOW_K. Dual-lobe Henyey-Greenstein (g +0.6
-//     forward / -0.25 back), sky-ish ambient shaded by height in layer.
-//     Direct sun gates out just below the horizon and ambient follows the
-//     sky down — clouds go dark before the sky does.
+//     tap a mean-field column with per-tap coverage/relief fields
+//     (FRONTS.shadow3D selects). Over-estimates are compensated by
+//     SUN_SHADOW_K. The od -> light transfer is multi-scatter Beer-Lambert
+//     (MS_* octaves, deep octaves isotropic) — never binary, warm floor in
+//     shadowed cores and interiors (PASS-1 #5: a single exp() printed
+//     dead-straight stripes + octagonal cell shadows at grazing sun).
+//     Dual-lobe Henyey-Greenstein (g +0.6 forward / -0.25 back), sky-ish
+//     ambient shaded by height in layer, warmed toward gray-white when the
+//     camera itself sits in cloud. Direct sun gates out just below the
+//     horizon and ambient follows the sky down — clouds go dark before the
+//     sky does.
 //   - aerial perspective: accumulated cloud light is pushed through the
 //     Hillaire trans/inscatter pair at the transmittance-weighted mean
 //     scatter distance, so distant clouds sit IN the haze instead of popping
@@ -56,7 +62,7 @@
 
 import * as THREE from "three";
 import {
-  Fn, If, Loop, Break, uniform, texture3D, uv, vec2, vec3, vec4, float, int,
+  Fn, If, Loop, Break, uniform, texture3D, uv, vec3, vec4, float, int,
   exp, pow, dot, normalize, clamp, max, min, abs, mix, smoothstep, select,
   fract, length, and, getViewPosition, screenCoordinate,
 } from "three/tsl";
@@ -104,11 +110,40 @@ const TOWER_SLICE = 16.5 / DETAIL_N; // detail.a on this v-plane = the 2D tower 
 const STEPS_MIN = 40, STEPS_MAX = 56, STEP_TARGET = 450; // march step sizing (m)
 const T_MIN = 0.015;                 // early-out transmittance
 const SUN_TAPS = [40, 100, 220, 460, 950]; // shadow-march distances (m)
+// stratiform mean-field taps are 1 fetch each — afford a denser ladder.
+// 5 coarse taps of a compact coverage cell PRINT AS POLYGONS: each tap's
+// boundary crossing contributes one straight edge scaled by its (huge)
+// quadrature weight — the valdez-213 octagons/pentagons at grazing sun.
+const SUN_TAPS_STRAT = [30, 70, 130, 220, 350, 520, 730, 980];
 const ANCHOR_GATE = 0.25;            // coverage*grad level whose crossing anchors the
                                      // per-ray sun-shadow march (inside the cell mass)
 const SUN_SHADOW_K = 0.8;            // cheap density skips erosion -> overestimates OD
 const ALBEDO = 0.97;                 // single-scatter albedo folded into the sun term
 const ENTRY_MAX = 58000;             // slab entries past this are pure haze
+// Multi-scatter Beer-Lambert octaves (Wrenninge/Hillaire): tSun = sum of
+// a_i*exp(-od*sigmaK*k_i), each octave's phase blended toward isotropic.
+// PASS-1 #5 (grazing sun): a single exp(-od*sigmaK) is BINARY over the deck —
+// 950m of taps saturates at mean density ~0.026, and the stratiform anchor
+// height is a pure function of dir.y, so the light/dark cliff prints as
+// dead-straight horizontal stripes + octagonal cell shadows (measured on
+// valdez-213: both vanish with tSun held flat). The octaves spread the
+// falloff over decades of od — never binary — and give shadowed cores and
+// cloud interiors a warm multiple-scattering floor instead of ambient-blue.
+const MS_A = [0.57, 0.28, 0.15];     // octave weights (sum 1)
+const MS_K = [1.0, 0.22, 0.05];      // per-octave extinction scale
+const MS_PMIX = [0.0, 0.7, 1.0];     // per-octave phase -> isotropic blend
+                                     // (deepest octave FULLY isotropic: its
+                                     // residual back-lobe fought the interior
+                                     // sun-direction gradient, measured)
+const ISO_PHASE = 1 / (4 * Math.PI);
+// Underside relief: the local cloud base rides the coverage-plane fetch's .b
+// channel (same texel read — zero extra fetches), lifting the base by up to
+// BASE_RELIEF of the layer span. Gives deck undersides the soft irregular
+// texture item 5 asks for; never LOWERS the base (slab gates stay exact).
+// SHAPING constant shared with the CPU oracle — change BOTH emitters.
+const BASE_RELIEF = 0.16;
+const ENTRY_FADE0 = 0.7;             // entry fade start (x ENTRY_MAX): fade, not clip
+const CAP_FADE0 = 0.85;              // in-slab travel fade start (x maxLen)
 
 // ---------------------------------------------------------------------------
 // Seeded noise bake. Local mulberry32 — NOT Math.random, NOT the sim's RNG
@@ -366,8 +401,10 @@ export function cpuDensity(noise, front, x, y, z) {
   const covQ = covThreshold(noise, P.coverage);
   const s4 = [0, 0, 0, 0];
 
-  // 1. coverage — base.r on the COV_SLICE plane at covRepeat (2D weather field)
+  // 1. coverage — base.r on the COV_SLICE plane at covRepeat (2D weather field);
+  //    .b of the SAME fetch drives the underside base relief (step 4)
   tri4(noise.baseData, noise.baseN, x / P.covRepeat, COV_SLICE, z / P.covRepeat, s4);
+  const baseL = P.base + s4[2] * BASE_RELIEF * (P.top - P.base);
   // 2. quantile remap: 0 at the coverage boundary, sharpened toward 1
   let covAmt = sat(((s4[0] - covQ) / Math.max(1 - covQ, 1e-4)) * P.covSharp);
   // 3. towers (MARIANAS): detail.a on the TOWER_SLICE plane raises the local
@@ -380,8 +417,10 @@ export function cpuDensity(noise, front, x, y, z) {
     covAmt = sat(covAmt + tw * P.towerCov);
   }
   if (covAmt <= 0) return 0;
-  // 4. height gradient — round base, anvil-less soft top (Schneider/Nubis)
-  const hf = (y - P.base) / (topL - P.base);
+  // 4. height gradient — round base, anvil-less soft top (Schneider/Nubis);
+  //    the base is the RELIEF-lifted baseL (>= P.base always: outside-slab
+  //    zero is preserved), so undersides get 875-1750m lumps instead of a slab
+  const hf = (y - baseL) / (topL - baseL);
   if (hf <= 0 || hf >= 1) return 0;
   const grad = sat(hf / P.baseRound) * (1 - sat((hf - P.topSoft) / (1 - P.topSoft)));
   // 5. base shape: Perlin-Worley eroded by the Worley fbm
@@ -414,13 +453,14 @@ export function cpuDensity(noise, front, x, y, z) {
 function tslDensityBuilders(noise, P, covQ) {
   const invCovQ = Math.max(1 - covQ, 1e-4);
 
-  // steps 1-3 -> vec2(covAmt, topL)
+  // steps 1-3 -> vec3(covAmt, topL, baseL)
   const field = Fn(([p]) => {
-    // 1. coverage
-    const cov = texture3D(noise.baseTex,
-      vec3(p.x.div(P.covRepeat), COV_SLICE, p.z.div(P.covRepeat))).r;
+    // 1. coverage (.b of the same fetch = underside base relief, step 4)
+    const c4 = texture3D(noise.baseTex,
+      vec3(p.x.div(P.covRepeat), COV_SLICE, p.z.div(P.covRepeat)));
+    const baseL = float(P.base).add(c4.b.mul(BASE_RELIEF * (P.top - P.base)));
     // 2. quantile remap
-    const covAmt = clamp(cov.sub(covQ).div(invCovQ).mul(P.covSharp), 0.0, 1.0).toVar();
+    const covAmt = clamp(c4.r.sub(covQ).div(invCovQ).mul(P.covSharp), 0.0, 1.0).toVar();
     // 3. towers
     const topL = float(P.top).toVar();
     if (P.towerTop) {
@@ -430,12 +470,12 @@ function tslDensityBuilders(noise, P, covQ) {
       topL.assign(mix(float(P.top), float(P.towerTop), tw));
       covAmt.assign(clamp(covAmt.add(tw.mul(P.towerCov)), 0.0, 1.0));
     }
-    return vec2(covAmt, topL);
+    return vec3(covAmt, topL, baseL);
   });
 
   // 4. height gradient — round base, anvil-less soft top (ALU only)
-  const gradAt = (y, topL) => {
-    const hf = y.sub(P.base).div(topL.sub(P.base));
+  const gradAt = (y, topL, baseL) => {
+    const hf = y.sub(baseL).div(topL.sub(baseL));
     return clamp(hf.div(P.baseRound), 0.0, 1.0)
       .mul(clamp(hf.sub(P.topSoft).div(1 - P.topSoft).oneMinus(), 0.0, 1.0));
   };
@@ -546,6 +586,28 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
       const cosT = dot(dir, sunN);
       const phaseV = mix(hg(cosT, 0.6), hg(cosT, -0.25), 0.3).toVar();
       const sunEl = sunN.y;
+      // shadow-TAP direction: sun clamped to >= ~14 deg elevation. At grazing
+      // sun the near-level taps saturate od within ~50m of anchor height —
+      // tSun becomes a step function of dir.y and prints iso-dy bands
+      // (valdez-213 stripes/octagons). Clamped taps keep the od falloff
+      // spread over the deck thickness exactly as at noon (noon-invariant);
+      // physically, forward Mie diffusion steepens the effective light
+      // direction inside the deck. Phase/sunCol still use the TRUE sun.
+      const sunT = normalize(vec3(sunN.x, max(sunN.y, 0.25), sunN.z)).toVar();
+
+      // multi-scatter sun transfer: od -> (sun visibility x phase), the MS_*
+      // octaves spreading the falloff over decades of od (never binary) with
+      // deep octaves going isotropic — shadowed cores keep a warm floor.
+      // A monotonic per-ray transform of od: the VOLUMETRIC LAW is intact.
+      const msSunPhase = (od) => {
+        let s = null;
+        for (let i = 0; i < MS_A.length; i++) {
+          const term = exp(od.mul(-P.sigma * SUN_SHADOW_K * MS_K[i]))
+            .mul(mix(phaseV, float(ISO_PHASE), MS_PMIX[i])).mul(MS_A[i]);
+          s = s ? s.add(term) : term;
+        }
+        return s;
+      };
 
       // Beer-Lambert shadow march toward the sun — ONCE PER RAY, anchored
       // where the ray enters cloud, from the smooth staged fields only
@@ -572,39 +634,78 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
       // cumulus with far-away coverage and flattens them (measured: nellis
       // puffs went paper-flat). Cost: the old 5 base fetches PER CLOUDY
       // STEP become 1-2 field fetches ONCE per ray.
-      const tSun = float(1.0).toVar();
+      const tSunP = msSunPhase(float(0.0)).toVar(); // sun visibility x phase
       const gatePrev = float(0.0).toVar();
       const armed = float(1.0).toVar(); // anchor hysteresis (see below)
 
-      // Stratiform fronts (shadow3D: false): ONE shadow march per ray at
-      // the mid-course of the DEPTH-FREE geometric slab span, hard
-      // mean-field taps off the anchor's own coverage. The deck is
-      // continuous, so the mid-course field is coherent with the fog being
-      // shaded — and the anchor is a pure function of dir: temporally
-      // static, smooth across pixels, rough terrain cannot print into it
-      // (measured on valdez-155: worst smooth-window 0.82/0.30 vs 4.4-8.5
-      // stock; the crossing anchor below instead re-couples to the jitter
-      // on this front's razor coverage flanks and dotted the fog banks).
-      if (!P.shadow3D) {
-        const tRepEnd = min(max(tA, tB), tIn.add(P.maxLen));
-        const pR = uCamPos.add(dir.mul(mix(tIn, tRepEnd, 0.5))).toVar();
-        const fR = density.field(pR).toVar();
-        const odR = float(0.0).toVar();
-        let prevR = 0;
-        for (const sd of SUN_TAPS) {
-          const gR = density.gradAt(pR.y.add(sunN.y.mul(sd)), fR.y);
-          odR.addAssign(clamp(gR.mul(0.5).sub(fR.x.oneMinus()).div(max(fR.x, 1e-4)), 0.0, 1.0)
-            .mul(fR.x).mul(sd - prevR));
-          prevR = sd;
-        }
-        tSun.assign(exp(odR.mul(-P.sigma * SUN_SHADOW_K)));
-      }
+      // PASS-1 #5 (grazing sun) — the mid-slab stratiform anchor is GONE.
+      // Every grazing-sun artifact traced to it by elimination on valdez-213:
+      // frozen-coverage taps printed dead-straight iso-dir.y stripes +
+      // octagonal cell shadows (verified: all vanish with tSun held flat);
+      // per-tap coverage still left flat-topped slabs (anchor height = pure
+      // function of dir.y); clamped-elevation taps narrowed but kept the
+      // band; height-free mid-deck taps traded it for full-height shadow
+      // curtains decoupled from the visible cloud. Root: ONE depth-free
+      // anchor shades a 16km integral with a field sampled ~8km away — the
+      // shadow can never align with the material being shaded, so the
+      // anchor's geometry prints as literal shapes. Both front types now use
+      // the coverage-gate CROSSING anchor below (the shadow rides the cloud
+      // the ray actually enters); what differs per front is the TAP STYLE.
+      // The D-056 dotted-fog risk that originally forced the mid-slab
+      // anchor is retired by the preset retune (covSharp 2.6->1.9, razor
+      // flanks gone) + msSunPhase contrast compression — re-gated on
+      // valdez-155 (worst masked 300x200 window mean/p99 below).
       // twilight energy ordering: direct dies just below the horizon, ambient
       // follows the sky down — clouds go dark BEFORE the sky does
       const warm = mix(vec3(1.0, 0.62, 0.38), vec3(1.0), smoothstep(0.0, 0.35, sunEl));
       const sunCol = warm.mul(uSunE).mul(smoothstep(-0.02, 0.08, sunEl)).mul(ALBEDO).toVar();
-      const ambCol = vec3(0.45, 0.62, 0.95).mul(uSunE).mul(0.05)
+      // in-cloud hue continuity (PASS-1 #5): a camera inside the deck used to
+      // see pure sky-blue ambient (interior B-R +48 vs +21 exterior). The
+      // interior ambient is multiple-scattered sunlight — warm gray-white.
+      // interiorW is a function of the CAMERA point only (frame-constant,
+      // smooth over frames): d6 at uCamPos gates how deep in cloud we sit.
+      const interiorW = float(0.0).toVar();
+      If(tIn.lessThan(1.0), () => { // camera inside the slab
+        const f0 = density.field(uCamPos).toVar();
+        const d0 = density.shape6(uCamPos, f0.x,
+          density.gradAt(uCamPos.y, f0.y, f0.z));
+        interiorW.assign(smoothstep(0.04, 0.30, d0));
+      });
+      // 0.35: measured B-R vs the +21 exterior faces — full warm shift gave
+      // -5, 0.62 gave +5; 0.35 lands inside the +-10 continuity window
+      const ambCol = mix(vec3(0.45, 0.62, 0.95), vec3(1.0, 0.94, 0.86), interiorW.mul(0.35))
+        .mul(uSunE).mul(0.05).mul(mix(1.0, 1.25, interiorW))
+        // sun-direction luminance cue for interiors: multiple scattering is
+        // brightest toward the sun; cosT grades the whole-ray ambient
+        .mul(float(1.0).add(cosT.mul(interiorW).mul(0.6)).clamp(0.45, 1.55))
         .mul(smoothstep(-0.08, 0.25, sunEl)).toVar();
+      // 2-octave ANIMATED interior extinction variation (PASS-1 #5: interior
+      // std 1.2 DN, a featureless void). Per-step powder from 34m detail
+      // texels is exactly the LAW's forbidden high-contrast per-step term,
+      // so the modulation is PER-RAY: two detail fetches at FIXED distances
+      // along dir (a pure function of dir — jitter-independent, smooth
+      // across pixels, ~50-150px features), drifting with uTime. Gated by
+      // interiorW: exterior frames are bit-identical.
+      const intMod = float(1.0).toVar();
+      If(interiorW.greaterThan(0.01), () => {
+        const drift = uTime.mul(8.0);
+        // 900/2100m: far enough that the 34m detail texels stay sub-2.5deg
+        // on screen (at 520m their trilinear tents read as soft squares)
+        const p1 = uCamPos.add(dir.mul(900.0)).add(vec3(drift, 0.0, drift.mul(0.7)));
+        const p2 = uCamPos.add(dir.mul(2100.0)).add(vec3(drift.mul(-0.6), 0.0, drift));
+        const d1 = texture3D(noise.detailTex, p1.div(P.detailRepeat)).r;
+        const d2 = texture3D(noise.detailTex, p2.div(P.detailRepeat * 2.3)).g;
+        const m2 = d1.sub(0.5).mul(0.63).add(d2.sub(0.5).mul(0.42));
+        intMod.assign(clamp(float(1.0).add(m2.mul(interiorW).mul(2.0)), 0.35, 1.75));
+      });
+
+      // fade-not-clip at the march bounds (PASS-1 #5): rays entering near
+      // ENTRY_MAX dissolve into the haze instead of a hard slab silhouette,
+      // and the maxLen travel cap tapers over its last 15% instead of
+      // guillotining mid-cloud. Smooth, monotonic, low-contrast — TRAA-safe.
+      const entryFade = smoothstep(float(ENTRY_MAX * ENTRY_FADE0), float(ENTRY_MAX), tIn)
+        .oneMinus().toVar();
+      const tCap0 = tIn.add(P.maxLen * CAP_FADE0), tCap1 = tIn.add(P.maxLen);
 
       Loop({ start: int(0), end: int(nSteps), type: 'int', condition: '<' }, () => {
         const p = uCamPos.add(dir.mul(t)).toVar();
@@ -613,23 +714,26 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
         // empty air is the common case and must stay near-free
         const f = density.field(p).toVar();
         const covAmt = f.x, topL = f.y;
-        const grad = density.gradAt(p.y, topL).toVar();
+        const grad = density.gradAt(p.y, topL, f.z).toVar();
         const gateVal = covAmt.mul(grad).toVar();
-        // Cumulus fronts (shadow3D: true): per-ray-segment sun shadow,
-        // re-evaluated at each interpolated ANCHOR_GATE up-crossing (a
-        // cloud ENTRY — so a thin near puff cannot hijack the shading of a
-        // big cell behind it; each cell is shaded from its own entry).
-        // Hysteresis: the anchor re-arms only after the gate falls below
-        // 0.10, so micro-dips around the threshold cannot flip WHICH
-        // crossing anchors a pixel. Taps read the REAL shape6 recipe with
-        // per-tap fields — the 3D base-shape carries the bulge that
-        // actually shades a cumulus face (a coverage-only column is
-        // height-independent and left every noon face flat-bright,
-        // measured) — but from THIS stable anchor, not the jittered step:
-        // interpolating the SMOOTH gate field's threshold crossing cancels
-        // the jitter to first order. ~10-15 fetches per cloud entry (1-3
-        // entries per ray) vs the old 5 per cloudy step.
-        if (P.shadow3D) {
+        // Per-ray-segment sun shadow, re-evaluated at each interpolated
+        // ANCHOR_GATE up-crossing (a cloud ENTRY — so a thin near puff
+        // cannot hijack the shading of a big cell behind it; each cell is
+        // shaded from its own entry). Hysteresis: the anchor re-arms only
+        // after the gate falls below 0.10, so micro-dips around the
+        // threshold cannot flip WHICH crossing anchors a pixel. The anchor
+        // is jitter-stable: interpolating the SMOOTH gate field's threshold
+        // crossing cancels the jitter to first order. TAP STYLE per front:
+        // cumulus (shadow3D) taps read the REAL shape6 recipe — the 3D
+        // base-shape carries the bulge that actually shades a cumulus face
+        // (a coverage-only column is height-independent and left every noon
+        // face flat-bright, measured); stratiform taps are mean-field
+        // (shape -> its 0.5 mean) at the FIXED mid-deck height fraction —
+        // any anchor-height term is a function of dir.y and prints iso-dy
+        // bands at grazing sun, so od is a pure lateral coverage map, and
+        // the ambient height grade owns vertical shading. ~10-15 fetches
+        // per cloud entry (1-3 entries per ray).
+        {
           If(and(armed.greaterThan(0.5), gateVal.greaterThanEqual(ANCHOR_GATE)), () => {
             const u = clamp(float(ANCHOR_GATE).sub(gatePrev).div(gateVal.sub(gatePrev).add(1e-9)), 0.0, 1.0);
             // crossing + 1.0dt: the anchor must sit INSIDE the cell (from
@@ -640,14 +744,25 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
             const tX = max(t.sub(dt.mul(u.oneMinus())).add(dt.mul(1.0)), tIn.add(dt.mul(0.1)));
             const pA = uCamPos.add(dir.mul(tX)).toVar();
             const odA = float(0.0).toVar();
+            const gMid = Math.min(0.5 / P.baseRound, 1) *
+              (1 - Math.min(Math.max((0.5 - P.topSoft) / (1 - P.topSoft), 0), 1));
             let prevA = 0;
-            for (const sd of SUN_TAPS) {
-              const pT = pA.add(sunN.mul(sd)).toVar();
+            for (const sd of (P.shadow3D ? SUN_TAPS : SUN_TAPS_STRAT)) {
+              const pT = pA.add(sunT.mul(sd)).toVar();
               const fT = density.field(pT).toVar();
-              odA.addAssign(density.shape6(pT, fT.x, density.gradAt(pT.y, fT.y)).mul(sd - prevA));
+              odA.addAssign((P.shadow3D
+                ? density.shape6(pT, fT.x, density.gradAt(pT.y, fT.y, fT.z))
+                : clamp(float(gMid * 0.5).sub(fT.x.oneMinus()).div(max(fT.x, 1e-4)), 0.0, 1.0).mul(fT.x)
+              ).mul(sd - prevA));
               prevA = sd;
             }
-            tSun.assign(exp(odA.mul(-P.sigma * SUN_SHADOW_K)));
+            // grazing-sun contrast compression (stratiform): near-horizontal
+            // light diffuses through the broken deck's gaps — the 950m tap
+            // span overestimates od there and cells read as phantom dark
+            // slabs. Full od (the valdez-155 look) above ~27 deg elevation.
+            const odScale = P.shadow3D
+              ? float(1.0) : mix(0.35, 1.0, smoothstep(0.05, 0.45, sunEl));
+            tSunP.assign(msSunPhase(odA.mul(odScale)));
             armed.assign(0.0);
           });
           If(gateVal.lessThan(0.10), () => { armed.assign(1.0); });
@@ -658,10 +773,11 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
           If(d6.greaterThan(0.002), () => {
             const dens = density.erode8(p, d6).toVar();
             If(dens.greaterThan(0.002), () => {
-              const sigma = dens.mul(P.sigma);
+              const capFade = smoothstep(tCap0, tCap1, t).oneMinus();
+              const sigma = dens.mul(entryFade).mul(capFade).mul(P.sigma);
               const stepT = exp(sigma.mul(dt).negate()).toVar();
               const hfA = clamp(p.y.sub(P.base).div(P.top - P.base), 0.0, 1.0);
-              const S = sunCol.mul(tSun).mul(phaseV).add(ambCol.mul(mix(0.35, 1.0, hfA)));
+              const S = sunCol.mul(tSunP).add(ambCol.mul(mix(0.35, 1.0, hfA))).mul(intMod);
               const w = T.mul(stepT.oneMinus()); // energy this step scatters to the eye
               acc.addAssign(S.mul(w));
               dsum.addAssign(w.mul(t));
