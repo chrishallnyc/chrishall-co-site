@@ -3,6 +3,7 @@
 import * as THREE from "three";
 import { SimCore, determinismProbe, DT } from "./engine/sim.js";
 import { Input } from "./engine/input.js";
+import { GamepadInput } from "./engine/gamepad.js";
 import { detectTier, tierParams, setTier, TIERS } from "./engine/quality.js";
 import { DebugOverlay } from "./engine/debug.js";
 import { TestWorld } from "./game/testworld.js";
@@ -62,6 +63,7 @@ async function boot() {
   sim.addSystem(world);
 
   const input = new Input(window);
+  const gamepad = new GamepadInput();
   const dbg = new DebugOverlay();
 
   window.addEventListener("resize", () => {
@@ -72,7 +74,7 @@ async function boot() {
 
   // public hooks (QA + future phases)
   Object.assign(state, {
-    sim, input, dbg,
+    sim, input, gamepad, dbg,
     hash: () => sim.stateHash(),
     determinismProbe,
     setSeed: (s) => sim.reset(s),
@@ -88,6 +90,7 @@ async function boot() {
     requestAnimationFrame(frame);
     const dtMs = Math.min(now - last, 250);
     last = now;
+    gamepad.update();
     if (input.pressed("debug")) dbg.toggle();
     const alpha = sim.advance(dtMs / 1000);
     world.render(alpha, camera);

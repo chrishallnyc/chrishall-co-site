@@ -1,112 +1,132 @@
-// Action-map input system. War Thunder's default air binds, taken exactly.
-// CORE binds below are the WT layout confirmed from muscle memory + docs;
-// the LONG TAIL (radar, weapon select, countermeasures, trim, airbrake...)
-// lands from the verified bind-table research (.context/raptor/WT-CONTROLS.md)
-// before those systems are coded — placeholders here are marked PENDING.
+// Input v2 — chord-capable action map with WT semantics.
+// A bind is a chord array; last code = trigger, the rest must be held.
+// Edge resolution on a trigger event: among all binds whose trigger matches
+// and whose held-set is satisfied, the LONGEST chords win (Alt+F beats F) —
+// ties all fire, matching WT's shipped overlaps (Space, T, Mouse0…).
+// held() evaluates each action's chords directly (flight keys keep working
+// under modifiers). Rebinds persist as chord strings ("AltLeft+KeyX").
 
-const STORE_KEY = "raptor:binds:v1";
+import { ACTIONS } from "./binds.js";
 
-// action id -> { key: KeyboardEvent.code | "MouseN" | "WheelUp/Down", label }
-export const DEFAULT_BINDS = {
-  // -- flight (WT mouse-aim scheme: mouse = pitch/roll target via instructor) --
-  throttle_up:   { key: "KeyW", label: "throttle up" },
-  throttle_down: { key: "KeyS", label: "throttle down" },
-  rudder_left:   { key: "KeyA", label: "rudder left" },
-  rudder_right:  { key: "KeyD", label: "rudder right" },
-  roll_left:     { key: "KeyQ", label: "roll left" },
-  roll_right:    { key: "KeyE", label: "roll right" },
-  // -- weapons --
-  fire_mg:       { key: "Mouse0", label: "fire machine guns" },
-  fire_cannon:   { key: "Space", label: "fire cannons" },
-  // PENDING research: missile fire, weapon selector, bomb/rocket, countermeasures
-  // -- aircraft systems --
-  gear:          { key: "KeyG", label: "landing gear" },
-  flaps:         { key: "KeyF", label: "flaps" },
-  // -- view --
-  view_change:   { key: "KeyV", label: "change view" },
-  freelook:      { key: "KeyC", label: "free look (hold)" },
-  // -- interface --
-  scoreboard:    { key: "Tab", label: "scoreboard" },
-  map:           { key: "KeyM", label: "map" },
-  pause:         { key: "Escape", label: "menu" },
-  debug:         { key: "Backquote", label: "debug overlay" },
-};
+const STORE_KEY = "raptor:binds:v2";
+
+// keys the browser must not act on while flying
+const PREVENT = new Set(["Tab", "Space", "AltLeft", "AltRight", "Quote", "Slash", "Backquote", "CapsLock", "F1", "F2", "F3", "F4", "F5", "F7"]);
 
 export class Input {
   constructor(target = window) {
-    this.binds = this._load();
-    this.down = new Set();        // currently-held bind keys
-    this.pressedEdge = new Set(); // keys pressed since last consumeFrame()
+    this.actions = this._load();
+    this.down = new Set();
+    this.edge = new Set();          // action ids fired since last consumeFrame
     this.mouse = { x: 0, y: 0, nx: 0, ny: 0, dx: 0, dy: 0, wheel: 0 };
-    this._keyToActions = new Map();
+    this._byTrigger = new Map();    // trigger code -> [{id, chord}]
     this._rebuildIndex();
 
-    this._onKeyDown = (e) => {
+    this._kd = (e) => {
       if (e.repeat) return;
       this.down.add(e.code);
-      this.pressedEdge.add(e.code);
-      if (this._keyToActions.has(e.code) && e.code !== "F5" && e.code !== "F12") {
-        if (e.code === "Tab" || e.code === "Space") e.preventDefault();
-      }
+      this._resolveEdge(e.code);
+      if (PREVENT.has(e.code)) e.preventDefault();
     };
-    this._onKeyUp = (e) => this.down.delete(e.code);
-    this._onMouseDown = (e) => { this.down.add("Mouse" + e.button); this.pressedEdge.add("Mouse" + e.button); };
-    this._onMouseUp = (e) => this.down.delete("Mouse" + e.button);
-    this._onMouseMove = (e) => {
+    this._ku = (e) => this.down.delete(e.code);
+    this._md = (e) => { const c = "Mouse" + e.button; this.down.add(c); this._resolveEdge(c); };
+    this._mu = (e) => this.down.delete("Mouse" + e.button);
+    this._mm = (e) => {
       this.mouse.x = e.clientX; this.mouse.y = e.clientY;
       this.mouse.nx = (e.clientX / window.innerWidth) * 2 - 1;
       this.mouse.ny = -((e.clientY / window.innerHeight) * 2 - 1);
       this.mouse.dx += e.movementX || 0; this.mouse.dy += e.movementY || 0;
     };
-    this._onWheel = (e) => { this.mouse.wheel += Math.sign(e.deltaY); };
-    this._onBlur = () => { this.down.clear(); };
+    this._wh = (e) => { this.mouse.wheel += -Math.sign(e.deltaY); }; // up = +throttle, WT wheel-throttle
+    this._cm = (e) => e.preventDefault();                            // RMB is a game control
+    this._bl = () => this.down.clear();
 
-    target.addEventListener("keydown", this._onKeyDown);
-    target.addEventListener("keyup", this._onKeyUp);
-    target.addEventListener("mousedown", this._onMouseDown);
-    target.addEventListener("mouseup", this._onMouseUp);
-    target.addEventListener("mousemove", this._onMouseMove);
-    target.addEventListener("wheel", this._onWheel, { passive: true });
-    target.addEventListener("blur", this._onBlur);
+    target.addEventListener("keydown", this._kd);
+    target.addEventListener("keyup", this._ku);
+    target.addEventListener("mousedown", this._md);
+    target.addEventListener("mouseup", this._mu);
+    target.addEventListener("mousemove", this._mm);
+    target.addEventListener("wheel", this._wh, { passive: true });
+    target.addEventListener("contextmenu", this._cm);
+    target.addEventListener("blur", this._bl);
   }
 
   _load() {
-    const binds = {};
-    for (const [id, def] of Object.entries(DEFAULT_BINDS)) binds[id] = { ...def };
+    const actions = {};
+    for (const [id, a] of Object.entries(ACTIONS))
+      actions[id] = { ...a, binds: a.binds.map((c) => [...c]) };
     try {
       const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
-      for (const [id, key] of Object.entries(saved)) if (binds[id]) binds[id].key = key;
-    } catch (_) { /* fresh defaults */ }
-    return binds;
+      for (const [id, chordStr] of Object.entries(saved))
+        if (actions[id]) actions[id].binds = [chordStr.split("+")];
+    } catch (_) { /* defaults */ }
+    return actions;
   }
 
   _rebuildIndex() {
-    this._keyToActions.clear();
-    for (const [id, b] of Object.entries(this.binds)) {
-      if (!this._keyToActions.has(b.key)) this._keyToActions.set(b.key, []);
-      this._keyToActions.get(b.key).push(id);
+    this._byTrigger.clear();
+    for (const [id, a] of Object.entries(this.actions)) {
+      for (const chord of a.binds) {
+        const trigger = chord[chord.length - 1];
+        if (!this._byTrigger.has(trigger)) this._byTrigger.set(trigger, []);
+        this._byTrigger.get(trigger).push({ id, chord });
+      }
     }
   }
 
-  rebind(actionId, key) {
-    if (!this.binds[actionId]) return false;
-    this.binds[actionId].key = key;
+  _resolveEdge(trigger) {
+    const cands = this._byTrigger.get(trigger);
+    if (!cands) return;
+    let best = 0;
+    const satisfied = [];
+    for (const c of cands) {
+      let ok = true;
+      for (let i = 0; i < c.chord.length - 1; i++)
+        if (!this.down.has(c.chord[i])) { ok = false; break; }
+      if (ok) { satisfied.push(c); if (c.chord.length > best) best = c.chord.length; }
+    }
+    for (const c of satisfied) if (c.chord.length === best) this.edge.add(c.id);
+  }
+
+  held(actionId) {
+    const a = this.actions[actionId];
+    if (!a) return false;
+    outer: for (const chord of a.binds) {
+      for (const code of chord) if (!this.down.has(code)) continue outer;
+      return true;
+    }
+    return false;
+  }
+
+  pressed(actionId) { return this.edge.has(actionId); }
+
+  // Signed wheel ticks accumulated since last consumeFrame (WT: wheel = throttle).
+  wheelDelta() { return this.mouse.wheel; }
+
+  rebind(actionId, chord) {
+    if (!this.actions[actionId] || !chord?.length) return false;
+    this.actions[actionId].binds = [chord];
     this._rebuildIndex();
     const out = {};
-    for (const [id, b] of Object.entries(this.binds))
-      if (b.key !== DEFAULT_BINDS[id]?.key) out[id] = b.key;
+    for (const [id, a] of Object.entries(this.actions)) {
+      const def = ACTIONS[id].binds.map((c) => c.join("+")).join(",");
+      const cur = a.binds.map((c) => c.join("+")).join(",");
+      if (def !== cur) out[id] = a.binds[0].join("+");
+    }
     localStorage.setItem(STORE_KEY, JSON.stringify(out));
     return true;
   }
 
-  resetBinds() { localStorage.removeItem(STORE_KEY); this.binds = this._load(); this._rebuildIndex(); }
+  resetBinds() {
+    localStorage.removeItem(STORE_KEY);
+    this.actions = this._load();
+    this._rebuildIndex();
+  }
 
-  held(actionId) { const b = this.binds[actionId]; return !!b && this.down.has(b.key); }
-  pressed(actionId) { const b = this.binds[actionId]; return !!b && this.pressedEdge.has(b.key); }
+  bindsOf(actionId) { return this.actions[actionId]?.binds.map((c) => c.join("+")) || []; }
 
-  // Call once per rendered frame AFTER game code has sampled input.
   consumeFrame() {
-    this.pressedEdge.clear();
+    this.edge.clear();
     this.mouse.dx = 0; this.mouse.dy = 0; this.mouse.wheel = 0;
   }
 }
