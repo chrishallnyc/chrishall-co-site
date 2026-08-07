@@ -11,8 +11,9 @@ import { pass, mrt, output, velocity } from "three/tsl";
 import { traa } from "../../vendor/display/TRAANode.js";
 import { bloom } from "../../vendor/display/BloomNode.js";
 import { lensflare } from "../../vendor/display/LensflareNode.js";
+import { ao } from "../../vendor/display/GTAONode.js";
 
-export function buildPost(renderer, scene, camera, { flare = true, chain: chainSel = "full" } = {}) {
+export function buildPost(renderer, scene, camera, { flare = true, gtao = false, chain: chainSel = "full" } = {}) {
   const scenePass = pass(scene, camera);
   scenePass.setMRT(mrt({ output, velocity }));
 
@@ -20,7 +21,14 @@ export function buildPost(renderer, scene, camera, { flare = true, chain: chainS
   const depth = scenePass.getTextureNode("depth");
   const vel = scenePass.getTextureNode("velocity");
 
-  const taa = traa(beauty, depth, vel, camera);
+  let taa = traa(beauty, depth, vel, camera);
+  // GTAO (?ao=1, eyeball-gated): normals reconstructed from depth (null),
+  // occlusion multiplied into the lit scene before bloom picks highlights
+  let aoPass = null;
+  if (gtao) {
+    aoPass = ao(depth, null, camera);
+    taa = taa.mul(aoPass.getTextureNode().r);
+  }
   // threshold in LINEAR HDR (pre-tonemap): the whole sky sits above 1.0, so
   // the cut must be well beyond it — only the sun disk, water glint, and AB
   // flame overshoot ~3

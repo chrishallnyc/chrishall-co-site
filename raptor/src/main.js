@@ -252,7 +252,11 @@ async function boot() {
   if (backend === "webgpu" && flags.get("post") !== "0") {
     try {
       const { buildPost } = await import("./engine/post.js");
-      post = buildPost(renderer, scene, camera, { flare: flags.get("flare") !== "0", chain: flags.get("chain") || "full" });
+      post = buildPost(renderer, scene, camera, {
+        flare: flags.get("flare") !== "0",
+        gtao: flags.get("ao") === "1", // default off until eyeball-passed
+        chain: flags.get("chain") || "full",
+      });
     } catch (err) { console.warn("post chain unavailable, plain render:", err && err.message); }
   }
   state.post = !!post;
