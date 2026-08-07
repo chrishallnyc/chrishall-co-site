@@ -108,6 +108,11 @@ export class Terrain {
     // height texture: R/G byte-packed; decode is linear in (R,G) so LINEAR
     // filtering interpolates true heights
     this.tex = new THREE.Texture(img);
+    // three defaults flipY=true — but worldUV (v = 0.5 - z/size), the CPU
+    // decode, and the culling pyramid all address UNFLIPPED rows (row 0 =
+    // north). The default silently MIRRORED the whole world north-south on
+    // every front (workflow wf_1f9df84a-570, verified both backends).
+    this.tex.flipY = false;
     this.tex.colorSpace = THREE.NoColorSpace;
     this.tex.wrapS = this.tex.wrapT = THREE.ClampToEdgeWrapping;
     this.tex.minFilter = THREE.LinearMipmapLinearFilter;
