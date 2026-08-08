@@ -1,11 +1,12 @@
 {
- "updated": "2026-08-08T00:55:00-07:00",
- "version": "v0.26.0",
- "now": "v0.26.0 THE LONG WAR \u2014 persistent dynamic campaign live on all three fronts; bandits (enemy aircraft) next",
+ "updated": "2026-08-08T02:40:00-07:00",
+ "version": "v0.27.0",
+ "now": "v0.27.0 THE FIRST BANDITS \u2014 enemy aircraft fly, your missiles lead moving targets; air combat missions next",
  "nowPhase": 12,
  "paused": false,
- "pushes": 57,
+ "pushes": 59,
  "ledger": [
+  "2026-08-08 v0.27.0 \u2014 THE FIRST BANDITS: enemy aircraft exist. Drones, transports and fighters fly waypoint routes with honest physics (energy bleed in hard turns, terrain-following floor), raiders dive on your convoys and shoot back at ships, and your AIM-9X finally leads a MOVING target \u2014 the guidance law that misses a 150 m/s crosser by 8 meters now kills it at 2.8. Dashed diamonds track every contact. Plus: cloud shadows reach the sea, and the valdez camera-ring artifact is root-caused and gone.",
   "2026-08-08 v0.26.0 \u2014 THE LONG WAR \u2014 persistent operations: generated sorties push a real front line (win +2km toward victory at +16), the hangar remembers your war, deterministic 200-sortie chains",
   "2026-08-08 v0.25.0 \u2014 THE LIVING BATTLEFIELD \u2014 48-unit war: driving convoys, mid-sortie reinforcements, friendly forces, rearm pads on all three fronts",
   "2026-08-08 v0.24.0 \u2014 THE FIRST SORTIE \u2014 mission system: objectives HUD, radio comms, STRIKE + SEAD sorties over Nevada (?mission=), deterministic replays",
@@ -88,13 +89,13 @@
   {
    "n": 8,
    "name": "Sensors & weapons",
-   "pct": 60,
+   "pct": 75,
    "note": "cannon + pipper + AIM-9X with seeker lock live; AIM-120 + radar later"
   },
   {
    "n": 9,
    "name": "AI & ground war",
-   "pct": 70,
+   "pct": 78,
    "note": "AAA + SAM return fire live with real evasion doctrine; vehicle movement + bandits next"
   },
   {

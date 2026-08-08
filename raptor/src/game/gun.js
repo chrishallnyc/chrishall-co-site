@@ -56,8 +56,13 @@ export class Gun {
   }
 
   // trigger held? fm supplies position/velocity/attitude (ENU/FRD);
-  // battlefield (optional) takes segment hit-tests against unit spheres
-  tick(sim, dt, fm, trigger, terrain, battlefield) {
+  // battlefield (optional) takes segment hit-tests against unit spheres.
+  // directory (optional, phase 11 W3): TargetDirectory (targets.js) — when
+  // present, segment tests run through directory.testSegmentAll (battlefield
+  // spheres THEN bandit air spheres, first-hit-wins in tid order) and damage
+  // routes to the hit tid's owning list; ground puffs/impacts unchanged.
+  // Null directory = shipped phase-8 battlefield behavior, bit for bit.
+  tick(sim, dt, fm, trigger, terrain, battlefield, directory = null) {
     const st = fm.state;
     // fire
     if (trigger && this.ammo > 0) {
@@ -82,12 +87,14 @@ export class Gun {
       const x0 = r[o], y0 = r[o + 1], z0 = r[o + 2]; // pre-move (rounds cover ~10m/tick — point tests tunnel)
       r[o] += r[o + 3] * dt; r[o + 1] += r[o + 4] * dt; r[o + 2] += r[o + 5] * dt;
       r[o + 6] += dt;
-      if (battlefield) {
-        const hit = battlefield.testSegment(x0, y0, z0, r[o], r[o + 1], r[o + 2]);
+      if (directory || battlefield) {
+        const hit = directory
+          ? directory.testSegmentAll(x0, y0, z0, r[o], r[o + 1], r[o + 2])
+          : battlefield.testSegment(x0, y0, z0, r[o], r[o + 1], r[o + 2]);
         if (hit >= 0) {
           this.live[i] = 0;
           this.impacts++;
-          battlefield.damage(hit, 1);
+          if (directory) directory.damage(hit, 1); else battlefield.damage(hit, 1);
           this.puffs.push({ x: r[o], y: r[o + 2], z: r[o + 1], age: -0.1 }); // negative age = grows larger (hit spark, PASS-2 item 7)
           this.puffs.push({ x: r[o], y: r[o + 2] + 1.5, z: r[o + 1], age: 0 });
           if (this.puffs.length > MAX_PUFFS) { this.puffs.shift(); this.puffs.shift(); }

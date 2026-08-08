@@ -17,7 +17,7 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.26.0";
+const VERSION = "0.27.0";
 const PHASE = 12;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
@@ -103,6 +103,7 @@ async function boot() {
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 120000);
+  const _bv = new THREE.Vector3(); // HUD projection scratch
 
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.5;
@@ -202,7 +203,8 @@ async function boot() {
           }
           state.fftOcean = !!fft;
           if (fft) fft.update(0); // pre-compile the 19 compute pipelines behind the veil
-          water = new Water(atmosphere.frontName, terrain, atmoH?.aerial, fft);
+          water = new Water(atmosphere.frontName, terrain, atmoH?.aerial, fft,
+            { cloudShadow: volShadow || makeCloudShadowNode(clouds.shared) });
           scene.add(water.group);
         } catch (err) {
           console.warn("water unavailable, placeholder sea stays:", err && err.message);
@@ -223,6 +225,20 @@ async function boot() {
     sim.addSystem(battlefield);
   }
 
+  // PHASE 11 INC-4: enemy air. Flag-gated while the module lands (no 404s in
+  // normal boots); flips always-on at integration. Tick order per design §0:
+  // battlefield -> bandits -> player -> script -> match.
+  let bandits = null, directory = null;
+  if (battlefield && flags.get("bandits") !== "0") {
+    try {
+      const BD = await import("./game/bandits.js");
+      const TG = await import("./game/targets.js");
+      bandits = new BD.Bandits(scene, { terrain, battlefield });
+      sim.addSystem(bandits);
+      directory = TG.makeDirectory({ battlefield, bandits });
+    } catch (err) { bandits = null; directory = null; console.warn("bandits unavailable:", err && err.message); }
+  }
+
   // PHASE 7: you fly. ?demo=1 keeps the old scripted circle for QA baselines.
   let player = null;
   if (flags.get("demo") !== "1") {
@@ -230,7 +246,7 @@ async function boot() {
     world.trailMesh.visible = false; // FM-driven trail is a polish item
     world.pylons.visible = false; // phase-1 scale pylons — PASS-1 item 8: they render as needle spikes at distance (and stand ON the ocean)
     player = new Player(scene, {
-      jet: world.jet, terrain, battlefield,
+      jet: world.jet, terrain, battlefield, directory,
       spawn: { x: 0, y: -6000, alt: (fg?.baseAlt || 3400) + 200, headingRad: 0, speed: 200 },
     });
     sim.addSystem(player);
@@ -373,6 +389,35 @@ async function boot() {
           ctx.restore();
         }
       }
+      // PHASE 11 INC-4: bandit diamonds — project live bandits, dashed
+      // diamond + range; blue for friendlies. Render-side only.
+      if (bandits && bandits.aliveCount() > 0) {
+        const st = player.fm.state;
+        ctx.save();
+        ctx.setLineDash([5, 4]);
+        ctx.lineWidth = 1.6;
+        ctx.font = "10px ui-monospace, Menlo, monospace";
+        ctx.textAlign = "center";
+        for (let i = 0; i < 8; i++) {
+          if (!bandits.live[i]) continue;
+          const o = i * 14;
+          const bx = bandits.state[o], by = bandits.state[o + 1], bz = bandits.state[o + 2];
+          _bv.set(bx, bz, by).project(camera); // ENU -> three -> NDC
+          if (_bv.z > 1) continue; // behind the camera plane
+          const sx = (_bv.x * 0.5 + 0.5) * w, sy = (-_bv.y * 0.5 + 0.5) * h;
+          if (sx < -30 || sx > w + 30 || sy < -30 || sy > h + 30) continue;
+          const col = bandits.side[i] === 1 ? "#7fb4e8" : "#ff8a5c";
+          ctx.strokeStyle = col;
+          ctx.beginPath();
+          ctx.moveTo(sx, sy - 12); ctx.lineTo(sx + 12, sy); ctx.lineTo(sx, sy + 12); ctx.lineTo(sx - 12, sy);
+          ctx.closePath(); ctx.stroke();
+          const km = Math.hypot(bx - st[0], by - st[1], bz - st[2]) / 1000;
+          ctx.fillStyle = col;
+          ctx.fillText(km.toFixed(1), sx, sy + 26);
+        }
+        ctx.restore();
+      }
+
       // taking fire: red vignette pulse
       if (player.hitFlash > 0) {
         player.hitFlash = Math.max(0, player.hitFlash - 1 / 60);
@@ -565,7 +610,7 @@ async function boot() {
   const kcPos = new THREE.Vector3();
 
   Object.assign(state, {
-    sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud, player, battlefield, match, script,
+    sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud, player, battlefield, match, script, bandits, directory,
     kc: () => killCam,
     cloudImmersion: () => clouds.immersion,
     setTimeOfDay: (h) => atmosphere.setTime(h),
@@ -696,6 +741,7 @@ async function boot() {
       world.render(alpha, camera);
     }
     battlefield?.render(dtMs / 1000, camera);
+    bandits?.render(alpha, camera);
     terrain?.update(camera);
     waterClock += dtMs / 1000;
     water?.update(camera, waterClock);

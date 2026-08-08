@@ -17,10 +17,11 @@ const AB_PUSH_RATE = 0.125;     // slower shove through the AB detent (~0.8s of 
 const AIM_PITCH_LIM = 80 * Math.PI / 180;
 
 export class Player {
-  constructor(scene, { jet, terrain, spawn, battlefield }) {
+  constructor(scene, { jet, terrain, spawn, battlefield, directory }) {
     this.jet = jet;             // the F-22 group (taken over from TestWorld)
     this.terrain = terrain || null;
     this.battlefield = battlefield || null;
+    this.directory = directory || null; // W1 unified targets (ground + air)
     this.spawn = spawn;
     this.gun = new Gun(scene);  // boot-time scene.add — safe
     this.missiles = new Missiles(scene);
@@ -139,8 +140,8 @@ export class Player {
       gearDown: this.gearDown,
     }, { groundH: Math.max(groundH, 0) });
 
-    this.gun.tick(sim, dt, this.fm, L.fire === 1, this.terrain, this.battlefield);
-    this.missiles.tick(sim, dt, this.fm, this.battlefield, L.aamEdge === 1);
+    this.gun.tick(sim, dt, this.fm, L.fire === 1, this.terrain, this.battlefield, this.directory);
+    this.missiles.tick(sim, dt, this.fm, this.battlefield, L.aamEdge === 1, this.directory);
     L.aamEdge = 0;
 
     // gear-up terrain/water contact = crash → respawn (proper damage phase 8)

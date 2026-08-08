@@ -6,6 +6,14 @@ import { SfcRng, hashBegin, hashNum, hashArray, hashHex } from "./rng.js";
 
 export const TICK_HZ = 120;
 export const DT = 1 / TICK_HZ;
+
+// Replay/sim-format version: bump ONCE per change that alters sim numerics —
+// same seed + same inputs no longer reproduce a stream recorded under an
+// older number. Replay headers / campaign logs stamp this beside specHash.
+//   1 = phases 7-11 INC-3 (player missile PN assumed static targets)
+//   2 = phase 11 INC-4 W2: moving-target prop-nav in missiles.js
+//       (dR/dt = v_tgt − v_m through the TargetDirectory)
+export const SIM_VERSION = 2;
 const MAX_CATCHUP_TICKS = 10; // beyond this we drop time rather than spiral
 
 export class SimCore {
@@ -83,5 +91,5 @@ export function determinismProbe(n = 600, seed = 0xC0FFEE) {
     return sim.stateHash();
   };
   const a = mk(), b = mk();
-  return { a, b, equal: a === b, n, seed };
+  return { a, b, equal: a === b, n, seed, v: SIM_VERSION };
 }
