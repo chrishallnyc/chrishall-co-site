@@ -129,6 +129,9 @@ export class Atmosphere {
     // Hillaire twilight: the physical arch lives at radiances the
     // Preetham-tuned exposure curve crushes to black — floor it through dusk
     if (this.hillaire && el < 4 && el > -10) this.exposure = Math.max(this.exposure, 0.34);
+    // (PASS-3 item 5 attempt reverted: a shared el->EV floor lifted marianas
+    // glare more than valdez shadow — the golden triptych spread is SCENE
+    // luminance; converging it needs auto-exposure metering = phase-12 work)
 
     this.stars.update(el, this.hours, this.front.lat, this._sunDir);
     if (Math.abs(this.hours - this._iblHours) > 0.2) this._iblDirty = true;

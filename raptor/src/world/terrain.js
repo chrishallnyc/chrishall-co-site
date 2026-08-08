@@ -322,7 +322,11 @@ export class Terrain {
         // PASS-2 item 3: NAIP's blue-gray cast on the dry front — warm
         // white-balance at ingest (the physical playa albedo photographs
         // cool under blue sky; the eye expects warm desert)
-        if (front === "NELLIS") ci = ci.mul(vec3(1.09, 1.0, 0.87));
+        if (front === "NELLIS") {
+          ci = ci.mul(vec3(1.14, 1.0, 0.82)); // stronger warm WB (3rd-pass fail: B−R must go negative on sunlit ground)
+          const l = dot(ci, vec3(0.2126, 0.7152, 0.0722));
+          ci = vec3(l, l, l).add(ci.sub(vec3(l, l, l)).mul(1.18)); // saturation floor — desaturating to gray is cheating
+        }
         ci = ci.mul(micro.sub(0.5).mul(0.08).add(1.0));
         const cov = coverTex ? texture(coverTex, worldUV(wp)).r : float(1.0);
         c = mix(c, ci, cov);
