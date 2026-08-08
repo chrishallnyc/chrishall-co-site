@@ -1,9 +1,10 @@
 // Volumetric clouds — MAXFI B3 rung 1: a full-res single-pass raymarch that
 // rides the post chain between the scene pass and TRAA (the jittered march is
 // exactly the noise TRAA's history filter integrates away). Supersedes the
-// billboard field visually; clouds.js stays as the fallback tier AND keeps
-// owning the ground cloud-shadow projector (known gap, journaled: the volume
-// does not shadow the terrain yet).
+// billboard field visually; clouds.js stays as the fallback tier. Ground
+// cloud shadows on the volumetric path come from makeVolCloudShadowNode
+// below — the SAME coverage stage the march breathes, projected sun-ward
+// onto the terrain (closes the journaled billboard-shadow mismatch).
 //
 // House pattern (hillaire.js, shipped 3x): ONE density recipe, TWO emitters —
 // cpuDensity is the float64 oracle the battery gates, tslDensity emits the
@@ -89,7 +90,8 @@ import {
 // base/top/towerTop in world meters (y-up), *Repeat = noise tiling periods in
 // meters, coverage = target areal cloud fraction (enforced by quantile — see
 // covThreshold), sigma = extinction m^-1 at density 1, maxLen = in-slab march
-// cap, erode = detail erosion strength.
+// cap, erode = detail erosion strength, shadowFloor = ground cloud-shadow
+// floor (makeVolCloudShadowNode; values mirror clouds.js CLOUD_CLIMATES).
 // ---------------------------------------------------------------------------
 const FRONTS = {
   // shadow3D (render-side only, sun-shadow taps at the per-ray anchor):
@@ -102,13 +104,13 @@ const FRONTS = {
     coverage: 0.30, base: 2700, top: 4300,
     covRepeat: 26000, baseRepeat: 8000, detailRepeat: 1100,
     covSharp: 2.6, baseRound: 0.10, topSoft: 0.55, erode: 0.28,
-    sigma: 0.035, maxLen: 22000, shadow3D: true,
+    sigma: 0.035, maxLen: 22000, shadow3D: true, shadowFloor: 0.45,
   },
   VALDEZ: {   // broken stratocumulus deck: thin, flat, wide cells
     coverage: 0.55, base: 1100, top: 2400,
     covRepeat: 14000, baseRepeat: 7000, detailRepeat: 1050,
     covSharp: 1.9, baseRound: 0.16, topSoft: 0.40, erode: 0.34,
-    sigma: 0.05, maxLen: 16000, shadow3D: false,
+    sigma: 0.05, maxLen: 16000, shadow3D: false, shadowFloor: 0.62,
   },
   MARIANAS: { // trade cumulus deck + isolated towers to 5200 (tower mask ch.)
     coverage: 0.38, base: 550, top: 1900,
@@ -118,7 +120,7 @@ const FRONTS = {
     // underside printed as a knife-straight 550m plane (base fade was 108m
     // and the shared 0.16 relief too shallow for a deck this thin)
     covSharp: 2.2, baseRound: 0.13, topSoft: 0.60, erode: 0.35, baseRelief: 0.30,
-    sigma: 0.04, maxLen: 22000, shadow3D: true,
+    sigma: 0.04, maxLen: 22000, shadow3D: true, shadowFloor: 0.50,
   },
 };
 
@@ -465,15 +467,11 @@ function covThreshold(noise, coverage) {
 
 const sat = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
 
-// ---------------------------------------------------------------------------
-// THE DENSITY RECIPE — emitter 1 of 2 (float64 oracle). Steps 1..8 mirror
-// tslDensityBuilders below 1:1.
-// ---------------------------------------------------------------------------
-export function cpuDensity(noise, front, x, y, z) {
-  const P = FRONTS[front] || FRONTS.NELLIS;
-  const covQ = covThreshold(noise, P.coverage);
-  const s4 = [0, 0, 0, 0];
-
+// coverage stage (steps 1-3), the CPU twin of tslDensityBuilders' field():
+// ONE implementation shared by cpuDensity and cpuCoverage so the oracle and
+// the ground-shadow projector can never drift apart. s4 is the caller's
+// scratch vec4 (cpuDensity keeps reusing it for the later stages).
+function cpuCoverageStage(noise, P, covQ, x, z, s4) {
   // 1. coverage — base.r on the COV_SLICE plane at covRepeat (2D weather field);
   //    .b of the SAME fetch drives the underside base relief (step 4)
   tri4(noise.baseData, noise.baseN, x / P.covRepeat, COV_SLICE, z / P.covRepeat, s4);
@@ -489,6 +487,28 @@ export function cpuDensity(noise, front, x, y, z) {
     topL = P.top + (P.towerTop - P.top) * tw;
     covAmt = sat(covAmt + tw * P.towerCov);
   }
+  return { covAmt, topL, baseL };
+}
+
+// the coverage stage alone, 0..1 — the float64 oracle for the ground-shadow
+// projector (makeVolCloudShadowNode samples this exact stage on the GPU)
+export function cpuCoverage(noise, front, x, z) {
+  const P = FRONTS[front] || FRONTS.NELLIS;
+  const covQ = covThreshold(noise, P.coverage);
+  return cpuCoverageStage(noise, P, covQ, x, z, [0, 0, 0, 0]).covAmt;
+}
+
+// ---------------------------------------------------------------------------
+// THE DENSITY RECIPE — emitter 1 of 2 (float64 oracle). Steps 1..8 mirror
+// tslDensityBuilders below 1:1 (steps 1-3 live in cpuCoverageStage above).
+// ---------------------------------------------------------------------------
+export function cpuDensity(noise, front, x, y, z) {
+  const P = FRONTS[front] || FRONTS.NELLIS;
+  const covQ = covThreshold(noise, P.coverage);
+  const s4 = [0, 0, 0, 0];
+
+  // steps 1-3: coverage + towers (shared stage — see cpuCoverageStage)
+  const { covAmt, topL, baseL } = cpuCoverageStage(noise, P, covQ, x, z, s4);
   if (covAmt <= 0) return 0;
   // 4. height gradient — round base, anvil-less soft top (Schneider/Nubis);
   //    the base is the RELIEF-lifted baseL (>= P.base always: outside-slab
@@ -576,6 +596,54 @@ function tslDensityBuilders(noise, P, covQ) {
   });
 
   return { field, gradAt, shape6, erode8 };
+}
+
+// ---------------------------------------------------------------------------
+// Ground cloud-shadow projector — the volumetric twin of clouds.js
+// makeCloudShadowNode (same call shape: hand the returned fn to a terrain
+// colorNode as `c = c.mul(cloudShadow(wp))`; range [shadowFloor..1]).
+// Projects from the ground point up the sun ray to the slab's mid-altitude
+// and samples the SAME GPU coverage plane the march's field() stage samples
+// (base.r on COV_SLICE at covRepeat) with the same quantile threshold +
+// covSharp remap — the shadow sits under the visible cloud by construction.
+// The coverage field is STATIC (the march never advects it; only interior
+// detail drifts with uTime), so there is NO time scroll here — flipping that
+// would be the drift bug. 1 texture tap (+1 tower tap on MARIANAS), no
+// loops, no If-staging: a pure smooth function of wp, jitter/TRAA-
+// independent by construction (VOLUMETRIC LAW).
+// ---------------------------------------------------------------------------
+export function makeVolCloudShadowNode({ noise, front, uSunDir }) {
+  const P = FRONTS[front] || FRONTS.NELLIS;
+  const covQ = covThreshold(noise, P.coverage);
+  const invCovQ = Math.max(1 - covQ, 1e-4);       // same constant field() bakes
+  const midAlt = (P.base + P.top) / 2;            // main-deck casting plane
+  const towerMid = P.towerTop ? (P.base + P.towerTop) / 2 : 0;
+  const floor = P.shadowFloor ?? 0.55;
+  return function volCloudShadow(wp) {
+    const sun = normalize(uSunDir);
+    const sy = max(sun.y, 0.08); // low-sun ray-length clamp (billboard contract)
+    // project up the sun ray to the deck's mid-altitude; max(,0) keeps
+    // terrain poking above the deck from projecting backwards
+    const t = max(float(midAlt).sub(wp.y), 0.0).div(sy);
+    const hit = wp.xz.add(sun.xz.mul(t));
+    // steps 1-2 of the march's coverage stage (field()), verbatim
+    const cov = texture3D(noise.baseTex,
+      vec3(hit.x.div(P.covRepeat), COV_SLICE, hit.y.div(P.covRepeat))).r;
+    let covAmt = clamp(cov.sub(covQ).div(invCovQ).mul(P.covSharp), 0.0, 1.0);
+    if (P.towerTop) {
+      // step 3: MARIANAS towers are a separate additive coverage term in
+      // field() — one extra tap, projected at the TOWER column's own
+      // mid-altitude so the dominant casters shadow where they stand
+      const tT = max(float(towerMid).sub(wp.y), 0.0).div(sy);
+      const hitT = wp.xz.add(sun.xz.mul(tT));
+      const tw = clamp(texture3D(noise.detailTex,
+        vec3(hitT.x.div(P.towerRepeat), TOWER_SLICE, hitT.y.div(P.towerRepeat))).a
+        .sub(P.towerLo).div(P.towerHi - P.towerLo), 0.0, 1.0);
+      covAmt = clamp(covAmt.add(tw.mul(P.towerCov)), 0.0, 1.0);
+    }
+    const dayGate = smoothstep(0.03, 0.12, sun.y); // shadows die past sunset
+    return mix(float(1.0), float(floor), covAmt.mul(dayGate));
+  };
 }
 
 // dual-lobe Henyey-Greenstein

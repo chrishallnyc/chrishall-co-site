@@ -164,6 +164,21 @@ async function boot() {
     MARIANAS: { asset: "marianas", ocean: true, baseAlt: 1400, label: "THE MARIANAS" },
   };
   let terrain = null, water = null;
+  // PHASE 12 item 4: on the volumetric path, ground shadows come from the
+  // SAME coverage field the march breathes (volclouds noise hoisted here —
+  // terrain materials bake their shadow node at construction, so this must
+  // exist pre-Terrain.load; the post chain reuses volPre, no double bake).
+  // ?cloudshadow=old keeps the billboard projector for A/B.
+  let volPre = null;
+  if (backend === "webgpu" && flags.get("post") !== "0" && flags.get("vclouds") !== "0") {
+    try {
+      const VC = await import("./world/volclouds.js");
+      volPre = { VC, noise: VC.makeCloudNoise(1337) };
+    } catch (err) { console.warn("volumetric clouds unavailable, billboards stay:", err && err.message); }
+  }
+  const volShadow = (volPre && volPre.VC.makeVolCloudShadowNode && flags.get("cloudshadow") !== "old")
+    ? volPre.VC.makeVolCloudShadowNode({ noise: volPre.noise, front: atmosphere.frontName, uSunDir: atmosphere.sky.uSunDir })
+    : null;
   const fg = FRONT_GROUND[atmosphere.frontName];
   if (fg && flags.get("noterrain") !== "1") {
     const vs = document.querySelector("#veil .status");
@@ -173,7 +188,7 @@ async function boot() {
       // tops out at 8192); ?drape=0 keeps the procedural ramps for QA
       const drape = flags.get("drape") === "0" ? null : (backend === "webgpu" ? "16k" : "4k");
       terrain = await Terrain.load("/assets/terrain/" + fg.asset, atmosphere.frontName,
-        makeCloudShadowNode(clouds.shared), { drape, aerial: atmoH?.aerial });
+        volShadow || makeCloudShadowNode(clouds.shared), { drape, aerial: atmoH?.aerial });
       scene.add(terrain.group);
       if (fg.ocean && flags.get("nowater") !== "1") {
         try {
@@ -428,17 +443,15 @@ async function boot() {
   let post = null;
   let vol = null;
   if (backend === "webgpu" && flags.get("post") !== "0") {
-    // volumetric clouds ride the post chain (?vclouds=0 keeps billboards)
-    if (flags.get("vclouds") !== "0") {
-      try {
-        const VC = await import("./world/volclouds.js");
-        vol = {
-          VC,
-          noise: VC.makeCloudNoise(1337),
-          uTime: uniform(0),
-          uCamPos: atmoH ? atmoH.uCamPos : uniform(new THREE.Vector3(0, 3400, 0)),
-        };
-      } catch (err) { vol = null; console.warn("volumetric clouds unavailable, billboards stay:", err && err.message); }
+    // volumetric clouds ride the post chain (?vclouds=0 keeps billboards);
+    // module + noise were hoisted pre-terrain (volPre) for the shadow node
+    if (volPre) {
+      vol = {
+        VC: volPre.VC,
+        noise: volPre.noise,
+        uTime: uniform(0),
+        uCamPos: atmoH ? atmoH.uCamPos : uniform(new THREE.Vector3(0, 3400, 0)),
+      };
     }
     try {
       const { buildPost } = await import("./engine/post.js");
