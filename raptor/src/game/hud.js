@@ -93,13 +93,33 @@ const font = (size, weight = 400) => `${weight} ${size}px ${FONT}`;
 // per-stroke() fixed cost, not path length, dominates canvas 2D line drawing.
 function strokeSegs(ctx, segs, width) {
   if (!segs.length) return;
-  ctx.lineWidth = width;
   ctx.beginPath();
   for (let i = 0; i < segs.length; i += 4) {
     ctx.moveTo(segs[i], segs[i + 1]);
     ctx.lineTo(segs[i + 2], segs[i + 3]);
   }
+  // PASS-2 item 2: dark halo under every stroke (source-over — additive dark
+  // is a no-op), then the green pass on top; one extra stroke() per batch
+  ctx.save();
+  ctx.globalCompositeOperation = "source-over";
+  ctx.strokeStyle = "rgba(0,14,0,0.7)";
+  ctx.lineWidth = width + 2.4;
   ctx.stroke();
+  ctx.restore();
+  ctx.lineWidth = width;
+  ctx.stroke();
+}
+
+// haloed glyph draw: 3px dark under-stroke keeps text >=3:1 over bright cloud
+function fillTextH(ctx, str, x, y) {
+  ctx.save();
+  ctx.globalCompositeOperation = "source-over";
+  ctx.lineWidth = 3;
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = "rgba(0,14,0,0.75)";
+  ctx.strokeText(str, x, y);
+  ctx.restore();
+  ctx.fillText(str, x, y);
 }
 
 // normalize an angle delta to (-180, 180]
@@ -287,7 +307,7 @@ export class HUD {
     ctx.textBaseline = "middle";
     for (let i = 0; i < labels.length; i += 4) {
       ctx.textAlign = labels[i + 3] < 0 ? "right" : "left";
-      ctx.fillText(String(labels[i + 2]), labels[i], labels[i + 1]);
+      fillTextH(ctx, String(labels[i + 2]), labels[i], labels[i + 1]);
     }
   }
 
@@ -372,7 +392,7 @@ export class HUD {
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
     for (let i = 0; i < labels.length; i += 3) {
-      ctx.fillText(String(labels[i + 2]), labels[i], labels[i + 1]);
+      fillTextH(ctx, String(labels[i + 2]), labels[i], labels[i + 1]);
     }
 
     ctx.lineWidth = 1.6;
@@ -380,7 +400,7 @@ export class HUD {
     ctx.strokeRect(x - boxW / 2, cy - boxH / 2, boxW, boxH);
     ctx.font = font(15, 700);
     ctx.textAlign = "center";
-    ctx.fillText(fmt(value, boxDecimals), x, cy);
+    fillTextH(ctx, fmt(value, boxDecimals), x, cy);
   }
 
   // -- heading tape (top) -----------------------------------------------------
@@ -412,7 +432,7 @@ export class HUD {
     ctx.textAlign = "center";
     ctx.textBaseline = "alphabetic";
     for (let i = 0; i < labels.length; i += 2) {
-      ctx.fillText(String(Math.round(labels[i + 1] / 10)).padStart(2, "0"), labels[i], hdgY - 6);
+      fillTextH(ctx, String(Math.round(labels[i + 1] / 10)).padStart(2, "0"), labels[i], hdgY - 6);
     }
 
     // up-caret (points into the tick row from below) + boxed 3-digit readout
@@ -427,7 +447,7 @@ export class HUD {
     ctx.strokeRect(cx - boxW / 2, by, boxW, boxH);
     ctx.font = font(13, 700);
     ctx.textBaseline = "middle";
-    ctx.fillText(String(Math.round(hdg)).padStart(3, "0"), cx, by + boxH / 2);
+    fillTextH(ctx, String(Math.round(hdg)).padStart(3, "0"), cx, by + boxH / 2);
   }
 
   // -- G / Mach / AoA block (lower-left) --------------------------------------
@@ -444,10 +464,10 @@ export class HUD {
       const y = rows + i * 22;
       ctx.font = font(11);
       ctx.fillStyle = GREEN_DIM;
-      ctx.fillText(lines[i][0], x0, y);
+      fillTextH(ctx, lines[i][0], x0, y);
       ctx.font = font(15, 700);
       ctx.fillStyle = GREEN;
-      ctx.fillText(lines[i][1], x0 + 40, y);
+      fillTextH(ctx, lines[i][1], x0 + 40, y);
     }
   }
 
@@ -459,14 +479,14 @@ export class HUD {
     ctx.textBaseline = "alphabetic";
     ctx.font = font(11);
     ctx.fillStyle = GREEN_DIM;
-    ctx.fillText("THR", x1, y0);
+    fillTextH(ctx, "THR", x1, y0);
     ctx.font = font(19, 700);
     ctx.fillStyle = GREEN;
-    ctx.fillText(ab ? "AB" : `${Math.round(throttle)}%`, x1, y0 + 24);
+    fillTextH(ctx, ab ? "AB" : `${Math.round(throttle)}%`, x1, y0 + 24);
     if (ab) {
       ctx.font = font(10);
       ctx.fillStyle = GREEN_DIM;
-      ctx.fillText(`${Math.round(throttle)}%`, x1, y0 + 40);
+      fillTextH(ctx, `${Math.round(throttle)}%`, x1, y0 + 40);
       ctx.fillStyle = GREEN;
     }
   }

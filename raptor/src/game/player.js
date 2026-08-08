@@ -173,7 +173,7 @@ export class Player {
     this._m.makeBasis(r, u, f);
     this.jet.quaternion.setFromRotationMatrix(this._m);
 
-    this.gun.render(1 / 60); // visual aging; cheap approximation of dt
+    this.gun.render(1 / 60, camera); // visual aging; cheap approximation of dt
     this.missiles.render(1 / 60, camera);
 
     if (parked) return; // QA parked-camera owns the view

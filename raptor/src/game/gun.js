@@ -8,6 +8,7 @@
 import * as THREE from "three";
 import { M61A2 } from "../sim/weapondata.js";
 import { S } from "../sim/flight.js";
+import { softDiscTexture } from "../engine/sprites.js";
 
 const MAX_ROUNDS = 360;   // pool ≥ rate × life: 100/s × 3.5s = 350 live at steady state
 const MAX_PUFFS = 48;
@@ -27,8 +28,8 @@ export class Gun {
     this.live = new Uint8Array(MAX_ROUNDS);
 
     // render: tracer streaks (thin boxes oriented along velocity), additive
-    const tGeo = new THREE.BoxGeometry(0.35, 0.35, 7.0); // fat WT-style streaks — scale-true rounds vanish at chase-cam range
-    const tMat = new THREE.MeshBasicMaterial({ color: 0xffd27a, transparent: true, opacity: 1.0, blending: THREE.AdditiveBlending, depthWrite: false });
+    const tGeo = new THREE.BoxGeometry(0.5, 0.5, 7.5); // fat WT-style streaks — scale-true rounds vanish at chase-cam range
+    const tMat = new THREE.MeshBasicMaterial({ color: 0xffe2a8, transparent: true, opacity: 1.0, blending: THREE.AdditiveBlending, depthWrite: false }); // hotter core (PASS-2: 1.7:1 beige ribbon didn't read)
     this.tracers = new THREE.InstancedMesh(tGeo, tMat, MAX_ROUNDS);
     this.tracers.frustumCulled = false;
     this.tracers.count = 0;
@@ -41,6 +42,14 @@ export class Gun {
     this.puffMesh.count = 0;
     scene.add(this.puffMesh);
     this.puffs = []; // {x,y,z(three frame), age} — render-side, fed by sim events
+
+    // muzzle flash: 2 additive quads pulsing at the gun port while firing
+    const fMat = new THREE.MeshBasicMaterial({ color: 0xffb050, map: softDiscTexture(), transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
+    this.flash = new THREE.InstancedMesh(new THREE.PlaneGeometry(3.2, 3.2), fMat, 2);
+    this.flash.frustumCulled = false;
+    this.flash.count = 0;
+    scene.add(this.flash);
+    this._muzzle = new Float64Array(3);
     this._m4 = new THREE.Matrix4();
     this._q = new THREE.Quaternion();
     this._dir = new THREE.Vector3();
@@ -79,8 +88,9 @@ export class Gun {
           this.live[i] = 0;
           this.impacts++;
           battlefield.damage(hit, 1);
-          this.puffs.push({ x: r[o], y: r[o + 2], z: r[o + 1], age: 0 });
-          if (this.puffs.length > MAX_PUFFS) this.puffs.shift();
+          this.puffs.push({ x: r[o], y: r[o + 2], z: r[o + 1], age: -0.1 }); // negative age = grows larger (hit spark, PASS-2 item 7)
+          this.puffs.push({ x: r[o], y: r[o + 2] + 1.5, z: r[o + 1], age: 0 });
+          if (this.puffs.length > MAX_PUFFS) { this.puffs.shift(); this.puffs.shift(); }
           continue;
         }
       }
@@ -122,6 +132,7 @@ export class Gun {
     const n = Math.hypot(fx, fy, fz); fx /= n; fy /= n; fz /= n;
     const o = slot * 7, r = this.r, mv = M61A2.muzzleVelocityMs;
     r[o] = st[S.PX] + fx * 8; r[o + 1] = st[S.PY] + fy * 8; r[o + 2] = st[S.PZ] + fz * 8;
+    this._muzzle[0] = r[o]; this._muzzle[1] = r[o + 1]; this._muzzle[2] = r[o + 2];
     r[o + 3] = st[S.VX] + fx * mv;
     r[o + 4] = st[S.VY] + fy * mv;
     r[o + 5] = st[S.VZ] + fz * mv;
@@ -129,7 +140,7 @@ export class Gun {
     this.live[slot] = 1;
   }
 
-  render(dtSec) {
+  render(dtSec, camera) {
     let n = 0;
     for (let i = 0; i < MAX_ROUNDS; i++) {
       if (!this.live[i]) continue;
@@ -143,6 +154,20 @@ export class Gun {
     }
     this.tracers.count = n;
     this.tracers.instanceMatrix.needsUpdate = true;
+
+    // muzzle flash while firing: 2 quads, pulsing scale (render-side only)
+    if (this.firing) {
+      const t = performance.now() * 0.09;
+      for (let f = 0; f < 2; f++) {
+        const sc = 0.7 + Math.abs(Math.sin(t + f * 1.7)) * 0.9;
+        if (camera) this._m4.makeRotationFromQuaternion(camera.quaternion); else this._m4.identity();
+        this._m4.scale(new THREE.Vector3(sc, sc, sc));
+        this._m4.setPosition(this._muzzle[0], this._muzzle[2], this._muzzle[1]);
+        this.flash.setMatrixAt(f, this._m4);
+      }
+      this.flash.count = 2;
+    } else this.flash.count = 0;
+    this.flash.instanceMatrix.needsUpdate = true;
 
     let p = 0;
     for (const puff of this.puffs) {

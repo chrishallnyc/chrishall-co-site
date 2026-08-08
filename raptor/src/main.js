@@ -232,7 +232,11 @@ async function boot() {
   const dbg = new DebugOverlay();
   const hud = new HUD({ parent: document.body });
   hud.setMode("arcade");
-  if (flags.get("hud") === "0") hud.canvas ? (hud.canvas.style.display = "none") : hud.svg && (hud.svg.style.display = "none"); // QA: clean scenery shots
+  if (flags.get("hud") === "0") {
+    if (hud.canvas) hud.canvas.style.display = "none"; else if (hud.svg) hud.svg.style.display = "none"; // QA: clean scenery shots
+    const chrome = document.getElementById("chrome");
+    if (chrome) chrome.style.display = "none"; // PASS-2 item 8: demo captures open on dev chrome otherwise
+  }
 
   // WT-style mouse-aim marker: where the instructor is being told to fly.
   // FM heading convention: 0 = east (+x ENU), measured toward north (+y).
@@ -261,13 +265,14 @@ async function boot() {
         const px = (pv.x * 0.5 + 0.5) * w, py = (1 - (pv.y * 0.5 + 0.5)) * h;
         if (px > 8 && py > 8 && px < w - 8 && py < h - 8) {
           ctx.save();
-          ctx.strokeStyle = "#ffb000"; ctx.lineWidth = 2.2; ctx.globalAlpha = 0.95; // saturated pipper (panel: 1.06:1 amber was invisible)
           ctx.beginPath();
           ctx.moveTo(px - 8, py); ctx.lineTo(px - 3, py);
           ctx.moveTo(px + 3, py); ctx.lineTo(px + 8, py);
           ctx.moveTo(px, py - 8); ctx.lineTo(px, py - 3);
           ctx.moveTo(px, py + 3); ctx.lineTo(px, py + 8);
-          ctx.stroke();
+          ctx.globalCompositeOperation = "source-over";
+          ctx.strokeStyle = "rgba(0,10,0,0.75)"; ctx.lineWidth = 4.6; ctx.globalAlpha = 1; ctx.stroke(); // halo (PASS-2 item 2)
+          ctx.strokeStyle = "#ffb000"; ctx.lineWidth = 2.2; ctx.globalAlpha = 0.95; ctx.stroke();
           ctx.restore();
         }
       }
@@ -310,22 +315,6 @@ async function boot() {
           ctx.restore();
         }
       }
-      // SAM inbound: MISSILE warning — alpha-modulated blink (never fully
-      // absent from a frame; the panel found 0 warning pixels in a frozen
-      // combat still) with a hard black outline for contrast anywhere
-      if (battlefield && battlefield.samInbound()) {
-        ctx.save();
-        const pulse = Math.floor(performance.now() / 250) % 2 === 0 ? 1.0 : 0.35;
-        ctx.globalAlpha = pulse;
-        ctx.font = "bold 30px ui-monospace, Menlo, monospace";
-        ctx.textAlign = "center";
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = "rgba(0,0,0,0.85)";
-        ctx.strokeText("MISSILE", w / 2, h * 0.3);
-        ctx.fillStyle = "#ff5a3c";
-        ctx.fillText("MISSILE", w / 2, h * 0.3);
-        ctx.restore();
-      }
       // taking fire: red vignette pulse
       if (player.hitFlash > 0) {
         player.hitFlash = Math.max(0, player.hitFlash - 1 / 60);
@@ -338,6 +327,29 @@ async function boot() {
         ctx.fillRect(0, 0, w, h);
         ctx.restore();
       }
+    };
+
+    // top layer: threat warnings draw OVER all symbology (PASS-2 item 2 —
+    // the pitch ladder was drawing across the MISSILE text); outline never
+    // blinks below 0.6, fill pulses, round joins kill the miter spikes
+    hud.arcadeTopLayer = (ctx) => {
+      if (!(battlefield && battlefield.samInbound())) return;
+      const w = ctx.canvas.width / (window.devicePixelRatio || 1);
+      const h = ctx.canvas.height / (window.devicePixelRatio || 1);
+      ctx.save();
+      ctx.globalCompositeOperation = "source-over";
+      const pulse = Math.floor(performance.now() / 250) % 2 === 0 ? 1.0 : 0.6;
+      ctx.font = "bold 30px ui-monospace, Menlo, monospace";
+      ctx.textAlign = "center";
+      ctx.lineJoin = "round";
+      ctx.miterLimit = 2;
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "rgba(0,0,0,0.9)";
+      ctx.strokeText("MISSILE", w / 2, h * 0.3);
+      ctx.globalAlpha = pulse;
+      ctx.fillStyle = "#ff5a3c";
+      ctx.fillText("MISSILE", w / 2, h * 0.3);
+      ctx.restore();
     };
   }
 
