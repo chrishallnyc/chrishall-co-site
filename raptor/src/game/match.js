@@ -21,15 +21,18 @@ const REARM_TIME = 4.0;
 const BOUNDARY = 30000, BOUNDARY_GRACE = 8.0, BOUNDARY_DPS = 4;
 
 export class Match {
-  constructor(battlefield, player) {
+  constructor(battlefield, player, { airfield } = {}) {
     this.name = "match";
     this.bf = battlefield;
     this.player = player;
-    // seed red from what is actually standing on this front
+    this.airfield = airfield || AIRFIELD; // per-front pad (INC-2); NELLIS default
+    // seed red from what is actually standing on this front (side 0 only —
+    // blue/friendly units are not the enemy's ground war)
     let red = 0;
     if (battlefield) {
       for (let i = 0; i < battlefield.n; i++) {
-        if (battlefield.alive(i)) red += TICKET_WEIGHTS[battlefield.types[i]] || 5;
+        if (battlefield.alive(i) && (!battlefield.side || battlefield.side[i] === 0))
+          red += TICKET_WEIGHTS[battlefield.types[i]] || 5;
       }
     }
     this.redMax = red || 1;
@@ -58,7 +61,9 @@ export class Match {
     if (bf && bf.kills !== this._killsSeen) {
       this._killsSeen = bf.kills;
       let red = 0;
-      for (let i = 0; i < bf.n; i++) if (bf.alive(i)) red += TICKET_WEIGHTS[bf.types[i]] || 5;
+      for (let i = 0; i < bf.n; i++) {
+        if (bf.alive(i) && (!bf.side || bf.side[i] === 0)) red += TICKET_WEIGHTS[bf.types[i]] || 5;
+      }
       this.red = red;
     }
 
@@ -72,11 +77,12 @@ export class Match {
 
     // airfield rearm: inside the circle, low and slow
     const st = P.fm.state;
-    const dx = st[0] - AIRFIELD.x, dy = st[1] - AIRFIELD.y;
+    const AF = this.airfield;
+    const dx = st[0] - AF.x, dy = st[1] - AF.y;
     const groundH = P.terrain ? P.terrain.heightAt(st[0], st[1]) : 0;
     const agl = st[2] - Math.max(groundH, 0);
     const spd = Math.hypot(st[7], st[8], st[9]);
-    const inZone = (dx * dx + dy * dy) < AIRFIELD.r * AIRFIELD.r && agl < REARM_AGL_MAX && spd < REARM_SPEED_MAX;
+    const inZone = (dx * dx + dy * dy) < AF.r * AF.r && agl < REARM_AGL_MAX && spd < REARM_SPEED_MAX;
     const needs = P.gun.ammo < 480 || P.missiles.ammo < 4 || P.hp < 100;
     this.rearming = inZone && needs;
     if (this.rearming) {

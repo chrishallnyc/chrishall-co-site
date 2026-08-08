@@ -1,11 +1,15 @@
 {
- "updated": "2026-08-07T23:20:00-07:00",
- "version": "v0.24.0",
- "now": "v0.24.0 THE FIRST SORTIE \u2014 real missions with objectives, radio calls, win/lose; dynamic campaign next",
+ "updated": "2026-08-08T00:05:00-07:00",
+ "version": "v0.25.0",
+ "now": "v0.25.0 THE LIVING BATTLEFIELD \u2014 convoys drive, reinforcements spawn, friendly forces exist; campaign engine next",
  "nowPhase": 12,
  "paused": false,
- "pushes": 55,
+ "pushes": 56,
  "ledger": [
+  {
+   "v": "v0.25.0",
+   "what": "THE LIVING BATTLEFIELD \u2014 48-unit war: driving convoys, mid-sortie reinforcements, friendly forces, rearm pads on all three fronts"
+  },
   {
    "v": "v0.24.0",
    "what": "THE FIRST SORTIE \u2014 mission system: objectives HUD, radio comms, STRIKE + SEAD sorties over Nevada (?mission=), deterministic replays"
@@ -101,13 +105,13 @@
   {
    "n": 9,
    "name": "AI & ground war",
-   "pct": 60,
+   "pct": 70,
    "note": "AAA + SAM return fire live with real evasion doctrine; vehicle movement + bandits next"
   },
   {
    "n": 10,
    "name": "Match modes & dynamic campaign",
-   "pct": 72,
+   "pct": 76,
    "note": "tickets/respawns/rearm/boundary/win-lose live; Daily Operation seeds + wingmen later"
   },
   {

@@ -4,6 +4,15 @@
 // the SimCore auto-hash; groups/materials/smoke are render-side only.
 // Placement tables are hand-picked from terrain probes (flat cells, real
 // water for ships) — see BUILD-STATE D-040.
+//
+// PHASE 11 INC-2 (D-065 amendment 3 POOL DOCTRINE): fixed capacity
+// MAX_UNITS=48. Slots [0, n) are the FRONTS boot placements (index order is
+// a t17/t20 contract — never reorder); slots [n, 48) are typed RESERVE
+// slots whose meshes are built and scene-added AT CONSTRUCTION (this
+// renderer build silently drops post-boot top-level scene.add — flightfx
+// landmine) and hidden until spawnGroup() activates them. State arrays are
+// all sized 48 at construction so the hash length never changes. side/tag
+// columns + convoy drive along setPath() waypoints land here too.
 
 import * as THREE from "three";
 import { UNITS } from "../world/groundunits.js";
@@ -52,6 +61,44 @@ const FRONTS = {
     ["zsu", -5000, -4000, 2.6], ["supply_truck", -4900, -4120, 2.6],
   ],
 };
+
+// Fixed pool capacity (design §0 rule 5): state length — and therefore hash
+// length — never changes. n stays "boot placement count"; cap is 48.
+export const MAX_UNITS = 48;
+
+// Reserve slot i (i >= n) is pre-built as RESERVE_TYPES[i - n]: spawnGroup
+// activates the first free reserve slot of the requested type in index
+// order. Trucks/zsus lead (convoys + ambushes are the INC-2/INC-3 spawn
+// vocabulary); ships trail (ASHM/fleet increments) so they only pre-build
+// on fronts with deep reserve room. 48 entries covers even an empty front.
+const RESERVE_TYPES = [
+  "supply_truck", "supply_truck", "zsu", "supply_truck", "zsu", "sam_tel",
+  "supply_truck", "sam_radar", "supply_truck", "zsu", "supply_truck",
+  "sam_tel", "zsu", "supply_truck", "supply_truck", "zsu", "sam_radar",
+  "sam_tel", "supply_truck", "zsu", "supply_truck", "sam_tel", "zsu",
+  "supply_truck", "sam_radar", "supply_truck", "zsu", "sam_tel",
+  "supply_truck", "zsu", "supply_truck", "sam_radar", "sam_tel",
+  "supply_truck", "zsu", "supply_truck",
+  "cargo_ship", "destroyer", "cargo_ship", "destroyer", "carrier",
+  "supply_truck", "supply_truck", "supply_truck", "supply_truck",
+  "supply_truck", "supply_truck", "supply_truck",
+];
+
+// Per-front rearm pads (kills match.js's NELLIS-only const; main.js hands
+// these to Match). NELLIS is the probed D-061 pad. VALDEZ/MARIANAS probed
+// 2026-08-07 (dense 100m grid across the disc, land-only h > 2m):
+//   VALDEZ   (0, -6000) r600 — the spawn plateau itself; height 834.6-854.0m,
+//            variance 19.4m, sd 3.9m; nearest red unit ≥ 18 km.
+//   MARIANAS (-3200, -8000) r600 — Saipan coastal flat; height 3.6-31.0m,
+//            variance 27.3m, sd 7.8m; 4.4 km from the Saipan ZSU (outside
+//            its 2600m AAA range — you can rearm unshelled).
+export const FRONT_AIRFIELDS = {
+  NELLIS: { x: -3000, y: -8700, r: 900 },
+  VALDEZ: { x: 0, y: -6000, r: 600 },
+  MARIANAS: { x: -3200, y: -8000, r: 600 },
+};
+
+const CONVOY_SPEED = 8; // m/s along setPath waypoints (design §2 CONVOY row)
 
 const MAX_SMOKE = 64; // instanced billboard quads shared by all plumes
 
@@ -137,15 +184,24 @@ const MAX_SAM = 4;
 export class Battlefield {
   constructor(scene, terrain, front, player = null) {
     this.name = "battlefield";
-    this.kills = 0;
+    this.kills = 0;       // red deaths only (drives match red-ticket recount)
+    this.blueLosses = 0;  // blue deaths — never touch kills/tickets (INC-2)
     this.player = player; // set post-construction by main.js (build order)
     const table = FRONTS[front] || [];
-    this.n = table.length;
-    this.state = new Float64Array(this.n * 5); // hashed via hash() below
+    this.n = table.length;   // boot placement count (t17/t20 index contract)
+    this.cap = MAX_UNITS;    // fixed slot capacity; [n, cap) = reserve pool
+    this.state = new Float64Array(MAX_UNITS * 5); // hashed via hash() below
+    this.side = new Uint8Array(MAX_UNITS);   // 0 red, 1 blue (boot rows: red)
+    this.tag = new Int32Array(MAX_UNITS);    // 0 = untagged group id
+    this.slotUsed = new Uint8Array(MAX_UNITS); // activated ever (dead != free reserve)
+    this.yawS = new Float64Array(MAX_UNITS); // three-frame yaw; convoy drive steers it
+    this.wpt = new Int32Array(MAX_UNITS);    // convoy waypoint cursor
+    this.paths = new Map();                  // tag -> flat Float64Array [x0,y0,x1,y1,...]
     this.types = []; this.groups = []; this.parts = [];
-    this.zsus = []; // unit indices that shoot back
-    // per-zsu fire state: [phase timer, spool] — phase>0 bursting, <0 cooling
-    this.aaa = new Float64Array(0);
+    this.zsus = []; // unit indices that shoot back (red only; spawns append)
+    // per-UNIT-INDEX fire state: [phase timer, spool] at i*2 — phase>0
+    // bursting, <0 cooling. Fixed 48-wide so reserve zsus activate in place.
+    this.aaa = new Float64Array(MAX_UNITS * 2);
     // enemy rounds (ENU): x,y,z, vx,vy,vz, age
     this.er = new Float64Array(MAX_ER * 7);
     this.erLive = new Uint8Array(MAX_ER);
@@ -155,6 +211,13 @@ export class Battlefield {
     this.root.name = "battlefield";
     scene.add(this.root); // boot-time add — safe per the flightfx landmine
 
+    const buildUnit = (type) => {
+      const { group, parts } = UNITS[type]();
+      batchStatics(group, parts); // ~35 meshes -> ~5 per unit (MAXFI item-budget rule)
+      this.root.add(group);
+      this.types.push(type); this.groups.push(group); this.parts.push(parts);
+      return group;
+    };
     table.forEach(([type, x, y, yaw], i) => {
       const spec = TYPE[type];
       const h = terrain ? terrain.heightAt(x, y) : 0;
@@ -162,19 +225,26 @@ export class Battlefield {
       const o = i * 5;
       this.state[o] = x; this.state[o + 1] = y; this.state[o + 2] = base + spec.cz;
       this.state[o + 3] = spec.r; this.state[o + 4] = spec.hp;
-      const { group, parts } = UNITS[type]();
-      batchStatics(group, parts); // ~35 meshes -> ~5 per unit (MAXFI item-budget rule)
+      this.slotUsed[i] = 1;
+      this.yawS[i] = yaw;
+      const group = buildUnit(type);
       group.position.set(x, base, y); // ENU -> three: (east, up, north)
       group.rotation.y = yaw;
-      this.root.add(group);
-      this.types.push(type); this.groups.push(group); this.parts.push(parts);
       if (type === "zsu") this.zsus.push(i);
     });
-    this.aaa = new Float64Array(this.zsus.length * 2);
-    for (let k = 0; k < this.zsus.length; k++) this.aaa[k * 2] = -1.0 - k * 0.9; // staggered first bursts
+    // RESERVE pool (amendment 3): every mesh a trigger could ever activate
+    // is built and scene-added right here, hidden. spawnGroup only re-poses
+    // and shows them — it never constructs scene geometry.
+    for (let i = this.n; i < MAX_UNITS; i++) {
+      const group = buildUnit(RESERVE_TYPES[i - this.n]);
+      group.visible = false;
+      group.position.set(0, -500, 0);
+    }
+    for (let k = 0; k < this.zsus.length; k++) this.aaa[this.zsus[k] * 2] = -1.0 - k * 0.9; // staggered first bursts
     this.tels = [];
     for (let i = 0; i < this.n; i++) if (this.types[i] === "sam_tel") this.tels.push(i);
-    this.telCool = new Float64Array(this.tels.length).fill(3); // grace at spawn
+    this.telCool = new Float64Array(MAX_UNITS); // per unit index, fixed width
+    for (const i of this.tels) this.telCool[i] = 3; // grace at spawn
     // SAM pool: x,y,z, vx,vy,vz, age, massKg, axS,ayS,azS (lagged accel)
     this.sam = new Float64Array(MAX_SAM * 11);
     this.samLive = new Uint8Array(MAX_SAM);
@@ -222,18 +292,95 @@ export class Battlefield {
   }
 
   alive(i) { return this.state[i * 5 + 4] > 0; }
-  aliveCount() { let c = 0; for (let i = 0; i < this.n; i++) if (this.alive(i)) c++; return c; }
+  aliveCount() { let c = 0; for (let i = 0; i < this.cap; i++) if (this.alive(i)) c++; return c; }
   samInbound() { for (let s = 0; s < MAX_SAM; s++) if (this.samLive[s]) return true; return false; }
+
+  // Register a convoy path: tagged supply_trucks drive it at 8 m/s.
+  setPath(tag, pts) {
+    const flat = new Float64Array(pts.length * 2);
+    for (let k = 0; k < pts.length; k++) { flat[k * 2] = pts[k][0]; flat[k * 2 + 1] = pts[k][1]; }
+    this.paths.set(tag | 0, flat);
+  }
+
+  // Activate reserve slots (amendment 3 pool doctrine): units =
+  // [[type, x, y, yaw, side, tag], ...]. Deterministic assignment — the
+  // first free reserve slot of the requested type, in index order. Returns
+  // one slot index per unit; -1 where the typed reserve pool is exhausted.
+  // Activated units shoot (red zsus join the AAA loop, red TELs the SAM
+  // loop) and die (damage/testSegment) exactly like boot units.
+  spawnGroup(units) {
+    const out = [];
+    for (const u of units) {
+      const type = u[0], x = u[1], y = u[2];
+      const yaw = u[3] || 0, side = u[4] ? 1 : 0, tag = (u[5] || 0) | 0;
+      const spec = TYPE[type];
+      let slot = -1;
+      if (spec) {
+        for (let i = this.n; i < this.cap; i++) {
+          if (!this.slotUsed[i] && this.types[i] === type) { slot = i; break; }
+        }
+      }
+      out.push(slot);
+      if (slot < 0) continue;
+      const h = this.terrain ? this.terrain.heightAt(x, y) : 0;
+      const base = h <= 0 ? 0 : h; // terrain-snap, boot placement rule
+      const o = slot * 5;
+      this.state[o] = x; this.state[o + 1] = y; this.state[o + 2] = base + spec.cz;
+      this.state[o + 3] = spec.r; this.state[o + 4] = spec.hp;
+      this.slotUsed[slot] = 1;
+      this.side[slot] = side;
+      this.tag[slot] = tag;
+      this.yawS[slot] = yaw;
+      this.wpt[slot] = 0;
+      const g = this.groups[slot]; // pre-built at construction — show, never add
+      g.position.set(x, base, y);
+      g.rotation.y = yaw;
+      g.visible = true;
+      if (side === 0) { // red joins the war; blue is scenery with hitpoints (INC-2)
+        if (type === "zsu") { this.zsus.push(slot); this.aaa[slot * 2] = -0.6; this.aaa[slot * 2 + 1] = 0; }
+        else if (type === "sam_tel") { this.tels.push(slot); this.telCool[slot] = 3; }
+      }
+    }
+    return out;
+  }
 
   // ---- sim side ----
   tick(sim, dt) {
+    // ---- convoy drive (before AAA/SAM per design): tagged trucks follow
+    // their setPath waypoints at 8 m/s, terrain-snapped, yaw on heading ----
+    if (this.paths.size) {
+      for (let i = 0; i < this.cap; i++) {
+        const o = i * 5;
+        if (this.state[o + 4] <= 0 || this.types[i] !== "supply_truck") continue;
+        const path = this.tag[i] !== 0 ? this.paths.get(this.tag[i]) : null;
+        if (!path) continue;
+        let w = this.wpt[i];
+        if (w * 2 >= path.length) continue; // path done — hold position
+        let x = this.state[o], y = this.state[o + 1];
+        let step = CONVOY_SPEED * dt;
+        while (step > 0 && w * 2 < path.length) {
+          const dx = path[w * 2] - x, dy = path[w * 2 + 1] - y;
+          const d = Math.hypot(dx, dy);
+          if (d <= step) { x = path[w * 2]; y = path[w * 2 + 1]; step -= d; w++; }
+          else {
+            x += (dx / d) * step; y += (dy / d) * step;
+            this.yawS[i] = Math.atan2(dx, dy); // ENU bearing == three yaw
+            step = 0;
+          }
+        }
+        this.wpt[i] = w;
+        const h = this.terrain ? this.terrain.heightAt(x, y) : 0;
+        this.state[o] = x; this.state[o + 1] = y;
+        this.state[o + 2] = (h <= 0 ? 0 : h) + TYPE.supply_truck.cz;
+      }
+    }
     const P = this.player;
     if (P) {
       const ps = P.fm.state; // previous-tick pos is fine (battlefield ticks first)
       const px = ps[0], py = ps[1], pz = ps[2];
       const pvx = ps[7], pvy = ps[8], pvz = ps[9];
       for (let k = 0; k < this.zsus.length; k++) {
-        const i = this.zsus[k], o = i * 5, a = k * 2;
+        const i = this.zsus[k], o = i * 5, a = i * 2;
         if (this.state[o + 4] <= 0) continue; // dead guns don't shoot
         const dx = px - this.state[o], dy = py - this.state[o + 1], dz = pz - this.state[o + 2];
         const dist = Math.hypot(dx, dy, dz);
@@ -253,9 +400,9 @@ export class Battlefield {
     if (P) {
       const ps = P.fm.state;
       for (let k = 0; k < this.tels.length; k++) {
-        this.telCool[k] -= dt;
         const i = this.tels[k], o = i * 5;
-        if (this.state[o + 4] <= 0 || this.telCool[k] > 0) continue;
+        this.telCool[i] -= dt;
+        if (this.state[o + 4] <= 0 || this.telCool[i] > 0) continue;
         const dx = ps[0] - this.state[o], dy = ps[1] - this.state[o + 1], dz = ps[2] - this.state[o + 2];
         const dist = Math.hypot(dx, dy, dz);
         if (dist < SAM.envMin || dist > SAM.envMax || dz < 50) continue; // envelope + no ground-hugging shots
@@ -270,7 +417,7 @@ export class Battlefield {
         r[so + 6] = 0; r[so + 7] = SAM.massKg;
         r[so + 8] = 0; r[so + 9] = 0; r[so + 10] = 0;
         this.samLive[slot] = 1;
-        this.telCool[k] = SAM.reloadS;
+        this.telCool[i] = SAM.reloadS;
       }
       const mdot = SAM.propKg / SAM.burnS;
       for (let s = 0; s < MAX_SAM; s++) {
@@ -399,7 +546,12 @@ export class Battlefield {
     for (let i = 0; i < this.aaa.length; i++) H(this.aaa[i]);
     for (let i = 0; i < this.sam.length; i++) H(this.sam[i]);
     for (let i = 0; i < this.telCool.length; i++) H(this.telCool[i]);
-    H(this.kills); H(this.playerHits); H(this.samHits);
+    for (let i = 0; i < this.cap; i++) H(this.side[i]);
+    for (let i = 0; i < this.cap; i++) H(this.tag[i]);
+    for (let i = 0; i < this.cap; i++) H(this.slotUsed[i]);
+    for (let i = 0; i < this.cap; i++) H(this.wpt[i]);
+    for (let i = 0; i < this.cap; i++) H(this.yawS[i]);
+    H(this.kills); H(this.playerHits); H(this.samHits); H(this.blueLosses);
     return h;
   }
 
@@ -407,7 +559,7 @@ export class Battlefield {
   testSegment(x0, y0, z0, x1, y1, z1) {
     const dx = x1 - x0, dy = y1 - y0, dz = z1 - z0;
     const len2 = dx * dx + dy * dy + dz * dz;
-    for (let i = 0; i < this.n; i++) {
+    for (let i = 0; i < this.cap; i++) {
       const o = i * 5;
       if (this.state[o + 4] <= 0) continue;
       const cx = this.state[o] - x0, cy = this.state[o + 1] - y0, cz = this.state[o + 2] - z0;
@@ -425,7 +577,10 @@ export class Battlefield {
     this.state[o + 4] -= dmg;
     if (this.state[o + 4] <= 0) {
       this.state[o + 4] = 0;
-      this.kills++;
+      // blue deaths never feed kills (match's red recount trigger) — they
+      // book to blueLosses; protect_tag objectives read it later (INC-4)
+      if (this.side[i]) this.blueLosses++;
+      else this.kills++;
       this._destroy(i);
       return true;
     }
@@ -442,8 +597,18 @@ export class Battlefield {
   // ---- render side ----
   render(dt, camera) {
     this._clock += dt;
+    // convoy trucks move sim-side — mirror the hashed truth into their groups
+    if (this.paths.size) {
+      for (let i = 0; i < this.cap; i++) {
+        if (!this.alive(i) || this.tag[i] === 0 || this.types[i] !== "supply_truck") continue;
+        if (!this.paths.has(this.tag[i])) continue;
+        const o = i * 5, g = this.groups[i];
+        g.position.set(this.state[o], this.state[o + 2] - TYPE.supply_truck.cz, this.state[o + 1]);
+        g.rotation.y = this.yawS[i];
+      }
+    }
     // idle life: spin live radar dishes; live ZSU turrets track the player
-    for (let i = 0; i < this.n; i++) {
+    for (let i = 0; i < this.cap; i++) {
       if (!this.alive(i)) continue;
       const p = this.parts[i];
       if (p.dish) p.dish.rotation.y += dt * 1.4;

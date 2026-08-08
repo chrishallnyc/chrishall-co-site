@@ -17,7 +17,7 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.24.0";
+const VERSION = "0.25.0";
 const PHASE = 12;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
@@ -244,7 +244,9 @@ async function boot() {
   let match = null, script = null, missionData = null;
   if (player && battlefield && flags.get("nomatch") !== "1") {
     const { Match } = await import("./game/match.js");
-    match = new Match(battlefield, player);
+    const BF = await import("./game/battlefield.js");
+    const pad = BF.FRONT_AIRFIELDS ? BF.FRONT_AIRFIELDS[atmosphere.frontName] : null; // INC-2 per-front pads
+    match = new Match(battlefield, player, { airfield: pad });
     const mname = flags.get("mission");
     if (mname) {
       try {
@@ -253,6 +255,7 @@ async function boot() {
         const spec = M.loadMission(mname);
         script = new Script(spec, { battlefield, player, match, terrain });
         match.scripted = true;
+        if (spec.airfield) match.airfield = spec.airfield; // mission pad overrides
         missionData = { spec, lines: M.COMMS_LINES };
         if (spec.playerSpawn) {
           const ps = spec.playerSpawn; // mission spawn is also the respawn point
