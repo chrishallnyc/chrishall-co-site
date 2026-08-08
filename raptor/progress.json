@@ -1,11 +1,15 @@
 {
- "updated": "2026-08-08T00:05:00-07:00",
- "version": "v0.25.0",
- "now": "v0.25.0 THE LIVING BATTLEFIELD \u2014 convoys drive, reinforcements spawn, friendly forces exist; campaign engine next",
+ "updated": "2026-08-08T00:55:00-07:00",
+ "version": "v0.26.0",
+ "now": "v0.26.0 THE LONG WAR \u2014 persistent dynamic campaign live on all three fronts; bandits (enemy aircraft) next",
  "nowPhase": 12,
  "paused": false,
- "pushes": 56,
+ "pushes": 57,
  "ledger": [
+  {
+   "v": "v0.26.0",
+   "what": "THE LONG WAR \u2014 persistent operations: generated sorties push a real front line (win +2km toward victory at +16), the hangar remembers your war, deterministic 200-sortie chains"
+  },
   {
    "v": "v0.25.0",
    "what": "THE LIVING BATTLEFIELD \u2014 48-unit war: driving convoys, mid-sortie reinforcements, friendly forces, rearm pads on all three fronts"
@@ -111,7 +115,7 @@
   {
    "n": 10,
    "name": "Match modes & dynamic campaign",
-   "pct": 76,
+   "pct": 85,
    "note": "tickets/respawns/rearm/boundary/win-lose live; Daily Operation seeds + wingmen later"
   },
   {

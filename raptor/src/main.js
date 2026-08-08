@@ -17,7 +17,7 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.25.0";
+const VERSION = "0.26.0";
 const PHASE = 12;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
@@ -241,29 +241,40 @@ async function boot() {
   // PHASE 11 INC-1: ?mission=<name> loads a MissionSpec; the Script system
   // ticks AFTER player (observes the completed combat tick), BEFORE match
   // (which scores it). Script owns win/lose; match keeps tickets/rearm/boundary.
-  let match = null, script = null, missionData = null;
+  let match = null, script = null, missionData = null, campaign = null;
   if (player && battlefield && flags.get("nomatch") !== "1") {
     const { Match } = await import("./game/match.js");
     const BF = await import("./game/battlefield.js");
     const pad = BF.FRONT_AIRFIELDS ? BF.FRONT_AIRFIELDS[atmosphere.frontName] : null; // INC-2 per-front pads
     match = new Match(battlefield, player, { airfield: pad });
     const mname = flags.get("mission");
-    if (mname) {
+    const opFront = !mname && flags.get("op") ? atmosphere.frontName : null;
+    if (mname || opFront) {
       try {
         const M = await import("./game/missions.js");
         const { Script } = await import("./game/script.js");
-        const spec = M.loadMission(mname);
+        let spec, extraLines = null;
+        if (opFront) { // INC-3: generated operation sortie — save -> spec, one door in
+          const E = await import("./campaign/engine.js");
+          const save = E.loadSave(opFront);
+          spec = M.loadMission(E.genMission(save));
+          extraLines = E.OP_LINES || null;
+          campaign = { E, save, spec, saved: false };
+          if (!flags.get("tod") && spec.todH !== undefined) atmosphere.setTime(spec.todH);
+        } else {
+          spec = M.loadMission(mname);
+        }
         script = new Script(spec, { battlefield, player, match, terrain });
         match.scripted = true;
         if (spec.airfield) match.airfield = spec.airfield; // mission pad overrides
-        missionData = { spec, lines: M.COMMS_LINES };
+        missionData = { spec, lines: extraLines ? { ...M.COMMS_LINES, ...extraLines } : M.COMMS_LINES };
         if (spec.playerSpawn) {
           const ps = spec.playerSpawn; // mission spawn is also the respawn point
           player.spawn = { x: ps.x, y: ps.y, alt: ps.alt, headingRad: (ps.headingDeg || 0) * Math.PI / 180, speed: ps.speed || 200 };
           player.debugCommand({ pos: ps, throttle: 0.8 });
         }
         sim.addSystem(script);
-      } catch (err) { console.warn("mission unavailable, quick match stays:", err && err.message); }
+      } catch (err) { campaign = null; console.warn("mission unavailable, quick match stays:", err && err.message); }
     }
     sim.addSystem(match);
   }
@@ -646,6 +657,14 @@ async function boot() {
         killCam = { c: lastJetPos.clone(), until: now + 4000 };
       }
       if (killCam && killCam.until && now > killCam.until) killCam = null;
+      if (campaign && match && match.over !== 0 && !campaign.saved) {
+        campaign.saved = true; // one write, render-side: sim never reads the save
+        try {
+          campaign.save = campaign.E.reduceCampaign(campaign.save, campaign.spec,
+            { over: match.over, blueLeft: match.blue, redLeft: match.red });
+          campaign.E.saveSave(campaign.save);
+        } catch (err) { console.warn("campaign save failed:", err && err.message); }
+      }
       const matchOrbit = match && match.over !== 0;
       const cine = !!killCam || matchOrbit;
       const parked = world.fixYaw !== null;
@@ -725,13 +744,34 @@ function hangar() {
     for (const c of chips) c.classList.toggle("sel", c.dataset.tod === tod);
   };
   const fly = () => { location.href = "?front=" + front + "&tod=" + TOD[tod](front); };
-  for (const c of cards) c.addEventListener("click", () => { front = c.dataset.front; sync(); });
+  // INC-3: persistent operation card — the war you left is still there
+  const opBox = document.getElementById("opRow");
+  const flyOp = () => { location.href = "?front=" + front + "&op=1"; };
+  let opSum = null;
+  const syncOp = async () => {
+    if (!opBox) return;
+    try {
+      const E = await import("./campaign/engine.js");
+      opSum = E.summarize(E.loadSave(front));
+      const km = opSum.frontKm > 0 ? "+" + opSum.frontKm : String(opSum.frontKm);
+      opBox.innerHTML = opSum.status !== "live"
+        ? `OPERATION ${opSum.status.toUpperCase()} — front line ${km} km · <button id="opFly">START ANEW</button>`
+        : `OPERATION · front line ${km} km · sortie ${opSum.sortieIndex + 1} · next: ${opSum.nextType ? opSum.nextType.toUpperCase() : "?"}${opSum.nextZoneName ? " — " + opSum.nextZoneName : ""} · <button id="opFly">FLY THE OPERATION</button>`;
+      opBox.style.display = "block";
+      document.getElementById("opFly")?.addEventListener("click", () => {
+        if (opSum.status !== "live") { try { localStorage.removeItem("raptor.op.v1:" + front); } catch (_) {} }
+        flyOp();
+      });
+    } catch (_) { opBox.style.display = "none"; } // engine not landed yet — hide
+  };
+  syncOp();
+  for (const c of cards) c.addEventListener("click", () => { front = c.dataset.front; sync(); syncOp(); });
   for (const c of cards) c.addEventListener("dblclick", fly);
   for (const c of chips) c.addEventListener("click", () => { tod = c.dataset.tod; sync(); });
   document.getElementById("flyBtn").addEventListener("click", fly);
   addEventListener("keydown", (e) => {
     const i = ["Digit1", "Digit2", "Digit3"].indexOf(e.code);
-    if (i >= 0) { front = cards[i].dataset.front; sync(); }
+    if (i >= 0) { front = cards[i].dataset.front; sync(); syncOp(); }
     else if (e.code === "KeyT") { tod = chips[(chips.findIndex((c) => c.dataset.tod === tod) + 1) % chips.length].dataset.tod; sync(); }
     else if (e.code === "Enter" || e.code === "Space") fly();
   });

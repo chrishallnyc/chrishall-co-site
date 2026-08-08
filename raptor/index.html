@@ -62,6 +62,10 @@ body { color:var(--ink); font-family:"SF Mono", ui-monospace, Menlo, Consolas, m
 #hangar .flybtn { background:var(--acc); border:none; color:#101014; font:inherit; font-weight:700;
   letter-spacing:6px; font-size:13px; padding:13px 58px; cursor:pointer; }
 #hangar .flybtn:hover { filter:brightness(1.1); }
+#hangar .oprow { color:var(--mid); font-size:10px; letter-spacing:2px; text-align:center; }
+#hangar .oprow button { background:none; border:1px solid var(--acc); color:var(--acc); font:inherit;
+  font-size:10px; letter-spacing:2px; padding:5px 14px; cursor:pointer; margin-left:8px; }
+#hangar .oprow button:hover { background:rgba(232,180,111,.12); }
 #hangar .hkeys { color:var(--dim); font-size:9px; letter-spacing:2px; }
 #hangar .hfoot { color:var(--dim); font-size:9px; letter-spacing:1.5px; text-align:center; }
 #hangar .hfoot a { color:var(--dim); }
@@ -104,7 +108,7 @@ body { color:var(--ink); font-family:"SF Mono", ui-monospace, Menlo, Consolas, m
 
 <div id="chrome">
   <div class="brand">RAPTOR</div>
-  <div class="sub">EYES THAT ADAPT · <a href="#" id="controlsLink">controls</a> · <a href="/progress.html">progress</a> · <a href="/devlog.html">devlog</a> · v0.25.0<br>
+  <div class="sub">EYES THAT ADAPT · <a href="#" id="controlsLink">controls</a> · <a href="/progress.html">progress</a> · <a href="/devlog.html">devlog</a> · v0.26.0<br>
   terrain: USGS 3DEP + NAIP · <a href="https://s2maps.eu" rel="noopener">Sentinel-2 cloudless by EOX</a></div>
 </div>
 
@@ -138,6 +142,7 @@ body { color:var(--ink); font-family:"SF Mono", ui-monospace, Menlo, Consolas, m
     <button class="todchip" data-tod="afternoon">AFTERNOON</button>
     <button class="todchip" data-tod="golden">GOLDEN HOUR</button>
   </div>
+  <div class="oprow" id="opRow" style="display:none"></div>
   <button class="flybtn" id="flyBtn">FLY</button>
   <div class="hkeys">1 / 2 / 3 FRONT · T TIME · ENTER FLY</div>
   <div class="hfoot">terrain: USGS 3DEP + NAIP · <a href="https://s2maps.eu" rel="noopener">Sentinel-2 cloudless by EOX</a> · <a href="/devlog.html">devlog</a></div>
