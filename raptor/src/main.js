@@ -17,8 +17,8 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.20.0";
-const PHASE = 10;
+const VERSION = "0.21.0";
+const PHASE = 12;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
 // (phase 7, FM-PLAN.md) is wired into gameplay. Fields not derivable from
@@ -489,6 +489,40 @@ async function boot() {
   let benchSamples = (!hasManualTier() && !savedBench()) ? [] : null;
   let frameNo = 0;
 
+  // PHASE 12: auto-exposure metering (closes the golden-triptych
+  // LIVE-WITH-IT). Every 12 frames, blit the finished canvas into a 16x16
+  // 2D canvas, take log-average luminance, and drive an exposure multiplier
+  // toward mid-gray with eye-like adaptation (fast to brighten into shadow,
+  // slower to recover from glare). Multiplies the PALETTE exposure — night
+  // stays night via clamps. WebGPU+post only; ?autoexp=0 reverts.
+  let meter = null;
+  if (post && flags.get("autoexp") !== "0") {
+    const mc = document.createElement("canvas");
+    mc.width = 16; mc.height = 16;
+    meter = { ctx: mc.getContext("2d", { willReadFrequently: true }), mult: 1, frame: 0 };
+  }
+  state.autoExposure = !!meter;
+  state.meter = meter; // QA: adaptation multiplier visibility
+  function meterStep(dtSec) {
+    meter.frame++;
+    if (meter.frame % 12 !== 0) return;
+    try {
+      meter.ctx.drawImage(renderer.domElement, 0, 0, 16, 16);
+      const px = meter.ctx.getImageData(0, 0, 16, 16).data;
+      let logSum = 0;
+      for (let i = 0; i < px.length; i += 4) {
+        const l = (0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2]) / 255;
+        logSum += Math.log(Math.max(l, 1e-3));
+      }
+      const avg = Math.exp(logSum / 256);
+      const target = 0.42;
+      const desired = Math.min(Math.max(meter.mult * Math.pow(target / Math.max(avg, 1e-3), 0.6), 0.55), 2.3);
+      // adaptation: ~1s brightening, ~3s dimming (12-frame cadence)
+      const k = desired > meter.mult ? Math.min(dtSec * 12 / 1.0, 1) : Math.min(dtSec * 12 / 3.0, 1);
+      meter.mult += (desired - meter.mult) * k;
+    } catch (_) { /* canvas readback denied — palette exposure carries on */ }
+  }
+
   let last = performance.now();
   let firstFrame = true;
   let waterClock = 0; // render-side only — the sim never reads water
@@ -549,9 +583,10 @@ async function boot() {
     hud.update(player ? player.hudState() : testworldHudState(world, alpha));
     atmosphere.update(camera);
     if (atmoH) atmoH.uCamPos.value.copy(camera.position);
-    renderer.toneMappingExposure = atmosphere.exposure;
+    renderer.toneMappingExposure = atmosphere.exposure * (meter ? meter.mult : 1);
     if (post) post.post.render();
     else renderer.render(scene, camera);
+    if (meter) meterStep(dtMs / 1000);
     dbg.frame(dtMs, { backend: state.backend, tier: state.tier, sim });
     input.consumeFrame();
     if (firstFrame) {

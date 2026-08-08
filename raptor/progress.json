@@ -1,11 +1,12 @@
 {
-  "updated": "2026-08-07T20:55:00-07:00",
-  "version": "v0.20.0",
+  "updated": "2026-08-07T21:20:00-07:00",
+  "version": "v0.21.0",
   "now": "presentation era: auto-exposure, kill cam, hangar — then the campaign",
   "nowPhase": 12,
   "paused": false,
-  "pushes": 50,
+  "pushes": 51,
   "ledger": [
+    "2026-08-07 v0.21.0 — EYES THAT ADAPT: the camera now meters the scene like a human eye — quick to brighten into shadowed fjords, slow to recover from glare. The golden-hour shots across all three fronts finally sit within two-thirds of a stop of each other (the last big 'ships imperfect' item, now closed).",
     "2026-08-07 v0.20.0 — THE WAR HAS RULES: tickets on both sides, three lives, an airfield that rearms you if you come in low and slow, a battle boundary that warns then bites, and a VICTORY screen you have to earn by breaking the whole ground war. The sandbox is now a game you can win or lose.",
     "2026-08-07 v0.19.0 — PASS THREE, mandate complete: three judge panels, 22 measured fixes, and a final ship-readiness scorecard. The last pass caught its own subtleties (a cloud shadow anchor 'interpolating a crossing that never existed', a glint comb that WAS the fix for the previous problem) and closed with an honest list of conscious imperfections. The three 10%-better passes are done.",
     "2026-08-07 v0.18.0 — PASS TWO: the second judge panel widened every measurement and caught two of our own pass-1 fixes only holding where we'd measured them — both re-fixed globally (including under camera motion). Plus: combat finally LOOKS like combat (muzzle flash, hot tracers, impact sparks), the ocean lost its denim moire, and the golden-hour fjord mirrors the orange sky.",
@@ -106,8 +107,8 @@
     {
       "n": 12,
       "name": "Presentation (hangar, replays)",
-      "pct": 20,
-      "note": "HUD live; hangar, kill cam, war room pending"
+      "pct": 35,
+      "note": "auto-exposure metering live (golden triptych 1.56 -> 0.59 stops); kill cam + hangar next"
     },
     {
       "n": 13,
