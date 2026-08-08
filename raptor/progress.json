@@ -1,11 +1,12 @@
 {
-  "updated": "2026-08-07T20:05:00-07:00",
-  "version": "v0.19.0",
-  "now": "match modes next — tickets, respawns, rearm: the sandbox becomes a war",
-  "nowPhase": 14,
+  "updated": "2026-08-07T20:55:00-07:00",
+  "version": "v0.20.0",
+  "now": "presentation era: auto-exposure, kill cam, hangar — then the campaign",
+  "nowPhase": 12,
   "paused": false,
-  "pushes": 48,
+  "pushes": 50,
   "ledger": [
+    "2026-08-07 v0.20.0 — THE WAR HAS RULES: tickets on both sides, three lives, an airfield that rearms you if you come in low and slow, a battle boundary that warns then bites, and a VICTORY screen you have to earn by breaking the whole ground war. The sandbox is now a game you can win or lose.",
     "2026-08-07 v0.19.0 — PASS THREE, mandate complete: three judge panels, 22 measured fixes, and a final ship-readiness scorecard. The last pass caught its own subtleties (a cloud shadow anchor 'interpolating a crossing that never existed', a glint comb that WAS the fix for the previous problem) and closed with an honest list of conscious imperfections. The three 10%-better passes are done.",
     "2026-08-07 v0.18.0 — PASS TWO: the second judge panel widened every measurement and caught two of our own pass-1 fixes only holding where we'd measured them — both re-fixed globally (including under camera motion). Plus: combat finally LOOKS like combat (muzzle flash, hot tracers, impact sparks), the ocean lost its denim moire, and the golden-hour fjord mirrors the orange sky.",
     "2026-08-07 v0.17.0 — PASS ONE: a six-judge panel tore the game apart frame by frame and all 8 findings got fixed with measurements: cloud dot-lattice root-caused to a shadow term (10x cleaner), Nevada's air un-blued, the sun disc warms at sunset, HUD readable against clouds, living water with real glints, organic coastlines, and the phase-1 scale pylons finally retired from the ocean.",
@@ -93,8 +94,8 @@
     {
       "n": 10,
       "name": "Match modes & dynamic campaign",
-      "pct": 0,
-      "note": ""
+      "pct": 60,
+      "note": "tickets/respawns/rearm/boundary/win-lose live; Daily Operation seeds + wingmen later"
     },
     {
       "n": 11,
@@ -129,8 +130,8 @@
     {
       "n": 16,
       "name": "QA hardening",
-      "pct": 75,
-      "note": "13 batteries, 130 gates, judge panels + global-sweep acceptance standing"
+      "pct": 78,
+      "note": "14 batteries, 136 gates"
     },
     {
       "n": 17,

@@ -17,8 +17,8 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.19.0";
-const PHASE = 14;
+const VERSION = "0.20.0";
+const PHASE = 10;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
 // (phase 7, FM-PLAN.md) is wired into gameplay. Fields not derivable from
@@ -222,6 +222,13 @@ async function boot() {
     // the war shoots back (?noaaa=1 for scenery QA — no player ref, guns idle)
     if (battlefield && flags.get("noaaa") !== "1") battlefield.player = player;
   }
+  // PHASE 10: the war has rules (?nomatch=1 keeps the free-flight sandbox)
+  let match = null;
+  if (player && battlefield && flags.get("nomatch") !== "1") {
+    const { Match } = await import("./game/match.js");
+    match = new Match(battlefield, player);
+    sim.addSystem(match);
+  }
   // AB plume + wingtip vortices (nests under jetGroup — post-boot top-level
   // scene.add is silently dropped by this renderer build; see flightfx.js)
   const flightfx = player ? new FlightFX(scene, { jetGroup: world.jet, parts: world.f22parts }) : null;
@@ -335,22 +342,74 @@ async function boot() {
     // the pitch ladder was drawing across the MISSILE text); outline never
     // blinks below 0.6, fill pulses, round joins kill the miter spikes
     hud.arcadeTopLayer = (ctx) => {
-      if (!(battlefield && battlefield.samInbound())) return;
       const w = ctx.canvas.width / (window.devicePixelRatio || 1);
       const h = ctx.canvas.height / (window.devicePixelRatio || 1);
       ctx.save();
       ctx.globalCompositeOperation = "source-over";
-      const pulse = Math.floor(performance.now() / 250) % 2 === 0 ? 1.0 : 0.6;
-      ctx.font = "bold 30px ui-monospace, Menlo, monospace";
-      ctx.textAlign = "center";
-      ctx.lineJoin = "round";
-      ctx.miterLimit = 2;
-      ctx.lineWidth = 4;
-      ctx.strokeStyle = "rgba(0,0,0,0.9)";
-      ctx.strokeText("MISSILE", w / 2, h * 0.3);
-      ctx.globalAlpha = pulse;
-      ctx.fillStyle = "#ff5a3c";
-      ctx.fillText("MISSILE", w / 2, h * 0.3);
+      ctx.lineJoin = "round"; ctx.miterLimit = 2; ctx.textAlign = "center";
+
+      // ticket bars: blue (you) left, red (them) right — WT-style
+      if (match) {
+        const bw = 170, bh = 7, gap = 14, y0 = 58;
+        const blueF = match.blue / match.blueMax, redF = match.red / match.redMax;
+        ctx.fillStyle = "rgba(0,10,0,0.5)";
+        ctx.fillRect(w / 2 - bw - gap / 2 - 2, y0 - 2, bw + 4, bh + 4);
+        ctx.fillRect(w / 2 + gap / 2 - 2, y0 - 2, bw + 4, bh + 4);
+        ctx.fillStyle = "#7fb4e8";
+        ctx.fillRect(w / 2 - gap / 2 - bw * blueF, y0, bw * blueF, bh);
+        ctx.fillStyle = "#ff5a3c";
+        ctx.fillRect(w / 2 + gap / 2, y0, bw * redF, bh);
+        ctx.font = "10px ui-monospace, Menlo, monospace";
+        ctx.fillStyle = "#9be89b";
+        ctx.fillText(String(Math.round(match.blue)), w / 2 - bw - gap / 2 - 16, y0 + bh);
+        ctx.fillText(String(Math.round(match.red)), w / 2 + bw + gap / 2 + 16, y0 + bh);
+
+        if (match.rearming) {
+          ctx.font = "bold 14px ui-monospace, Menlo, monospace";
+          ctx.lineWidth = 3; ctx.strokeStyle = "rgba(0,0,0,0.85)";
+          const msg = "REARMING " + Math.round(match.rearmT / 4 * 100) + "%";
+          ctx.strokeText(msg, w / 2, h * 0.62);
+          ctx.fillStyle = "#9be89b";
+          ctx.fillText(msg, w / 2, h * 0.62);
+        }
+        if (match.outside && match.over === 0) {
+          const pulse2 = Math.floor(performance.now() / 300) % 2 === 0 ? 1.0 : 0.55;
+          ctx.font = "bold 26px ui-monospace, Menlo, monospace";
+          ctx.lineWidth = 4; ctx.strokeStyle = "rgba(0,0,0,0.9)";
+          ctx.strokeText("RETURN TO THE BATTLE", w / 2, h * 0.24);
+          ctx.globalAlpha = pulse2;
+          ctx.fillStyle = "#ff5a3c";
+          ctx.fillText("RETURN TO THE BATTLE", w / 2, h * 0.24);
+          ctx.globalAlpha = 1;
+        }
+        if (match.over !== 0) {
+          ctx.fillStyle = "rgba(10,10,14,0.55)";
+          ctx.fillRect(0, 0, w, h);
+          ctx.font = "bold 44px ui-monospace, Menlo, monospace";
+          ctx.lineWidth = 6; ctx.strokeStyle = "rgba(0,0,0,0.9)";
+          const title = match.over > 0 ? "VICTORY" : "DEFEAT";
+          ctx.strokeText(title, w / 2, h * 0.42);
+          ctx.fillStyle = match.over > 0 ? "#9be89b" : "#ff5a3c";
+          ctx.fillText(title, w / 2, h * 0.42);
+          ctx.font = "13px ui-monospace, Menlo, monospace";
+          ctx.fillStyle = "#e8e6df";
+          const sub = match.over > 0 ? "the ground war is broken — every target destroyed" : "no aircraft remaining — the war goes on without you";
+          ctx.lineWidth = 3; ctx.strokeText(sub, w / 2, h * 0.42 + 34);
+          ctx.fillText(sub, w / 2, h * 0.42 + 34);
+        }
+      }
+
+      // MISSILE warning (over everything but the end card)
+      if (battlefield && battlefield.samInbound() && (!match || match.over === 0)) {
+        const pulse = Math.floor(performance.now() / 250) % 2 === 0 ? 1.0 : 0.6;
+        ctx.font = "bold 30px ui-monospace, Menlo, monospace";
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "rgba(0,0,0,0.9)";
+        ctx.strokeText("MISSILE", w / 2, h * 0.3);
+        ctx.globalAlpha = pulse;
+        ctx.fillStyle = "#ff5a3c";
+        ctx.fillText("MISSILE", w / 2, h * 0.3);
+      }
       ctx.restore();
     };
   }
@@ -411,7 +470,7 @@ async function boot() {
 
   // public hooks (QA + future phases)
   Object.assign(state, {
-    sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud, player, battlefield,
+    sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud, player, battlefield, match,
     cloudImmersion: () => clouds.immersion,
     setTimeOfDay: (h) => atmosphere.setTime(h),
     setFront: (f) => atmosphere.setFront(String(f).toUpperCase()),
