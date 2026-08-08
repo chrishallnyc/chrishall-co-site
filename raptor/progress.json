@@ -1,11 +1,12 @@
 {
-  "updated": "2026-08-07T18:30:00-07:00",
-  "version": "v0.18.0",
-  "now": "final polish pass 3 of 3, then match modes — the sandbox becomes a war",
+  "updated": "2026-08-07T20:05:00-07:00",
+  "version": "v0.19.0",
+  "now": "match modes next — tickets, respawns, rearm: the sandbox becomes a war",
   "nowPhase": 14,
   "paused": false,
-  "pushes": 43,
+  "pushes": 48,
   "ledger": [
+    "2026-08-07 v0.19.0 — PASS THREE, mandate complete: three judge panels, 22 measured fixes, and a final ship-readiness scorecard. The last pass caught its own subtleties (a cloud shadow anchor 'interpolating a crossing that never existed', a glint comb that WAS the fix for the previous problem) and closed with an honest list of conscious imperfections. The three 10%-better passes are done.",
     "2026-08-07 v0.18.0 — PASS TWO: the second judge panel widened every measurement and caught two of our own pass-1 fixes only holding where we'd measured them — both re-fixed globally (including under camera motion). Plus: combat finally LOOKS like combat (muzzle flash, hot tracers, impact sparks), the ocean lost its denim moire, and the golden-hour fjord mirrors the orange sky.",
     "2026-08-07 v0.17.0 — PASS ONE: a six-judge panel tore the game apart frame by frame and all 8 findings got fixed with measurements: cloud dot-lattice root-caused to a shadow term (10x cleaner), Nevada's air un-blued, the sun disc warms at sunset, HUD readable against clouds, living water with real glints, organic coastlines, and the phase-1 scale pylons finally retired from the ocean.",
     "2026-08-07 v0.16.2 — THROTTLE, PERFECTED (per Chris): hold W to 100%, keep holding for afterburner, let go and it settles at 100% — exactly like War Thunder. Mouse never touches the throttle.",
@@ -116,8 +117,8 @@
     {
       "n": 14,
       "name": "Max fidelity pass",
-      "pct": 92,
-      "note": "pass 2/3: regressions caught by global sweeps, all re-fixed with motion-proof acceptance"
+      "pct": 100,
+      "note": "three passes complete, 22 measured fixes; auto-exposure + cloud ground-shadows + F-22 texture pass -> presentation backlog"
     },
     {
       "n": 15,
@@ -128,8 +129,8 @@
     {
       "n": 16,
       "name": "QA hardening",
-      "pct": 70,
-      "note": "13 batteries, 130 gates, global-sweep acceptance protocol"
+      "pct": 75,
+      "note": "13 batteries, 130 gates, judge panels + global-sweep acceptance standing"
     },
     {
       "n": 17,
