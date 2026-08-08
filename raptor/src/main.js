@@ -632,7 +632,39 @@ async function boot() {
   requestAnimationFrame(frame);
 }
 
-boot().catch((err) => {
+// PHASE 12: hangar — a bare URL gets the front picker before any engine
+// spend; ANY query param (QA flags included) flies straight in unchanged.
+function hangar() {
+  document.getElementById("veil")?.remove();
+  const chrome = document.getElementById("chrome");
+  if (chrome) chrome.style.display = "none"; // the hangar carries its own brand
+  const el = document.getElementById("hangar");
+  el.style.display = "flex";
+  const cards = [...el.querySelectorAll(".fcard")];
+  const chips = [...el.querySelectorAll(".todchip")];
+  const GOLDEN = { NELLIS: 18.8, VALDEZ: 21.4, MARIANAS: 17.8 }; // solar-elevation-matched (LATITUDE LAW)
+  const TOD = { noon: () => 12, afternoon: () => 15.5, golden: (f) => GOLDEN[f] };
+  let front = "NELLIS", tod = "noon";
+  const sync = () => {
+    for (const c of cards) c.classList.toggle("sel", c.dataset.front === front);
+    for (const c of chips) c.classList.toggle("sel", c.dataset.tod === tod);
+  };
+  const fly = () => { location.href = "?front=" + front + "&tod=" + TOD[tod](front); };
+  for (const c of cards) c.addEventListener("click", () => { front = c.dataset.front; sync(); });
+  for (const c of cards) c.addEventListener("dblclick", fly);
+  for (const c of chips) c.addEventListener("click", () => { tod = c.dataset.tod; sync(); });
+  document.getElementById("flyBtn").addEventListener("click", fly);
+  addEventListener("keydown", (e) => {
+    const i = ["Digit1", "Digit2", "Digit3"].indexOf(e.code);
+    if (i >= 0) { front = cards[i].dataset.front; sync(); }
+    else if (e.code === "KeyT") { tod = chips[(chips.findIndex((c) => c.dataset.tod === tod) + 1) % chips.length].dataset.tod; sync(); }
+    else if (e.code === "Enter" || e.code === "Space") fly();
+  });
+  state.hangar = true; // QA: visible without booting
+}
+
+if (!location.search) hangar();
+else boot().catch((err) => {
   state.failure = String(err && err.stack || err);
   console.error("RAPTOR boot failure:", err);
   const v = document.getElementById("veil");

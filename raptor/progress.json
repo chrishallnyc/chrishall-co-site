@@ -1,162 +1,166 @@
 {
-  "updated": "2026-08-07T21:20:00-07:00",
-  "version": "v0.21.0",
-  "now": "presentation era: auto-exposure, kill cam, hangar — then the campaign",
-  "nowPhase": 12,
-  "paused": false,
-  "pushes": 51,
-  "ledger": [
-    "2026-08-07 v0.21.0 — EYES THAT ADAPT: the camera now meters the scene like a human eye — quick to brighten into shadowed fjords, slow to recover from glare. The golden-hour shots across all three fronts finally sit within two-thirds of a stop of each other (the last big 'ships imperfect' item, now closed).",
-    "2026-08-07 v0.20.0 — THE WAR HAS RULES: tickets on both sides, three lives, an airfield that rearms you if you come in low and slow, a battle boundary that warns then bites, and a VICTORY screen you have to earn by breaking the whole ground war. The sandbox is now a game you can win or lose.",
-    "2026-08-07 v0.19.0 — PASS THREE, mandate complete: three judge panels, 22 measured fixes, and a final ship-readiness scorecard. The last pass caught its own subtleties (a cloud shadow anchor 'interpolating a crossing that never existed', a glint comb that WAS the fix for the previous problem) and closed with an honest list of conscious imperfections. The three 10%-better passes are done.",
-    "2026-08-07 v0.18.0 — PASS TWO: the second judge panel widened every measurement and caught two of our own pass-1 fixes only holding where we'd measured them — both re-fixed globally (including under camera motion). Plus: combat finally LOOKS like combat (muzzle flash, hot tracers, impact sparks), the ocean lost its denim moire, and the golden-hour fjord mirrors the orange sky.",
-    "2026-08-07 v0.17.0 — PASS ONE: a six-judge panel tore the game apart frame by frame and all 8 findings got fixed with measurements: cloud dot-lattice root-caused to a shadow term (10x cleaner), Nevada's air un-blued, the sun disc warms at sunset, HUD readable against clouds, living water with real glints, organic coastlines, and the phase-1 scale pylons finally retired from the ocean.",
-    "2026-08-07 v0.16.2 — THROTTLE, PERFECTED (per Chris): hold W to 100%, keep holding for afterburner, let go and it settles at 100% — exactly like War Thunder. Mouse never touches the throttle.",
-    "2026-08-07 v0.16.1 — NEW AIRFRAME: the F-22 rebuilt at 4x the detail — smooth blended fuselage, real chines, gold bubble canopy, thrust-vectoring nozzles. The builder critiqued its own screenshots through six rounds before showing it.",
-    "2026-08-07 v0.16.0 — REAL SKIES: the clouds are volumes now — the GPU marches rays through 3D cloud fields with real light scattering. Towering Pacific cumulus, Alaska overcast decks, Nevada fair-weather puffs — and you can fly through them. Still 121fps.",
-    "2026-08-07 v0.15.0 — SAM CITY: the missile sites launch back. Launch warning tone + flashing MISSILE alert, then physics decides: fly straight and it connects; turn away on the warning and run, and it dies chasing you. Every counter-tactic works because the physics is real, not scripted.",
-    "2026-08-07 v0.14.0 — FOX TWO: AIM-9X Sidewinders. The seeker locks onto targets (box + growl tone), the missile launches with real rocket physics — boost, sustain, burnout — and steers itself in with the same guidance law real missiles use. First test flight missed forever because one minus sign was flipped; the test caught it.",
-    "2026-08-07 v0.13.0 — THE SEA COMPUTES: the ocean is now a real physics simulation running on your GPU — thousands of waves computed 120 times a second (verified against textbook math to 14 decimal places), with foam that forms where waves actually break. Alaska chop and Pacific swell are physically different seas now. Plus: ground units render 6x leaner.",
-    "2026-08-07 v0.12.0 — THE AIR IS REAL: the sky is now computed from actual atmospheric physics — light scattered by real air molecules. Distant mountains fade into blue with distance, sunsets ignite a true twilight arch, all verified against a physics reference to 8 decimal places. 90/90 tests.",
-    "2026-08-07 v0.11.0 — THE WAR SHOOTS BACK: anti-aircraft guns track you and fire leaded bursts (red tracers). Hull damage, red-flash hits, shot down = respawn. Nevada's real satellite imagery also landed — all three fronts are photographic now. 65/65 tests.",
-    "2026-08-07 v0.10.0 — THE REAL EARTH: actual aerial photography draped over Alaska and the Marianas (sub-meter USGS source), plus laser-scan normal maps and baked ambient shadows on all three fronts. The fjords look like the real fjords now.",
-    "2026-08-07 v0.9.0 — THE AAA PASS BEGINS: rebuilt render pipeline — temporal anti-aliasing, HDR bloom (sun halo + water-glint sparkle), lens ghosts. 121fps with it all on. 51/51 tests.",
-    "2026-08-07 THE MANDATE — new goal: the most beautiful game possible in a browser, built for the most powerful Macs. An 8-agent research fleet mapped the ceiling; the AAA rebuild starts now, then three full 10%-better passes.",
-    "2026-08-07 v0.8.0 — TARGETS ON THE GROUND: 29 units across the three fronts (convoy + SAM site in Nevada, ships in the Alaska Sound, a carrier group off Saipan). Shoot them, they burn. Kills score on screen.",
-    "2026-08-07 v0.7.0 — THE GUN WORKS: 6000-rounds-a-minute cannon with honest ballistics (bullets slow down and drop like real ones), glowing tracers, dust where they hit the desert, engine + gun sound. 11/11 tests.",
-    "2026-08-06 v0.6.0 — YOU FLY: mouse steers the jet, W/S throttle, real physics, crash and respawn. The game became a game.",
-    "2026-08-06 v0.5.0 — the sea is real: waves that match each place — glassy fjords in Alaska, Pacific swell over the reef.",
-    "2026-08-06 v0.4.0 — the ground is real: actual US Geological Survey elevation data for Nevada, Alaska and the Marianas. Zero seams, verified by pixel measurement.",
-    "2026-08-06 v0.3.0 — a sky that knows the time: physically-computed daylight, the sun where it really is, stars at night.",
-    "2026-08-06 v0.1.0 — the engine boots: runs in any browser, simulation so precise two computers get identical results.",
-    "2026-08-06 day zero — plan approved: 21 phases, one F-22, three real battlefields."
-  ],
-  "phases": [
-    {
-      "n": 0,
-      "name": "Berth & deploy pipe",
-      "pct": 100,
-      "note": "raptor.chall.net live, push-to-deploy"
-    },
-    {
-      "n": 1,
-      "name": "Engine core",
-      "pct": 100,
-      "note": "WebGPU+WebGL2, deterministic 120Hz sim, controls"
-    },
-    {
-      "n": 2,
-      "name": "Atmosphere & time-of-day",
-      "pct": 100,
-      "note": "Hillaire physical atmosphere: LUT sky + per-pixel aerial perspective"
-    },
-    {
-      "n": 3,
-      "name": "Real-Earth terrain",
-      "pct": 100,
-      "note": "USGS heights + real NAIP/Sentinel-2 imagery drape"
-    },
-    {
-      "n": 4,
-      "name": "Water",
-      "pct": 100,
-      "note": "FFT compute ocean (JONSWAP spectra, Jacobian foam) + Gerstner fallback"
-    },
-    {
-      "n": 5,
-      "name": "Clouds & weather",
-      "pct": 85,
-      "note": "volumetric raymarched clouds on all fronts + fly-through; weather fronts later"
-    },
-    {
-      "n": 6,
-      "name": "The F-22 airframe",
-      "pct": 88,
-      "note": "v3 lofted airframe (41k tris, 6 self-review rounds); cockpit interior later"
-    },
-    {
-      "n": 7,
-      "name": "Flight model & controls",
-      "pct": 75,
-      "note": "you fly: mouse-aim + 6-DOF physics, 13/13 gates"
-    },
-    {
-      "n": 8,
-      "name": "Sensors & weapons",
-      "pct": 60,
-      "note": "cannon + pipper + AIM-9X with seeker lock live; AIM-120 + radar later"
-    },
-    {
-      "n": 9,
-      "name": "AI & ground war",
-      "pct": 60,
-      "note": "AAA + SAM return fire live with real evasion doctrine; vehicle movement + bandits next"
-    },
-    {
-      "n": 10,
-      "name": "Match modes & dynamic campaign",
-      "pct": 60,
-      "note": "tickets/respawns/rearm/boundary/win-lose live; Daily Operation seeds + wingmen later"
-    },
-    {
-      "n": 11,
-      "name": "Authored campaign (30+ sorties)",
-      "pct": 0,
-      "note": ""
-    },
-    {
-      "n": 12,
-      "name": "Presentation (hangar, replays)",
-      "pct": 35,
-      "note": "auto-exposure metering live (golden triptych 1.56 -> 0.59 stops); kill cam + hangar next"
-    },
-    {
-      "n": 13,
-      "name": "Audio & voice",
-      "pct": 55,
-      "note": "engine, gun, seeker growl + lock tones live in-game"
-    },
-    {
-      "n": 14,
-      "name": "Max fidelity pass",
-      "pct": 100,
-      "note": "three passes complete, 22 measured fixes; auto-exposure + cloud ground-shadows + F-22 texture pass -> presentation backlog"
-    },
-    {
-      "n": 15,
-      "name": "Settings, accessibility, PWA",
-      "pct": 10,
-      "note": "rebind menu live"
-    },
-    {
-      "n": 16,
-      "name": "QA hardening",
-      "pct": 78,
-      "note": "14 batteries, 136 gates"
-    },
-    {
-      "n": 17,
-      "name": "Ship v1.0",
-      "pct": 0,
-      "note": ""
-    },
-    {
-      "n": 18,
-      "name": "Multiplayer duels (P2P)",
-      "pct": 5,
-      "note": "determinism foundation ready"
-    },
-    {
-      "n": 19,
-      "name": "16-player server battles",
-      "pct": 0,
-      "note": ""
-    },
-    {
-      "n": 20,
-      "name": "Live-ops era",
-      "pct": 0,
-      "note": ""
-    }
-  ]
+ "updated": "2026-08-07T22:10:00-07:00",
+ "version": "v0.22.0",
+ "now": "kill cam + hangar shipped (v0.22.0) \u2014 cloud ground shadows next, then the campaign",
+ "nowPhase": 12,
+ "paused": false,
+ "pushes": 53,
+ "ledger": [
+  {
+   "v": "v0.22.0",
+   "what": "THE HANGAR DOOR \u2014 death/victory kill cam (4s crash orbit, HUD fades), pre-flight hangar: front cards + time-of-day presets + FLY"
+  },
+  "2026-08-07 v0.21.0 \u2014 EYES THAT ADAPT: the camera now meters the scene like a human eye \u2014 quick to brighten into shadowed fjords, slow to recover from glare. The golden-hour shots across all three fronts finally sit within two-thirds of a stop of each other (the last big 'ships imperfect' item, now closed).",
+  "2026-08-07 v0.20.0 \u2014 THE WAR HAS RULES: tickets on both sides, three lives, an airfield that rearms you if you come in low and slow, a battle boundary that warns then bites, and a VICTORY screen you have to earn by breaking the whole ground war. The sandbox is now a game you can win or lose.",
+  "2026-08-07 v0.19.0 \u2014 PASS THREE, mandate complete: three judge panels, 22 measured fixes, and a final ship-readiness scorecard. The last pass caught its own subtleties (a cloud shadow anchor 'interpolating a crossing that never existed', a glint comb that WAS the fix for the previous problem) and closed with an honest list of conscious imperfections. The three 10%-better passes are done.",
+  "2026-08-07 v0.18.0 \u2014 PASS TWO: the second judge panel widened every measurement and caught two of our own pass-1 fixes only holding where we'd measured them \u2014 both re-fixed globally (including under camera motion). Plus: combat finally LOOKS like combat (muzzle flash, hot tracers, impact sparks), the ocean lost its denim moire, and the golden-hour fjord mirrors the orange sky.",
+  "2026-08-07 v0.17.0 \u2014 PASS ONE: a six-judge panel tore the game apart frame by frame and all 8 findings got fixed with measurements: cloud dot-lattice root-caused to a shadow term (10x cleaner), Nevada's air un-blued, the sun disc warms at sunset, HUD readable against clouds, living water with real glints, organic coastlines, and the phase-1 scale pylons finally retired from the ocean.",
+  "2026-08-07 v0.16.2 \u2014 THROTTLE, PERFECTED (per Chris): hold W to 100%, keep holding for afterburner, let go and it settles at 100% \u2014 exactly like War Thunder. Mouse never touches the throttle.",
+  "2026-08-07 v0.16.1 \u2014 NEW AIRFRAME: the F-22 rebuilt at 4x the detail \u2014 smooth blended fuselage, real chines, gold bubble canopy, thrust-vectoring nozzles. The builder critiqued its own screenshots through six rounds before showing it.",
+  "2026-08-07 v0.16.0 \u2014 REAL SKIES: the clouds are volumes now \u2014 the GPU marches rays through 3D cloud fields with real light scattering. Towering Pacific cumulus, Alaska overcast decks, Nevada fair-weather puffs \u2014 and you can fly through them. Still 121fps.",
+  "2026-08-07 v0.15.0 \u2014 SAM CITY: the missile sites launch back. Launch warning tone + flashing MISSILE alert, then physics decides: fly straight and it connects; turn away on the warning and run, and it dies chasing you. Every counter-tactic works because the physics is real, not scripted.",
+  "2026-08-07 v0.14.0 \u2014 FOX TWO: AIM-9X Sidewinders. The seeker locks onto targets (box + growl tone), the missile launches with real rocket physics \u2014 boost, sustain, burnout \u2014 and steers itself in with the same guidance law real missiles use. First test flight missed forever because one minus sign was flipped; the test caught it.",
+  "2026-08-07 v0.13.0 \u2014 THE SEA COMPUTES: the ocean is now a real physics simulation running on your GPU \u2014 thousands of waves computed 120 times a second (verified against textbook math to 14 decimal places), with foam that forms where waves actually break. Alaska chop and Pacific swell are physically different seas now. Plus: ground units render 6x leaner.",
+  "2026-08-07 v0.12.0 \u2014 THE AIR IS REAL: the sky is now computed from actual atmospheric physics \u2014 light scattered by real air molecules. Distant mountains fade into blue with distance, sunsets ignite a true twilight arch, all verified against a physics reference to 8 decimal places. 90/90 tests.",
+  "2026-08-07 v0.11.0 \u2014 THE WAR SHOOTS BACK: anti-aircraft guns track you and fire leaded bursts (red tracers). Hull damage, red-flash hits, shot down = respawn. Nevada's real satellite imagery also landed \u2014 all three fronts are photographic now. 65/65 tests.",
+  "2026-08-07 v0.10.0 \u2014 THE REAL EARTH: actual aerial photography draped over Alaska and the Marianas (sub-meter USGS source), plus laser-scan normal maps and baked ambient shadows on all three fronts. The fjords look like the real fjords now.",
+  "2026-08-07 v0.9.0 \u2014 THE AAA PASS BEGINS: rebuilt render pipeline \u2014 temporal anti-aliasing, HDR bloom (sun halo + water-glint sparkle), lens ghosts. 121fps with it all on. 51/51 tests.",
+  "2026-08-07 THE MANDATE \u2014 new goal: the most beautiful game possible in a browser, built for the most powerful Macs. An 8-agent research fleet mapped the ceiling; the AAA rebuild starts now, then three full 10%-better passes.",
+  "2026-08-07 v0.8.0 \u2014 TARGETS ON THE GROUND: 29 units across the three fronts (convoy + SAM site in Nevada, ships in the Alaska Sound, a carrier group off Saipan). Shoot them, they burn. Kills score on screen.",
+  "2026-08-07 v0.7.0 \u2014 THE GUN WORKS: 6000-rounds-a-minute cannon with honest ballistics (bullets slow down and drop like real ones), glowing tracers, dust where they hit the desert, engine + gun sound. 11/11 tests.",
+  "2026-08-06 v0.6.0 \u2014 YOU FLY: mouse steers the jet, W/S throttle, real physics, crash and respawn. The game became a game.",
+  "2026-08-06 v0.5.0 \u2014 the sea is real: waves that match each place \u2014 glassy fjords in Alaska, Pacific swell over the reef.",
+  "2026-08-06 v0.4.0 \u2014 the ground is real: actual US Geological Survey elevation data for Nevada, Alaska and the Marianas. Zero seams, verified by pixel measurement.",
+  "2026-08-06 v0.3.0 \u2014 a sky that knows the time: physically-computed daylight, the sun where it really is, stars at night.",
+  "2026-08-06 v0.1.0 \u2014 the engine boots: runs in any browser, simulation so precise two computers get identical results.",
+  "2026-08-06 day zero \u2014 plan approved: 21 phases, one F-22, three real battlefields."
+ ],
+ "phases": [
+  {
+   "n": 0,
+   "name": "Berth & deploy pipe",
+   "pct": 100,
+   "note": "raptor.chall.net live, push-to-deploy"
+  },
+  {
+   "n": 1,
+   "name": "Engine core",
+   "pct": 100,
+   "note": "WebGPU+WebGL2, deterministic 120Hz sim, controls"
+  },
+  {
+   "n": 2,
+   "name": "Atmosphere & time-of-day",
+   "pct": 100,
+   "note": "Hillaire physical atmosphere: LUT sky + per-pixel aerial perspective"
+  },
+  {
+   "n": 3,
+   "name": "Real-Earth terrain",
+   "pct": 100,
+   "note": "USGS heights + real NAIP/Sentinel-2 imagery drape"
+  },
+  {
+   "n": 4,
+   "name": "Water",
+   "pct": 100,
+   "note": "FFT compute ocean (JONSWAP spectra, Jacobian foam) + Gerstner fallback"
+  },
+  {
+   "n": 5,
+   "name": "Clouds & weather",
+   "pct": 85,
+   "note": "volumetric raymarched clouds on all fronts + fly-through; weather fronts later"
+  },
+  {
+   "n": 6,
+   "name": "The F-22 airframe",
+   "pct": 88,
+   "note": "v3 lofted airframe (41k tris, 6 self-review rounds); cockpit interior later"
+  },
+  {
+   "n": 7,
+   "name": "Flight model & controls",
+   "pct": 75,
+   "note": "you fly: mouse-aim + 6-DOF physics, 13/13 gates"
+  },
+  {
+   "n": 8,
+   "name": "Sensors & weapons",
+   "pct": 60,
+   "note": "cannon + pipper + AIM-9X with seeker lock live; AIM-120 + radar later"
+  },
+  {
+   "n": 9,
+   "name": "AI & ground war",
+   "pct": 60,
+   "note": "AAA + SAM return fire live with real evasion doctrine; vehicle movement + bandits next"
+  },
+  {
+   "n": 10,
+   "name": "Match modes & dynamic campaign",
+   "pct": 60,
+   "note": "tickets/respawns/rearm/boundary/win-lose live; Daily Operation seeds + wingmen later"
+  },
+  {
+   "n": 11,
+   "name": "Authored campaign (30+ sorties)",
+   "pct": 0,
+   "note": ""
+  },
+  {
+   "n": 12,
+   "name": "Presentation (hangar, replays)",
+   "pct": 70,
+   "note": "auto-exposure metering live (golden triptych 1.56 -> 0.59 stops); kill cam + hangar next"
+  },
+  {
+   "n": 13,
+   "name": "Audio & voice",
+   "pct": 55,
+   "note": "engine, gun, seeker growl + lock tones live in-game"
+  },
+  {
+   "n": 14,
+   "name": "Max fidelity pass",
+   "pct": 100,
+   "note": "three passes complete, 22 measured fixes; auto-exposure + cloud ground-shadows + F-22 texture pass -> presentation backlog"
+  },
+  {
+   "n": 15,
+   "name": "Settings, accessibility, PWA",
+   "pct": 10,
+   "note": "rebind menu live"
+  },
+  {
+   "n": 16,
+   "name": "QA hardening",
+   "pct": 78,
+   "note": "14 batteries, 136 gates"
+  },
+  {
+   "n": 17,
+   "name": "Ship v1.0",
+   "pct": 0,
+   "note": ""
+  },
+  {
+   "n": 18,
+   "name": "Multiplayer duels (P2P)",
+   "pct": 5,
+   "note": "determinism foundation ready"
+  },
+  {
+   "n": 19,
+   "name": "16-player server battles",
+   "pct": 0,
+   "note": ""
+  },
+  {
+   "n": 20,
+   "name": "Live-ops era",
+   "pct": 0,
+   "note": ""
+  }
+ ]
 }
