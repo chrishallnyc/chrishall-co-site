@@ -6,26 +6,11 @@
  "paused": false,
  "pushes": 57,
  "ledger": [
-  {
-   "v": "v0.26.0",
-   "what": "THE LONG WAR \u2014 persistent operations: generated sorties push a real front line (win +2km toward victory at +16), the hangar remembers your war, deterministic 200-sortie chains"
-  },
-  {
-   "v": "v0.25.0",
-   "what": "THE LIVING BATTLEFIELD \u2014 48-unit war: driving convoys, mid-sortie reinforcements, friendly forces, rearm pads on all three fronts"
-  },
-  {
-   "v": "v0.24.0",
-   "what": "THE FIRST SORTIE \u2014 mission system: objectives HUD, radio comms, STRIKE + SEAD sorties over Nevada (?mission=), deterministic replays"
-  },
-  {
-   "v": "v0.23.0",
-   "what": "SHADOWS OF THE WAR \u2014 cloud shadows now cast by the real volumetric cloud field (dappled desert, tower shadows on the reef)"
-  },
-  {
-   "v": "v0.22.0",
-   "what": "THE HANGAR DOOR \u2014 death/victory kill cam (4s crash orbit, HUD fades), pre-flight hangar: front cards + time-of-day presets + FLY"
-  },
+  "2026-08-08 v0.26.0 \u2014 THE LONG WAR \u2014 persistent operations: generated sorties push a real front line (win +2km toward victory at +16), the hangar remembers your war, deterministic 200-sortie chains",
+  "2026-08-08 v0.25.0 \u2014 THE LIVING BATTLEFIELD \u2014 48-unit war: driving convoys, mid-sortie reinforcements, friendly forces, rearm pads on all three fronts",
+  "2026-08-08 v0.24.0 \u2014 THE FIRST SORTIE \u2014 mission system: objectives HUD, radio comms, STRIKE + SEAD sorties over Nevada (?mission=), deterministic replays",
+  "2026-08-08 v0.23.0 \u2014 SHADOWS OF THE WAR \u2014 cloud shadows now cast by the real volumetric cloud field (dappled desert, tower shadows on the reef)",
+  "2026-08-08 v0.22.0 \u2014 THE HANGAR DOOR \u2014 death/victory kill cam (4s crash orbit, HUD fades), pre-flight hangar: front cards + time-of-day presets + FLY",
   "2026-08-07 v0.21.0 \u2014 EYES THAT ADAPT: the camera now meters the scene like a human eye \u2014 quick to brighten into shadowed fjords, slow to recover from glare. The golden-hour shots across all three fronts finally sit within two-thirds of a stop of each other (the last big 'ships imperfect' item, now closed).",
   "2026-08-07 v0.20.0 \u2014 THE WAR HAS RULES: tickets on both sides, three lives, an airfield that rearms you if you come in low and slow, a battle boundary that warns then bites, and a VICTORY screen you have to earn by breaking the whole ground war. The sandbox is now a game you can win or lose.",
   "2026-08-07 v0.19.0 \u2014 PASS THREE, mandate complete: three judge panels, 22 measured fixes, and a final ship-readiness scorecard. The last pass caught its own subtleties (a cloud shadow anchor 'interpolating a crossing that never existed', a glint comb that WAS the fix for the previous problem) and closed with an honest list of conscious imperfections. The three 10%-better passes are done.",

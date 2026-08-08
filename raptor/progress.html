@@ -117,6 +117,7 @@ async function load() {
     wrap.appendChild(row);
   }
   document.getElementById("ledger").innerHTML = (d.ledger || []).map((l) => {
+    if (typeof l !== "string") l = (l.date || "") + " " + (l.v || "") + " — " + (l.what || ""); // tolerate object entries
     const m = l.match(/^(\S+)\s+([\s\S]*)$/);
     return m ? `<li><b>${m[1]}</b> — ${m[2]}</li>` : `<li>${l}</li>`;
   }).join("");
