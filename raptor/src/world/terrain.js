@@ -319,6 +319,10 @@ export class Terrain {
         // 4m/px imagery up close; coverage mask crossfades imagery holes
         // back to the ramps.
         let ci = texture(albedoTex, worldUV(wp)).rgb;
+        // PASS-2 item 3: NAIP's blue-gray cast on the dry front — warm
+        // white-balance at ingest (the physical playa albedo photographs
+        // cool under blue sky; the eye expects warm desert)
+        if (front === "NELLIS") ci = ci.mul(vec3(1.09, 1.0, 0.87));
         ci = ci.mul(micro.sub(0.5).mul(0.08).add(1.0));
         const cov = coverTex ? texture(coverTex, worldUV(wp)).r : float(1.0);
         c = mix(c, ci, cov);
