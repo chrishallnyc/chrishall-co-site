@@ -21,13 +21,13 @@
 // ON_OBJECTIVE_DONE/FAILED cover objDone/objFailed. Zone-enter as a bare
 // trigger + groupDead land with INC-2 (tags), playerHpBelow with the HUD
 // pass, aceState with INC-6.
-export const TRIG = { ON_START: 0, ON_OBJECTIVE_DONE: 1, ON_TIME: 2, ON_OBJECTIVE_FAILED: 3 };
+export const TRIG = { ON_START: 0, ON_OBJECTIVE_DONE: 1, ON_TIME: 2, ON_OBJECTIVE_FAILED: 3, ON_ACE_STATE: 4 };
 
 // Objective kinds, §2 table order. INC-1 implements destroy_tag / reach_zone
 // / survive_until; protect_tag (ESCORT, INC-4) and kill_ace (INC-6) are
 // validate-rejected until their increments land.
 export const OBJ_KIND = { destroy_tag: 0, protect_tag: 1, reach_zone: 2, survive_until: 3, kill_ace: 4 };
-const INC1_KINDS = new Set(["destroy_tag", "reach_zone", "survive_until", "protect_tag"]); // protect_tag unlocked INC-5 (kill_ace: INC-6)
+const INC1_KINDS = new Set(["destroy_tag", "reach_zone", "survive_until", "protect_tag", "kill_ace"]); // kill_ace unlocked INC-6
 
 // numeric lineId -> subtitle text. RENDER-SIDE ONLY — the Script's comms ring
 // stores ids; the HUD looks text up here; phase 13 bakes VO onto the same
@@ -251,6 +251,8 @@ function validate(spec) {
       if (o.air) { if (!num(o.tag)) bad(`objective ${o.id}: air protect_tag needs a numeric tag`); }
       else if (!Array.isArray(o.bfIdx) || !o.bfIdx.length || !o.bfIdx.every(num)) bad(`objective ${o.id}: protect_tag needs bfIdx (or air+tag)`);
       if (o.zone && (!num(o.zone.x) || !num(o.zone.y) || !num(o.zone.r) || o.zone.r <= 0)) bad(`objective ${o.id}: zone needs {x,y,r>0}`);
+    } else if (o.kind === "kill_ace") {
+      if (!num(o.aceId) || o.aceId < 0) bad(`objective ${o.id}: kill_ace needs aceId >= 0`);
     } else if (o.kind === "reach_zone") {
       const z = o.zone;
       if (!z || !num(z.x) || !num(z.y) || !num(z.r) || z.r <= 0) bad(`objective ${o.id}: reach_zone needs zone {x,y,r>0}`);
@@ -266,7 +268,8 @@ function validate(spec) {
   if (!Array.isArray(spec.comms)) bad("comms must be an array");
   if (spec.comms.length > MAX_COMMS) bad(`more than ${MAX_COMMS} comms rows`);
   for (const c of spec.comms) {
-    if (!c || !num(c.on) || c.on < 0 || c.on > 3) bad("comms row needs on in 0..3 (TRIG)");
+    if (!c || !num(c.on) || c.on < 0 || c.on > 4) bad("comms row needs on in 0..4 (TRIG)");
+    if (c.on === TRIG.ON_ACE_STATE && (!num(c.aceId) || typeof c.aceState !== "string")) bad("ON_ACE_STATE comms row needs {aceId, aceState}");
     if (!num(c.lineId)) bad("comms row needs a numeric lineId");
     if (c.on === TRIG.ON_TIME && (!num(c.t) || c.t < 0)) bad("ON_TIME comms row needs t >= 0");
     if ((c.on === TRIG.ON_OBJECTIVE_DONE || c.on === TRIG.ON_OBJECTIVE_FAILED) && !ids.has(c.obj)) bad(`comms row references unknown objective ${c.obj}`);

@@ -71,6 +71,11 @@ export const OP_LINES = {
   242: "OVERLORD: tally the merge.",
   243: "OVERLORD: picture clean. The sky is yours, Raptor.",
   244: "OVERLORD: sweep expired and they know the range now. Tomorrow costs more.",
+  250: "??: New voice on guard: 'So you're the one they scrambled. I've buried better.'",
+  251: "??: 'A scratch. You'll need more than luck, Raptor.'",
+  252: "OVERLORD: he's running for the fence — smoking but alive. You'll meet again.",
+  253: "OVERLORD: splash the ace! That's a name off their board for good.",
+  254: "??: 'You again. I remember the smoke. This time I won't leave early.'",
 };
 const OP_COMMS = {
   strike: [200, 201, 202, 203, 204],
@@ -78,6 +83,16 @@ const OP_COMMS = {
   anti_ship: [220, 221, 222, 223, 224],
   intercept: [230, 231, 232, 233, 234],
   cap: [240, 241, 242, 243, 244],
+};
+
+// ---- aces (§5 + amendment 1): 2 per front; TYPHOON is the MARIANAS finale
+// boss (react 0.35 per Part B). States live in the save; traits ship in
+// bandits.js (hp 120, smoking, BINGO escape). Names are meta-world strings —
+// they never enter sim state (the HUD reads this table render-side).
+export const ACES = {
+  NELLIS: [{ id: 0, name: "VIPER" }, { id: 1, name: "JACKAL" }],
+  VALDEZ: [{ id: 2, name: "BOREAS" }, { id: 3, name: "WRAITH" }],
+  MARIANAS: [{ id: 4, name: "SHRIKE" }, { id: 5, name: "TYPHOON", reactS: 0.35, finale: true }],
 };
 
 // ---- seed mixing + save integrity ----
@@ -94,7 +109,7 @@ function fnvMix(a, b, c) {
 
 // canonical serialization (missions.js specHash pattern): fixed top-level
 // field order, sorted keys below — same save, same sum, forever.
-const SAVE_FIELDS = ["v", "front", "seed", "sortieIndex", "frontKm", "status", "log", "nemesisId"];
+const SAVE_FIELDS = ["v", "front", "seed", "sortieIndex", "frontKm", "status", "log", "nemesisId", "aces"];
 function canon(v) {
   if (Array.isArray(v)) return "[" + v.map(canon).join(",") + "]";
   if (v && typeof v === "object") return "{" + Object.keys(v).sort().map((k) => JSON.stringify(k) + ":" + canon(v[k])).join(",") + "}";
@@ -117,7 +132,8 @@ export function freshSave(front, seed = DEFAULT_SEED) {
     frontKm: 0,            // 1-D front-line axis, + = pushing into enemy ground
     status: "live",        // "live" | "won" | "lost"
     log: [],               // [{specHash, result, simHash?}], capped 64
-    nemesisId: -1,         // reserved for INC-6 (aces)
+    nemesisId: -1,
+    aces: (ACES[front] || []).map((a) => ({ id: a.id, state: "fresh", escapes: 0, bonus: 0 })),         // reserved for INC-6 (aces)
   };
   save.sum = computeSum(save);
   return save;
@@ -179,6 +195,13 @@ function gen(save) {
   const isAir = airRoll < airP;
   // tier from front-line pressure — deterministic, no draw
   const airTier = Math.max(1, Math.min(4, 1 + Math.round(save.frontKm / 6) + (save.sortieIndex >= 12 ? 1 : 0)));
+  // INC-6 ace draws — unconditional (stream stability)
+  const aceRoll = rng.f();
+  const acePickDraw = rng.int(8);
+  const living = (save.aces || []).filter((a) => a.state !== "killed");
+  const nem = living.find((a) => a.id === save.nemesisId);
+  const aceP = nem ? 0.5 : 0.25;
+  const aceEntry = nem || (living.length ? living[acePickDraw % living.length] : null);
 
   const sp = preset.spawn, zc = zone.zoneCenter;
   const dx = zc.x - sp.x, dy = zc.y - sp.y, d = Math.hypot(dx, dy) || 1;
@@ -247,6 +270,24 @@ function gen(save) {
     const AL = OP_COMMS[type];
     spec.type = type;
     spec.bandits = bandits;
+    // ace injection: rides along on his OWN tag (7) so the win condition
+    // never depends on him — his outcome is the nemesis ledger's business
+    if (aceEntry && aceRoll < aceP) {
+      const meta = (ACES[save.front] || []).find((a) => a.id === aceEntry.id) || {};
+      const aceUnit = { kind: "fighter", tier: Math.min(4, Math.round(airTier + aceEntry.bonus)), aceId: aceEntry.id,
+        x: bandits[0].x + 3200, y: bandits[0].y + 2600, z: 4600,
+        headingDeg: -90, speed: 260, tag: 7, side: 0, engage: true,
+        wpts: bandits[0].wpts };
+      if (meta.reactS !== undefined) aceUnit.reactS = meta.reactS;
+      bandits.push(aceUnit);
+      spec.comms = spec.comms || [];
+      spec._aceTauntRows = [ // merged below after the base comms build
+        { on: TRIG.ON_TIME, t: 35, lineId: nem ? 254 : 250 },
+        { on: TRIG.ON_ACE_STATE, aceId: aceEntry.id, aceState: "smoking", lineId: 251 },
+        { on: TRIG.ON_ACE_STATE, aceId: aceEntry.id, aceState: "escaped", lineId: 252 },
+        { on: TRIG.ON_ACE_STATE, aceId: aceEntry.id, aceState: "killed", lineId: 253 },
+      ];
+    }
     spec.comms = [
       { on: TRIG.ON_START, lineId: AL[0] },
       { on: TRIG.ON_TIME, t: 20, lineId: AL[1] },
@@ -254,6 +295,7 @@ function gen(save) {
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 1, lineId: AL[3] },
       { on: type === "intercept" ? TRIG.ON_OBJECTIVE_FAILED : TRIG.ON_TIME, ...(type === "intercept" ? { obj: 2 } : { t: TIME_LIMIT_S }), lineId: AL[4] },
     ];
+    if (spec._aceTauntRows) { spec.comms = spec.comms.concat(spec._aceTauntRows); delete spec._aceTauntRows; }
     spec.scoreKm = SCORE_KM[type];
   }
   return { spec, zone };
@@ -270,6 +312,22 @@ export function reduceCampaign(save, spec, result) {
   const frontKm = Math.max(LOSE_KM, Math.min(WIN_KM, save.frontKm + delta));
   const entry = { specHash: specHash(spec), result: result.over };
   if (result.simHash !== undefined) entry.simHash = result.simHash;
+  // ace ledger (INC-6): result.ace = { id, status } from the sortie end.
+  // escaped -> nemesis thread opens (+0.5 tier each escape, cap via injection);
+  // killed -> KIA permanent; a LOSS with the ace alive also promotes him.
+  let nemesisId = save.nemesisId;
+  const aces = (save.aces || []).map((a) => ({ ...a }));
+  if (result.ace && result.ace.id >= 0) {
+    const a = aces.find((x) => x.id === result.ace.id);
+    if (a && a.state !== "killed") {
+      if (result.ace.status === "killed") { a.state = "killed"; if (nemesisId === a.id) nemesisId = -1; }
+      else if (result.ace.status !== "none") {
+        // alive at sortie end IS survival — the save writes the moment the
+        // win condition lands, often mid-BINGO-run; he got away either way
+        a.state = "escaped"; a.escapes += 1; a.bonus = Math.min(a.bonus + 0.5, 3); nemesisId = a.id;
+      }
+    }
+  }
   const next = {
     v: 1, front: save.front, seed: save.seed,
     sortieIndex: save.sortieIndex + 1,
@@ -278,7 +336,8 @@ export function reduceCampaign(save, spec, result) {
     status: save.status !== "live" ? save.status
       : frontKm >= WIN_KM ? "won" : frontKm <= LOSE_KM ? "lost" : "live",
     log: save.log.concat([entry]).slice(-LOG_CAP),
-    nemesisId: save.nemesisId,
+    nemesisId,
+    aces,
   };
   next.sum = computeSum(next);
   return next;
@@ -324,6 +383,7 @@ export function summarize(save) {
     sortieIndex: save.sortieIndex,
     status: save.status,
     nextType: g.spec.type,
+    nemesisName: (() => { const a = (ACES[save.front] || []).find((x) => x.id === save.nemesisId); return a ? a.name : null; })(),
     nextZoneName: g.zone.name,
   };
 }

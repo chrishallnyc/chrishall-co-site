@@ -50,7 +50,7 @@ export class Script {
       this.objId[i] = o.id;
       this.objKind[i] = OBJ_KIND[o.kind];
       this.objNeed[i] = o.need || 1;
-      this.objT[i] = o.t || 0;
+      this.objT[i] = o.kind === "kill_ace" ? o.aceId : (o.t || 0);
       if (o.zone) {
         const zo = i * 4;
         this.objZone[zo] = o.zone.x; this.objZone[zo + 1] = o.zone.y;
@@ -155,7 +155,11 @@ export class Script {
       } else if (k === OBJ_KIND.survive_until) {
         if (sim.time >= this.objT[i] && M.blue > 0) { this.objState[i] = 1; this._count[i] = 1; }
       }
-      // kill_ace: loadMission rejects it until INC-6
+      else if (k === OBJ_KIND.kill_ace && this.bandits) {
+        const st = this.bandits.aceStatus(this.objT[i]); // objT reused as aceId store (see ctor)
+        if (st === "killed") { this.objState[i] = 1; this._count[i] = 1; }
+        else if (st === "escaped") this.objState[i] = 2; // the set-piece slipped away
+      }
     }
 
     // 2. triggers -> comms ring (same tick as the state change: no dead air)
@@ -168,6 +172,7 @@ export class Script {
       else if (c.on === TRIG.ON_TIME) fire = sim.time >= c.t;
       else if (c.on === TRIG.ON_OBJECTIVE_DONE) fire = this.objState[this._slotOf.get(c.obj)] === 1;
       else if (c.on === TRIG.ON_OBJECTIVE_FAILED) fire = this.objState[this._slotOf.get(c.obj)] === 2;
+      else if (c.on === TRIG.ON_ACE_STATE) fire = this.bandits ? this.bandits.aceStatus(c.aceId) === c.aceState : false;
       if (fire) {
         this.trigFired[i] = 1;
         const s = this.commsHead % RING;

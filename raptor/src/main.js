@@ -17,7 +17,7 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.28.0";
+const VERSION = "0.29.0";
 const PHASE = 12;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
@@ -415,6 +415,7 @@ async function boot() {
           const km = Math.hypot(bx - st[0], by - st[1], bz - st[2]) / 1000;
           ctx.fillStyle = col;
           ctx.fillText(km.toFixed(1), sx, sy + 26);
+          if (bandits.aceId[i] >= 0) ctx.fillText("★", sx, sy - 18); // the named one
         }
         ctx.restore();
       }
@@ -707,8 +708,10 @@ async function boot() {
       if (campaign && match && match.over !== 0 && !campaign.saved) {
         campaign.saved = true; // one write, render-side: sim never reads the save
         try {
+          const aceUnit = campaign.spec.bandits && campaign.spec.bandits.find((b) => b.aceId >= 0);
           campaign.save = campaign.E.reduceCampaign(campaign.save, campaign.spec,
-            { over: match.over, blueLeft: match.blue, redLeft: match.red });
+            { over: match.over, blueLeft: match.blue, redLeft: match.red,
+              ace: aceUnit && bandits ? { id: aceUnit.aceId, status: bandits.aceStatus(aceUnit.aceId) } : undefined });
           campaign.E.saveSave(campaign.save);
         } catch (err) { console.warn("campaign save failed:", err && err.message); }
       }
@@ -804,7 +807,7 @@ function hangar() {
       const km = opSum.frontKm > 0 ? "+" + opSum.frontKm : String(opSum.frontKm);
       opBox.innerHTML = opSum.status !== "live"
         ? `OPERATION ${opSum.status.toUpperCase()} — front line ${km} km · <button id="opFly">START ANEW</button>`
-        : `OPERATION · front line ${km} km · sortie ${opSum.sortieIndex + 1} · next: ${opSum.nextType ? opSum.nextType.toUpperCase() : "?"}${opSum.nextZoneName ? " — " + opSum.nextZoneName : ""} · <button id="opFly">FLY THE OPERATION</button>`;
+        : `OPERATION · front line ${km} km · sortie ${opSum.sortieIndex + 1} · next: ${opSum.nextType ? opSum.nextType.toUpperCase() : "?"}${opSum.nextZoneName ? " — " + opSum.nextZoneName : ""}${opSum.nemesisName ? " · NEMESIS: " + opSum.nemesisName + " IS ALIVE" : ""} · <button id="opFly">FLY THE OPERATION</button>`;
       opBox.style.display = "block";
       document.getElementById("opFly")?.addEventListener("click", () => {
         if (opSum.status !== "live") { try { localStorage.removeItem("raptor.op.v1:" + front); } catch (_) {} }

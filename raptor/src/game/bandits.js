@@ -27,6 +27,24 @@
 //     tracers fly ~0.7 s before a round can land. Warning precedes harm.
 //   A4 (BFM geometry, pairs, countermeasures) stays phase-9 completion.
 //
+// ACES (INC-6, design §5 + BINDING AMENDMENT 1 — the marquee beat): an ace
+//   is a bandit spawned with aceId >= 0. Trait overrides ON TOP of tier,
+//   applied at spawn: hp 120 (one 9X dmg 90 leaves the ace at 30 — smoking,
+//   NOT dead; regular fighters stay one-9X-kill), reaction floor (an ace
+//   reacts at least as fast as tier-4's 0.4 s; spawn config may pass reactS
+//   for faster — TYPHOON 0.35 per Part B), livery tint (render-side
+//   aggressor red on the ace meshes: the "that's HIM" read). SMOKING below
+//   hp 60: dark puff trail (the mslTrail pattern, own boot-built pool) and
+//   gMax degrades 15% (DEFENSIVE_DAMAGED airframe). BINGO below hp 40: the
+//   ace goes cold — breaks off ANY state into B_BINGO(5), runs at full
+//   speed (the VMAX clamp opens to the 420 dash cap: AB flavor, guardrail
+//   intact) direct for the nearest map edge (|x| or |y| = 30000;
+//   deterministic pick, ties -> +x). Crossing the boundary alive = ESCAPED:
+//   escaped[i] = 1 (hashed Uint8 column), escapes++, mesh hidden, kills
+//   NOT incremented. Killed first = plain KIA (kills++). aceStatus(aceId)
+//   -> "none"|"alive"|"smoking"|"bingo"|"escaped"|"killed" is derived from
+//   the columns for the campaign layer; no state storage beyond `escaped`.
+//
 // Determinism doctrine (design §0): flat Float64Array truth, SLOTS_B=14 per
 // bandit (+ a fixed-width SLOTS_AI sidecar for the A2/A3 clocks), decisions
 // every 60 ticks in index order. rng law: A1 draws none; A2/A3 DECISION rng
@@ -64,8 +82,9 @@ export const MAX_BANDITS = 8;
 export const SLOTS_B = 14; // [x,y,z, vx,vy,vz, hp, state, stateT, wptIdx, cmdHdg, cmdPitch, cmdSpd, cooldown]
 
 // states — values are a data contract (INGRESS 0 / ATTACK 1 / EGRESS 4
-// shipped in INC-4 and t23 asserts them; EVADE/ENGAGE fill the 2/3 gap)
-export const B_INGRESS = 0, B_ATTACK = 1, B_EVADE = 2, B_ENGAGE = 3, B_EGRESS = 4;
+// shipped in INC-4 and t23 asserts them; EVADE/ENGAGE fill the 2/3 gap;
+// BINGO 5 is the INC-6 ace cold-run — aces only, terminal until the edge)
+export const B_INGRESS = 0, B_ATTACK = 1, B_EVADE = 2, B_ENGAGE = 3, B_EGRESS = 4, B_BINGO = 5;
 
 // kind ids: 0 drone, 1 transport, 2 fighter (ids-not-strings in sim state;
 // spawnFlight accepts the string names as config sugar)
@@ -85,6 +104,15 @@ const DECIDE_TICKS = 60;                        // 0.5 s decision cadence
 const WPT_R = 400;                              // waypoint capture radius (m, 2-D)
 const ATTACK_R = 8000;                          // raider commits to the dive inside this
 const LAUNCH_R = 2500;                          // one SAM-clone shot inside this, then EGRESS
+
+// ---- ACES (INC-6, amendment 1) ----
+const ACE_HP = 120;        // one 9X (dmg 90) leaves an ace at 30 — smoking, alive
+const ACE_REACT = 0.4;     // reaction floor: at least tier-4 fast (reactS spawn override for faster, e.g. TYPHOON 0.35)
+const SMOKE_HP = 60;       // below this: smoke trail + 15% gMax degradation
+const BINGO_HP = 40;       // below this: cold, AB, run for the nearest edge
+const DMG_GFRAC = 0.85;    // DEFENSIVE_DAMAGED airframe: gMax * 0.85
+const EDGE = 30000;        // map boundary (|x| or |y|) — crossing alive in BINGO = escaped
+const MAX_SMOKE = 128;     // ace smoke puff budget (render-side, boot-built pool; ~1.3 km of trail at the 10 m gate)
 
 // ---- A2/A3 (INC-5) ----
 const SLOTS_AI = 6; // per-bandit clock sidecar: [reactT, jinkHdg, jinkT, evadeT, gunPhase, gunSpool]
@@ -147,6 +175,7 @@ export class Bandits {
     this.mslHitsPlayer = 0;  // A3: AAM impacts on the player
     this.gunRounds = 0;      // A3: bandit gun rounds fired
     this.gunHitsPlayer = 0;  // A3: bandit gun impacts on the player
+    this.escapes = 0;        // INC-6: aces that crossed the boundary alive (never counted in kills)
 
     // ---- flat sim truth (design §1 layout), all fixed width == fixed hash length ----
     this.state = new Float64Array(MAX_BANDITS * SLOTS_B);
@@ -156,6 +185,8 @@ export class Bandits {
     this.side = new Uint8Array(MAX_BANDITS);      // 0 red, 1 blue (escort targets)
     this.slotUsed = new Uint8Array(MAX_BANDITS);  // activated ever (dead != free)
     this.aceId = new Int32Array(MAX_BANDITS).fill(-1);
+    this.escaped = new Uint8Array(MAX_BANDITS);   // INC-6: 1 = crossed the boundary alive in BINGO (not-live-but-escaped)
+    this.react = new Float64Array(MAX_BANDITS);   // INC-6: per-slot reaction delay s (REACT[tier]; aces floored at ACE_REACT)
     this.tag = new Int32Array(MAX_BANDITS);       // 0 = untagged group id
     this.attackTag = new Int32Array(MAX_BANDITS); // raider surface-target tag (0 = none)
     // waypoint routes: flat [x0,y0,x1,y1,...] per slot. Not hashed — set
@@ -182,6 +213,9 @@ export class Bandits {
 
     this._matRed = new THREE.MeshStandardMaterial({ color: 0x3c4046, roughness: 0.85, metalness: 0.25 });
     this._matBlue = new THREE.MeshStandardMaterial({ color: 0x9aa2ad, roughness: 0.8, metalness: 0.2 });
+    // INC-6 ace livery: aggressor red (design §5 liveryTint) — the player
+    // can SEE which contact is the ace at a glance
+    this._matAce = new THREE.MeshStandardMaterial({ color: 0xb03a2e, roughness: 0.7, metalness: 0.3 });
     this.groups = []; this._variants = [];
     for (let i = 0; i < MAX_BANDITS; i++) {
       const g = new THREE.Group();
@@ -209,6 +243,18 @@ export class Bandits {
     this.root.add(this.mslTrail);
     this.mslPuffs = [];
     this._mslLastPuff = new Float64Array(MAX_BMSL * 3);
+
+    // INC-6 ace smoke: the mslTrail puff pattern with its own boot-built
+    // pool (pool doctrine — no post-boot scene geometry), dark against sky
+    // and desert alike. Emission is render-side off the smoking() flag.
+    const kGeo = new THREE.PlaneGeometry(4.0, 4.0);
+    const kMat = new THREE.MeshBasicMaterial({ color: 0x1f1c19, map: softDiscTexture(), transparent: true, opacity: 0.6, depthWrite: false });
+    this.smokeMesh = new THREE.InstancedMesh(kGeo, kMat, MAX_SMOKE);
+    this.smokeMesh.frustumCulled = false;
+    this.smokeMesh.count = 0;
+    this.root.add(this.smokeMesh);
+    this.smokePuffs = [];
+    this._smokeLastPuff = new Float64Array(MAX_BANDITS * 3);
 
     // bandit gun tracers: the battlefield enemy-round streaks verbatim —
     // hot red, unmistakably incoming (amendment-5 telegraph). Built + added
@@ -269,6 +315,26 @@ export class Bandits {
     return false;
   }
 
+  // ---- INC-6 ace accessors (campaign layer reads these; all derived from
+  // the hashed columns — no state storage beyond the escaped flag) ----
+  smoking(i) { return this.alive(i) && this.aceId[i] >= 0 && this.state[i * SLOTS_B + 6] < SMOKE_HP; }
+  _aceSlot(aceId) {
+    if (aceId < 0) return -1;
+    for (let i = 0; i < MAX_BANDITS; i++) if (this.slotUsed[i] && this.aceId[i] === aceId) return i;
+    return -1;
+  }
+  aceEscaped(aceId) { const i = this._aceSlot(aceId); return i >= 0 && this.escaped[i] === 1; }
+  aceStatus(aceId) {
+    const i = this._aceSlot(aceId);
+    if (i < 0) return "none";
+    if (this.escaped[i]) return "escaped";
+    const hp = this.state[i * SLOTS_B + 6];
+    if (!this.live[i] || hp <= 0) return "killed";
+    if (hp < BINGO_HP) return "bingo";
+    if (hp < SMOKE_HP) return "smoking";
+    return "alive";
+  }
+
   // Activate pool slots (mirrors battlefield.spawnGroup): units =
   // [{ kind, tier, x, y, z, headingDeg, speed, tag, aceId, side,
   //    wpts: [[x,y],...], attackTag?, engage? }]. kind: "drone"|"transport"|
@@ -293,11 +359,14 @@ export class Bandits {
       const gh = this.terrain ? Math.max(this.terrain.heightAt(u.x, u.y), 0) : 0;
       const z = Math.max(u.z ?? gh + FOLLOW_AGL, gh + FLOOR_AGL);
       const o = slot * SLOTS_B;
+      const ace = (u.aceId ?? -1) >= 0;
       this.state[o] = u.x; this.state[o + 1] = u.y; this.state[o + 2] = z;
       this.state[o + 3] = spd * Math.cos(hdg);
       this.state[o + 4] = spd * Math.sin(hdg);
       this.state[o + 5] = 0;
-      this.state[o + 6] = HP0[k];
+      // INC-6 ace trait override, applied at spawn (amendment 1): hp 120 —
+      // one 9X leaves the ace smoking, never dead
+      this.state[o + 6] = ace ? ACE_HP : HP0[k];
       this.state[o + 7] = B_INGRESS; this.state[o + 8] = 0; this.state[o + 9] = 0;
       this.state[o + 10] = hdg; this.state[o + 11] = 0; this.state[o + 12] = CRUISE[k];
       this.state[o + 13] = 0;
@@ -308,6 +377,10 @@ export class Bandits {
       this.side[slot] = u.side ? 1 : 0;
       this.tag[slot] = (u.tag || 0) | 0;
       this.aceId[slot] = u.aceId ?? -1;
+      // reaction: tier table; aces floored at tier-4 speed, spawn config may
+      // pass reactS for faster still (TYPHOON 0.35 per Part B)
+      const baseReact = REACT[this.tier[slot]];
+      this.react[slot] = ace ? Math.min(baseReact, u.reactS ?? ACE_REACT) : baseReact;
       this.attackTag[slot] = (u.attackTag || 0) | 0;
       this.engage[slot] = u.engage && k === 2 && this.tier[slot] >= 2 && this.side[slot] === 0 ? 1 : 0;
       const ai0 = slot * SLOTS_AI;
@@ -323,8 +396,9 @@ export class Bandits {
       // pose + show the pre-built mesh (never construct scene geometry here)
       const g = this.groups[slot], vars = this._variants[slot];
       for (let v = 0; v < 3; v++) vars[v].visible = v === k;
-      const mat = this.side[slot] ? this._matBlue : this._matRed;
+      const mat = this.side[slot] ? this._matBlue : (ace ? this._matAce : this._matRed);
       vars[k].traverse((m) => { if (m.isMesh) m.material = mat; });
+      this._smokeLastPuff.set([u.x, u.y, z], slot * 3); // ENU, matches render's lx/ly/lz
       g.position.set(u.x, z, u.y); // ENU -> three (east, up, north)
       g.rotation.set(0, Math.atan2(this.state[o + 3], this.state[o + 4]), 0);
       g.visible = true;
@@ -423,15 +497,24 @@ export class Bandits {
   // the A2/A3 draws below (jink heading, evade duration) happen ONLY here.
   _decide(sim, i) {
     const o = i * SLOTS_B, ai0 = i * SLOTS_AI;
+    // ---- INC-6 BINGO (amendment 1): below hp 40 the ace goes cold — breaks
+    // off WHATEVER it is doing (even the committed ATTACK dive), disarms any
+    // pending reaction break, and runs for the nearest edge. Terminal: only
+    // the boundary crossing (escape) or death ends it.
+    if (this.aceId[i] >= 0 && this.state[o + 6] < BINGO_HP && this.state[o + 7] !== B_BINGO) {
+      this.state[o + 7] = B_BINGO; this.state[o + 8] = 0;
+      this.ai[ai0] = -1;
+    }
     const st = this.state[o + 7];
     const x = this.state[o], y = this.state[o + 1], z = this.state[o + 2];
     const P = this.player;
     // ---- A2 threat watch (red only; EVADE never re-arms, ATTACK is a
-    // committed dive). On trigger, pre-draw the WHOLE evade here — break
-    // heading (a 60-180 deg banked break off the current heading) and
-    // duration — and start the tier reaction clock; the break itself fires
-    // rng-free in the integrator when the clock runs out.
-    if (P && this.side[i] === 0 && this.ai[ai0] < 0 && st !== B_EVADE && st !== B_ATTACK) {
+    // committed dive, BINGO never defends — it just runs). On trigger,
+    // pre-draw the WHOLE evade here — break heading (a 60-180 deg banked
+    // break off the current heading) and duration — and start the tier
+    // reaction clock; the break itself fires rng-free in the integrator
+    // when the clock runs out.
+    if (P && this.side[i] === 0 && this.ai[ai0] < 0 && st !== B_EVADE && st !== B_ATTACK && st !== B_BINGO) {
       const threat = this._missileThreat(i) ||
         ((st === B_INGRESS || st === B_EGRESS) && this._rearThreat(i));
       if (threat) {
@@ -439,7 +522,7 @@ export class Bandits {
         const sgn = sim.rng.f() < 0.5 ? -1 : 1;
         this.ai[ai0 + 1] = wrapPi(hdg + sgn * (Math.PI / 3 + sim.rng.f() * (2 * Math.PI / 3)));
         this.ai[ai0 + 3] = 4 + sim.rng.f() * 3;
-        this.ai[ai0] = REACT[this.tier[i]];
+        this.ai[ai0] = this.react[i];
       }
     }
     if (st === B_INGRESS) {
@@ -537,6 +620,18 @@ export class Bandits {
           this.state[o + 13] = RELOAD_S;
         }
       }
+    } else if (st === B_BINGO) {
+      // INC-6: cold AB run for the nearest map edge. Deterministic pick —
+      // distances checked in fixed order E, W, N, S with strict <, so a tie
+      // holds the earlier edge (ties -> +x). Re-resolved every decision (a
+      // fixed target, but re-deriving keeps zero extra state to hash).
+      let d = EDGE - x, hdg = 0;              // +x east
+      if (EDGE + x < d) { d = EDGE + x; hdg = Math.PI; }        // -x west
+      if (EDGE - y < d) { d = EDGE - y; hdg = Math.PI / 2; }    // +y north
+      if (EDGE + y < d) { d = EDGE + y; hdg = -Math.PI / 2; }   // -y south
+      this.state[o + 10] = hdg;
+      this.state[o + 11] = this._followPitch(o);
+      this.state[o + 12] = DASH_CAP; // AB flavor — the integrator opens VMAX to the dash cap in BINGO
     } else { // B_EGRESS: hold heading, terrain-follow, fighters firewall it
       // A3 recovery: an engage fighter that extended re-commits once its
       // energy is back (design: re-engage at v > 0.9·cruise)
@@ -639,7 +734,7 @@ export class Bandits {
         if (this.ai[ai0] >= 0) { // reaction clock -> the break
           this.ai[ai0] -= dt;
           const s7 = this.state[o + 7];
-          if (this.ai[ai0] < 0 && s7 !== B_EVADE && s7 !== B_ATTACK) {
+          if (this.ai[ai0] < 0 && s7 !== B_EVADE && s7 !== B_ATTACK && s7 !== B_BINGO) {
             this.state[o + 7] = B_EVADE; this.state[o + 8] = 0;
             this.state[o + 10] = this.ai[ai0 + 1];
             this.state[o + 11] = this._followPitch(o);
@@ -671,17 +766,23 @@ export class Bandits {
       let v = Math.hypot(vx, vy, vz) || 1;
       const hdg = Math.atan2(vy, vx);
       const pit = Math.asin(Math.max(-1, Math.min(1, vz / v)));
-      const turnMax = Math.min(GMAX[this.tier[i]] * 9.81 / v, TURN_CAP);
+      // INC-6 SMOKING: a damaged ace airframe turns 15% softer (design Part
+      // B DEFENSIVE_DAMAGED; aces only — regular fighters are unchanged)
+      let gm = GMAX[this.tier[i]];
+      if (this.aceId[i] >= 0 && this.state[o + 6] < SMOKE_HP) gm *= DMG_GFRAC;
+      const turnMax = Math.min(gm * 9.81 / v, TURN_CAP);
       let dH = wrapPi(this.state[o + 10] - hdg);
       dH = Math.max(-turnMax * dt, Math.min(turnMax * dt, dH));
       let dP = this.state[o + 11] - pit;
       dP = Math.max(-0.6 * turnMax * dt, Math.min(0.6 * turnMax * dt, dP));
       const rate = Math.hypot(dH, dP) / dt;
       this._turn[i] = dH / dt; // render-side banking (deterministic, not hashed)
-      // thrust toward the commanded speed, then the hard-turn bleed
+      // thrust toward the commanded speed, then the hard-turn bleed. BINGO
+      // (INC-6) opens the VMAX clamp to the 420 dash cap — AB flavor; the
+      // amendment-5 guardrail below still rules everything.
       v += Math.max(-ACCEL * dt, Math.min(ACCEL * dt, this.state[o + 12] - v));
       v -= BLEED_K * v * rate * dt;
-      v = Math.max(VMIN, Math.min(VMAX, v));
+      v = Math.max(VMIN, Math.min(this.state[o + 7] === B_BINGO ? DASH_CAP : VMAX, v));
       const nh = hdg + dH, np = pit + dP, cp = Math.cos(np);
       vx = v * cp * Math.cos(nh); vy = v * cp * Math.sin(nh); vz = v * Math.sin(np);
       // amendment-5 guardrail: nothing red ever outruns supercruise
@@ -701,6 +802,16 @@ export class Bandits {
       this.state[o] = x; this.state[o + 1] = y; this.state[o + 2] = z;
       this.state[o + 3] = vx; this.state[o + 4] = vy; this.state[o + 5] = vz;
       this.state[o + 8] += dt;
+      // INC-6 ESCAPE: a BINGO ace crossing the map boundary ALIVE is gone —
+      // not a kill (kills stays), not free (slotUsed stays). The mesh hides
+      // exactly like a death; the campaign layer reads escaped/aceStatus.
+      if (this.state[o + 7] === B_BINGO && (Math.abs(x) > EDGE || Math.abs(y) > EDGE)) {
+        this.live[i] = 0;
+        this.escaped[i] = 1;
+        this.escapes++;
+        this.groups[i].visible = false;
+        continue;
+      }
       if (this.state[o + 13] > 0) this.state[o + 13] = Math.max(0, this.state[o + 13] - dt);
       // ---- A3 bandit gun: the ZSU burst/spool state machine on the nose —
       // ENGAGE only, range 700, ~15 deg cone. Dispersion rng draws at fire
@@ -864,8 +975,12 @@ export class Bandits {
     for (let i = 0; i < MAX_BANDITS; i++) H(this.engage[i]);
     for (let i = 0; i < this.br.length; i++) H(this.br[i]);
     for (let i = 0; i < MAX_BR; i++) H(this.brLive[i]);
+    // INC-6 ace columns — appended folds, all fixed width
+    for (let i = 0; i < MAX_BANDITS; i++) H(this.escaped[i]);
+    for (let i = 0; i < MAX_BANDITS; i++) H(this.react[i]);
     H(this.kills); H(this.blueLosses); H(this.launches); H(this.mslHits);
     H(this.launchesPlayer); H(this.mslHitsPlayer); H(this.gunRounds); H(this.gunHitsPlayer);
+    H(this.escapes);
     return h;
   }
 
@@ -886,6 +1001,16 @@ export class Bandits {
         g.rotation.y = Math.atan2(vx, vy);                       // ENU bearing == three yaw
         g.rotation.x = -Math.asin(Math.max(-1, Math.min(1, vz / v))); // climb = nose up
         g.rotation.z = Math.max(-1.15, Math.min(1.15, Math.atan2(this._turn[i] * v, 9.81))); // bank into the turn
+      }
+      // INC-6 SMOKING trail: dark puffs laid along the damaged ace's path
+      // (the mslTrail emission pattern — distance-gated off the render pos)
+      if (this.aceId[i] >= 0 && b[o + 6] < SMOKE_HP) {
+        const s3 = i * 3, sp = this._smokeLastPuff;
+        const sd = Math.hypot(lx - sp[s3], ly - sp[s3 + 1], lz - sp[s3 + 2]);
+        if (sd > 10 && this.smokePuffs.length < MAX_SMOKE) {
+          this.smokePuffs.push({ x: lx, y: ly, z: lz, age: 0 });
+          sp.set([lx, ly, lz], s3);
+        }
       }
     }
     // missiles: SAM render pattern (bodies along velocity + billboard puffs)
@@ -934,5 +1059,20 @@ export class Bandits {
     this.mslTrail.count = np;
     this.mslTrail.instanceMatrix.needsUpdate = true;
     while (this.mslPuffs.length && this.mslPuffs[0].age > 5.0) this.mslPuffs.shift();
+    // INC-6 ace smoke draw (the mslPuffs pattern: camera billboards, grow
+    // with age, cull at 4.5 s visual age)
+    let nk = 0;
+    for (const pf of this.smokePuffs) {
+      pf.age += pdt;
+      if (pf.age > 4.5) continue;
+      const sc = 1.0 + pf.age * 1.4;
+      this._m4.makeRotationFromQuaternion(camera.quaternion);
+      this._m4.scale(this._sc.set(sc, sc, sc));
+      this._m4.setPosition(pf.x, pf.z, pf.y);
+      if (nk < MAX_SMOKE) this.smokeMesh.setMatrixAt(nk++, this._m4);
+    }
+    this.smokeMesh.count = nk;
+    this.smokeMesh.instanceMatrix.needsUpdate = true;
+    while (this.smokePuffs.length && this.smokePuffs[0].age > 4.5) this.smokePuffs.shift();
   }
 }
