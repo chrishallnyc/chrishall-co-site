@@ -14,7 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#f6f4ee">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f6f4ee'/%3E%3Cpath d='M1.5 19.4 L30.5 16.4' stroke='%23989690' stroke-width='1'/%3E%3Cpath d='M3.5 19 C6.5 12.6 13.5 10.6 19.5 12 C24.5 13.2 28 15.4 29 16.6 C26 18.2 18.5 20.6 11.5 20.9 C7.5 21 4.5 20.3 3.5 19 Z' fill='%2318181c'/%3E%3Ccircle cx='4.2' cy='19' r='2.4' fill='%23e8b46f'/%3E%3C/svg%3E">
-<!-- CHALL TUNNEL v0.10.0 · phase 10 — R3 FINER AIR + THE LONG EXPOSURE: the mid-rungs land as table data — probe order H1 → W1 1536×768×58 → W2 1280×640×48 → W3 1024×512×38, accept first pass, τ-gated at the LIMIT-2D 9 ms mid-rung pick law (W1 ≤9/58, W2 ≤9/48, W3 ≤9/38 ms/substep; the governor demotes through the table at boot, timing-only, never sniffing; H1's pick line and R₀ formula are byte-unchanged; STILLS stays the floor; MEDIAN-FREEZE asserted by frozen-region sha in qa/r3-live.mjs). THE LONG EXPOSURE (AM-14 / INSTRUMENT-LOCK §1.3): a door on the plate panel — `long exposure →` — runs the CURRENT specimen at 8192×4096 = 33,554,432 TRUE cells as a deliberate offline-in-browser exposure: its own device at raised limits (the live rungs keep default limits), the 2D-dispatch law for >16.7M cells (65,535-workgroup cap — the three NC-wide kernels re-index onto a 2D grid, default OFF, live rungs byte-identical), chunked 256-substep batches with the moment field integrated every chunk (the accumulation IS the negative), one full crossing at full wind, progress printed `exposing . 33,554,432 cells . N% . ~M min left`, cancellable, the wind holds while it runs; then the portrait develops at export class 6400×4000 — the badge prints cells · grid · the MEASURED crossing minutes, row two carries the honesty microline VERBATIM + `computed in this browser · not real-time`; a device that refuses (limits check or the out-of-memory error scope) gets the honest refusal printed at the door and nothing else prints, ever. QA flags (query = QA space, never product): ?rung=h1|w1|w2|w3 · ?qatau= (forced-τ pick, RUNG-LADDER lane) · ?lxgrid= · ?lxrefuse=1 · ?qa=st gains &stbatch= / &stlx=1 (the replay re-bake law: the frozen St fixture re-runs through every touched rung, ±2% of the 0.2139 baseline). · on phase 9 — THE MODEL SHOP, PHASE 2 (the pencil, the reference row, and the lawful counts): THE REFERENCE ROW R-001…R-008 joins the hangar wall as row citizens (drawn clean, one verbatim lesson each; `test →` mounts keeping air; the cylinder and flat plate keep their analytic in-tunnel masks — REF-CAL and LAYOUT laws unchanged); THE PENCIL — the drafting table, literal: wind-off, the outline lies flat with control points, the verb set CLOSED at {move, add, delete, smooth} (PENCIL-CAP is structural — the frozen tuple IS the tool), ≤50 undo session-scoped, `revert to trace` always present, blank-paper `draw →` door (a seeded 12-point blob, same four verbs); the original row is IMMUTABLE — edits bake through the spooled swap to a MOD accession (U-NNN/A · mod of U-NNN · the pencil; reference edits fork to fresh U-NNN), A/B = the existing held-air [ ] swap cycling the specimen family; THE COUNTS under the COMPARISON LAW (DECISIONS R2.5): `measure against the row →` re-measures up to three reference bodies LIVE this session at EQUAL FRONTAL HEIGHT and identical settings (one rake column, staircase settle, wake-rake momentum deficit), prints ONLY dimensionless ratios at one decimal under the verbatim chrome line — operands never print anywhere, seed spread demotes the print to ≈, a body too long for the wake at equal height gets the refusal card (never a silent rescale), and THE AIRCRAFT NEVER JOIN THE LINEUP (the picker is built from the reference row and nothing else — absent by construction). · on phase 8 — THE MODEL SHOP OPENS (phase 1, "the drop"): scan-anything enters the live page — drag a file (or the hangar's `load an object →` door), the mesh is read in a Worker and thrown away (magic bytes, typed refusals, never a throw), three ink sections print (silhouette / center slice / ground — never the mesh), the pencil traces the pick stroke-by-stroke, U-NNN accessions to THE SHELF (IndexedDB, cap 24, serials append-only, strikes leave tombstones), MODEL CHANGE spool → your wake in the same air as the sixteen; ground mode = free-slip floor at the wheel line, state printed on the specimen line; share = outline in the URL FRAGMENT only (#u=, ≤2000 chars, 12-bit deflate; the share-moment line prints beside the copied link); receiving #u= = rename-before-keep; METHODS gains the shop privacy paragraph verbatim. Comparison counts do NOT ship this phase — no drag numbers print. · on phase 7 — THE RECORD SURFACES: wind-off portraits (LAW 6b: power→0 seals the page, the trace develops ~3.5 s, done-beat) + PLATE exports (3200×2000 offscreen re-render, honesty microline verbatim, serial accession, filename law) + THE STILLS DIGNITY TIER (no-webgpu / prefers-reduced-motion / ?force=stills → one composed static state: paper + TEST 001 + a time-averaged impression from this instrument's own cpu oracle) + storage-throw boot + device-loss relight · on phase 6 (RISO lock + METHODS + hangar wall) + phase 5 (A-10 + THE PAIR) + phase 4 (pressure view) -->
+<!-- CHALL TUNNEL v0.11.0 · phase 11 — VOLUME (R4 · docs/limit99/VOLUME.md): real 3D airflow for scanned objects and reference solids. WGSL D3Q19 BGK+Smagorinsky at FP16S SHIFTED storage, IN-PLACE single-buffer streaming (the 2D AA/esoteric-pull pattern generalized to 19 directions), halfway bounce-back STATIC masks, equilibrium inflow ramp + deterministic +y kick, ρ-ANCHORED zero-gradient outflow, quadratic-τ sponge (3D law max(16, 0.10·W)), free-slip on all four lateral faces (FLIPY/FLIPZ specular composition) — CONSTANTS3D mirrors qa/oracle3d.mjs EXACTLY (the shared-constants law; VOL-CONST byte-compares, VOL-DIFF-3D holds L∞(u) < 1e-3 vs the oracle at 200 lockstep steps, VOL-ST-GPU re-runs the ratified 192×96×96 D=24 sphere fixture on this page's own solver). THE ARTICLE: a `volume →` door on USER-MOUNTED articles ONLY (scanned meshes voxelized from the SAME parsed triangles the drop already read — surface rasterize + interior flood fill + the ≥3-cell dilation law; reference solids from the CLOSED VOLTAB — revolve/extrude of the drawn-clean row; aircraft NEVER mount in 3D: no honest 3D models exist, and the door is absent for them by construction). V1 = 256×128×128 × ss10 @ 60, probe-gated: a measured 96³ τ-probe must clear 2.6 GLUPS or the door prints the honest refusal card and nothing else; yaw/α is DETENTED (0/±15/±30) — each detent an async re-voxelize + fresh-cell refill behind the crane line, never a live morph. The ink is ORTHOGRAPHIC 3D-TRACER ink (ray-march refused twice): 2,097,152 tracers advected in the live field (RK2, trilinear), deposited into the same device-pixel deposit pipeline, depth as engraver's line weight (far span ×0.35 alpha, half duty), governor sheds tracers first. THE HONESTY FIREWALL: the chrome prints `VOLUME · QUALITATIVE · chord 44 cells · no numbers leave this view` — the badge is the only number the volume ever emits; no detector captions, no counts lineups, no gap lines, and no plates from the 3D field in v1 (the plate door prints the honest refusal). QA flags (query = QA space): ?qa=vol3d (the pinned 64×32×32 diff geometry) · ?qa=volst (the sphere St fixture) · ?volrefuse=1 (forced refusal) · ?volglups= (forced probe verdict; the real measurement still runs and is recorded). · on phase 10 — R3 FINER AIR + THE LONG EXPOSURE: the mid-rungs land as table data — probe order H1 → W1 1536×768×58 → W2 1280×640×48 → W3 1024×512×38, accept first pass, τ-gated at the LIMIT-2D 9 ms mid-rung pick law (W1 ≤9/58, W2 ≤9/48, W3 ≤9/38 ms/substep; the governor demotes through the table at boot, timing-only, never sniffing; H1's pick line and R₀ formula are byte-unchanged; STILLS stays the floor; MEDIAN-FREEZE asserted by frozen-region sha in qa/r3-live.mjs). THE LONG EXPOSURE (AM-14 / INSTRUMENT-LOCK §1.3): a door on the plate panel — `long exposure →` — runs the CURRENT specimen at 8192×4096 = 33,554,432 TRUE cells as a deliberate offline-in-browser exposure: its own device at raised limits (the live rungs keep default limits), the 2D-dispatch law for >16.7M cells (65,535-workgroup cap — the three NC-wide kernels re-index onto a 2D grid, default OFF, live rungs byte-identical), chunked 256-substep batches with the moment field integrated every chunk (the accumulation IS the negative), one full crossing at full wind, progress printed `exposing . 33,554,432 cells . N% . ~M min left`, cancellable, the wind holds while it runs; then the portrait develops at export class 6400×4000 — the badge prints cells · grid · the MEASURED crossing minutes, row two carries the honesty microline VERBATIM + `computed in this browser · not real-time`; a device that refuses (limits check or the out-of-memory error scope) gets the honest refusal printed at the door and nothing else prints, ever. QA flags (query = QA space, never product): ?rung=h1|w1|w2|w3 · ?qatau= (forced-τ pick, RUNG-LADDER lane) · ?lxgrid= · ?lxrefuse=1 · ?qa=st gains &stbatch= / &stlx=1 (the replay re-bake law: the frozen St fixture re-runs through every touched rung, ±2% of the 0.2139 baseline). · on phase 9 — THE MODEL SHOP, PHASE 2 (the pencil, the reference row, and the lawful counts): THE REFERENCE ROW R-001…R-008 joins the hangar wall as row citizens (drawn clean, one verbatim lesson each; `test →` mounts keeping air; the cylinder and flat plate keep their analytic in-tunnel masks — REF-CAL and LAYOUT laws unchanged); THE PENCIL — the drafting table, literal: wind-off, the outline lies flat with control points, the verb set CLOSED at {move, add, delete, smooth} (PENCIL-CAP is structural — the frozen tuple IS the tool), ≤50 undo session-scoped, `revert to trace` always present, blank-paper `draw →` door (a seeded 12-point blob, same four verbs); the original row is IMMUTABLE — edits bake through the spooled swap to a MOD accession (U-NNN/A · mod of U-NNN · the pencil; reference edits fork to fresh U-NNN), A/B = the existing held-air [ ] swap cycling the specimen family; THE COUNTS under the COMPARISON LAW (DECISIONS R2.5): `measure against the row →` re-measures up to three reference bodies LIVE this session at EQUAL FRONTAL HEIGHT and identical settings (one rake column, staircase settle, wake-rake momentum deficit), prints ONLY dimensionless ratios at one decimal under the verbatim chrome line — operands never print anywhere, seed spread demotes the print to ≈, a body too long for the wake at equal height gets the refusal card (never a silent rescale), and THE AIRCRAFT NEVER JOIN THE LINEUP (the picker is built from the reference row and nothing else — absent by construction). · on phase 8 — THE MODEL SHOP OPENS (phase 1, "the drop"): scan-anything enters the live page — drag a file (or the hangar's `load an object →` door), the mesh is read in a Worker and thrown away (magic bytes, typed refusals, never a throw), three ink sections print (silhouette / center slice / ground — never the mesh), the pencil traces the pick stroke-by-stroke, U-NNN accessions to THE SHELF (IndexedDB, cap 24, serials append-only, strikes leave tombstones), MODEL CHANGE spool → your wake in the same air as the sixteen; ground mode = free-slip floor at the wheel line, state printed on the specimen line; share = outline in the URL FRAGMENT only (#u=, ≤2000 chars, 12-bit deflate; the share-moment line prints beside the copied link); receiving #u= = rename-before-keep; METHODS gains the shop privacy paragraph verbatim. Comparison counts do NOT ship this phase — no drag numbers print. · on phase 7 — THE RECORD SURFACES: wind-off portraits (LAW 6b: power→0 seals the page, the trace develops ~3.5 s, done-beat) + PLATE exports (3200×2000 offscreen re-render, honesty microline verbatim, serial accession, filename law) + THE STILLS DIGNITY TIER (no-webgpu / prefers-reduced-motion / ?force=stills → one composed static state: paper + TEST 001 + a time-averaged impression from this instrument's own cpu oracle) + storage-throw boot + device-loss relight · on phase 6 (RISO lock + METHODS + hangar wall) + phase 5 (A-10 + THE PAIR) + phase 4 (pressure view) -->
 <style>
 :root { --bg:#f6f4ee; --ink:#18181c; --mid:#56565e; --dim:#69675f; --hair:#989690; --acc:#e8b46f; --accd:#8a5d0c; --spec:#255079; }
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -49,7 +49,7 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
   left:50%; top:50%; transform:translate(-50%,-50%);
   touch-action:none;
 }
-#gpu { position:absolute; inset:0; width:100%; height:100%; }
+#gpu, #gpu3 { position:absolute; inset:0; width:100%; height:100%; }
 #specimen { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
 #etch { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
 #capstack {
@@ -207,6 +207,8 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 <canvas id="paper" aria-hidden="true"></canvas>
 <div id="stage" hidden>
   <canvas id="gpu"></canvas>
+  <canvas id="gpu3" hidden></canvas><!-- VOLUME (phase 11): the 3D article's own canvas — its own device at raised limits; the 2D canvas holds beneath -->
+
   <svg id="specimen" aria-hidden="true">
     <circle id="body" fill="#18181c" hidden/>
     <rect id="plate" fill="#18181c" hidden/>
@@ -255,7 +257,7 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
     <nav id="views" aria-label="views"><button class="vw on" data-v="smoke" type="button" aria-pressed="true">smoke</button> · <button class="vw" data-v="specks" type="button" aria-pressed="false">specks</button> · <button class="vw" data-v="pressure" type="button" aria-pressed="false">pressure</button></nav>
     <p id="pressline" hidden>pressure view · warm = compression · cool = suction · magnitude is density, hue is sign only</p>
   </div>
-  <p class="doors"><span id="groundword" hidden><button class="door" id="grounddoor" type="button">ground</button> · </span><span id="countsword" hidden><button class="door" id="countsdoor" type="button">measure against the row →</button> · </span><button class="door" id="platedoor" type="button">plate ↓</button> · <span id="lxword" hidden><button class="door" id="lxdoor" type="button" title="8192×4096 — 33,554,432 cells · a deliberate exposure, minutes of wall clock · the wind holds while it runs">long exposure →</button><button class="door" id="lxcancel" type="button" hidden> · cancel</button> · </span><button class="door" id="methodsdoor" type="button">methods →</button> · <button class="door" id="hangardoor" type="button">hangar →</button></p>
+  <p class="doors"><span id="groundword" hidden><button class="door" id="grounddoor" type="button">ground</button> · </span><span id="countsword" hidden><button class="door" id="countsdoor" type="button">measure against the row →</button> · </span><span id="volword" hidden><button class="door" id="voldoor" type="button" title="real 3d airflow — d3q19, probe-gated · qualitative structure, never digits">volume →</button> · </span><button class="door" id="platedoor" type="button">plate ↓</button> · <span id="lxword" hidden><button class="door" id="lxdoor" type="button" title="8192×4096 — 33,554,432 cells · a deliberate exposure, minutes of wall clock · the wind holds while it runs">long exposure →</button><button class="door" id="lxcancel" type="button" hidden> · cancel</button> · </span><button class="door" id="methodsdoor" type="button">methods →</button> · <button class="door" id="hangardoor" type="button">hangar →</button></p>
   <a class="cwatch" href="https://admin.chall.net/tunnel-mission">watch it being built → admin.chall.net/tunnel-mission</a>
 </aside>
 <!-- —— METHODS: the instrument's own paper, in-page (R1 assembly; zero requests —
@@ -274,9 +276,11 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
   <p class="mp">the cylinder first . a frozen fixture (400×160, d = 24, 40,000 steps) sheds vortices at a strouhal number the literature has measured for a century: the cpu oracle reads <span class="kw">0.2139</span>, the gpu instrument reads <span class="kw">0.2138</span> — agreement to 0.05% . the unbounded-cylinder literature band near this re is St ≈ 0.19–0.21 (shedding onset re ≈ 47, williamson 1996); our fixture's 15% blockage sits it at the top of the band, and the number that matters is the gpu-versus-oracle agreement, not the absolute.</p>
   <p class="mp">the pair . the f-16's thin section separates at 9.0°; the a-10's thick cambered section holds to 13.5° — a 4.5° window, measured across three seeds with zero spread, geometry never tuned . the requirement was 2°.</p>
   <p class="mp">the batteries . L0 is the deterministic cpu-oracle battery — seven lanes (strouhal, anchor, settled state, poiseuille, moving-wall sweep, mass, layout), ~70 s in node, exits nonzero on any red . this build's page battery stands at 80/80 . the gpu-versus-oracle diff lane runs both solvers in lockstep on a pinned 128×64 geometry and holds L∞ &lt; 10⁻³ over 500 steps — 11/11.</p>
-  <p class="mp">and the part we care most about: <span class="kw">you can run this yourself, in your own browser</span> . add <span class="kw">?qa=st</span> to the url and this page runs the frozen 40,000-step fixture on your gpu and prints the strouhal it measured . add <span class="kw">?qa=diff</span> and it boots the pinned diff geometry for inspection . the validation is not a pdf — it is a mode of the instrument.</p>
+  <p class="mp">the sphere, for the volume . a sphere at re ~300 sheds hairpin vortices at a strouhal number two independent groups measured within a percent of each other — johnson &amp; patel (jfm 378, 1999) read 0.137, tomboulides &amp; orszag (jfm 416, 2000) read 0.136 . this program's 3d cpu oracle, on the ratified fixture, reads <span class="kw">0.1354</span>; the d3q19 gpu solver on the same fixture reads <span class="kw">0.1377</span> — inside the ±15% band two different grids honestly allow, and the lockstep diff between them holds L∞ &lt; 10⁻³ over 200 steps (measured 0.000043) . the negative control matters as much: at re ~100 the same fixture goes <span class="kw">steady</span> and the seeded perturbation decays by four orders — an instrument that always sheds is not measuring anything.</p>
+  <p class="mp">and the part we care most about: <span class="kw">you can run this yourself, in your own browser</span> . add <span class="kw">?qa=st</span> to the url and this page runs the frozen 40,000-step fixture on your gpu and prints the strouhal it measured . add <span class="kw">?qa=diff</span> and it boots the pinned diff geometry for inspection . add <span class="kw">?qa=volst</span> and it runs the 3d sphere fixture the same way . the validation is not a pdf — it is a mode of the instrument.</p>
   <p class="mk">THE LIMITS</p>
-  <p class="mp"><span class="kw">2d.</span> these are sections, not airplanes — no wingtip, no sweep relief, no strake vortex unless it is drawn in the section . real wings get three-dimensional help this tunnel cannot give.</p>
+  <p class="mp"><span class="kw">2d.</span> these are sections, not airplanes — no wingtip, no sweep relief, no strake vortex unless it is drawn in the section . real wings get three-dimensional help this tunnel cannot give . in 2d the streamwise vorticity is identically zero: tip vortices and pillar swirl are absent from the equations, not under-resolved.</p>
+  <p class="mp"><span class="kw">the volume.</span> objects you load in yourself get a second solver — d3q19, the same laws in three dimensions: the same shared-constants oracle, fp16 storage streaming in place through one buffer, halfway bounce-back, the same ρ-anchored outlet . it runs 256×128×128 with a chord about 44 cells, and it is a <span class="kw">different instrument, not a better one</span> . 44 cells resolves a tailgate recirculation as structure and a pillar core as a smear; it closes the gap the silhouette card confesses, and it earns no digits doing it . so it prints none — the badge on that view says qualitative, states its own chord, and that badge is the only number the volume ever emits . the aircraft never enter it: honest 3d models of them do not exist here, and lofting one from two flat views would fabricate exactly the geometry that makes those aircraft themselves.</p>
   <p class="mp"><span class="kw">incompressible.</span> no mach effects, no shocks . supersonic lives on paper here, cited — never in the solve.</p>
   <p class="mp"><span class="kw">tunnel re.</span> 10³–10⁴, orders below flight . separation here is honest physics at THIS re, and the per-plane gap line prints what the full-scale number does differently.</p>
   <p class="mp"><span class="kw">solid inlets.</span> engines are solid bodies; nothing flows through the nacelle . propellers do not exist here.</p>
@@ -379,7 +383,95 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 <script type="text/plain" id="shopw">
 var B=Object.freeze({TOO_LARGE:"too-large",TRUNCATED:"truncated",UNRECOGNIZED:"unrecognized-format",EMPTY_MESH:"empty-mesh",BAD_GEOMETRY:"bad-geometry",BAD_INDEX:"bad-index",BAD_JSON:"bad-json",GLB_COMPRESSED:"glb-compressed",GLB_UNSUPPORTED:"glb-unsupported",CONTAINER_ZIP:"container-zip"});function zQ(Z){if(Z==null)return null;if(typeof Z.byteLength==="number"&&typeof Z.slice==="function"&&!(Z instanceof ArrayBuffer)&&!ArrayBuffer.isView(Z))return{len:Z.byteLength,bytes:(Q,$)=>hQ(Z.slice(Q,$))};if(Z instanceof ArrayBuffer){let Q=new Uint8Array(Z);return{len:Q.length,bytes:($,J)=>Q.subarray($,J)}}if(ArrayBuffer.isView(Z)){let Q=new Uint8Array(Z.buffer,Z.byteOffset,Z.byteLength);return{len:Q.length,bytes:($,J)=>Q.subarray($,J)}}return null}function hQ(Z){if(Z instanceof Uint8Array)return Z;if(Z instanceof ArrayBuffer)return new Uint8Array(Z);if(ArrayBuffer.isView(Z))return new Uint8Array(Z.buffer,Z.byteOffset,Z.byteLength);return new Uint8Array(0)}function s(Z,Q){let $=Z.length/9|0;if($===0)return T(B.EMPTY_MESH,"file parsed but contains zero triangles",Q);for(let j=0;j<Z.length;j++)if(!Number.isFinite(Z[j]))return T(B.BAD_GEOMETRY,"non-finite vertex coordinates (NaN/Inf)",Q);let J,Y,K=!1;if($>3000000){let j=Math.ceil($/3000000);Y=Math.floor(($+j-1)/j),J=new Float32Array(Y*9);let X=0;for(let O=0;O<$;O+=j)for(let V=0;V<9;V++)J[X++]=Z[O*9+V];Y=X/9,J=J.subarray(0,X),K=!0}else J=Z instanceof Float32Array?Z:Float32Array.from(Z),Y=$;return{ok:!0,format:Q,tris:J,triCount:Y,srcTris:$,subsampled:K}}function AQ(Z,Q){if(Q===0)return T(B.EMPTY_MESH,"binary STL declares zero triangles","stl");let $=Q>3000000?Math.ceil(Q/3000000):1,J=Math.ceil(Q/$),Y=new Float32Array(J*9),K=0;for(let X=0;X<Q;X+=$){let O=84+X*50+12,V=Z.bytes(O,O+36);if(V.length<36)return T(B.TRUNCATED,"binary STL ends mid-triangle","stl");let G=new DataView(V.buffer,V.byteOffset,36);for(let q=0;q<9;q++)Y[K*9+q]=G.getFloat32(q*4,!0);K++}let j=s(Y.subarray(0,K*9),"stl");if(j.ok)j.srcTris=Q,j.subsampled=$>1;return j}function SQ(Z){let Q=[],$=Z.split(`
 `);for(let J=0;J<$.length;J++){let Y=$[J].trim();if(!Y.startsWith("vertex"))continue;let K=Y.split(/\s+/);if(K.length<4)return T(B.TRUNCATED,"ASCII STL vertex line malformed","stl");Q.push(parseFloat(K[1]),parseFloat(K[2]),parseFloat(K[3]))}if(Q.length%9!==0)return T(B.TRUNCATED,"ASCII STL vertex count not a multiple of 3","stl");return s(Q,"stl")}function fQ(Z){let Q=[],$=[],J=Z.split(`
-`);for(let Y=0;Y<J.length;Y++){let K=J[Y];if(K.length<2)continue;let j=K.charCodeAt(0);if(j===118&&(K.charCodeAt(1)===32||K.charCodeAt(1)===9)){let X=K.trim().split(/\s+/);Q.push(parseFloat(X[1]),parseFloat(X[2]),parseFloat(X[3]))}else if(j===102&&(K.charCodeAt(1)===32||K.charCodeAt(1)===9)){let X=K.trim().split(/\s+/),O=Q.length/3,V=[];for(let G=1;G<X.length;G++){let q=X[G].split("/")[0],N=parseInt(q,10);if(!Number.isFinite(N)||N===0)return T(B.BAD_INDEX,`OBJ face index "${X[G]}" is not a valid vertex reference`,"obj");if(N=N>0?N-1:O+N,N<0||N>=O)return T(B.BAD_INDEX,`OBJ face references vertex ${X[G]} out of range (${O} verts)`,"obj");V.push(N)}for(let G=2;G<V.length;G++){let q=V[0]*3,N=V[G-1]*3,I=V[G]*3;$.push(Q[q],Q[q+1],Q[q+2],Q[N],Q[N+1],Q[N+2],Q[I],Q[I+1],Q[I+2])}}}return s($,"obj")}var RQ={5120:1,5121:1,5122:2,5123:2,5125:4,5126:4};function bQ(Z,Q){let $=new Float64Array(16);for(let J=0;J<4;J++)for(let Y=0;Y<4;Y++){let K=0;for(let j=0;j<4;j++)K+=Z[j*4+Y]*Q[J*4+j];$[J*4+Y]=K}return $}var WQ=Object.freeze([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);function kQ(Z){if(Z.matrix)return Float64Array.from(Z.matrix);let Q=Z.translation||[0,0,0],$=Z.rotation||[0,0,0,1],J=Z.scale||[1,1,1],[Y,K,j,X]=$,O=Y+Y,V=K+K,G=j+j,q=Y*O,N=Y*V,I=Y*G,U=K*V,P=K*G,D=j*G,M=X*O,F=X*V,h=X*G;return Float64Array.from([(1-(U+D))*J[0],(N+h)*J[0],(I-F)*J[0],0,(N-h)*J[1],(1-(q+D))*J[1],(P+M)*J[1],0,(I+F)*J[2],(P-M)*J[2],(1-(q+U))*J[2],0,Q[0],Q[1],Q[2],1])}function uQ(Z){if(Z.len<20)return T(B.TRUNCATED,"GLB shorter than its own header","glb");let Q=Z.bytes(0,20),$=new DataView(Q.buffer,Q.byteOffset,Q.length),J=$.getUint32(4,!0);if(J!==2)return T(B.GLB_UNSUPPORTED,`GLB version ${J} — only glTF 2.0 binary is read`,"glb");if($.getUint32(8,!0)>Z.len)return T(B.TRUNCATED,"GLB header declares more bytes than the file holds","glb");let K=$.getUint32(12,!0);if($.getUint32(16,!0)!==1313821514)return T(B.GLB_UNSUPPORTED,"GLB first chunk is not JSON","glb");if(20+K>Z.len)return T(B.TRUNCATED,"GLB JSON chunk length lies past end of file","glb");let X;try{X=JSON.parse(new TextDecoder().decode(Z.bytes(20,20+K)))}catch{return T(B.BAD_JSON,"GLB JSON chunk does not parse","glb")}let O=-1,V=0,G=20+K;if(G+8<=Z.len){let C=Z.bytes(G,G+8),H=new DataView(C.buffer,C.byteOffset,8),A=H.getUint32(0,!0);if(H.getUint32(4,!0)===5130562){if(O=G+8,V=A,O+V>Z.len)return T(B.TRUNCATED,"GLB BIN chunk length lies past end of file","glb")}}let q=X.extensionsRequired||[],N=["KHR_draco_mesh_compression","EXT_meshopt_compression","KHR_mesh_quantization"];for(let C of N)if(q.includes(C))return T(B.GLB_COMPRESSED,`${C} — re-export uncompressed (Polycam/Scaniverse default GLB export is uncompressed; compression is opt-in)`,"glb");let I=X.accessors||[],U=X.bufferViews||[],P=X.meshes||[],D=X.nodes||[],M=X.scenes||[],F=Number.isInteger(X.scene)?X.scene:0,h=M[F]&&M[F].nodes||D.map((C,H)=>H);function d(C,H,A){let z=I[C];if(!z)return{err:T(B.GLB_UNSUPPORTED,"accessor index out of range","glb")};if(z.sparse)return{err:T(B.GLB_COMPRESSED,"sparse accessor — re-export uncompressed","glb")};if(z.type!==H||!A.includes(z.componentType))return{err:T(B.GLB_UNSUPPORTED,`accessor ${z.type}/${z.componentType} not in the minimal-read set`,"glb")};let v=U[z.bufferView];if(!v||(v.buffer||0)!==0)return{err:T(B.GLB_UNSUPPORTED,"accessor without a chunk-1 bufferView","glb")};if(O<0)return{err:T(B.TRUNCATED,"accessor points at a BIN chunk the file does not carry","glb")};let p=RQ[z.componentType],u=H==="VEC3"?3:1,y=p*u,x=v.byteStride||y,W=O+(v.byteOffset||0)+(z.byteOffset||0),c=z.count>0?x*(z.count-1)+y:0;if(W+c>O+V)return{err:T(B.TRUNCATED,"accessor range lies past the BIN chunk","glb")};let a=Z.bytes(W,W+c);if(a.length<c)return{err:T(B.TRUNCATED,"BIN chunk shorter than its accessors claim","glb")};return{acc:z,u8:a,stride:x,compBytes:p,nComp:u}}let f=[],R=new Set;function b(C,H){if(R.has(C))return null;R.add(C);let A=D[C];if(!A)return null;let z=bQ(H,kQ(A));if(Number.isInteger(A.mesh)&&P[A.mesh])for(let v of P[A.mesh].primitives||[]){if((v.mode===void 0?4:v.mode)!==4)continue;if(v.extensions&&(v.extensions.KHR_draco_mesh_compression||v.extensions.EXT_meshopt_compression))return T(B.GLB_COMPRESSED,"compressed primitive — re-export uncompressed","glb");if(!v.attributes||v.attributes.POSITION===void 0)continue;let u=d(v.attributes.POSITION,"VEC3",[5126]);if(u.err)return u.err;let y=new DataView(u.u8.buffer,u.u8.byteOffset,u.u8.length),x=u.acc.count,W=new Float64Array(x*3);for(let E=0;E<x;E++){let S=E*u.stride,g=y.getFloat32(S,!0),k=y.getFloat32(S+4,!0),r=y.getFloat32(S+8,!0);W[E*3]=z[0]*g+z[4]*k+z[8]*r+z[12],W[E*3+1]=z[1]*g+z[5]*k+z[9]*r+z[13],W[E*3+2]=z[2]*g+z[6]*k+z[10]*r+z[14]}let c=null;if(v.indices!==void 0){let E=d(v.indices,"SCALAR",[5121,5123,5125]);if(E.err)return E.err;let S=new DataView(E.u8.buffer,E.u8.byteOffset,E.u8.length);c=new Uint32Array(E.acc.count);for(let g=0;g<E.acc.count;g++){let k=g*E.stride;if(c[g]=E.compBytes===1?S.getUint8(k):E.compBytes===2?S.getUint16(k,!0):S.getUint32(k,!0),c[g]>=x)return T(B.BAD_INDEX,"GLB index out of POSITION range","glb")}}let a=c?c.length:x;for(let E=0;E+2<a;E+=3)for(let S=0;S<3;S++){let g=(c?c[E+S]:E+S)*3;f.push(W[g],W[g+1],W[g+2])}}for(let v of A.children||[]){let p=b(v,z);if(p)return p}return null}for(let C of h){let H=b(C,WQ);if(H)return H}return s(f,"glb")}function PQ(Z){if(Z.length===0)return!1;let Q=0,$=Math.min(Z.length,512);for(let J=0;J<$;J++){let Y=Z[J];if(Y===9||Y===10||Y===13||Y>=32&&Y<127)Q++}return Q/$>0.9}function cQ(Z){let Q=zQ(Z);if(!Q||Q.len===0)return"unknown";let $=Q.bytes(0,Math.min(Q.len,512));if($.length>=4&&$[0]===103&&$[1]===108&&$[2]===84&&$[3]===70)return"glb";if($.length>=4&&$[0]===80&&$[1]===75&&$[2]===3&&$[3]===4)return"zip";if(Q.len>=84){if(84+new DataView($.buffer,$.byteOffset,$.length).getUint32(80,!0)*50===Q.len)return"stl-binary"}if(PQ($)){let Y=new TextDecoder().decode($).replace(/^[\s﻿]+/,"");if(Y.startsWith("solid"))return"stl-ascii";if(Y.startsWith('{"v":1'))return"challobj";let K=new TextDecoder().decode(Q.bytes(0,Math.min(Q.len,65536)));if(/^v[ \t]/m.test(K)&&/^f[ \t]/m.test(K))return"obj";if(/^v[ \t]/m.test(K))return"obj"}return"unknown"}function IQ(Z){try{if(Z==null)return T(B.UNRECOGNIZED,"no input");let Q=typeof Z.byteLength==="number"?Z.byteLength:NaN;if(Number.isFinite(Q)&&Q>314572800)return T(B.TOO_LARGE,"over 300 MB — export at low/reduced quality; the tunnel needs the shape, not the paint");let $=zQ(Z);if(!$)return T(B.UNRECOGNIZED,"input is not a byte source");if($.len===0)return T(B.UNRECOGNIZED,"empty file");if($.len>314572800)return T(B.TOO_LARGE,"over 300 MB — export at low/reduced quality; the tunnel needs the shape, not the paint");switch(cQ(Z)){case"glb":return uQ($);case"stl-binary":{let Y=$.bytes(80,84),K=new DataView(Y.buffer,Y.byteOffset,4).getUint32(0,!0);return AQ($,K)}case"stl-ascii":return SQ(new TextDecoder().decode($.bytes(0,$.len)));case"obj":return fQ(new TextDecoder().decode($.bytes(0,$.len)));case"zip":return T(B.CONTAINER_ZIP,"zip container (USDZ?) — Scaniverse (free): Share → Export → STL. Polycam: Export → GLB or OBJ.");case"challobj":return T(B.UNRECOGNIZED,".challobj outline record — this is the mesh intake; outline import is a different door");default:{if($.len>=84&&!PQ($.bytes(0,Math.min($.len,512)))){let Y=$.bytes(80,84),K=new DataView(Y.buffer,Y.byteOffset,4).getUint32(0,!0);if(K>=1&&K<=1e8&&84+K*50>$.len)return T(B.TRUNCATED,`binary STL declares ${K} triangles but the file ends early`,"stl")}return T(B.UNRECOGNIZED,"not a mesh format this shop reads (STL / OBJ / GLB) — magic bytes did not match")}}}catch(Q){return T(B.UNRECOGNIZED,`parser fault contained: ${Q&&Q.message?Q.message:Q}`)}}var mQ=1024,t=8,_Q=4096,CQ=8,o=3*CQ,DQ=300,lQ=1.5,yQ=2.5,TQ=o*o,xQ=0.4;function T(Z,Q){return{ok:!1,refusal:{code:Z,message:Q}}}function dQ(Z,Q=0,$={}){return EQ(Z,{...$,mode:"silhouette",yawDeg:Q})}function nQ(Z,Q,$={}){return EQ(Z,{...$,mode:"slice",slabHalfWidth:Q,yawDeg:$.yawDeg||0})}function EQ(Z,Q){try{return pQ(Z,Q)}catch($){return T("outline-fault",`outline fault contained: ${$&&$.message?$.message:$}`)}}function pQ(Z,{mode:Q,yawDeg:$=0,slabHalfWidth:J,gridW:Y=mQ}){let K=Z.length/9|0;if(K===0)return T("empty-mesh","no triangles to project");let j=$*Math.PI/180,X=Math.cos(j),O=Math.sin(j),V=new Float64Array(K*3),G=new Float64Array(K*3),q=new Float64Array(K*3);for(let _=0;_<K*3;_++){let L=Z[_*3],w=Z[_*3+1],l=Z[_*3+2];V[_]=L*X+l*O,G[_]=w,q[_]=-L*O+l*X}let N=null;if(Q==="slice"){let _=1/0,L=-1/0;for(let m=0;m<V.length;m++){if(V[m]<_)_=V[m];if(V[m]>L)L=V[m]}let w=(L-_)/(Y-2*t)||1,l=Number.isFinite(J)&&J>0?J:2*w;N=new Uint8Array(K);let OQ=0;for(let m=0;m<K;m++){let XQ=q[m*3],NQ=q[m*3+1],qQ=q[m*3+2],wQ=Math.min(XQ,NQ,qQ),gQ=Math.max(XQ,NQ,qQ);if(wQ<=l&&gQ>=-l)N[m]=1,OQ++}if(OQ===0)return T("slice-empty","no geometry inside the slab — move the plane or try silhouette")}let I=1/0,U=-1/0,P=1/0,D=-1/0;for(let _=0;_<K;_++){if(N&&!N[_])continue;for(let L=0;L<3;L++){let w=_*3+L;if(V[w]<I)I=V[w];if(V[w]>U)U=V[w];if(G[w]<P)P=G[w];if(G[w]>D)D=G[w]}}let M=U-I,F=D-P;if(!(M>0)&&!(F>0))return T("degenerate","projected geometry has no extent");let h=Y-2*t,d=Math.min(h/(M||0.000000001),(_Q-2*t)/(F||0.000000001)),f=Y,R=Math.min(_Q,Math.ceil(F*d)+2*t+1),b=new Uint8Array(f*R),C=(_)=>t+(V[_]-I)*d,H=(_)=>t+(G[_]-P)*d;for(let _=0;_<K;_++){if(N&&!N[_])continue;let L=_*3,w=_*3+1,l=_*3+2;rQ(b,f,R,C(L),H(L),C(w),H(w),C(l),H(l)),$Q(b,f,R,C(L),H(L),C(w),H(w)),$Q(b,f,R,C(w),H(w),C(l),H(l)),$Q(b,f,R,C(l),H(l),C(L),H(L))}aQ(b,f,R,2);let A=[],z=tQ(b,f,R);if(z>0)A.push(`debris removed: ${z} fragment${z>1?"s":""}`);let{holesFilled:v,holesKept:p}=oQ(b,f,R,Q==="slice"?1/0:TQ);if(v>0)A.push(Q==="slice"?`section healed: ${v} enclosed void${v>1?"s":""} filled (a shell's slice is a ring)`:`voids filled: ${v}`);let u=0;for(let _=0;_<b.length;_++)u+=b[_];if(u===0)return T(Q==="slice"?"slice-empty":"empty-outline","nothing survived rasterization");let y=iQ(b,f,R),x=sQ(b,f,R,u);if(x.fired)A.push("thin features thickened to 3 cells — the antenna reads fatter than life.");let W=eQ(b,f,R);if(W.length===0)return T("empty-outline","no closed contour found");W.sort((_,L)=>Math.abs(L.area)-Math.abs(_.area));let c=W[0].pts,a=W.slice(1).filter((_)=>Math.abs(_.area)>=TQ).map((_)=>_.pts),E=BQ(c),S=a.map(BQ),g=E,k=MQ(g),r=!1;if(k.dy>k.dx){r=!0,g=g.map(([_,L])=>[L,-_]);for(let _=0;_<S.length;_++)S[_]=S[_].map(([L,w])=>[w,-L]);k=MQ(g)}let YQ=k.dx,e=1/YQ,KQ=(k.ymin+k.ymax)/2,VQ=(_)=>[n((_[0]-k.xmin)*e),n((_[1]-KQ)*e)],QQ=g.map(VQ),jQ=S.map((_)=>_.map(VQ));A.push("chord-normalized");let{area:LQ,perimeter:HQ}=$Z(QQ),GQ=r?{on:!1,flatFraction:0,y:null}:{on:y.flatFraction>xQ,flatFraction:n(y.flatFraction),y:n((y.wheelLinePx-KQ)*e)};return A.push(GQ.on?"GROUND: free-slip floor at wheel line — the road moves with the air":"FREE AIR — no ground effect"),{ok:!0,outline:QQ,holes:jQ,groundLine:GQ,meta:{mode:Q,yawDeg:$,gridW:f,gridH:R,cellSize:1/d,chordCells:Math.round(YQ),points:QQ.length,area:n(Math.abs(LQ)),perimeter:n(HQ),triCount:K,debrisRemoved:z,holesFilled:v,holesKept:jQ.length,thin:x,rotated90:r,cleanups:A}}}function rQ(Z,Q,$,J,Y,K,j,X,O){let V=Math.max(0,Math.ceil(Math.min(Y,j,O))),G=Math.min($-1,Math.floor(Math.max(Y,j,O)));for(let q=V;q<=G;q++){let N=[];if(ZQ(J,Y,K,j,q,N),ZQ(K,j,X,O,q,N),ZQ(X,O,J,Y,q,N),N.length<2)continue;N.sort((I,U)=>I-U);for(let I=0;I+1<N.length;I+=2){let U=Math.max(0,Math.ceil(N[I])),P=Math.min(Q-1,Math.floor(N[I+1])),D=q*Q;for(let M=U;M<=P;M++)Z[D+M]=1}}}function ZQ(Z,Q,$,J,Y,K){if(Q<=Y&&J>Y||J<=Y&&Q>Y)K.push(Z+(Y-Q)/(J-Q)*($-Z))}function $Q(Z,Q,$,J,Y,K,j){let X=Math.max(1,Math.ceil(Math.max(Math.abs(K-J),Math.abs(j-Y))));for(let O=0;O<=X;O++){let V=O/X,G=Math.round(J+(K-J)*V),q=Math.round(Y+(j-Y)*V);if(G>=0&&G<Q&&q>=0&&q<$)Z[q*Q+G]=1}}function FQ(Z,Q,$,J,Y){let K=new Uint8Array(Q*$);for(let X=0;X<$;X++){let O=X*Q;for(let V=0;V<Q;V++){let G=Y?0:1,q=Math.max(0,V-J),N=Math.min(Q-1,V+J);for(let I=q;I<=N;I++){let U=Z[O+I];if(Y){if(U){G=1;break}}else if(!U){G=0;break}}K[O+V]=G}}let j=new Uint8Array(Q*$);for(let X=0;X<Q;X++)for(let O=0;O<$;O++){let V=Y?0:1,G=Math.max(0,O-J),q=Math.min($-1,O+J);for(let N=G;N<=q;N++){let I=K[N*Q+X];if(Y){if(I){V=1;break}}else if(!I){V=0;break}}j[O*Q+X]=V}return j}var JQ=(Z,Q,$,J)=>FQ(Z,Q,$,J,!0),vQ=(Z,Q,$,J)=>FQ(Z,Q,$,J,!1);function aQ(Z,Q,$,J){let Y=vQ(JQ(Z,Q,$,J),Q,$,J);Z.set(Y)}function tQ(Z,Q,$){let J=new Int32Array(Q*$),Y=[],K=0,j=[0];for(let O=0;O<Z.length;O++){if(!Z[O]||J[O])continue;K++,j.push(0),Y.length=0,Y.push(O),J[O]=K;while(Y.length){let V=Y.pop();j[K]++;let G=V%Q,q=V/Q|0;for(let N=-1;N<=1;N++)for(let I=-1;I<=1;I++){if(!I&&!N)continue;let U=G+I,P=q+N;if(U<0||U>=Q||P<0||P>=$)continue;let D=P*Q+U;if(Z[D]&&!J[D])J[D]=K,Y.push(D)}}}if(K<=1)return 0;let X=1;for(let O=2;O<=K;O++)if(j[O]>j[X])X=O;for(let O=0;O<Z.length;O++)if(Z[O]&&J[O]!==X)Z[O]=0;return K-1}function oQ(Z,Q,$,J){let Y=new Uint8Array(Q*$),K=[];for(let V=0;V<Q;V++)K.push(V),K.push(($-1)*Q+V);for(let V=0;V<$;V++)K.push(V*Q),K.push(V*Q+Q-1);while(K.length){let V=K.pop();if(Y[V]||Z[V])continue;Y[V]=1;let G=V%Q,q=V/Q|0;if(G>0)K.push(V-1);if(G<Q-1)K.push(V+1);if(q>0)K.push(V-Q);if(q<$-1)K.push(V+Q)}let j=0,X=0,O=[];for(let V=0;V<Z.length;V++){if(Z[V]||Y[V])continue;O.length=0,K.length=0,K.push(V),Y[V]=1;while(K.length){let G=K.pop();O.push(G);let q=G%Q,N=G/Q|0,I=(U)=>{if(!Y[U]&&!Z[U])Y[U]=1,K.push(U)};if(q>0)I(G-1);if(q<Q-1)I(G+1);if(N>0)I(G-Q);if(N<$-1)I(G+Q)}if(O.length<J){for(let G of O)Z[G]=1;j++}else X++}return{holesFilled:j,holesKept:X}}function iQ(Z,Q,$){let J=[];for(let O=0;O<Q;O++)for(let V=0;V<$;V++)if(Z[V*Q+O]){J.push(V);break}if(J.length===0)return{flatFraction:0,wheelLinePx:0};let Y=[...J].sort((O,V)=>O-V),K=Y[Y.length/2|0],j=Y[0],X=0;for(let O of J)if(Math.abs(O-K)<=3)X++;return{flatFraction:X/J.length,wheelLinePx:j}}function sQ(Z,Q,$,J){let Y=[1,2,4,8,12],K=o;for(let V of Y){let G=JQ(vQ(Z,Q,$,V),Q,$,V),q=0;for(let N=0;N<Z.length;N++)if(Z[N]&&!G[N])q++;if(q/J>0.01){K=Math.max(1,2*V-1);break}}let j=n(K/CQ),X=K<o,O=0;if(X){let V=Math.ceil((o-K)/2),G=JQ(Z,Q,$,V),q=0;for(let N=0;N<G.length;N++)q+=G[N];O=n((q-J)/J*100)}return{minFeaturePx:K,minFeatureSolverCells:j,fired:X&&O>8,areaGrowthPct:O}}function eQ(Z,Q,$){let J=[],Y=(V,G)=>Z[G*Q+V];for(let V=0;V<$-1;V++)for(let G=0;G<Q-1;G++){let q=Y(G,V),N=Y(G+1,V),I=Y(G+1,V+1),U=Y(G,V+1),P=q|N<<1|I<<2|U<<3;if(P===0||P===15)continue;let D=[2*G+1,2*V],M=[2*G+2,2*V+1],F=[2*G+1,2*V+2],h=[2*G,2*V+1];switch(P){case 1:J.push([D,h]);break;case 2:J.push([D,M]);break;case 3:J.push([h,M]);break;case 4:J.push([M,F]);break;case 5:J.push([D,h],[M,F]);break;case 6:J.push([D,F]);break;case 7:J.push([h,F]);break;case 8:J.push([F,h]);break;case 9:J.push([D,F]);break;case 10:J.push([D,M],[F,h]);break;case 11:J.push([M,F]);break;case 12:J.push([h,M]);break;case 13:J.push([D,M]);break;case 14:J.push([D,h]);break}}let K=(V)=>V[0]*262144+V[1],j=new Map;for(let V=0;V<J.length;V++){let[G,q]=J[V],N=K(G),I=K(q);if(!j.has(N))j.set(N,[]);if(!j.has(I))j.set(I,[]);j.get(N).push({to:I,pt:q,seg:V}),j.get(I).push({to:N,pt:G,seg:V})}let X=new Uint8Array(J.length),O=[];for(let V=0;V<J.length;V++){if(X[V])continue;let G=[],[q]=J[V],N=K(q),I=N,U=q;while(!0){G.push([U[0]/2,U[1]/2]);let P=j.get(I),D=null;for(let M of P)if(!X[M.seg]){D=M;break}if(!D)break;if(X[D.seg]=1,U=D.pt,I=D.to,I===N)break}if(G.length>=3){let P=0;for(let D=0;D<G.length;D++){let[M,F]=G[D],[h,d]=G[(D+1)%G.length];P+=M*d-h*F}O.push({pts:G,area:P/2})}}return O}function BQ(Z){let Q=lQ,$=i(Z,Q);while($.length>DQ)Q*=1.5,$=i(Z,Q);$=QZ($,yQ);let J=i($,0.75),Y=0.75;while(J.length>DQ)Y*=1.5,J=i(J,Y);return J}function i(Z,Q){if(Z.length<=4)return Z.slice();let $=0,J=-1;for(let O=1;O<Z.length;O++){let V=Z[O][0]-Z[0][0],G=Z[O][1]-Z[0][1],q=V*V+G*G;if(q>J)J=q,$=O}let Y=Z.slice(0,$+1),K=Z.slice($).concat([Z[0]]),j=UQ(Y,Q),X=UQ(K,Q);return j.slice(0,-1).concat(X.slice(0,-1))}function UQ(Z,Q){let $=Z.length;if($<=2)return Z.slice();let J=new Uint8Array($);J[0]=J[$-1]=1;let Y=[[0,$-1]];while(Y.length){let[j,X]=Y.pop();if(X-j<2)continue;let O=Z[j][0],V=Z[j][1],G=Z[X][0],q=Z[X][1],N=G-O,I=q-V,U=Math.hypot(N,I)||0.000000000001,P=-1,D=-1;for(let M=j+1;M<X;M++){let F=Math.abs(I*(Z[M][0]-O)-N*(Z[M][1]-V))/U;if(F>P)P=F,D=M}if(P>Q)J[D]=1,Y.push([j,D],[D,X])}let K=[];for(let j=0;j<$;j++)if(J[j])K.push(Z[j]);return K}function QZ(Z,Q){let $=Z.length;if($<5)return Z.slice();let J=[];for(let Y=0;Y<$;Y++){let K=Z[(Y-1+$)%$],j=Z[Y],X=Z[(Y+1)%$];if(ZZ(j,K,X)>Q)J.push(j);else J.push([j[0]+0.25*(K[0]-j[0]),j[1]+0.25*(K[1]-j[1])]),J.push([j[0]+0.25*(X[0]-j[0]),j[1]+0.25*(X[1]-j[1])])}return J}function ZZ(Z,Q,$){let J=$[0]-Q[0],Y=$[1]-Q[1],K=Math.hypot(J,Y)||0.000000000001;return Math.abs(Y*(Z[0]-Q[0])-J*(Z[1]-Q[1]))/K}function MQ(Z){let Q=1/0,$=-1/0,J=1/0,Y=-1/0;for(let[K,j]of Z){if(K<Q)Q=K;if(K>$)$=K;if(j<J)J=j;if(j>Y)Y=j}return{xmin:Q,xmax:$,ymin:J,ymax:Y,dx:$-Q,dy:Y-J}}function $Z(Z){let Q=0,$=0;for(let J=0;J<Z.length;J++){let[Y,K]=Z[J],[j,X]=Z[(J+1)%Z.length];Q+=Y*X-j*K,$+=Math.hypot(j-Y,X-K)}return{area:Q/2,perimeter:$}}function n(Z){return Math.round(Z*1e4)/1e4}self.onmessage=async(Z)=>{let Q=($)=>self.postMessage($);try{let $=Z.data&&Z.data.file;if(!$)return Q({ok:!1,refusal:{code:"unrecognized-format",message:"no file received"}});if($.size>314572800)return Q(IQ({byteLength:$.size}));let J=await $.arrayBuffer(),Y=IQ(J);if(!Y.ok)return Q(Y);Q({ok:!0,stage:"read",format:Y.format,triCount:Y.triCount,srcTris:Y.srcTris,subsampled:Y.subsampled});let K=dQ(Y.tris,0);if(!K.ok)return Q(K);let j=nQ(Y.tris);Q({ok:!0,stage:"cuts",sil:K,slice:j.ok?j:null,sliceRefusal:j.ok?null:j.refusal})}catch($){Q({ok:!1,refusal:{code:"shop-fault",message:"shop fault contained: "+($&&$.message?$.message:$)}})}};
+`);for(let Y=0;Y<J.length;Y++){let K=J[Y];if(K.length<2)continue;let j=K.charCodeAt(0);if(j===118&&(K.charCodeAt(1)===32||K.charCodeAt(1)===9)){let X=K.trim().split(/\s+/);Q.push(parseFloat(X[1]),parseFloat(X[2]),parseFloat(X[3]))}else if(j===102&&(K.charCodeAt(1)===32||K.charCodeAt(1)===9)){let X=K.trim().split(/\s+/),O=Q.length/3,V=[];for(let G=1;G<X.length;G++){let q=X[G].split("/")[0],N=parseInt(q,10);if(!Number.isFinite(N)||N===0)return T(B.BAD_INDEX,`OBJ face index "${X[G]}" is not a valid vertex reference`,"obj");if(N=N>0?N-1:O+N,N<0||N>=O)return T(B.BAD_INDEX,`OBJ face references vertex ${X[G]} out of range (${O} verts)`,"obj");V.push(N)}for(let G=2;G<V.length;G++){let q=V[0]*3,N=V[G-1]*3,I=V[G]*3;$.push(Q[q],Q[q+1],Q[q+2],Q[N],Q[N+1],Q[N+2],Q[I],Q[I+1],Q[I+2])}}}return s($,"obj")}var RQ={5120:1,5121:1,5122:2,5123:2,5125:4,5126:4};function bQ(Z,Q){let $=new Float64Array(16);for(let J=0;J<4;J++)for(let Y=0;Y<4;Y++){let K=0;for(let j=0;j<4;j++)K+=Z[j*4+Y]*Q[J*4+j];$[J*4+Y]=K}return $}var WQ=Object.freeze([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);function kQ(Z){if(Z.matrix)return Float64Array.from(Z.matrix);let Q=Z.translation||[0,0,0],$=Z.rotation||[0,0,0,1],J=Z.scale||[1,1,1],[Y,K,j,X]=$,O=Y+Y,V=K+K,G=j+j,q=Y*O,N=Y*V,I=Y*G,U=K*V,P=K*G,D=j*G,M=X*O,F=X*V,h=X*G;return Float64Array.from([(1-(U+D))*J[0],(N+h)*J[0],(I-F)*J[0],0,(N-h)*J[1],(1-(q+D))*J[1],(P+M)*J[1],0,(I+F)*J[2],(P-M)*J[2],(1-(q+U))*J[2],0,Q[0],Q[1],Q[2],1])}function uQ(Z){if(Z.len<20)return T(B.TRUNCATED,"GLB shorter than its own header","glb");let Q=Z.bytes(0,20),$=new DataView(Q.buffer,Q.byteOffset,Q.length),J=$.getUint32(4,!0);if(J!==2)return T(B.GLB_UNSUPPORTED,`GLB version ${J} — only glTF 2.0 binary is read`,"glb");if($.getUint32(8,!0)>Z.len)return T(B.TRUNCATED,"GLB header declares more bytes than the file holds","glb");let K=$.getUint32(12,!0);if($.getUint32(16,!0)!==1313821514)return T(B.GLB_UNSUPPORTED,"GLB first chunk is not JSON","glb");if(20+K>Z.len)return T(B.TRUNCATED,"GLB JSON chunk length lies past end of file","glb");let X;try{X=JSON.parse(new TextDecoder().decode(Z.bytes(20,20+K)))}catch{return T(B.BAD_JSON,"GLB JSON chunk does not parse","glb")}let O=-1,V=0,G=20+K;if(G+8<=Z.len){let C=Z.bytes(G,G+8),H=new DataView(C.buffer,C.byteOffset,8),A=H.getUint32(0,!0);if(H.getUint32(4,!0)===5130562){if(O=G+8,V=A,O+V>Z.len)return T(B.TRUNCATED,"GLB BIN chunk length lies past end of file","glb")}}let q=X.extensionsRequired||[],N=["KHR_draco_mesh_compression","EXT_meshopt_compression","KHR_mesh_quantization"];for(let C of N)if(q.includes(C))return T(B.GLB_COMPRESSED,`${C} — re-export uncompressed (Polycam/Scaniverse default GLB export is uncompressed; compression is opt-in)`,"glb");let I=X.accessors||[],U=X.bufferViews||[],P=X.meshes||[],D=X.nodes||[],M=X.scenes||[],F=Number.isInteger(X.scene)?X.scene:0,h=M[F]&&M[F].nodes||D.map((C,H)=>H);function d(C,H,A){let z=I[C];if(!z)return{err:T(B.GLB_UNSUPPORTED,"accessor index out of range","glb")};if(z.sparse)return{err:T(B.GLB_COMPRESSED,"sparse accessor — re-export uncompressed","glb")};if(z.type!==H||!A.includes(z.componentType))return{err:T(B.GLB_UNSUPPORTED,`accessor ${z.type}/${z.componentType} not in the minimal-read set`,"glb")};let v=U[z.bufferView];if(!v||(v.buffer||0)!==0)return{err:T(B.GLB_UNSUPPORTED,"accessor without a chunk-1 bufferView","glb")};if(O<0)return{err:T(B.TRUNCATED,"accessor points at a BIN chunk the file does not carry","glb")};let p=RQ[z.componentType],u=H==="VEC3"?3:1,y=p*u,x=v.byteStride||y,W=O+(v.byteOffset||0)+(z.byteOffset||0),c=z.count>0?x*(z.count-1)+y:0;if(W+c>O+V)return{err:T(B.TRUNCATED,"accessor range lies past the BIN chunk","glb")};let a=Z.bytes(W,W+c);if(a.length<c)return{err:T(B.TRUNCATED,"BIN chunk shorter than its accessors claim","glb")};return{acc:z,u8:a,stride:x,compBytes:p,nComp:u}}let f=[],R=new Set;function b(C,H){if(R.has(C))return null;R.add(C);let A=D[C];if(!A)return null;let z=bQ(H,kQ(A));if(Number.isInteger(A.mesh)&&P[A.mesh])for(let v of P[A.mesh].primitives||[]){if((v.mode===void 0?4:v.mode)!==4)continue;if(v.extensions&&(v.extensions.KHR_draco_mesh_compression||v.extensions.EXT_meshopt_compression))return T(B.GLB_COMPRESSED,"compressed primitive — re-export uncompressed","glb");if(!v.attributes||v.attributes.POSITION===void 0)continue;let u=d(v.attributes.POSITION,"VEC3",[5126]);if(u.err)return u.err;let y=new DataView(u.u8.buffer,u.u8.byteOffset,u.u8.length),x=u.acc.count,W=new Float64Array(x*3);for(let E=0;E<x;E++){let S=E*u.stride,g=y.getFloat32(S,!0),k=y.getFloat32(S+4,!0),r=y.getFloat32(S+8,!0);W[E*3]=z[0]*g+z[4]*k+z[8]*r+z[12],W[E*3+1]=z[1]*g+z[5]*k+z[9]*r+z[13],W[E*3+2]=z[2]*g+z[6]*k+z[10]*r+z[14]}let c=null;if(v.indices!==void 0){let E=d(v.indices,"SCALAR",[5121,5123,5125]);if(E.err)return E.err;let S=new DataView(E.u8.buffer,E.u8.byteOffset,E.u8.length);c=new Uint32Array(E.acc.count);for(let g=0;g<E.acc.count;g++){let k=g*E.stride;if(c[g]=E.compBytes===1?S.getUint8(k):E.compBytes===2?S.getUint16(k,!0):S.getUint32(k,!0),c[g]>=x)return T(B.BAD_INDEX,"GLB index out of POSITION range","glb")}}let a=c?c.length:x;for(let E=0;E+2<a;E+=3)for(let S=0;S<3;S++){let g=(c?c[E+S]:E+S)*3;f.push(W[g],W[g+1],W[g+2])}}for(let v of A.children||[]){let p=b(v,z);if(p)return p}return null}for(let C of h){let H=b(C,WQ);if(H)return H}return s(f,"glb")}function PQ(Z){if(Z.length===0)return!1;let Q=0,$=Math.min(Z.length,512);for(let J=0;J<$;J++){let Y=Z[J];if(Y===9||Y===10||Y===13||Y>=32&&Y<127)Q++}return Q/$>0.9}function cQ(Z){let Q=zQ(Z);if(!Q||Q.len===0)return"unknown";let $=Q.bytes(0,Math.min(Q.len,512));if($.length>=4&&$[0]===103&&$[1]===108&&$[2]===84&&$[3]===70)return"glb";if($.length>=4&&$[0]===80&&$[1]===75&&$[2]===3&&$[3]===4)return"zip";if(Q.len>=84){if(84+new DataView($.buffer,$.byteOffset,$.length).getUint32(80,!0)*50===Q.len)return"stl-binary"}if(PQ($)){let Y=new TextDecoder().decode($).replace(/^[\s﻿]+/,"");if(Y.startsWith("solid"))return"stl-ascii";if(Y.startsWith('{"v":1'))return"challobj";let K=new TextDecoder().decode(Q.bytes(0,Math.min(Q.len,65536)));if(/^v[ \t]/m.test(K)&&/^f[ \t]/m.test(K))return"obj";if(/^v[ \t]/m.test(K))return"obj"}return"unknown"}function IQ(Z){try{if(Z==null)return T(B.UNRECOGNIZED,"no input");let Q=typeof Z.byteLength==="number"?Z.byteLength:NaN;if(Number.isFinite(Q)&&Q>314572800)return T(B.TOO_LARGE,"over 300 MB — export at low/reduced quality; the tunnel needs the shape, not the paint");let $=zQ(Z);if(!$)return T(B.UNRECOGNIZED,"input is not a byte source");if($.len===0)return T(B.UNRECOGNIZED,"empty file");if($.len>314572800)return T(B.TOO_LARGE,"over 300 MB — export at low/reduced quality; the tunnel needs the shape, not the paint");switch(cQ(Z)){case"glb":return uQ($);case"stl-binary":{let Y=$.bytes(80,84),K=new DataView(Y.buffer,Y.byteOffset,4).getUint32(0,!0);return AQ($,K)}case"stl-ascii":return SQ(new TextDecoder().decode($.bytes(0,$.len)));case"obj":return fQ(new TextDecoder().decode($.bytes(0,$.len)));case"zip":return T(B.CONTAINER_ZIP,"zip container (USDZ?) — Scaniverse (free): Share → Export → STL. Polycam: Export → GLB or OBJ.");case"challobj":return T(B.UNRECOGNIZED,".challobj outline record — this is the mesh intake; outline import is a different door");default:{if($.len>=84&&!PQ($.bytes(0,Math.min($.len,512)))){let Y=$.bytes(80,84),K=new DataView(Y.buffer,Y.byteOffset,4).getUint32(0,!0);if(K>=1&&K<=1e8&&84+K*50>$.len)return T(B.TRUNCATED,`binary STL declares ${K} triangles but the file ends early`,"stl")}return T(B.UNRECOGNIZED,"not a mesh format this shop reads (STL / OBJ / GLB) — magic bytes did not match")}}}catch(Q){return T(B.UNRECOGNIZED,`parser fault contained: ${Q&&Q.message?Q.message:Q}`)}}var mQ=1024,t=8,_Q=4096,CQ=8,o=3*CQ,DQ=300,lQ=1.5,yQ=2.5,TQ=o*o,xQ=0.4;function T(Z,Q){return{ok:!1,refusal:{code:Z,message:Q}}}function dQ(Z,Q=0,$={}){return EQ(Z,{...$,mode:"silhouette",yawDeg:Q})}function nQ(Z,Q,$={}){return EQ(Z,{...$,mode:"slice",slabHalfWidth:Q,yawDeg:$.yawDeg||0})}function EQ(Z,Q){try{return pQ(Z,Q)}catch($){return T("outline-fault",`outline fault contained: ${$&&$.message?$.message:$}`)}}function pQ(Z,{mode:Q,yawDeg:$=0,slabHalfWidth:J,gridW:Y=mQ}){let K=Z.length/9|0;if(K===0)return T("empty-mesh","no triangles to project");let j=$*Math.PI/180,X=Math.cos(j),O=Math.sin(j),V=new Float64Array(K*3),G=new Float64Array(K*3),q=new Float64Array(K*3);for(let _=0;_<K*3;_++){let L=Z[_*3],w=Z[_*3+1],l=Z[_*3+2];V[_]=L*X+l*O,G[_]=w,q[_]=-L*O+l*X}let N=null;if(Q==="slice"){let _=1/0,L=-1/0;for(let m=0;m<V.length;m++){if(V[m]<_)_=V[m];if(V[m]>L)L=V[m]}let w=(L-_)/(Y-2*t)||1,l=Number.isFinite(J)&&J>0?J:2*w;N=new Uint8Array(K);let OQ=0;for(let m=0;m<K;m++){let XQ=q[m*3],NQ=q[m*3+1],qQ=q[m*3+2],wQ=Math.min(XQ,NQ,qQ),gQ=Math.max(XQ,NQ,qQ);if(wQ<=l&&gQ>=-l)N[m]=1,OQ++}if(OQ===0)return T("slice-empty","no geometry inside the slab — move the plane or try silhouette")}let I=1/0,U=-1/0,P=1/0,D=-1/0;for(let _=0;_<K;_++){if(N&&!N[_])continue;for(let L=0;L<3;L++){let w=_*3+L;if(V[w]<I)I=V[w];if(V[w]>U)U=V[w];if(G[w]<P)P=G[w];if(G[w]>D)D=G[w]}}let M=U-I,F=D-P;if(!(M>0)&&!(F>0))return T("degenerate","projected geometry has no extent");let h=Y-2*t,d=Math.min(h/(M||0.000000001),(_Q-2*t)/(F||0.000000001)),f=Y,R=Math.min(_Q,Math.ceil(F*d)+2*t+1),b=new Uint8Array(f*R),C=(_)=>t+(V[_]-I)*d,H=(_)=>t+(G[_]-P)*d;for(let _=0;_<K;_++){if(N&&!N[_])continue;let L=_*3,w=_*3+1,l=_*3+2;rQ(b,f,R,C(L),H(L),C(w),H(w),C(l),H(l)),$Q(b,f,R,C(L),H(L),C(w),H(w)),$Q(b,f,R,C(w),H(w),C(l),H(l)),$Q(b,f,R,C(l),H(l),C(L),H(L))}aQ(b,f,R,2);let A=[],z=tQ(b,f,R);if(z>0)A.push(`debris removed: ${z} fragment${z>1?"s":""}`);let{holesFilled:v,holesKept:p}=oQ(b,f,R,Q==="slice"?1/0:TQ);if(v>0)A.push(Q==="slice"?`section healed: ${v} enclosed void${v>1?"s":""} filled (a shell's slice is a ring)`:`voids filled: ${v}`);let u=0;for(let _=0;_<b.length;_++)u+=b[_];if(u===0)return T(Q==="slice"?"slice-empty":"empty-outline","nothing survived rasterization");let y=iQ(b,f,R),x=sQ(b,f,R,u);if(x.fired)A.push("thin features thickened to 3 cells — the antenna reads fatter than life.");let W=eQ(b,f,R);if(W.length===0)return T("empty-outline","no closed contour found");W.sort((_,L)=>Math.abs(L.area)-Math.abs(_.area));let c=W[0].pts,a=W.slice(1).filter((_)=>Math.abs(_.area)>=TQ).map((_)=>_.pts),E=BQ(c),S=a.map(BQ),g=E,k=MQ(g),r=!1;if(k.dy>k.dx){r=!0,g=g.map(([_,L])=>[L,-_]);for(let _=0;_<S.length;_++)S[_]=S[_].map(([L,w])=>[w,-L]);k=MQ(g)}let YQ=k.dx,e=1/YQ,KQ=(k.ymin+k.ymax)/2,VQ=(_)=>[n((_[0]-k.xmin)*e),n((_[1]-KQ)*e)],QQ=g.map(VQ),jQ=S.map((_)=>_.map(VQ));A.push("chord-normalized");let{area:LQ,perimeter:HQ}=$Z(QQ),GQ=r?{on:!1,flatFraction:0,y:null}:{on:y.flatFraction>xQ,flatFraction:n(y.flatFraction),y:n((y.wheelLinePx-KQ)*e)};return A.push(GQ.on?"GROUND: free-slip floor at wheel line — the road moves with the air":"FREE AIR — no ground effect"),{ok:!0,outline:QQ,holes:jQ,groundLine:GQ,meta:{mode:Q,yawDeg:$,gridW:f,gridH:R,cellSize:1/d,chordCells:Math.round(YQ),points:QQ.length,area:n(Math.abs(LQ)),perimeter:n(HQ),triCount:K,debrisRemoved:z,holesFilled:v,holesKept:jQ.length,thin:x,rotated90:r,cleanups:A}}}function rQ(Z,Q,$,J,Y,K,j,X,O){let V=Math.max(0,Math.ceil(Math.min(Y,j,O))),G=Math.min($-1,Math.floor(Math.max(Y,j,O)));for(let q=V;q<=G;q++){let N=[];if(ZQ(J,Y,K,j,q,N),ZQ(K,j,X,O,q,N),ZQ(X,O,J,Y,q,N),N.length<2)continue;N.sort((I,U)=>I-U);for(let I=0;I+1<N.length;I+=2){let U=Math.max(0,Math.ceil(N[I])),P=Math.min(Q-1,Math.floor(N[I+1])),D=q*Q;for(let M=U;M<=P;M++)Z[D+M]=1}}}function ZQ(Z,Q,$,J,Y,K){if(Q<=Y&&J>Y||J<=Y&&Q>Y)K.push(Z+(Y-Q)/(J-Q)*($-Z))}function $Q(Z,Q,$,J,Y,K,j){let X=Math.max(1,Math.ceil(Math.max(Math.abs(K-J),Math.abs(j-Y))));for(let O=0;O<=X;O++){let V=O/X,G=Math.round(J+(K-J)*V),q=Math.round(Y+(j-Y)*V);if(G>=0&&G<Q&&q>=0&&q<$)Z[q*Q+G]=1}}function FQ(Z,Q,$,J,Y){let K=new Uint8Array(Q*$);for(let X=0;X<$;X++){let O=X*Q;for(let V=0;V<Q;V++){let G=Y?0:1,q=Math.max(0,V-J),N=Math.min(Q-1,V+J);for(let I=q;I<=N;I++){let U=Z[O+I];if(Y){if(U){G=1;break}}else if(!U){G=0;break}}K[O+V]=G}}let j=new Uint8Array(Q*$);for(let X=0;X<Q;X++)for(let O=0;O<$;O++){let V=Y?0:1,G=Math.max(0,O-J),q=Math.min($-1,O+J);for(let N=G;N<=q;N++){let I=K[N*Q+X];if(Y){if(I){V=1;break}}else if(!I){V=0;break}}j[O*Q+X]=V}return j}var JQ=(Z,Q,$,J)=>FQ(Z,Q,$,J,!0),vQ=(Z,Q,$,J)=>FQ(Z,Q,$,J,!1);function aQ(Z,Q,$,J){let Y=vQ(JQ(Z,Q,$,J),Q,$,J);Z.set(Y)}function tQ(Z,Q,$){let J=new Int32Array(Q*$),Y=[],K=0,j=[0];for(let O=0;O<Z.length;O++){if(!Z[O]||J[O])continue;K++,j.push(0),Y.length=0,Y.push(O),J[O]=K;while(Y.length){let V=Y.pop();j[K]++;let G=V%Q,q=V/Q|0;for(let N=-1;N<=1;N++)for(let I=-1;I<=1;I++){if(!I&&!N)continue;let U=G+I,P=q+N;if(U<0||U>=Q||P<0||P>=$)continue;let D=P*Q+U;if(Z[D]&&!J[D])J[D]=K,Y.push(D)}}}if(K<=1)return 0;let X=1;for(let O=2;O<=K;O++)if(j[O]>j[X])X=O;for(let O=0;O<Z.length;O++)if(Z[O]&&J[O]!==X)Z[O]=0;return K-1}function oQ(Z,Q,$,J){let Y=new Uint8Array(Q*$),K=[];for(let V=0;V<Q;V++)K.push(V),K.push(($-1)*Q+V);for(let V=0;V<$;V++)K.push(V*Q),K.push(V*Q+Q-1);while(K.length){let V=K.pop();if(Y[V]||Z[V])continue;Y[V]=1;let G=V%Q,q=V/Q|0;if(G>0)K.push(V-1);if(G<Q-1)K.push(V+1);if(q>0)K.push(V-Q);if(q<$-1)K.push(V+Q)}let j=0,X=0,O=[];for(let V=0;V<Z.length;V++){if(Z[V]||Y[V])continue;O.length=0,K.length=0,K.push(V),Y[V]=1;while(K.length){let G=K.pop();O.push(G);let q=G%Q,N=G/Q|0,I=(U)=>{if(!Y[U]&&!Z[U])Y[U]=1,K.push(U)};if(q>0)I(G-1);if(q<Q-1)I(G+1);if(N>0)I(G-Q);if(N<$-1)I(G+Q)}if(O.length<J){for(let G of O)Z[G]=1;j++}else X++}return{holesFilled:j,holesKept:X}}function iQ(Z,Q,$){let J=[];for(let O=0;O<Q;O++)for(let V=0;V<$;V++)if(Z[V*Q+O]){J.push(V);break}if(J.length===0)return{flatFraction:0,wheelLinePx:0};let Y=[...J].sort((O,V)=>O-V),K=Y[Y.length/2|0],j=Y[0],X=0;for(let O of J)if(Math.abs(O-K)<=3)X++;return{flatFraction:X/J.length,wheelLinePx:j}}function sQ(Z,Q,$,J){let Y=[1,2,4,8,12],K=o;for(let V of Y){let G=JQ(vQ(Z,Q,$,V),Q,$,V),q=0;for(let N=0;N<Z.length;N++)if(Z[N]&&!G[N])q++;if(q/J>0.01){K=Math.max(1,2*V-1);break}}let j=n(K/CQ),X=K<o,O=0;if(X){let V=Math.ceil((o-K)/2),G=JQ(Z,Q,$,V),q=0;for(let N=0;N<G.length;N++)q+=G[N];O=n((q-J)/J*100)}return{minFeaturePx:K,minFeatureSolverCells:j,fired:X&&O>8,areaGrowthPct:O}}function eQ(Z,Q,$){let J=[],Y=(V,G)=>Z[G*Q+V];for(let V=0;V<$-1;V++)for(let G=0;G<Q-1;G++){let q=Y(G,V),N=Y(G+1,V),I=Y(G+1,V+1),U=Y(G,V+1),P=q|N<<1|I<<2|U<<3;if(P===0||P===15)continue;let D=[2*G+1,2*V],M=[2*G+2,2*V+1],F=[2*G+1,2*V+2],h=[2*G,2*V+1];switch(P){case 1:J.push([D,h]);break;case 2:J.push([D,M]);break;case 3:J.push([h,M]);break;case 4:J.push([M,F]);break;case 5:J.push([D,h],[M,F]);break;case 6:J.push([D,F]);break;case 7:J.push([h,F]);break;case 8:J.push([F,h]);break;case 9:J.push([D,F]);break;case 10:J.push([D,M],[F,h]);break;case 11:J.push([M,F]);break;case 12:J.push([h,M]);break;case 13:J.push([D,M]);break;case 14:J.push([D,h]);break}}let K=(V)=>V[0]*262144+V[1],j=new Map;for(let V=0;V<J.length;V++){let[G,q]=J[V],N=K(G),I=K(q);if(!j.has(N))j.set(N,[]);if(!j.has(I))j.set(I,[]);j.get(N).push({to:I,pt:q,seg:V}),j.get(I).push({to:N,pt:G,seg:V})}let X=new Uint8Array(J.length),O=[];for(let V=0;V<J.length;V++){if(X[V])continue;let G=[],[q]=J[V],N=K(q),I=N,U=q;while(!0){G.push([U[0]/2,U[1]/2]);let P=j.get(I),D=null;for(let M of P)if(!X[M.seg]){D=M;break}if(!D)break;if(X[D.seg]=1,U=D.pt,I=D.to,I===N)break}if(G.length>=3){let P=0;for(let D=0;D<G.length;D++){let[M,F]=G[D],[h,d]=G[(D+1)%G.length];P+=M*d-h*F}O.push({pts:G,area:P/2})}}return O}function BQ(Z){let Q=lQ,$=i(Z,Q);while($.length>DQ)Q*=1.5,$=i(Z,Q);$=QZ($,yQ);let J=i($,0.75),Y=0.75;while(J.length>DQ)Y*=1.5,J=i(J,Y);return J}function i(Z,Q){if(Z.length<=4)return Z.slice();let $=0,J=-1;for(let O=1;O<Z.length;O++){let V=Z[O][0]-Z[0][0],G=Z[O][1]-Z[0][1],q=V*V+G*G;if(q>J)J=q,$=O}let Y=Z.slice(0,$+1),K=Z.slice($).concat([Z[0]]),j=UQ(Y,Q),X=UQ(K,Q);return j.slice(0,-1).concat(X.slice(0,-1))}function UQ(Z,Q){let $=Z.length;if($<=2)return Z.slice();let J=new Uint8Array($);J[0]=J[$-1]=1;let Y=[[0,$-1]];while(Y.length){let[j,X]=Y.pop();if(X-j<2)continue;let O=Z[j][0],V=Z[j][1],G=Z[X][0],q=Z[X][1],N=G-O,I=q-V,U=Math.hypot(N,I)||0.000000000001,P=-1,D=-1;for(let M=j+1;M<X;M++){let F=Math.abs(I*(Z[M][0]-O)-N*(Z[M][1]-V))/U;if(F>P)P=F,D=M}if(P>Q)J[D]=1,Y.push([j,D],[D,X])}let K=[];for(let j=0;j<$;j++)if(J[j])K.push(Z[j]);return K}function QZ(Z,Q){let $=Z.length;if($<5)return Z.slice();let J=[];for(let Y=0;Y<$;Y++){let K=Z[(Y-1+$)%$],j=Z[Y],X=Z[(Y+1)%$];if(ZZ(j,K,X)>Q)J.push(j);else J.push([j[0]+0.25*(K[0]-j[0]),j[1]+0.25*(K[1]-j[1])]),J.push([j[0]+0.25*(X[0]-j[0]),j[1]+0.25*(X[1]-j[1])])}return J}function ZZ(Z,Q,$){let J=$[0]-Q[0],Y=$[1]-Q[1],K=Math.hypot(J,Y)||0.000000000001;return Math.abs(Y*(Z[0]-Q[0])-J*(Z[1]-Q[1]))/K}function MQ(Z){let Q=1/0,$=-1/0,J=1/0,Y=-1/0;for(let[K,j]of Z){if(K<Q)Q=K;if(K>$)$=K;if(j<J)J=j;if(j>Y)Y=j}return{xmin:Q,xmax:$,ymin:J,ymax:Y,dx:$-Q,dy:Y-J}}function $Z(Z){let Q=0,$=0;for(let J=0;J<Z.length;J++){let[Y,K]=Z[J],[j,X]=Z[(J+1)%Z.length];Q+=Y*X-j*K,$+=Math.hypot(j-Y,X-K)}return{area:Q/2,perimeter:$}}function n(Z){return Math.round(Z*1e4)/1e4}// —— VOLUME (phase 11): the retained triangles + the 3D voxelizer. The mesh is
+// already in hand at drop time — the volume article voxelizes the SAME parsed
+// triangles the silhouette was cut from; nothing new is read, nothing leaves
+// this worker. Surface rasterize (barycentric ≤0.45-cell sampling) → r=1
+// morphological close (phone-scan crack sealing) → border flood fill (outside
+// = air; the interior and enclosed voids are solid — hole-tolerant by
+// construction, watertight parity tricks refused) → the mandated 1× dilation
+// (≥3-cell minimum feature in 3D) → optional wheel-line ground shift. ——
+var VT=null;
+function vbox(m,W,H,D,mx){var a=new Uint8Array(m.length),b=new Uint8Array(m.length),z,y,x,rb;
+  for(z=0;z<D;z++)for(y=0;y<H;y++){rb=(z*H+y)*W;
+    for(x=0;x<W;x++){var l=x>0?m[rb+x-1]:m[rb+x],r=x<W-1?m[rb+x+1]:m[rb+x];a[rb+x]=mx?(m[rb+x]|l|r):(m[rb+x]&l&r)}}
+  for(z=0;z<D;z++)for(y=0;y<H;y++){rb=(z*H+y)*W;var ru=y>0?rb-W:rb,rd=y<H-1?rb+W:rb;
+    for(x=0;x<W;x++)b[rb+x]=mx?(a[rb+x]|a[ru+x]|a[rd+x]):(a[rb+x]&a[ru+x]&a[rd+x])}
+  var HW=H*W;
+  for(z=0;z<D;z++)for(y=0;y<H;y++){rb=(z*H+y)*W;var rn=z>0?rb-HW:rb,rf=z<D-1?rb+HW:rb;
+    for(x=0;x<W;x++)a[rb+x]=mx?(b[rb+x]|b[rn+x]|b[rf+x]):(b[rb+x]&b[rn+x]&b[rf+x])}
+  return a}
+function vshift(m,W,H,D){var ymax=-1,z,y,x;
+  for(z=0;z<D;z++)for(y=H-1;y>ymax;y--){var rb=(z*H+y)*W,hit=0;
+    for(x=0;x<W;x++)if(m[rb+x]){hit=1;break}
+    if(hit){if(y>ymax)ymax=y;break}}
+  if(ymax<0)return 0;
+  var sh=(H-2)-ymax;if(sh<=0)return 0;
+  for(z=0;z<D;z++)for(y=H-1;y>=0;y--){var dst=(z*H+y)*W,sr=(z*H+(y-sh))*W;
+    if(y-sh>=0)m.copyWithin(dst,sr,sr+W);else m.fill(0,dst,dst+W)}
+  return sh}
+function vox3d(P){
+  if(!P||!(P.W>=64&&P.W<=384&&P.H>=32&&P.H<=192&&P.D>=32&&P.D<=192))return{err:{code:"bad-grid",message:"voxel grid outside the rung table"}};
+  var W=P.W,H=P.H,D=P.D,L=P.chordCells,px=P.px,py=P.py,pz=P.pz,pl=P.pivotL;
+  var al=P.alphaDeg*Math.PI/180,ca=Math.cos(al),sa=Math.sin(al);
+  var nv=VT.length/3|0,k;
+  var xmin=1/0,xmax=-1/0,ymin=1/0,ymax=-1/0;
+  for(k=0;k<nv;k++){var vx=VT[k*3],vy=VT[k*3+1];if(vx<xmin)xmin=vx;if(vx>xmax)xmax=vx;if(vy<ymin)ymin=vy;if(vy>ymax)ymax=vy}
+  var rot90=(ymax-ymin)>(xmax-xmin);
+  var txmin=1/0,txmax=-1/0,tymin=1/0,tymax=-1/0,zmin=1/0,zmax=-1/0;
+  for(k=0;k<nv;k++){var tx=rot90?VT[k*3+1]:VT[k*3],ty=rot90?-VT[k*3]:VT[k*3+1],tz=VT[k*3+2];
+    if(tx<txmin)txmin=tx;if(tx>txmax)txmax=tx;if(ty<tymin)tymin=ty;if(ty>tymax)tymax=ty;if(tz<zmin)zmin=tz;if(tz>zmax)zmax=tz}
+  var sc=1/((txmax-txmin)||1e-9),ymid=(tymin+tymax)/2,zmid=(zmin+zmax)/2;
+  var mask=new Uint8Array(W*H*D),oob=0;
+  var gv=function(k2,o){
+    var tx2=rot90?VT[k2*3+1]:VT[k2*3],ty2=rot90?-VT[k2*3]:VT[k2*3+1];
+    var bx=(tx2-txmin)*sc,by=(ty2-ymid)*sc,bz=(VT[k2*3+2]-zmid)*sc;
+    var xi=(bx-pl)*L,eta=-by*L;
+    o[0]=px+xi*ca-eta*sa;o[1]=py+xi*sa+eta*ca;o[2]=pz+bz*L};
+  var A=[0,0,0],B2=[0,0,0],C2=[0,0,0];
+  var mark=function(x,y,z){
+    var xi=Math.round(x),yi=Math.round(y),zi=Math.round(z);
+    if(xi<1||xi>W-2||yi<1||yi>H-2||zi<1||zi>D-2){oob++;return}
+    mask[(zi*H+yi)*W+xi]=1};
+  for(var v0=0;v0+2<nv;v0+=3){
+    gv(v0,A);gv(v0+1,B2);gv(v0+2,C2);
+    var e1=Math.max(Math.abs(B2[0]-A[0]),Math.abs(B2[1]-A[1]),Math.abs(B2[2]-A[2]));
+    var e2=Math.max(Math.abs(C2[0]-A[0]),Math.abs(C2[1]-A[1]),Math.abs(C2[2]-A[2]));
+    var e3=Math.max(Math.abs(C2[0]-B2[0]),Math.abs(C2[1]-B2[1]),Math.abs(C2[2]-B2[2]));
+    var ns=Math.max(1,Math.ceil(Math.max(e1,e2,e3)/0.45));
+    for(var si=0;si<=ns;si++)for(var ti=0;ti+si<=ns;ti++){
+      var s=si/ns,t=ti/ns,w=1-s-t;
+      mark(w*A[0]+s*B2[0]+t*C2[0],w*A[1]+s*B2[1]+t*C2[1],w*A[2]+s*B2[2]+t*C2[2])}}
+  var shell=0;for(k=0;k<mask.length;k++)shell+=mask[k];
+  if(shell===0)return{err:{code:"empty-voxel",message:"nothing survived voxelization"}};
+  var closed=vbox(vbox(mask,W,H,D,!0),W,H,D,!1);
+  var outo=new Uint8Array(W*H*D),st=new Int32Array(W*H*D),sp=0;
+  var seed=function(i){if(!outo[i]&&!closed[i]){outo[i]=1;st[sp++]=i}};
+  var z,y,x;
+  for(z=0;z<D;z++)for(y=0;y<H;y++){var rb=(z*H+y)*W;
+    if(z===0||z===D-1||y===0||y===H-1){for(x=0;x<W;x++)seed(rb+x)}else{seed(rb);seed(rb+W-1)}}
+  var HW=H*W;
+  while(sp>0){var i=st[--sp],ix=i%W,r2=i/W|0,iy=r2%H,iz=r2/H|0;
+    if(ix>0)seed(i-1);if(ix<W-1)seed(i+1);
+    if(iy>0)seed(i-W);if(iy<H-1)seed(i+W);
+    if(iz>0)seed(i-HW);if(iz<D-1)seed(i+HW)}
+  var solid=new Uint8Array(W*H*D),interior=0;
+  for(k=0;k<solid.length;k++){if(!outo[k]){solid[k]=1;if(!closed[k])interior++}}
+  solid=vbox(solid,W,H,D,!0);
+  var shiftY=P.ground?vshift(solid,W,H,D):0;
+  var cells=0,proj=new Uint8Array(H*D);
+  for(z=0;z<D;z++)for(y=0;y<H;y++){var rb2=(z*H+y)*W,pi=z*H+y;
+    for(x=0;x<W;x++)if(solid[rb2+x]){cells++;proj[pi]=1}}
+  var frontal=0;for(k=0;k<proj.length;k++)frontal+=proj[k];
+  return{mask:solid,meta:{cells:cells,shell:shell,interior:interior,blockage:frontal/(H*D),oob:oob,rot90:rot90,shiftY:shiftY,alphaDeg:P.alphaDeg}}}
+self.onmessage=async(Z)=>{let Q=($,tr)=>self.postMessage($,tr||[]);try{
+if(Z.data&&Z.data.voxelize){ // VOLUME: voxelize the retained triangles at the requested detent
+  if(!VT)return Q({ok:!1,stage:"voxel",refusal:{code:"no-mesh",message:"this record is an outline — volume needs the mesh . re-drop the scan"}});
+  var R3=vox3d(Z.data.voxelize);
+  if(R3.err)return Q({ok:!1,stage:"voxel",refusal:R3.err});
+  return Q({ok:!0,stage:"voxel",mask:R3.mask,meta:R3.meta},[R3.mask.buffer]);
+}
+let $=Z.data&&Z.data.file;if(!$)return Q({ok:!1,refusal:{code:"unrecognized-format",message:"no file received"}});if($.size>314572800)return Q(IQ({byteLength:$.size}));let J=await $.arrayBuffer(),Y=IQ(J);if(!Y.ok)return Q(Y);VT=Y.tris;Q({ok:!0,stage:"read",format:Y.format,triCount:Y.triCount,srcTris:Y.srcTris,subsampled:Y.subsampled});let K=dQ(Y.tris,0);if(!K.ok)return Q(K);let j=nQ(Y.tris);Q({ok:!0,stage:"cuts",sil:K,slice:j.ok?j:null,sliceRefusal:j.ok?null:j.refusal,meshHeld:!0})}catch($){Q({ok:!1,refusal:{code:"shop-fault",message:"shop fault contained: "+($&&$.message?$.message:$)}})}};
 </script>
 <!-- ^ the shop Worker source (parsers.mjs + outline.mjs, bun --minify, exports stripped;
      re-derivable from ~/.chall/tunnel-mission/shop/ — the tested 66/66 module set).
@@ -1876,6 +1968,962 @@ fn cover(@builtin(global_invocation_id) gid: vec3<u32>) {
   }
 }
 
+// ============================================================================
+// VOLUME (phase 11 · R4 · docs/limit99/VOLUME.md) — real 3D airflow.
+// D3Q19 BGK + Smagorinsky LES, FP16S SHIFTED storage (s_i = f_i − w_i),
+// IN-PLACE single-buffer streaming — the 2D AA/esoteric-pull pattern
+// generalized to 19 directions (even substep collides in place with the slot
+// swap; the odd substep streams twice). Halfway bounce-back on STATIC masks
+// (u_w = 0 — yaw/α is DETENTED; every detent is an async re-voxelize + the
+// fresh-cell refill, never a live morph). Equilibrium inflow with the
+// smoothstep ramp + the deterministic +y kick; ρ-ANCHORED zero-gradient
+// outflow; quadratic-τ sponge at the 3D law max(16, 0.10·W); free-slip on all
+// FOUR lateral faces (FLIPY/FLIPZ specular composition at edges).
+// CONSTANTS3D below mirrors ~/.chall/tunnel-mission/qa/oracle3d.mjs EXACTLY —
+// the shared-constants law: shaders interpolate these values; no number is
+// ever retyped in a shader string (VOL-CONST byte-compares the objects).
+// THE HONESTY FIREWALL (VOLUME.md §4): the badge is the only number VOLUME
+// ever emits; no detector captions, no counts, no gap lines, no plates from
+// the 3D field in v1; aircraft NEVER mount in 3D (VOL-PROVENANCE — the door
+// exists only on user-mounted articles, by construction).
+// ============================================================================
+const C3 = Object.freeze({
+  W19: Object.freeze([
+    1 / 3,
+    1 / 18, 1 / 18, 1 / 18, 1 / 18, 1 / 18, 1 / 18,
+    1 / 36, 1 / 36, 1 / 36, 1 / 36, 1 / 36, 1 / 36, 1 / 36, 1 / 36, 1 / 36, 1 / 36, 1 / 36, 1 / 36,
+  ]),
+  EX: Object.freeze([0, 1, -1, 0, 0, 0, 0, 1, -1, 1, -1, 1, -1, 1, -1, 0, 0, 0, 0]),
+  EY: Object.freeze([0, 0, 0, 1, -1, 0, 0, 1, -1, -1, 1, 0, 0, 0, 0, 1, -1, 1, -1]),
+  EZ: Object.freeze([0, 0, 0, 0, 0, 1, -1, 0, 0, 0, 0, 1, -1, -1, 1, 1, -1, -1, 1]),
+  OPP: Object.freeze([0, 2, 1, 4, 3, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15, 18, 17]),
+  FLIPY: Object.freeze([0, 1, 2, 4, 3, 5, 6, 9, 10, 7, 8, 11, 12, 13, 14, 18, 17, 16, 15]),
+  FLIPZ: Object.freeze([0, 1, 2, 3, 4, 6, 5, 7, 8, 9, 10, 13, 14, 11, 12, 17, 18, 15, 16]),
+  CS2: 1 / 3,
+  TAU0: 0.529,
+  U0: 0.12,
+  SMAG_CS: 0.1,
+  TAU_FLOOR: 0.5005,
+  RAMP_STEPS: 300,
+  KICK_START: 400, KICK_END: 700, KICK_FRAC: 0.02,
+  RHO_OUTLET: 1,
+  SPONGE_FLOOR: 16, SPONGE_FRAC: 0.10, TAU_SPONGE: 1.6,
+  UMAX_CLAMP: 0.35,
+  LAYOUT: Object.freeze({
+    NOSE_FRAC: 0.25,
+    CHORD_FRAC: 0.17,
+    WAKE_MIN_CHORDS: 2.5,
+    UPSTREAM_MIN_CHORDS: 1,
+    BLOCKAGE_MAX: 0.30,
+    RUNGS: Object.freeze([[256, 128, 128], [320, 160, 160], [384, 192, 144]]),
+  }),
+});
+const spongeCols3 = (W) => Math.max(C3.SPONGE_FLOOR, Math.round(C3.SPONGE_FRAC * W));
+
+// ---------- WGSL D3Q19 generation (every constant interpolated from C3) ----------
+function eqTerm3(i, v) { // v = [c1, x3, y3, z3, xx, yy, zz, xy, xz, yz] variable names
+  const e = [C3.EX[i], C3.EY[i], C3.EZ[i]];
+  if (!e[0] && !e[1] && !e[2]) return v[0];
+  let s = v[0];
+  for (let a = 0; a < 3; a++) if (e[a]) s += (e[a] > 0 ? ' + ' : ' - ') + v[1 + a];
+  for (let a = 0; a < 3; a++) if (e[a]) s += ' + ' + v[4 + a];
+  const cross = [[null, v[7], v[8]], [null, null, v[9]]];
+  for (let a = 0; a < 2; a++) for (let b = a + 1; b < 3; b++)
+    if (e[a] && e[b]) s += (e[a] * e[b] > 0 ? ' + ' : ' - ') + cross[a][b];
+  return s;
+}
+const V3U = ['c1', 'ux3', 'uy3', 'uz3', 'uxx', 'uyy', 'uzz', 'uxy', 'uxz', 'uyz'];
+const V3E = ['ec1', 'ex3', 'ey3', 'ez3', 'exx', 'eyy', 'ezz', 'exy', 'exz', 'eyz'];
+const flipDi3 = (i, fy, fz) => { let d = i; if (fy) d = C3.FLIPY[d]; if (fz) d = C3.FLIPZ[d]; return d; };
+
+function common3WGSL(W, H, D, nSponge) {
+  const xs = W - 1 - nSponge;
+  return `
+enable f16;
+const W3 = ${W}u; const H3 = ${H}u; const D3 = ${D}u; const NC3 = ${W * H * D}u;
+struct SimU3 { pow: f32 }
+@group(0) @binding(0) var<storage, read_write> fbuf: array<f16>;
+@group(0) @binding(1) var<storage, read_write> misc: array<atomic<u32>>;
+@group(0) @binding(5) var<storage, read> mask: array<u32>;
+@group(0) @binding(6) var<uniform> su: SimU3;
+fn cix(x: u32, y: u32, z: u32) -> u32 { return (z * H3 + y) * W3 + x; }
+fn solid3(x: u32, y: u32, z: u32) -> bool { return mask[(z * H3 + y) * W3 + x] != 0u; }
+fn tau0_col3(x: u32) -> f32 {
+  if (x < ${xs}u) { return ${f(C3.TAU0)}; }
+  let s = (f32(x) - ${f(xs)}) / ${f(nSponge)};
+  return ${f(C3.TAU0)} + ${f(C3.TAU_SPONGE - C3.TAU0)} * s * s;
+}
+fn ramp_u3(t: u32) -> vec2f {
+  let r = select(1.0, f32(t) / ${f(C3.RAMP_STEPS)}, t < ${C3.RAMP_STEPS}u);
+  let uin = ${f(C3.U0)} * (r * r * (3.0 - 2.0 * r));
+  let vin = select(0.0, ${f(C3.KICK_FRAC * C3.U0)}, t >= ${C3.KICK_START}u && t < ${C3.KICK_END}u);
+  return vec2f(uin, vin) * su.pow;
+}
+`;
+}
+// collision — shifted storage; LES via the oracle's streamed-second-moment
+// convention (Q_ab = Π_ab − ρ(cs²δ + u_a u_b), plain-Frobenius |Q|); cs = 0
+// selects pure BGK (the sphere fixture's citation regime)
+function collide3WGSL(cs) {
+  const sSum = Array.from({ length: 19 }, (_, i) => `s${i}`).join(' + ');
+  const les = cs === 0 ? `  let omg = 1.0 / max(tau0_col3(x), ${f(C3.TAU_FLOOR)});`
+    : `  let rc = rho * ${f(C3.CS2)};
+  let qxx = (s1 + s2 + s7 + s8 + s9 + s10 + s11 + s12 + s13 + s14) + ${f(1 / 3)} - rc - rho * ux * ux;
+  let qyy = (s3 + s4 + s7 + s8 + s9 + s10 + s15 + s16 + s17 + s18) + ${f(1 / 3)} - rc - rho * uy * uy;
+  let qzz = (s5 + s6 + s11 + s12 + s13 + s14 + s15 + s16 + s17 + s18) + ${f(1 / 3)} - rc - rho * uz * uz;
+  let qxy = (s7 + s8) - (s9 + s10) - rho * ux * uy;
+  let qxz = (s11 + s12) - (s13 + s14) - rho * ux * uz;
+  let qyz = (s15 + s16) - (s17 + s18) - rho * uy * uz;
+  let qn = sqrt(qxx * qxx + qyy * qyy + qzz * qzz + 2.0 * (qxy * qxy + qxz * qxz + qyz * qyz));
+  let t0 = tau0_col3(x);
+  var tau = 0.5 * (t0 + sqrt(t0 * t0 + ${f(18 * cs * cs)} * qn * invR));
+  if (tau < ${f(C3.TAU_FLOOR)}) { tau = ${f(C3.TAU_FLOOR)}; }
+  let omg = 1.0 / tau;`;
+  let eqs = '';
+  for (let i = 0; i < 19; i++) eqs += `  let fes${i} = ${f(C3.W19[i])} * (rho * (${eqTerm3(i, V3U)}) - 1.0);\n`;
+  let outs = '';
+  for (let i = 0; i < 19; i++) outs += `  let out${i} = s${i} - omg * (s${i} - fes${i});\n`;
+  return `
+  let rho = 1.0 + ${sSum};
+  let invR = 1.0 / rho;
+  var ux = (s1 - s2 + s7 - s8 + s9 - s10 + s11 - s12 + s13 - s14) * invR;
+  var uy = (s3 - s4 + s7 - s8 - s9 + s10 + s15 - s16 + s17 - s18) * invR;
+  var uz = (s5 - s6 + s11 - s12 - s13 + s14 + s15 - s16 - s17 + s18) * invR;
+  let uu = ux * ux + uy * uy + uz * uz;
+  if (uu > ${f(C3.UMAX_CLAMP * C3.UMAX_CLAMP)}) {
+    let sc = ${f(C3.UMAX_CLAMP)} / sqrt(uu); ux *= sc; uy *= sc; uz *= sc;
+    atomicAdd(&misc[1], 1u);
+  }
+  let u2 = 1.5 * (ux * ux + uy * uy + uz * uz);
+  let c1 = 1.0 - u2;
+  let ux3 = 3.0 * ux; let uy3 = 3.0 * uy; let uz3 = 3.0 * uz;
+  let uxx = 4.5 * ux * ux; let uyy = 4.5 * uy * uy; let uzz = 4.5 * uz * uz;
+  let uxy = 9.0 * ux * uy; let uxz = 9.0 * ux * uz; let uyz = 9.0 * uy * uz;
+${les}
+${eqs}${outs}`;
+}
+// inflow equilibrium at rho = 1, u = (uv.x, uv.y, 0) — shifted by w_i
+function eq3WGSL() {
+  let s = `
+  let eux = uv.x; let euy = uv.y;
+  let ec1 = 1.0 - 1.5 * (eux * eux + euy * euy);
+  let ex3 = 3.0 * eux; let ey3 = 3.0 * euy; let ez3 = 0.0;
+  let exx = 4.5 * eux * eux; let eyy = 4.5 * euy * euy; let ezz = 0.0;
+  let exy = 9.0 * eux * euy; let exz = 0.0; let eyz = 0.0;
+`;
+  for (let i = 0; i < 19; i++) s += `  let e${i} = ${f(C3.W19[i])} * ((${eqTerm3(i, V3E)}) - 1.0);\n`;
+  return s;
+}
+// AA-pattern odd gather/scatter + unscatter in 3D: bounce-back on solid
+// sources (own-cell slot law), FLIPY/FLIPZ specular at the four lateral
+// faces, composed at the yz edges — the exact 3D generalization of the 2D
+// rowType branches, generated per direction (static branches, no tables).
+function oddGather3(H, D) {
+  const O = C3.OPP;
+  let s = '';
+  for (let i = 1; i < 19; i++) {
+    const ex = C3.EX[i], ey = C3.EY[i], ez = C3.EZ[i];
+    const sx = ex === 0 ? 'x' : (ex > 0 ? '(x - 1u)' : '(x + 1u)');
+    if (ey === 0 && ez === 0) {
+      s += `  { let sx = ${sx};
+    if (solid3(sx, y, z)) { s${i} = f32(fbuf[${i}u*NC3 + idx]); } else { s${i} = f32(fbuf[${O[i]}u*NC3 + cix(sx, y, z)]); } }
+`;
+    } else if (ez === 0) {
+      s += `  { let sx = ${sx}; let sy = yi - ${ey > 0 ? '1' : '(-1)'};
+    if (sy < 0 || sy > ${H - 1}) { s${i} = f32(fbuf[${O[flipDi3(i, 1, 0)]}u*NC3 + cix(sx, y, z)]); }
+    else if (solid3(sx, u32(sy), z)) { s${i} = f32(fbuf[${i}u*NC3 + idx]); }
+    else { s${i} = f32(fbuf[${O[i]}u*NC3 + cix(sx, u32(sy), z)]); } }
+`;
+    } else if (ey === 0) {
+      s += `  { let sx = ${sx}; let sz = zi - ${ez > 0 ? '1' : '(-1)'};
+    if (sz < 0 || sz > ${D - 1}) { s${i} = f32(fbuf[${O[flipDi3(i, 0, 1)]}u*NC3 + cix(sx, y, z)]); }
+    else if (solid3(sx, y, u32(sz))) { s${i} = f32(fbuf[${i}u*NC3 + idx]); }
+    else { s${i} = f32(fbuf[${O[i]}u*NC3 + cix(sx, y, u32(sz))]); } }
+`;
+    } else { // the yz edge diagonals (15–18): both flips may compose
+      s += `  { let sy = yi - ${ey > 0 ? '1' : '(-1)'}; let sz = zi - ${ez > 0 ? '1' : '(-1)'};
+    let wy = sy < 0 || sy > ${H - 1}; let wz = sz < 0 || sz > ${D - 1};
+    if (wy && wz) { s${i} = f32(fbuf[${O[flipDi3(i, 1, 1)]}u*NC3 + idx]); }
+    else if (wy) { s${i} = f32(fbuf[${O[flipDi3(i, 1, 0)]}u*NC3 + cix(x, y, u32(sz))]); }
+    else if (wz) { s${i} = f32(fbuf[${O[flipDi3(i, 0, 1)]}u*NC3 + cix(x, u32(sy), z)]); }
+    else if (solid3(x, u32(sy), u32(sz))) { s${i} = f32(fbuf[${i}u*NC3 + idx]); }
+    else { s${i} = f32(fbuf[${O[i]}u*NC3 + cix(x, u32(sy), u32(sz))]); } }
+`;
+    }
+  }
+  return s;
+}
+function oddScatter3(H, D) {
+  const O = C3.OPP;
+  let s = '';
+  for (let i = 1; i < 19; i++) {
+    const ex = C3.EX[i], ey = C3.EY[i], ez = C3.EZ[i];
+    const tx = ex === 0 ? 'x' : (ex > 0 ? '(x + 1u)' : '(x - 1u)');
+    if (ey === 0 && ez === 0) {
+      s += `  { let tx = ${tx};
+    if (solid3(tx, y, z)) { fbuf[${O[i]}u*NC3 + idx] = f16(out${i}); } else { fbuf[${i}u*NC3 + cix(tx, y, z)] = f16(out${i}); } }
+`;
+    } else if (ez === 0) {
+      s += `  { let tx = ${tx}; let ty = yi + ${ey > 0 ? '1' : '(-1)'};
+    if (ty < 0 || ty > ${H - 1}) { fbuf[${flipDi3(i, 1, 0)}u*NC3 + cix(tx, y, z)] = f16(out${i}); }
+    else if (solid3(tx, u32(ty), z)) { fbuf[${O[i]}u*NC3 + idx] = f16(out${i}); }
+    else { fbuf[${i}u*NC3 + cix(tx, u32(ty), z)] = f16(out${i}); } }
+`;
+    } else if (ey === 0) {
+      s += `  { let tx = ${tx}; let tz = zi + ${ez > 0 ? '1' : '(-1)'};
+    if (tz < 0 || tz > ${D - 1}) { fbuf[${flipDi3(i, 0, 1)}u*NC3 + cix(tx, y, z)] = f16(out${i}); }
+    else if (solid3(tx, y, u32(tz))) { fbuf[${O[i]}u*NC3 + idx] = f16(out${i}); }
+    else { fbuf[${i}u*NC3 + cix(tx, y, u32(tz))] = f16(out${i}); } }
+`;
+    } else {
+      s += `  { let ty = yi + ${ey > 0 ? '1' : '(-1)'}; let tz = zi + ${ez > 0 ? '1' : '(-1)'};
+    let wy = ty < 0 || ty > ${H - 1}; let wz = tz < 0 || tz > ${D - 1};
+    if (wy && wz) { fbuf[${flipDi3(i, 1, 1)}u*NC3 + idx] = f16(out${i}); }
+    else if (wy) { fbuf[${flipDi3(i, 1, 0)}u*NC3 + cix(x, y, u32(tz))] = f16(out${i}); }
+    else if (wz) { fbuf[${flipDi3(i, 0, 1)}u*NC3 + cix(x, u32(ty), z)] = f16(out${i}); }
+    else if (solid3(x, u32(ty), u32(tz))) { fbuf[${O[i]}u*NC3 + idx] = f16(out${i}); }
+    else { fbuf[${i}u*NC3 + cix(x, u32(ty), u32(tz))] = f16(out${i}); } }
+`;
+    }
+  }
+  return s;
+}
+// inverse of the odd scatter — recover post-collision f*(x,y,z); exact (u_w = 0)
+function unscatter3WGSL(H, D) {
+  const O = C3.OPP;
+  let s = `fn unscatter3(xu: u32, yu: u32, zu: u32) -> array<f32, 19> {
+  var sa: array<f32, 19>;
+  let yi = i32(yu); let zi = i32(zu);
+  let idx = cix(xu, yu, zu);
+  sa[0] = f32(fbuf[idx]);
+`;
+  for (let i = 1; i < 19; i++) {
+    const ex = C3.EX[i], ey = C3.EY[i], ez = C3.EZ[i];
+    const tx = ex === 0 ? 'xu' : (ex > 0 ? '(xu + 1u)' : '(xu - 1u)');
+    if (ey === 0 && ez === 0) {
+      s += `  { let tx = ${tx};
+    if (solid3(tx, yu, zu)) { sa[${i}] = f32(fbuf[${O[i]}u*NC3 + idx]); } else { sa[${i}] = f32(fbuf[${i}u*NC3 + cix(tx, yu, zu)]); } }
+`;
+    } else if (ez === 0) {
+      s += `  { let tx = ${tx}; let ty = yi + ${ey > 0 ? '1' : '(-1)'};
+    if (ty < 0 || ty > ${H - 1}) { sa[${i}] = f32(fbuf[${flipDi3(i, 1, 0)}u*NC3 + cix(tx, yu, zu)]); }
+    else if (solid3(tx, u32(ty), zu)) { sa[${i}] = f32(fbuf[${O[i]}u*NC3 + idx]); }
+    else { sa[${i}] = f32(fbuf[${i}u*NC3 + cix(tx, u32(ty), zu)]); } }
+`;
+    } else if (ey === 0) {
+      s += `  { let tx = ${tx}; let tz = zi + ${ez > 0 ? '1' : '(-1)'};
+    if (tz < 0 || tz > ${D - 1}) { sa[${i}] = f32(fbuf[${flipDi3(i, 0, 1)}u*NC3 + cix(tx, yu, zu)]); }
+    else if (solid3(tx, yu, u32(tz))) { sa[${i}] = f32(fbuf[${O[i]}u*NC3 + idx]); }
+    else { sa[${i}] = f32(fbuf[${i}u*NC3 + cix(tx, yu, u32(tz))]); } }
+`;
+    } else {
+      s += `  { let ty = yi + ${ey > 0 ? '1' : '(-1)'}; let tz = zi + ${ez > 0 ? '1' : '(-1)'};
+    let wy = ty < 0 || ty > ${H - 1}; let wz = tz < 0 || tz > ${D - 1};
+    if (wy && wz) { sa[${i}] = f32(fbuf[${flipDi3(i, 1, 1)}u*NC3 + idx]); }
+    else if (wy) { sa[${i}] = f32(fbuf[${flipDi3(i, 1, 0)}u*NC3 + cix(xu, yu, u32(tz))]); }
+    else if (wz) { sa[${i}] = f32(fbuf[${flipDi3(i, 0, 1)}u*NC3 + cix(xu, u32(ty), zu)]); }
+    else if (solid3(xu, u32(ty), u32(tz))) { sa[${i}] = f32(fbuf[${O[i]}u*NC3 + idx]); }
+    else { sa[${i}] = f32(fbuf[${i}u*NC3 + cix(xu, u32(ty), u32(tz))]); } }
+`;
+    }
+  }
+  return s + '  return sa;\n}\n';
+}
+// fresh-cell refill on mask swap (oracle setMask mirror, u_w = 0): feq at
+// (mean ρ of neighbors fluid in BOTH masks, else 1), u = 0, written to the
+// own-cell swapped slots at ODD parity — race-free (disjoint sets)
+function refill3WGSL() {
+  const O = C3.OPP;
+  let nbr = '';
+  for (let i = 1; i < 19; i++) {
+    nbr += `  { let nx = xi + ${C3.EX[i]}; let ny = yi + ${C3.EY[i]}; let nz = zi + ${C3.EZ[i]};
+    if (nx >= 0 && nx < W3i && ny >= 0 && ny < H3i && nz >= 0 && nz < D3i) {
+      let j = cix(u32(nx), u32(ny), u32(nz));
+      if (maskPrev[j] == 0u && mask[j] == 0u) { rs += rho_at3(j); n += 1.0; }
+    } }
+`;
+  }
+  const writes = Array.from({ length: 19 }, (_, i) =>
+    `  fbuf[${O[i]}u*NC3 + idx] = f16(${f(C3.W19[i])} * (rho - 1.0));`).join('\n');
+  return `
+@group(0) @binding(7) var<storage, read> maskPrev: array<u32>;
+fn rho_at3(j: u32) -> f32 {
+  return 1.0 ${Array.from({ length: 19 }, (_, i) => `+ f32(fbuf[${i}u*NC3 + j])`).join(' ')};
+}
+@compute @workgroup_size(256)
+fn refill3(@builtin(global_invocation_id) gid: vec3<u32>) {
+  let idx = gid.x;
+  if (idx >= NC3) { return; }
+  if (!(maskPrev[idx] != 0u && mask[idx] == 0u)) { return; }
+  let z = idx / (W3 * H3);
+  let rem = idx - z * W3 * H3;
+  let y = rem / W3;
+  let x = rem - y * W3;
+  let xi = i32(x); let yi = i32(y); let zi = i32(z);
+  let W3i = i32(W3); let H3i = i32(H3); let D3i = i32(D3);
+  var rs = 0.0; var n = 0.0;
+${nbr}
+  let rho = select(1.0, rs / n, n > 0.0);
+${writes}
+}
+`;
+}
+function solver3WGSL(W, H, D, nSponge, cs) {
+  const O = C3.OPP;
+  const evenGather = Array.from({ length: 19 }, (_, i) => `    s${i} = f32(fbuf[${i}u*NC3 + idx]);`).join('\n');
+  const evenScatter = Array.from({ length: 19 }, (_, i) => `    fbuf[${O[i]}u*NC3 + idx] = f16(out${i});`).join('\n');
+  const inflowEven = Array.from({ length: 19 }, (_, i) => `    fbuf[${O[i]}u*NC3 + row] = f16(e${i});`).join('\n');
+  const outEvenR = Array.from({ length: 19 }, (_, i) => `    let s${i} = f32(fbuf[${O[i]}u*NC3 + a]);`).join('\n');
+  const outEvenW = Array.from({ length: 19 }, (_, i) => `    fbuf[${O[i]}u*NC3 + a + 1u] = f16(sc * (s${i} + ${f(C3.W19[i])}) - ${f(C3.W19[i])});`).join('\n');
+  const sSum = Array.from({ length: 19 }, (_, i) => `s${i}`).join(' + ');
+  // inflow odd: the five ex>0 populations placed at their streamed positions
+  // (single-axis specular at the faces — no ex>0 direction carries both y and z)
+  const inOdd = [1, 7, 9, 11, 13].map((i) => {
+    const ey = C3.EY[i], ez = C3.EZ[i];
+    if (!ey && !ez) return `    fbuf[${i}u*NC3 + row + 1u] = f16(e${i});`;
+    if (ey) {
+      const cond = ey > 0 ? `y < ${H - 1}u` : 'y > 0u';
+      const t = ey > 0 ? 'y + 1u' : 'y - 1u';
+      return `    if (${cond}) { fbuf[${i}u*NC3 + cix(1u, ${t}, z)] = f16(e${i}); } else { fbuf[${flipDi3(i, 1, 0)}u*NC3 + row + 1u] = f16(e${i}); }`;
+    }
+    const cond = ez > 0 ? `z < ${D - 1}u` : 'z > 0u';
+    const t = ez > 0 ? 'z + 1u' : 'z - 1u';
+    return `    if (${cond}) { fbuf[${i}u*NC3 + cix(1u, y, ${t})] = f16(e${i}); } else { fbuf[${flipDi3(i, 0, 1)}u*NC3 + row + 1u] = f16(e${i}); }`;
+  }).join('\n');
+  // outflow odd: rescaled copies of (W−2)'s post-collision, streamed from W−1
+  const outOdd = [2, 8, 10, 12, 14].map((i) => {
+    const ey = C3.EY[i], ez = C3.EZ[i];
+    const o = `let o${i} = sc * (sa[${i}] + ${f(C3.W19[i])}) - ${f(C3.W19[i])};`;
+    if (!ey && !ez) return `    { ${o} fbuf[${i}u*NC3 + row + ${W - 2}u] = f16(o${i}); }`;
+    if (ey) {
+      const cond = ey > 0 ? `y < ${H - 1}u` : 'y > 0u';
+      const t = ey > 0 ? 'y + 1u' : 'y - 1u';
+      return `    { ${o} if (${cond}) { fbuf[${i}u*NC3 + cix(${W - 2}u, ${t}, z)] = f16(o${i}); } else { fbuf[${flipDi3(i, 1, 0)}u*NC3 + row + ${W - 2}u] = f16(o${i}); } }`;
+    }
+    const cond = ez > 0 ? `z < ${D - 1}u` : 'z > 0u';
+    const t = ez > 0 ? 'z + 1u' : 'z - 1u';
+    return `    { ${o} if (${cond}) { fbuf[${i}u*NC3 + cix(${W - 2}u, y, ${t})] = f16(o${i}); } else { fbuf[${flipDi3(i, 0, 1)}u*NC3 + row + ${W - 2}u] = f16(o${i}); } }`;
+  }).join('\n');
+  return `
+${common3WGSL(W, H, D, nSponge)}
+${unscatter3WGSL(H, D)}
+${refill3WGSL()}
+@compute @workgroup_size(256)
+fn main_step(@builtin(global_invocation_id) gid: vec3<u32>) {
+  let idx = gid.x;
+  if (idx >= NC3) { return; }
+  let z = idx / (W3 * H3);
+  let rem = idx - z * W3 * H3;
+  let y = rem / W3;
+  let x = rem - y * W3;
+  if (x == 0u || x == W3 - 1u) { return; }
+  if (solid3(x, y, z)) { return; }
+  let par = atomicLoad(&misc[0]) & 1u;
+  let yi = i32(y); let zi = i32(z);
+  var s0: f32; var s1: f32; var s2: f32; var s3: f32; var s4: f32; var s5: f32;
+  var s6: f32; var s7: f32; var s8: f32; var s9: f32; var s10: f32; var s11: f32;
+  var s12: f32; var s13: f32; var s14: f32; var s15: f32; var s16: f32;
+  var s17: f32; var s18: f32;
+  if (par == 0u) {
+${evenGather}
+  } else {
+  s0 = f32(fbuf[idx]);
+${oddGather3(H, D)}
+  }
+${collide3WGSL(cs)}
+  if (par == 0u) {
+${evenScatter}
+  } else {
+  fbuf[idx] = f16(out0);
+${oddScatter3(H, D)}
+  }
+}
+@compute @workgroup_size(64)
+fn boundary(@builtin(global_invocation_id) gid: vec3<u32>) {
+  let r = gid.x;
+  if (r >= H3 * D3) { return; }
+  let z = r / H3;
+  let y = r - z * H3;
+  let t = atomicLoad(&misc[0]);
+  let par = t & 1u;
+  let uv = ramp_u3(t);
+${eq3WGSL()}
+  let row = (z * H3 + y) * W3;
+  if (par == 0u) {
+${inflowEven}
+    let a = row + ${W - 2}u;
+${outEvenR}
+    let rho = 1.0 + ${sSum};
+    let sc = ${f(C3.RHO_OUTLET)} / rho;
+${outEvenW}
+  } else {
+${inOdd}
+    let sa = unscatter3(${W - 2}u, y, z);
+    let rho = 1.0 + ${Array.from({ length: 19 }, (_, i) => `sa[${i}]`).join(' + ')};
+    let sc = ${f(C3.RHO_OUTLET)} / rho;
+${outOdd}
+  }
+}
+@compute @workgroup_size(1)
+fn tick_step() {
+  atomicAdd(&misc[0], 1u);
+}
+`;
+}
+function fields3WGSL(W, H, D, nSponge, probe, ringLen) {
+  return `
+${common3WGSL(W, H, D, nSponge)}
+@group(0) @binding(2) var<storage, read_write> vel3: array<vec4f>;
+@group(0) @binding(4) var<storage, read_write> ring: array<f32>;
+${unscatter3WGSL(H, D)}
+fn cell_m3(x: u32, y: u32, z: u32) -> vec4f { // (ux, uy, uz, rho) — oracle getFields convention
+  if (solid3(x, y, z)) { return vec4f(0.0, 0.0, 0.0, 0.0); }
+  if (x == 0u) {
+    let cnt = atomicLoad(&misc[0]);
+    let uv = ramp_u3(select(cnt - 1u, 0u, cnt == 0u));
+    return vec4f(uv.x, uv.y, 0.0, 1.0);
+  }
+  var xx = x;
+  if (x == W3 - 1u) { xx = W3 - 2u; } // rho-anchored copy: rho = RHO_OUTLET, u = u(W−2)
+  let sa = unscatter3(xx, y, z);
+  let rho = 1.0 + ${Array.from({ length: 19 }, (_, i) => `sa[${i}]`).join(' + ')};
+  let iv = 1.0 / rho;
+  let ux = (sa[1] - sa[2] + sa[7] - sa[8] + sa[9] - sa[10] + sa[11] - sa[12] + sa[13] - sa[14]) * iv;
+  let uy = (sa[3] - sa[4] + sa[7] - sa[8] - sa[9] + sa[10] + sa[15] - sa[16] + sa[17] - sa[18]) * iv;
+  let uz = (sa[5] - sa[6] + sa[11] - sa[12] - sa[13] + sa[14] + sa[15] - sa[16] - sa[17] + sa[18]) * iv;
+  return vec4f(ux, uy, uz, select(rho, ${f(C3.RHO_OUTLET)}, x == W3 - 1u));
+}
+@compute @workgroup_size(256)
+fn fields3(@builtin(global_invocation_id) gid: vec3<u32>) {
+  let idx = gid.x;
+  if (idx >= NC3) { return; }
+  let z = idx / (W3 * H3);
+  let rem = idx - z * W3 * H3;
+  let y = rem / W3;
+  let x = rem - y * W3;
+  vel3[idx] = cell_m3(x, y, z);
+}
+@compute @workgroup_size(1)
+fn probe3() {
+  let sa = unscatter3(${probe.x}u, ${probe.y}u, ${probe.z}u);
+  let rho = 1.0 + ${Array.from({ length: 19 }, (_, i) => `sa[${i}]`).join(' + ')};
+  let uy = (sa[3] - sa[4] + sa[7] - sa[8] - sa[9] + sa[10] + sa[15] - sa[16] + sa[17] - sa[18]) / rho;
+  let cur = atomicLoad(&misc[2]);
+  ring[cur % ${ringLen}u] = uy;
+  atomicStore(&misc[2], cur + 1u);
+}
+`;
+}
+
+// ---------- Solver3 — the D3Q19 rig (own device; the 2D Solver's sibling) ----------
+class Solver3 {
+  constructor(device, { W, H, D, cs = C3.SMAG_CS, solid, probe, pow, sponge }) {
+    this.device = device;
+    this.W = W; this.H = H; this.D = D; this.NC = W * H * D;
+    this.pow = pow ?? 1;
+    this.nSponge = sponge ?? spongeCols3(W);
+    this.probe = probe || { x: W - 2, y: H >> 1, z: D >> 1 };
+    this.ringLen = 2048;
+    this.t = 0;
+    this.maskArr = new Uint32Array(this.NC);
+    if (typeof solid === 'function') {
+      for (let z = 0; z < D; z++)
+        for (let y = 0; y < H; y++) {
+          const rb = (z * H + y) * W;
+          for (let x = 0; x < W; x++) if (solid(x, y, z)) this.maskArr[rb + x] = 1;
+        }
+    } else if (solid) this.maskArr.set(solid);
+    const d = device;
+    // FP16S shifted storage boots at s_i = f_i − w_i = 0 — a zeroed buffer IS feq(ρ=1, u=0)
+    this.fbuf = d.createBuffer({ size: 19 * this.NC * 2, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
+    this.misc = d.createBuffer({ size: 32, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST });
+    this.ring = d.createBuffer({ size: this.ringLen * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
+    this.vel3 = d.createBuffer({ size: this.NC * 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
+    this.mask = d.createBuffer({ size: this.NC * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST });
+    this.maskPrev = d.createBuffer({ size: this.NC * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+    this.simU = d.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+    d.queue.writeBuffer(this.mask, 0, this.maskArr);
+    this.setPow(this.pow);
+    const solverMod = d.createShaderModule({ code: solver3WGSL(W, H, D, this.nSponge, cs) });
+    const fieldsMod = d.createShaderModule({ code: fields3WGSL(W, H, D, this.nSponge, this.probe, this.ringLen) });
+    const cp = (mod, entry) => d.createComputePipeline({ layout: 'auto', compute: { module: mod, entryPoint: entry } });
+    this.pMain = cp(solverMod, 'main_step');
+    this.pBoundary = cp(solverMod, 'boundary');
+    this.pTick = cp(solverMod, 'tick_step');
+    this.pRefill = cp(solverMod, 'refill3');
+    this.pFields = cp(fieldsMod, 'fields3');
+    this.pProbe = cp(fieldsMod, 'probe3');
+    const bg = (pipe, entries) => d.createBindGroup({
+      layout: pipe.getBindGroupLayout(0),
+      entries: entries.map(([binding, resource]) => ({ binding, resource })),
+    });
+    const fb = { buffer: this.fbuf }, ms = { buffer: this.misc };
+    const mk = { buffer: this.mask }, un = { buffer: this.simU };
+    // main_step never reads su (u_w = 0 — no moving-wall term in 3D v1): its
+    // auto layout drops binding 6, so its bind group must too
+    this.bgMain = bg(this.pMain, [[0, fb], [1, ms], [5, mk]]);
+    this.bgBoundary = bg(this.pBoundary, [[0, fb], [1, ms], [5, mk], [6, un]]);
+    this.bgTick = bg(this.pTick, [[1, ms]]);
+    this.bgRefill = bg(this.pRefill, [[0, fb], [5, mk], [7, { buffer: this.maskPrev }]]);
+    this.bgFields = bg(this.pFields, [[0, fb], [1, ms], [2, { buffer: this.vel3 }], [5, mk], [6, un]]);
+    this.bgProbe = bg(this.pProbe, [[0, fb], [1, ms], [4, { buffer: this.ring }], [5, mk]]);
+    this.wgMain = Math.ceil(this.NC / 256);
+    this.wgBoundary = Math.ceil(H * D / 64);
+  }
+  setPow(p) {
+    this.pow = p;
+    this.device.queue.writeBuffer(this.simU, 0, new Float32Array([p, 0, 0, 0]));
+  }
+  encodeSubstep(pass) {
+    pass.setPipeline(this.pMain); pass.setBindGroup(0, this.bgMain); pass.dispatchWorkgroups(this.wgMain);
+    pass.setPipeline(this.pBoundary); pass.setBindGroup(0, this.bgBoundary); pass.dispatchWorkgroups(this.wgBoundary);
+    pass.setPipeline(this.pTick); pass.setBindGroup(0, this.bgTick); pass.dispatchWorkgroups(1);
+    this.t++;
+  }
+  encodeFields(pass) {
+    pass.setPipeline(this.pFields); pass.setBindGroup(0, this.bgFields); pass.dispatchWorkgroups(this.wgMain);
+  }
+  encodeProbe(pass) {
+    pass.setPipeline(this.pProbe); pass.setBindGroup(0, this.bgProbe); pass.dispatchWorkgroups(1);
+  }
+  async stepN(n, probeEvery) { // n even (checkpoints only after odd substeps)
+    let left = n;
+    while (left > 0) {
+      const k = Math.min(left, 512);
+      const enc = this.device.createCommandEncoder();
+      const pass = enc.beginComputePass();
+      for (let i = 0; i < k; i++) {
+        this.encodeSubstep(pass);
+        if (probeEvery && this.t % probeEvery === 0) this.encodeProbe(pass);
+      }
+      pass.end();
+      this.device.queue.submit([enc.finish()]);
+      left -= k;
+      if (left > 0) await this.device.queue.onSubmittedWorkDone();
+    }
+    await this.device.queue.onSubmittedWorkDone();
+  }
+  // the detent swap (oracle setMask → step sequence): one even substep moves
+  // parity to odd, the mask snapshots + swaps, refill lands at ODD parity,
+  // one more substep returns the rig to even — the frame loop never sees odd
+  async swapMask(newMask) {
+    const enc = this.device.createCommandEncoder();
+    { const p = enc.beginComputePass(); this.encodeSubstep(p); p.end(); }
+    enc.copyBufferToBuffer(this.mask, 0, this.maskPrev, 0, this.NC * 4);
+    this.device.queue.submit([enc.finish()]);
+    this.maskArr.set(newMask);
+    this.device.queue.writeBuffer(this.mask, 0, this.maskArr);
+    const enc2 = this.device.createCommandEncoder();
+    { const p = enc2.beginComputePass();
+      p.setPipeline(this.pRefill); p.setBindGroup(0, this.bgRefill); p.dispatchWorkgroups(this.wgMain);
+      this.encodeSubstep(p);
+      p.end(); }
+    this.device.queue.submit([enc2.finish()]);
+    await this.device.queue.onSubmittedWorkDone();
+  }
+  async readBuf(buf, size) {
+    const st = this.device.createBuffer({ size, usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST });
+    const enc = this.device.createCommandEncoder();
+    enc.copyBufferToBuffer(buf, 0, st, 0, size);
+    this.device.queue.submit([enc.finish()]);
+    await st.mapAsync(GPUMapMode.READ);
+    const out = st.getMappedRange().slice(0);
+    st.unmap(); st.destroy();
+    return out;
+  }
+  async readVel() {
+    const enc = this.device.createCommandEncoder();
+    const pass = enc.beginComputePass();
+    this.encodeFields(pass);
+    pass.end();
+    this.device.queue.submit([enc.finish()]);
+    return new Float32Array(await this.readBuf(this.vel3, this.NC * 16)); // [ux,uy,uz,rho] per cell
+  }
+  async readMisc() {
+    const m = new Uint32Array(await this.readBuf(this.misc, 32));
+    return { steps: m[0], clamps: m[1], probeCursor: m[2] };
+  }
+  async readRing() {
+    return new Float32Array(await this.readBuf(this.ring, this.ringLen * 4));
+  }
+  destroy() {
+    for (const b of [this.fbuf, this.misc, this.ring, this.vel3, this.mask, this.maskPrev, this.simU]) b.destroy();
+  }
+}
+
+// ---------- the 3D voxel helpers (masks are Uint8, cell-major — oracle law) ----------
+function sphereSolid3(cx, cy, cz, r) {
+  const r2 = r * r;
+  return (x, y, z) => (x - cx) * (x - cx) + (y - cy) * (y - cy) + (z - cz) * (z - cz) <= r2;
+}
+function dilate3(mask, W, H, D) { // 1× box (Chebyshev r=1) — the ≥3-cell law in 3D, separable
+  const a = new Uint8Array(mask.length), b = new Uint8Array(mask.length);
+  for (let z = 0; z < D; z++) for (let y = 0; y < H; y++) { // x
+    const rb = (z * H + y) * W;
+    for (let x = 0; x < W; x++) a[rb + x] = mask[rb + x] | (x > 0 ? mask[rb + x - 1] : 0) | (x < W - 1 ? mask[rb + x + 1] : 0);
+  }
+  for (let z = 0; z < D; z++) for (let y = 0; y < H; y++) { // y
+    const rb = (z * H + y) * W, ru = y > 0 ? rb - W : rb, rd = y < H - 1 ? rb + W : rb;
+    for (let x = 0; x < W; x++) b[rb + x] = a[rb + x] | a[ru + x] | a[rd + x];
+  }
+  const HW = H * W;
+  for (let z = 0; z < D; z++) for (let y = 0; y < H; y++) { // z
+    const rb = (z * H + y) * W, rn = z > 0 ? rb - HW : rb, rf = z < D - 1 ? rb + HW : rb;
+    for (let x = 0; x < W; x++) a[rb + x] = b[rb + x] | b[rn + x] | b[rf + x];
+  }
+  return a;
+}
+function maskMeta3(mask, W, H, D) { // solid count + frontal-area blockage (VOL-LAYOUT law: area, not height)
+  let cells = 0;
+  const proj = new Uint8Array(H * D);
+  for (let z = 0; z < D; z++)
+    for (let y = 0; y < H; y++) {
+      const rb = (z * H + y) * W;
+      for (let x = 0; x < W; x++) if (mask[rb + x]) { cells++; proj[z * H + y] = 1; }
+    }
+  let frontal = 0;
+  for (let k = 0; k < proj.length; k++) frontal += proj[k];
+  return { cells, blockage: frontal / (H * D) };
+}
+// the CLOSED reference-solid table (VOL-CAP): only these row citizens own an
+// honest 3D form in v1 — revolve for the round body, extrude for the
+// prismatic ones. Everything else at the volume door gets the honest refusal;
+// the aircraft never reach this table at all (they never mount as 'user').
+const VOLTAB = Object.freeze({
+  'R-003': Object.freeze({ op: 'revolve' }),
+  'R-004': Object.freeze({ op: 'extrude', span: 0.50 }),
+  'R-005': Object.freeze({ op: 'extrude', span: 0.50 }),
+  'R-007': Object.freeze({ op: 'extrude', span: 0.42 }),
+});
+function voxProcedural(outline, tab, o) { // reference solids: revolve/extrude the drawn-clean outline
+  const g = userGeom(outline);
+  const bw = g.bmp.w, bh = g.bmp.h, bd = g.bmp.data, yc0 = g.yc0;
+  const top = new Float32Array(bw).fill(NaN), bot = new Float32Array(bw).fill(NaN);
+  for (let i = 0; i < bw; i++) {
+    for (let j = bh - 1; j >= 0; j--) if (bd[j * bw + i]) { top[i] = (j + 0.5) / bw; break; }
+    for (let j = 0; j < bh; j++) if (bd[j * bw + i]) { bot[i] = (j + 0.5) / bw; break; }
+  }
+  const halfSpan = tab.op === 'extrude' ? tab.span / 2 : 0;
+  const solidAt = tab.op === 'revolve'
+    ? (bx, by, bz) => {
+      const i = (bx * bw) | 0;
+      if (i < 0 || i >= bw || Number.isNaN(top[i])) return false;
+      const r = (top[i] - bot[i]) / 2, ay = (top[i] + bot[i]) / 2 - yc0, dy = by - ay;
+      return dy * dy + bz * bz <= r * r;
+    }
+    : (bx, by, bz) => {
+      if (Math.abs(bz) > halfSpan) return false;
+      const i = (bx * bw) | 0;
+      if (i < 0 || i >= bw) return false;
+      const ym = yc0 + by;
+      if (ym < 0 || ym > g.ymax) return false;
+      const j = Math.min(bh - 1, (ym * bw) | 0);
+      return bd[j * bw + i] !== 0;
+    };
+  const { W, H, D, chordCells: L, px, py, pz, pivotL, alphaDeg } = o;
+  const a = alphaDeg * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a);
+  let mask = new Uint8Array(W * H * D);
+  const R = g.maxRN * L + 3;
+  const x0 = Math.max(1, Math.floor(px - R)), x1 = Math.min(W - 2, Math.ceil(px + R));
+  const y0 = Math.max(1, Math.floor(py - R)), y1 = Math.min(H - 2, Math.ceil(py + R));
+  const zR = (tab.op === 'revolve' ? R : halfSpan * L + 3);
+  const z0 = Math.max(1, Math.floor(pz - zR)), z1 = Math.min(D - 2, Math.ceil(pz + zR));
+  for (let z = z0; z <= z1; z++) {
+    const bz = (z - pz) / L;
+    for (let y = y0; y <= y1; y++) {
+      const rb = (z * H + y) * W, dy = y - py;
+      for (let x = x0; x <= x1; x++) {
+        const dx = x - px;
+        const xi = dx * ca + dy * sa, eta = -dx * sa + dy * ca;
+        if (solidAt(pivotL + xi / L, -eta / L, bz)) mask[rb + x] = 1;
+      }
+    }
+  }
+  const pre = maskMeta3(mask, W, H, D);
+  mask = dilate3(mask, W, H, D);
+  let shiftY = 0;
+  if (o.ground) shiftY = voxGround3(mask, W, H, D);
+  const meta = { ...maskMeta3(mask, W, H, D), preCells: pre.cells, op: tab.op, shiftY };
+  return { mask, meta };
+}
+function voxGround3(mask, W, H, D) { // in-place row shift to the wheel line (y = H−2)
+  let ymax = -1;
+  for (let z = 0; z < D; z++)
+    for (let y = H - 1; y >= 0; y--) {
+      if (y <= ymax) break;
+      const rb = (z * H + y) * W;
+      let hit = false;
+      for (let x = 0; x < W; x++) if (mask[rb + x]) { hit = true; break; }
+      if (hit && y > ymax) { ymax = y; break; }
+    }
+  if (ymax < 0) return 0;
+  const shift = Math.min((H - 2) - ymax, H - 2);
+  if (shift <= 0) return 0;
+  for (let z = 0; z < D; z++)
+    for (let y = H - 1; y >= 0; y--) {
+      const dst = (z * H + y) * W, src = (z * H + (y - shift)) * W;
+      if (y - shift >= 0) mask.copyWithin(dst, src, src + W);
+      else mask.fill(0, dst, dst + W);
+    }
+  return shift;
+}
+
+// ---------- Ink3 — orthographic 3D-tracer ink (the 2D grammar extended) ----------
+// 2,097,152 tracers advected in the LIVE 3D field (RK2, two trilinear taps),
+// deposited into the SAME device-pixel deposit → persistent-ink pipeline the
+// 2D article uses. Depth is engraver's line weight: far-span specks land at
+// F2 (×0.35 alpha, half duty), never a camera — ray-march stays refused.
+const NP3 = 1 << 21;
+class Ink3 {
+  constructor(device, S3, ss, canvasFormat) {
+    this.device = device; this.S3 = S3;
+    const { W, H, D } = S3;
+    this.gain = INK.speck;
+    this.q = 0.5;
+    this.frame = 0;
+    this.seed = 1;
+    this.npDraw = NP3; // governor shed #1 halves this — tracers shed before anything else (the 2D count-shed-first law)
+    this.parts = device.createBuffer({ size: NP3 * 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC });
+    this.inkU = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+    this.covCnt = device.createBuffer({ size: 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST });
+    this.sealedNever = true;
+    this.seedParticles(1);
+    const adv = `
+struct U { seed: u32, gain: f32, q: f32, frame: u32 }
+const W3 = ${W}u; const H3 = ${H}u; const D3 = ${D}u;
+@group(0) @binding(0) var<storage, read_write> parts: array<vec4f>;
+@group(0) @binding(1) var<storage, read> vel3: array<vec4f>;
+@group(0) @binding(3) var<uniform> u: U;
+@group(0) @binding(4) var<storage, read> mask: array<u32>;
+fn pcg(v0: u32) -> u32 {
+  var v = v0 * 747796405u + 2891336453u;
+  v = ((v >> ((v >> 28u) + 4u)) ^ v) * 277803737u;
+  return (v >> 22u) ^ v;
+}
+fn vat(x: u32, y: u32, z: u32) -> vec3f { return vel3[(z * H3 + y) * W3 + x].xyz; }
+fn trilin(p: vec3f) -> vec3f {
+  let q = clamp(p, vec3f(0.0), vec3f(${f(W - 1.001)}, ${f(H - 1.001)}, ${f(D - 1.001)}));
+  let fl = floor(q);
+  let w = q - fl;
+  let x0 = u32(fl.x); let y0 = u32(fl.y); let z0 = u32(fl.z);
+  let x1 = min(x0 + 1u, ${W - 1}u); let y1 = min(y0 + 1u, ${H - 1}u); let z1 = min(z0 + 1u, ${D - 1}u);
+  let c00 = mix(vat(x0, y0, z0), vat(x1, y0, z0), w.x);
+  let c10 = mix(vat(x0, y1, z0), vat(x1, y1, z0), w.x);
+  let c01 = mix(vat(x0, y0, z1), vat(x1, y0, z1), w.x);
+  let c11 = mix(vat(x0, y1, z1), vat(x1, y1, z1), w.x);
+  return mix(mix(c00, c10, w.y), mix(c01, c11, w.y), w.z);
+}
+@compute @workgroup_size(256)
+fn advect(@builtin(global_invocation_id) gid: vec3<u32>) {
+  let i = gid.x;
+  if (i >= ${NP3}u) { return; }
+  var p = parts[i];
+  var pos = p.xyz;
+  let v1 = trilin(pos);
+  let v2 = trilin(pos + 0.5 * ${f(ss)} * v1);
+  pos += ${f(ss)} * v2;
+  var solidHit = false;
+  { let cx = i32(round(pos.x)); let cy = i32(round(pos.y)); let cz = i32(round(pos.z));
+    if (cx >= 0 && cx < ${W} && cy >= 0 && cy < ${H} && cz >= 0 && cz < ${D}) {
+      solidHit = mask[(u32(cz) * H3 + u32(cy)) * W3 + u32(cx)] != 0u;
+    } }
+  let dead = pos.x > ${f(W - 2)} || pos.x < 0.0 || pos.x != pos.x || pos.y != pos.y || pos.z != pos.z || solidHit;
+  if (dead) {
+    let rs = u32(p.w) + 1u;
+    let h = pcg(i ^ pcg(rs * 2654435761u + u.seed));
+    let h2 = pcg(h);
+    pos = vec3f(
+      0.5 + 2.5 * f32(h & 0xffffu) / 65535.0,
+      1.0 + ${f(H - 3)} * f32(h >> 16u) / 65535.0,
+      1.0 + ${f(D - 3)} * f32(h2 & 0xffffu) / 65535.0);
+    p.w = f32(rs);
+  }
+  parts[i] = vec4f(pos, p.w);
+}`;
+    const draw = `
+struct U { seed: u32, gain: f32, q: f32, frame: u32 }
+struct VOut { @builtin(position) pos: vec4f, @location(0) a: f32 }
+@group(0) @binding(0) var<storage, read> parts: array<vec4f>;
+@group(0) @binding(3) var<uniform> u: U;
+fn pcg(v0: u32) -> u32 {
+  var v = v0 * 747796405u + 2891336453u;
+  v = ((v >> ((v >> 28u) + 4u)) ^ v) * 277803737u;
+  return (v >> 22u) ^ v;
+}
+@vertex
+fn vmain(@builtin(vertex_index) vi: u32) -> VOut {
+  var o: VOut;
+  o.pos = vec4f(2.0, 2.0, 0.0, 1.0); o.a = 0.0;
+  let h = f32(pcg(vi ^ pcg(u.frame * 2654435761u + u.seed)) & 0xffffffu) / 16777216.0;
+  if (h > u.q) { return o; }
+  let p = parts[vi];
+  let zn = abs(p.z - ${f(D / 2)}) / ${f(D / 2)};
+  var aw = 1.0;
+  if (zn > 0.5) { // far span — F2: ×0.35 alpha, half duty (a static half draws; depth is line weight, never a camera)
+    if ((pcg(vi * 2654435761u) & 1u) == 1u) { return o; }
+    aw = 0.35;
+  }
+  o.pos = vec4f((p.x + 0.5) * ${f(2 / W)} - 1.0, 1.0 - (p.y + 0.5) * ${f(2 / H)}, 0.0, 1.0);
+  o.a = aw;
+  return o;
+}
+@fragment
+fn fmain(@location(0) a: f32) -> @location(0) vec4f { return vec4f(u.gain * a, 0.0, 0.0, 1.0); }`;
+    const fade = `
+@vertex
+fn vmain(@builtin(vertex_index) vi: u32) -> @builtin(position) vec4f {
+  let xy = vec2f(f32((vi << 1u) & 2u), f32(vi & 2u));
+  return vec4f(xy * 2.0 - 1.0, 0.0, 1.0);
+}
+@fragment
+fn fmain() -> @location(0) vec4f { return vec4f(0.0); }`;
+    const comp = `
+@group(0) @binding(0) var dep: texture_2d<f32>;
+@vertex
+fn vmain(@builtin(vertex_index) vi: u32) -> @builtin(position) vec4f {
+  let xy = vec2f(f32((vi << 1u) & 2u), f32(vi & 2u));
+  return vec4f(xy * 2.0 - 1.0, 0.0, 1.0);
+}
+@fragment
+fn fmain(@builtin(position) fc: vec4f) -> @location(0) vec4f {
+  let d = textureLoad(dep, vec2<i32>(fc.xy), 0).r;
+  let a = min(d, ${f(INK.cap)}); // LAW 1 band cap — the same ink law, mono only (hue never enters the volume)
+  return vec4f(vec3f(${f(0x18 / 255)}, ${f(0x18 / 255)}, ${f(0x1c / 255)}) * a, a);
+}`;
+    const cover = `
+@group(0) @binding(0) var dep: texture_2d<f32>;
+@group(0) @binding(1) var<storage, read_write> cnt: array<atomic<u32>>;
+@compute @workgroup_size(16, 16)
+fn cover(@builtin(global_invocation_id) gid: vec3<u32>) {
+  let dim = textureDimensions(dep);
+  if (gid.x >= dim.x || gid.y >= dim.y) { return; }
+  if (textureLoad(dep, vec2<i32>(gid.xy), 0).r > ${f(INK.covThresh)}) { atomicAdd(&cnt[0], 1u); }
+}`;
+    const d = device;
+    this.pAdvect = d.createComputePipeline({ layout: 'auto', compute: { module: d.createShaderModule({ code: adv }), entryPoint: 'advect' } });
+    const drawMod = d.createShaderModule({ code: draw });
+    this.pPoints = d.createRenderPipeline({
+      layout: 'auto',
+      vertex: { module: drawMod, entryPoint: 'vmain' },
+      fragment: {
+        module: drawMod, entryPoint: 'fmain',
+        targets: [{ format: 'r16float', blend: { color: { srcFactor: 'one', dstFactor: 'one' }, alpha: { srcFactor: 'one', dstFactor: 'one' } } }],
+      },
+      primitive: { topology: 'point-list' },
+    });
+    const fadeMod = d.createShaderModule({ code: fade });
+    this.pFade = d.createRenderPipeline({
+      layout: 'auto',
+      vertex: { module: fadeMod, entryPoint: 'vmain' },
+      fragment: {
+        module: fadeMod, entryPoint: 'fmain',
+        targets: [{ format: 'r16float', blend: { color: { srcFactor: 'zero', dstFactor: 'constant' }, alpha: { srcFactor: 'zero', dstFactor: 'constant' } } }],
+      },
+    });
+    const compMod = d.createShaderModule({ code: comp });
+    this.pComp = d.createRenderPipeline({
+      layout: 'auto',
+      vertex: { module: compMod, entryPoint: 'vmain' },
+      fragment: { module: compMod, entryPoint: 'fmain', targets: [{ format: canvasFormat }] },
+    });
+    this.pCover = d.createComputePipeline({ layout: 'auto', compute: { module: d.createShaderModule({ code: cover }), entryPoint: 'cover' } });
+    this.bgAdvect = d.createBindGroup({
+      layout: this.pAdvect.getBindGroupLayout(0),
+      entries: [
+        { binding: 0, resource: { buffer: this.parts } },
+        { binding: 1, resource: { buffer: S3.vel3 } },
+        { binding: 3, resource: { buffer: this.inkU } },
+        { binding: 4, resource: { buffer: S3.mask } },
+      ],
+    });
+    this.bgPoints = d.createBindGroup({
+      layout: this.pPoints.getBindGroupLayout(0),
+      entries: [{ binding: 0, resource: { buffer: this.parts } }, { binding: 3, resource: { buffer: this.inkU } }],
+    });
+    this.deposit = null;
+  }
+  seedParticles(seed) {
+    this.seed = seed >>> 0;
+    const rnd = mulberry32(this.seed || 1);
+    const { W, H, D, maskArr } = this.S3;
+    const a = new Float32Array(NP3 * 4);
+    for (let i = 0; i < NP3; i++) {
+      let x = 0, y = 0, z = 0;
+      do { x = rnd() * (W - 2); y = 1 + rnd() * (H - 3); z = 1 + rnd() * (D - 3); }
+      while (maskArr[(Math.round(z) * H + Math.round(y)) * W + Math.round(x)]);
+      a[i * 4] = x; a[i * 4 + 1] = y; a[i * 4 + 2] = z;
+    }
+    this.device.queue.writeBuffer(this.parts, 0, a);
+    this.writeU();
+  }
+  writeU() {
+    const b = new ArrayBuffer(16);
+    const u = new Uint32Array(b), fl = new Float32Array(b);
+    u[0] = this.seed; fl[1] = this.gain; fl[2] = this.q; u[3] = this.frame;
+    this.device.queue.writeBuffer(this.inkU, 0, b);
+  }
+  resize(w, h) {
+    if (this.deposit) this.deposit.destroy();
+    this.deposit = this.device.createTexture({
+      size: [w, h], format: 'r16float',
+      usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
+    });
+    this.depView = this.deposit.createView();
+    this.bgComp = this.device.createBindGroup({
+      layout: this.pComp.getBindGroupLayout(0),
+      entries: [{ binding: 0, resource: this.depView }],
+    });
+    this.bgCover = this.device.createBindGroup({
+      layout: this.pCover.getBindGroupLayout(0),
+      entries: [{ binding: 0, resource: this.depView }, { binding: 1, resource: { buffer: this.covCnt } }],
+    });
+    this.depW = w; this.depH = h;
+  }
+  shed() { // governor shed #1 — tone stays lawful (the deposit thins; existing ink is never lightened)
+    this.npDraw = Math.max(262144, this.npDraw >> 1);
+    return this.npDraw;
+  }
+  encodeFrame(enc, canvasView, dtS) {
+    this.frame++; this.writeU();
+    { const p = enc.beginComputePass(); p.setPipeline(this.pAdvect); p.setBindGroup(0, this.bgAdvect); p.dispatchWorkgroups(NP3 / 256); p.end(); }
+    const decay = Math.exp(-dtS / INK.absorbS);
+    {
+      const p = enc.beginRenderPass({ colorAttachments: [{ view: this.depView, loadOp: 'load', storeOp: 'store' }] });
+      p.setPipeline(this.pFade); p.setBlendConstant({ r: decay, g: decay, b: decay, a: decay }); p.draw(3);
+      p.setPipeline(this.pPoints); p.setBindGroup(0, this.bgPoints); p.draw(this.npDraw);
+      p.end();
+    }
+    {
+      const p = enc.beginRenderPass({
+        colorAttachments: [{ view: canvasView, loadOp: 'clear', storeOp: 'store', clearValue: { r: 0, g: 0, b: 0, a: 0 } }],
+      });
+      p.setPipeline(this.pComp); p.setBindGroup(0, this.bgComp); p.draw(3);
+      p.end();
+    }
+  }
+  async coverage(readBuf) {
+    this.device.queue.writeBuffer(this.covCnt, 0, new Uint32Array([0]));
+    const enc = this.device.createCommandEncoder();
+    const p = enc.beginComputePass();
+    p.setPipeline(this.pCover); p.setBindGroup(0, this.bgCover);
+    p.dispatchWorkgroups(Math.ceil(this.depW / 16), Math.ceil(this.depH / 16));
+    p.end();
+    this.device.queue.submit([enc.finish()]);
+    const n = new Uint32Array(await readBuf(this.covCnt, 4))[0];
+    return n / (this.depW * this.depH);
+  }
+  govern(cov) {
+    if (cov > INK.covCap) this.q *= 0.6;
+    else if (cov > INK.covHi) this.q *= 0.88;
+    else if (cov < INK.covLo) this.q *= 1.1;
+    this.q = Math.min(1, Math.max(0.02, this.q));
+  }
+  destroy() {
+    for (const b of [this.parts, this.inkU, this.covCnt]) b.destroy();
+    if (this.deposit) this.deposit.destroy();
+  }
+}
+
 // ---------- page plumbing ----------
 const Q = new URLSearchParams(location.search);
 
@@ -2208,7 +3256,11 @@ function shopIntake(file) { // the drop: parse in the Worker under the shop's ca
         SHOP.read = { format: m.format, triCount: m.triCount, srcTris: m.srcTris, subsampled: m.subsampled, points: m.triCount * 3 };
         slog('read');
         E('shopline').textContent = `reading your scan . ${SHOP.read.points.toLocaleString('en-US')} points`;
-      } else if (m.stage === 'cuts') { SHOP.cuts = m; slog('cuts'); shopShowCuts(m); done(m); }
+      } else if (m.stage === 'cuts') {
+        SHOP.cuts = m;
+        SHOP.meshStamp = (SHOP.meshStamp || 0) + 1; // VOLUME: the worker now holds THIS mesh's triangles — later drops retire earlier holds
+        slog('cuts'); shopShowCuts(m); done(m);
+      }
     };
     try { w.postMessage({ file }); } catch {
       shopRefuse({ code: 'unrecognized-format', message: 'that drop carried no file' });
@@ -2261,6 +3313,7 @@ async function shopChoose(k) { // THE TRACE, then the label prompt
 async function shopKeep(outline, name, prov, ground) { // U-NNN, then mount + spool
   const r = await accessionOutline(outline, name, prov, ground);
   if (!r.ok) { E('shopline').textContent = r.refusal.message; return r; } // the polite refusal, no theater
+  if (prov === 'traced from your scan' && SHOP.meshStamp) SHOP.meshKept = { serial: r.rec.serial, stamp: SHOP.meshStamp }; // VOLUME: this serial's mesh is in hand — the volume door voxelizes the SAME parsed triangles
   slog('accession');
   SHOP.state = 'mounted';
   SHOP.mount = { serial: r.rec.serial, name: r.rec.name, ground: !!(r.rec.ground && r.rec.ground.on) };
@@ -2419,7 +3472,7 @@ function crossHz(samples, dts) { // upward mean-crossings; 0 until a real, regul
 }
 
 const T = { // __TUNNEL — the __PARK contract lineage
-  version: '0.10.0',
+  version: '0.11.0',
   tier: 'boot',
   press: PRESS, // the duotone canary — PRESS-LUM computes luminance-silence from these
   grid: null,
@@ -2427,6 +3480,8 @@ const T = { // __TUNNEL — the __PARK contract lineage
   articleKind: null, // 'plate' | 'f16' | 'a10' | 'f16-wing' | 'a10-wing' | 'cyl'
   plane: null, // the selected plane ('f16' | 'a10') — THE PAIR ring
   constants: C,
+  constants3d: C3, // the 3D shared-constants object — VOL-CONST byte-compares this against qa/oracle3d.mjs
+  vol: null, // VOLUME (phase 11) — the live boot fills this in; stills never (the door cannot render there)
   qaResult: null,
   qaProgress: '',
   ready: false,
@@ -2764,6 +3819,12 @@ async function bootLive(g) {
   let sealed = false, sealT0 = 0, developed = false, plating = false;
   // ---- LONG EXPOSURE state (phase 10): the wind holds while the page exposes ----
   const LX = { on: false, cancel: false };
+  // ---- VOLUME state (phase 11): the 3D article — the 2D section holds while it runs ----
+  const VOL = {
+    on: false, busy: false, hold: false, dev: null, S3: null, ink3: null, ctx3: null,
+    alpha: 0, alphaT: 0, px: 0, py: 0, glups: null, vox: null, refusal: null,
+    frames: 0, dts: [], covBusy: false, shedSpoke: false, clineBase: '', log: [],
+  };
   const DEVELOP_S = 3.5, DEVELOP_GAIN = 1.6; // ~3-4 s ramp; the comp caps under LAW 1's 0.55
 
   // —— the rung ladder (R3 finer air): probe order H1 → W1 → W2 → W3, accept
@@ -3062,10 +4123,14 @@ async function bootLive(g) {
     // the counts door rides USER specimens only — a reference measured against
     // itself teaches nothing, and the aircraft never see this door at all
     dom.countsword.hidden = !(userMounted && AC.user.rec && !AC.user.rec.ref);
+    // VOLUME (phase 11, VOL-PROVENANCE by construction): the volume door
+    // exists ONLY on user-mounted articles — scanned meshes and reference
+    // solids. The aircraft never see it: no honest 3D models exist.
+    E('volword').hidden = !userMounted;
     syncAnnex();
   }
   async function swapArticle(k, force) { // behind the spool: α/power/view persist (keep-this-air law), detector re-arms
-    if (swapping || plating || (k === kind && !force) || !KINDS.includes(k)) return;
+    if (swapping || plating || VOL.on || (k === kind && !force) || !KINDS.includes(k)) return;
     swapping = true;
     kind = k;
     dom.readout.textContent = 'spooling up —';
@@ -3097,7 +4162,7 @@ async function bootLive(g) {
   // through the spooled mask swap untouched (only the mask changes). From
   // plate/cyl the keys enter the ring at the selected plane's AIRCRAFT.
   function cyclePlane(dir) {
-    if (swapping || countsBusy || PEN2.on) return;
+    if (swapping || countsBusy || PEN2.on || VOL.on) return; // the volume owns the sting until its door closes
     if (kind === 'user' && AC.user.rec && !AC.user.rec.ref) {
       // A/B (phase 9): the same held-air swap first cycles the specimen's own
       // family — U-NNN ↔ U-NNN/A at held settings IS the before/after. A
@@ -3157,6 +4222,7 @@ async function bootLive(g) {
       if (ovAnyOpen()) return; // an open sheet owns the keys (Escape closes it)
       if (PEN2.on) { penKeys(e); return; } // the drafting table owns the keys — four verbs + undo, nothing else
       if (countsBusy) { if (e.key === 'Escape') { countsCancel = true; e.preventDefault(); } return; } // the lineup runs in turn — Escape cancels it
+      if (VOL.on && e.key === 'Escape') { volClose(); e.preventDefault(); return; } // the volume hands the section back
       if (e.key === 'ArrowLeft') { setPowerTarget(powerTarget - 5); e.preventDefault(); }
       else if (e.key === 'ArrowRight') { setPowerTarget(powerTarget + 5); e.preventDefault(); }
       else if (e.key === '[') { cyclePlane(-1); e.preventDefault(); }
@@ -3205,7 +4271,7 @@ async function bootLive(g) {
     }
   }
   function penEnter(rec) { // rec = the mounted user/reference record, or null = blank paper
-    if (PEN2.on || swapping || plating || countsBusy || T.tier === 'stills') return;
+    if (PEN2.on || swapping || plating || countsBusy || VOL.on || T.tier === 'stills') return;
     PEN2.on = true; PEN2.parent = rec || null;
     const src = rec ? rec.outline.map((p) => [p[0], p[1]]) : penSeed();
     const f0 = src[0], l0 = src[src.length - 1];
@@ -3778,7 +4844,7 @@ async function bootLive(g) {
   let covBusy = false;
   function frame(now) {
     if (!running) return;
-    if (penciling || LX.on) { requestAnimationFrame(frame); return; } // WIND-OFF law: the drafting table is out — the solver holds (B-1B: no live morph, no air). LX law: the wind holds while the page exposes.
+    if (penciling || LX.on || VOL.on || VOL.hold) { requestAnimationFrame(frame); return; } // WIND-OFF law: the drafting table is out — the solver holds (B-1B: no live morph, no air). LX law: the wind holds while the page exposes. VOLUME law: the 2D section holds while the 3D article runs — and while its probe measures a quiet GPU.
     if (!ticking && !swapping) {
       const dt = Math.min(0.1, Math.max(0.001, (now - lastT) / 1000));
       lastT = now;
@@ -3896,6 +4962,16 @@ async function bootLive(g) {
     };
     let drag = null;
     dom.stage.addEventListener('pointerdown', (e) => {
+      if (VOL.on) { // VOLUME: the same drag, about the 3D pivot — the release snaps to a detent
+        if (VOL.busy) return;
+        const rc = dom.stage.getBoundingClientRect();
+        const pxc = rc.left + (VOL.px / VOL_GRID.W) * rc.width;
+        const pyc = rc.top + (VOL.py / VOL_GRID.H) * rc.height;
+        drag = { mode: 'v3', th0: Math.atan2(e.clientY - pyc, e.clientX - pxc), a0: VOL.alphaT, pxc, pyc };
+        dom.stage.setPointerCapture(e.pointerId);
+        e.preventDefault();
+        return;
+      }
       if (!hasAlpha() || swapping || PEN2.on || countsBusy) return; // the table and the lineup both own the sting
       if (!etchOn) { etchOn = true; dom.etch.hidden = false; } // the protractor appears at first touch
       const gp = grid(e);
@@ -3915,6 +4991,15 @@ async function bootLive(g) {
     });
     dom.stage.addEventListener('pointermove', (e) => {
       if (!drag) return;
+      if (drag.mode === 'v3') {
+        let dv = Math.atan2(e.clientY - drag.pyc, e.clientX - drag.pxc) - drag.th0;
+        while (dv > Math.PI) dv -= 2 * Math.PI;
+        while (dv < -Math.PI) dv += 2 * Math.PI;
+        VOL.alphaT = Math.max(-30, Math.min(30, drag.a0 + dv * 180 / Math.PI));
+        volSilhouette();
+        dom.alphaline.textContent = `α ${VOL.alphaT.toFixed(1)}°`;
+        return;
+      }
       if (drag.mode === 'pan') {
         alphaTarget = clampA(drag.a0 - 0.15 * (e.clientY - drag.y0)); // pan up = nose up
       } else {
@@ -3925,7 +5010,10 @@ async function bootLive(g) {
         alphaTarget = clampA(drag.a0 + d * 180 / Math.PI);
       }
     });
-    const endDrag = () => { drag = null; };
+    const endDrag = () => {
+      if (drag && drag.mode === 'v3') volSetAlpha(VOL.alphaT); // the release snaps — the crane re-mounts at the detent
+      drag = null;
+    };
     dom.stage.addEventListener('pointerup', endDrag);
     dom.stage.addEventListener('pointercancel', endDrag);
   }
@@ -4149,6 +5237,12 @@ async function bootLive(g) {
     return `chall-tunnel-plate-${String(serial).padStart(2, '0')}-${cap.plane || cap.kind}-${art}-a${cap.alpha.toFixed(1)}.png`;
   };
   async function plate(opts = {}) {
+    if (VOL.on) { // VOL-NO-DIGIT: no plates from the 3D field in v1 — the door answers honestly
+      const pd = document.getElementById('platedoor');
+      pd.textContent = 'no plates from the volume — structure, never digits';
+      setTimeout(() => { pd.textContent = 'plate ↓'; }, 4000);
+      return null;
+    }
     if (plating || swapping || PEN2.on || countsBusy || T.tier === 'stills') return null; // a lineup body is nobody's plate; the table has no air to print
     plating = true;
     const platedoor = document.getElementById('platedoor');
@@ -4527,6 +5621,329 @@ fn accumulate(@builtin(global_invocation_id) gid: vec3<u32>) {
   lxcancel.addEventListener('click', () => { LX.cancel = true; });
   T.lxRun = (opts) => lxRun(opts);
 
+  // ———— VOLUME (phase 11 · R4 · docs/limit99/VOLUME.md) — the 3D article ————
+  // The `volume →` door lives on USER-MOUNTED articles only (scans + reference
+  // solids; aircraft never — VOL-PROVENANCE by construction, asserted). The
+  // door is probe-gated: a MEASURED 96³ τ-probe must clear 2.6 GLUPS or the
+  // honest refusal card prints and nothing else does. The article mounts
+  // behind the spool on its OWN device at raised limits: V1 = 256×128×128 at
+  // ss 10 (chord 44 — the LAYOUT law at 0.25·W nose), orthographic 3D-tracer
+  // ink, α detented at 0/±15/±30 (each detent an async re-voxelize + the
+  // fresh-cell refill — the crane re-mounts; never a live morph). While the
+  // volume runs, the 2D section HOLDS and the chrome prints the badge — the
+  // only number this view ever emits.
+  const VOL_GRID = Object.freeze({ W: 256, H: 128, D: 128, SS: 10 }); // V1 (VOLUME.md §1.3), probe-earned
+  const VOL_DETENTS = Object.freeze([-30, -15, 0, 15, 30]);
+  const volChord = () => Math.round(C3.LAYOUT.CHORD_FRAC * VOL_GRID.W); // 44
+  const VOL_BADGE = () => `VOLUME · QUALITATIVE · chord ${volChord()} cells · no numbers leave this view`;
+  const VOL_REFUSE_CARD = 'VOLUME needs ~500 GB/s of memory bandwidth — an M4-Max-class GPU. this machine gets the flat bench, which is most of the truth.';
+  const voldoor = E('voldoor');
+  const vlog = (beat) => VOL.log.push({ t: performance.now(), beat });
+  function volRefuseDoor(msg) {
+    voldoor.textContent = `volume — refused: ${msg}`;
+    setTimeout(() => { if (!VOL.on) voldoor.textContent = 'volume →'; }, 8000);
+    vlog('refused');
+    return null;
+  }
+  async function volProbe() { // capability + the measured 96³ τ-probe (timing-only, never sniffing)
+    if (Q.get('volrefuse') === '1') return { refusal: { code: 'qa-forced', message: VOL_REFUSE_CARD } };
+    const needBytes = 19 * VOL_GRID.W * VOL_GRID.H * VOL_GRID.D * 2;
+    if (!navigator.gpu) return { refusal: { code: 'no-webgpu', message: VOL_REFUSE_CARD } };
+    let adapter = null;
+    try { adapter = await navigator.gpu.requestAdapter(); } catch { adapter = null; }
+    if (!adapter || adapter.isFallbackAdapter || !adapter.features.has('shader-f16')) {
+      return { refusal: { code: 'no-f16', message: VOL_REFUSE_CARD } };
+    }
+    if (adapter.limits.maxBufferSize < needBytes || adapter.limits.maxStorageBufferBindingSize < needBytes) {
+      return { refusal: { code: 'buffer-cap', message: VOL_REFUSE_CARD } };
+    }
+    let dev;
+    try {
+      dev = await adapter.requestDevice({
+        requiredFeatures: ['shader-f16'],
+        requiredLimits: { maxBufferSize: needBytes, maxStorageBufferBindingSize: needBytes },
+      });
+    } catch { return { refusal: { code: 'device-refused', message: VOL_REFUSE_CARD } }; }
+    let glups = null;
+    try {
+      const P = new Solver3(dev, { W: 96, H: 96, D: 96 });
+      await P.stepN(120); // warm — real substeps
+      for (let b = 0; b < 2; b++) { // two measured batches; the machine's capability is the best sustained one
+        const t0 = performance.now();
+        await P.stepN(240);
+        const ms = performance.now() - t0;
+        glups = Math.max(glups || 0, (96 * 96 * 96 * 240) / (ms * 1e6));
+      }
+      P.destroy();
+    } catch (e) { T._err = String(e); dev.destroy(); return { refusal: { code: 'probe-fault', message: VOL_REFUSE_CARD } }; }
+    const qg = Q.get('volglups'); // QA flag (query = QA space): forces the VERDICT input; the measurement above still ran and is recorded
+    const pick = qg !== null && Number.isFinite(+qg) ? +qg : glups;
+    if (pick < 2.6) { dev.destroy(); return { glups, refusal: { code: 'bandwidth', message: VOL_REFUSE_CARD } }; }
+    return { dev, glups };
+  }
+  function volVoxMesh(opts) { // the drop's own triangles, voxelized in the same worker (nothing re-read, nothing leaves)
+    return new Promise((resolve) => {
+      let w;
+      try { w = shopWorker(); } catch {
+        return resolve({ refusal: { code: 'worker-unavailable', message: 'this browser will not start the reader' } });
+      }
+      const done = (v) => { w.onmessage = null; w.onerror = null; resolve(v); };
+      w.onerror = () => done({ refusal: { code: 'voxel-fault', message: 'the voxelizer stopped' } });
+      w.onmessage = (e) => {
+        const m = e.data;
+        if (!m.ok) return done({ refusal: m.refusal });
+        if (m.stage === 'voxel') return done({ mask: m.mask, meta: m.meta });
+      };
+      try { w.postMessage({ voxelize: opts }); } catch {
+        done({ refusal: { code: 'voxel-fault', message: 'the voxelizer refused the message' } });
+      }
+    });
+  }
+  async function volMask(alphaDeg) { // sources, in order (VOLUME.md §3): reference solids from the CLOSED table · the drop's mesh · else the honest refusal
+    const rec = AC.user && AC.user.rec;
+    if (!rec) return { refusal: { code: 'no-article', message: 'nothing user-mounted' } };
+    const { W, H, D } = VOL_GRID;
+    const L = volChord();
+    const opts = {
+      W, H, D, chordCells: L,
+      px: Math.round(C3.LAYOUT.NOSE_FRAC * W) + 0.5 * L, py: H / 2, pz: D / 2,
+      pivotL: 0.5, alphaDeg, ground: !!AC.user.ground,
+    };
+    let r;
+    if (rec.ref) {
+      const tab = VOLTAB[rec.serial];
+      if (!tab) return { refusal: { code: 'closed-table', message: 'no honest 3d form on file for this body — the volume table is closed .' } };
+      r = voxProcedural(rec.outline, tab, opts);
+    } else if (SHOP.meshKept && SHOP.meshKept.serial === rec.serial && SHOP.meshKept.stamp === SHOP.meshStamp) {
+      r = await volVoxMesh(opts);
+      if (r.refusal) return r;
+    } else {
+      return { refusal: { code: 'outline-only', message: 'this record is an outline — volume needs the mesh . re-drop the scan' } };
+    }
+    if (r.meta.blockage > C3.LAYOUT.BLOCKAGE_MAX) {
+      return { refusal: { code: 'blockage', message: 'the article fills more than 30% of the section at this angle — the mount is refused' } };
+    }
+    r.opts = opts;
+    return r;
+  }
+  function volSilhouette() { // the same one-master silhouette, repositioned to the 3D frame (both stages are 2:1 — one scale)
+    const g = _acGeom.user;
+    if (!g) return;
+    const s = GW / VOL_GRID.W;
+    const L = volChord() * s;
+    const px = VOL.px * s, py = VOL.py * s;
+    let d = '';
+    for (let i = 0; i < g.pts.length - 1; i++) {
+      const gx = px + (g.pts[i][0] - 0.5) * L;
+      const gy = py - (g.pts[i][1] - g.yc0) * L;
+      d += (i ? 'L' : 'M') + gx.toFixed(2) + ' ' + gy.toFixed(2);
+    }
+    dom.ac.setAttribute('d', d + 'Z');
+    dom.ac.setAttribute('transform', `rotate(${VOL.alphaT.toFixed(3)} ${px.toFixed(2)} ${py.toFixed(2)})`);
+  }
+  const volDetent = (v) => {
+    let best = VOL_DETENTS[0];
+    for (const dd of VOL_DETENTS) if (Math.abs(dd - v) < Math.abs(best - v)) best = dd;
+    return best;
+  };
+  async function volSetAlpha(v) { // detented — the release snaps; the crane re-mounts behind its own line
+    const det = volDetent(Math.max(-30, Math.min(30, Number(v) || 0)));
+    VOL.alphaT = det;
+    if (!VOL.on || VOL.busy) { volSilhouette(); return VOL.alpha; }
+    if (det === VOL.alpha) { volSilhouette(); dom.alphaline.textContent = `α ${det.toFixed(1)}°`; return VOL.alpha; }
+    VOL.busy = true;
+    const held = dom.cline.textContent;
+    dom.cline.textContent = `the crane re-mounts the article · α ${det}°`;
+    try {
+      const m = await volMask(det);
+      if (m.refusal) {
+        dom.cline.textContent = `${VOL.clineBase} · ${m.refusal.message}`;
+        VOL.alphaT = VOL.alpha;
+        volSilhouette();
+        return VOL.alpha;
+      }
+      await VOL.S3.swapMask(m.mask);
+      VOL.alpha = det;
+      VOL.vox = m.meta;
+      VOL.py = m.opts.py + (m.meta.shiftY || 0);
+      volSilhouette();
+      dom.alphaline.textContent = `α ${det.toFixed(1)}°`;
+      dom.cline.textContent = VOL.clineBase + (VOL.shedSpoke ? ' · heavy air — tracers shed' : '');
+      vlog('remount');
+    } catch (e) { T._err = String(e); dom.cline.textContent = held; }
+    finally { VOL.busy = false; }
+    return VOL.alpha;
+  }
+  function volFrame(now) {
+    if (!VOL.on) return;
+    const dt = Math.min(0.1, Math.max(0.001, (now - (VOL.lastT || now - 16)) / 1000));
+    VOL.lastT = now;
+    if (!VOL.busy) {
+      if (powerApplied !== powerTarget) { // one power law, one plant — shared with the held section
+        const mx = 150 * dt;
+        powerApplied += Math.max(-mx, Math.min(mx, powerTarget - powerApplied));
+        if (Math.abs(powerTarget - powerApplied) < 1e-9) powerApplied = powerTarget;
+        S.setPow(powerApplied / 100);
+        VOL.S3.setPow(powerApplied / 100);
+        drawPower();
+      }
+      try {
+        const enc = VOL.dev.createCommandEncoder();
+        { const pass = enc.beginComputePass();
+          for (let i = 0; i < VOL_GRID.SS; i++) VOL.S3.encodeSubstep(pass);
+          VOL.S3.encodeFields(pass); // the moment field the tracers ride
+          pass.end(); }
+        VOL.ink3.encodeFrame(enc, VOL.ctx3.getCurrentTexture().createView(), dt);
+        VOL.dev.queue.submit([enc.finish()]);
+      } catch (e) { T._err = String(e); }
+      VOL.frames++;
+      VOL.dts.push(dt * 1000);
+      if (VOL.dts.length > 240) VOL.dts.shift();
+      if (VOL.frames % 240 === 0 && VOL.dts.length >= 120) { // demote-only governor: tracers shed FIRST (the 2D count-shed law)
+        const p95 = pctile(VOL.dts, 0.95);
+        if (p95 > 22 && VOL.ink3.npDraw > 262144) {
+          VOL.ink3.shed();
+          if (!VOL.shedSpoke) { VOL.shedSpoke = true; dom.cline.textContent = VOL.clineBase + ' · heavy air — tracers shed'; }
+          vlog('shed');
+        }
+      }
+      if (VOL.frames % 90 === 0 && !VOL.covBusy) {
+        VOL.covBusy = true;
+        VOL.ink3.coverage((b, n) => VOL.S3.readBuf(b, n))
+          .then((cov) => { VOL.ink3.govern(cov); VOL.covBusy = false; })
+          .catch(() => { VOL.covBusy = false; });
+      }
+    }
+    requestAnimationFrame(volFrame);
+  }
+  async function volOpen() {
+    if (VOL.on) return volClose();
+    if (VOL.busy || swapping || plating || PEN2.on || countsBusy || LX.on || T.tier === 'stills') return null;
+    if (kind !== 'user' || !AC.user || !AC.user.rec) return null; // by construction: the door only renders user-mounted
+    VOL.busy = true;
+    VOL.hold = true; // the spool: the 2D wind holds while the article voxelizes and the probe measures a quiet GPU
+    VOL.refusal = null;
+    let dev = null;
+    try {
+      await device.queue.onSubmittedWorkDone(); // the held section's last frame drains first
+      // the SOURCE refusals fire before the machine is ever asked (a closed
+      // table or an outline-only record refuses the same way on every GPU)
+      voldoor.textContent = 'the crane measures the article …';
+      const m = await volMask(0);
+      if (m.refusal) { VOL.refusal = m.refusal; return volRefuseDoor(m.refusal.message); }
+      voldoor.textContent = 'the volume probe runs …';
+      const p = await volProbe();
+      VOL.glups = p.glups ?? null;
+      if (!p.dev) { VOL.refusal = p.refusal; return volRefuseDoor(p.refusal.message); }
+      dev = p.dev;
+      voldoor.textContent = 'the crane mounts the article …';
+      VOL.vox = m.meta;
+      dev.pushErrorScope('out-of-memory');
+      const S3 = new Solver3(dev, { W: VOL_GRID.W, H: VOL_GRID.H, D: VOL_GRID.D, solid: m.mask, pow: powerApplied / 100 });
+      const ink3 = new Ink3(dev, S3, VOL_GRID.SS, format);
+      const oom = await dev.popErrorScope();
+      if (oom) {
+        S3.destroy(); ink3.destroy(); dev.destroy();
+        VOL.refusal = { code: 'oom', message: VOL_REFUSE_CARD };
+        return volRefuseDoor(VOL_REFUSE_CARD);
+      }
+      VOL.dev = dev; VOL.S3 = S3; VOL.ink3 = ink3;
+      VOL.px = m.opts.px;
+      VOL.py = m.opts.py + (m.meta.shiftY || 0);
+      VOL.alpha = 0; VOL.alphaT = 0;
+      const cv3 = E('gpu3');
+      cv3.width = dom.gpu.width; cv3.height = dom.gpu.height;
+      VOL.ctx3 = cv3.getContext('webgpu');
+      VOL.ctx3.configure({ device: dev, format, alphaMode: 'premultiplied' });
+      ink3.resize(cv3.width, cv3.height);
+      await S3.stepN(600); // the spool covers the ramp — the article arrives in moving air
+      // —— the chrome swap + THE FIREWALL: badge on, every measured-voice
+      // surface of the 2D section off; the badge is the only number ——
+      VOL.on = true;
+      VOL.frames = 0; VOL.dts.length = 0; VOL.shedSpoke = false;
+      cv3.hidden = false;
+      dom.gpu.style.visibility = 'hidden';
+      dom.etch.hidden = true; etchOn = false;
+      dom.caption.hidden = true;
+      dom.gap.hidden = dom.spec1.hidden = dom.spec2.hidden = dom.spec3.hidden = dom.pairk.hidden = dom.bridge.hidden = true;
+      dom.shopspec.hidden = true;
+      dom.viewsrow.hidden = true;
+      dom.groundword.hidden = true;
+      dom.countsword.hidden = true;
+      E('lxword').hidden = true;
+      dom.readout.textContent = VOL_BADGE();
+      dom.alphaline.hidden = false;
+      dom.alphaline.textContent = 'α 0.0°';
+      VOL.clineBase = `${AC.user.serial} · ${AC.user.name} · REAL 3D AIRFLOW — drag it; the crane re-mounts at each detent`;
+      dom.cline.textContent = VOL.clineBase;
+      volSilhouette();
+      voldoor.textContent = 'back to the section ×';
+      VOL.lastT = performance.now();
+      requestAnimationFrame(volFrame);
+      vlog('mount');
+      return true;
+    } catch (e) {
+      T._err = String(e);
+      try { if (VOL.ink3) VOL.ink3.destroy(); } catch { /* device may be gone */ }
+      try { if (VOL.S3) VOL.S3.destroy(); } catch { /* ditto */ }
+      try { if (dev) dev.destroy(); } catch { /* ditto */ }
+      VOL.dev = VOL.S3 = VOL.ink3 = null;
+      VOL.refusal = { code: 'fault', message: 'volume fault contained' };
+      return volRefuseDoor('volume fault contained — the section stands');
+    } finally {
+      VOL.busy = false;
+      VOL.hold = false;
+      if (!VOL.on) lastT = performance.now(); // a refused door hands the wind back on a clean clock
+    }
+  }
+  function volClose() {
+    if (!VOL.on && !VOL.dev) return null;
+    VOL.on = false;
+    try { if (VOL.ink3) VOL.ink3.destroy(); } catch { /* device may be gone */ }
+    try { if (VOL.S3) VOL.S3.destroy(); } catch { /* ditto */ }
+    try { if (VOL.dev) VOL.dev.destroy(); } catch { /* ditto */ }
+    VOL.dev = VOL.S3 = VOL.ink3 = VOL.ctx3 = null;
+    VOL.alpha = 0; VOL.alphaT = 0; VOL.shedSpoke = false;
+    E('gpu3').hidden = true;
+    dom.gpu.style.visibility = '';
+    dom.viewsrow.hidden = false;
+    E('lxword').hidden = false;
+    voldoor.textContent = 'volume →';
+    dom.readout.textContent = 'the section returns —';
+    applyArticleDom(); // restores the silhouette, the doors, and re-arms the caption block
+    lastT = performance.now(); // the 2D wind resumes on a clean clock
+    vlog('close');
+    return null;
+  }
+  E('voldoor').addEventListener('click', () => { volOpen(); });
+  T.vol = { // the volume's QA surface — state and verbs, never field numbers
+    open: () => volOpen(),
+    close: () => volClose(),
+    setAlpha: (v) => volSetAlpha(v),
+    probe: async () => { // standalone probe: measures against a HELD wind, reports, keeps nothing
+      if (VOL.on || VOL.busy) return { glups: VOL.glups, refused: false, message: null };
+      VOL.hold = true;
+      try {
+        await device.queue.onSubmittedWorkDone();
+        const p = await volProbe();
+        const out = { glups: p.glups ?? null, refused: !p.dev, message: p.refusal ? p.refusal.message : null };
+        if (p.dev) p.dev.destroy();
+        return out;
+      } finally { VOL.hold = false; lastT = performance.now(); }
+    },
+    state: () => ({
+      on: VOL.on, busy: VOL.busy, grid: `${VOL_GRID.W}×${VOL_GRID.H}×${VOL_GRID.D}`, ss: VOL_GRID.SS,
+      chordCells: volChord(), alpha: VOL.alpha, alphaT: VOL.alphaT,
+      tracers: VOL.ink3 ? VOL.ink3.npDraw : 0, glups: VOL.glups,
+      badge: VOL_BADGE(), refusal: VOL.refusal, vox: VOL.vox,
+      log: VOL.log.map((l) => l.beat),
+    }),
+    sample: async () => { // the first 16 tracer positions — QA asserts motion, never physics numbers
+      if (!VOL.S3 || !VOL.ink3) return null;
+      return Array.from(new Float32Array(await VOL.S3.readBuf(VOL.ink3.parts, 16 * 16)));
+    },
+  };
+
   T.stats = async () => {
     const misc = await S.readMisc();
     const ring = await S.readRing();
@@ -4704,6 +6121,99 @@ async function bootSt(g) {
   };
 }
 
+// ---------- QA: VOL-DIFF-3D lane (?qa=vol3d) — the pinned 64×32×32 laminar geometry ----------
+// The 3D twin of ?qa=diff: sphere D=8 at (16.5, 15.5, 15.5) — blockage
+// π·16/1024 = 4.9% (the ratified fixture's own figure), sponge pinned at the
+// 3D floor 16, defaults from CONSTANTS3D (LES on). qa/gpu-diff-3d.mjs runs
+// this in lockstep against qa/oracle3d.mjs: L∞(u) < 1e-3 at 200 steps.
+async function bootVol3d(g) {
+  const W = 64, H = 32, D = 32;
+  const S3 = new Solver3(g.device, {
+    W, H, D,
+    solid: sphereSolid3(16.5, 15.5, 15.5, 4),
+    sponge: 16,
+  });
+  T.tier = 'qa-vol3d'; T.grid = '64×32×32';
+  T.qaStepN3 = async (n) => { await S3.stepN(n - (n % 2)); };
+  T.qaDumpFields3 = async () => {
+    const v = await S3.readVel();
+    const NCC = S3.NC, rho = new Array(NCC), ux = new Array(NCC), uy = new Array(NCC), uz = new Array(NCC);
+    for (let i = 0; i < NCC; i++) { ux[i] = v[i * 4]; uy[i] = v[i * 4 + 1]; uz[i] = v[i * 4 + 2]; rho[i] = v[i * 4 + 3]; }
+    return { W, H, D, rho, ux, uy, uz };
+  };
+  T.stats = async () => {
+    const m = await S3.readMisc();
+    return { steps: m.steps, clamps: m.clamps };
+  };
+  T.ready = true;
+}
+
+// ---------- QA: the ratified 3D sphere fixture (?qa=volst) — 192×96×96, D=24, BGK-pure ----------
+// VOL-ST-GPU: Re ~300 hairpin shedding on THIS page's own D3Q19 solver at the
+// ratified size (VOLUME.md §5) — nose 2.03·D from the inlet, blockage 4.9%,
+// probe 3·D aft, τ₀ = 0.529 from CONSTANTS3D, LES OFF (the citation regime).
+// The oracle's Node twin measured St = 0.1354; the GPU fixture must land in
+// its ±15% band (grid differs — a band, never exactness).
+async function bootVolSt(g) {
+  const W = 192, H = 96, D = 96, R = 12, DS = 24;
+  const S3 = new Solver3(g.device, {
+    W, H, D, cs: 0,
+    solid: sphereSolid3(60.5, 47.5, 47.5, R),
+    probe: { x: 132, y: 47, z: 47 },
+  });
+  T.tier = 'qa-volst'; T.grid = '192×96×96';
+  T.ready = true;
+  const STEPS = 30000, EVERY = 20;
+  const t0 = performance.now();
+  for (let done = 0; done < STEPS;) {
+    const k = Math.min(500, STEPS - done);
+    await S3.stepN(k, EVERY);
+    done += k;
+    T.qaProgress = `volst ${done}/${STEPS}`;
+  }
+  const misc = await S3.readMisc();
+  const ring = await S3.readRing();
+  const nS = misc.probeCursor; // 1,500 samples — the ring (2048) holds them all
+  const series = Array.from({ length: nS }, (_, k) => ring[k]);
+  const start = Math.max(0, nS - Math.floor(10000 / EVERY)); // the last 10k steps ≈ 6.7 shedding periods
+  const win = series.slice(start);
+  let mean = 0;
+  for (const v of win) mean += v;
+  mean /= win.length;
+  let rms = 0;
+  for (const v of win) rms += (v - mean) * (v - mean);
+  rms = Math.sqrt(rms / win.length);
+  const cross = [];
+  for (let k = 1; k < win.length; k++) {
+    const a = win[k - 1] - mean, b = win[k] - mean;
+    if (a < 0 && b >= 0) cross.push((k - 1) + (-a) / (b - a));
+  }
+  let period = NaN, periodStd = NaN;
+  if (cross.length >= 3) {
+    period = (cross[cross.length - 1] - cross[0]) / (cross.length - 1) * EVERY;
+    let v = 0;
+    for (let i = 1; i < cross.length; i++) {
+      const d = (cross[i] - cross[i - 1]) * EVERY - period;
+      v += d * d;
+    }
+    periodStd = Math.sqrt(v / (cross.length - 1));
+  }
+  const st = (1 / period) * DS / C3.U0;
+  const v3 = await S3.readVel();
+  let finite = true, maxU = 0;
+  for (let i = 0; i < S3.NC; i++) {
+    const ux = v3[i * 4], uy = v3[i * 4 + 1], uz = v3[i * 4 + 2];
+    if (!Number.isFinite(ux) || !Number.isFinite(uy) || !Number.isFinite(uz)) { finite = false; break; }
+    const m = Math.hypot(ux, uy, uz);
+    if (m > maxU) maxU = m;
+  }
+  T.qaResult = {
+    st, periodSteps: period, periodStd, nCross: cross.length, rms,
+    steps: misc.steps, clamps: misc.clamps, finite, maxU,
+    wallMs: Math.round(performance.now() - t0), grid: `${W}×${H}×${D}`, sphereD: DS,
+  };
+}
+
 // ---------- boot ----------
 (async () => {
   drawPaper();
@@ -4718,6 +6228,8 @@ async function bootSt(g) {
   try {
     if (qaMode === 'diff') await bootDiff(g);
     else if (qaMode === 'st') await bootSt(g);
+    else if (qaMode === 'vol3d') await bootVol3d(g);
+    else if (qaMode === 'volst') await bootVolSt(g);
     else { await bootLive(g); await shopReceive(); } // a #u= link lands on the running tunnel, rename-before-keep
   } catch (e) {
     T._err = String((e && e.stack) || e);
