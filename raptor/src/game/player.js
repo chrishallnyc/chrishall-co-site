@@ -78,10 +78,8 @@ export class Player {
   // QA hook: drive the aim/throttle directly (batteries can't move a mouse);
   // pos teleports the FM (batteries can't fly 20km to a target either)
   debugCommand({ aimPitchDeg, aimHeadingDeg, throttle, pos } = {}) {
-    if (aimPitchDeg !== undefined) this.aimPitch = aimPitchDeg * Math.PI / 180;
-    if (aimHeadingDeg !== undefined) this.aimHeading = aimHeadingDeg * Math.PI / 180;
     if (throttle !== undefined) this.throttleCmd = throttle;
-    if (pos) {
+    if (pos) { // pos FIRST — a combined {pos, aimHeadingDeg} call must keep the aim (PASS-3 item 2 bug)
       this.fm.initFlight({
         x: pos.x, y: pos.y, alt: pos.alt,
         headingRad: (pos.headingDeg || 0) * Math.PI / 180,
@@ -90,6 +88,8 @@ export class Player {
       this.aimHeading = (pos.headingDeg || 0) * Math.PI / 180;
       this._prev.set(this.fm.state);
     }
+    if (aimPitchDeg !== undefined) this.aimPitch = aimPitchDeg * Math.PI / 180;
+    if (aimHeadingDeg !== undefined) this.aimHeading = aimHeadingDeg * Math.PI / 180;
   }
 
   // AAA/weapon damage; shot down = same respawn path as a crash

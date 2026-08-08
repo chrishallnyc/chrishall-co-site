@@ -234,8 +234,10 @@ async function boot() {
   hud.setMode("arcade");
   if (flags.get("hud") === "0") {
     if (hud.canvas) hud.canvas.style.display = "none"; else if (hud.svg) hud.svg.style.display = "none"; // QA: clean scenery shots
+  }
+  if (flags.get("hud") === "0" || flags.get("chrome") === "0") {
     const chrome = document.getElementById("chrome");
-    if (chrome) chrome.style.display = "none"; // PASS-2 item 8: demo captures open on dev chrome otherwise
+    if (chrome) chrome.style.display = "none"; // PASS-3 item 1: HUD-mode demo captures need bare frames too
   }
 
   // WT-style mouse-aim marker: where the instructor is being told to fly.
