@@ -21,7 +21,11 @@
 //   - caret intakes with raked lips and a deep dark duct
 //   - 2D TVC nozzles: near-rectangular convergent/divergent shell with a
 //     horizontal paddle seam crease, external paddle plates, dark interior
-//   - subtle panel-band vertex-color bake on the fuselage (no textures)
+//   - procedural PBR paint via vertex colors (no textures, no UVs):
+//     Have-Glass gray-blue base with subtly darker RAM radome / chine +
+//     leading-edge tape / dorsal spine, 4-8% panel-line rows at the loft
+//     stations, belly counter-shade, straw->blue->scorched heat tint on
+//     the TVC petals, toned canopy sill frame
 
 import * as THREE from "three";
 
@@ -31,7 +35,11 @@ const DEG = Math.PI / 180;
 function makeMaterials() {
   return {
     skin: new THREE.MeshStandardMaterial({
-      color: 0xa9aeb8, roughness: 0.46, metalness: 0.4, vertexColors: true,
+      // Have-Glass gray-blue RAM overcoat: painted absorber, NOT bare metal.
+      // Tone zones (radome, LEs, spine, panel rows) ride in vertex colors.
+      // (#5c646e family, lifted a half-step: metalness eats diffuse energy
+      // in the env-map-less lab and the jet went near-black on the side)
+      color: 0x666e78, roughness: 0.55, metalness: 0.35, vertexColors: true,
     }),
     canopy: new THREE.MeshPhysicalMaterial({
       // gold via baked fresnel-ish vertex gradient + faint emissive (reads
@@ -42,7 +50,8 @@ function makeMaterials() {
       transparent: true, opacity: 0.6, side: THREE.DoubleSide,
     }),
     dark: new THREE.MeshStandardMaterial({      // nozzle / exhaust metal
-      color: 0x24262a, roughness: 0.36, metalness: 0.85,
+      // heat-tint gradient (straw->blue->scorched) rides in vertex colors
+      color: 0x585d65, roughness: 0.35, metalness: 0.8, vertexColors: true,
     }),
     inlet: new THREE.MeshStandardMaterial({     // duct/exhaust cavity
       color: 0x0b0c0e, roughness: 0.95, metalness: 0.05, side: THREE.DoubleSide,
@@ -195,30 +204,142 @@ const foil = (t) => 2.439 * Math.sqrt(Math.max(0, t)) * Math.pow(1 - t, 0.85);
 const wedge = (t) => Math.min(1, t / 0.1) * (1 - t) / 0.9;
 
 // ------------------------------------------------------------- vertex color
+// All airframe tints are LINEAR-space multipliers over mats.skin's base coat
+// (vertex colors multiply material.color). 1.0 = base Have-Glass; RAM zones
+// (radome, leading edges, dorsal spine) sit subtly darker; panel lines are
+// 4-8% perceptual dips at the natural loft stations.
+const RAM_LE   = [0.68, 0.69, 0.73];  // leading-edge RAM tape (keeps blue lean)
+const RAM_NOSE = [0.78, 0.76, 0.72];  // radome coating (drier, warmer gray)
+const SPINE    = [0.80, 0.81, 0.85];  // dorsal RAM panels behind the canopy
+const clamp01 = (x) => Math.min(1, Math.max(0, x));
+const smoothT = (e0, e1, x) => {
+  const t = clamp01((x - e0) / (e1 - e0));
+  return t * t * (3 - 2 * t);
+};
+const mix3 = (a, b, t) =>
+  [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+
 function whiteColors(geom) {
   const n = geom.getAttribute("position").count;
   const col = new Float32Array(n * 3).fill(1);
   geom.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
 }
+function tintColors(geom, rgb) {                // constant per-part tint
+  const n = geom.getAttribute("position").count;
+  const col = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    col[i * 3] = rgb[0]; col[i * 3 + 1] = rgb[1]; col[i * 3 + 2] = rgb[2];
+  }
+  geom.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+}
 
-// subtle panel-frame bands + aft heat scorch around the engine bay
-// (fuselage, booms and sting — everything the nozzles sit in)
-const PANEL_BANDS = [-6.55, -2.95, 0.9, 3.5, 6.05];
+// panel-line dip: 1.0 -> (1-depth) triangular falloff around each band.
+// hw must exceed the local loft ring spacing or a band can miss every row.
+function panelDip(v, bands, depth, hw) {
+  let k = 0;
+  for (const b of bands) {
+    const d = Math.abs(v - b);
+    if (d < hw) k = Math.max(k, 1 - d / hw);
+  }
+  return 1 - depth * k;
+}
+
+// fuselage/boom/sting bake: radome RAM cap, chine RAM band on the forebody,
+// dorsal spine panels, belly counter-shade, panel-line dips at the natural
+// stations (radome joint, canopy sill, intake join, wing root, booms), and
+// the aft heat scorch around the engine bay.
+const PANEL_BANDS = [-7.55, -6.55, -2.95, -1.70, 0.9, 2.35, 3.5, 5.0, 6.05];
 function bakeFuselageColors(geom) {
+  const p = geom.getAttribute("position"), nr = geom.getAttribute("normal");
+  const col = new Float32Array(p.count * 3);
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), y = p.getY(i), z = p.getZ(i), ny = nr.getY(i);
+    let c = [1, 1, 1];
+    // radome: subtly darker/drier coating with a crisp joint at z~-7.5
+    c = mix3(c, RAM_NOSE, 1 - smoothT(-7.65, -7.35, z));
+    // chine RAM band on the forebody (crease sits at (w(z), yc(z)))
+    if (z > -9.2 && z < -2.4) {
+      const d = Math.hypot(Math.abs(x) - crom(FUS, "w", z), y - crom(FUS, "yc", z));
+      c = mix3(c, RAM_LE, 1 - smoothT(0.05, 0.22, d));
+    }
+    // dorsal spine panels behind the canopy
+    const sp = smoothT(-3.15, -2.55, z) * (1 - smoothT(2.2, 3.4, z)) *
+               smoothT(0.5, 0.85, ny);
+    c = mix3(c, SPINE, sp);
+    // belly counter-shade: undersides a touch lighter (kills the flat read)
+    let v = 1 + 0.05 * smoothT(0.25, 0.75, -ny);
+    v *= panelDip(z, PANEL_BANDS, 0.11, 0.09);
+    if (z > 5.6) {                              // engine-bay heat scorch
+      const f = Math.min(1, (z - 5.6) / 2.7);
+      v *= 1 - f * (y < -0.1 ? 0.42 : 0.30);
+    }
+    col[i * 3] = c[0] * v; col[i * 3 + 1] = c[1] * v; col[i * 3 + 2] = c[2] * v;
+  }
+  geom.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+}
+
+// wing bake (wing-local: +x span, +z aft): LE RAM tape, root-join row where
+// the wing emerges from the loft (model |x|=2.26 -> wing-local ~0.66), one
+// mid-span panel row. Mirrors survive mirrorGeom (colors ride the vertices).
+function bakeWingColors(geom) {
   const p = geom.getAttribute("position");
   const col = new Float32Array(p.count * 3);
   for (let i = 0; i < p.count; i++) {
-    const z = p.getZ(i), y = p.getY(i);
-    let v = 1.0;
-    for (const b of PANEL_BANDS) {
-      const d = Math.abs(z - b);
-      if (d < 0.06) v = Math.min(v, 0.91 + 0.09 * (d / 0.06));
-    }
-    if (z > 5.5) {
-      const f = Math.min(1, (z - 5.5) / 2.8);
-      v *= 1 - f * (y < -0.1 ? 0.62 : 0.42);
-    }
-    col[i * 3] = v; col[i * 3 + 1] = v; col[i * 3 + 2] = v;
+    const x = clamp01(p.getX(i) / W_SPAN) * W_SPAN, z = p.getZ(i);
+    const c = mix3([1, 1, 1], RAM_LE, 1 - smoothT(0.20, 0.90, z - wingLE(x)));
+    const v = panelDip(x, [0.70, 2.60], 0.10, 0.30);
+    col[i * 3] = c[0] * v; col[i * 3 + 1] = c[1] * v; col[i * 3 + 2] = c[2] * v;
+  }
+  geom.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+}
+
+// stab bake (stab-local): LE RAM tape + root shadow row at the boom
+function bakeStabColors(geom) {
+  const p = geom.getAttribute("position");
+  const col = new Float32Array(p.count * 3);
+  for (let i = 0; i < p.count; i++) {
+    const x = Math.max(0, p.getX(i)), z = p.getZ(i);
+    const c = mix3([1, 1, 1], RAM_LE, 1 - smoothT(0.10, 0.60, z - stabLE(x)));
+    const v = panelDip(x, [0.0], 0.10, 0.35);
+    col[i * 3] = c[0] * v; col[i * 3 + 1] = c[1] * v; col[i * 3 + 2] = c[2] * v;
+  }
+  geom.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+}
+
+// fin bake (fin-local: x up-along-fin, z chord): LE RAM tape, slightly
+// darker tip fairing, root shadow row at the boom shoulder
+function bakeFinColors(geom) {
+  const p = geom.getAttribute("position");
+  const col = new Float32Array(p.count * 3);
+  for (let i = 0; i < p.count; i++) {
+    const x = Math.max(0, p.getX(i)), z = p.getZ(i);
+    let c = mix3([1, 1, 1], RAM_LE, 1 - smoothT(0.10, 0.60, z - finLE(x)));
+    c = mix3(c, [0.86, 0.87, 0.90], smoothT(FIN_SPAN - 0.45, FIN_SPAN - 0.1, x));
+    const v = panelDip(x, [0.0], 0.10, 0.35);
+    col[i * 3] = c[0] * v; col[i * 3 + 1] = c[1] * v; col[i * 3 + 2] = c[2] * v;
+  }
+  geom.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+}
+
+// F119 petal heat tint over mats.dark: gunmetal -> straw -> blue -> scorched
+// dark toward the exit (nozzle-local z 0 -> 1.36).
+const HEAT = [
+  [0.00, [0.72, 0.73, 0.76]],                   // shrouded fwd shell: gunmetal
+  [0.42, [0.90, 0.90, 0.92]],
+  [0.62, [1.90, 1.35, 0.55]],                   // straw (tints the metal glint)
+  [0.85, [0.55, 0.75, 1.55]],                   // blue
+  [1.00, [0.30, 0.28, 0.33]],                   // scorched exit lip
+];
+function bakeNozzleHeat(geom) {
+  const p = geom.getAttribute("position");
+  const col = new Float32Array(p.count * 3);
+  for (let i = 0; i < p.count; i++) {
+    const t = clamp01(p.getZ(i) / 1.36);
+    let j = 0;
+    while (j < HEAT.length - 2 && t > HEAT[j + 1][0]) j++;
+    const f = clamp01((t - HEAT[j][0]) / (HEAT[j + 1][0] - HEAT[j][0]));
+    const c = mix3(HEAT[j][1], HEAT[j + 1][1], f);
+    col[i * 3] = c[0]; col[i * 3 + 1] = c[1]; col[i * 3 + 2] = c[2];
   }
   geom.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
 }
@@ -419,14 +540,14 @@ function flapGeometry() {
 // All-moving, on the tail boom. Pivot = lateral X axis at (1.72, 0.08, 7.40).
 // rotation.x sense identical to v2 (geometry z-aft in pivot-local coords).
 const ST_PIVOT = new THREE.Vector3(1.72, 0.08, 7.40);
+const stabLE = (x) => -1.80 + 0.92 * x;         // ~42.6 deg LE sweep
 function stabGeometry() {
   const span = 2.95;
-  const zLE = (x) => -1.80 + 0.92 * x;          // ~42.6 deg LE sweep
   const zTE = (x) => 1.95 - 0.102 * x;
   const stations = [];
   for (let i = 0; i <= 9; i++) {
     const x = (i / 9) * span;
-    stations.push({ x, zLE: zLE(x), zTE: zTE(x), th: 0.085 - 0.055 * (x / span) });
+    stations.push({ x, zLE: stabLE(x), zTE: zTE(x), th: 0.085 - 0.055 * (x / span) });
   }
   return surfGeometry(stations, 14, foil);
 }
@@ -564,7 +685,10 @@ function gearLeg(mats, strutLen, wheelR, wheelW) {
 }
 function doorSlab(mats, w, h, d) {
   const g = new THREE.BoxGeometry(w, h, d);
-  whiteColors(g);
+  // RAM-family tint: the side-bay door corner clips out of the lower hull
+  // bevel (pre-existing), and a base-coat slab there read as a white beacon
+  // against the dark belly — toned down it reads as an access panel.
+  tintColors(g, [0.55, 0.56, 0.60]);
   return new THREE.Mesh(g, mats.skin);
 }
 
@@ -606,12 +730,14 @@ export function buildF22() {
   canPivot.add(glass);
   const frameGeom = canopyFrameGeometry();
   frameGeom.translate(0, -0.55, 2.95);
+  tintColors(frameGeom, [0.58, 0.59, 0.62]);   // dark sill frame, not gold
   skin(frameGeom, "canopyFrame", canPivot);
   add(canPivot, "canopy");
   parts.canopy = canPivot;
 
   // ---- wings (slight anhedral; rotation.z sense verified in the lab)
   const wingGeomR = wingGeometry();
+  bakeWingColors(wingGeomR);
   const wingR = new THREE.Group();
   wingR.position.set(W_ROOT_X, 0.50, 0);
   wingR.rotation.z = -2 * DEG;                  // drops the +X tip
@@ -627,6 +753,7 @@ export function buildF22() {
   // TE down on the right wing. The left flap is a mirrored geometry with a
   // mirrored hinge yaw (the wingL group itself is NOT mirrored).
   const flapGeom = flapGeometry();
+  tintColors(flapGeom, [0.95, 0.95, 0.97]);    // control surface reads as its own panel
   const mkFlap = (mirrored) => {
     const pv = new THREE.Group();
     pv.position.set(0, 0, FLAP_HZ0);            // wing-local root hinge point
@@ -640,6 +767,7 @@ export function buildF22() {
 
   // ---- stabilators (all-moving; hinge axis = X, lateral)
   const stabGeom = stabGeometry();
+  bakeStabColors(stabGeom);
   const stabR = new THREE.Group();
   stabR.position.copy(ST_PIVOT);
   skin(stabGeom, "stabRmesh", stabR);
@@ -651,7 +779,9 @@ export function buildF22() {
 
   // ---- twin verticals canted 28 deg outboard (roll 62/118 deg from flat)
   const finGeom = finGeometry();
+  bakeFinColors(finGeom);
   const rudGeom = rudderGeometry();
+  tintColors(rudGeom, [0.95, 0.95, 0.97]);
   // fin geometry is shared by both sides: the whole fin-local frame is
   // rolled (62 deg right / 118 deg left), so no geometry mirror (v2 scheme).
   const mkTail = (sideSign) => {
@@ -674,8 +804,11 @@ export function buildF22() {
   // ---- nozzles: pivots at (±0.75, 0, 8.10), DIRECT children of the group;
   // hinge axis = X (2D pitch vectoring); exit plane at pivot-local z=1.36.
   const nozGeom = nozzleGeometry();
+  bakeNozzleHeat(nozGeom);
   const nozInt = nozzleInteriorGeometry();
   const padT = paddlePlate(true), padB = paddlePlate(false);
+  tintColors(padT, [0.52, 0.58, 0.80]);        // external paddles: blued heat
+  tintColors(padB, [0.52, 0.58, 0.80]);
   const mkNozzle = (x) => {
     const pv = new THREE.Group();
     pv.position.set(x, 0, 8.10);
@@ -690,6 +823,8 @@ export function buildF22() {
 
   // ---- intakes: caret wedge + lip band + deep dark duct + diverter plate
   const intk = intakeGeometry();
+  tintColors(intk.body, [0.93, 0.94, 0.96]);   // wedge reads as its own panel
+  tintColors(intk.lip, [0.70, 0.71, 0.74]);    // RAM-taped lip edge
   skin(intk.body, "intakeR");
   skin(intk.lip, "intakeLipR");
   add(new THREE.Mesh(intk.duct, mats.inlet), "intakeDuctR");
