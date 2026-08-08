@@ -11,17 +11,22 @@
 // untouched): all detail layers are filtered against the PROJECTED PIXEL
 // FOOTPRINT with the removed slope variance traded into roughness
 // (Toksvig/LEAN), the FFT normal/foam tile is phase-jittered per 320m cell,
-// micro chop is domain-warped at relatively-prime scales, glitter is
-// stochastic and luminance-floored — all of it because six fixed sinusoids
-// + a raw tile once aliased into denim moire / comb rows / fingerprint
-// rings. Grazing Fresnel picks up the hillaire horizon (skyRefl march) so
-// golden-hour water finally mirrors the warm sky.
+// glitter is stochastic and luminance-floored — all of it because six fixed
+// sinusoids + a raw tile once aliased into denim moire / comb rows /
+// fingerprint rings. Grazing Fresnel picks up the hillaire horizon (skyRefl
+// march) so golden-hour water finally mirrors the warm sky.
+// PASS-3 item 6: the pass-2 micro chop (three warped cos gratings) itself
+// combed at grazing and its fades left noon water dead glass — the gratings
+// are gone entirely and the glitter is now a footprint-adaptive stochastic
+// glint NDF (world-anchored hash cells sized to the pixel footprint,
+// amplitude fed by the Toksvig-retired variance; see the micro-layer note).
 
 import * as THREE from "three";
 import {
   Fn, uniform, texture, vec2, vec3, float, positionLocal, positionWorld,
   modelWorldMatrix, vec4, normalize, clamp, smoothstep, mix, sin, cos, dot,
   fract, floor, cameraPosition, dFdx, dFdy, max, pow, sqrt, luminance,
+  log2, exp2,
 } from "three/tsl";
 
 const NEAR_SPAN = 32000, NEAR_VERTS = 384;
@@ -102,8 +107,8 @@ export class Water {
     // source of periodicity and filters by the ACTUAL footprint:
     //   - footprint(wp) = max screen-derivative of world XZ (meters/pixel);
     //     every detail layer fades against ITS wavelength vs this, not range
-    //   - 3 octaves at relatively-prime wavelengths/angles, phase lines bent
-    //     by a vnoise domain warp (no straight wavefront survives ~50m)
+    //   - (pass-2 kept 3 warped cos octaves here — they combed at grazing;
+    //     retired by PASS-3 item 6, see the micro-layer note below)
     //   - the retired slope variance folds into roughness (Toksvig/LEAN trade
     //     below) so far water stays wind-rough instead of mirror-flat
     //   - glitter is gated by the reflected-sky luminance (skyRefl, shared
@@ -119,50 +124,35 @@ export class Water {
       return vec2(p.x.mul(c).sub(p.y.mul(s)), p.x.mul(s).add(p.y.mul(c)));
     };
 
-    const MICRO = [
-      // [wavelengthM, dirDeg, phaseSpeed, slopeAmp] — wavelength ratios
-      // ~2.15/2.18 and angle gaps 54°/134°: no pair ever re-phases. Flat
-      // amplitude spread: a dominant octave reads as continuous ribbons in
-      // the glint; near-equal octaves + sparkle break it into twinkles.
-      [12.7, 27, 1.9, 0.085], [5.9, 81, 1.3, 0.08], [2.7, -53, 0.9, 0.075],
-    ];
-    const microSlope = (wp, fp, glintGate) => {
-      // domain warp: two slow noise channels shove the sample point a few
-      // meters around, bending every octave's phase lines (moire needs
-      // long-range coherence; this denies it without changing the look)
-      const w1 = vnoise(rot2(wp.xz, 11).div(53.0)).sub(0.5);
-      const w2 = vnoise(rot2(wp.xz, -47).div(37.0).add(vec2(19.7, 7.3))).sub(0.5);
-      // 10m shove vs 12.7m longest octave: ribbons bend inside one wavelength
-      const wq = wp.xz.add(vec2(w1.mul(10.0), w2.mul(10.0)));
-      let gx = float(0), gz = float(0), varLost = float(0);
-      for (const [L, degDir, spd, amp] of MICRO) {
-        const k = (2 * Math.PI) / L;
-        const rad = (degDir * Math.PI) / 180;
-        const dx = Math.sin(rad), dz = Math.cos(rad);
-        // Nyquist guard against the projected footprint (warp margin: the
-        // octave is fully retired by fp = 0.38·L, well before L/2)
-        const fade = smoothstep(L * 0.38, L * 0.14, fp);
-        const theta = wq.x.mul(dx * k).add(wq.y.mul(dz * k)).add(this.uTime.mul(spd * k));
-        const g = cos(theta).mul(amp).mul(fade);
-        gx = gx.add(g.mul(dx));
-        gz = gz.add(g.mul(dz));
-        // slope variance of a cos grating is amp²/2 — the faded share is
-        // what the Toksvig companion hands to roughness
-        varLost = varLost.add(float(1.0).sub(fade.mul(fade)).mul(amp * amp * 0.5));
-      }
-      // gust patches: real glitter arrives in cat's-paw fields, not uniformly
-      // (two rotated incommensurate octaves — see rot2 note)
+    // PASS-3 item 6 (REGRESSION — noon sparkle dead, golden glint a screen-
+    // period comb): the pass-2 micro layer was still THREE FIXED-DIRECTION
+    // cos gratings. Bisect (waterdbg captures, marianas-178) pinned the comb
+    // on them alone: near its Nyquist-fade band one octave dominates and its
+    // across-view projection is a single ~11-14px frequency — the 10m domain
+    // warp bends phase lines over ~50m, which is ~50 SCREEN px out there, so
+    // patches stay coherent (FFT concentration 87-258x, aniso 46-60x; every
+    // other suspect — glint dither, tile phase jitter, displacement, fftFade,
+    // luminance floor, Toksvig — measured innocent). And at noon the fades
+    // retired FFT texels + micro + the fp<2.4 glint dither TOGETHER, leaving
+    // only smooth roughness: HF p99 1.5-3.0 DN vs the 5-20 bar (fftFade=1
+    // alone doubled it; glintGate=1 and constant roughness changed nothing).
+    // Fix: no gratings at all — the FFT field owns the near-field wave look
+    // (its texels are live exactly where micro octaves lived), and a
+    // FOOTPRINT-ADAPTIVE stochastic glint NDF (below) re-carries the retired
+    // variance as sparse world-anchored dots at every distance. Nothing in
+    // the micro path is periodic anymore, so there is nothing left to comb.
+    // Kept: the cat's-paw gust field — glitter arrives in patches, not
+    // uniformly (two rotated incommensurate octaves — see rot2 note).
+    const gustField = (wp) => {
       const gust = vnoise(rot2(wp.xz, 17).div(210.0).add(vec2(this.uTime.mul(0.011), this.uTime.mul(-0.007))))
         .mul(0.62)
         .add(vnoise(rot2(wp.xz, -39).div(151.0).add(vec2(this.uTime.mul(-0.008), this.uTime.mul(0.006)))).mul(0.38));
-      const gustK = smoothstep(0.25, 0.8, gust).mul(0.85).add(0.15).mul(S.micro ?? 1.0);
-      const gK = gustK.mul(glintGate);
-      // Toksvig share rides the MEAN gust energy (0.36·micro²), not the
-      // per-pixel gust — gust² roughness patches at 210m were re-painting
-      // quasi-periodic rows onto the far field they were meant to clean
-      return { gx: gx.mul(gK), gz: gz.mul(gK), gustK,
-               varLost: varLost.mul(glintGate).mul(glintGate).mul(0.36 * (S.micro ?? 1) * (S.micro ?? 1)) };
+      return smoothstep(0.25, 0.8, gust).mul(0.85).add(0.15).mul(S.micro ?? 1.0);
     };
+    // retired micro slope variance (was Σamp²/2 · 0.36·micro² of the removed
+    // octaves) — still budgeted so the Toksvig trade and the glint amplitude
+    // conserve the same energy the old layer carried
+    const MICRO_VAR = 0.0097 * 0.36 * (S.micro ?? 1) * (S.micro ?? 1);
 
     // 4-tap tile-phase jitter (normals + foam only — the vertex displacement
     // keeps plain UVs for mesh continuity; 0.4m geometry repeats are invisible
@@ -272,15 +262,34 @@ export class Water {
         const texel = fft.tileM / fft.N;
         const fftFade = smoothstep(texel * 5.0, texel * 1.2, fp);
         const sf = slopeFoam(wp);
-        const m = microSlope(wp, fp, glintGate);
-        // stochastic glitter: sparse world-anchored slope dither — ~1/4 of
-        // 0.38m cells carry a dot (blue-noise-ish thresholding), dots retire
-        // before their cell goes sub-pixel and below the luminance floor
-        const cell = floor(wp.xz.mul(2.63));
-        const sparkK = smoothstep(0.35, 0.7, hash2(cell.add(vec2(91.7, 33.3))))
-          .mul(smoothstep(2.4, 0.5, fp)).mul(m.gustK).mul(glintGate).mul(0.13);
-        const nx = sf.sx.mul(fftFade).sub(m.gx).add(hash2(cell).sub(0.5).mul(sparkK));
-        const nz = sf.sz.mul(fftFade).sub(m.gz).add(hash2(cell.add(vec2(57.1, 7.7))).sub(0.5).mul(sparkK));
+        // FOOTPRINT-ADAPTIVE stochastic glint NDF: sparse world-anchored
+        // slope dots whose CELL SIZE tracks the pixel footprint (0.38m cells
+        // at lod 0, doubling per lod, two lods crossfaded), so dots stay
+        // ~1-2.6px at every distance instead of retiring at fp>2.4 (that
+        // retirement was the dead noon). Amplitude rides the SAME variance
+        // the footprint fades hand to roughness (Toksvig budget) — the NDF
+        // is mirror + discrete facets, not mirror-or-nothing. Cell ids are
+        // hashed (wrapped mod 1024 so the sin-hash keeps fp32 precision at
+        // 16km; the 389m·2^lod dot-layout repeat is invisible in sparse
+        // noise) — pure world anchoring + per-cell blue-noise-ish threshold:
+        // nothing is screen-locked and nothing is periodic.
+        const gustK = gustField(wp);
+        const varRet = float(S.mss).mul(float(1.0).sub(fftFade.mul(fftFade))).add(MICRO_VAR);
+        const lodF = clamp(log2(max(fp.mul(2.63), 1.0)), 0.0, 7.0);
+        const l0 = floor(lodF), lw = lodF.sub(l0);
+        const dotAt = (scale, lodId) => {
+          const c = fract(floor(wp.xz.mul(2.63).div(scale)).div(1024.0)).mul(1024.0)
+            .add(lodId.mul(13.7));
+          const on = smoothstep(0.5, 0.8, hash2(c.add(vec2(91.7, 33.3))));
+          return vec2(hash2(c).sub(0.5), hash2(c.add(vec2(57.1, 7.7))).sub(0.5)).mul(on);
+        };
+        const spark = mix(dotAt(exp2(l0), l0), dotAt(exp2(l0.add(1.0)), l0.add(1.0)), lw);
+        // fade only where a cell would exceed ~50m / the horizon band: the
+        // far-field glitter average IS the roughness lobe (horizon intact)
+        const sparkA = sqrt(varRet.add(1e-5)).mul(3.1).mul(gustK).mul(glintGate)
+          .mul(smoothstep(45.0, 18.0, fp));
+        const nx = sf.sx.mul(fftFade).add(spark.x.mul(sparkA));
+        const nz = sf.sz.mul(fftFade).add(spark.y.mul(sparkA));
         // lerp toward flat by the same damp field (shore + rim)
         return normalize(mix(vec3(0, 1, 0), vec3(nx, 1.0, nz), clamp(damp, 0.0, 1.0)));
       }
@@ -291,22 +300,24 @@ export class Water {
       // GGX companion: as micro-normal energy rises the surface must sparkle,
       // not mirror-flash — nudge roughness up with the same gust/damp fields.
       // Toksvig/LEAN trade: every slope-variance unit the footprint filters
-      // removed from the normal (FFT texels via fftFade, micro octaves via
-      // their Nyquist fades) returns as roughness in α² space, so far water
-      // stays wind-rough instead of collapsing to a mirror.
+      // removed from the normal (FFT texels via fftFade, plus the retired
+      // MICRO_VAR budget) returns as roughness in α² space, so far water
+      // stays wind-rough instead of collapsing to a mirror — and the glint
+      // NDF above re-carries a share of it as discrete facets.
       mat.roughnessNode = Fn(() => {
         const wp = positionWorld;
         const fp = footprint(wp);
         const edgeFadeR = smoothstep(15800.0, 9000.0, positionLocal.xz.length());
         const microDamp = smoothstep(0.0, 120.0, shoreDist(wp)).mul(edgeFadeR);
-        const m = microSlope(wp, fp, glintGate);
+        const gustK = gustField(wp);
         const texel = fft.tileM / fft.N;
         const fftFade = smoothstep(texel * 5.0, texel * 1.2, fp);
-        const lost = float(S.mss).mul(float(1.0).sub(fftFade.mul(fftFade))).add(m.varLost);
+        const lost = float(S.mss).mul(float(1.0).sub(fftFade.mul(fftFade)))
+          .add(float(MICRO_VAR).mul(glintGate).mul(glintGate));
         // gust sheen patches are a NEAR/MID-field glint texture — faded by
         // footprint before grazing projection stacks them into far-field rows
         return sqrt(float(S.roughness * S.roughness).add(lost.mul(microDamp)))
-          .add(m.gustK.mul(microDamp).mul(0.05).mul(smoothstep(14.0, 4.0, fp)));
+          .add(gustK.mul(microDamp).mul(0.05).mul(smoothstep(14.0, 4.0, fp)));
       })();
     }
 
