@@ -24,13 +24,14 @@ const KIND_NAME = ["destroy_tag", "protect_tag", "reach_zone", "survive_until", 
 // timeout rule (§2 priority table): offense types lose at timeLimitS;
 // defense types (protect objectives intact — they'd have failed loseWhen
 // otherwise) win. Only offense types exist in INC-1.
-const DEFENSE_TYPES = new Set(["escort", "fleet_defense"]);
+const DEFENSE_TYPES = new Set(["escort", "fleet_defense", "intercept"]); // timeout with the protect intact = the raid is beaten
 
 export class Script {
-  constructor(spec, { battlefield, player, match, terrain } = {}) {
+  constructor(spec, { battlefield, player, match, terrain, bandits } = {}) {
     this.name = "script";
     this.spec = spec;
     this.bf = battlefield || null;
+    this.bandits = bandits || null;
     this.player = player || null;
     this.match = match || null;
     this.terrain = terrain || null;
@@ -59,6 +60,15 @@ export class Script {
       this.objIdx.push(o.bfIdx ? o.bfIdx.slice() : []);
       this._slotOf.set(o.id, i);
     });
+    this.objAir = new Uint8Array(MAX_OBJ);
+    this.objTag = new Int32Array(MAX_OBJ).fill(-1);
+    spec.objectives.forEach((o, i) => { if (o.air) { this.objAir[i] = 1; this.objTag[i] = o.tag; } });
+    // INC-5: air raids are spec data — spawn the flight at mission start
+    // (boot-time like battlefield placements; pool meshes already built)
+    this._bSlots = []; // slots this mission spawned, for tag counting
+    if (spec.bandits.length && this.bandits) {
+      this._bSlots = this.bandits.spawnFlight(spec.bandits);
+    }
     this._win = spec.winWhen.map((id) => this._slotOf.get(id));
     this._lose = spec.loseWhen.map((id) => this._slotOf.get(id));
     this._offense = !DEFENSE_TYPES.has(spec.type);
@@ -93,11 +103,44 @@ export class Script {
       if (this.objState[i] !== 0) continue;
       const k = this.objKind[i];
       if (k === OBJ_KIND.destroy_tag) {
-        const list = this.objIdx[i];
         let dead = 0;
-        if (this.bf) for (let j = 0; j < list.length; j++) if (this.bf.state[list[j] * 5 + 4] <= 0) dead++;
+        if (this.objAir[i]) {
+          const B = this.bandits;
+          if (B) for (const bi of this._bSlots) {
+            if (bi < 0 || B.tag[bi] !== this.objTag[i]) continue;
+            if (!B.live[bi]) dead++;
+          }
+        } else {
+          const list = this.objIdx[i];
+          if (this.bf) for (let j = 0; j < list.length; j++) if (this.bf.state[list[j] * 5 + 4] <= 0) dead++;
+        }
         this._count[i] = dead;
         if (dead >= this.objNeed[i]) this.objState[i] = 1;
+      } else if (k === OBJ_KIND.protect_tag) {
+        // with a zone: DENIAL — fails when a tagged live bandit crosses it.
+        // without: fails when `need` tagged units are dead.
+        const zo = i * 4, hasZone = this.objZone[zo + 2] > 0;
+        if (this.objAir[i] && this.bandits) {
+          const B = this.bandits;
+          let dead = 0;
+          for (const bi of this._bSlots) {
+            if (bi < 0 || B.tag[bi] !== this.objTag[i]) continue;
+            if (!B.live[bi]) { dead++; continue; }
+            if (hasZone) {
+              const o14 = bi * 14;
+              const dx = B.state[o14] - this.objZone[zo], dy = B.state[o14 + 1] - this.objZone[zo + 1];
+              if (dx * dx + dy * dy < this.objZone[zo + 2] * this.objZone[zo + 2]) { this.objState[i] = 2; break; }
+            }
+          }
+          if (this.objState[i] === 0 && !hasZone && dead >= this.objNeed[i]) this.objState[i] = 2;
+          this._count[i] = dead;
+        } else if (this.bf) {
+          const list = this.objIdx[i];
+          let dead = 0;
+          for (let j = 0; j < list.length; j++) if (this.bf.state[list[j] * 5 + 4] <= 0) dead++;
+          this._count[i] = dead;
+          if (dead >= this.objNeed[i]) this.objState[i] = 2;
+        }
       } else if (k === OBJ_KIND.reach_zone) {
         if (!this.player) continue;
         const st = this.player.fm.state, zo = i * 4;
@@ -112,7 +155,7 @@ export class Script {
       } else if (k === OBJ_KIND.survive_until) {
         if (sim.time >= this.objT[i] && M.blue > 0) { this.objState[i] = 1; this._count[i] = 1; }
       }
-      // protect_tag / kill_ace: loadMission rejects them until INC-4/INC-6
+      // kill_ace: loadMission rejects it until INC-6
     }
 
     // 2. triggers -> comms ring (same tick as the state change: no dead air)

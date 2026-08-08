@@ -1,11 +1,12 @@
 {
- "updated": "2026-08-08T02:40:00-07:00",
- "version": "v0.27.0",
- "now": "v0.27.0 THE FIRST BANDITS \u2014 enemy aircraft fly, your missiles lead moving targets; air combat missions next",
+ "updated": "2026-08-08T13:40:00-07:00",
+ "version": "v0.28.0",
+ "now": "v0.28.0 THE SKY SHOOTS BACK \u2014 real dogfights: bandits evade, engage and fire; air war in the campaign; aces next",
  "nowPhase": 12,
  "paused": false,
- "pushes": 59,
+ "pushes": 60,
  "ledger": [
+  "2026-08-08 v0.28.0 \u2014 THE SKY SHOOTS BACK: the first real dogfights. Fighters see you, turn in, and shoot \u2014 their missiles trip your MISSILE warning before they can hurt you, their guns only bite inside 700m, and they jink your Sidewinders off bad shots exactly like you dodge theirs. Energy is honest both ways: a bandit that turns too hard goes slow, breaks off to rebuild speed, then comes back. INTERCEPT and CAP sorties now appear in the campaign \u2014 the deeper you push the front, the harder the sky fights back.",
   "2026-08-08 v0.27.0 \u2014 THE FIRST BANDITS: enemy aircraft exist. Drones, transports and fighters fly waypoint routes with honest physics (energy bleed in hard turns, terrain-following floor), raiders dive on your convoys and shoot back at ships, and your AIM-9X finally leads a MOVING target \u2014 the guidance law that misses a 150 m/s crosser by 8 meters now kills it at 2.8. Dashed diamonds track every contact. Plus: cloud shadows reach the sea, and the valdez camera-ring artifact is root-caused and gone.",
   "2026-08-08 v0.26.0 \u2014 THE LONG WAR \u2014 persistent operations: generated sorties push a real front line (win +2km toward victory at +16), the hangar remembers your war, deterministic 200-sortie chains",
   "2026-08-08 v0.25.0 \u2014 THE LIVING BATTLEFIELD \u2014 48-unit war: driving convoys, mid-sortie reinforcements, friendly forces, rearm pads on all three fronts",
@@ -89,19 +90,19 @@
   {
    "n": 8,
    "name": "Sensors & weapons",
-   "pct": 75,
+   "pct": 80,
    "note": "cannon + pipper + AIM-9X with seeker lock live; AIM-120 + radar later"
   },
   {
    "n": 9,
    "name": "AI & ground war",
-   "pct": 78,
+   "pct": 88,
    "note": "AAA + SAM return fire live with real evasion doctrine; vehicle movement + bandits next"
   },
   {
    "n": 10,
    "name": "Match modes & dynamic campaign",
-   "pct": 85,
+   "pct": 90,
    "note": "tickets/respawns/rearm/boundary/win-lose live; Daily Operation seeds + wingmen later"
   },
   {

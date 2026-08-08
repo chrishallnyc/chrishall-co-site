@@ -17,7 +17,7 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.27.0";
+const VERSION = "0.28.0";
 const PHASE = 12;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
@@ -252,6 +252,7 @@ async function boot() {
     sim.addSystem(player);
     // the war shoots back (?noaaa=1 for scenery QA — no player ref, guns idle)
     if (battlefield && flags.get("noaaa") !== "1") battlefield.player = player;
+    if (bandits) bandits.player = player; // A3 weapons target the player (INC-5)
   }
   // PHASE 10: the war has rules (?nomatch=1 keeps the free-flight sandbox)
   // PHASE 11 INC-1: ?mission=<name> loads a MissionSpec; the Script system
@@ -280,7 +281,7 @@ async function boot() {
         } else {
           spec = M.loadMission(mname);
         }
-        script = new Script(spec, { battlefield, player, match, terrain });
+        script = new Script(spec, { battlefield, player, match, terrain, bandits });
         match.scripted = true;
         if (spec.airfield) match.airfield = spec.airfield; // mission pad overrides
         missionData = { spec, lines: extraLines ? { ...M.COMMS_LINES, ...extraLines } : M.COMMS_LINES };
@@ -533,7 +534,8 @@ async function boot() {
       }
 
       // MISSILE warning (over everything but the end card)
-      if (battlefield && battlefield.samInbound() && (!match || match.over === 0)) {
+      const airInbound = bandits && bandits.mslInboundPlayer ? bandits.mslInboundPlayer() : false;
+      if (battlefield && (battlefield.samInbound() || airInbound) && (!match || match.over === 0)) {
         const pulse = Math.floor(performance.now() / 250) % 2 === 0 ? 1.0 : 0.6;
         ctx.font = "bold 30px ui-monospace, Menlo, monospace";
         ctx.lineWidth = 4;

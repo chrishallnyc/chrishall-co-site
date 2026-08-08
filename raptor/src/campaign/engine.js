@@ -36,7 +36,7 @@ const MAX_SHOOTERS = 4;           // amendment 5: <= 4 simultaneous shooters
 const SHOOTER_R = 5000;           // "within ~5 km of zoneCenter"
 const INGRESS_R = 2500;           // reach_zone radius (INC-1 authored-spec scale)
 // §4 type weights: STRIKE/SEAD 2.0, ANTI-SHIP 2.5 (front-line swing per sortie)
-const SCORE_KM = { strike: 2.0, sead: 2.0, anti_ship: 2.5 };
+const SCORE_KM = { strike: 2.0, sead: 2.0, anti_ship: 2.5, intercept: 2.0, cap: 2.0 };
 const AFFORD_TYPE = { strike: "strike", sead: "sead", antiship: "anti_ship" };
 
 // Amendment-8 comms floor for generated ops: a per-type table so Operation
@@ -61,11 +61,23 @@ export const OP_LINES = {
   222: "RAPTOR 1-1: Tally hulls on the water. Beginning my run.",
   223: "OVERLORD: Scratch the group — they are going under. Outstanding, Raptor 1-1. RTB when ready.",
   224: "OVERLORD: The hulls are still afloat and we are out of time. Break off and RTB.",
+  230: "OVERLORD: Raptor 1-1, POP-UP GROUP — drone raid inbound to your field from up the axis. Splash every airframe before the fence.",
+  231: "OVERLORD: raid tracking steady. Arm hot, burn north.",
+  232: "OVERLORD: merge plot. Guns and Foxes free.",
+  233: "OVERLORD: raid destroyed. Field secure — the line holds tonight.",
+  234: "OVERLORD: too slow — they're over the fence. RTB.",
+  240: "OVERLORD: Raptor 1-1, hostile sweep over the range. Clear the air and come home.",
+  241: "OVERLORD: bandits hold their sweep line. They haven't seen you yet.",
+  242: "OVERLORD: tally the merge.",
+  243: "OVERLORD: picture clean. The sky is yours, Raptor.",
+  244: "OVERLORD: sweep expired and they know the range now. Tomorrow costs more.",
 };
 const OP_COMMS = {
   strike: [200, 201, 202, 203, 204],
   sead: [210, 211, 212, 213, 214],
   anti_ship: [220, 221, 222, 223, 224],
+  intercept: [230, 231, 232, 233, 234],
+  cap: [240, 241, 242, 243, 244],
 };
 
 // ---- seed mixing + save integrity ----
@@ -154,10 +166,19 @@ function gen(save) {
     need = 1;
   }
 
-  // fixed draw order (zone choice above is draw-free): type, tod, seed
-  const type = AFFORD_TYPE[zone.affords[rng.int(zone.affords.length)]];
+  // fixed draw order (zone choice above is draw-free): type, tod, seed,
+  // then the INC-5 air draws — ALWAYS drawn so the stream never forks on
+  // the branch (quantized-seed doctrine, D-069)
+  let type = AFFORD_TYPE[zone.affords[rng.int(zone.affords.length)]];
   const todH = preset.tods[rng.int(preset.tods.length)];
   const sortieSeed = rng.u32();
+  const airP = Math.min(0.15 + 0.05 * save.sortieIndex, 0.6); // §2 bandit-presence curve
+  const airRoll = rng.f();
+  const airKindDraw = rng.int(2);          // 0 intercept, 1 cap
+  const airCountDraw = 2 + rng.int(2);     // 2-3 airframes (guardrail headroom)
+  const isAir = airRoll < airP;
+  // tier from front-line pressure — deterministic, no draw
+  const airTier = Math.max(1, Math.min(4, 1 + Math.round(save.frontKm / 6) + (save.sortieIndex >= 12 ? 1 : 0)));
 
   const sp = preset.spawn, zc = zone.zoneCenter;
   const dx = zc.x - sp.x, dy = zc.y - sp.y, d = Math.hypot(dx, dy) || 1;
@@ -194,6 +215,47 @@ function gen(save) {
     ],
     scoreKm: SCORE_KM[type],
   };
+
+  // INC-5: air sortie override — the ground mission yields to the air war.
+  // Intercept: a raid runs down the axis at the blue airfield (denial zone).
+  // Cap: a fighter sweep holds mid-range waypoints until killed.
+  if (isAir) {
+    type = airKindDraw === 0 ? "intercept" : "cap";
+    const af = spec.airfield;
+    const bandits = [];
+    if (type === "intercept") {
+      for (let i = 0; i < airCountDraw; i++) {
+        const off = (i - (airCountDraw - 1) / 2) * 2400;
+        bandits.push({ kind: "drone", tier: Math.max(1, airTier - 1), x: af.x + off + 4000, y: af.y + 21000, z: 3000 + i * 300,
+          headingDeg: -90, speed: 180, tag: 5, side: 0, wpts: [[af.x + off * 0.3, af.y]] });
+      }
+      spec.objectives = [
+        { id: 1, kind: "destroy_tag", air: true, tag: 5, need: airCountDraw },
+        { id: 2, kind: "protect_tag", air: true, tag: 5, zone: { x: af.x, y: af.y, r: 3000 } },
+      ];
+      spec.winWhen = [1]; spec.loseWhen = [2];
+    } else {
+      for (let i = 0; i < airCountDraw; i++) {
+        const off = i * 2600;
+        bandits.push({ kind: "fighter", tier: airTier, x: zc.x + off, y: zc.y + 12000, z: 3800 + i * 400,
+          headingDeg: -90, speed: 240, tag: 6, side: 0, engage: true, // A3 opt-in (D-071)
+          wpts: [[zc.x + off, zc.y - 9000], [zc.x + off - 7000, zc.y - 9000], [zc.x + off - 7000, zc.y + 12000]] });
+      }
+      spec.objectives = [{ id: 1, kind: "destroy_tag", air: true, tag: 6, need: airCountDraw }];
+      spec.winWhen = [1]; spec.loseWhen = [];
+    }
+    const AL = OP_COMMS[type];
+    spec.type = type;
+    spec.bandits = bandits;
+    spec.comms = [
+      { on: TRIG.ON_START, lineId: AL[0] },
+      { on: TRIG.ON_TIME, t: 20, lineId: AL[1] },
+      { on: TRIG.ON_TIME, t: 60, lineId: AL[2] },
+      { on: TRIG.ON_OBJECTIVE_DONE, obj: 1, lineId: AL[3] },
+      { on: type === "intercept" ? TRIG.ON_OBJECTIVE_FAILED : TRIG.ON_TIME, ...(type === "intercept" ? { obj: 2 } : { t: TIME_LIMIT_S }), lineId: AL[4] },
+    ];
+    spec.scoreKm = SCORE_KM[type];
+  }
   return { spec, zone };
 }
 

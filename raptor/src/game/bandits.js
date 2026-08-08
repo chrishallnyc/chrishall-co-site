@@ -1,17 +1,45 @@
-// Bandits (phase 11 INC-4): the first enemy aircraft. One SimCore system,
-// rung A1 ONLY (CAMPAIGN-DESIGN.md Part A §1): INGRESS(0) -> ATTACK(1) ->
-// EGRESS(4) liner — waypoints from the spawn config, no reaction to the
-// player. Point-mass vehicle with the design's honest constraints (cruise/
-// vmax/turn caps/energy bleed/terrain floor), NOT the 6-DOF FM; A2-A4
-// replace the brain behind this same array interface later.
+// Bandits (phase 11 INC-4/INC-5): enemy aircraft. One SimCore system, rungs
+// A1-A3 (CAMPAIGN-DESIGN.md Part A §1): the full state ladder is
+// INGRESS(0) -> ATTACK(1) / EVADE(2) / ENGAGE(3) -> EGRESS(4).
+//   A1 liner: waypoints from the spawn config; ATTACK = raider dive + one
+//     SAM-clone at a tagged surface unit, then EGRESS.
+//   A2 survivor (all red bandits): EVADE on (a) a live player missile inside
+//     3 km and closing, or (b) the player inside the 1.5 km rear hemisphere
+//     (liners only — an ENGAGEd fighter evades on missiles alone, per §1).
+//     Tier reaction delay [1.6,1.2,0.9,0.6,0.4] s between trigger and break;
+//     break turn at tier gMax toward a jink heading resampled every
+//     2.6 - 0.4·tier s, for 4 + rng·3 s; then EGRESS (raider types), resume
+//     INGRESS, or re-ENGAGE (CAP with energy + the player in range).
+//   A3 threat (red fighters tier 2-4, EXPLICIT `engage: true` spawn opt-in —
+//     never inferred, so every INC-4 spawn config behaves exactly as
+//     shipped): ENGAGE = pursue-pointing under the same honest turn caps.
+//     Weapons: the in-file SAM-clone pool re-aimed at the player (tgtIdx
+//     sentinel -2; envelope 800..[-,-,2600,3000,3400] by tier, reload 15 s >
+//     missile life 6.5 s => ONE in flight per bandit by construction, dmg 45,
+//     guideTau 0.35 — the player's t15 late-break/run counter works
+//     unchanged) + a nose-mounted clone of the battlefield ZSU round pool
+//     (range 700, 25 rps, 0.8 s bursts, 8 mrad, dmg 12, ~15 deg nose cone).
+//     ENGAGE -> EVADE on inbound player missile; ENGAGE -> EGRESS below the
+//     0.6·cruise energy floor (extends to recover, re-engages at 0.9·cruise).
+//   TELEGRAPH (amendment 5): mslInboundPlayer() flips true ON the launch
+//     tick — main.js ORs it into the battlefield samInbound() MISSILE-banner
+//     path, so the warning is up seconds before any impact is possible; gun
+//     tracers fly ~0.7 s before a round can land. Warning precedes harm.
+//   A4 (BFM geometry, pairs, countermeasures) stays phase-9 completion.
 //
 // Determinism doctrine (design §0): flat Float64Array truth, SLOTS_B=14 per
-// bandit, decisions every 60 ticks in index order, and — A1 draws NO rng at
-// all (the liner is fully deterministic; sim.rng use, when A2 jink arrives,
-// is allowed only inside decision ticks). hash(h) folds every fixed-width
-// array, battlefield/match imul-FNV style, fixed length always. Bandits do
-// NOT reset() on sim.reset (battlefield precedent — batteries setSeed FIRST,
-// spawnFlight after).
+// bandit (+ a fixed-width SLOTS_AI sidecar for the A2/A3 clocks), decisions
+// every 60 ticks in index order. rng law: A1 draws none; A2/A3 DECISION rng
+// (jink headings, evade durations) draws ONLY inside decision ticks — the
+// break itself and all clock countdowns run rng-free in the integrator on
+// pre-drawn values, so draw order stays index-stable. Gun dispersion draws
+// at fire time, the battlefield AAA pattern verbatim (order stable: tick ->
+// bandit index -> round index). hash(h) folds every fixed-width array,
+// battlefield/match imul-FNV style, fixed length always. Bandits do NOT
+// reset() on sim.reset (battlefield precedent — batteries setSeed FIRST,
+// spawnFlight after). `bandits.player` attaches post-construction
+// (battlefield.player pattern; main.js wires it) — without it A2 has no
+// threat sense and A3 has no target, and all INC-4 behavior is unchanged.
 //
 // POOL DOCTRINE (D-065 amendment 3): all 8 bandit groups (each carrying the
 // drone/transport/fighter silhouette variants) AND the 8-missile pool are
@@ -35,8 +63,9 @@ import { softDiscTexture } from "../engine/sprites.js";
 export const MAX_BANDITS = 8;
 export const SLOTS_B = 14; // [x,y,z, vx,vy,vz, hp, state, stateT, wptIdx, cmdHdg, cmdPitch, cmdSpd, cooldown]
 
-// states (A1 subset; 2=EVADE / 3=ENGAGE are A2/A3 rungs)
-export const B_INGRESS = 0, B_ATTACK = 1, B_EGRESS = 4;
+// states — values are a data contract (INGRESS 0 / ATTACK 1 / EGRESS 4
+// shipped in INC-4 and t23 asserts them; EVADE/ENGAGE fill the 2/3 gap)
+export const B_INGRESS = 0, B_ATTACK = 1, B_EVADE = 2, B_ENGAGE = 3, B_EGRESS = 4;
 
 // kind ids: 0 drone, 1 transport, 2 fighter (ids-not-strings in sim state;
 // spawnFlight accepts the string names as config sugar)
@@ -56,6 +85,29 @@ const DECIDE_TICKS = 60;                        // 0.5 s decision cadence
 const WPT_R = 400;                              // waypoint capture radius (m, 2-D)
 const ATTACK_R = 8000;                          // raider commits to the dive inside this
 const LAUNCH_R = 2500;                          // one SAM-clone shot inside this, then EGRESS
+
+// ---- A2/A3 (INC-5) ----
+const SLOTS_AI = 6; // per-bandit clock sidecar: [reactT, jinkHdg, jinkT, evadeT, gunPhase, gunSpool]
+const REACT = [1.6, 1.2, 0.9, 0.6, 0.4];        // s, trigger -> break, by tier (design §1 A2)
+const JINK_BASE = 2.6, JINK_TIER = 0.4;         // jinkPeriod = 2.6 - 0.4·tier s
+const EVADE_MSL_R = 3000;                       // trigger (a): player missile inside 3 km and closing
+const EVADE_REAR_R = 1500;                      // trigger (b): player in the rear hemisphere
+const ENGAGE_R = 10000;                         // CAP commit radius (doc silent — chosen: HUD diamond is visible long before)
+const DISENGAGE_R = 15000;                      // supercruise escape is real: pursuit gives up out here
+const RELOAD_S = 15;                            // AAM reload; > BMSL.lifeS 6.5 => one in flight per bandit
+const AAM_ENV_MIN = 800;
+const AAM_ENV_MAX = [0, 0, 2600, 3000, 3400];   // by tier — tiers 0-1 never ENGAGE, never fire
+const BORE_COS = Math.cos(25 * Math.PI / 180);  // AAM boresight gate == the player's 9X seeker cone (the shot comes off the nose — readable + the turn-in fight stays honest)
+const TGT_PLAYER = -2;                          // msl tgtIdx sentinel: guiding on the player
+const PLAYER_R = 7.0;                           // player hit sphere (battlefield AAA value)
+// bandit gun = the battlefield ZSU pattern nose-mounted; no ground-mount
+// strain term (the airframe IS the mount), rounds inherit airframe velocity
+const BGUN = {
+  range: 700, muzzle: 970, rps: 25, burstS: 0.8, cooldownS: 1.4,
+  dispersionMrad: 8, dmg: 12, dragK: 0.0005, life: 1.2,
+};
+const GUN_CONE_COS = Math.cos(15 * Math.PI / 180); // ~15 deg nose cone
+const MAX_BR = 120; // round pool: 4 shooters (amendment-5 cap) x 25 rps x 1.2 s life
 
 // SAM-clone missile (battlefield.js SAM constants verbatim — same honest
 // integrator, re-aimed at a surface unit; its prop-nav is already the
@@ -86,10 +138,15 @@ export class Bandits {
     this.name = "bandits";
     this.terrain = terrain || null;
     this.battlefield = battlefield;
+    this.player = null;  // attached post-construction (battlefield.player pattern; main.js wires it)
     this.kills = 0;      // RED bandit deaths (battlefield.kills semantics)
     this.blueLosses = 0; // side-1 deaths — never touch kills (battlefield.blueLosses semantics)
-    this.launches = 0;   // SAM-clone launches (raider fired-exactly-once audit)
+    this.launches = 0;   // ALL SAM-clone launches (raider fired-exactly-once audit)
     this.mslHits = 0;    // SAM-clone impacts on surface units
+    this.launchesPlayer = 0; // A3: AAM launches at the player
+    this.mslHitsPlayer = 0;  // A3: AAM impacts on the player
+    this.gunRounds = 0;      // A3: bandit gun rounds fired
+    this.gunHitsPlayer = 0;  // A3: bandit gun impacts on the player
 
     // ---- flat sim truth (design §1 layout), all fixed width == fixed hash length ----
     this.state = new Float64Array(MAX_BANDITS * SLOTS_B);
@@ -105,9 +162,16 @@ export class Bandits {
     // deterministically at spawn (battlefield.paths Map precedent); the
     // hashed wptIdx cursor carries the progress.
     this.wpts = new Array(MAX_BANDITS).fill(null);
-    // missile pool (SAM state layout + tgtIdx)
+    // missile pool (SAM state layout + tgtIdx; tgtIdx -2 = the player)
     this.msl = new Float64Array(MAX_BMSL * MSL_SLOTS);
     this.mLive = new Uint8Array(MAX_BMSL);
+    // A2/A3 sidecars (fixed width == fixed hash length, design §0 rule 5)
+    this.engage = new Uint8Array(MAX_BANDITS);            // A3 CAP flag (red fighters tier 2-4, explicit opt-in)
+    this.ai = new Float64Array(MAX_BANDITS * SLOTS_AI);   // [reactT, jinkHdg, jinkT, evadeT, gunPhase, gunSpool]
+    for (let i = 0; i < MAX_BANDITS; i++) this.ai[i * SLOTS_AI] = -1; // reactT < 0 = idle
+    // bandit gun round pool (battlefield enemy-round layout: x,y,z,vx,vy,vz,age)
+    this.br = new Float64Array(MAX_BR * 7);
+    this.brLive = new Uint8Array(MAX_BR);
 
     // ---- render-side ----
     this._prev = new Float64Array(this.state);
@@ -145,6 +209,16 @@ export class Bandits {
     this.root.add(this.mslTrail);
     this.mslPuffs = [];
     this._mslLastPuff = new Float64Array(MAX_BMSL * 3);
+
+    // bandit gun tracers: the battlefield enemy-round streaks verbatim —
+    // hot red, unmistakably incoming (amendment-5 telegraph). Built + added
+    // AT CONSTRUCTION (pool doctrine; post-boot scene.add drops silently).
+    const rGeo = new THREE.BoxGeometry(0.4, 0.4, 6.0);
+    const rMat = new THREE.MeshBasicMaterial({ color: 0xff5a3c, transparent: true, opacity: 1.0, blending: THREE.AdditiveBlending, depthWrite: false });
+    this.brMesh = new THREE.InstancedMesh(rGeo, rMat, MAX_BR);
+    this.brMesh.frustumCulled = false;
+    this.brMesh.count = 0;
+    this.root.add(this.brMesh);
 
     this._m4 = new THREE.Matrix4();
     this._q = new THREE.Quaternion();
@@ -184,13 +258,28 @@ export class Bandits {
   aliveCount() { let c = 0; for (let i = 0; i < MAX_BANDITS; i++) if (this.alive(i)) c++; return c; }
   mslInbound() { for (let m = 0; m < MAX_BMSL; m++) if (this.mLive[m]) return true; return false; }
 
+  // TELEGRAPH hook (amendment 5): true while any bandit AAM is guiding on
+  // the player. main.js ORs this into battlefield.samInbound() for the
+  // MISSILE banner + RWR tone. Flips true ON the launch tick — the missile
+  // needs seconds to arrive, so the warning strictly precedes any harm.
+  mslInboundPlayer() {
+    for (let m = 0; m < MAX_BMSL; m++) {
+      if (this.mLive[m] && (this.msl[m * MSL_SLOTS + 11] | 0) === TGT_PLAYER) return true;
+    }
+    return false;
+  }
+
   // Activate pool slots (mirrors battlefield.spawnGroup): units =
   // [{ kind, tier, x, y, z, headingDeg, speed, tag, aceId, side,
-  //    wpts: [[x,y],...], attackTag? }]. kind: "drone"|"transport"|"fighter"
-  // or the numeric id. headingDeg follows the FM/debugCommand convention
-  // (0 = east / +x ENU, CCW positive, 90 = north). Deterministic assignment:
-  // first never-used slot in index order; -1 per unit when the pool is
-  // exhausted. Meshes were built at construction — this only re-poses/shows.
+  //    wpts: [[x,y],...], attackTag?, engage? }]. kind: "drone"|"transport"|
+  // "fighter" or the numeric id. headingDeg follows the FM/debugCommand
+  // convention (0 = east / +x ENU, CCW positive, 90 = north). Deterministic
+  // assignment: first never-used slot in index order; -1 per unit when the
+  // pool is exhausted. Meshes were built at construction — this only
+  // re-poses/shows. `engage: true` (INC-5) = CAP behavior: EXPLICIT opt-in,
+  // never inferred, honored only for red fighters tier 2-4 (tiers 0-1 are
+  // A2-capped by design §1) — every engage-less config flies exactly the
+  // INC-4 liner.
   spawnFlight(units) {
     const out = [];
     for (const u of units) {
@@ -220,6 +309,10 @@ export class Bandits {
       this.tag[slot] = (u.tag || 0) | 0;
       this.aceId[slot] = u.aceId ?? -1;
       this.attackTag[slot] = (u.attackTag || 0) | 0;
+      this.engage[slot] = u.engage && k === 2 && this.tier[slot] >= 2 && this.side[slot] === 0 ? 1 : 0;
+      const ai0 = slot * SLOTS_AI;
+      this.ai[ai0] = -1; this.ai[ai0 + 1] = 0; this.ai[ai0 + 2] = 0;
+      this.ai[ai0 + 3] = 0; this.ai[ai0 + 4] = -0.5; this.ai[ai0 + 5] = 0; // gun spin-up grace
       if (u.wpts && u.wpts.length) {
         const flat = new Float64Array(u.wpts.length * 2);
         for (let w = 0; w < u.wpts.length; w++) { flat[w * 2] = u.wpts[w][0]; flat[w * 2 + 1] = u.wpts[w][1]; }
@@ -296,12 +389,69 @@ export class Bandits {
     return Math.max(-0.12, Math.min(0.25, err * 0.004));
   }
 
-  // decision tick (every 60 ticks, index order). A1 draws no rng.
-  _decide(i) {
+  // A2 trigger (a): any live player missile inside 3 km whose velocity
+  // relative to this bandit is closing (proximity sense, not lock sense —
+  // the bandit sees a smoke trail, it doesn't read the seeker)
+  _missileThreat(i) {
+    const M = this.player && this.player.missiles;
+    if (!M) return false;
     const o = i * SLOTS_B;
+    const x = this.state[o], y = this.state[o + 1], z = this.state[o + 2];
+    const vx = this.state[o + 3], vy = this.state[o + 4], vz = this.state[o + 5];
+    for (let m = 0; m < M.live.length; m++) {
+      if (!M.live[m]) continue;
+      const mo = m * 9; // missiles.js SLOTS=9: x,y,z, vx,vy,vz, mass, age, tgt
+      const rx = x - M.r[mo], ry = y - M.r[mo + 1], rz = z - M.r[mo + 2];
+      if (Math.hypot(rx, ry, rz) > EVADE_MSL_R) continue;
+      const cx = M.r[mo + 3] - vx, cy = M.r[mo + 4] - vy, cz = M.r[mo + 5] - vz;
+      if (rx * cx + ry * cy + rz * cz > 0) return true; // relative velocity points at us
+    }
+    return false;
+  }
+
+  // A2 trigger (b): the player inside the 1.5 km rear hemisphere
+  _rearThreat(i) {
+    const P = this.player;
+    if (!P) return false;
+    const ps = P.fm.state, o = i * SLOTS_B;
+    const dx = ps[0] - this.state[o], dy = ps[1] - this.state[o + 1], dz = ps[2] - this.state[o + 2];
+    if (Math.hypot(dx, dy, dz) > EVADE_REAR_R) return false;
+    return dx * this.state[o + 3] + dy * this.state[o + 4] + dz * this.state[o + 5] < 0;
+  }
+
+  // decision tick (every 60 ticks, index order). rng law: A1 draws none;
+  // the A2/A3 draws below (jink heading, evade duration) happen ONLY here.
+  _decide(sim, i) {
+    const o = i * SLOTS_B, ai0 = i * SLOTS_AI;
     const st = this.state[o + 7];
     const x = this.state[o], y = this.state[o + 1], z = this.state[o + 2];
+    const P = this.player;
+    // ---- A2 threat watch (red only; EVADE never re-arms, ATTACK is a
+    // committed dive). On trigger, pre-draw the WHOLE evade here — break
+    // heading (a 60-180 deg banked break off the current heading) and
+    // duration — and start the tier reaction clock; the break itself fires
+    // rng-free in the integrator when the clock runs out.
+    if (P && this.side[i] === 0 && this.ai[ai0] < 0 && st !== B_EVADE && st !== B_ATTACK) {
+      const threat = this._missileThreat(i) ||
+        ((st === B_INGRESS || st === B_EGRESS) && this._rearThreat(i));
+      if (threat) {
+        const hdg = Math.atan2(this.state[o + 4], this.state[o + 3]);
+        const sgn = sim.rng.f() < 0.5 ? -1 : 1;
+        this.ai[ai0 + 1] = wrapPi(hdg + sgn * (Math.PI / 3 + sim.rng.f() * (2 * Math.PI / 3)));
+        this.ai[ai0 + 3] = 4 + sim.rng.f() * 3;
+        this.ai[ai0] = REACT[this.tier[i]];
+      }
+    }
     if (st === B_INGRESS) {
+      // A3 CAP commit: engage-flagged fighters break off the liner when the
+      // player is inside ENGAGE_R (flag pre-gated to red fighters tier 2-4)
+      if (this.engage[i] && P) {
+        const ps = P.fm.state;
+        if (Math.hypot(ps[0] - x, ps[1] - y, ps[2] - z) <= ENGAGE_R) {
+          this.state[o + 7] = B_ENGAGE; this.state[o + 8] = 0;
+          return;
+        }
+      }
       // advance waypoints (2-D capture)
       const w = this.wpts[i];
       let wi = this.state[o + 9] | 0;
@@ -343,7 +493,62 @@ export class Bandits {
         this.state[o + 10] = wrapPi(this.state[o + 10] + Math.PI); // break off the target
         this.state[o + 11] = this._followPitch(o);
       }
+    } else if (st === B_EVADE) {
+      // A2: hold the break — turn at tier gMax toward the pre-drawn jink
+      // heading, firewall, terrain-follow. Resample (rng) when the jink
+      // clock (run down per-tick by the integrator) has expired.
+      if (this.ai[ai0 + 2] <= 0) {
+        const hdg = Math.atan2(this.state[o + 4], this.state[o + 3]);
+        const sgn = sim.rng.f() < 0.5 ? -1 : 1;
+        this.ai[ai0 + 1] = wrapPi(hdg + sgn * (Math.PI / 3 + sim.rng.f() * (2 * Math.PI / 3)));
+        this.ai[ai0 + 2] = JINK_BASE - JINK_TIER * this.tier[i];
+      }
+      this.state[o + 10] = this.ai[ai0 + 1];
+      this.state[o + 11] = this._followPitch(o);
+      this.state[o + 12] = VMAX;
+    } else if (st === B_ENGAGE) {
+      // A3: pursue-pointing at the player under the same honest turn caps
+      // (the 420 dash guardrail still rules — supercruise always escapes)
+      const ps = P ? P.fm.state : null;
+      if (!ps) { this.state[o + 7] = B_INGRESS; this.state[o + 8] = 0; return; }
+      const dx = ps[0] - x, dy = ps[1] - y, dz = ps[2] - z;
+      const dh = Math.hypot(dx, dy), d = Math.hypot(dh, dz);
+      if (d > DISENGAGE_R) { // the player ran — CAP goes back to the liner
+        this.state[o + 7] = B_INGRESS; this.state[o + 8] = 0;
+        this.state[o + 12] = CRUISE[this.kind[i]];
+        return;
+      }
+      const v = Math.hypot(this.state[o + 3], this.state[o + 4], this.state[o + 5]);
+      if (v < 0.6 * CRUISE[this.kind[i]]) { // energy floor: extend to recover
+        this.state[o + 7] = B_EGRESS; this.state[o + 8] = 0;
+        this.state[o + 11] = this._followPitch(o);
+        return;
+      }
+      this.state[o + 10] = Math.atan2(dy, dx);
+      this.state[o + 11] = Math.max(-0.5, Math.min(0.45, Math.atan2(dz, dh)));
+      this.state[o + 12] = VMAX;
+      // AAM: tier envelope + boresight + reload (15 s > 6.5 s life => one in
+      // flight per bandit). The launch IS the telegraph: mslInboundPlayer()
+      // is true from this tick, seconds before any possible impact.
+      if (d >= AAM_ENV_MIN && d <= AAM_ENV_MAX[this.tier[i]] && this.state[o + 13] <= 0 && v > 1) {
+        const cosOff = (dx * this.state[o + 3] + dy * this.state[o + 4] + dz * this.state[o + 5]) / (d * v);
+        if (cosOff >= BORE_COS) {
+          this._launch(i, TGT_PLAYER);
+          this.state[o + 13] = RELOAD_S;
+        }
+      }
     } else { // B_EGRESS: hold heading, terrain-follow, fighters firewall it
+      // A3 recovery: an engage fighter that extended re-commits once its
+      // energy is back (design: re-engage at v > 0.9·cruise)
+      if (this.engage[i] && P) {
+        const ps = P.fm.state;
+        const v = Math.hypot(this.state[o + 3], this.state[o + 4], this.state[o + 5]);
+        if (v > 0.9 * CRUISE[this.kind[i]] &&
+            Math.hypot(ps[0] - x, ps[1] - y, ps[2] - z) <= ENGAGE_R) {
+          this.state[o + 7] = B_ENGAGE; this.state[o + 8] = 0;
+          return;
+        }
+      }
       this.state[o + 11] = this._followPitch(o);
       this.state[o + 12] = this.kind[i] === 2 ? VMAX : CRUISE[this.kind[i]];
     }
@@ -363,7 +568,45 @@ export class Bandits {
     r[so + 11] = tgt;
     this.mLive[slot] = 1;
     this.launches++;
+    if (tgt === TGT_PLAYER) this.launchesPlayer++;
     this._mslLastPuff.set([r[so], r[so + 1], r[so + 2]], slot * 3);
+  }
+
+  // A3 gun round spawn — the battlefield _aaaFire pattern from the nose:
+  // two-pass lead + gravity comp + 8 mrad perpendicular dispersion. No
+  // ground-mount strain term (the airframe tracks with its own nose), and
+  // rounds inherit the airframe velocity (the airframe IS the mount).
+  _gunFire(sim, i, ps) {
+    let slot = -1;
+    for (let j = 0; j < MAX_BR; j++) if (!this.brLive[j]) { slot = j; break; }
+    if (slot < 0) return;
+    const o = i * SLOTS_B;
+    const gx = this.state[o], gy = this.state[o + 1], gz = this.state[o + 2];
+    const d0 = Math.hypot(ps[0] - gx, ps[1] - gy, ps[2] - gz);
+    const tof = d0 / BGUN.muzzle;
+    const lead = 0.95 + (sim.rng.f() - 0.5) * 0.18; // good gunner, human wobble
+    const tx = ps[0] + ps[7] * tof * lead, ty = ps[1] + ps[8] * tof * lead;
+    let tz = ps[2] + ps[9] * tof * lead;
+    tz += 4.9 * tof * tof; // gravity drop compensation
+    let fx = tx - gx, fy = ty - gy, fz = tz - gz;
+    const fl = Math.hypot(fx, fy, fz) || 1; fx /= fl; fy /= fl; fz /= fl;
+    const mrad = BGUN.dispersionMrad / 1000;
+    const g1 = (sim.rng.f() + sim.rng.f() + sim.rng.f() - 1.5) * mrad;
+    const g2 = (sim.rng.f() + sim.rng.f() + sim.rng.f() - 1.5) * mrad;
+    let rx = fy, ry = -fx;
+    const rl = Math.hypot(rx, ry);
+    if (rl > 1e-4) { rx /= rl; ry /= rl; } else { rx = 1; ry = 0; }
+    const ux = ry * fz, uy = -rx * fz, uz = rx * fy - ry * fx;
+    fx += g1 * rx + g2 * ux; fy += g1 * ry + g2 * uy; fz += g2 * uz;
+    const fn = Math.hypot(fx, fy, fz); fx /= fn; fy /= fn; fz /= fn;
+    const ro = slot * 7, r = this.br;
+    r[ro] = gx + fx * 8; r[ro + 1] = gy + fy * 8; r[ro + 2] = gz + fz * 8;
+    r[ro + 3] = fx * BGUN.muzzle + this.state[o + 3];
+    r[ro + 4] = fy * BGUN.muzzle + this.state[o + 4];
+    r[ro + 5] = fz * BGUN.muzzle + this.state[o + 5];
+    r[ro + 6] = 0;
+    this.brLive[slot] = 1;
+    this.gunRounds++;
   }
 
   // surface-target velocity for the missile's moving-target prop-nav:
@@ -383,12 +626,47 @@ export class Bandits {
   tick(sim, dt) {
     this._prev.set(this.state);
     if (sim.tickCount % DECIDE_TICKS === 0) {
-      for (let i = 0; i < MAX_BANDITS; i++) if (this.live[i]) this._decide(i);
+      for (let i = 0; i < MAX_BANDITS; i++) if (this.live[i]) this._decide(sim, i);
     }
     // point-mass integration under the honest caps
     for (let i = 0; i < MAX_BANDITS; i++) {
       if (!this.live[i]) continue;
-      const o = i * SLOTS_B;
+      const o = i * SLOTS_B, ai0 = i * SLOTS_AI;
+      // ---- A2 clocks (red only; rng-free — everything was pre-drawn in the
+      // decision tick that saw the threat, so reaction windows are per-tick
+      // exact, not 0.5 s quantized) ----
+      if (this.side[i] === 0) {
+        if (this.ai[ai0] >= 0) { // reaction clock -> the break
+          this.ai[ai0] -= dt;
+          const s7 = this.state[o + 7];
+          if (this.ai[ai0] < 0 && s7 !== B_EVADE && s7 !== B_ATTACK) {
+            this.state[o + 7] = B_EVADE; this.state[o + 8] = 0;
+            this.state[o + 10] = this.ai[ai0 + 1];
+            this.state[o + 11] = this._followPitch(o);
+            this.state[o + 12] = VMAX;
+            this.ai[ai0 + 2] = JINK_BASE - JINK_TIER * this.tier[i];
+          }
+        }
+        if (this.state[o + 7] === B_EVADE) { // jink + duration clocks
+          this.ai[ai0 + 2] -= dt;
+          this.ai[ai0 + 3] -= dt;
+          if (this.ai[ai0 + 3] <= 0) {
+            // evade complete — route by role (design §1): raiders abort to
+            // EGRESS, liners resume INGRESS, CAP re-engages if it has the
+            // energy and the player is still in reach (else extends first)
+            let next = this.attackTag[i] !== 0 ? B_EGRESS : B_INGRESS;
+            if (this.engage[i] && this.player) {
+              const ps = this.player.fm.state;
+              if (Math.hypot(ps[0] - this.state[o], ps[1] - this.state[o + 1], ps[2] - this.state[o + 2]) <= ENGAGE_R) {
+                const ev = Math.hypot(this.state[o + 3], this.state[o + 4], this.state[o + 5]);
+                next = ev >= 0.6 * CRUISE[this.kind[i]] ? B_ENGAGE : B_EGRESS;
+              }
+            }
+            this.state[o + 7] = next; this.state[o + 8] = 0;
+            if (next === B_INGRESS) this.state[o + 12] = CRUISE[this.kind[i]];
+          }
+        }
+      }
       let vx = this.state[o + 3], vy = this.state[o + 4], vz = this.state[o + 5];
       let v = Math.hypot(vx, vy, vz) || 1;
       const hdg = Math.atan2(vy, vx);
@@ -424,11 +702,71 @@ export class Bandits {
       this.state[o + 3] = vx; this.state[o + 4] = vy; this.state[o + 5] = vz;
       this.state[o + 8] += dt;
       if (this.state[o + 13] > 0) this.state[o + 13] = Math.max(0, this.state[o + 13] - dt);
+      // ---- A3 bandit gun: the ZSU burst/spool state machine on the nose —
+      // ENGAGE only, range 700, ~15 deg cone. Dispersion rng draws at fire
+      // time (the AAA pattern; order stable: tick -> index -> round).
+      // Tracers fly ~0.7 s before a round can land — the gun's telegraph.
+      if (this.state[o + 7] === B_ENGAGE && this.player) {
+        const g0 = ai0 + 4; // [gunPhase, gunSpool]
+        const ps = this.player.fm.state;
+        const dx = ps[0] - x, dy = ps[1] - y, dz = ps[2] - z;
+        const d = Math.hypot(dx, dy, dz) || 1;
+        const vv = Math.hypot(vx, vy, vz) || 1;
+        const cosOff = (dx * vx + dy * vy + dz * vz) / (d * vv);
+        if (d > BGUN.range || d < 40 || cosOff < GUN_CONE_COS) {
+          this.ai[g0] = Math.min(this.ai[g0], -0.4); this.ai[g0 + 1] = 0;
+        } else {
+          this.ai[g0] += dt;
+          if (this.ai[g0] >= 0) {
+            if (this.ai[g0] > BGUN.burstS) { this.ai[g0] = -BGUN.cooldownS; this.ai[g0 + 1] = 0; }
+            else {
+              this.ai[g0 + 1] += BGUN.rps * dt;
+              while (this.ai[g0 + 1] >= 1) {
+                this.ai[g0 + 1] -= 1;
+                this._gunFire(sim, i, ps);
+              }
+            }
+          }
+        }
+      }
     }
-    // ---- SAM-clone missiles vs surface units (battlefield SAM integrator) ----
+    // ---- bandit rounds vs the player (the battlefield enemy-round loop:
+    // drag + gravity ballistics, segment test against the 7 m sphere) ----
+    const pl = this.player;
+    const pps = pl ? pl.fm.state : null;
+    for (let j = 0; j < MAX_BR; j++) {
+      if (!this.brLive[j]) continue;
+      const ro = j * 7, r = this.br;
+      const rv = Math.hypot(r[ro + 3], r[ro + 4], r[ro + 5]);
+      const kk = 1 - BGUN.dragK * dt * rv;
+      r[ro + 3] *= kk; r[ro + 4] *= kk; r[ro + 5] = r[ro + 5] * kk - 9.81 * dt;
+      const x0 = r[ro], y0 = r[ro + 1], z0 = r[ro + 2];
+      r[ro] += r[ro + 3] * dt; r[ro + 1] += r[ro + 4] * dt; r[ro + 2] += r[ro + 5] * dt;
+      r[ro + 6] += dt;
+      if (pps) {
+        const cx = pps[0] - x0, cy = pps[1] - y0, cz = pps[2] - z0;
+        const sx = r[ro] - x0, sy = r[ro + 1] - y0, sz = r[ro + 2] - z0;
+        const l2 = sx * sx + sy * sy + sz * sz;
+        let tt = l2 > 0 ? (cx * sx + cy * sy + cz * sz) / l2 : 0;
+        tt = tt < 0 ? 0 : tt > 1 ? 1 : tt;
+        const qx = cx - sx * tt, qy = cy - sy * tt, qz = cz - sz * tt;
+        if (qx * qx + qy * qy + qz * qz <= PLAYER_R * PLAYER_R) {
+          this.brLive[j] = 0;
+          this.gunHitsPlayer++;
+          pl.takeHit(BGUN.dmg);
+          continue;
+        }
+      }
+      const rgh = this.terrain ? this.terrain.heightAt(r[ro], r[ro + 1]) : 0;
+      if (r[ro + 2] <= Math.max(rgh, 0) || r[ro + 6] > BGUN.life) this.brLive[j] = 0;
+    }
+    // ---- SAM-clone missiles (battlefield SAM integrator) vs surface units
+    // (A1 raiders) or the player (A3, tgtIdx sentinel -2 — the same
+    // moving-target prop-nav; the player is just v_tgt = the jet) ----
     const bf = this.battlefield;
     const mdot = BMSL.propKg / BMSL.burnS;
     const tv = this._tv || (this._tv = new Float64Array(3));
+    const tp = this._tp || (this._tp = new Float64Array(3));
     for (let s = 0; s < MAX_BMSL; s++) {
       if (!this.mLive[s]) continue;
       const so = s * MSL_SLOTS, r = this.msl;
@@ -443,12 +781,25 @@ export class Bandits {
       vx += (vx / v) * acc * dt; vy += (vy / v) * acc * dt; vz += (vz / v) * acc * dt - 9.81 * dt;
       const t = r[so + 11] | 0;
       let Rm = Infinity;
-      if (bf && t >= 0 && bf.state[t * 5 + 4] > 0) {
+      // target fetch: the player (A3) or a battlefield unit (A1 raider).
+      // pos/vel land in tp/tv; the PN math below is identical either way.
+      let track = false;
+      if (t === TGT_PLAYER) {
+        if (pps) {
+          tp[0] = pps[0]; tp[1] = pps[1]; tp[2] = pps[2];
+          tv[0] = pps[7]; tv[1] = pps[8]; tv[2] = pps[9];
+          track = true;
+        }
+      } else if (bf && t >= 0 && bf.state[t * 5 + 4] > 0) {
         const to = t * 5;
-        // prop-nav vs the (possibly driving) unit: dR/dt = v_tgt - v_msl
-        const Rx = bf.state[to] - r[so], Ry = bf.state[to + 1] - r[so + 1], Rz = bf.state[to + 2] - r[so + 2];
-        Rm = Math.hypot(Rx, Ry, Rz) || 1;
+        tp[0] = bf.state[to]; tp[1] = bf.state[to + 1]; tp[2] = bf.state[to + 2];
         this._tgtVel(t, tv);
+        track = true;
+      }
+      if (track) {
+        // prop-nav vs the moving target: dR/dt = v_tgt - v_msl
+        const Rx = tp[0] - r[so], Ry = tp[1] - r[so + 1], Rz = tp[2] - r[so + 2];
+        Rm = Math.hypot(Rx, Ry, Rz) || 1;
         const dRx = tv[0] - vx, dRy = tv[1] - vy, dRz = tv[2] - vz;
         const Vc = -(Rx * dRx + Ry * dRy + Rz * dRz) / Rm;
         const wx = (Ry * dRz - Rz * dRy) / (Rm * Rm);
@@ -474,19 +825,20 @@ export class Bandits {
       r[so + 3] = vx; r[so + 4] = vy; r[so + 5] = vz;
       r[so] += vx * dt; r[so + 1] += vy * dt; r[so + 2] += vz * dt;
       r[so + 6] = age + dt;
-      if (bf && t >= 0 && bf.state[t * 5 + 4] > 0) {
-        const to = t * 5;
-        Rm = Math.hypot(bf.state[to] - r[so], bf.state[to + 1] - r[so + 1], bf.state[to + 2] - r[so + 2]);
+      if (track) {
+        Rm = Math.hypot(tp[0] - r[so], tp[1] - r[so + 1], tp[2] - r[so + 2]);
         if (Rm < BMSL.proxM) {
           this.mLive[s] = 0;
-          this.mslHits++;
-          bf.damage(t, BMSL.dmg);
+          if (t === TGT_PLAYER) { this.mslHitsPlayer++; pl.takeHit(BMSL.dmg); }
+          else { this.mslHits++; bf.damage(t, BMSL.dmg); }
           continue;
         }
       }
       const gh = this.terrain ? this.terrain.heightAt(r[so], r[so + 1]) : 0;
       if (r[so + 2] <= Math.max(gh, 0)) {
-        if (bf && t >= 0 && bf.state[t * 5 + 4] > 0 && Rm < BMSL.blastM) { this.mslHits++; bf.damage(t, BMSL.dmg); }
+        // blastM ground-contact grace is a SURFACE-target fuse behavior —
+        // a player-targeted round that meets the dirt just dies
+        if (t >= 0 && track && Rm < BMSL.blastM) { this.mslHits++; bf.damage(t, BMSL.dmg); }
         this.mLive[s] = 0;
       } else if (age > BMSL.lifeS) this.mLive[s] = 0;
     }
@@ -507,7 +859,13 @@ export class Bandits {
     for (let i = 0; i < MAX_BANDITS; i++) H(this.aceId[i]);
     for (let i = 0; i < MAX_BANDITS; i++) H(this.attackTag[i]);
     for (let i = 0; i < MAX_BMSL; i++) H(this.mLive[i]);
+    // INC-5 sidecars — appended folds, all fixed width (no length changes)
+    for (let i = 0; i < this.ai.length; i++) H(this.ai[i]);
+    for (let i = 0; i < MAX_BANDITS; i++) H(this.engage[i]);
+    for (let i = 0; i < this.br.length; i++) H(this.br[i]);
+    for (let i = 0; i < MAX_BR; i++) H(this.brLive[i]);
     H(this.kills); H(this.blueLosses); H(this.launches); H(this.mslHits);
+    H(this.launchesPlayer); H(this.mslHitsPlayer); H(this.gunRounds); H(this.gunHitsPlayer);
     return h;
   }
 
@@ -549,6 +907,19 @@ export class Bandits {
     }
     this.mslMesh.count = ns;
     this.mslMesh.instanceMatrix.needsUpdate = true;
+    // bandit gun tracers along velocity (battlefield enemy-round pattern)
+    let nr = 0;
+    for (let j = 0; j < MAX_BR; j++) {
+      if (!this.brLive[j]) continue;
+      const ro = j * 7, r = this.br;
+      this._dir.set(r[ro + 3], r[ro + 5], r[ro + 4]).normalize();
+      this._q.setFromUnitVectors(new THREE.Vector3(0, 0, 1), this._dir);
+      this._m4.makeRotationFromQuaternion(this._q);
+      this._m4.setPosition(r[ro], r[ro + 2], r[ro + 1]);
+      this.brMesh.setMatrixAt(nr++, this._m4);
+    }
+    this.brMesh.count = nr;
+    this.brMesh.instanceMatrix.needsUpdate = true;
     let np = 0;
     const pdt = 1 / 60; // visual aging; cheap approximation (player.js precedent)
     for (const pf of this.mslPuffs) {

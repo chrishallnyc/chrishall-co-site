@@ -27,7 +27,7 @@ export const TRIG = { ON_START: 0, ON_OBJECTIVE_DONE: 1, ON_TIME: 2, ON_OBJECTIV
 // / survive_until; protect_tag (ESCORT, INC-4) and kill_ace (INC-6) are
 // validate-rejected until their increments land.
 export const OBJ_KIND = { destroy_tag: 0, protect_tag: 1, reach_zone: 2, survive_until: 3, kill_ace: 4 };
-const INC1_KINDS = new Set(["destroy_tag", "reach_zone", "survive_until"]);
+const INC1_KINDS = new Set(["destroy_tag", "reach_zone", "survive_until", "protect_tag"]); // protect_tag unlocked INC-5 (kill_ace: INC-6)
 
 // numeric lineId -> subtitle text. RENDER-SIDE ONLY — the Script's comms ring
 // stores ids; the HUD looks text up here; phase 13 bakes VO onto the same
@@ -46,6 +46,16 @@ export const COMMS_LINES = {
   112: "RAPTOR 1-1: Contact — dish and launchers on the flat. Engaging.",
   113: "OVERLORD: Site's down and blind. Magnum work, Raptor 1-1 — RTB when ready.",
   114: "OVERLORD: Negative effect — the site is still radiating and we're out of time. RTB.",
+  120: "OVERLORD: Raptor 1-1, POP-UP GROUP bullseye north — three-ship drone raid inbound to your field. Splash them before they cross the fence.",
+  121: "OVERLORD: raid is through the mountains, tracking south. You are cleared to arm.",
+  122: "OVERLORD: good kill. Raid thinning.",
+  123: "OVERLORD: raid destroyed. The field owes you a drink, Raptor.",
+  124: "OVERLORD: they're over the fence — field is taking hits. RTB.",
+  130: "OVERLORD: Raptor 1-1, two hostile fighters sweeping the range. Clear the air.",
+  131: "OVERLORD: bandits are aware of you. Watch your six.",
+  132: "OVERLORD: one down. One to go.",
+  133: "OVERLORD: picture clean — the sky is yours.",
+  134: "OVERLORD: sweep expired. They'll be back tomorrow.",
 };
 
 // Two authored specs on the CURRENT NELLIS standing placements
@@ -110,6 +120,68 @@ export const BUILTIN = {
     ],
     scoreKm: 2.0,
   },
+
+  // INTERCEPT (INC-5): a three-drone raid ingresses toward the airfield; kill
+  // them all before any crosses the fence. Zone denial = protect_tag + zone.
+  "nellis-intercept-01": {
+    v: 1, kind: "authored",
+    front: "NELLIS",
+    type: "intercept",
+    seed: 0x1497c3,
+    todH: 9.0, weatherIdx: 0,
+    playerSpawn: { x: -3000, y: -7500, alt: 3200, headingDeg: 100, speed: 240 },
+    airfield: { x: -3000, y: -8700, r: 900 },
+    units: [],
+    paths: {},
+    bandits: [
+      { kind: "drone", tier: 1, x: 2000, y: 14000, z: 3200, headingDeg: -90, speed: 180, tag: 5, side: 0, wpts: [[-1500, -8700]] },
+      { kind: "drone", tier: 1, x: -500, y: 15500, z: 3400, headingDeg: -90, speed: 180, tag: 5, side: 0, wpts: [[-3000, -8700]] },
+      { kind: "drone", tier: 1, x: -3200, y: 14500, z: 3000, headingDeg: -90, speed: 180, tag: 5, side: 0, wpts: [[-4500, -8700]] },
+    ],
+    objectives: [
+      { id: 1, kind: "destroy_tag", air: true, tag: 5, need: 3 },
+      { id: 2, kind: "protect_tag", air: true, tag: 5, zone: { x: -3000, y: -8700, r: 3000 } },
+    ],
+    winWhen: [1], loseWhen: [2],
+    timeLimitS: 480,
+    comms: [
+      { on: TRIG.ON_START, lineId: 120 },
+      { on: TRIG.ON_TIME, t: 25, lineId: 121 },
+      { on: TRIG.ON_OBJECTIVE_DONE, obj: 1, lineId: 123 },
+      { on: TRIG.ON_OBJECTIVE_FAILED, obj: 2, lineId: 124 },
+    ],
+    scoreKm: 2.0,
+  },
+
+  // CAP (INC-5): clear two fighters off the range. They fight back once the
+  // A3 rung is live; the objective grammar doesn't care either way.
+  "nellis-cap-01": {
+    v: 1, kind: "authored",
+    front: "NELLIS",
+    type: "cap",
+    seed: 0xca9001,
+    todH: 15.5, weatherIdx: 0,
+    playerSpawn: { x: 0, y: -6000, alt: 3600, headingDeg: 90, speed: 240 },
+    airfield: { x: -3000, y: -8700, r: 900 },
+    units: [],
+    paths: {},
+    bandits: [
+      { kind: "fighter", tier: 2, x: 4000, y: 9000, z: 3800, headingDeg: -90, speed: 240, tag: 6, side: 0, engage: true, wpts: [[4000, -14000], [-6000, -14000], [-6000, 9000]] },
+      { kind: "fighter", tier: 2, x: 6500, y: 10500, z: 4200, headingDeg: -90, speed: 240, tag: 6, side: 0, engage: true, wpts: [[6500, -14000], [-8000, -14000], [-8000, 10500]] },
+    ],
+    objectives: [
+      { id: 1, kind: "destroy_tag", air: true, tag: 6, need: 2 },
+    ],
+    winWhen: [1], loseWhen: [],
+    timeLimitS: 600,
+    comms: [
+      { on: TRIG.ON_START, lineId: 130 },
+      { on: TRIG.ON_TIME, t: 25, lineId: 131 },
+      { on: TRIG.ON_OBJECTIVE_DONE, obj: 1, lineId: 133 },
+      { on: TRIG.ON_TIME, t: 600, lineId: 134 },
+    ],
+    scoreKm: 2.0,
+  },
 };
 
 // ---- loader ----
@@ -146,7 +218,14 @@ function validate(spec) {
   // INC-1: standing battlefield only (see header)
   if (!Array.isArray(spec.units) || spec.units.length) bad("INC-1: units must be [] (spawnGroup lands in INC-2)");
   if (!spec.paths || typeof spec.paths !== "object" || Object.keys(spec.paths).length) bad("INC-1: paths must be {} (convoy drive lands in INC-2)");
-  if (!Array.isArray(spec.bandits) || spec.bandits.length) bad("INC-1: bandits must be [] (air lands in INC-4)");
+  if (!Array.isArray(spec.bandits)) bad("bandits must be an array");
+  if (spec.bandits.length > 8) bad("more than 8 bandits (pool cap)");
+  for (const b of spec.bandits) { // INC-5: air raids are declarative data
+    if (!b || !num(b.x) || !num(b.y) || !num(b.z) || !num(b.headingDeg) || !num(b.speed)) bad("bandit needs numeric {x,y,z,headingDeg,speed}");
+    if (!num(b.tier) || b.tier < 0 || b.tier > 4) bad("bandit tier must be 0..4");
+    if (b.tag !== undefined && !num(b.tag)) bad("bandit tag must be numeric");
+    if (b.wpts !== undefined && (!Array.isArray(b.wpts) || !b.wpts.every((w) => Array.isArray(w) && w.length === 2 && w.every(num)))) bad("bandit wpts must be [[x,y],...]");
+  }
 
   if (!Array.isArray(spec.objectives) || !spec.objectives.length) bad("objectives must be a non-empty array");
   if (spec.objectives.length > MAX_OBJECTIVES) bad(`more than ${MAX_OBJECTIVES} objectives`);
@@ -156,10 +235,22 @@ function validate(spec) {
     if (ids.has(o.id)) bad(`duplicate objective id ${o.id}`);
     ids.add(o.id);
     if (OBJ_KIND[o.kind] === undefined) bad(`objective ${o.id}: unknown kind "${o.kind}"`);
-    if (!INC1_KINDS.has(o.kind)) bad(`objective ${o.id}: kind "${o.kind}" is not in INC-1 (protect_tag: INC-4, kill_ace: INC-6)`);
+    if (!INC1_KINDS.has(o.kind)) bad(`objective ${o.id}: kind "${o.kind}" not yet implemented (kill_ace: INC-6)`);
     if (o.kind === "destroy_tag") {
-      if (!Array.isArray(o.bfIdx) || !o.bfIdx.length || !o.bfIdx.every(num)) bad(`objective ${o.id}: destroy_tag needs a non-empty numeric bfIdx list (INC-1 tag stand-in)`);
-      if (!num(o.need) || o.need < 1 || o.need > o.bfIdx.length) bad(`objective ${o.id}: need must be 1..bfIdx.length`);
+      if (o.air) { // INC-5: bandit objective — tag selects spawned air
+        if (!num(o.tag)) bad(`objective ${o.id}: air destroy_tag needs a numeric tag`);
+        if (!num(o.need) || o.need < 1) bad(`objective ${o.id}: need must be >= 1`);
+      } else {
+        if (!Array.isArray(o.bfIdx) || !o.bfIdx.length || !o.bfIdx.every(num)) bad(`objective ${o.id}: destroy_tag needs a non-empty numeric bfIdx list (INC-1 tag stand-in)`);
+        if (!num(o.need) || o.need < 1 || o.need > o.bfIdx.length) bad(`objective ${o.id}: need must be 1..bfIdx.length`);
+      }
+    } else if (o.kind === "protect_tag") {
+      // ground: bfIdx list; air: tag. Optional zone turns it into zone denial
+      // (fails when a tagged LIVE bandit enters the zone) — §2's 5-kind
+      // vocabulary held by widening, not growing.
+      if (o.air) { if (!num(o.tag)) bad(`objective ${o.id}: air protect_tag needs a numeric tag`); }
+      else if (!Array.isArray(o.bfIdx) || !o.bfIdx.length || !o.bfIdx.every(num)) bad(`objective ${o.id}: protect_tag needs bfIdx (or air+tag)`);
+      if (o.zone && (!num(o.zone.x) || !num(o.zone.y) || !num(o.zone.r) || o.zone.r <= 0)) bad(`objective ${o.id}: zone needs {x,y,r>0}`);
     } else if (o.kind === "reach_zone") {
       const z = o.zone;
       if (!z || !num(z.x) || !num(z.y) || !num(z.r) || z.r <= 0) bad(`objective ${o.id}: reach_zone needs zone {x,y,r>0}`);
