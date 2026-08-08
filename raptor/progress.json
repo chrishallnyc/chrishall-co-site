@@ -1,11 +1,15 @@
 {
- "updated": "2026-08-07T22:45:00-07:00",
- "version": "v0.23.0",
- "now": "v0.23.0 shadows shipped; campaign architecture chosen (judge panel) \u2014 building the war next",
+ "updated": "2026-08-07T23:20:00-07:00",
+ "version": "v0.24.0",
+ "now": "v0.24.0 THE FIRST SORTIE \u2014 real missions with objectives, radio calls, win/lose; dynamic campaign next",
  "nowPhase": 12,
  "paused": false,
- "pushes": 54,
+ "pushes": 55,
  "ledger": [
+  {
+   "v": "v0.24.0",
+   "what": "THE FIRST SORTIE \u2014 mission system: objectives HUD, radio comms, STRIKE + SEAD sorties over Nevada (?mission=), deterministic replays"
+  },
   {
    "v": "v0.23.0",
    "what": "SHADOWS OF THE WAR \u2014 cloud shadows now cast by the real volumetric cloud field (dappled desert, tower shadows on the reef)"
@@ -103,13 +107,13 @@
   {
    "n": 10,
    "name": "Match modes & dynamic campaign",
-   "pct": 65,
+   "pct": 72,
    "note": "tickets/respawns/rearm/boundary/win-lose live; Daily Operation seeds + wingmen later"
   },
   {
    "n": 11,
    "name": "Authored campaign (30+ sorties)",
-   "pct": 0,
+   "pct": 8,
    "note": ""
   },
   {

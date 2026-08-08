@@ -17,7 +17,7 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.21.0";
+const VERSION = "0.24.0";
 const PHASE = 12;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
@@ -238,10 +238,30 @@ async function boot() {
     if (battlefield && flags.get("noaaa") !== "1") battlefield.player = player;
   }
   // PHASE 10: the war has rules (?nomatch=1 keeps the free-flight sandbox)
-  let match = null;
+  // PHASE 11 INC-1: ?mission=<name> loads a MissionSpec; the Script system
+  // ticks AFTER player (observes the completed combat tick), BEFORE match
+  // (which scores it). Script owns win/lose; match keeps tickets/rearm/boundary.
+  let match = null, script = null, missionData = null;
   if (player && battlefield && flags.get("nomatch") !== "1") {
     const { Match } = await import("./game/match.js");
     match = new Match(battlefield, player);
+    const mname = flags.get("mission");
+    if (mname) {
+      try {
+        const M = await import("./game/missions.js");
+        const { Script } = await import("./game/script.js");
+        const spec = M.loadMission(mname);
+        script = new Script(spec, { battlefield, player, match, terrain });
+        match.scripted = true;
+        missionData = { spec, lines: M.COMMS_LINES };
+        if (spec.playerSpawn) {
+          const ps = spec.playerSpawn; // mission spawn is also the respawn point
+          player.spawn = { x: ps.x, y: ps.y, alt: ps.alt, headingRad: (ps.headingDeg || 0) * Math.PI / 180, speed: ps.speed || 200 };
+          player.debugCommand({ pos: ps, throttle: 0.8 });
+        }
+        sim.addSystem(script);
+      } catch (err) { console.warn("mission unavailable, quick match stays:", err && err.message); }
+    }
     sim.addSystem(match);
   }
   // AB plume + wingtip vortices (nests under jetGroup — post-boot top-level
@@ -408,10 +428,49 @@ async function boot() {
           ctx.fillText(title, w / 2, h * 0.42);
           ctx.font = "13px ui-monospace, Menlo, monospace";
           ctx.fillStyle = "#e8e6df";
-          const sub = match.over > 0 ? "the ground war is broken — every target destroyed" : "no aircraft remaining — the war goes on without you";
+          const sub = script ? (match.over > 0 ? "mission complete" : "mission failed")
+            : match.over > 0 ? "the ground war is broken — every target destroyed" : "no aircraft remaining — the war goes on without you";
           ctx.lineWidth = 3; ctx.strokeText(sub, w / 2, h * 0.42 + 34);
           ctx.fillText(sub, w / 2, h * 0.42 + 34);
         }
+      }
+
+      // PHASE 11 INC-1: mission objectives (top-left) + comms feed (bottom-left)
+      if (script && missionData && (!match || match.over === 0)) {
+        ctx.textAlign = "left";
+        const VERB = { destroy_tag: "DESTROY", reach_zone: "REACH", survive_until: "HOLD", protect_tag: "PROTECT", kill_ace: "KILL" };
+        let oy = 92;
+        ctx.font = "10px ui-monospace, Menlo, monospace";
+        ctx.lineWidth = 3; ctx.strokeStyle = "rgba(0,10,0,0.8)";
+        for (const o of script.objectiveSummary()) {
+          const mark = o.done ? "✓" : o.failed ? "✗" : "◦";
+          const count = o.need > 1 ? ` ${o.count}/${o.need}` : "";
+          const line = `${mark} ${VERB[o.kind] || o.kind.toUpperCase()}${count}`;
+          ctx.strokeText(line, 18, oy);
+          ctx.fillStyle = o.done ? "rgba(155,232,155,0.55)" : o.failed ? "#ff5a3c" : "#9be89b";
+          ctx.fillText(line, 18, oy);
+          oy += 15;
+        }
+        const nowS = performance.now() / 1000;
+        if (script._commsShown === undefined) script._commsShown = new Map(); // render-side age memory
+        let cy = h - 64;
+        const cx = 96; // clear of the G/M/AOA block in the corner
+        for (const c of script.readComms().slice(0, 3)) {
+          const key = c.lineId + ":" + c.t;
+          if (!script._commsShown.has(key)) script._commsShown.set(key, nowS);
+          const age = nowS - script._commsShown.get(key);
+          if (age > 9) continue;
+          const text = missionData.lines[c.lineId];
+          if (!text) continue;
+          ctx.globalAlpha = Math.min(1, Math.max(0, (9 - age) / 2));
+          ctx.font = "11px ui-monospace, Menlo, monospace";
+          ctx.strokeText("» " + text, cx, cy);
+          ctx.fillStyle = "#cfe8cf";
+          ctx.fillText("» " + text, cx, cy);
+          ctx.globalAlpha = 1;
+          cy -= 16;
+        }
+        ctx.textAlign = "center";
       }
 
       // MISSILE warning (over everything but the end card)
@@ -492,7 +551,7 @@ async function boot() {
   const kcPos = new THREE.Vector3();
 
   Object.assign(state, {
-    sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud, player, battlefield, match,
+    sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud, player, battlefield, match, script,
     kc: () => killCam,
     cloudImmersion: () => clouds.immersion,
     setTimeOfDay: (h) => atmosphere.setTime(h),

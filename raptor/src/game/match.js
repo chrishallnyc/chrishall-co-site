@@ -44,6 +44,8 @@ export class Match {
     this.boundaryT = 0;       // seconds outside the square
     this.outside = false;
     this.over = 0;            // 0 = live, 1 = victory, -1 = defeat
+    this.scripted = false;    // a mission Script owns win/lose (D-065 amendment 2:
+                              // air-only missions would seed red=0 = tick-1 victory)
     this._boundaryAcc = 0;    // fractional hull drain accumulator
   }
 
@@ -101,9 +103,10 @@ export class Match {
       }
     } else { this.boundaryT = 0; this._boundaryAcc = 0; }
 
-    // outcome
-    if (this.red <= 0) this.over = 1;
-    else if (this.blue <= 0) this.over = -1;
+    // outcome: lives ending it is universal; the ground-war victory rule is
+    // quick-match only (scripted missions decide victory via objectives)
+    if (this.blue <= 0) this.over = -1;
+    else if (!this.scripted && this.red <= 0) this.over = 1;
   }
 
   hash(h) {
