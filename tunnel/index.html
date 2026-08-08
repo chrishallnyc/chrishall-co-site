@@ -7,11 +7,17 @@
 <meta name="description" content="a live wind tunnel is being built here — by a machine, in the open.">
 <meta name="robots" content="noindex">
 <link rel="canonical" href="https://tunnel.chall.net/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tunnel.chall.net/">
+<meta property="og:title" content="CHALL TUNNEL — a wind tunnel, live in your browser">
+<meta property="og:description" content="a real d2q9 solver running on your gpu — every number measured or cited.">
+<meta property="og:image" content="https://tunnel.chall.net/og.png">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#f6f4ee">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f6f4ee'/%3E%3Cpath d='M1.5 19.4 L30.5 16.4' stroke='%23989690' stroke-width='1'/%3E%3Cpath d='M3.5 19 C6.5 12.6 13.5 10.6 19.5 12 C24.5 13.2 28 15.4 29 16.6 C26 18.2 18.5 20.6 11.5 20.9 C7.5 21 4.5 20.3 3.5 19 Z' fill='%2318181c'/%3E%3Ccircle cx='4.2' cy='19' r='2.4' fill='%23e8b46f'/%3E%3C/svg%3E">
-<!-- CHALL TUNNEL v0.5.0 · phase 5 — TEST 006: the A-10 enters (FM 44-80 master, NACA 6716 exact WING) + THE PAIR live ([ ] keep-air plane cycling, Reynolds-flagship gap line, pair kicker) · on phase 4 (pressure view, ?dir= sheets) + test 001 (F-16 TP-1538 master, WING + gap line, POWER) -->
+<!-- CHALL TUNNEL v0.6.0 · phase 6 — THE DIRECTION LOCK: riso (owner GO 2026-08-08; the manual's voice prints in the second ink by default; direction machinery deleted) + METHODS in-page (nine sections, CLAIM-ONE v2) + THE HANGAR WALL opens (datum-wall bank index: TEST 001 + TEST 006 drawn at ladder weights, R-001/R-002 stubs) · on phase 5 (A-10 + THE PAIR) + phase 4 (pressure view) + test 001 (F-16, POWER) -->
 <style>
-:root { --bg:#f6f4ee; --ink:#18181c; --mid:#56565e; --dim:#69675f; --hair:#989690; --acc:#e8b46f; --accd:#8a5d0c; }
+:root { --bg:#f6f4ee; --ink:#18181c; --mid:#56565e; --dim:#69675f; --hair:#989690; --acc:#e8b46f; --accd:#8a5d0c; --spec:#255079; }
 * { margin:0; padding:0; box-sizing:border-box; }
 html,body { background:var(--bg); height:100%; }
 body {
@@ -73,6 +79,11 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 #speclabel { position:fixed; z-index:2; text-align:right; }
 #speclabel .sl1 { font-size:10px; letter-spacing:2px; color:var(--mid); text-transform:uppercase; }
 #speclabel .sl2 { margin-top:2px; font-size:9px; letter-spacing:1px; color:var(--dim); }
+/* THE DIRECTION LOCK — RISO (owner GO, DECISIONS 2026-08-08): the manual's
+   voice prints in the second ink BY DEFAULT. Spec-voice matter only — SPEC
+   kickers, the gap line's spec half, the provenance line. The measured voice
+   is NEVER blue (two inks, one sheet, never blended); amber keeps its job. */
+.spec .k, #gapsp, #speclabel .sl2 { color:var(--spec); }
 #power { margin-top:8px; }
 #pscale { display:block; width:208px; height:30px; cursor:ew-resize; touch-action:none; }
 #viewsrow { margin-top:6px; }
@@ -94,6 +105,54 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 .cline { color:var(--ink); }
 .cread { margin-top:8px; color:var(--dim); letter-spacing:.5px; }
 .cwatch { display:inline-block; margin-top:8px; font-size:10px; letter-spacing:.5px; }
+.doors { margin-top:8px; font-size:10px; letter-spacing:.5px; color:var(--hair); }
+.door {
+  background:none; border:0; padding:2px 4px; margin:0;
+  font:inherit; letter-spacing:.5px; color:var(--dim); cursor:pointer;
+}
+.door:hover { color:var(--ink); text-decoration:underline; }
+.door:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
+/* —— the overlays: METHODS + THE HANGAR WALL (doors in the card; sheet idiom) —— */
+.ov {
+  position:fixed; z-index:4; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:min(92vw, 640px); max-height:min(84vh, 84dvh); overflow-y:auto;
+  border:1px solid var(--ink); background:var(--bg);
+  padding:28px clamp(20px,4vw,40px) 28px;
+  font-size:11px; line-height:1.7; color:var(--mid);
+}
+.ov { outline:1px solid var(--hair); outline-offset:-3px; } /* the inner hairline — outline, so it holds while the sheet scrolls */
+#hangar.ov { width:min(94vw, 900px); }
+.ovhead { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; }
+.ovbrand { font-weight:700; letter-spacing:3px; font-size:11px; color:var(--ink); }
+.ovclose {
+  background:none; border:0; padding:2px 4px; font:inherit; font-size:10px;
+  letter-spacing:.5px; color:var(--dim); cursor:pointer;
+}
+.ovclose:hover { color:var(--ink); text-decoration:underline; }
+.ovclose:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
+.ovrule { border:0; border-top:1px solid var(--hair); margin:12px 0; }
+.mk { font-size:9px; letter-spacing:2.5px; color:var(--spec); font-weight:700; margin:16px 0 4px; }
+.mp { margin-top:6px; max-width:62ch; }
+.mp .kw { font-weight:700; color:var(--ink); }
+.mclaim { margin:8px 0 4px; max-width:56ch; color:var(--ink); border-left:2px solid var(--spec); padding-left:12px; }
+.mfine { margin-top:6px; font-size:10px; color:var(--dim); max-width:62ch; }
+#hangarrows { position:relative; }
+.hrow { position:relative; border-top:1px solid var(--hair); }
+.hrow:first-child { border-top:0; }
+.hrail { position:absolute; left:0; right:0; height:0; border-top:1px solid var(--hair); pointer-events:none; }
+.hsil { position:absolute; }
+.hsil svg { display:block; overflow:visible; }
+.hlab { position:absolute; }
+.hname { font-size:11px; color:var(--ink); }
+.hserial { margin-top:2px; font-size:9px; letter-spacing:2px; color:var(--dim); text-transform:uppercase; }
+.hlesson { margin-top:4px; font-size:11px; color:var(--mid); max-width:40ch; }
+.htest {
+  display:inline-block; margin-top:4px; background:none; border:0; padding:2px 4px 2px 0;
+  font:inherit; font-size:10px; letter-spacing:.5px; color:var(--dim); cursor:pointer;
+}
+.htest:hover { color:var(--ink); text-decoration:underline; }
+.htest:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
+#hscale { margin:2px 0 10px; }
 [hidden] { display:none !important; }
 @media (prefers-reduced-motion: reduce) { #card { transition:none; } }
 @media (max-width:600px) { #card { left:12px; bottom:12px; right:12px; max-width:none; } }
@@ -137,8 +196,56 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
     <nav id="views" aria-label="views"><button class="vw on" data-v="smoke" type="button" aria-pressed="true">smoke</button> · <button class="vw" data-v="specks" type="button" aria-pressed="false">specks</button> · <button class="vw" data-v="pressure" type="button" aria-pressed="false">pressure</button></nav>
     <p id="pressline" hidden>pressure view · warm = compression · cool = suction · magnitude is density, hue is sign only</p>
   </div>
+  <p class="doors"><button class="door" id="methodsdoor" type="button">methods →</button> · <button class="door" id="hangardoor" type="button">hangar →</button></p>
   <a class="cwatch" href="https://admin.chall.net/tunnel-mission">watch it being built → admin.chall.net/tunnel-mission</a>
 </aside>
+<!-- —— METHODS: the instrument's own paper, in-page (R1 assembly; zero requests —
+     the census cite prints as text; the build record lives at
+     admin.chall.net/tunnel-mission). Spec voice in the second ink. —— -->
+<section class="ov" id="methods" role="dialog" aria-label="methods" hidden>
+  <div class="ovhead"><span class="ovbrand">METHODS</span><button class="ovclose" type="button" data-close="methods">close ×</button></div>
+  <hr class="ovrule">
+  <p class="mk">WHAT THIS IS</p>
+  <p class="mp">this tunnel is honest about being small . the solver is real — d2q9 lattice-boltzmann, computed live in front of you — and it is 2d, incompressible, and running at re ~10³–10⁴, three to four orders below flight . nothing on this page is flight data; everything is measured in this tunnel or cited to its source . the gaps are printed, badged EST, and taught.</p>
+  <p class="mk">THE SOLVER</p>
+  <p class="mp">d2q9 bgk with a smagorinsky eddy-viscosity term (Cs 0.1), fp16 storage with fp32 math, streaming in place through a single buffer — one copy of the lattice lives on your gpu, 1.6 million cells at 1792×896, dozens of substeps every frame at 60 fps . walls are halfway bounce-back with a moving-wall term, so the model rotates through the air rather than teleporting; cells the body uncovers are refilled at equilibrium . the outlet copies its neighbor and re-anchors density to 1 — without that anchor the whole domain slowly pressurizes, and we say so because we measured it.</p>
+  <p class="mp">one law binds every backend: <span class="kw">the shared-constants oracle</span> . all physics constants live in one exported object inside the cpu reference solver; gpu shaders interpolate those exact values into their source . no number is ever retyped into a shader string — the cpu oracle and the gpu instrument cannot drift apart by a typo.</p>
+  <p class="mp">τ and re, disclosed: τ₀ = 0.53 (lattice ν = 0.01), τ floored at 0.5005; the readout prints this run's chord reynolds live, in the 10³–10⁴ band . one hedge the solver itself earns: the eddy-viscosity term raises effective viscosity wherever strain is high, so the effective re near the body is lower than the nominal number . the stall you see is laminar-bubble physics moderated by that term — not flight-re turbulent stall . the gap line on every article teaches exactly this.</p>
+  <p class="mk">VALIDATION</p>
+  <p class="mp">the cylinder first . a frozen fixture (400×160, d = 24, 40,000 steps) sheds vortices at a strouhal number the literature has measured for a century: the cpu oracle reads <span class="kw">0.2139</span>, the gpu instrument reads <span class="kw">0.2138</span> — agreement to 0.05% . the unbounded-cylinder literature band near this re is St ≈ 0.19–0.21 (shedding onset re ≈ 47, williamson 1996); our fixture's 15% blockage sits it at the top of the band, and the number that matters is the gpu-versus-oracle agreement, not the absolute.</p>
+  <p class="mp">the pair . the f-16's thin section separates at 9.0°; the a-10's thick cambered section holds to 13.5° — a 4.5° window, measured across three seeds with zero spread, geometry never tuned . the requirement was 2°.</p>
+  <p class="mp">the batteries . L0 is the deterministic cpu-oracle battery — seven lanes (strouhal, anchor, settled state, poiseuille, moving-wall sweep, mass, layout), ~70 s in node, exits nonzero on any red . this build's page battery stands at 80/80 . the gpu-versus-oracle diff lane runs both solvers in lockstep on a pinned 128×64 geometry and holds L∞ &lt; 10⁻³ over 500 steps — 11/11.</p>
+  <p class="mp">and the part we care most about: <span class="kw">you can run this yourself, in your own browser</span> . add <span class="kw">?qa=st</span> to the url and this page runs the frozen 40,000-step fixture on your gpu and prints the strouhal it measured . add <span class="kw">?qa=diff</span> and it boots the pinned diff geometry for inspection . the validation is not a pdf — it is a mode of the instrument.</p>
+  <p class="mk">THE LIMITS</p>
+  <p class="mp"><span class="kw">2d.</span> these are sections, not airplanes — no wingtip, no sweep relief, no strake vortex unless it is drawn in the section . real wings get three-dimensional help this tunnel cannot give.</p>
+  <p class="mp"><span class="kw">incompressible.</span> no mach effects, no shocks . supersonic lives on paper here, cited — never in the solve.</p>
+  <p class="mp"><span class="kw">tunnel re.</span> 10³–10⁴, orders below flight . separation here is honest physics at THIS re, and the per-plane gap line prints what the full-scale number does differently.</p>
+  <p class="mp"><span class="kw">solid inlets.</span> engines are solid bodies; nothing flows through the nacelle . propellers do not exist here.</p>
+  <p class="mp"><span class="kw">the near-plate admission.</span> thin sections are thin: the f-16's 64a204 spans 4.8 cells at its thickest and rides the minimum-feature floor over most of its chord — in this tunnel it behaves closer to a cambered plate than to its section . thick sections resolve honestly (the a-10's 6716 spans 19.2 cells) . we print which regime each article is in rather than pretending they are the same.</p>
+  <p class="mk">SOURCES</p>
+  <p class="mp">every silhouette is traced from a public-domain us-government document; each plane's dossier records the document, figure, mirror url, access date, and sha256 . every ratio prints its basis, every sweep its datum, every aspect ratio its span convention . EST marks a literature estimate; ◆ marks sources that genuinely conflict, with the conflict documented.</p>
+  <p class="mp">the sourcing law runs before the pen, and it has already fired twice . the f-16 trace came off a flight-manual mirror carrying an fms disclosure statement — the master was quarantined and re-based to nasa tp-1538, a public report, the same day . the a-10's t.o. 1a-10a-1 carries distribution c — caught before tracing began, re-based to fm 44-80, distribution a . those demotions are not embarrassments; they are the system working, and this page will keep printing them.</p>
+  <p class="mk">FIRSTS · AS FAR AS WE CAN CITE</p>
+  <p class="mclaim">more lattice updates per second than any browser fluid sim we can cite — 7.96 billion, sustained, at the demo rung — with 2,097,152 passive tracers coupled to the live solve. if we're wrong, tell us and this line changes.</p>
+  <p class="mfine">measured on apple m5 max · chrome 151 · 2026-08-07 · sustained means the thermal plateau, never the first warm minute . the hero floor is 6.45 billion by construction at the shipped rung . the full prior-art census — who we compared against, in whose units, with every url — lives in the build record: admin.chall.net/tunnel-mission, re-run before every print . the census found real neighbors (a 16.8-million-cell webgpu smoke box; a d3q19 browser tunnel that takes stl files), and this line is scoped to survive them: updates per second, live, client-side, cited.</p>
+  <p class="mk">THE MACHINE</p>
+  <p class="mp">this instrument is building itself . an autonomous loop of agents works under a written law: an owner's decisions file, an append-only ledger, a spend ceiling enforced in code . physics waits for the oracle; taste waits for a human eye — artifacts sit behind gates until the owner looks . every number on this page was measured by the machine that ships it, on named hardware, dated . the owner holds the pen and a kill switch.</p>
+  <p class="mk">PRIVACY</p>
+  <p class="mp">zero runtime network requests — the page you load is the whole product, and it runs with the wifi off . no account, no analytics, no cookies.</p>
+  <p class="mk">THE LINES THE LAWYERS GET</p>
+  <p class="mfine">aircraft names and designations are used for identification only . no aircraft manufacturer, armed service, or government has endorsed, sponsored, or approved this instrument . silhouettes derive from public-domain united states government publications . nothing here is flight data, and nothing here supports operational, engineering, or certification use.</p>
+</section>
+<!-- —— THE HANGAR WALL: the bank index (datum-wall law, COMPOSITION §3.2) —
+     one printed scale, one rail, aligned noses; rows exist only for landed
+     planes + the reference stubs . silhouettes are the DRAWN inking of the
+     one master (PLANE-MASTERS §1 — first use of the museum rendering). —— -->
+<section class="ov" id="hangar" role="dialog" aria-label="hangar" hidden>
+  <div class="ovhead"><span class="ovbrand">THE HANGAR</span><button class="ovclose" type="button" data-close="hangar">close ×</button></div>
+  <hr class="ovrule">
+  <p class="mfine">the wall grows as planes land . one scale, one rail — true size is the composition . reference shapes hang at their declared size.</p>
+  <div id="hscale"></div>
+  <div id="hangarrows"></div>
+</section>
 <main class="sheet" id="sheet">
   <svg class="glyph" viewBox="0 0 32 32" aria-hidden="true">
     <rect width="32" height="32" fill="#f6f4ee"/>
@@ -155,6 +262,25 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 </main>
 <script type="module">
 'use strict';
+// ============================================================================
+// CHALL TUNNEL — phase 6 "THE DIRECTION LOCK + R1 assembly begins"
+// Phase 6 adds:
+//   - THE DIRECTION LOCK = RISO (owner GO, DECISIONS.md 2026-08-08): the
+//     spec-voice second ink (--spec) becomes the shipped DEFAULT — SPEC
+//     kickers, the gap line's spec half, the provenance line print in the
+//     drawing office's blue; measured voice stays ink; amber keeps its job.
+//     The ?dir= boards machinery and the losing token tables are DELETED
+//     (DSR-LOCK: the losing palettes' hexes are permanent canaries — they may
+//     never appear in this file again).
+//   - METHODS in-page: a door in the card opens the instrument's own paper —
+//     nine sections, the FIRSTS print (CLAIM-ONE v2 verbatim), the two
+//     sourcing-catch stories, the reproduce-it-yourself ?qa= instructions.
+//     Census cite is textual; zero-request law untouched.
+//   - THE HANGAR WALL opens (bank index skeleton): datum-wall rows (one
+//     printed scale, one rail, aligned noses — COMPOSITION §3.2) for TEST 001
+//     + TEST 006 in the DRAWN inking (outline + named interiors at the
+//     four-pen ladder — PLANE-MASTERS, first use) + R-001/R-002 reference
+//     stubs . test → mounts the row's article, keeping air.
 // ============================================================================
 // CHALL TUNNEL — phase 5 "test 006: the a-10 enters — THE PAIR goes live"
 // Phase 5 adds:
@@ -184,12 +310,9 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 //     remains density (alpha untouched — LAW 1). SPECKS drops the afterglow
 //     (the raw instantaneous speck field). Hue is view-gated: smoke stays
 //     mono ink, byte-for-byte the phase-3 rendering.
-//   - DIRECTION token sheets (?dir= — DESIGN-SYSTEM §4 boards law: the REAL
-//     page with a swapped token table, unlisted): archive/absent/unknown ≡
-//     incumbent byte-identical (empty delta); riso = spec-voice text in
-//     blueprint #255079 (SPEC kickers, gap-line spec half, provenance line —
-//     measured voice NEVER blue, amber kept); swiss = #f4f4f2 paper +
-//     #b9bcb6 hair + #e64a19 on EVENT text (measured voice NEVER orange).
+//   - DIRECTION token sheets for the boards gate (HISTORY: served the hero
+//     gate; the owner chose RISO and the machinery was deleted at the
+//     phase-6 direction lock — see the phase-6 block above).
 //   - a11y tokens everywhere: --dim #69675f, --accd #8a5d0c, ink focus
 //     outlines (COLOR-SCIENCE §3.2).
 // ============================================================================
@@ -668,7 +791,8 @@ fn probe() {
 //         max |delta| 253
 //   a10 — TEST 006, FM 44-80 p18 (A-10A recognition 3-view, Dist-A; airframe
 //         A→C unchanged), 690 pts, sha d4c741c0…, max |delta| 187
-// Interiors are NOT drawn in-tunnel — solid ink (PLANE-MASTERS tunnel context).
+// Interiors are NOT drawn in-tunnel — solid ink (PLANE-MASTERS tunnel
+// context); the HANGAR WALL prints the DRAWN inking of the same master.
 const AC = {
   f16: {
     serial: 'TEST 001', name: 'F-16C FIGHTING FALCON',
@@ -746,6 +870,182 @@ function acGeom(pk) {
   _acGeom[pk] = { pts, ymax, yc0, bmp: { w, h, data }, upN: up, dnN: dn, maxRN: maxR };
   return _acGeom[pk];
 }
+
+// ---------- THE HANGAR WALL — the bank index skeleton (phase 6) ----------
+// The DRAWN inking of the one master (PLANE-MASTERS §1, first use): outline
+// at W1 + named interior features at their pens. Interiors are traced from
+// the SAME source drawing as each outline (assets/<pk>-master.json, rounded
+// 1e-4 — sourcing law v2 applies to a canopy line exactly as to the
+// silhouette); the mask rasterizer never sees them (§2.4 — the drawing is
+// ink, not geometry). Pens by CSS px, non-scaling strokes so the ladder
+// holds at any wall scale; in-tunnel the article stays SOLID ink.
+const PEN = { W1: 1.4, W2: 1.0, W3: 0.6 };
+const AC_INT = {
+  f16: [{"id":"canopy-arc","pen":"W2","pts":[[0.2247,0.1067],[0.2333,0.1068],[0.2364,0.1061],[0.2401,0.1065],[0.2584,0.1062],[0.2724,0.1068],[0.2876,0.1083],[0.2979,0.1105],[0.3142,0.1125],[0.317,0.1134],[0.325,0.1139],[0.327,0.1148],[0.3559,0.1194],[0.3599,0.1196],[0.3662,0.1208],[0.3685,0.122],[0.3905,0.1242],[0.3925,0.1251],[0.4102,0.1276]]},{"id":"intake-lip","pen":"W2","pts":[[0.3225,0.0544],[0.3416,0.055],[0.3736,0.0569],[0.3771,0.0577],[0.3882,0.0577],[0.4091,0.0592]]},{"id":"strake-line","pen":"W3","pts":[[0.213,0.0698],[0.2753,0.0675],[0.277,0.0678],[0.279,0.0695],[0.2839,0.0697],[0.2936,0.0698],[0.2956,0.0692],[0.3059,0.0697],[0.3516,0.0696],[0.3536,0.0702],[0.3728,0.0698],[0.3962,0.0706],[0.4011,0.0702],[0.4079,0.0706],[0.4099,0.0712],[0.4122,0.0706],[0.4228,0.0715],[0.4294,0.071],[0.462,0.0729],[0.4648,0.0738],[0.4826,0.0752],[0.4886,0.0767],[0.4903,0.0762],[0.4929,0.0775]]},{"id":"fin-dorsal-break","pen":"W2","pts":[[0.7925,0.155],[0.8748,0.1555],[0.8816,0.1561],[0.8862,0.1583],[0.8885,0.1567],[0.8962,0.1563],[0.9008,0.1562],[0.9034,0.1571],[0.9285,0.1568]]},{"id":"ventral-tick","pen":"W3","pts":[[0.7141,0.0386],[0.7333,0.0394],[0.7401,0.039],[0.7965,0.04]]}],
+  a10: [{"id":"canopy-arc","pen":"W2","pts":[[0.1774,0.1249],[0.1829,0.1257],[0.1878,0.1283],[0.1979,0.129],[0.2079,0.1322],[0.2216,0.1332],[0.2255,0.1352],[0.2326,0.1365],[0.2378,0.1365],[0.2459,0.1394],[0.2573,0.14],[0.2645,0.1429],[0.2758,0.1434]]},{"id":"gun-line","pen":"W3","pts":[[0.0016,0.0569],[0.0133,0.0565],[0.0175,0.0573]]},{"id":"engine-pod","pen":"W2","pts":[[0.6371,0.075],[0.6693,0.0727],[0.6725,0.0741],[0.6761,0.0741],[0.6784,0.0721],[0.681,0.0714],[0.693,0.0698],[0.706,0.069],[0.7135,0.0677],[0.7157,0.0664],[0.7281,0.0666],[0.7313,0.0663],[0.7326,0.0654],[0.7505,0.065],[0.7534,0.067],[0.77,0.0677],[0.7797,0.0704],[0.7891,0.0718],[0.7973,0.075],[0.8002,0.0778],[0.8012,0.0801],[0.8119,0.0811]]},{"id":"tail-group","pen":"W2","pts":[[0.8824,0.0267],[0.8921,0.0258],[0.9123,0.0285],[0.9194,0.0302],[0.9366,0.0327],[0.9467,0.0357]]}],
+};
+// datum-wall rows: landed planes in accession order + the reference stubs.
+// Unshipped planes are ABSENT — the wall grows as planes land (no coming-
+// soon). Lessons from DATA-v1; reference sizes are DECLARED and printed.
+const HROWS = [
+  { pk: 'f16', k: 'f16', serial: 'TEST 001', name: 'F-16C FIGHTING FALCON', lenM: 15.09,
+    lesson: 'the thin section quits early at this reynolds — the real jet flies to its 25° limiter' },
+  { pk: 'a10', k: 'a10', serial: 'TEST 006', name: 'A-10C THUNDERBOLT II', lenM: 16.256,
+    lesson: 'straight, thick, deeply cambered — docile stall . the reynolds flagship' },
+  { ref: 'cyl', k: 'cyl', serial: 'R-001 · REFERENCE · Ø 1 M DECLARED', name: 'THE CYLINDER', lenM: 1,
+    lesson: 'the shape this tunnel is proven on — the battery flies this circle every release and demands the same wake song . st 0.214' },
+  { ref: 'plate', k: 'plate', serial: 'R-002 · REFERENCE · 1 M CHORD DECLARED', name: 'THE FLAT PLATE', lenM: 1,
+    lesson: 'edge-on it is barely there . broadside it is everything . same shape — α is the whole story' },
+];
+const SVGNS = 'http://www.w3.org/2000/svg';
+function svgEl(tag, attrs) {
+  const el = document.createElementNS(SVGNS, tag);
+  for (const k of Object.keys(attrs)) el.setAttribute(k, attrs[k]);
+  return el;
+}
+function penStroke(el, pen) { // the closed pen set — ink only, width carries lightness
+  el.setAttribute('fill', 'none');
+  el.setAttribute('stroke', TOK.ink);
+  el.setAttribute('stroke-width', PEN[pen]);
+  el.setAttribute('stroke-linejoin', 'round');
+  el.setAttribute('stroke-linecap', 'butt'); // interiors abut the outline (butt where a line abuts — §2.3)
+  el.setAttribute('vector-effect', 'non-scaling-stroke');
+}
+function drawnPlaneSVG(pk, u, dpr) { // u = px per master length-unit; DRAWN inking
+  const geo = acGeom(pk);
+  const svg = svgEl('svg', {
+    viewBox: `0 0 1 ${geo.ymax}`, width: u, height: geo.ymax * u, 'aria-hidden': 'true',
+  });
+  let d = '';
+  for (let i = 0; i < geo.pts.length - 1; i++)
+    d += (i ? 'L' : 'M') + geo.pts[i][0].toFixed(4) + ' ' + (geo.ymax - geo.pts[i][1]).toFixed(4);
+  const outline = svgEl('path', { d: d + 'Z', 'data-pen': 'W1' });
+  penStroke(outline, 'W1');
+  svg.appendChild(outline);
+  // THE LEGIBILITY RULE (PLANE-MASTERS §1): interiors ≥90 dpx rendered
+  // length (canopy line only); the full signature set ≥180 dpx; below,
+  // withdrawn cleanly — an outline, never a smudge.
+  const dpx = u * dpr;
+  if (dpx >= 90) for (const f of AC_INT[pk]) {
+    if (dpx < 180 && f.id !== 'canopy-arc') continue;
+    let p = '';
+    for (let i = 0; i < f.pts.length; i++)
+      p += (i ? 'L' : 'M') + f.pts[i][0] + ' ' + (geo.ymax - f.pts[i][1]).toFixed(4);
+    const line = svgEl('path', { d: p, 'data-pen': f.pen, 'data-int': f.id });
+    penStroke(line, f.pen);
+    svg.appendChild(line);
+  }
+  return svg;
+}
+function buildHangar() { // hung fresh at each open — one scale, one rail, aligned noses
+  const rowsEl = document.getElementById('hangarrows');
+  const scaleEl = document.getElementById('hscale');
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  const usable = rowsEl.clientWidth;
+  // one printed scale (COMPOSITION §3.2): s anchors to the ROSTER's longest
+  // (C-17, 53.04 m) so the wall never rescales as it grows; floor2 snaps to
+  // 0.5; 6.7 px/m is the phone floor (PLAN-v4 verbatim)
+  let s = Math.floor(((usable - 380 - 28) / 53.04) * 2) / 2;
+  let narrow = false;
+  if (s < 4) { s = 6.7; narrow = true; }
+  rowsEl.textContent = '';
+  scaleEl.textContent = '';
+  { // the wall header scale bar — hairline + end ticks, `10 M`
+    const bw = Math.round(10 * s);
+    const svg = svgEl('svg', { width: bw + 44, height: 14, 'aria-hidden': 'true' });
+    const bar = svgEl('path', { d: `M0.5 4.5 V11.5 M0.5 8.5 H${bw + 0.5} M${bw + 0.5} 4.5 V11.5` });
+    bar.setAttribute('fill', 'none'); bar.setAttribute('stroke', TOK.hair); bar.setAttribute('stroke-width', 1);
+    svg.appendChild(bar);
+    const t = svgEl('text', { x: bw + 10, y: 12, 'font-size': 9, fill: TOK.mid });
+    t.setAttribute('font-family', '"SF Mono", ui-monospace, Menlo, Consolas, monospace');
+    t.setAttribute('letter-spacing', '1');
+    t.textContent = '10 M';
+    svg.appendChild(t);
+    scaleEl.appendChild(svg);
+  }
+  const specW = narrow ? usable : Math.round(s * 53.04);
+  const labelX = narrow ? 0 : specW + 28;
+  // per-silhouette geometry: [aboveRail px, belowRail px, builder]
+  const geom = HROWS.map((r) => {
+    if (r.pk) {
+      const g = acGeom(r.pk), u = s * r.lenM;
+      return { above: (g.ymax - g.yc0) * u, below: g.yc0 * u, make: () => drawnPlaneSVG(r.pk, u, dpr) };
+    }
+    if (r.ref === 'cyl') {
+      const rr = s / 2;
+      return { above: rr, below: rr, make: () => {
+        const svg = svgEl('svg', { width: s + 2, height: s + 2, 'aria-hidden': 'true' });
+        const c = svgEl('circle', { cx: rr + 1, cy: rr + 1, r: rr, 'data-pen': 'W1' });
+        penStroke(c, 'W1');
+        svg.appendChild(c);
+        return svg;
+      } };
+    }
+    return { above: 1, below: 1, make: () => { // the plate, side-on at true scale, IS a line
+      const svg = svgEl('svg', { width: s, height: 2, 'aria-hidden': 'true' });
+      const l = svgEl('path', { d: `M0 1H${s}`, 'data-pen': 'W1' });
+      penStroke(l, 'W1');
+      svg.appendChild(l);
+      return svg;
+    } };
+  });
+  const railY = Math.max(...geom.map((g) => g.above)) + 12; // equal rail offset, every row (COMP-DATUM)
+  for (let i = 0; i < HROWS.length; i++) {
+    const r = HROWS[i], g = geom[i];
+    const row = document.createElement('div');
+    row.className = 'hrow';
+    const labH = 84;
+    const rowH = Math.max(railY + g.below + 12, narrow ? railY + g.below + labH : labH, 44);
+    row.style.height = rowH + 'px';
+    const rail = document.createElement('div');
+    rail.className = 'hrail';
+    rail.style.top = railY + 'px';
+    if (!narrow) rail.style.right = (usable - specW) + 'px'; // the rail lives in the specimen column
+    row.appendChild(rail);
+    const sil = document.createElement('div');
+    sil.className = 'hsil';
+    sil.style.left = '0px'; // noses at one x — the gutter
+    sil.style.top = (railY - g.above) + 'px';
+    sil.appendChild(g.make());
+    row.appendChild(sil);
+    const lab = document.createElement('div');
+    lab.className = 'hlab';
+    lab.style.left = labelX + 'px';
+    lab.style.top = (narrow ? railY + g.below + 8 : 10) + 'px';
+    const nm = document.createElement('div'); nm.className = 'hname'; nm.textContent = r.name;
+    const se = document.createElement('div'); se.className = 'hserial'; se.textContent = r.serial;
+    const le = document.createElement('div'); le.className = 'hlesson'; le.textContent = r.lesson;
+    const bt = document.createElement('button');
+    bt.type = 'button'; bt.className = 'htest'; bt.dataset.k = r.k;
+    bt.textContent = 'test →';
+    lab.appendChild(nm); lab.appendChild(se); lab.appendChild(le); lab.appendChild(bt);
+    row.appendChild(lab);
+    rowsEl.appendChild(row);
+  }
+  for (const row of rowsEl.children) { // measure pass: a wrapped lesson must never spill under the next row
+    const lab = row.querySelector('.hlab');
+    const need = parseFloat(lab.style.top) + lab.offsetHeight + 12;
+    if (need > row.clientHeight) row.style.height = need + 'px';
+  }
+}
+// —— overlay plumbing (the doors live in the card; Escape closes) ——
+const OVS = ['methods', 'hangar'];
+const ovAnyOpen = () => OVS.some((n) => !document.getElementById(n).hidden);
+function ovOpen(n) {
+  for (const o of OVS) document.getElementById(o).hidden = o !== n;
+  const el = document.getElementById(n);
+  if (n === 'hangar') buildHangar(); // hung at open (needs layout); rebuilt fresh each time
+  el.scrollTop = 0;
+  const c = el.querySelector('.ovclose');
+  if (c) c.focus();
+}
+function ovClose() {
+  for (const o of OVS) document.getElementById(o).hidden = true;
+}
+document.getElementById('methodsdoor').addEventListener('click', () => ovOpen('methods'));
+document.getElementById('hangardoor').addEventListener('click', () => ovOpen('hangar'));
+for (const b of document.querySelectorAll('.ovclose')) b.addEventListener('click', ovClose);
+addEventListener('keydown', (e) => { if (e.key === 'Escape' && ovAnyOpen()) { ovClose(); e.preventDefault(); } });
 
 // ---------- the WING sections (qa/sections.mjs mirror — one generator law) ----------
 // Per-plane, plane-keyed (the article-pair law: WING shows the SELECTED
@@ -1336,31 +1636,13 @@ fn cover(@builtin(global_invocation_id) gid: vec3<u32>) {
 // ---------- page plumbing ----------
 const Q = new URLSearchParams(location.search);
 
-// —— DIRECTION token sheets (DESIGN-SYSTEM §4 boards law: unlisted ?dir=
-// renders the REAL page with a swapped token table; absent/unknown/archive ≡
-// the incumbent, byte-identical by construction — an EMPTY delta, nothing to
-// apply). riso: the second ink — spec-voice text (SPEC kickers, the gap line's
-// spec half, the provenance line) prints in blueprint #255079; measured voice
-// NEVER blue; amber kept. swiss: cooled paper + hair, the one signal orange
-// #e64a19 replacing --accd on EVENT text; measured voice NEVER orange. ——
-const DIRSHEETS = {
-  archive: {},
-  riso: { specInk: '#255079' },
-  swiss: { css: { bg: '#f4f4f2', hair: '#b9bcb6', accd: '#e64a19' } },
-};
-const DIR = Object.prototype.hasOwnProperty.call(DIRSHEETS, Q.get('dir') || '') ? Q.get('dir') : 'archive';
-// the one token object every CANVAS chrome draw reads (paper dots, power scale,
-// protractor) — swapped at boot alongside the CSS custom properties
-const TOK = { ink: '#18181c', mid: '#56565e', hair: '#989690', ...(DIRSHEETS[DIR].css || {}) };
-{
-  const d = DIRSHEETS[DIR];
-  if (d.css) for (const k of Object.keys(d.css)) document.documentElement.style.setProperty('--' + k, d.css[k]);
-  if (d.specInk) { // the drawing office's second ink lands on spec-voice matter only
-    const st = document.createElement('style');
-    st.textContent = `.spec .k, #gapsp, #speclabel .sl2 { color:${d.specInk}; }`;
-    document.head.appendChild(st);
-  }
-}
+// —— THE DIRECTION LOCK (RISO — owner GO, DECISIONS.md 2026-08-08). The
+// boards served the gate and are gone: the spec-voice second ink now ships
+// in the stylesheet itself (--spec; .spec .k / #gapsp / #speclabel .sl2),
+// the losing token tables are deleted, and their hexes are DSR-LOCK
+// canaries forever. The one token object every CANVAS chrome draw reads
+// (paper dots, power scale, protractor) stays measured-voice ink. ——
+const TOK = { ink: '#18181c', mid: '#56565e', hair: '#989690' };
 
 const dom = {
   paper: document.getElementById('paper'),
@@ -1445,9 +1727,8 @@ function crossHz(samples, dts) { // upward mean-crossings; 0 until a real, regul
 }
 
 const T = { // __TUNNEL — the __PARK contract lineage
-  version: '0.5.0',
+  version: '0.6.0',
   tier: 'boot',
-  dir: DIR, // the direction token sheet in force (boards law; default archive ≡ incumbent)
   press: PRESS, // the duotone canary — PRESS-LUM computes luminance-silence from these
   grid: null,
   article: null, // {type, ...geometry, alpha} — set by the live boot
@@ -1926,6 +2207,7 @@ async function bootLive(g) {
     dom.pscale.addEventListener('pointerup', pup);
     dom.pscale.addEventListener('pointercancel', pup);
     addEventListener('keydown', (e) => { // keys ←/→ nudge the plant target 5%; [ ] cycle THE PAIR keeping air
+      if (ovAnyOpen()) return; // an open sheet owns the keys (Escape closes it)
       if (e.key === 'ArrowLeft') { setPowerTarget(powerTarget - 5); e.preventDefault(); }
       else if (e.key === 'ArrowRight') { setPowerTarget(powerTarget + 5); e.preventDefault(); }
       else if (e.key === '[') { cyclePlane(-1); e.preventDefault(); }
@@ -1956,6 +2238,14 @@ async function bootLive(g) {
     });
   for (const b of dom.views.querySelectorAll('.vw'))
     b.addEventListener('click', () => { setView(b.dataset.v); });
+  // the hangar wall's test → doors: mount the row's article KEEPING AIR
+  // (α/power/view ride through the spooled swap — the keep-this-air law)
+  document.getElementById('hangarrows').addEventListener('click', (e) => {
+    const b = e.target.closest('.htest');
+    if (!b) return;
+    ovClose();
+    swapArticle(b.dataset.k);
+  });
 
   // timestamp-query τ instrument (falls back to the boot-probe value)
   const taus = [rung.tau];
