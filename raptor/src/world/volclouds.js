@@ -45,12 +45,15 @@
 //     and tap the real shape6 column; stratiform fronts anchor mid-slab and
 //     tap a mean-field column with per-tap coverage/relief fields
 //     (FRONTS.shadow3D selects). Over-estimates are compensated by
-//     SUN_SHADOW_K. The anchored shadow BLENDS in with the ray's running
-//     gate maximum (PASS-2 #1/#6, SUN_BLEND_*: the anchored/unanchored
-//     CLIFF printed a ruler-straight iso-dir.y line across the valdez-214
-//     sky and a per-frame anchor lottery = stipple wedges on grazing
-//     cumulus faces — both measured gone with the blend). The od -> light
-//     transfer is multi-scatter Beer-Lambert
+//     SUN_SHADOW_K. The anchored shadow BLENDS in (PASS-2 #1/#6,
+//     SUN_BLEND_*: the anchored/unanchored CLIFF printed a ruler-straight
+//     iso-dir.y line across the valdez-214 sky and a per-frame anchor
+//     lottery = stipple wedges on grazing cumulus faces); the blend weight
+//     is assigned per ANCHOR from fixed look-ahead gate probes, and a march
+//     that starts in-gate (camera in cloud) anchors at a jitter-free depth
+//     (PASS-3 #3: the per-step running-max blend and the synthetic step-0
+//     "crossing" were the in-cloud fabric weave + golden lit-face lattice).
+//     The od -> light transfer is multi-scatter Beer-Lambert
 //     (MS_* octaves, deep octaves isotropic) — never binary, warm floor in
 //     shadowed cores and interiors (PASS-1 #5: a single exp() printed
 //     dead-straight stripes + octagonal cell shadows at grazing sun).
@@ -63,8 +66,10 @@
 //     Hillaire trans/inscatter pair at the transmittance-weighted mean
 //     scatter distance, so distant clouds sit IN the haze instead of popping
 //     against the horizon (closes the journaled billboard gap).
-//   - compositing: out = beauty*T + cloudLight (cloudLight already carries
-//     the per-step (1-stepT) energy weights).
+//   - compositing: out = beauty*Tvis + cloudLight (cloudLight already
+//     carries the per-step (1-stepT) energy weights). Tvis is T through the
+//     WHITEOUT_T remap — deep-extinction pixels drop the background
+//     entirely (PASS-3 #3), the removed share re-scattered into cloudLight.
 //
 // Camera API: the node never reads the camera inside the node graph — the
 // projection-inverse and world matrices live in mat4 uniforms seeded at
@@ -173,9 +178,32 @@ const BASE_RELIEF = 0.16;
 // at all, so the cliff printed as (a) a dead-straight iso-dir.y line across
 // the valdez-214 sky (the gate-max = 0.25 circle of the deck) and (b) the
 // per-frame anchor lottery = stipple wedges on grazing cumulus faces. The
-// shadow now BLENDS in with the running gate maximum over this window —
-// smoothstep of a smooth field, monotone along the ray: LAW-compliant.
+// shadow BLENDS in over this window — smoothstep of a smooth field:
+// LAW-compliant.
+// PASS-3 #3: the blend weight is no longer the RUNNING gate max — that made
+// the per-step blend value at the energy-collapse step swing by dt*gate' per
+// frame (a per-step high-contrast factor once golden sun makes the
+// unshadowed/anchored radiance ratio large: the nellis-188 lit-face
+// lattice). The weight
+// is now assigned ONCE per anchor from look-ahead gate probes at FIXED
+// offsets along the ray from the jitter-stable anchor (BLEND_PROBES, ~2-6
+// field fetches per cloud entry): same "how deep does this ray go" semantic,
+// smooth across pixels, jitter-independent — and it gates anchor NOISE too
+// (grazing crossings, whose interpolated anchors are the least stable, get
+// the least anchored shadow).
 const SUN_BLEND_LO = 0.20, SUN_BLEND_HI = 0.55;
+const BLEND_PROBES = [0, 300, 800];  // look-ahead distances from the anchor (m)
+// PASS-3 #3 WHITEOUT: with the camera inside dense cloud the early-Break
+// floor (T_MIN) still lets ~1.5% of the background through, and T's comb
+// variance modulates it per frame — high-contrast terrain detail woven
+// through the whiteout. Below this view-transmittance the background is
+// fully extinguished: Tvis = max((T - WHITEOUT_T)/(1 - WHITEOUT_T), 0), a
+// monotone per-ray remap (slope 1/(1-a) ~= 1.06: no comb-variance
+// amplification), with the removed bg share re-scattered into the cloud
+// radiance (acc *= (1-Tvis)/(1-T) — exact when S is per-ray, which PASS-3 #3
+// makes true). T = 1 (clear pixels) maps to exactly 1: no-cloud frames are
+// bit-identical.
+const WHITEOUT_T = 0.06;
 // PASS-2 #6 bound margins: entry/cap fades are circles around the camera
 // (world-axis edges). One detail fetch at a fixed point along the ray
 // wobbles both fade windows per ray — smooth in dir, jitter-independent.
@@ -688,9 +716,11 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
       // puffs went paper-flat). Cost: the old 5 base fetches PER CLOUDY
       // STEP become 1-2 field fetches ONCE per ray.
       const msSun0 = msSunPhase(float(0.0)).toVar(); // unshadowed sun x phase
-      const tSunP = msSunPhase(float(0.0)).toVar(); // anchored sun visibility x phase
+      // tSunB = the ray's sun visibility x phase, ASSIGNED per anchor (PASS-3
+      // #3): mix(msSun0, anchored column, probe-blend weight) — per-ray-
+      // segment constant, so the energy-collapse step can't dither it.
+      const tSunB = msSunPhase(float(0.0)).toVar();
       const gatePrev = float(0.0).toVar();
-      const gMax = float(0.0).toVar(); // running gate max -> anchor-blend weight
       const armed = float(1.0).toVar(); // anchor hysteresis (see below)
       const skinMod = float(1.0).toVar(); // near-field skin texture (set at anchor)
 
@@ -721,11 +751,19 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
       // interiorW is a function of the CAMERA point only (frame-constant,
       // smooth over frames): d6 at uCamPos gates how deep in cloud we sit.
       const interiorW = float(0.0).toVar();
+      // gate0 = the coverage gate at the march START (PASS-3 #3). Non-zero
+      // only when the camera sits inside the slab (slab-plane entries have
+      // grad = 0 by construction): the in-gate-at-step-0 detector for the
+      // degenerate-anchor fix below, and the real sample gatePrev is seeded
+      // with (the old synthetic 0 made step-0 "crossings" interpolate
+      // against a value the field never had).
+      const gate0 = float(0.0).toVar();
       If(tIn.lessThan(1.0), () => { // camera inside the slab
         const f0 = density.field(uCamPos).toVar();
-        const d0 = density.shape6(uCamPos, f0.x,
-          density.gradAt(uCamPos.y, f0.y, f0.z));
+        const g0 = density.gradAt(uCamPos.y, f0.y, f0.z).toVar();
+        const d0 = density.shape6(uCamPos, f0.x, g0);
         interiorW.assign(smoothstep(0.04, 0.30, d0));
+        gate0.assign(f0.x.mul(g0));
       });
       // 0.35: measured B-R vs the +21 exterior faces — full warm shift gave
       // -5, 0.62 gave +5; 0.35 lands inside the +-10 continuity window
@@ -754,6 +792,68 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
         const m2 = d1.sub(0.5).mul(0.63).add(d2.sub(0.5).mul(0.42));
         intMod.assign(clamp(float(1.0).add(m2.mul(interiorW).mul(2.0)), 0.35, 1.75));
       });
+
+      // THE ANCHOR ROUTINE — emitted twice (degenerate in-gate start below +
+      // the in-loop gate crossings): sun-shadow column, near-field skin, and
+      // (PASS-3 #3) the per-anchor blend weight. tX must be jitter-stable —
+      // everything here is high-contrast (83m base texels in the taps, 19m
+      // detail texels in the skin) and multiplies EVERY subsequent step.
+      const gMid = Math.min(0.5 / P.baseRound, 1) *
+        (1 - Math.min(Math.max((0.5 - P.topSoft) / (1 - P.topSoft), 0), 1));
+      const anchorAt = (tX) => {
+        const pA = uCamPos.add(dir.mul(tX)).toVar();
+        const odA = float(0.0).toVar();
+        let prevA = 0;
+        for (const sd of (P.shadow3D ? SUN_TAPS : SUN_TAPS_STRAT)) {
+          const pT = pA.add(sunT.mul(sd)).toVar();
+          const fT = density.field(pT).toVar();
+          odA.addAssign((P.shadow3D
+            ? density.shape6(pT, fT.x, density.gradAt(pT.y, fT.y, fT.z))
+            : clamp(float(gMid * 0.5).sub(fT.x.oneMinus()).div(max(fT.x, 1e-4)), 0.0, 1.0).mul(fT.x)
+          ).mul(sd - prevA));
+          prevA = sd;
+        }
+        // grazing-sun contrast compression (stratiform): near-horizontal
+        // light diffuses through the broken deck's gaps — the 950m tap
+        // span overestimates od there and cells read as phantom dark
+        // slabs. Full od (the valdez-155 look) above ~27 deg elevation.
+        const odScale = P.shadow3D
+          ? float(1.0) : mix(0.35, 1.0, smoothstep(0.05, 0.45, sunEl));
+        // PASS-3 #3 blend weight (see BLEND_PROBES): "how deep does this ray
+        // go" probed at fixed offsets from the jitter-stable anchor — the
+        // per-step running-gate-max blend put dt*gate' of per-frame swing on
+        // the energy-collapse step (the golden lit-face lattice).
+        const gPk = float(0.0).toVar();
+        for (const bd of BLEND_PROBES) {
+          const pP = bd ? pA.add(dir.mul(bd)).toVar() : pA;
+          const fP = density.field(pP).toVar();
+          gPk.assign(max(gPk, fP.x.mul(density.gradAt(pP.y, fP.y, fP.z))));
+        }
+        tSunB.assign(mix(msSun0, msSunPhase(odA.mul(odScale)),
+          smoothstep(SUN_BLEND_LO, SUN_BLEND_HI, gPk)));
+        // PASS-2 #6 near-field skin: one detail fetch at the (jitter-
+        // stable) anchor paints 60-250m surface structure onto close
+        // cumulus interiors — the sub-step T collapse airbrushes them
+        // otherwise. Fades out by SKIN_FAR; per-ray, LAW-compliant.
+        const sk = texture3D(noise.detailTex, pA.div(P.detailRepeat * SKIN_REPEAT));
+        skinMod.assign(clamp(float(1.0).add(
+          sk.r.mul(0.4).add(sk.g.mul(0.35)).add(sk.b.mul(0.25)).sub(0.487)
+            .mul(smoothstep(SKIN_FAR, SKIN_NEAR, tX)).mul(SKIN_AMP)), 0.45, 1.55));
+        armed.assign(0.0);
+      };
+
+      // PASS-3 #3 (the in-cloud fabric-weave root cause): a march that
+      // STARTS in-gate has no crossing to interpolate — the old anchor fired
+      // off gatePrev's synthetic 0 and tX = tIn + dt*(jit + u) RODE THE
+      // JITTER (up to a full dt ~ 344m on sky-bound rays), so the sun column
+      // and the skin fetch became per-frame lotteries multiplying every step
+      // (measured on nellis-incloud: checker 2.05 -> 0.33 with the skin
+      // held flat, -> 0.05 with the sun blend also flat). Anchor ONCE at a
+      // jitter-FREE depth instead: dt is a pure function of the slab clip.
+      If(gate0.greaterThanEqual(ANCHOR_GATE), () => {
+        anchorAt(tIn.add(dt));
+      });
+      gatePrev.assign(gate0);
 
       // fade-not-clip at the march bounds (PASS-1 #5): rays entering near
       // ENTRY_MAX dissolve into the haze instead of a hard slab silhouette,
@@ -789,7 +889,6 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
         const covAmt = f.x, topL = f.y;
         const grad = density.gradAt(p.y, topL, f.z).toVar();
         const gateVal = covAmt.mul(grad).toVar();
-        gMax.assign(max(gMax, gateVal));
         // Per-ray-segment sun shadow, re-evaluated at each interpolated
         // ANCHOR_GATE up-crossing (a cloud ENTRY — so a thin near puff
         // cannot hijack the shading of a big cell behind it; each cell is
@@ -805,8 +904,8 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
         // (shape -> its 0.5 mean) at the FIXED mid-deck height fraction —
         // any anchor-height term is a function of dir.y and prints iso-dy
         // bands at grazing sun, so od is a pure lateral coverage map, and
-        // the ambient height grade owns vertical shading. ~10-15 fetches
-        // per cloud entry (1-3 entries per ray).
+        // the ambient height grade owns vertical shading. ~12-21 fetches
+        // per cloud entry incl. the blend probes (1-3 entries per ray).
         {
           If(and(armed.greaterThan(0.5), gateVal.greaterThanEqual(ANCHOR_GATE)), () => {
             const u = clamp(float(ANCHOR_GATE).sub(gatePrev).div(gateVal.sub(gatePrev).add(1e-9)), 0.0, 1.0);
@@ -815,37 +914,7 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
             // od ~ 0 — faces went flat; the old per-step estimator sat 0..1
             // jittered steps deep on average). dt is smooth per ray, so the
             // push keeps the anchor's temporal/spatial stability.
-            const tX = max(t.sub(dt.mul(u.oneMinus())).add(dt.mul(1.0)), tIn.add(dt.mul(0.1)));
-            const pA = uCamPos.add(dir.mul(tX)).toVar();
-            const odA = float(0.0).toVar();
-            const gMid = Math.min(0.5 / P.baseRound, 1) *
-              (1 - Math.min(Math.max((0.5 - P.topSoft) / (1 - P.topSoft), 0), 1));
-            let prevA = 0;
-            for (const sd of (P.shadow3D ? SUN_TAPS : SUN_TAPS_STRAT)) {
-              const pT = pA.add(sunT.mul(sd)).toVar();
-              const fT = density.field(pT).toVar();
-              odA.addAssign((P.shadow3D
-                ? density.shape6(pT, fT.x, density.gradAt(pT.y, fT.y, fT.z))
-                : clamp(float(gMid * 0.5).sub(fT.x.oneMinus()).div(max(fT.x, 1e-4)), 0.0, 1.0).mul(fT.x)
-              ).mul(sd - prevA));
-              prevA = sd;
-            }
-            // grazing-sun contrast compression (stratiform): near-horizontal
-            // light diffuses through the broken deck's gaps — the 950m tap
-            // span overestimates od there and cells read as phantom dark
-            // slabs. Full od (the valdez-155 look) above ~27 deg elevation.
-            const odScale = P.shadow3D
-              ? float(1.0) : mix(0.35, 1.0, smoothstep(0.05, 0.45, sunEl));
-            tSunP.assign(msSunPhase(odA.mul(odScale)));
-            // PASS-2 #6 near-field skin: one detail fetch at the (jitter-
-            // stable) anchor paints 60-250m surface structure onto close
-            // cumulus interiors — the sub-step T collapse airbrushes them
-            // otherwise. Fades out by SKIN_FAR; per-ray, LAW-compliant.
-            const sk = texture3D(noise.detailTex, pA.div(P.detailRepeat * SKIN_REPEAT));
-            skinMod.assign(clamp(float(1.0).add(
-              sk.r.mul(0.4).add(sk.g.mul(0.35)).add(sk.b.mul(0.25)).sub(0.487)
-                .mul(smoothstep(SKIN_FAR, SKIN_NEAR, tX)).mul(SKIN_AMP)), 0.45, 1.55));
-            armed.assign(0.0);
+            anchorAt(max(t.sub(dt.mul(u.oneMinus())).add(dt.mul(1.0)), tIn.add(dt.mul(0.1))));
           });
           If(gateVal.lessThan(0.10), () => { armed.assign(1.0); });
           gatePrev.assign(gateVal);
@@ -861,10 +930,10 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
               const sigma = densX.mul(entryFade).mul(capFade).mul(P.sigma);
               const stepT = exp(sigma.mul(dt).negate()).toVar();
               const hfA = clamp(p.y.sub(P.base).div(P.top - P.base), 0.0, 1.0);
-              // anchored shadow blends in with the running gate max (see
-              // SUN_BLEND_*): grazing rays that barely reach the anchor gate
-              // stay near-unshadowed — no anchored/unanchored cliff.
-              const tSunB = mix(msSun0, tSunP, smoothstep(SUN_BLEND_LO, SUN_BLEND_HI, gMax));
+              // tSunB carries the anchored/unanchored blend, assigned per
+              // anchor (PASS-3 #3): grazing rays that barely reach the
+              // anchor gate stay near-unshadowed — no cliff, and no
+              // per-step blend swing for the jitter to dither.
               const S = sunCol.mul(tSunB).add(ambCol.mul(mix(0.35, 1.0, hfA)))
                 .mul(intMod).mul(skinMod);
               const w = T.mul(stepT.oneMinus()); // energy this step scatters to the eye
@@ -880,10 +949,18 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
       });
     });
 
+    // PASS-3 #3 WHITEOUT (see WHITEOUT_T): deep-extinction pixels drop the
+    // background entirely — no terrain detail through the in-cloud weave —
+    // with the removed share re-scattered into the cloud (exact recomposite:
+    // out = bg*Tvis + S*(1-Tvis) when S is per-ray). T's residual comb
+    // variance cancels in acc/(1-T): whited-out pixels are jitter-immune.
+    const Tvis = max(T.sub(WHITEOUT_T).div(1 - WHITEOUT_T), 0.0).toVar();
+    acc.mulAssign(Tvis.oneMinus().div(max(T.oneMinus(), 1e-4)));
+
     // aerial perspective at the mean scatter distance: distant clouds sit IN
     // the haze (inscatter weighted by cloud alpha — clear pixels keep the
     // in-material aerial the beauty already carries)
-    const alpha = T.oneMinus();
+    const alpha = Tvis.oneMinus();
     if (aerial) {
       If(alpha.greaterThan(0.002), () => {
         const wpRep = uCamPos.add(dir.mul(dsum.div(max(wsum, 1e-4)))).toVar();
@@ -892,6 +969,6 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
       });
     }
 
-    return vec4(bg.rgb.mul(T).add(acc), 1.0);
+    return vec4(bg.rgb.mul(Tvis).add(acc), 1.0);
   })();
 }
