@@ -20,13 +20,19 @@
 // are gone entirely and the glitter is now a footprint-adaptive stochastic
 // glint NDF (world-anchored hash cells sized to the pixel footprint,
 // amplitude fed by the Toksvig-retired variance; see the micro-layer note).
+// PASS-3 polish: D-066 cloud shadows on water (optional cloudShadow
+// projector — constructor note below) + the valdez radial-aperture fix
+// (normal/roughness rim fades were CAMERA-anchored — they printed a
+// camera-centered luminance trough + a hard step at the 15.8km skirt
+// handoff; every optical term is now world/footprint-anchored and the far
+// skirt SHARES the sheet material outright — see the skirt note).
 
 import * as THREE from "three";
 import {
   Fn, uniform, texture, vec2, vec3, float, positionLocal, positionWorld,
   modelWorldMatrix, vec4, normalize, clamp, smoothstep, mix, sin, cos, dot,
   fract, floor, cameraPosition, dFdx, dFdy, max, pow, sqrt, luminance,
-  log2, exp2,
+  log2, exp2, abs,
 } from "three/tsl";
 
 const NEAR_SPAN = 32000, NEAR_VERTS = 384;
@@ -53,7 +59,21 @@ const SEA_STATES = {
 };
 
 export class Water {
-  constructor(front, terrain, aerial = null, fft = null) {
+  constructor(front, terrain, aerial = null, fft = null, { cloudShadow = null } = {}) {
+    // D-066 CLOUD SHADOWS ON WATER: cloudShadow is an optional TSL projector
+    // fn (wp)=>node in [shadowFloor..1] — volclouds.makeVolCloudShadowNode
+    // ({noise,front,uSunDir}) or clouds.makeCloudShadowNode, exactly what
+    // terrain.js already consumes. It attenuates the DIFFUSE terms only:
+    // water-body/foam color (sheet + skirt) and the stochastic glint
+    // amplitude. The Fresnel/IBL sky reflection and the emissive sky terms
+    // (aerial inscatter + warm-horizon mirror) are intentionally untouched —
+    // a cloud shadow dims sun glint + sub-surface light, not the mirrored
+    // sky. Null-safe: absent = pre-D-066 behavior. ?watershadow=0 QA-disables
+    // a provided node (default on).
+    if (cloudShadow && typeof location !== "undefined" &&
+        new URLSearchParams(location.search).get("watershadow") === "0") cloudShadow = null;
+    this.cloudShadow = cloudShadow;
+    this.aerial = aerial; // exposed for QA rebuilds (t6b battery)
     this.fft = fft; // MAXFI A4: createFFTOcean result, or null = Gerstner
     if (fft) {
       // world-tiled sampling needs repeat wrapping (set defensively here)
@@ -86,7 +106,19 @@ export class Water {
       wp.x.div(this.terrainSize).add(0.5),
       float(0.5).sub(wp.z.div(this.terrainSize))
     );
-    const shoreDist = (wp) => texture(shore.tex, shoreUV(wp)).r.mul(shore.maxDist);
+    // PASS-3 RADIAL FIX prereq: the sheet material now also dresses the far
+    // skirt (see the skirt note), which reaches 240km — far past the DEM.
+    // Out there the shore field's ClampToEdge texel is whatever the map
+    // border held (often LAND -> sd 0), which would paint turquoise shallows
+    // + full wave energy past the world edge. Fade every shore consumer to
+    // open deep water across the last 2km of the map — a WORLD-anchored
+    // boundary, unlike the camera-anchored rim this fix retires.
+    const HALF = this.terrainSize / 2;
+    const shoreDist = (wp) => {
+      const raw = texture(shore.tex, shoreUV(wp)).r.mul(shore.maxDist);
+      const inMap = smoothstep(float(HALF), float(HALF - 2000), max(abs(wp.x), abs(wp.z)));
+      return mix(float(shore.maxDist), raw, inMap);
+    };
 
     // value noise (same idiom as terrain.js): foam ribbons + micro-gust fields
     const hash2 = (p) => fract(sin(dot(p, vec2(127.1, 311.7))).mul(43758.5453));
@@ -250,8 +282,7 @@ export class Water {
 
     mat.normalNode = Fn(() => {
       const wp = positionWorld;
-      const edgeFadeN = smoothstep(15800.0, 9000.0, positionLocal.xz.length());
-      const damp = smoothstep(0.0, 120.0, shoreDist(wp)).mul(S.normalK).mul(edgeFadeN);
+      const shoreDamp = smoothstep(0.0, 120.0, shoreDist(wp)).mul(S.normalK);
       if (fft) {
         // filtered-NDF LOD, footprint edition: normTex has no mips (per-frame
         // storage) — flatten the phase-jittered slope as its 1.25m texels go
@@ -286,13 +317,27 @@ export class Water {
         const spark = mix(dotAt(exp2(l0), l0), dotAt(exp2(l0.add(1.0)), l0.add(1.0)), lw);
         // fade only where a cell would exceed ~50m / the horizon band: the
         // far-field glitter average IS the roughness lobe (horizon intact)
-        const sparkA = sqrt(varRet.add(1e-5)).mul(3.1).mul(gustK).mul(glintGate)
+        let sparkA = sqrt(varRet.add(1e-5)).mul(3.1).mul(gustK).mul(glintGate)
           .mul(smoothstep(45.0, 18.0, fp));
+        // D-066: a cloud between sun and water kills the glint (a diffuse-
+        // side sun term); the mirror/IBL sky reflection stays untouched
+        if (cloudShadow) sparkA = sparkA.mul(cloudShadow(wp));
         const nx = sf.sx.mul(fftFade).add(spark.x.mul(sparkA));
         const nz = sf.sz.mul(fftFade).add(spark.y.mul(sparkA));
-        // lerp toward flat by the same damp field (shore + rim)
-        return normalize(mix(vec3(0, 1, 0), vec3(nx, 1.0, nz), clamp(damp, 0.0, 1.0)));
+        // PASS-3 RADIAL FIX: NO sheet-rim fade here (shore damp only). The
+        // old edgeFadeN was CAMERA-anchored (the sheet follows the camera)
+        // and retired spark energy over a 9-15.8km camera ring. The fft
+        // texel share needs no rim fade: texels are 1.25m, so fp >= ~5.9m at
+        // 9km+ keeps fftFade = 0 there from any camera (the footprint law
+        // owns the retirement), and the glint NDF is world-anchored with its
+        // own footprint fade — both continue seamlessly onto the far skirt,
+        // which now wears this same material (see the skirt note).
+        return normalize(mix(vec3(0, 1, 0), vec3(nx, 1.0, nz), clamp(shoreDamp, 0.0, 1.0)));
       }
+      // analytic Gerstner waves carry no footprint machinery — keep the rim
+      // fade so the fallback sheet still flattens into the skirt
+      const edgeFadeN = smoothstep(15800.0, 9000.0, positionLocal.xz.length());
+      const damp = shoreDamp.mul(edgeFadeN);
       const g = gerstner(wp);
       return normalize(vec3(g.nx.negate().mul(damp), float(1.0).sub(g.nyAcc.mul(damp).mul(0.8)), g.nz.negate().mul(damp)));
     })();
@@ -304,11 +349,15 @@ export class Water {
       // MICRO_VAR budget) returns as roughness in α² space, so far water
       // stays wind-rough instead of collapsing to a mirror — and the glint
       // NDF above re-carries a share of it as discrete facets.
+      // PASS-3 RADIAL FIX: microDamp is the SHORE field only — the old
+      // edgeFadeR retired the Toksvig restore over the camera-centered
+      // 9-15.8km sheet-rim ring. Footprint keeps the fftFade half honest at
+      // every range; the restore is world/footprint-anchored, never camera-
+      // anchored, and continues seamlessly onto the shared-material skirt.
       mat.roughnessNode = Fn(() => {
         const wp = positionWorld;
         const fp = footprint(wp);
-        const edgeFadeR = smoothstep(15800.0, 9000.0, positionLocal.xz.length());
-        const microDamp = smoothstep(0.0, 120.0, shoreDist(wp)).mul(edgeFadeR);
+        const microDamp = smoothstep(0.0, 120.0, shoreDist(wp));
         const gustK = gustField(wp);
         const texel = fft.tileM / fft.N;
         const fftFade = smoothstep(texel * 5.0, texel * 1.2, fp);
@@ -358,6 +407,9 @@ export class Water {
         ? slopeFoam(wp).foam.mul(smoothstep(10.0, 2.5, footprint(wp))).mul(0.75)
         : smoothstep(0.55, 0.95, gerstner(wp).nyAcc).mul(0.6);
       c = mix(c, vec3(0.92, 0.95, 0.96), clamp(shoreFoam.add(crest), 0.0, 0.85).mul(edgeFadeC));
+      // D-066: cloud shadow attenuates the water-body/foam diffuse (same
+      // consume shape as terrain.js); the emissive sky terms stay lit
+      if (cloudShadow) c = c.mul(cloudShadow(wp));
       if (aerial) c = c.mul(aerial.trans(wp)); // MAXFI A3 (see terrain.js note)
       return c;
     })();
@@ -370,26 +422,32 @@ export class Water {
       mat
     );
     this.mesh.frustumCulled = false;
-    let farMat;
-    if (aerial) {
-      // the skirt must wear the same air as the sheet or they seam at the rim
-      // — and the same item-5 mirror: the horizon band that must warm-mirror
-      // the sky at golden hour IS mostly this skirt
-      farMat = new THREE.MeshStandardNodeMaterial({ roughness: S.roughness + 0.04, metalness: 0 });
-      farMat.colorNode = Fn(() => vec3(deepC.r, deepC.g, deepC.b).mul(aerial.trans(positionWorld)))();
-      farMat.emissiveNode = Fn(() => aerial.ins(positionWorld).mul(aerial.uSunI).add(mirror))();
-    } else {
-      farMat = new THREE.MeshStandardMaterial({ color: S.deep, roughness: S.roughness + 0.04, metalness: 0 });
-    }
-    // PASS-1 item 6a: the full-span skirt plane z-fought the sheet at range
-    // (metres of Y separation vanish in far-field depth precision) — the
-    // skirt won in patches and stamped a hard-edged flat rectangle into the
-    // textured water (the measured x≈483 seam). A ring whose hole matches
-    // the sheet's flat rim never overlaps live waves; past 15.8km both
-    // surfaces are flat and same-colored, so the residual overlap is moot.
+    // PASS-3 RADIAL FIX, skirt half (the valdez "camera aperture"): the
+    // skirt used to wear its own flat material (pure deep color, roughness
+    // +0.04). Its inner rim is a CAMERA-CENTERED 15.8km circle, and wherever
+    // shore-graded fjord water crossed it the color popped from the sheet's
+    // shallow/deep shore mix to the skirt's pure deep — a hard luminance
+    // step that tracked the camera (measured -0.019..-0.025 at exactly
+    // 15.81km from three displaced camera positions; A/B'd the skirt's
+    // roughness and normals — both irrelevant, the COLOR handoff was the
+    // whole step). The skirt now SHARES the sheet material: on ring geometry
+    // every positionLocal-radius fade sits at 0 (flat, no foam — exactly the
+    // sheet's rim state) and every other term (shore color mix, glint NDF,
+    // Toksvig roughness, aerial air + item-5 mirror, D-066 cloud shadow) is
+    // world/footprint-anchored, so the seam is invisible by construction and
+    // the two surfaces can never drift apart again. Measured: seam step
+    // -0.004 (probe noise floor), 121fps unchanged. Beyond-DEM water reads
+    // open-deep via the shoreDist map-border fade above.
+    // PASS-1 item 6a (still true): the full-span skirt plane z-fought the
+    // sheet at range (metres of Y separation vanish in far-field depth
+    // precision) — the skirt won in patches and stamped a hard-edged flat
+    // rectangle into the textured water (the measured x≈483 seam). A ring
+    // whose hole matches the sheet's flat rim never overlaps live waves;
+    // past 15.8km both surfaces are flat and now share ONE material, so the
+    // residual overlap is invisible outright.
     this.far = new THREE.Mesh(
       new THREE.RingGeometry(15800, FAR_SPAN / 2, 48, 1).rotateX(-Math.PI / 2),
-      farMat
+      mat
     );
     this.far.position.y = -0.4; // tucked under the flattened sheet rim
     this.far.frustumCulled = false;
