@@ -14,7 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#f6f4ee">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f6f4ee'/%3E%3Cpath d='M1.5 19.4 L30.5 16.4' stroke='%23989690' stroke-width='1'/%3E%3Cpath d='M3.5 19 C6.5 12.6 13.5 10.6 19.5 12 C24.5 13.2 28 15.4 29 16.6 C26 18.2 18.5 20.6 11.5 20.9 C7.5 21 4.5 20.3 3.5 19 Z' fill='%2318181c'/%3E%3Ccircle cx='4.2' cy='19' r='2.4' fill='%23e8b46f'/%3E%3C/svg%3E">
-<!-- CHALL TUNNEL v0.7.0 · phase 7 — THE RECORD SURFACES: wind-off portraits (LAW 6b: power→0 seals the page, the trace develops ~3.5 s, done-beat) + PLATE exports (3200×2000 offscreen re-render, honesty microline verbatim, serial accession, filename law) + THE STILLS DIGNITY TIER (no-webgpu / prefers-reduced-motion / ?force=stills → one composed static state: paper + TEST 001 + a time-averaged impression from this instrument's own cpu oracle) + storage-throw boot + device-loss relight · on phase 6 (RISO lock + METHODS + hangar wall) + phase 5 (A-10 + THE PAIR) + phase 4 (pressure view) -->
+<!-- CHALL TUNNEL v0.8.0 · phase 8 — THE MODEL SHOP OPENS (phase 1, "the drop"): scan-anything enters the live page — drag a file (or the hangar's `load an object →` door), the mesh is read in a Worker and thrown away (magic bytes, typed refusals, never a throw), three ink sections print (silhouette / center slice / ground — never the mesh), the pencil traces the pick stroke-by-stroke, U-NNN accessions to THE SHELF (IndexedDB, cap 24, serials append-only, strikes leave tombstones), MODEL CHANGE spool → your wake in the same air as the sixteen; ground mode = free-slip floor at the wheel line, state printed on the specimen line; share = outline in the URL FRAGMENT only (#u=, ≤2000 chars, 12-bit deflate; the share-moment line prints beside the copied link); receiving #u= = rename-before-keep; METHODS gains the shop privacy paragraph verbatim. Comparison counts do NOT ship this phase — no drag numbers print. · on phase 7 — THE RECORD SURFACES: wind-off portraits (LAW 6b: power→0 seals the page, the trace develops ~3.5 s, done-beat) + PLATE exports (3200×2000 offscreen re-render, honesty microline verbatim, serial accession, filename law) + THE STILLS DIGNITY TIER (no-webgpu / prefers-reduced-motion / ?force=stills → one composed static state: paper + TEST 001 + a time-averaged impression from this instrument's own cpu oracle) + storage-throw boot + device-loss relight · on phase 6 (RISO lock + METHODS + hangar wall) + phase 5 (A-10 + THE PAIR) + phase 4 (pressure view) -->
 <style>
 :root { --bg:#f6f4ee; --ink:#18181c; --mid:#56565e; --dim:#69675f; --hair:#989690; --acc:#e8b46f; --accd:#8a5d0c; --spec:#255079; }
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -152,6 +152,31 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 .htest:hover { color:var(--ink); text-decoration:underline; }
 .htest:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 #hscale { margin:2px 0 10px; }
+/* —— THE MODEL SHOP (phase 8): the drop sheet, section cards, shelf rows —— */
+#dropline {
+  position:fixed; z-index:5; left:50%; top:50%; transform:translate(-50%,-50%);
+  border:1px solid var(--ink); background:var(--bg); padding:10px 18px;
+  font-size:11px; letter-spacing:.5px; color:var(--mid); pointer-events:none;
+}
+#shopcards { display:flex; gap:14px; flex-wrap:wrap; margin:12px 0 4px; }
+.scard {
+  background:none; border:1px solid var(--hair); padding:10px 10px 8px;
+  cursor:pointer; font:inherit; color:var(--dim); text-align:center;
+}
+.scard:hover { border-color:var(--ink); color:var(--ink); }
+.scard:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
+.scard svg { display:block; margin:0 auto 6px; }
+.scword { font-size:10px; letter-spacing:1.5px; text-transform:uppercase; }
+.scfine { margin-top:2px; font-size:9px; letter-spacing:.5px; }
+#shop input[type=text] {
+  background:none; border:0; border-bottom:1px solid var(--hair); border-radius:0;
+  padding:2px 4px; font:inherit; font-size:12px; color:var(--ink); width:18ch;
+}
+#shop input[type=text]:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
+.srow { border-top:1px solid var(--hair); padding:10px 0 8px; display:flex; align-items:center; gap:14px; }
+.srow svg { flex:0 0 auto; }
+.srow .doors { margin-top:4px; }
+.srow.struck .hname { text-decoration:line-through; color:var(--dim); }
 [hidden] { display:none !important; }
 @media (prefers-reduced-motion: reduce) { #card { transition:none; } }
 @media (max-width:600px) { #card { left:12px; bottom:12px; right:12px; max-width:none; } }
@@ -166,6 +191,7 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
     <rect id="plate" fill="#18181c" hidden/>
     <path id="ac" fill="#18181c" hidden/><!-- solid-ink vector silhouette, ON TOP at device px (display law — never the raster) -->
     <path id="wing" fill="#18181c" hidden/>
+    <path id="utrace" fill="none" stroke="#18181c" stroke-width="1.4" stroke-linejoin="round" vector-effect="non-scaling-stroke" hidden/><!-- THE TRACE: the pencil draws the user outline (Class B one-shot) -->
   </svg>
   <canvas id="etch" aria-hidden="true" hidden></canvas>
 </div>
@@ -180,7 +206,9 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
   <p class="spec" id="spec3" hidden><span class="k">SPEC — </span>the fat, deeply cambered wing . at this reynolds the camber does the holding</p>
   <p class="spec" id="pairk" hidden><span class="k">SPEC — </span>the f-16's section quit ~2° ago at this angle . camber is doing the holding</p>
   <p class="spec" id="bridge" hidden><span class="k">SPEC — </span>this is the tunnel's crude stall . see the textbook one → wing</p>
+  <p class="spec" id="shopspec" hidden><span class="k">SPEC — </span>a 2d section at toy reynolds — direction is real, road numbers don't exist here</p>
 </div>
+<p id="dropline" hidden>receiving specimen…</p>
 <div id="speclabel" hidden>
   <div class="sl1" id="sl1"></div>
   <div class="sl2" id="sl2"></div>
@@ -195,7 +223,7 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
     <nav id="views" aria-label="views"><button class="vw on" data-v="smoke" type="button" aria-pressed="true">smoke</button> · <button class="vw" data-v="specks" type="button" aria-pressed="false">specks</button> · <button class="vw" data-v="pressure" type="button" aria-pressed="false">pressure</button></nav>
     <p id="pressline" hidden>pressure view · warm = compression · cool = suction · magnitude is density, hue is sign only</p>
   </div>
-  <p class="doors"><button class="door" id="platedoor" type="button">plate ↓</button> · <button class="door" id="methodsdoor" type="button">methods →</button> · <button class="door" id="hangardoor" type="button">hangar →</button></p>
+  <p class="doors"><span id="groundword" hidden><button class="door" id="grounddoor" type="button">ground</button> · </span><button class="door" id="platedoor" type="button">plate ↓</button> · <button class="door" id="methodsdoor" type="button">methods →</button> · <button class="door" id="hangardoor" type="button">hangar →</button></p>
   <a class="cwatch" href="https://admin.chall.net/tunnel-mission">watch it being built → admin.chall.net/tunnel-mission</a>
 </aside>
 <!-- —— METHODS: the instrument's own paper, in-page (R1 assembly; zero requests —
@@ -231,6 +259,7 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
   <p class="mp">this instrument is building itself . an autonomous loop of agents works under a written law: an owner's decisions file, an append-only ledger, a spend ceiling enforced in code . physics waits for the oracle; taste waits for a human eye — artifacts sit behind gates until the owner looks . every number on this page was measured by the machine that ships it, on named hardware, dated . the owner holds the pen and a kill switch.</p>
   <p class="mk">PRIVACY</p>
   <p class="mp">zero runtime network requests — the page you load is the whole product, and it runs with the wifi off . no account, no analytics, no cookies.</p>
+  <p class="mp">the model shop runs in this browser only: scans are parsed, sectioned, and shelved locally; nothing uploads, nothing is logged. a share link carries the outline after the # — the fragment never reaches any server; sending the link is sending the shape.</p>
   <p class="mk">THE LINES THE LAWYERS GET</p>
   <p class="mfine">aircraft names and designations are used for identification only . no aircraft manufacturer, armed service, or government has endorsed, sponsored, or approved this instrument . silhouettes derive from public-domain united states government publications . nothing here is flight data, and nothing here supports operational, engineering, or certification use.</p>
 </section>
@@ -244,6 +273,32 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
   <p class="mfine">the wall grows as planes land . one scale, one rail — true size is the composition . reference shapes hang at their declared size.</p>
   <div id="hscale"></div>
   <div id="hangarrows"></div>
+  <!-- —— THE SHELF (phase 8): user specimens join the wall under their own rule.
+       Shelf-local scale (a truck at fighter scale would be a smudge — METHODS
+       notes the shelf scale is its own); rows exist only for real accessions;
+       strikes stay as tombstone rows; serials are never reused. —— -->
+  <hr class="ovrule">
+  <p class="mfine"><span class="hserial">YOUR SHELF</span> — user specimens · kept in this browser only · a struck row keeps its serial forever</p>
+  <div id="shelfrows"></div>
+  <p class="mfine"><button class="door" id="shopdoor" type="button" hidden>load an object →</button></p>
+  <p class="mfine" id="shopmoment" hidden></p>
+  <input id="shopfile" type="file" accept=".stl,.obj,.glb" aria-label="load an object" hidden>
+</section>
+<!-- —— THE MODEL SHOP intake sheet (phase 8): the 90-second arc's paper end.
+     The mesh is never shown (ink outlines only — THE OUTLINE IS THE OBJECT);
+     every failure is a typed refusal in the house voice; the privacy line is
+     printed where the scan lands. —— -->
+<section class="ov" id="shop" role="dialog" aria-label="the model shop" hidden>
+  <div class="ovhead"><span class="ovbrand">THE MODEL SHOP</span><button class="ovclose" type="button" data-close="shop">close ×</button></div>
+  <hr class="ovrule">
+  <p class="mp" id="shopline"></p>
+  <div id="shopcards" hidden></div>
+  <p class="mfine" id="shopclean" hidden></p>
+  <div id="shoplabelrow" hidden>
+    <p class="mp"><input id="shopname" type="text" maxlength="24" autocomplete="off" spellcheck="false" placeholder="name your specimen" aria-label="specimen name"> <button class="door" id="shopkeep" type="button">accession →</button></p>
+    <p class="mfine">lowercase a–z · 0–9 · space · dash · 24 max · plain text, label register only</p>
+  </div>
+  <p class="mfine" id="shopfine">your scan is read in this browser and thrown away . only the ink outline remains .</p>
 </section>
 <main class="sheet" id="sheet">
   <svg class="glyph" viewBox="0 0 32 32" aria-hidden="true">
@@ -259,8 +314,53 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
   <a class="watch" href="https://admin.chall.net/tunnel-mission">watch it being built → admin.chall.net/tunnel-mission</a>
   <p class="foot">tunnel.chall.net</p>
 </main>
+<script type="text/plain" id="shopw">
+var B=Object.freeze({TOO_LARGE:"too-large",TRUNCATED:"truncated",UNRECOGNIZED:"unrecognized-format",EMPTY_MESH:"empty-mesh",BAD_GEOMETRY:"bad-geometry",BAD_INDEX:"bad-index",BAD_JSON:"bad-json",GLB_COMPRESSED:"glb-compressed",GLB_UNSUPPORTED:"glb-unsupported",CONTAINER_ZIP:"container-zip"});function zQ(Z){if(Z==null)return null;if(typeof Z.byteLength==="number"&&typeof Z.slice==="function"&&!(Z instanceof ArrayBuffer)&&!ArrayBuffer.isView(Z))return{len:Z.byteLength,bytes:(Q,$)=>hQ(Z.slice(Q,$))};if(Z instanceof ArrayBuffer){let Q=new Uint8Array(Z);return{len:Q.length,bytes:($,J)=>Q.subarray($,J)}}if(ArrayBuffer.isView(Z)){let Q=new Uint8Array(Z.buffer,Z.byteOffset,Z.byteLength);return{len:Q.length,bytes:($,J)=>Q.subarray($,J)}}return null}function hQ(Z){if(Z instanceof Uint8Array)return Z;if(Z instanceof ArrayBuffer)return new Uint8Array(Z);if(ArrayBuffer.isView(Z))return new Uint8Array(Z.buffer,Z.byteOffset,Z.byteLength);return new Uint8Array(0)}function s(Z,Q){let $=Z.length/9|0;if($===0)return T(B.EMPTY_MESH,"file parsed but contains zero triangles",Q);for(let j=0;j<Z.length;j++)if(!Number.isFinite(Z[j]))return T(B.BAD_GEOMETRY,"non-finite vertex coordinates (NaN/Inf)",Q);let J,Y,K=!1;if($>3000000){let j=Math.ceil($/3000000);Y=Math.floor(($+j-1)/j),J=new Float32Array(Y*9);let X=0;for(let O=0;O<$;O+=j)for(let V=0;V<9;V++)J[X++]=Z[O*9+V];Y=X/9,J=J.subarray(0,X),K=!0}else J=Z instanceof Float32Array?Z:Float32Array.from(Z),Y=$;return{ok:!0,format:Q,tris:J,triCount:Y,srcTris:$,subsampled:K}}function AQ(Z,Q){if(Q===0)return T(B.EMPTY_MESH,"binary STL declares zero triangles","stl");let $=Q>3000000?Math.ceil(Q/3000000):1,J=Math.ceil(Q/$),Y=new Float32Array(J*9),K=0;for(let X=0;X<Q;X+=$){let O=84+X*50+12,V=Z.bytes(O,O+36);if(V.length<36)return T(B.TRUNCATED,"binary STL ends mid-triangle","stl");let G=new DataView(V.buffer,V.byteOffset,36);for(let q=0;q<9;q++)Y[K*9+q]=G.getFloat32(q*4,!0);K++}let j=s(Y.subarray(0,K*9),"stl");if(j.ok)j.srcTris=Q,j.subsampled=$>1;return j}function SQ(Z){let Q=[],$=Z.split(`
+`);for(let J=0;J<$.length;J++){let Y=$[J].trim();if(!Y.startsWith("vertex"))continue;let K=Y.split(/\s+/);if(K.length<4)return T(B.TRUNCATED,"ASCII STL vertex line malformed","stl");Q.push(parseFloat(K[1]),parseFloat(K[2]),parseFloat(K[3]))}if(Q.length%9!==0)return T(B.TRUNCATED,"ASCII STL vertex count not a multiple of 3","stl");return s(Q,"stl")}function fQ(Z){let Q=[],$=[],J=Z.split(`
+`);for(let Y=0;Y<J.length;Y++){let K=J[Y];if(K.length<2)continue;let j=K.charCodeAt(0);if(j===118&&(K.charCodeAt(1)===32||K.charCodeAt(1)===9)){let X=K.trim().split(/\s+/);Q.push(parseFloat(X[1]),parseFloat(X[2]),parseFloat(X[3]))}else if(j===102&&(K.charCodeAt(1)===32||K.charCodeAt(1)===9)){let X=K.trim().split(/\s+/),O=Q.length/3,V=[];for(let G=1;G<X.length;G++){let q=X[G].split("/")[0],N=parseInt(q,10);if(!Number.isFinite(N)||N===0)return T(B.BAD_INDEX,`OBJ face index "${X[G]}" is not a valid vertex reference`,"obj");if(N=N>0?N-1:O+N,N<0||N>=O)return T(B.BAD_INDEX,`OBJ face references vertex ${X[G]} out of range (${O} verts)`,"obj");V.push(N)}for(let G=2;G<V.length;G++){let q=V[0]*3,N=V[G-1]*3,I=V[G]*3;$.push(Q[q],Q[q+1],Q[q+2],Q[N],Q[N+1],Q[N+2],Q[I],Q[I+1],Q[I+2])}}}return s($,"obj")}var RQ={5120:1,5121:1,5122:2,5123:2,5125:4,5126:4};function bQ(Z,Q){let $=new Float64Array(16);for(let J=0;J<4;J++)for(let Y=0;Y<4;Y++){let K=0;for(let j=0;j<4;j++)K+=Z[j*4+Y]*Q[J*4+j];$[J*4+Y]=K}return $}var WQ=Object.freeze([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);function kQ(Z){if(Z.matrix)return Float64Array.from(Z.matrix);let Q=Z.translation||[0,0,0],$=Z.rotation||[0,0,0,1],J=Z.scale||[1,1,1],[Y,K,j,X]=$,O=Y+Y,V=K+K,G=j+j,q=Y*O,N=Y*V,I=Y*G,U=K*V,P=K*G,D=j*G,M=X*O,F=X*V,h=X*G;return Float64Array.from([(1-(U+D))*J[0],(N+h)*J[0],(I-F)*J[0],0,(N-h)*J[1],(1-(q+D))*J[1],(P+M)*J[1],0,(I+F)*J[2],(P-M)*J[2],(1-(q+U))*J[2],0,Q[0],Q[1],Q[2],1])}function uQ(Z){if(Z.len<20)return T(B.TRUNCATED,"GLB shorter than its own header","glb");let Q=Z.bytes(0,20),$=new DataView(Q.buffer,Q.byteOffset,Q.length),J=$.getUint32(4,!0);if(J!==2)return T(B.GLB_UNSUPPORTED,`GLB version ${J} — only glTF 2.0 binary is read`,"glb");if($.getUint32(8,!0)>Z.len)return T(B.TRUNCATED,"GLB header declares more bytes than the file holds","glb");let K=$.getUint32(12,!0);if($.getUint32(16,!0)!==1313821514)return T(B.GLB_UNSUPPORTED,"GLB first chunk is not JSON","glb");if(20+K>Z.len)return T(B.TRUNCATED,"GLB JSON chunk length lies past end of file","glb");let X;try{X=JSON.parse(new TextDecoder().decode(Z.bytes(20,20+K)))}catch{return T(B.BAD_JSON,"GLB JSON chunk does not parse","glb")}let O=-1,V=0,G=20+K;if(G+8<=Z.len){let C=Z.bytes(G,G+8),H=new DataView(C.buffer,C.byteOffset,8),A=H.getUint32(0,!0);if(H.getUint32(4,!0)===5130562){if(O=G+8,V=A,O+V>Z.len)return T(B.TRUNCATED,"GLB BIN chunk length lies past end of file","glb")}}let q=X.extensionsRequired||[],N=["KHR_draco_mesh_compression","EXT_meshopt_compression","KHR_mesh_quantization"];for(let C of N)if(q.includes(C))return T(B.GLB_COMPRESSED,`${C} — re-export uncompressed (Polycam/Scaniverse default GLB export is uncompressed; compression is opt-in)`,"glb");let I=X.accessors||[],U=X.bufferViews||[],P=X.meshes||[],D=X.nodes||[],M=X.scenes||[],F=Number.isInteger(X.scene)?X.scene:0,h=M[F]&&M[F].nodes||D.map((C,H)=>H);function d(C,H,A){let z=I[C];if(!z)return{err:T(B.GLB_UNSUPPORTED,"accessor index out of range","glb")};if(z.sparse)return{err:T(B.GLB_COMPRESSED,"sparse accessor — re-export uncompressed","glb")};if(z.type!==H||!A.includes(z.componentType))return{err:T(B.GLB_UNSUPPORTED,`accessor ${z.type}/${z.componentType} not in the minimal-read set`,"glb")};let v=U[z.bufferView];if(!v||(v.buffer||0)!==0)return{err:T(B.GLB_UNSUPPORTED,"accessor without a chunk-1 bufferView","glb")};if(O<0)return{err:T(B.TRUNCATED,"accessor points at a BIN chunk the file does not carry","glb")};let p=RQ[z.componentType],u=H==="VEC3"?3:1,y=p*u,x=v.byteStride||y,W=O+(v.byteOffset||0)+(z.byteOffset||0),c=z.count>0?x*(z.count-1)+y:0;if(W+c>O+V)return{err:T(B.TRUNCATED,"accessor range lies past the BIN chunk","glb")};let a=Z.bytes(W,W+c);if(a.length<c)return{err:T(B.TRUNCATED,"BIN chunk shorter than its accessors claim","glb")};return{acc:z,u8:a,stride:x,compBytes:p,nComp:u}}let f=[],R=new Set;function b(C,H){if(R.has(C))return null;R.add(C);let A=D[C];if(!A)return null;let z=bQ(H,kQ(A));if(Number.isInteger(A.mesh)&&P[A.mesh])for(let v of P[A.mesh].primitives||[]){if((v.mode===void 0?4:v.mode)!==4)continue;if(v.extensions&&(v.extensions.KHR_draco_mesh_compression||v.extensions.EXT_meshopt_compression))return T(B.GLB_COMPRESSED,"compressed primitive — re-export uncompressed","glb");if(!v.attributes||v.attributes.POSITION===void 0)continue;let u=d(v.attributes.POSITION,"VEC3",[5126]);if(u.err)return u.err;let y=new DataView(u.u8.buffer,u.u8.byteOffset,u.u8.length),x=u.acc.count,W=new Float64Array(x*3);for(let E=0;E<x;E++){let S=E*u.stride,g=y.getFloat32(S,!0),k=y.getFloat32(S+4,!0),r=y.getFloat32(S+8,!0);W[E*3]=z[0]*g+z[4]*k+z[8]*r+z[12],W[E*3+1]=z[1]*g+z[5]*k+z[9]*r+z[13],W[E*3+2]=z[2]*g+z[6]*k+z[10]*r+z[14]}let c=null;if(v.indices!==void 0){let E=d(v.indices,"SCALAR",[5121,5123,5125]);if(E.err)return E.err;let S=new DataView(E.u8.buffer,E.u8.byteOffset,E.u8.length);c=new Uint32Array(E.acc.count);for(let g=0;g<E.acc.count;g++){let k=g*E.stride;if(c[g]=E.compBytes===1?S.getUint8(k):E.compBytes===2?S.getUint16(k,!0):S.getUint32(k,!0),c[g]>=x)return T(B.BAD_INDEX,"GLB index out of POSITION range","glb")}}let a=c?c.length:x;for(let E=0;E+2<a;E+=3)for(let S=0;S<3;S++){let g=(c?c[E+S]:E+S)*3;f.push(W[g],W[g+1],W[g+2])}}for(let v of A.children||[]){let p=b(v,z);if(p)return p}return null}for(let C of h){let H=b(C,WQ);if(H)return H}return s(f,"glb")}function PQ(Z){if(Z.length===0)return!1;let Q=0,$=Math.min(Z.length,512);for(let J=0;J<$;J++){let Y=Z[J];if(Y===9||Y===10||Y===13||Y>=32&&Y<127)Q++}return Q/$>0.9}function cQ(Z){let Q=zQ(Z);if(!Q||Q.len===0)return"unknown";let $=Q.bytes(0,Math.min(Q.len,512));if($.length>=4&&$[0]===103&&$[1]===108&&$[2]===84&&$[3]===70)return"glb";if($.length>=4&&$[0]===80&&$[1]===75&&$[2]===3&&$[3]===4)return"zip";if(Q.len>=84){if(84+new DataView($.buffer,$.byteOffset,$.length).getUint32(80,!0)*50===Q.len)return"stl-binary"}if(PQ($)){let Y=new TextDecoder().decode($).replace(/^[\s﻿]+/,"");if(Y.startsWith("solid"))return"stl-ascii";if(Y.startsWith('{"v":1'))return"challobj";let K=new TextDecoder().decode(Q.bytes(0,Math.min(Q.len,65536)));if(/^v[ \t]/m.test(K)&&/^f[ \t]/m.test(K))return"obj";if(/^v[ \t]/m.test(K))return"obj"}return"unknown"}function IQ(Z){try{if(Z==null)return T(B.UNRECOGNIZED,"no input");let Q=typeof Z.byteLength==="number"?Z.byteLength:NaN;if(Number.isFinite(Q)&&Q>314572800)return T(B.TOO_LARGE,"over 300 MB — export at low/reduced quality; the tunnel needs the shape, not the paint");let $=zQ(Z);if(!$)return T(B.UNRECOGNIZED,"input is not a byte source");if($.len===0)return T(B.UNRECOGNIZED,"empty file");if($.len>314572800)return T(B.TOO_LARGE,"over 300 MB — export at low/reduced quality; the tunnel needs the shape, not the paint");switch(cQ(Z)){case"glb":return uQ($);case"stl-binary":{let Y=$.bytes(80,84),K=new DataView(Y.buffer,Y.byteOffset,4).getUint32(0,!0);return AQ($,K)}case"stl-ascii":return SQ(new TextDecoder().decode($.bytes(0,$.len)));case"obj":return fQ(new TextDecoder().decode($.bytes(0,$.len)));case"zip":return T(B.CONTAINER_ZIP,"zip container (USDZ?) — Scaniverse (free): Share → Export → STL. Polycam: Export → GLB or OBJ.");case"challobj":return T(B.UNRECOGNIZED,".challobj outline record — this is the mesh intake; outline import is a different door");default:{if($.len>=84&&!PQ($.bytes(0,Math.min($.len,512)))){let Y=$.bytes(80,84),K=new DataView(Y.buffer,Y.byteOffset,4).getUint32(0,!0);if(K>=1&&K<=1e8&&84+K*50>$.len)return T(B.TRUNCATED,`binary STL declares ${K} triangles but the file ends early`,"stl")}return T(B.UNRECOGNIZED,"not a mesh format this shop reads (STL / OBJ / GLB) — magic bytes did not match")}}}catch(Q){return T(B.UNRECOGNIZED,`parser fault contained: ${Q&&Q.message?Q.message:Q}`)}}var mQ=1024,t=8,_Q=4096,CQ=8,o=3*CQ,DQ=300,lQ=1.5,yQ=2.5,TQ=o*o,xQ=0.4;function T(Z,Q){return{ok:!1,refusal:{code:Z,message:Q}}}function dQ(Z,Q=0,$={}){return EQ(Z,{...$,mode:"silhouette",yawDeg:Q})}function nQ(Z,Q,$={}){return EQ(Z,{...$,mode:"slice",slabHalfWidth:Q,yawDeg:$.yawDeg||0})}function EQ(Z,Q){try{return pQ(Z,Q)}catch($){return T("outline-fault",`outline fault contained: ${$&&$.message?$.message:$}`)}}function pQ(Z,{mode:Q,yawDeg:$=0,slabHalfWidth:J,gridW:Y=mQ}){let K=Z.length/9|0;if(K===0)return T("empty-mesh","no triangles to project");let j=$*Math.PI/180,X=Math.cos(j),O=Math.sin(j),V=new Float64Array(K*3),G=new Float64Array(K*3),q=new Float64Array(K*3);for(let _=0;_<K*3;_++){let L=Z[_*3],w=Z[_*3+1],l=Z[_*3+2];V[_]=L*X+l*O,G[_]=w,q[_]=-L*O+l*X}let N=null;if(Q==="slice"){let _=1/0,L=-1/0;for(let m=0;m<V.length;m++){if(V[m]<_)_=V[m];if(V[m]>L)L=V[m]}let w=(L-_)/(Y-2*t)||1,l=Number.isFinite(J)&&J>0?J:2*w;N=new Uint8Array(K);let OQ=0;for(let m=0;m<K;m++){let XQ=q[m*3],NQ=q[m*3+1],qQ=q[m*3+2],wQ=Math.min(XQ,NQ,qQ),gQ=Math.max(XQ,NQ,qQ);if(wQ<=l&&gQ>=-l)N[m]=1,OQ++}if(OQ===0)return T("slice-empty","no geometry inside the slab — move the plane or try silhouette")}let I=1/0,U=-1/0,P=1/0,D=-1/0;for(let _=0;_<K;_++){if(N&&!N[_])continue;for(let L=0;L<3;L++){let w=_*3+L;if(V[w]<I)I=V[w];if(V[w]>U)U=V[w];if(G[w]<P)P=G[w];if(G[w]>D)D=G[w]}}let M=U-I,F=D-P;if(!(M>0)&&!(F>0))return T("degenerate","projected geometry has no extent");let h=Y-2*t,d=Math.min(h/(M||0.000000001),(_Q-2*t)/(F||0.000000001)),f=Y,R=Math.min(_Q,Math.ceil(F*d)+2*t+1),b=new Uint8Array(f*R),C=(_)=>t+(V[_]-I)*d,H=(_)=>t+(G[_]-P)*d;for(let _=0;_<K;_++){if(N&&!N[_])continue;let L=_*3,w=_*3+1,l=_*3+2;rQ(b,f,R,C(L),H(L),C(w),H(w),C(l),H(l)),$Q(b,f,R,C(L),H(L),C(w),H(w)),$Q(b,f,R,C(w),H(w),C(l),H(l)),$Q(b,f,R,C(l),H(l),C(L),H(L))}aQ(b,f,R,2);let A=[],z=tQ(b,f,R);if(z>0)A.push(`debris removed: ${z} fragment${z>1?"s":""}`);let{holesFilled:v,holesKept:p}=oQ(b,f,R,Q==="slice"?1/0:TQ);if(v>0)A.push(Q==="slice"?`section healed: ${v} enclosed void${v>1?"s":""} filled (a shell's slice is a ring)`:`voids filled: ${v}`);let u=0;for(let _=0;_<b.length;_++)u+=b[_];if(u===0)return T(Q==="slice"?"slice-empty":"empty-outline","nothing survived rasterization");let y=iQ(b,f,R),x=sQ(b,f,R,u);if(x.fired)A.push("thin features thickened to 3 cells — the antenna reads fatter than life.");let W=eQ(b,f,R);if(W.length===0)return T("empty-outline","no closed contour found");W.sort((_,L)=>Math.abs(L.area)-Math.abs(_.area));let c=W[0].pts,a=W.slice(1).filter((_)=>Math.abs(_.area)>=TQ).map((_)=>_.pts),E=BQ(c),S=a.map(BQ),g=E,k=MQ(g),r=!1;if(k.dy>k.dx){r=!0,g=g.map(([_,L])=>[L,-_]);for(let _=0;_<S.length;_++)S[_]=S[_].map(([L,w])=>[w,-L]);k=MQ(g)}let YQ=k.dx,e=1/YQ,KQ=(k.ymin+k.ymax)/2,VQ=(_)=>[n((_[0]-k.xmin)*e),n((_[1]-KQ)*e)],QQ=g.map(VQ),jQ=S.map((_)=>_.map(VQ));A.push("chord-normalized");let{area:LQ,perimeter:HQ}=$Z(QQ),GQ=r?{on:!1,flatFraction:0,y:null}:{on:y.flatFraction>xQ,flatFraction:n(y.flatFraction),y:n((y.wheelLinePx-KQ)*e)};return A.push(GQ.on?"GROUND: free-slip floor at wheel line — the road moves with the air":"FREE AIR — no ground effect"),{ok:!0,outline:QQ,holes:jQ,groundLine:GQ,meta:{mode:Q,yawDeg:$,gridW:f,gridH:R,cellSize:1/d,chordCells:Math.round(YQ),points:QQ.length,area:n(Math.abs(LQ)),perimeter:n(HQ),triCount:K,debrisRemoved:z,holesFilled:v,holesKept:jQ.length,thin:x,rotated90:r,cleanups:A}}}function rQ(Z,Q,$,J,Y,K,j,X,O){let V=Math.max(0,Math.ceil(Math.min(Y,j,O))),G=Math.min($-1,Math.floor(Math.max(Y,j,O)));for(let q=V;q<=G;q++){let N=[];if(ZQ(J,Y,K,j,q,N),ZQ(K,j,X,O,q,N),ZQ(X,O,J,Y,q,N),N.length<2)continue;N.sort((I,U)=>I-U);for(let I=0;I+1<N.length;I+=2){let U=Math.max(0,Math.ceil(N[I])),P=Math.min(Q-1,Math.floor(N[I+1])),D=q*Q;for(let M=U;M<=P;M++)Z[D+M]=1}}}function ZQ(Z,Q,$,J,Y,K){if(Q<=Y&&J>Y||J<=Y&&Q>Y)K.push(Z+(Y-Q)/(J-Q)*($-Z))}function $Q(Z,Q,$,J,Y,K,j){let X=Math.max(1,Math.ceil(Math.max(Math.abs(K-J),Math.abs(j-Y))));for(let O=0;O<=X;O++){let V=O/X,G=Math.round(J+(K-J)*V),q=Math.round(Y+(j-Y)*V);if(G>=0&&G<Q&&q>=0&&q<$)Z[q*Q+G]=1}}function FQ(Z,Q,$,J,Y){let K=new Uint8Array(Q*$);for(let X=0;X<$;X++){let O=X*Q;for(let V=0;V<Q;V++){let G=Y?0:1,q=Math.max(0,V-J),N=Math.min(Q-1,V+J);for(let I=q;I<=N;I++){let U=Z[O+I];if(Y){if(U){G=1;break}}else if(!U){G=0;break}}K[O+V]=G}}let j=new Uint8Array(Q*$);for(let X=0;X<Q;X++)for(let O=0;O<$;O++){let V=Y?0:1,G=Math.max(0,O-J),q=Math.min($-1,O+J);for(let N=G;N<=q;N++){let I=K[N*Q+X];if(Y){if(I){V=1;break}}else if(!I){V=0;break}}j[O*Q+X]=V}return j}var JQ=(Z,Q,$,J)=>FQ(Z,Q,$,J,!0),vQ=(Z,Q,$,J)=>FQ(Z,Q,$,J,!1);function aQ(Z,Q,$,J){let Y=vQ(JQ(Z,Q,$,J),Q,$,J);Z.set(Y)}function tQ(Z,Q,$){let J=new Int32Array(Q*$),Y=[],K=0,j=[0];for(let O=0;O<Z.length;O++){if(!Z[O]||J[O])continue;K++,j.push(0),Y.length=0,Y.push(O),J[O]=K;while(Y.length){let V=Y.pop();j[K]++;let G=V%Q,q=V/Q|0;for(let N=-1;N<=1;N++)for(let I=-1;I<=1;I++){if(!I&&!N)continue;let U=G+I,P=q+N;if(U<0||U>=Q||P<0||P>=$)continue;let D=P*Q+U;if(Z[D]&&!J[D])J[D]=K,Y.push(D)}}}if(K<=1)return 0;let X=1;for(let O=2;O<=K;O++)if(j[O]>j[X])X=O;for(let O=0;O<Z.length;O++)if(Z[O]&&J[O]!==X)Z[O]=0;return K-1}function oQ(Z,Q,$,J){let Y=new Uint8Array(Q*$),K=[];for(let V=0;V<Q;V++)K.push(V),K.push(($-1)*Q+V);for(let V=0;V<$;V++)K.push(V*Q),K.push(V*Q+Q-1);while(K.length){let V=K.pop();if(Y[V]||Z[V])continue;Y[V]=1;let G=V%Q,q=V/Q|0;if(G>0)K.push(V-1);if(G<Q-1)K.push(V+1);if(q>0)K.push(V-Q);if(q<$-1)K.push(V+Q)}let j=0,X=0,O=[];for(let V=0;V<Z.length;V++){if(Z[V]||Y[V])continue;O.length=0,K.length=0,K.push(V),Y[V]=1;while(K.length){let G=K.pop();O.push(G);let q=G%Q,N=G/Q|0,I=(U)=>{if(!Y[U]&&!Z[U])Y[U]=1,K.push(U)};if(q>0)I(G-1);if(q<Q-1)I(G+1);if(N>0)I(G-Q);if(N<$-1)I(G+Q)}if(O.length<J){for(let G of O)Z[G]=1;j++}else X++}return{holesFilled:j,holesKept:X}}function iQ(Z,Q,$){let J=[];for(let O=0;O<Q;O++)for(let V=0;V<$;V++)if(Z[V*Q+O]){J.push(V);break}if(J.length===0)return{flatFraction:0,wheelLinePx:0};let Y=[...J].sort((O,V)=>O-V),K=Y[Y.length/2|0],j=Y[0],X=0;for(let O of J)if(Math.abs(O-K)<=3)X++;return{flatFraction:X/J.length,wheelLinePx:j}}function sQ(Z,Q,$,J){let Y=[1,2,4,8,12],K=o;for(let V of Y){let G=JQ(vQ(Z,Q,$,V),Q,$,V),q=0;for(let N=0;N<Z.length;N++)if(Z[N]&&!G[N])q++;if(q/J>0.01){K=Math.max(1,2*V-1);break}}let j=n(K/CQ),X=K<o,O=0;if(X){let V=Math.ceil((o-K)/2),G=JQ(Z,Q,$,V),q=0;for(let N=0;N<G.length;N++)q+=G[N];O=n((q-J)/J*100)}return{minFeaturePx:K,minFeatureSolverCells:j,fired:X&&O>8,areaGrowthPct:O}}function eQ(Z,Q,$){let J=[],Y=(V,G)=>Z[G*Q+V];for(let V=0;V<$-1;V++)for(let G=0;G<Q-1;G++){let q=Y(G,V),N=Y(G+1,V),I=Y(G+1,V+1),U=Y(G,V+1),P=q|N<<1|I<<2|U<<3;if(P===0||P===15)continue;let D=[2*G+1,2*V],M=[2*G+2,2*V+1],F=[2*G+1,2*V+2],h=[2*G,2*V+1];switch(P){case 1:J.push([D,h]);break;case 2:J.push([D,M]);break;case 3:J.push([h,M]);break;case 4:J.push([M,F]);break;case 5:J.push([D,h],[M,F]);break;case 6:J.push([D,F]);break;case 7:J.push([h,F]);break;case 8:J.push([F,h]);break;case 9:J.push([D,F]);break;case 10:J.push([D,M],[F,h]);break;case 11:J.push([M,F]);break;case 12:J.push([h,M]);break;case 13:J.push([D,M]);break;case 14:J.push([D,h]);break}}let K=(V)=>V[0]*262144+V[1],j=new Map;for(let V=0;V<J.length;V++){let[G,q]=J[V],N=K(G),I=K(q);if(!j.has(N))j.set(N,[]);if(!j.has(I))j.set(I,[]);j.get(N).push({to:I,pt:q,seg:V}),j.get(I).push({to:N,pt:G,seg:V})}let X=new Uint8Array(J.length),O=[];for(let V=0;V<J.length;V++){if(X[V])continue;let G=[],[q]=J[V],N=K(q),I=N,U=q;while(!0){G.push([U[0]/2,U[1]/2]);let P=j.get(I),D=null;for(let M of P)if(!X[M.seg]){D=M;break}if(!D)break;if(X[D.seg]=1,U=D.pt,I=D.to,I===N)break}if(G.length>=3){let P=0;for(let D=0;D<G.length;D++){let[M,F]=G[D],[h,d]=G[(D+1)%G.length];P+=M*d-h*F}O.push({pts:G,area:P/2})}}return O}function BQ(Z){let Q=lQ,$=i(Z,Q);while($.length>DQ)Q*=1.5,$=i(Z,Q);$=QZ($,yQ);let J=i($,0.75),Y=0.75;while(J.length>DQ)Y*=1.5,J=i(J,Y);return J}function i(Z,Q){if(Z.length<=4)return Z.slice();let $=0,J=-1;for(let O=1;O<Z.length;O++){let V=Z[O][0]-Z[0][0],G=Z[O][1]-Z[0][1],q=V*V+G*G;if(q>J)J=q,$=O}let Y=Z.slice(0,$+1),K=Z.slice($).concat([Z[0]]),j=UQ(Y,Q),X=UQ(K,Q);return j.slice(0,-1).concat(X.slice(0,-1))}function UQ(Z,Q){let $=Z.length;if($<=2)return Z.slice();let J=new Uint8Array($);J[0]=J[$-1]=1;let Y=[[0,$-1]];while(Y.length){let[j,X]=Y.pop();if(X-j<2)continue;let O=Z[j][0],V=Z[j][1],G=Z[X][0],q=Z[X][1],N=G-O,I=q-V,U=Math.hypot(N,I)||0.000000000001,P=-1,D=-1;for(let M=j+1;M<X;M++){let F=Math.abs(I*(Z[M][0]-O)-N*(Z[M][1]-V))/U;if(F>P)P=F,D=M}if(P>Q)J[D]=1,Y.push([j,D],[D,X])}let K=[];for(let j=0;j<$;j++)if(J[j])K.push(Z[j]);return K}function QZ(Z,Q){let $=Z.length;if($<5)return Z.slice();let J=[];for(let Y=0;Y<$;Y++){let K=Z[(Y-1+$)%$],j=Z[Y],X=Z[(Y+1)%$];if(ZZ(j,K,X)>Q)J.push(j);else J.push([j[0]+0.25*(K[0]-j[0]),j[1]+0.25*(K[1]-j[1])]),J.push([j[0]+0.25*(X[0]-j[0]),j[1]+0.25*(X[1]-j[1])])}return J}function ZZ(Z,Q,$){let J=$[0]-Q[0],Y=$[1]-Q[1],K=Math.hypot(J,Y)||0.000000000001;return Math.abs(Y*(Z[0]-Q[0])-J*(Z[1]-Q[1]))/K}function MQ(Z){let Q=1/0,$=-1/0,J=1/0,Y=-1/0;for(let[K,j]of Z){if(K<Q)Q=K;if(K>$)$=K;if(j<J)J=j;if(j>Y)Y=j}return{xmin:Q,xmax:$,ymin:J,ymax:Y,dx:$-Q,dy:Y-J}}function $Z(Z){let Q=0,$=0;for(let J=0;J<Z.length;J++){let[Y,K]=Z[J],[j,X]=Z[(J+1)%Z.length];Q+=Y*X-j*K,$+=Math.hypot(j-Y,X-K)}return{area:Q/2,perimeter:$}}function n(Z){return Math.round(Z*1e4)/1e4}self.onmessage=async(Z)=>{let Q=($)=>self.postMessage($);try{let $=Z.data&&Z.data.file;if(!$)return Q({ok:!1,refusal:{code:"unrecognized-format",message:"no file received"}});if($.size>314572800)return Q(IQ({byteLength:$.size}));let J=await $.arrayBuffer(),Y=IQ(J);if(!Y.ok)return Q(Y);Q({ok:!0,stage:"read",format:Y.format,triCount:Y.triCount,srcTris:Y.srcTris,subsampled:Y.subsampled});let K=dQ(Y.tris,0);if(!K.ok)return Q(K);let j=nQ(Y.tris);Q({ok:!0,stage:"cuts",sil:K,slice:j.ok?j:null,sliceRefusal:j.ok?null:j.refusal})}catch($){Q({ok:!1,refusal:{code:"shop-fault",message:"shop fault contained: "+($&&$.message?$.message:$)}})}};
+</script>
+<!-- ^ the shop Worker source (parsers.mjs + outline.mjs, bun --minify, exports stripped;
+     re-derivable from ~/.chall/tunnel-mission/shop/ — the tested 66/66 module set).
+     text/plain: inert to the HTML parser; the page blobs it into an inline Worker. -->
 <script type="module">
 'use strict';
+// ============================================================================
+// CHALL TUNNEL — phase 8 "THE MODEL SHOP OPENS — the drop"
+// Phase 8 adds (DECISIONS R2.5 · docs/scanlab/UX §1+§5 · AUDIT §3):
+//   - THE DROP: a file dropped anywhere on the running tunnel (or the hangar's
+//     quiet `load an object →` door) is read in an INLINE BLOB WORKER —
+//     STL binary/ASCII, OBJ, GLB, detected by MAGIC BYTES, never extension;
+//     300 MB refused before the first byte; >3M tris deterministically
+//     subsampled; every failure a TYPED REFUSAL in the house voice, never a
+//     throw and never error theater. The mesh is thrown away when the worker
+//     answers: only the ink outline remains.
+//   - THE SECTION CHOICE: three small ink outlines on the paper — silhouette
+//     (the default cut) · center slice (the 2-cell slab) · ground (the
+//     free-slip floor variant, auto-detected from the flat-bottom fraction).
+//     THE MESH IS NEVER SHOWN, at any point, in any form (UX §8).
+//   - THE TRACE: the pencil draws the picked outline stroke-by-stroke, ~2.5 s,
+//     one shot (Class B); reduced motion lands it complete in one frame.
+//   - THE LABEL + THE SHELF: `U-001 "NAME" — USER SPECIMEN`, plain text,
+//     lowercase [a-z0-9 -], 24 chars max, label register only — never in
+//     og.png, the title, or the URL. IndexedDB behind a throw-safe wrapper
+//     (a storage-refusing browser still mounts, for the session); CAP 24 with
+//     the polite refusal; U-NNN append-only; a strike is a TOMBSTONE row that
+//     keeps its serial forever. Shelf rows hang under the hangar wall's own
+//     `YOUR SHELF` rule, in the same pen, at shelf-local scale.
+//   - THE MOUNT: a user record becomes an ARTICLE through the aircraft path
+//     exactly — body-frame bitmap, 1× dilation (≥3-cell minimum feature),
+//     detector tables, sting, MODEL CHANGE spool, then YOUR WAKE in the same
+//     air as the sixteen. GROUND MODE sits the wheel line on the domain's own
+//     free-slip wall (the road moves with the air); the `ground` word toggles
+//     it behind the spool (B-1B law: no live mask morph), and the state
+//     prints on the specimen line either way.
+//   - SHARE: `share →` encodes the outline into the URL FRAGMENT (#u=,
+//     12-bit quantized deltas + deflate-raw + base64url, ≤2000 chars) — never
+//     a query param, so the shape never reaches any server; the share-moment
+//     line prints beside the copied link. A received #u= link opens
+//     rename-before-keep. METHODS gains the shop privacy paragraph verbatim.
+//   - NOT this phase: the comparison law (counts need the reference row) —
+//     no drag number prints anywhere, and the pencil is not built yet.
 // ============================================================================
 // CHALL TUNNEL — phase 7 "the record surfaces + the dignity tiers"
 // Phase 7 adds:
@@ -868,8 +968,15 @@ function unpackAC(def) {
 const _acGeom = {};
 function acGeom(pk) {
   if (_acGeom[pk]) return _acGeom[pk];
-  const def = AC[pk];
-  const pts = unpackAC(def);
+  _acGeom[pk] = geomFromPts(unpackAC(AC[pk]), AC[pk].pivotL);
+  return _acGeom[pk];
+}
+// shared with THE MODEL SHOP (phase 8): a user outline in master convention
+// (nose-left, y-up, bbox lower-left origin, chord 1, closed) builds the same
+// body-frame bitmap + detector tables the aircraft masters get — one geometry
+// law for every mounted article.
+function geomFromPts(pts, pivotL) {
+  const def = { pivotL };
   let ymax = 0;
   for (const p of pts) ymax = Math.max(ymax, p[1]);
   const w = 2048, h = Math.ceil(ymax * w) + 1;
@@ -904,8 +1011,7 @@ function acGeom(pk) {
     up[k] = top < 0 ? 0 : (top + 0.5) / w - yc0;
     dn[k] = bot < 0 ? 0 : yc0 - (bot + 0.5) / w;
   }
-  _acGeom[pk] = { pts, ymax, yc0, bmp: { w, h, data }, upN: up, dnN: dn, maxRN: maxR };
-  return _acGeom[pk];
+  return { pts, ymax, yc0, bmp: { w, h, data }, upN: up, dnN: dn, maxRN: maxR };
 }
 
 // ---------- THE HANGAR WALL — the bank index skeleton (phase 6) ----------
@@ -1067,18 +1173,19 @@ function buildHangar() { // hung fresh at each open — one scale, one rail, ali
   }
 }
 // —— overlay plumbing (the doors live in the card; Escape closes) ——
-const OVS = ['methods', 'hangar'];
+const OVS = ['methods', 'hangar', 'shop'];
 const ovAnyOpen = () => OVS.some((n) => !document.getElementById(n).hidden);
 function ovOpen(n) {
   for (const o of OVS) document.getElementById(o).hidden = o !== n;
   const el = document.getElementById(n);
-  if (n === 'hangar') buildHangar(); // hung at open (needs layout); rebuilt fresh each time
+  if (n === 'hangar') { buildHangar(); buildShelf(); } // hung at open (needs layout); rebuilt fresh each time
   el.scrollTop = 0;
   const c = el.querySelector('.ovclose');
   if (c) c.focus();
 }
 function ovClose() {
   for (const o of OVS) document.getElementById(o).hidden = true;
+  if (['reading', 'pick', 'label', 'refused'].includes(SHOP.state)) SHOP.state = 'idle'; // closing the sheet abandons the arc; a mid-parse result is discarded
 }
 document.getElementById('methodsdoor').addEventListener('click', () => ovOpen('methods'));
 document.getElementById('hangardoor').addEventListener('click', () => ovOpen('hangar'));
@@ -1715,6 +1822,320 @@ const store = {
 // the honesty microline — VERBATIM on every plate, non-negotiable, forever
 const MICROLINE = 'desktop tunnel · 2d incompressible · re ~10³–10⁴ · not flight data';
 
+// the #u= fragment codec — shop/share.mjs with its ONE named seam swapped for
+// the browser pair (CompressionStream/DecompressionStream 'deflate-raw', async;
+// strict decode, count cap 1000, 64KB inflate cap, base64url via btoa/atob).
+// Minified from ~/.chall/tunnel-mission/shop/ (SCN-RT: 810 chars at 200 pts,
+// re-encode byte-identical). FRAGMENT ONLY — never a query param.
+function N(C,A){return{ok:!1,refusal:{code:C,message:A}}}async function w(C){let A=new Blob([C]).stream().pipeThrough(new CompressionStream("deflate-raw"));return new Uint8Array(await new Response(A).arrayBuffer())}async function D(C,A){let j=new Blob([C]).stream().pipeThrough(new DecompressionStream("deflate-raw")).getReader(),G=[],J=0;for(;;){let{done:Q,value:M}=await j.read();if(Q)break;if(J+=M.length,J>A){try{j.cancel()}catch{}throw Error("inflate cap")}G.push(M)}let K=new Uint8Array(J),S=0;for(let Q of G)K.set(Q,S),S+=Q.length;return K}function F(C){let A="";for(let j=0;j<C.length;j+=8192)A+=String.fromCharCode.apply(null,C.subarray(j,j+8192));return btoa(A).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}function U(C){let A=C.replace(/-/g,"+").replace(/_/g,"/");while(A.length%4)A+="=";let j=atob(A),G=new Uint8Array(j.length);for(let J=0;J<j.length;J++)G[J]=j.charCodeAt(J);return G}function B(C){let A=new Uint8Array(Math.ceil(C.length*12/8)),j=0;for(let G=0;G<C.length;G++){let J=C[G]&4095,K=j>>3;if((j&7)===0)A[K]=J>>4,A[K+1]|=(J&15)<<4;else A[K]|=J>>8,A[K+1]=J&255;j+=12}return A}function L(C,A){let j=new Uint16Array(A),G=0;for(let J=0;J<A;J++){let K=G>>3;if((G&7)===0)j[J]=C[K]<<4|C[K+1]>>4;else j[J]=(C[K]&15)<<8|C[K+1];G+=12}return j}async function g(C,A=""){try{if(!Array.isArray(C)||C.length<3)return N("bad-outline","an outline is at least 3 points");if(C.length>1000)return N("too-many-points",`outline has ${C.length} points — re-simplify to ≤${"1000"} for the link`);let j=C.length;for(let H of C)if(!Array.isArray(H)||!Number.isFinite(H[0])||!Number.isFinite(H[1]))return N("bad-outline","outline points must be finite [x,y] pairs");let G=new TextEncoder().encode(String(A));if(G.length>40)return N("label-too-long","label over 40 bytes");let J=1/0,K=-1/0,S=1/0,Q=-1/0;for(let[H,I]of C){if(H<J)J=H;if(H>K)K=H;if(I<S)S=I;if(I>Q)Q=I}let M=new Float32Array([J,K,S,Q]),T=M[1]-M[0]||1,$=M[3]-M[2]||1,V=new Uint16Array(j*2);for(let H=0;H<j;H++)V[H*2]=Math.max(0,Math.min(4095,Math.round((C[H][0]-M[0])/T*4095))),V[H*2+1]=Math.max(0,Math.min(4095,Math.round((C[H][1]-M[2])/$*4095)));let Y=new Uint16Array(j*2),z=0,Z=0;for(let H=0;H<j;H++)Y[H*2]=V[H*2]-z&4095,Y[H*2+1]=V[H*2+1]-Z&4095,z=V[H*2],Z=V[H*2+1];let X=B(Y),_=2+G.length+2+16,O=new Uint8Array(_+X.length),P=new DataView(O.buffer),W=0;O[W++]=1,O[W++]=G.length,O.set(G,W),W+=G.length,P.setUint16(W,j,!0),W+=2;for(let H=0;H<4;H++)P.setFloat32(W,M[H],!0),W+=4;O.set(X,W);let E="#u="+F(await w(O));if(E.length>2000)return N("fragment-too-long",`${E.length} chars > ${"2000"} — re-simplify to 200 pts`);return{ok:!0,fragment:E,chars:E.length,bytes:O.length}}catch(j){return N("encode-fault",`encode fault contained: ${j&&j.message?j.message:j}`)}}async function q(C){try{if(typeof C!=="string"||C.length===0)return N("bad-fragment","not a string");if(C.length>2064)return N("bad-fragment","fragment over length cap");let A=C;if(A.startsWith("#u="))A=A.slice(3);else if(A.startsWith("u="))A=A.slice(2);if(!/^[A-Za-z0-9_-]+$/.test(A))return N("bad-fragment","fragment is not base64url");let j;try{j=await D(U(A),65536)}catch{return N("bad-fragment","fragment does not inflate")}if(j.length<20)return N("bad-fragment","fragment too short to carry an outline");let G=0,J=j[G++];if(J!==1)return N("bad-version",`fragment version ${J} unknown`);let K=j[G++];if(K>40||G+K>j.length)return N("bad-fragment","label length lies");let S=new TextDecoder().decode(j.subarray(G,G+K));if(G+=K,G+18>j.length)return N("bad-fragment","header truncated");let Q=new DataView(j.buffer,j.byteOffset,j.length),M=Q.getUint16(G,!0);if(G+=2,M<3||M>1000)return N("too-many-points",`fragment declares ${M} points (cap 1000)`);let T=new Float32Array(4);for(let O=0;O<4;O++)T[O]=Q.getFloat32(G,!0),G+=4;if(![...T].every(Number.isFinite))return N("bad-fragment","bbox is not finite");let $=Math.ceil(M*2*12/8);if(G+$>j.length)return N("bad-fragment","point data truncated");let V=L(j.subarray(G,G+$),M*2),Y=T[1]-T[0]||1,z=T[3]-T[2]||1,Z=Array(M),X=0,_=0;for(let O=0;O<M;O++)X=X+V[O*2]&4095,_=_+V[O*2+1]&4095,Z[O]=[T[0]+X/4095*Y,T[2]+_/4095*z];return{ok:!0,outline:Z,label:S}}catch(A){return N("decode-fault",`decode fault contained: ${A&&A.message?A.message:A}`)}}globalThis.__SHOPSHARE={encodeFragment:g,decodeFragment:q,MAX_FRAGMENT_CHARS:2000};
+const shopEncodeFragment = globalThis.__SHOPSHARE.encodeFragment;
+const shopDecodeFragment = globalThis.__SHOPSHARE.decodeFragment;
+
+// ---------- THE MODEL SHOP (phase 8, "the drop") ----------
+// Privacy law (AUDIT §3, battery SHOP-PRIV): the whole path — parse, section,
+// shelf, share — makes ZERO network requests. The mesh is read in a Worker
+// and thrown away; only the ink outline remains. Share rides the URL FRAGMENT
+// only (#u= — never query params, never any server log). Labels are user
+// speech: plain text, lowercase [a-z0-9 -], 24 max, never in og/title.
+const SHELF_FULL_LINE = 'the shelf holds 24 . strike a row to make room .';
+const SHARE_MOMENT_LINE = 'this link contains your outline — anyone who has it, has the shape.';
+const SHOP = { state: 'idle', sessionMax: 0 }; // worker · read · cuts · pick · mount · recv fill in as the arc runs
+const sanitizeName = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9 -]/g, '').replace(/\s+/g, ' ').trim().slice(0, 24);
+const slog = (beat) => T.shopLog.push({ t: performance.now(), beat });
+const E = (id) => document.getElementById(id);
+// the shelf — IndexedDB behind a throw-safe wrapper (the storage-shim law,
+// extended): a browser that refuses storage still mounts specimens for the
+// session; nothing ever throws out of here.
+let shelfDb;
+const shelf = {
+  db() { // one open, answered once; a refusing browser answers null forever
+    if (shelfDb !== undefined) return shelfDb;
+    shelfDb = new Promise((res) => {
+      try {
+        const rq = indexedDB.open('challtunnel', 1);
+        rq.onupgradeneeded = () => { try { rq.result.createObjectStore('specimens', { keyPath: 'serial' }); } catch { /* the error path answers below */ } };
+        rq.onsuccess = () => res(rq.result);
+        rq.onerror = rq.onblocked = () => res(null);
+      } catch { res(null); }
+    });
+    return shelfDb;
+  },
+  async run(mode, fn, fallback) { // every shelf touch rides this — nothing throws out
+    try {
+      const db = await this.db();
+      if (!db) return fallback;
+      return await new Promise((res) => {
+        try {
+          const rq = fn(db.transaction('specimens', mode).objectStore('specimens'));
+          rq.onsuccess = () => res(rq.result === undefined ? true : rq.result);
+          rq.onerror = () => res(fallback);
+        } catch { res(fallback); }
+      });
+    } catch { return fallback; }
+  },
+  all() { return this.run('readonly', (st) => st.getAll(), []); },
+  put(rec) { return this.run('readwrite', (st) => st.put(rec), false); },
+};
+const serialNum = (s) => parseInt(String(s).slice(2), 10) || 0;
+const shelfRows = async () => (await shelf.all()).sort((a, b) => serialNum(a.serial) - serialNum(b.serial));
+async function accessionOutline(outline, name, prov, ground) { // U-NNN append-only; cap 24 live rows; strikes never free a serial
+  const rows = await shelf.all();
+  if (rows.filter((x) => !x.struck).length >= 24) {
+    return { ok: false, refusal: { code: 'shelf-full', message: SHELF_FULL_LINE } };
+  }
+  let mx = SHOP.sessionMax; // storage-less floor: session serials still never repeat
+  for (const x of rows) mx = Math.max(mx, serialNum(x.serial));
+  SHOP.sessionMax = mx + 1;
+  const rec = {
+    serial: 'U-' + String(mx + 1).padStart(3, '0'),
+    name: sanitizeName(name) || 'specimen',
+    outline, ground: ground || null, prov,
+    date: new Date().toISOString().slice(0, 10),
+  };
+  rec.kept = (await shelf.put(rec)) !== false; // false = this browser refused storage — the honest-storage law prints it
+  return { ok: true, rec };
+}
+// user outline (chord-normalized, y centered, from outline.mjs or a decoded
+// fragment) → master convention for geomFromPts: re-normalized defensively,
+// y-up from the bbox bottom, closed.
+function userGeom(outline) {
+  let xmin = Infinity, xmax = -Infinity, ymin = Infinity;
+  for (const [x, y] of outline) {
+    if (x < xmin) xmin = x; if (x > xmax) xmax = x;
+    if (y < ymin) ymin = y;
+  }
+  const inv = 1 / ((xmax - xmin) || 1);
+  const pts = outline.map(([x, y]) => [(x - xmin) * inv, (y - ymin) * inv]);
+  const [fx, fy] = pts[0], [lx, ly] = pts[pts.length - 1];
+  if (fx !== lx || fy !== ly) pts.push([fx, fy]); // geomFromPts expects last === first
+  return geomFromPts(pts, 0.5); // sting pivot mid-chord — the unknown-body law
+}
+function outlineSVG(outline, w, h) { // small ink preview — W1 pen, never the mesh
+  let xmin = Infinity, xmax = -Infinity, ymin = Infinity, ymax = -Infinity;
+  for (const [x, y] of outline) {
+    if (x < xmin) xmin = x; if (x > xmax) xmax = x;
+    if (y < ymin) ymin = y; if (y > ymax) ymax = y;
+  }
+  const m = 5, sc = Math.min((w - 2 * m) / ((xmax - xmin) || 1), (h - 2 * m) / ((ymax - ymin) || 1));
+  const ox = (w - (xmax - xmin) * sc) / 2, oy = (h - (ymax - ymin) * sc) / 2;
+  const svg = svgEl('svg', { width: w, height: h, 'aria-hidden': 'true' });
+  let d = '';
+  for (let i = 0; i < outline.length; i++) {
+    const gx = ox + (outline[i][0] - xmin) * sc;
+    const gy = h - oy - (outline[i][1] - ymin) * sc; // outline y-up → svg y-down
+    d += (i ? 'L' : 'M') + gx.toFixed(1) + ' ' + gy.toFixed(1);
+  }
+  const p = svgEl('path', { d: d + 'Z' });
+  penStroke(p, 'W1');
+  svg.appendChild(p);
+  return svg;
+}
+const div = (cls, text) => { // the shop's one DOM helper — textContent always (user speech is never markup)
+  const d = document.createElement('div');
+  d.className = cls; d.textContent = text;
+  return d;
+};
+async function buildShelf() { // the wall's second section — rebuilt at each hangar open
+  const rowsEl = E('shelfrows');
+  rowsEl.textContent = '';
+  for (const r of await shelfRows()) {
+    const row = div('srow' + (r.struck ? ' struck' : ''), '');
+    row.appendChild(outlineSVG(r.outline, 64, 40));
+    const lab = div('', '');
+    lab.appendChild(div('hname', `${r.serial} · "${r.name}"`));
+    lab.appendChild(div('hserial', `${r.prov} · ${r.date}${r.struck ? ` · struck ${r.struck}` : ''}${r.kept === false ? ' · this session only — storage refused' : ''}`));
+    if (!r.struck) {
+      const doors = div('doors', '');
+      const acts = T.shopMount ? [['test', 'test →'], ['share', 'share →'], ['strike', 'strike ×']]
+        : [['share', 'share →'], ['strike', 'strike ×']]; // stills reads the wall; it cannot mount
+      for (const [act, word] of acts) {
+        if (doors.firstChild) doors.appendChild(document.createTextNode(' · '));
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'door'; b.dataset.act = act; b.dataset.serial = r.serial;
+        b.textContent = word;
+        doors.appendChild(b);
+      }
+      lab.appendChild(doors);
+    }
+    row.appendChild(lab);
+    rowsEl.appendChild(row);
+  }
+}
+E('shelfrows').addEventListener('click', async (e) => {
+  const b = e.target.closest('button[data-act]');
+  if (!b) return;
+  const rec = (await shelf.all()).find((r) => r.serial === b.dataset.serial);
+  if (!rec) return;
+  if (b.dataset.act === 'test' && T.shopMount) {
+    ovClose();
+    T.shopMount(rec); // keeps air — the spooled swap law, same as the wall's doors
+  } else if (b.dataset.act === 'share') {
+    const enc = await shopEncodeFragment(rec.outline, rec.name);
+    const mo = E('shopmoment');
+    if (!enc.ok) { mo.textContent = `share refused — ${enc.refusal.message}`; mo.hidden = false; return; }
+    const url = location.origin + location.pathname + enc.fragment; // FRAGMENT only — the # never transits any server
+    let copied = false;
+    try { await navigator.clipboard.writeText(url); copied = true; } catch { /* the line still prints the law */ }
+    mo.textContent = (copied ? 'link copied · ' : url + ' · ') + SHARE_MOMENT_LINE;
+    mo.hidden = false;
+  } else if (b.dataset.act === 'strike') { // record law: a strike is a tombstone, never an erasure
+    rec.struck = new Date().toISOString().slice(0, 10);
+    await shelf.put(rec);
+    buildShelf();
+  }
+});
+
+// —— THE ARC (UX §1): drop → read → pick a section → THE TRACE → label →
+// mount + spool → your wake. The mesh is NEVER rendered; the sheet speaks in
+// the record voice and refuses in the house voice. ——
+const SHOP_BLOCKS = ['shopcards', 'shopclean', 'shoplabelrow'];
+function shopSheet(line, show) { // one sheet, one beat visible at a time
+  E('shopline').textContent = line;
+  for (const id of SHOP_BLOCKS) E(id).hidden = id !== show;
+  if (show !== 'shopcards') E('shopcards').textContent = '';
+  ovOpen('shop');
+}
+function shopRefuse(refusal) { // typed refusal → one house card, never error theater
+  SHOP.state = 'refused';
+  shopSheet(`this one the shop cannot read — ${refusal.message}`);
+  slog('refused:' + refusal.code);
+}
+function shopWorker() { // inline blob Worker — no network fetch exists on this path
+  if (!SHOP.worker) {
+    const url = URL.createObjectURL(new Blob([E('shopw').textContent], { type: 'text/javascript' }));
+    SHOP.worker = new Worker(url);
+    URL.revokeObjectURL(url);
+  }
+  return SHOP.worker;
+}
+function shopIntake(file) { // the drop: parse in the Worker under the shop's caps
+  if (!file) return Promise.resolve(null);
+  SHOP.state = 'reading'; SHOP.read = null; SHOP.cuts = null; SHOP.pick = null;
+  slog('drop');
+  E('shopmoment').hidden = true;
+  shopSheet('reading your scan…');
+  return new Promise((resolve) => {
+    let w;
+    try { w = shopWorker(); } catch {
+      shopRefuse({ code: 'worker-unavailable', message: 'this browser will not start the reader' });
+      return resolve(null);
+    }
+    const done = (v) => { w.onmessage = null; w.onerror = null; resolve(v); };
+    w.onerror = () => { shopRefuse({ code: 'reader-fault', message: 'the reader stopped — try a smaller export' }); done(null); };
+    w.onmessage = (e) => {
+      const m = e.data;
+      if (!m.ok) { shopRefuse(m.refusal); return done(null); }
+      if (m.stage === 'read') { // the record voice, with the real count
+        SHOP.read = { format: m.format, triCount: m.triCount, srcTris: m.srcTris, subsampled: m.subsampled, points: m.triCount * 3 };
+        slog('read');
+        E('shopline').textContent = `reading your scan . ${SHOP.read.points.toLocaleString('en-US')} points`;
+      } else if (m.stage === 'cuts') { SHOP.cuts = m; slog('cuts'); shopShowCuts(m); done(m); }
+    };
+    try { w.postMessage({ file }); } catch {
+      shopRefuse({ code: 'unrecognized-format', message: 'that drop carried no file' });
+      done(null);
+    }
+  });
+}
+function shopShowCuts(m) { // three ink outlines on the paper — never the mesh
+  SHOP.state = 'pick';
+  const sil = m.sil, slice = m.slice;
+  const cards = [['silhouette', sil.outline, 'silhouette', 'the default cut']];
+  if (slice) cards.push(['slice', slice.outline, 'center slice', 'the slab through the middle']);
+  cards.push(['ground', sil.outline, 'ground',
+    sil.groundLine.on ? 'flat bottom found — free-slip floor' : 'put the floor under it anyway']);
+  const el = E('shopcards');
+  el.textContent = '';
+  for (const [k, outline, word, fine] of cards) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'scard'; b.dataset.k = k;
+    b.appendChild(outlineSVG(outline, 132, 78));
+    b.appendChild(div('scword', word));
+    b.appendChild(div('scfine', fine));
+    el.appendChild(b);
+  }
+  const notes = [...sil.meta.cleanups]; // silent correction is lying: every cleanup prints
+  if (SHOP.read.subsampled) notes.unshift(`subsampled to ${SHOP.read.triCount.toLocaleString('en-US')} triangles`);
+  if (!slice && m.sliceRefusal) notes.push(`no center slice — ${m.sliceRefusal.message}`);
+  E('shopclean').textContent = notes.join(' · ');
+  shopSheet(`the tunnel takes sections . pick one — ${sil.meta.points} points, ${SHOP.read.format.toUpperCase()} read and thrown away`, 'shopcards');
+  E('shopclean').hidden = !notes.length;
+}
+async function shopChoose(k) { // THE TRACE, then the label prompt
+  if (!SHOP.cuts) return null;
+  const sil = SHOP.cuts.sil, slice = SHOP.cuts.slice;
+  SHOP.pick = {
+    kind: k, outline: (k === 'slice' && slice ? slice : sil).outline,
+    ground: { on: k === 'ground', y: sil.groundLine.y, flatFraction: sil.groundLine.flatFraction },
+  };
+  SHOP.state = 'trace';
+  E('shopcards').hidden = E('shopclean').hidden = true;
+  slog('trace');
+  if (SHOP.rig) await SHOP.rig.trace(SHOP.pick.outline, SHOP.pick.ground); // the pencil draws it; reduced motion lands it in one frame
+  SHOP.state = 'label';
+  shopSheet('the pencil has it . name the specimen and it accessions to your shelf', 'shoplabelrow');
+  const nm = E('shopname');
+  nm.value = '';
+  nm.focus();
+  return SHOP.pick;
+}
+async function shopKeep(outline, name, prov, ground) { // U-NNN, then mount + spool
+  const r = await accessionOutline(outline, name, prov, ground);
+  if (!r.ok) { E('shopline').textContent = r.refusal.message; return r; } // the polite refusal, no theater
+  slog('accession');
+  SHOP.state = 'mounted';
+  SHOP.mount = { serial: r.rec.serial, name: r.rec.name, ground: !!(r.rec.ground && r.rec.ground.on) };
+  shopSheet(`${r.rec.serial} · accessioned to your shelf`);
+  if (T.shopMount) { ovClose(); await T.shopMount(r.rec); }
+  buildShelf();
+  return r;
+}
+function shopAccession() { // one keep path: a traced pick, or a received shape renamed
+  const name = E('shopname').value;
+  if (SHOP.state === 'received' && SHOP.recv) return shopKeep(SHOP.recv.outline, name, 'received', { on: false });
+  if (SHOP.pick) return shopKeep(SHOP.pick.outline, name, 'traced from your scan', SHOP.pick.ground);
+  return Promise.resolve(null);
+}
+E('shopcards').addEventListener('click', (e) => {
+  const b = e.target.closest('.scard');
+  if (b) shopChoose(b.dataset.k);
+});
+E('shopkeep').addEventListener('click', shopAccession);
+E('shopname').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); shopAccession(); }
+});
+// —— the doors: drop anywhere on the running tunnel · the hangar's file picker ——
+{
+  const dl = document.getElementById('dropline');
+  let depth = 0;
+  addEventListener('dragenter', (e) => { e.preventDefault(); depth++; dl.hidden = false; });
+  addEventListener('dragover', (e) => e.preventDefault());
+  addEventListener('dragleave', () => { if (!--depth) dl.hidden = true; });
+  addEventListener('drop', (e) => {
+    e.preventDefault();
+    depth = 0; dl.hidden = true;
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) shopIntake(f);
+  });
+  const fi = E('shopfile');
+  E('shopdoor').addEventListener('click', () => fi.click());
+  fi.addEventListener('change', () => { if (fi.files[0]) shopIntake(fi.files[0]); fi.value = ''; });
+}
+// —— receiving a #u= link: the shape arrives, and is renamed before it is kept
+// (untrusted input: strict decode, plain-text label, charset + length capped) ——
+async function shopReceive() {
+  if (!location.hash.startsWith('#u=')) return null;
+  const dec = await shopDecodeFragment(location.hash);
+  history.replaceState(null, '', location.pathname + location.search); // consumed, never re-shared by accident
+  if (!dec.ok) { shopRefuse(dec.refusal); return null; }
+  SHOP.recv = { outline: dec.outline, label: sanitizeName(dec.label) };
+  SHOP.state = 'received';
+  slog('received');
+  E('shopname').value = SHOP.recv.label;
+  shopSheet(`received specimen · "${SHOP.recv.label || 'unnamed'}" · ${dec.outline.length} points, sent as an outline . keep it on your shelf?`, 'shoplabelrow');
+  return SHOP.recv;
+}
+
 const dom = {
   paper: document.getElementById('paper'),
   stage: document.getElementById('stage'),
@@ -1751,9 +2172,13 @@ const dom = {
   pressline: document.getElementById('pressline'),
   card: document.getElementById('card'),
   cline: document.getElementById('cline'),
+  utrace: document.getElementById('utrace'),
+  shopspec: E('shopspec'),
+  grounddoor: document.getElementById('grounddoor'),
+  groundword: document.getElementById('groundword'),
   alphaline: document.getElementById('alphaline'),
   readout: document.getElementById('readout'),
-  sheet: document.getElementById('sheet'),
+  sheet: E('sheet'),
   growline: document.getElementById('growline'),
 };
 function drawPaper() {
@@ -1798,7 +2223,7 @@ function crossHz(samples, dts) { // upward mean-crossings; 0 until a real, regul
 }
 
 const T = { // __TUNNEL — the __PARK contract lineage
-  version: '0.7.0',
+  version: '0.8.0',
   tier: 'boot',
   press: PRESS, // the duotone canary — PRESS-LUM computes luminance-silence from these
   grid: null,
@@ -1851,6 +2276,17 @@ const T = { // __TUNNEL — the __PARK contract lineage
   plate: async () => null, // LAW 6 — the live boot fills this in
   plateLast: null,
   loseDevice: () => {}, // QA hook: forces a WebGPU device loss (the relight drill)
+  // THE MODEL SHOP (phase 8) — the shop's QA surface
+  shopLog: [], // [{t, beat}] arc beats: drop · read · cuts · trace · accession · mount
+  shopShelf: async () => (await shelfRows()).map(({ outline, ground, ...r }) => ({ ...r, pts: outline.length, ground: !!(ground && ground.on) })),
+  shopShare: async (serial) => {
+    const rec = (await shelf.all()).find((r) => r.serial === serial);
+    if (!rec) return null;
+    const enc = await shopEncodeFragment(rec.outline, rec.name);
+    return enc.ok ? { ...enc, moment: SHARE_MOMENT_LINE } : enc;
+  },
+  shopMount: null, // the live boot fills this in (a mounted user specimen needs air)
+  shopGround: null, // the `ground` word — free-slip floor at the wheel line
 };
 window.__TUNNEL = T;
 
@@ -2019,10 +2455,36 @@ async function gpuProbe() {
 const PLANES = ['f16', 'a10']; // THE PAIR ring — [ and ] cycle this, keeping air
 const isWing = (k) => k === 'f16-wing' || k === 'a10-wing';
 const planeOf = (k) => (k === 'f16' || k === 'a10') ? k : (isWing(k) ? k.slice(0, 3) : null);
+// THE MODEL SHOP mount (phase 8): a user record becomes an ARTICLE by the
+// aircraft path exactly — same body-frame bitmap, same 1× dilation, same
+// detector tables, same sting. It is NOT an aircraft: the bar never lights
+// for it, the label reads USER SPECIMEN, and it never joins the plane ring.
+function mountUserGeom(rec) {
+  _acGeom.user = userGeom(rec.outline);
+  const ground = !!(rec.ground && rec.ground.on);
+  AC.user = {
+    serial: rec.serial, name: `"${rec.name.toUpperCase()}" — USER SPECIMEN`,
+    basis: `${rec.prov} · ${rec.date} · ${ground ? 'GROUND — free-slip floor at the wheel line' : 'FREE AIR — no ground effect'}`,
+    pivotL: 0.5, nPts: rec.outline.length, ground, rec,
+  };
+}
 function makeArticle(kind, W, H) {
   if (kind === 'cyl') return { type: 'cyl', cx: W / 4 + 0.5, cy: H / 2 + 0.5, r: Math.round(H / 14) };
   const chord = Math.round(0.17 * W);
   const py = H / 2 + 0.5;
+  if (kind === 'user' && _acGeom.user) {
+    const def = AC.user, g = _acGeom.user, L = chord;
+    // GROUND MODE: the wheel line rides the domain's own free-slip wall — the
+    // road moves with the air, exactly what the heuristic promised. Free air:
+    // the specimen hangs on the sting at mid-height like every other article.
+    const uy = def.ground ? (H - 2) - g.yc0 * L : py;
+    return {
+      type: 'ac', pk: 'user', px: Math.round(0.22 * W + def.pivotL * L) + 0.5, py: uy,
+      L, pivotL: def.pivotL, ymax: g.ymax, yc0: g.yc0, bmp: g.bmp,
+      sepUp: g.upN.map((v) => v * L), sepDn: g.dnN.map((v) => v * L),
+      maxR: g.maxRN * L,
+    };
+  }
   if (kind === 'f16' || kind === 'a10') {
     const def = AC[kind], g = acGeom(kind), L = chord;
     return {
@@ -2058,9 +2520,11 @@ async function bootLive(g) {
   // the ARTICLE-PAIR bar: planes radio (f-16 · a-10 · plate) + article radio
   // (aircraft · wing); cylinder unlisted (?article=cyl); ?article=wing is the
   // phase-3 legacy alias for the F-16's section
-  const KINDS = ['plate', 'f16', 'a10', 'f16-wing', 'a10-wing', 'cyl'];
+  const KINDS = ['plate', 'f16', 'a10', 'f16-wing', 'a10-wing', 'cyl', 'user'];
   let qk = Q.get('article'); if (qk === 'wing') qk = 'f16-wing';
-  let kind = KINDS.includes(qk) ? qk : 'plate';
+  // 'user' is reachable only by mounting a shelf record — never from the URL
+  // (boot state and og.png stay the aircraft forever, asserted)
+  let kind = (KINDS.includes(qk) && qk !== 'user') ? qk : 'plate';
   let plane = planeOf(kind) || 'f16'; // sticky plane selection — the ring boots at the F-16
 
   // ---- POWER state (boot tuple: power 60 — DATA-v1; the plant IS the easing) ----
@@ -2303,7 +2767,9 @@ async function bootLive(g) {
       dom.ac.removeAttribute('hidden');
       dom.ac.setAttribute('d', acPathD());
       silEl = dom.ac;
-      dom.cline.textContent = CLINES[kind];
+      dom.cline.textContent = kind === 'user'
+        ? `${AC.user.serial} · ${AC.user.name} . drag it — find where the air lets go`
+        : CLINES[kind];
     } else {
       dom.wing.removeAttribute('hidden');
       dom.wing.setAttribute('d', wingPathD());
@@ -2326,7 +2792,7 @@ async function bootLive(g) {
       b.classList.toggle('on', on);
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
     }
-    const mode = isWing(kind) ? 'wing' : (A.type === 'ac' ? 'ac' : null);
+    const mode = isWing(kind) ? 'wing' : (A.type === 'ac' && A.pk !== 'user' ? 'ac' : null); // a user specimen is not an aircraft — the pair bar stays dark for it
     for (const b of dom.artmode.querySelectorAll('.aw')) { // article radio: aircraft · wing
       const on = b.dataset.m === mode;
       b.classList.toggle('on', on);
@@ -2336,10 +2802,15 @@ async function bootLive(g) {
     dom.caption.hidden = true; // caption block re-arms with the article
     dom.caption.classList.remove('broke');
     dom.capsuf.textContent = '';
+    // the shop's chrome: the reveal caption (SHOP-REVEAL-CAPTION) + the ground
+    // word ride the mounted user specimen, and nothing else
+    const userMounted = kind === 'user';
+    dom.shopspec.hidden = dom.groundword.hidden = !userMounted;
+    if (userMounted) dom.grounddoor.classList.toggle('on', !!AC.user.ground);
     syncAnnex();
   }
-  async function swapArticle(k) { // behind the spool: α/power/view persist (keep-this-air law), detector re-arms
-    if (swapping || plating || k === kind || !KINDS.includes(k)) return;
+  async function swapArticle(k, force) { // behind the spool: α/power/view persist (keep-this-air law), detector re-arms
+    if (swapping || plating || (k === kind && !force) || !KINDS.includes(k)) return;
     swapping = true;
     kind = k;
     dom.readout.textContent = 'spooling up —';
@@ -2360,7 +2831,9 @@ async function bootLive(g) {
     sealed = false; developed = false; // the fresh rig re-seals on its own if the air is still off
     applyArticleDom();
     const url = new URL(location.href);
-    if (k === 'plate') url.searchParams.delete('article'); else url.searchParams.set('article', k);
+    // user specimens never enter the URL (nor og, nor the title): the shape is
+    // shared by fragment, on purpose, or not at all
+    if (k === 'plate' || k === 'user') url.searchParams.delete('article'); else url.searchParams.set('article', k);
     history.replaceState(null, '', url);
     lastT = performance.now(); // the spool is not a frame
     swapping = false;
@@ -2370,7 +2843,7 @@ async function bootLive(g) {
   // plate/cyl the keys enter the ring at the selected plane's AIRCRAFT.
   function cyclePlane(dir) {
     if (swapping) return;
-    if (kind === 'plate' || kind === 'cyl') { swapArticle(plane); return; }
+    if (kind === 'plate' || kind === 'cyl' || kind === 'user') { swapArticle(plane); return; }
     const nx = PLANES[(PLANES.indexOf(planeOf(kind)) + (dir > 0 ? 1 : PLANES.length - 1)) % PLANES.length];
     swapArticle(isWing(kind) ? `${nx}-wing` : nx);
   }
@@ -2456,6 +2929,52 @@ async function bootLive(g) {
     ovClose();
     swapArticle(b.dataset.k);
   });
+
+  // ---- THE MODEL SHOP rig (phase 8): THE TRACE, the mount, the ground word ----
+  // THE TRACE (UX §1, juice Class B): the pencil draws the picked outline
+  // stroke-by-stroke, ~2.5 s, ONE SHOT — a physical act of the paper
+  // apparatus, never a loop. Reduced motion lands it complete in one frame.
+  function traceUser(outline, ground) {
+    _acGeom.user = userGeom(outline); // the trace draws where the article will actually mount
+    AC.user = { ...AC.user, pivotL: 0.5, ground: !!(ground && ground.on) };
+    dom.utrace.setAttribute('d', acPathFor(makeArticle('user', GW, GH)));
+    dom.utrace.removeAttribute('hidden');
+    let len = 0;
+    try { len = dom.utrace.getTotalLength(); } catch { len = 0; }
+    if (!len || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      dom.utrace.removeAttribute('stroke-dasharray');
+      return Promise.resolve();
+    }
+    dom.utrace.setAttribute('stroke-dasharray', String(len));
+    dom.utrace.setAttribute('stroke-dashoffset', String(len));
+    return new Promise((res) => {
+      const t0 = performance.now();
+      const step = (now) => {
+        const u = Math.min(1, (now - t0) / 2500);
+        dom.utrace.setAttribute('stroke-dashoffset', String(len * (1 - u)));
+        if (u < 1) requestAnimationFrame(step);
+        else { dom.utrace.removeAttribute('stroke-dasharray'); res(); }
+      };
+      requestAnimationFrame(step);
+    });
+  }
+  SHOP.rig = { trace: traceUser };
+  T.shopMount = async (rec) => { // MODEL CHANGE — the spool covers the geometry change, as it does for every article
+    mountUserGeom(rec);
+    dom.utrace.setAttribute('hidden', ''); // the drawing hands off to the solid-ink article
+    await swapArticle('user', true);
+    slog('mount');
+  };
+  T.shopGround = async () => { // the `ground` word: free-slip floor on/off, behind the spool (B-1B law — no live mask morph)
+    if (kind !== 'user' || !AC.user) return null;
+    const rec = AC.user.rec;
+    rec.ground = { ...(rec.ground || {}), on: !AC.user.ground };
+    await shelf.put(rec);
+    await T.shopMount(rec);
+    return !!rec.ground.on;
+  };
+  dom.grounddoor.addEventListener('click', () => { T.shopGround(); });
+  E('shopdoor').hidden = false; // the quiet door — live tier only (stills reads the wall, it cannot mount)
 
   // timestamp-query τ instrument (falls back to the boot-probe value)
   const taus = [rung.tau];
@@ -2713,8 +3232,10 @@ async function bootLive(g) {
     const pk = cap.plane;
     const specimen = cap.kind === 'plate' ? 'FLAT PLATE — REFERENCE'
       : cap.kind === 'cyl' ? 'CYLINDER — REFERENCE'
-        : isWing(cap.kind) ? `${AC[pk].name} — WING SECTION` : `${AC[pk].name} — AIRCRAFT`;
-    const test = cap.kind === 'plate' ? 'R-002' : cap.kind === 'cyl' ? 'R-001' : AC[pk].serial;
+        : cap.kind === 'user' ? AC.user.name // `"TUNDRA" — USER SPECIMEN`
+          : isWing(cap.kind) ? `${AC[pk].name} — WING SECTION` : `${AC[pk].name} — AIRCRAFT`;
+    const test = cap.kind === 'plate' ? 'R-002' : cap.kind === 'cyl' ? 'R-001'
+      : cap.kind === 'user' ? AC.user.serial : AC[pk].serial;
     const chordCells = cap.A.type === 'cyl' ? 2 * cap.A.r : (cap.A.type === 'ac' ? cap.A.L : cap.A.chord);
     const re = C.U0 * (cap.power / 100) * chordCells / ((C.TAU0 - 0.5) / 3);
     const tabular = `α ${cap.alpha.toFixed(1)}° · POWER ${Math.round(cap.power)}% · ${fmtRe(re)} · ${cap.view.toUpperCase()}`;
@@ -2890,6 +3411,9 @@ async function bootLive(g) {
     return nn;
   }
   const plateName = (serial, cap) => { // the filename law
+    if (cap.kind === 'user') { // the specimen's own serial + name carry the file
+      return `chall-tunnel-plate-${String(serial).padStart(2, '0')}-${AC.user.serial.toLowerCase().replace('-', '')}-${AC.user.rec.name.replace(/[^a-z0-9]+/g, '-')}-a${cap.alpha.toFixed(1)}.png`;
+    }
     const art = isWing(cap.kind) ? 'wing' : (cap.plane ? 'aircraft' : cap.kind);
     return `chall-tunnel-plate-${String(serial).padStart(2, '0')}-${cap.plane || cap.kind}-${art}-a${cap.alpha.toFixed(1)}.png`;
   };
@@ -3122,7 +3646,7 @@ async function bootSt(g) {
   try {
     if (qaMode === 'diff') await bootDiff(g);
     else if (qaMode === 'st') await bootSt(g);
-    else await bootLive(g);
+    else { await bootLive(g); await shopReceive(); } // a #u= link lands on the running tunnel, rename-before-keep
   } catch (e) {
     T._err = String((e && e.stack) || e);
     try { g.device.destroy(); } catch { /* already gone */ }
