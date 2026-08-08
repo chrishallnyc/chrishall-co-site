@@ -15,7 +15,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#f6f4ee">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f6f4ee'/%3E%3Cpath d='M1.5 19.4 L30.5 16.4' stroke='%23989690' stroke-width='1'/%3E%3Cpath d='M3.5 19 C6.5 12.6 13.5 10.6 19.5 12 C24.5 13.2 28 15.4 29 16.6 C26 18.2 18.5 20.6 11.5 20.9 C7.5 21 4.5 20.3 3.5 19 Z' fill='%2318181c'/%3E%3Ccircle cx='4.2' cy='19' r='2.4' fill='%23e8b46f'/%3E%3C/svg%3E">
-<!-- CHALL TUNNEL v0.6.0 · phase 6 — THE DIRECTION LOCK: riso (owner GO 2026-08-08; the manual's voice prints in the second ink by default; direction machinery deleted) + METHODS in-page (nine sections, CLAIM-ONE v2) + THE HANGAR WALL opens (datum-wall bank index: TEST 001 + TEST 006 drawn at ladder weights, R-001/R-002 stubs) · on phase 5 (A-10 + THE PAIR) + phase 4 (pressure view) + test 001 (F-16, POWER) -->
+<!-- CHALL TUNNEL v0.7.0 · phase 7 — THE RECORD SURFACES: wind-off portraits (LAW 6b: power→0 seals the page, the trace develops ~3.5 s, done-beat) + PLATE exports (3200×2000 offscreen re-render, honesty microline verbatim, serial accession, filename law) + THE STILLS DIGNITY TIER (no-webgpu / prefers-reduced-motion / ?force=stills → one composed static state: paper + TEST 001 + a time-averaged impression from this instrument's own cpu oracle) + storage-throw boot + device-loss relight · on phase 6 (RISO lock + METHODS + hangar wall) + phase 5 (A-10 + THE PAIR) + phase 4 (pressure view) -->
 <style>
 :root { --bg:#f6f4ee; --ink:#18181c; --mid:#56565e; --dim:#69675f; --hair:#989690; --acc:#e8b46f; --accd:#8a5d0c; --spec:#255079; }
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -196,7 +196,7 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
     <nav id="views" aria-label="views"><button class="vw on" data-v="smoke" type="button" aria-pressed="true">smoke</button> · <button class="vw" data-v="specks" type="button" aria-pressed="false">specks</button> · <button class="vw" data-v="pressure" type="button" aria-pressed="false">pressure</button></nav>
     <p id="pressline" hidden>pressure view · warm = compression · cool = suction · magnitude is density, hue is sign only</p>
   </div>
-  <p class="doors"><button class="door" id="methodsdoor" type="button">methods →</button> · <button class="door" id="hangardoor" type="button">hangar →</button></p>
+  <p class="doors"><button class="door" id="platedoor" type="button">plate ↓</button> · <button class="door" id="methodsdoor" type="button">methods →</button> · <button class="door" id="hangardoor" type="button">hangar →</button></p>
   <a class="cwatch" href="https://admin.chall.net/tunnel-mission">watch it being built → admin.chall.net/tunnel-mission</a>
 </aside>
 <!-- —— METHODS: the instrument's own paper, in-page (R1 assembly; zero requests —
@@ -262,6 +262,44 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 </main>
 <script type="module">
 'use strict';
+// ============================================================================
+// CHALL TUNNEL — phase 7 "the record surfaces + the dignity tiers"
+// Phase 7 adds:
+//   - WIND-OFF TRACE (LAW 6b): dragging POWER to 0 SEALS the page — the
+//     POWER-GATE (<15%) already holds the detector and freezes the captions;
+//     the seal freezes deposit absorption (pen up, fade frozen), then the
+//     accumulated ink DEVELOPS into the long-exposure portrait (~3.5 s
+//     smoothstep gain ramp, capped under LAW 1's 0.55) and the done-beat
+//     prints in the measured voice: `the trace is set — PLATE TO KEEP IT`.
+//     Power back up: the spool covers an honest reset — the deposit clears;
+//     a set trace never pretends to survive new air.
+//   - PLATE (LAW 6): the `plate` door word + Space — pen up + absorption
+//     frozen + a 3200×2000 OFFSCREEN re-render (§6.1 as amended by PLAN2 §6):
+//     paper + unmasked dot grid + double hairline frame (insets 26/30) + the
+//     field at NATIVE texel scale (1:1 blit; integer 2:1 box only when the
+//     deposit outsizes the interior — upscaling does not exist in this
+//     program) + silhouette/protractor/labels re-rendered as vectors at
+//     target resolution + caption band (PLATE NN · specimen · tabular state ·
+//     the measured caption at capture, stall keyword the only warm text) +
+//     the honesty microline VERBATIM + baseboard (brand · chord scale bar ·
+//     TEST NNN · date · version). Serial rides challtunnel.serial through the
+//     throw-safe storage shim; filename law
+//     chall-tunnel-plate-NN-<plane>-<article>-aN.N.png; PNG download.
+//   - THE STILLS TIER (the dignity pathway, ONE implementation): no-WebGPU
+//     browsers + prefers-reduced-motion + ?force=stills land on a COMPOSED
+//     static state — paper + the TEST 001 silhouette + a pre-drawn
+//     time-averaged ink impression (embedded 12-bit trace, computed by this
+//     instrument's own cpu oracle on the build machine) + every text door
+//     (METHODS, the hangar) fully functional. Honest label prints verbatim.
+//     Reduced-motion note: the live tier's only DOM keyframe (the .aw tick)
+//     already dies under the media query; buffet/sweep land in later phases
+//     carrying the same law.
+//   - ROBUSTNESS: every storage touch rides the throw-safe shim (the page
+//     boots with storage stubbed to throw); WebGPU device.lost → one relight
+//     behind the spool (a session marker is the breaker), a second loss
+//     inside 10 min — or a storage-less browser — lands the stills tier.
+//     (No WebGL context exists in this build; webglcontextlost has nothing
+//     to guard — the WebGL2 G tier gains its wait-for-restore when it lands.)
 // ============================================================================
 // CHALL TUNNEL — phase 6 "THE DIRECTION LOCK + R1 assembly begins"
 // Phase 6 adds:
@@ -1018,7 +1056,8 @@ function buildHangar() { // hung fresh at each open — one scale, one rail, ali
     const bt = document.createElement('button');
     bt.type = 'button'; bt.className = 'htest'; bt.dataset.k = r.k;
     bt.textContent = 'test →';
-    lab.appendChild(nm); lab.appendChild(se); lab.appendChild(le); lab.appendChild(bt);
+    lab.appendChild(nm); lab.appendChild(se); lab.appendChild(le);
+    if (T.tier !== 'stills') lab.appendChild(bt); // stills: the wall reads; it cannot mount
     row.appendChild(lab);
     rowsEl.appendChild(row);
   }
@@ -1401,8 +1440,10 @@ class Ink {
     this.inkU = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
     this.covCnt = device.createBuffer({ size: 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST });
     this.viewMode = 0; // 0 smoke · 1 pressure · 2 specks (fresh rig boots at smoke; the caller re-applies)
+    this.dv = 1; // LAW 6b develop gain — 1.0 is f32-exact: live rendering stays byte-identical
+    this.sealed = false; // LAW 6/6b: pen up + absorption frozen (the composite still draws)
     this.viewU = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
-    device.queue.writeBuffer(this.viewU, 0, new Uint32Array([0, 0, 0, 0]));
+    this.writeViewU();
     this.sampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear' });
     this.seedParticles(1);
     const adv = `
@@ -1470,10 +1511,11 @@ fn vmain(@builtin(vertex_index) vi: u32) -> @builtin(position) vec4f {
 @fragment
 fn fmain() -> @location(0) vec4f { return vec4f(0.0); }`;
     const comp = `
+struct VU { mode: u32, dv: f32, pad0: f32, pad1: f32 }
 @group(0) @binding(0) var dep: texture_2d<f32>;
 @group(0) @binding(1) var vel: texture_2d<f32>;
 @group(0) @binding(2) var vsamp: sampler;
-@group(0) @binding(3) var<uniform> vu: vec4<u32>;
+@group(0) @binding(3) var<uniform> vu: VU;
 @vertex
 fn vmain(@builtin(vertex_index) vi: u32) -> @builtin(position) vec4f {
   let xy = vec2f(f32((vi << 1u) & 2u), f32(vi & 2u));
@@ -1482,9 +1524,11 @@ fn vmain(@builtin(vertex_index) vi: u32) -> @builtin(position) vec4f {
 @fragment
 fn fmain(@builtin(position) fc: vec4f) -> @location(0) vec4f {
   let d = textureLoad(dep, vec2<i32>(fc.xy), 0).r;
-  let a = min(d, ${f(INK.cap)}); // LAW 1 band cap; under LAW 0's 0.62 by construction — alpha is view-invariant
+  // LAW 1 band cap (under LAW 0's 0.62 by construction — alpha is view-invariant);
+  // vu.dv is the LAW 6b develop gain: 1.0 live (f32-exact), ramping only wind-off
+  let a = min(d * vu.dv, ${f(INK.cap)});
   var col = vec3f(${f(0x18 / 255)}, ${f(0x18 / 255)}, ${f(0x1c / 255)});
-  if (vu.x == 1u) {
+  if (vu.mode == 1u) {
     // PRESSURE view: hue is SIGN ONLY — p = c_s²ρ vs freestream ρ = 1, live from the solver field (velTex.z)
     let rho = textureSampleLevel(vel, vsamp, fc.xy / vec2f(textureDimensions(dep)), 0.0).z;
     col = select(vec3f(${hexRGB(PRESS.cool).map(f).join(', ')}), vec3f(${hexRGB(PRESS.warm).map(f).join(', ')}), rho >= 1.0);
@@ -1568,7 +1612,7 @@ fn cover(@builtin(global_invocation_id) gid: vec3<u32>) {
     if (this.deposit) this.deposit.destroy();
     this.deposit = this.device.createTexture({
       size: [w, h], format: 'r16float',
-      usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
+      usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC, // COPY_SRC: the plate reads the negative back
     });
     this.depView = this.deposit.createView();
     this.bgComp = this.device.createBindGroup({
@@ -1586,21 +1630,37 @@ fn cover(@builtin(global_invocation_id) gid: vec3<u32>) {
     });
     this.depW = w; this.depH = h;
   }
+  writeViewU() {
+    const b = new ArrayBuffer(16);
+    new Uint32Array(b)[0] = this.viewMode;
+    new Float32Array(b)[1] = this.dv;
+    this.device.queue.writeBuffer(this.viewU, 0, b);
+  }
   setView(mode) { // 0 smoke · 1 pressure · 2 specks — the comp hue is view-gated; specks drop the afterglow
     this.viewMode = mode;
-    this.device.queue.writeBuffer(this.viewU, 0, new Uint32Array([mode, 0, 0, 0]));
+    this.writeViewU();
+  }
+  setDevelop(v) { this.dv = v; this.writeViewU(); } // the LAW 6b develop ramp
+  setSealed(on) { this.sealed = on; } // pen up + absorption frozen — the deposit goes bit-static
+  clearDeposit() { // power returns: the trace clears honestly behind the spool
+    const enc = this.device.createCommandEncoder();
+    const p = enc.beginRenderPass({ colorAttachments: [{ view: this.depView, loadOp: 'clear', storeOp: 'store', clearValue: { r: 0, g: 0, b: 0, a: 0 } }] });
+    p.end();
+    this.device.queue.submit([enc.finish()]);
   }
   encodeFrame(enc, canvasView, dtS) {
-    this.frame++; this.writeU();
-    { const p = enc.beginComputePass(); p.setPipeline(this.pAdvect); p.setBindGroup(0, this.bgAdvect); p.dispatchWorkgroups(NP / 256); p.end(); }
-    // absorption fade (LAW 2 minimal: slow ink dies, never pools); SPECKS view
-    // keeps no afterglow at all — the raw instantaneous speck field
-    const decay = this.viewMode === 2 ? 0 : Math.exp(-dtS / INK.absorbS);
-    {
-      const p = enc.beginRenderPass({ colorAttachments: [{ view: this.depView, loadOp: 'load', storeOp: 'store' }] });
-      p.setPipeline(this.pFade); p.setBlendConstant({ r: decay, g: decay, b: decay, a: decay }); p.draw(3);
-      p.setPipeline(this.pPoints); p.setBindGroup(0, this.bgPoints); p.draw(NP);
-      p.end();
+    if (!this.sealed) { // LAW 6/6b seal: pen up + absorption frozen — only the composite below runs
+      this.frame++; this.writeU();
+      { const p = enc.beginComputePass(); p.setPipeline(this.pAdvect); p.setBindGroup(0, this.bgAdvect); p.dispatchWorkgroups(NP / 256); p.end(); }
+      // absorption fade (LAW 2 minimal: slow ink dies, never pools); SPECKS view
+      // keeps no afterglow at all — the raw instantaneous speck field
+      const decay = this.viewMode === 2 ? 0 : Math.exp(-dtS / INK.absorbS);
+      {
+        const p = enc.beginRenderPass({ colorAttachments: [{ view: this.depView, loadOp: 'load', storeOp: 'store' }] });
+        p.setPipeline(this.pFade); p.setBlendConstant({ r: decay, g: decay, b: decay, a: decay }); p.draw(3);
+        p.setPipeline(this.pPoints); p.setBindGroup(0, this.bgPoints); p.draw(NP);
+        p.end();
+      }
     }
     {
       const p = enc.beginRenderPass({
@@ -1643,6 +1703,18 @@ const Q = new URLSearchParams(location.search);
 // canaries forever. The one token object every CANVAS chrome draw reads
 // (paper dots, power scale, protractor) stays measured-voice ink. ——
 const TOK = { ink: '#18181c', mid: '#56565e', hair: '#989690' };
+
+// —— the storage shim (throw-safe): EVERY storage touch rides this — private
+// windows, blocked storage, and the STORAGE-THROW QA lane all boot clean.
+// Reads answer null, writes vanish silently; the page never asks twice. ——
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch { /* the page boots without storage */ } },
+  sget(k) { try { return sessionStorage.getItem(k); } catch { return null; } },
+  sset(k, v) { try { sessionStorage.setItem(k, v); } catch { /* same law */ } },
+};
+// the honesty microline — VERBATIM on every plate, non-negotiable, forever
+const MICROLINE = 'desktop tunnel · 2d incompressible · re ~10³–10⁴ · not flight data';
 
 const dom = {
   paper: document.getElementById('paper'),
@@ -1727,7 +1799,7 @@ function crossHz(samples, dts) { // upward mean-crossings; 0 until a real, regul
 }
 
 const T = { // __TUNNEL — the __PARK contract lineage
-  version: '0.6.0',
+  version: '0.7.0',
   tier: 'boot',
   press: PRESS, // the duotone canary — PRESS-LUM computes luminance-silence from these
   grid: null,
@@ -1777,13 +1849,152 @@ const T = { // __TUNNEL — the __PARK contract lineage
   qaStepN: async () => {},
   qaDumpFields: async () => null,
   qaProbeTail: async () => null,
+  plate: async () => null, // LAW 6 — the live boot fills this in
+  plateLast: null,
+  loseDevice: () => {}, // QA hook: forces a WebGPU device loss (the relight drill)
 };
 window.__TUNNEL = T;
 
+function acPathFor(A) { // the master outline in grid coords at α=0 (rotation is a transform) — shared: live + stills + plate
+  const geo = acGeom(A.pk), L = A.L;
+  let d = '';
+  for (let i = 0; i < geo.pts.length - 1; i++) {
+    const gx = A.px + (geo.pts[i][0] - A.pivotL) * L;
+    const gy = A.py - (geo.pts[i][1] - A.yc0) * L; // master y-up → grid y-down
+    d += (i ? 'L' : 'M') + gx.toFixed(2) + ' ' + gy.toFixed(2);
+  }
+  return d + 'Z';
+}
+
+// —— THE STILLS TIER (the dignity pathway — ONE implementation for no-WebGPU
+// browsers, prefers-reduced-motion, and ?force=stills; DECISIONS: silent-
+// converge-and-show). The page composes a STATIC state: paper + the TEST 001
+// silhouette + a pre-drawn time-averaged ink impression + every text door
+// (METHODS, the hangar) fully functional. The impression is honest: its
+// polylines are mean-flow streamlines computed by THIS instrument's cpu
+// oracle (qa/still-trace.mjs in the build record — the f16 mask at α 4.0°,
+// fields time-averaged over the settled window) on the build machine, packed
+// 12-bit exactly like the masters. ——
+const STILL = {
+  alpha: 4.0, gw: 1792, gh: 896,
+  label: 'time-averaged impression · the live tunnel needs webgpu — chrome on an apple-silicon mac',
+  banner: 'LIVE TUNNEL REQUIRES WEBGPU — SHOWING THE SET TRACE . chrome on an apple-silicon mac runs the solver live',
+  lens: [2, 5, 5, 6, 6, 6, 7, 11, 23, 15, 11, 9, 9, 9, 6, 4, 4],
+  packed: 'AlFI7CEtAlIfLaIbaSICuCIH7CHzAlL2LpLxaKLNt6LV7CK4AlPNMAPHZkOWrqOnyzOb7CN/AlSkMXSfZcRerDR4yrRp7CRFAlV7MtV5ZbUjqcVMy5U47CUNAlZSNMZXXgXuZiXipPYl0LYH7CXmAlcpNqc+VebSYMajZnaYbKaggIbfodcEvHbn2fbt7CbdAlgAHXgMMOguNwhLOFhdOciDPJiYRCi3SFjVVZj0WskNYtj4aljQbmilcwhVdjg4gQgBinfkkafhokf5uwfi2ff87Cf5AljWGLjhKcj8MlkaPglfSGmNU0msW9m5Yomyaambhjj7j7jeuKjZ1ij87CkIAlmtFVm2JYnML/noSQpFWppjZ+pShMnlk/nIt6m87CnsAlqEIqqdSRsAWcsVaAsIhtqzmHqcuUqW7Cq9AltbIEtuSLu9WNvNZ5vEiVuBndttu1tr7CuLAlwyHmxBR8x9WGyJaCyCi1xPoTw/vkw/7CxYAl0JHP0UWH1Joy0TwL0T7C0mAl3gV/4MpK3n7C30Al63WA7RpZ677C7D',
+};
+function unpack12(b64) { // absolute 12-bit values, two per 3 bytes (the masters' packing, no deltas)
+  const s = atob(b64), vals = [];
+  for (let i = 0; i + 2 < s.length + 1; i += 3) {
+    const a = s.charCodeAt(i), b = s.charCodeAt(i + 1), c = s.charCodeAt(i + 2);
+    vals.push((a << 4) | (b >> 4), ((b & 15) << 8) | c);
+  }
+  return vals;
+}
+function stillPolys() {
+  const v = unpack12(STILL.packed), polys = [];
+  let k = 0;
+  for (const nn of STILL.lens) {
+    const pts = [];
+    for (let i = 0; i < nn; i++, k += 2) pts.push([v[k] / 4095 * STILL.gw, v[k + 1] / 4095 * STILL.gh]);
+    polys.push(pts);
+  }
+  return polys;
+}
+function drawStillTrace() {
+  const c = dom.etch, g2 = c.getContext('2d');
+  if (!g2) return;
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  g2.setTransform(1, 0, 0, 1, 0, 0);
+  g2.clearRect(0, 0, c.width, c.height);
+  const sx = c.width / STILL.gw, sy = c.height / STILL.gh;
+  g2.strokeStyle = TOK.ink;
+  g2.lineWidth = Math.max(1, 0.7 * dpr);
+  g2.lineJoin = 'round'; g2.lineCap = 'round';
+  g2.globalAlpha = 0.3; // LAW 1 band — one quiet weight; a set trace, not a live pen
+  for (const pts of stillPolys()) {
+    if (pts.length < 2) continue;
+    g2.beginPath();
+    for (let i = 0; i < pts.length; i++) {
+      if (i) g2.lineTo(pts[i][0] * sx, pts[i][1] * sy);
+      else g2.moveTo(pts[i][0] * sx, pts[i][1] * sy);
+    }
+    g2.stroke();
+  }
+  g2.globalAlpha = 1;
+}
+function stillsLayout() {
+  const aspect = STILL.gw / STILL.gh, pad = 24;
+  const availW = innerWidth - 2 * pad, availH = innerHeight - 2 * pad;
+  let w = availW, h = w / aspect;
+  if (h > availH) { h = availH; w = h * aspect; }
+  dom.stage.style.width = w + 'px'; dom.stage.style.height = h + 'px';
+  dom.specimen.setAttribute('viewBox', `0 0 ${STILL.gw} ${STILL.gh}`);
+  dom.specimen.setAttribute('preserveAspectRatio', 'none');
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  dom.etch.width = Math.max(2, Math.round(w * dpr));
+  dom.etch.height = Math.max(2, Math.round(h * dpr));
+  const stTop = Math.round((innerHeight - h) / 2);
+  dom.capstack.style.top = Math.round((innerHeight + h) / 2 + 10) + 'px';
+  // the honest label rides the stage's right edge (the centered position can
+  // hide its head behind the card on short viewports — the label prints whole)
+  dom.capstack.style.left = 'auto';
+  dom.capstack.style.transform = 'none';
+  dom.capstack.style.textAlign = 'right';
+  dom.capstack.style.right = Math.round((innerWidth - w) / 2) + 'px';
+  dom.speclabel.style.right = Math.round((innerWidth - w) / 2 + 14) + 'px';
+  dom.speclabel.style.bottom = (stTop + 12) + 'px';
+  drawPaper();
+  drawStillTrace();
+}
 function stills() {
   T.tier = 'stills'; T.grid = null; T.ready = true;
-  dom.stage.hidden = true; dom.card.hidden = true;
-  dom.sheet.hidden = false; dom.growline.hidden = false;
+  try {
+    const A = makeArticle('f16', STILL.gw, STILL.gh);
+    dom.ac.setAttribute('d', acPathFor(A));
+    dom.ac.setAttribute('transform', `rotate(${STILL.alpha} ${A.px} ${A.py})`);
+    dom.ac.removeAttribute('hidden');
+    for (const el of [dom.body, dom.plate, dom.wing]) el.setAttribute('hidden', '');
+    dom.sl1.textContent = `${AC.f16.serial} · ${AC.f16.name}`;
+    dom.sl2.textContent = AC.f16.basis;
+    dom.speclabel.hidden = false;
+    dom.capbase.textContent = STILL.label; // the honest line, verbatim
+    dom.capkw.textContent = ''; dom.capsuf.textContent = '';
+    dom.caption.classList.remove('broke');
+    dom.caption.hidden = false;
+    for (const el of [dom.gap, dom.spec1, dom.spec2, dom.spec3, dom.pairk, dom.bridge]) el.hidden = true;
+    dom.articles.hidden = true; dom.artmode.hidden = true;
+    dom.gpu.style.display = 'none'; // a lost webgpu canvas can hold its last frame — the trace owns the stage
+    dom.etch.hidden = false;
+    dom.stage.hidden = false;
+    dom.sheet.hidden = true;
+    dom.cline.textContent = STILL.banner;
+    dom.readout.textContent = 'wind off — the trace is set';
+    dom.alphaline.hidden = true;
+    dom.power.hidden = true; dom.viewsrow.hidden = true;
+    document.getElementById('platedoor').hidden = true; // plates are live records
+    dom.card.hidden = false;
+    dom.card.classList.add('on');
+    stillsLayout();
+  } catch (e) { // the placeholder sheet is the fallback of the fallback
+    T._err = T._err || String(e);
+    dom.stage.hidden = true; dom.card.hidden = true;
+    dom.sheet.hidden = false; dom.growline.hidden = false;
+  }
+}
+// —— device-loss doctrine: the FIRST loss relights the instrument behind the
+// spool (one honest reload; a session marker is the breaker); a second loss
+// inside 10 minutes — or a browser whose storage refuses the marker — lands
+// the stills tier. Fail-safe by construction: no marker held, no reload loop. ——
+function deviceLost() {
+  if (T.tier === 'stills') return;
+  if (T._halt) T._halt(); // stop the frame loop before the tier decides
+  if (T.tier === 'boot') return stills();
+  const mark = Number(store.sget('challtunnel.relit') || 0);
+  if (!(Date.now() - mark < 600000)) {
+    store.sset('challtunnel.relit', String(Date.now()));
+    if (store.sget('challtunnel.relit')) { location.reload(); return; } // marker held — safe to relight once
+  }
+  stills(); // second loss inside the window (or storage-less): the dignity tier
 }
 
 async function gpuProbe() {
@@ -1860,6 +2071,10 @@ async function bootLive(g) {
   // duotone is a VIEW, never the default (COLOR-SCIENCE §2b deployment law) ----
   let view = 'smoke';
   const VIEWM = { smoke: 0, pressure: 1, specks: 2 };
+
+  // ---- WIND-OFF state (LAW 6b): power→0 seals; the portrait develops ----
+  let sealed = false, sealT0 = 0, developed = false, plating = false;
+  const DEVELOP_S = 3.5, DEVELOP_GAIN = 1.6; // ~3-4 s ramp; the comp caps under LAW 1's 0.55
 
   let rung = null;
   {
@@ -2040,16 +2255,7 @@ async function bootLive(g) {
 
   // ---- article mount (DOM) — the silhouettes are VECTOR, on top, device px ----
   let silEl = null;
-  function acPathD() { // the master outline in grid coords at α=0 (rotation is a transform)
-    const geo = acGeom(A.pk), L = A.L;
-    let d = '';
-    for (let i = 0; i < geo.pts.length - 1; i++) {
-      const gx = A.px + (geo.pts[i][0] - A.pivotL) * L;
-      const gy = A.py - (geo.pts[i][1] - A.yc0) * L; // master y-up → grid y-down
-      d += (i ? 'L' : 'M') + gx.toFixed(2) + ' ' + gy.toFixed(2);
-    }
-    return d + 'Z';
-  }
+  const acPathD = () => acPathFor(A); // shared with the stills tier (one path law)
   function wingPathD() { // the generator section (~120 pts), TE→upper→LE→lower
     const c = A.chord, pts = wingOutline(A.sec, 120);
     let d = '';
@@ -2134,7 +2340,7 @@ async function bootLive(g) {
     syncAnnex();
   }
   async function swapArticle(k) { // behind the spool: α/power/view persist (keep-this-air law), detector re-arms
-    if (swapping || k === kind || !KINDS.includes(k)) return;
+    if (swapping || plating || k === kind || !KINDS.includes(k)) return;
     swapping = true;
     kind = k;
     dom.readout.textContent = 'spooling up —';
@@ -2152,6 +2358,7 @@ async function bootLive(g) {
     // per-article re-arm: fresh α≈0 baseline captured post-spool (detector law)
     sepFrac = 0; sepBase = null; sepBusy = false; sepEvery = 0;
     capState = null; capCand = null; mBreak = null;
+    sealed = false; developed = false; // the fresh rig re-seals on its own if the air is still off
     applyArticleDom();
     const url = new URL(location.href);
     if (k === 'plate') url.searchParams.delete('article'); else url.searchParams.set('article', k);
@@ -2212,13 +2419,16 @@ async function bootLive(g) {
       else if (e.key === 'ArrowRight') { setPowerTarget(powerTarget + 5); e.preventDefault(); }
       else if (e.key === '[') { cyclePlane(-1); e.preventDefault(); }
       else if (e.key === ']') { cyclePlane(1); e.preventDefault(); }
+      else if (e.key === ' ' && !(document.activeElement && document.activeElement.tagName === 'BUTTON')) {
+        plate(); e.preventDefault(); // Space = plate (a focused button keeps its own Space)
+      }
     });
   }
 
   // ---- mount ----
   applyArticleDom();
   layout();
-  addEventListener('resize', () => layout());
+  addEventListener('resize', () => { if (running) layout(); }); // a halted rig (device loss) leaves the stage to its successor
   dom.sheet.hidden = true;
   dom.stage.hidden = false;
   dom.card.hidden = false;
@@ -2238,6 +2448,7 @@ async function bootLive(g) {
     });
   for (const b of dom.views.querySelectorAll('.vw'))
     b.addEventListener('click', () => { setView(b.dataset.v); });
+  document.getElementById('platedoor').addEventListener('click', () => { plate(); });
   // the hangar wall's test → doors: mount the row's article KEEPING AIR
   // (α/power/view ride through the spooled swap — the keep-this-air law)
   document.getElementById('hangarrows').addEventListener('click', (e) => {
@@ -2331,6 +2542,31 @@ async function bootLive(g) {
         drawPower();
         syncAnnex(); // POWER-GATE: gap line suppressed below 15%
       }
+      // —— LAW 6b wind-off: the seal, the develop, the honest reset ——
+      if (!sealed && powerApplied === 0 && powerTarget === 0) {
+        sealed = true; developed = false; sealT0 = now; // the page seals — pen up, absorption frozen
+        ink.setSealed(true);
+      } else if (sealed && powerTarget > 0) { // power returns: the spool covers the reset
+        sealed = false; developed = false;
+        ink.setSealed(false); ink.setDevelop(1);
+        ink.clearDeposit(); // the trace clears honestly — a set portrait never rides new air
+        dom.caption.hidden = true; dom.caption.classList.remove('broke');
+        dom.capsuf.textContent = '';
+        capState = null; capCand = null; // the detector re-arms past the POWER-GATE
+      }
+      if (sealed && !developed) {
+        const u = Math.min(1, (now - sealT0) / (DEVELOP_S * 1000));
+        ink.setDevelop(1 + (DEVELOP_GAIN - 1) * u * u * (3 - 2 * u)); // smoothstep gain ramp
+        if (u >= 1) {
+          developed = true; // the done-beat — measured voice, no accent
+          dom.capbase.textContent = 'the trace is set — ';
+          dom.capkw.textContent = 'PLATE TO KEEP IT';
+          dom.capsuf.textContent = '';
+          dom.caption.classList.remove('broke');
+          dom.caption.hidden = false;
+          T.capLog.push({ t: performance.now(), s: 'trace-set', article: kind });
+        }
+      }
       try {
         encodeFrame(dt, frames % 8 === 0);
       } catch (e) { T._err = String(e); }
@@ -2347,7 +2583,7 @@ async function bootLive(g) {
         if (ab !== lastAB) { lastAB = ab; syncAnnex(); }
         if (etchOn) drawEtch();
       }
-      if (frames % 90 === 0 && !covBusy) {
+      if (frames % 90 === 0 && !covBusy && !sealed) { // a sealed wash is bit-static — nothing to govern
         covBusy = true;
         ink.coverage((b, n) => S.readBuf(b, n))
           .then((cov) => { ink.govern(cov); covBusy = false; })
@@ -2445,6 +2681,272 @@ async function bootLive(g) {
     dom.stage.addEventListener('pointercancel', endDrag);
   }
 
+  // ---- PLATE (LAW 6): pen up + absorption frozen + a 3200×2000 offscreen
+  // re-render (§6.1 as amended by PLAN2 §6). The field prints at NATIVE texel
+  // scale — a 1:1 blit of the deposit (integer 2:1 box only when the deposit
+  // outsizes the interior; upscaling does not exist in this program); every
+  // line and every glyph re-renders as vectors at target resolution. ----
+  const halfToFloat = (hb) => {
+    const sg = hb & 0x8000 ? -1 : 1, e = (hb >> 10) & 0x1f, m = hb & 0x3ff;
+    if (e === 0) return sg * m * 2 ** -24;
+    if (e === 31) return m ? NaN : sg * Infinity;
+    return sg * (1 + m / 1024) * 2 ** (e - 15);
+  };
+  async function readDeposit() { // the negative, mapped back — r16float rows 256-byte aligned
+    const w = ink.depW, h = ink.depH;
+    const bpr = Math.ceil((w * 2) / 256) * 256;
+    const buf = device.createBuffer({ size: bpr * h, usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST });
+    const enc = device.createCommandEncoder();
+    enc.copyTextureToBuffer({ texture: ink.deposit }, { buffer: buf, bytesPerRow: bpr }, [w, h]);
+    device.queue.submit([enc.finish()]);
+    await buf.mapAsync(GPUMapMode.READ);
+    const u16 = new Uint16Array(buf.getMappedRange().slice(0));
+    buf.unmap(); buf.destroy();
+    return { w, h, rowU16: bpr / 2, u16 };
+  }
+  const fmtRe = (re) => { // the readout's live-re law at plate register; unicode exponents (glyph set holds)
+    if (re < 1) return 'WIND OFF';
+    if (re < 1000) return `RE ~${Math.round(re)} NOMINAL`;
+    const e = Math.min(4, Math.floor(Math.log10(re)));
+    return `RE ~${(re / 10 ** e).toFixed(1)}×10${e === 4 ? '⁴' : '³'} NOMINAL`;
+  };
+  function plateStrings(cap) { // everything the chrome prints, from the captured state
+    const pk = cap.plane;
+    const specimen = cap.kind === 'plate' ? 'FLAT PLATE — REFERENCE'
+      : cap.kind === 'cyl' ? 'CYLINDER — REFERENCE'
+        : isWing(cap.kind) ? `${AC[pk].name} — WING SECTION` : `${AC[pk].name} — AIRCRAFT`;
+    const test = cap.kind === 'plate' ? 'R-002' : cap.kind === 'cyl' ? 'R-001' : AC[pk].serial;
+    const chordCells = cap.A.type === 'cyl' ? 2 * cap.A.r : (cap.A.type === 'ac' ? cap.A.L : cap.A.chord);
+    const re = C.U0 * (cap.power / 100) * chordCells / ((C.TAU0 - 0.5) / 3);
+    const tabular = `α ${cap.alpha.toFixed(1)}° · POWER ${Math.round(cap.power)}% · ${fmtRe(re)} · ${cap.view.toUpperCase()}`;
+    return { specimen, test, tabular, chordCells };
+  }
+  function composePlate(cap, dep, fields, serial) {
+    const PW = 3200, PH = 2000, ps = 2; // layout runs at 1600×1000; rasterization is native at target res
+    const cv = document.createElement('canvas');
+    cv.width = PW; cv.height = PH;
+    const g = cv.getContext('2d');
+    const FONT = (px, wt) => `${wt ? wt + ' ' : ''}${px}px "SF Mono", ui-monospace, Menlo, Consolas, monospace`;
+    g.scale(ps, ps);
+    // paper + the unmasked dot grid (§6.1 — the grid ships in the artifact)
+    g.fillStyle = '#f6f4ee'; g.fillRect(0, 0, 1600, 1000);
+    g.fillStyle = TOK.hair; g.globalAlpha = 0.5;
+    for (let y = 20; y < 1000; y += 20)
+      for (let x = 20; x < 1600; x += 20) { g.beginPath(); g.arc(x, y, 0.75, 0, 6.2832); g.fill(); }
+    g.globalAlpha = 1;
+    // the field, at native texel scale (1:1 blit; integer 2:1 box if oversize)
+    const FX0 = 31, FX1 = 1569, FY0 = 31, FY1 = 880; // interior above the caption rule
+    const devW = (FX1 - FX0) * ps, devH = (FY1 - FY0) * ps;
+    const bx = (dep.w <= devW && dep.h <= devH) ? 1 : 2;
+    const ow = Math.floor(dep.w / bx), oh = Math.floor(dep.h / bx);
+    const img = new ImageData(ow, oh);
+    const inkC = [0x18, 0x18, 0x1c], warm = [0x48, 0x2b, 0x16], cool = [0x1c, 0x35, 0x4e];
+    for (let y = 0; y < oh; y++) {
+      for (let x = 0; x < ow; x++) {
+        let d = 0;
+        for (let j = 0; j < bx; j++)
+          for (let i = 0; i < bx; i++) d += halfToFloat(dep.u16[(y * bx + j) * dep.rowU16 + x * bx + i]);
+        d /= bx * bx; // integer box — area-exact, the one sanctioned minifier
+        const a = Math.min(d * cap.dv, INK.cap);
+        if (!(a > 0.002)) continue;
+        let col = inkC;
+        if (cap.view === 'pressure' && fields) {
+          const gx = Math.min(GW - 1, ((x + 0.5) * GW / ow) | 0);
+          const gy = Math.min(GH - 1, ((y + 0.5) * GH / oh) | 0);
+          col = fields[(gy * GW + gx) * 3] >= 1 ? warm : cool;
+        }
+        const o = (y * ow + x) * 4;
+        img.data[o] = col[0]; img.data[o + 1] = col[1]; img.data[o + 2] = col[2];
+        img.data[o + 3] = Math.round(a * 255);
+      }
+    }
+    const tmp = document.createElement('canvas');
+    tmp.width = ow; tmp.height = oh;
+    tmp.getContext('2d').putImageData(img, 0, 0);
+    const devX = Math.round(FX0 * ps + (devW - ow) / 2), devY = Math.round(FY0 * ps + (devH - oh) / 2);
+    g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
+    g.imageSmoothingEnabled = false; // 1:1 — no resample exists on this path
+    g.drawImage(tmp, devX, devY);
+    g.restore();
+    // grid → layout mapping for the vector layers (they re-render, never scale)
+    const cell = ow / GW / ps, fx0 = devX / ps, fy0 = devY / ps;
+    const fw = ow / ps, fh = oh / ps;
+    // the protractor + needle at capture (etch class: hairlines, 1 plate px)
+    if (cap.A.type !== 'cyl') {
+      const px = fx0 + cap.A.px * cell, py = fy0 + cap.A.py * cell;
+      const r = Math.min(180, 0.42 * fh);
+      g.strokeStyle = TOK.hair; g.lineWidth = 0.5;
+      g.beginPath(); g.arc(px, py, r, -32 * Math.PI / 180, 32 * Math.PI / 180); g.stroke();
+      for (let dg = -30; dg <= 30; dg += 5) {
+        const ia = dg % 10 === 0;
+        const a = dg * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a);
+        const l = ia ? 10 : 6;
+        g.strokeStyle = ia ? TOK.ink : TOK.hair;
+        g.beginPath(); g.moveTo(px + (r - l) * ca, py + (r - l) * sa); g.lineTo(px + r * ca, py + r * sa); g.stroke();
+      }
+      g.fillStyle = TOK.mid; g.font = FONT(9); g.textAlign = 'center'; g.textBaseline = 'middle';
+      for (let dg = -30; dg <= 30; dg += 10) {
+        const a = dg * Math.PI / 180;
+        g.fillText(String(dg), Math.round(px + (r + 14) * Math.cos(a)), Math.round(py + (r + 14) * Math.sin(a)));
+      }
+      const na = cap.alpha * Math.PI / 180;
+      g.strokeStyle = TOK.ink; g.lineWidth = 0.5;
+      g.beginPath();
+      g.moveTo(px + 0.35 * r * Math.cos(na), py + 0.35 * r * Math.sin(na));
+      g.lineTo(px + (r - 3) * Math.cos(na), py + (r - 3) * Math.sin(na));
+      g.stroke();
+    }
+    // the silhouette — solid ink, LAST among flow layers (LAW 0 by paint order)
+    g.save();
+    g.translate(fx0 + cap.A.px * cell, fy0 + cap.A.py * cell);
+    g.rotate(cap.alpha * Math.PI / 180);
+    g.scale(cell, cell);
+    g.fillStyle = TOK.ink;
+    g.beginPath();
+    const A2 = cap.A;
+    if (A2.type === 'ac') {
+      const geo = acGeom(A2.pk);
+      for (let i = 0; i < geo.pts.length - 1; i++) {
+        const x = (geo.pts[i][0] - A2.pivotL) * A2.L, y = -(geo.pts[i][1] - A2.yc0) * A2.L;
+        if (i) g.lineTo(x, y); else g.moveTo(x, y);
+      }
+    } else if (A2.type === 'wing') {
+      const pts = wingOutline(A2.sec, 120);
+      for (let i = 0; i < pts.length - 1; i++) {
+        const x = (pts[i][0] - A2.sec.pivotFrac) * A2.chord, y = -pts[i][1] * A2.chord;
+        if (i) g.lineTo(x, y); else g.moveTo(x, y);
+      }
+    } else if (A2.type === 'plate') {
+      g.rect(-0.25 * A2.chord, -A2.halfTh, A2.chord, 2 * A2.halfTh);
+    } else {
+      g.arc(0, 0, A2.r, 0, 6.2832);
+    }
+    g.closePath(); g.fill();
+    g.restore();
+    // specimen label, lower-right of the field (the provenance line in the second ink — riso)
+    if (cap.sl1) {
+      g.textAlign = 'right'; g.textBaseline = 'alphabetic';
+      g.fillStyle = TOK.mid; g.font = FONT(10); g.letterSpacing = '2px';
+      g.fillText(cap.sl1.toUpperCase(), fx0 + fw - 14, fy0 + fh - 26);
+      g.fillStyle = '#255079'; g.font = FONT(9); g.letterSpacing = '1px';
+      g.fillText(cap.sl2, fx0 + fw - 14, fy0 + fh - 12);
+    }
+    // caption band, ruled by a hairline
+    const st = plateStrings(cap);
+    g.textBaseline = 'alphabetic';
+    g.strokeStyle = TOK.hair; g.lineWidth = 0.5;
+    g.beginPath(); g.moveTo(44, 884.25); g.lineTo(1556, 884.25); g.stroke();
+    g.textAlign = 'left';
+    g.fillStyle = TOK.ink; g.font = FONT(20, 700); g.letterSpacing = '4px';
+    const plateNN = `PLATE ${String(serial).padStart(2, '0')}`;
+    g.fillText(plateNN, 44, 916);
+    const pw2 = g.measureText(plateNN).width;
+    g.fillStyle = TOK.mid; g.font = FONT(16); g.letterSpacing = '2.5px';
+    g.fillText(st.specimen, 44 + pw2 + 24, 916);
+    g.textAlign = 'right';
+    g.fillStyle = TOK.ink; g.font = FONT(14); g.letterSpacing = '1.5px';
+    g.fillText(st.tabular, 1556, 916);
+    // row 2: the honesty microline (VERBATIM, non-negotiable) + the measured caption at capture
+    g.textAlign = 'left';
+    g.fillStyle = '#69675f'; g.font = FONT(11); g.letterSpacing = '1.5px';
+    g.fillText(MICROLINE, 44, 942);
+    if (cap.capBase || cap.capKw) {
+      g.font = FONT(11); g.letterSpacing = '0.5px'; g.textAlign = 'right';
+      let xr = 1556;
+      if (cap.capSuf) { g.fillStyle = TOK.mid; g.fillText(cap.capSuf, xr, 942); xr -= g.measureText(cap.capSuf).width; }
+      if (cap.capKw) { // the stall keyword is the only possible warm text on a plate
+        g.fillStyle = cap.broke ? '#8a5d0c' : TOK.ink; g.font = FONT(11, 700);
+        g.fillText(cap.capKw, xr, 942); xr -= g.measureText(cap.capKw).width; g.font = FONT(11);
+      }
+      if (cap.capBase) { g.fillStyle = TOK.mid; g.fillText(cap.capBase, xr, 942); }
+    }
+    // baseboard: brand · chord scale bar · TEST NNN · date · version
+    g.textAlign = 'left'; g.fillStyle = '#69675f'; g.font = FONT(10); g.letterSpacing = '2px';
+    g.fillText('CHALL TUNNEL · tunnel.chall.net', 44, 958);
+    g.textAlign = 'right';
+    g.fillText(`${st.test} · ${cap.date} · V${T.version}`, 1556, 958);
+    { // the chord scale bar — hairline + end ticks, `1 CHORD` at the plate's own field scale
+      const L = st.chordCells * cell;
+      const x0 = 800 - L / 2, x1 = 800 + L / 2, yb = 953.25;
+      g.strokeStyle = TOK.hair; g.lineWidth = 0.5;
+      g.beginPath();
+      g.moveTo(x0, yb - 3.5); g.lineTo(x0, yb + 3.5);
+      g.moveTo(x0, yb); g.lineTo(x1, yb);
+      g.moveTo(x1, yb - 3.5); g.lineTo(x1, yb + 3.5);
+      g.stroke();
+      g.textAlign = 'left'; g.font = FONT(9); g.letterSpacing = '1px'; g.fillStyle = '#69675f';
+      g.fillText('1 CHORD', x1 + 8, 956);
+    }
+    g.letterSpacing = '0px';
+    // the double hairline frame — LAST, over everything (nothing overpaints the edge)
+    g.strokeStyle = TOK.ink; g.lineWidth = 1;
+    g.strokeRect(26, 26, 1548, 948);
+    g.strokeStyle = TOK.hair;
+    g.strokeRect(30, 30, 1540, 940);
+    return cv;
+  }
+  function nextPlateSerial() { // accession, append-only; a storage-less shelf restarts at 1 — serials are per-shelf
+    const nn = (parseInt(store.get('challtunnel.serial'), 10) || 0) + 1;
+    store.set('challtunnel.serial', String(nn));
+    return nn;
+  }
+  const plateName = (serial, cap) => { // the filename law
+    const art = isWing(cap.kind) ? 'wing' : (cap.plane ? 'aircraft' : cap.kind);
+    return `chall-tunnel-plate-${String(serial).padStart(2, '0')}-${cap.plane || cap.kind}-${art}-a${cap.alpha.toFixed(1)}.png`;
+  };
+  async function plate(opts = {}) {
+    if (plating || swapping || T.tier === 'stills') return null;
+    plating = true;
+    const platedoor = document.getElementById('platedoor');
+    const wasSealed = ink.sealed;
+    ink.setSealed(true); // pen up + absorption frozen for the length of the compose (LAW 6)
+    try {
+      const cap = { // the captured state — the chrome prints THIS, never whatever comes later
+        kind, plane: planeOf(kind), alpha: hasAlpha() ? S.alphaApplied : 0,
+        power: powerApplied, view, dv: ink.dv, A,
+        capBase: dom.caption.hidden ? '' : dom.capbase.textContent,
+        capKw: dom.caption.hidden ? '' : dom.capkw.textContent,
+        capSuf: dom.caption.hidden ? '' : dom.capsuf.textContent,
+        broke: !dom.caption.hidden && dom.caption.classList.contains('broke'),
+        sl1: dom.speclabel.hidden ? '' : dom.sl1.textContent,
+        sl2: dom.speclabel.hidden ? '' : dom.sl2.textContent,
+        date: new Date().toISOString().slice(0, 10),
+      };
+      await device.queue.onSubmittedWorkDone(); // the sealed negative settles before the read
+      const dep = await readDeposit();
+      const fields = cap.view === 'pressure' ? await S.readFields() : null;
+      const serial = nextPlateSerial();
+      const cv = composePlate(cap, dep, fields, serial);
+      const filename = plateName(serial, cap);
+      const st = plateStrings(cap);
+      T.plateLast = {
+        filename, serial, w: cv.width, h: cv.height, microline: MICROLINE,
+        tabular: st.tabular, test: st.test, specimen: st.specimen,
+        caption: cap.capBase + cap.capKw + cap.capSuf,
+        alpha: cap.alpha, power: cap.power, view: cap.view,
+      };
+      const out = { ...T.plateLast };
+      if (opts.data) out.png = cv.toDataURL('image/png');
+      if (opts.save !== false) {
+        await new Promise((res) => cv.toBlob((blob) => {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = filename;
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+          res();
+        }, 'image/png'));
+      }
+      platedoor.textContent = 'export plate ↓'; // the word answers, then resumes
+      setTimeout(() => { platedoor.textContent = 'plate ↓'; }, 1200);
+      return out;
+    } catch (e) { T._err = String(e); return null; }
+    finally {
+      if (!wasSealed) ink.setSealed(false); // resume — unless the page itself is wind-off sealed
+      plating = false;
+    }
+  }
+
   T.stats = async () => {
     const misc = await S.readMisc();
     const ring = await S.readRing();
@@ -2481,6 +2983,10 @@ async function bootLive(g) {
       wingBreak: mBreak,
       baselineCaptured: sepBase !== null,
       swapping,
+      sealed,
+      developed,
+      developGain: ink.dv,
+      plating,
     };
   };
   T.setAlpha = (v) => { if (hasAlpha() && Number.isFinite(v)) alphaTarget = clampA(v); };
@@ -2519,6 +3025,9 @@ async function bootLive(g) {
     for (let i = 0; i < NCC; i++) { rho[i] = d[i * 3]; ux[i] = d[i * 3 + 1]; uy[i] = d[i * 3 + 2]; }
     return { W: S.W, H: S.H, rho, ux, uy };
   };
+  T.plate = (opts) => plate(opts);
+  T.loseDevice = () => { try { device.destroy(); } catch { /* already gone */ } }; // the relight drill
+  T._halt = () => { running = false; };
   T.ready = true;
 }
 
@@ -2603,16 +3112,17 @@ async function bootSt(g) {
 // ---------- boot ----------
 (async () => {
   drawPaper();
-  addEventListener('resize', () => { if (T.tier === 'stills' || T.tier === 'boot') drawPaper(); });
-  if (Q.get('tier') === 'stills') return stills();
+  addEventListener('resize', () => { if (T.tier === 'stills') stillsLayout(); else if (T.tier === 'boot') drawPaper(); });
+  const qaMode = Q.get('qa'); // the reproduce-it-yourself modes outrank the stills routing (METHODS' promise)
+  if (!qaMode && (Q.get('tier') === 'stills' || Q.get('force') === 'stills'
+    || matchMedia('(prefers-reduced-motion: reduce)').matches)) return stills(); // ONE dignity pathway (DECISIONS)
   let g = null;
   try { g = await gpuProbe(); } catch (e) { T._err = String(e); g = null; }
   if (!g) return stills();
-  g.device.lost.then(() => { if (T.tier !== 'stills') stills(); }).catch(() => {});
+  g.device.lost.then(() => deviceLost()).catch(() => {});
   try {
-    const qa = Q.get('qa');
-    if (qa === 'diff') await bootDiff(g);
-    else if (qa === 'st') await bootSt(g);
+    if (qaMode === 'diff') await bootDiff(g);
+    else if (qaMode === 'st') await bootSt(g);
     else await bootLive(g);
   } catch (e) {
     T._err = String((e && e.stack) || e);
