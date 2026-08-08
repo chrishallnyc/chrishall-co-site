@@ -9,7 +9,7 @@
 <link rel="canonical" href="https://tunnel.chall.net/">
 <meta name="theme-color" content="#f6f4ee">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f6f4ee'/%3E%3Cpath d='M1.5 19.4 L30.5 16.4' stroke='%23989690' stroke-width='1'/%3E%3Cpath d='M3.5 19 C6.5 12.6 13.5 10.6 19.5 12 C24.5 13.2 28 15.4 29 16.6 C26 18.2 18.5 20.6 11.5 20.9 C7.5 21 4.5 20.3 3.5 19 Z' fill='%2318181c'/%3E%3Ccircle cx='4.2' cy='19' r='2.4' fill='%23e8b46f'/%3E%3C/svg%3E">
-<!-- CHALL TUNNEL v0.4.0 · test 001 (F-16 TP-1538 master, WING + gap line, POWER) + phase 4 — PRESSURE view (sign-duotone #482b16/#1c354e, luminance-matched, view-gated), ?dir= direction token-sheets (archive/riso/swiss — the boards law), a11y tokens -->
+<!-- CHALL TUNNEL v0.5.0 · phase 5 — TEST 006: the A-10 enters (FM 44-80 master, NACA 6716 exact WING) + THE PAIR live ([ ] keep-air plane cycling, Reynolds-flagship gap line, pair kicker) · on phase 4 (pressure view, ?dir= sheets) + test 001 (F-16 TP-1538 master, WING + gap line, POWER) -->
 <style>
 :root { --bg:#f6f4ee; --ink:#18181c; --mid:#56565e; --dim:#69675f; --hair:#989690; --acc:#e8b46f; --accd:#8a5d0c; }
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -57,7 +57,7 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 #gap { margin-top:6px; font-size:10px; letter-spacing:1px; color:var(--mid); white-space:nowrap; }
 .spec { margin-top:4px; font-size:11px; color:var(--mid); white-space:nowrap; }
 .spec .k { font-size:9px; letter-spacing:2.5px; color:var(--dim); font-weight:700; }
-#articles {
+#articles, #artmode {
   position:fixed; z-index:2; left:50%; transform:translateX(-50%);
   font-size:11px; letter-spacing:1px; color:var(--hair); white-space:nowrap;
 }
@@ -111,13 +111,16 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
   </svg>
   <canvas id="etch" aria-hidden="true" hidden></canvas>
 </div>
-<nav id="articles" aria-label="test articles" hidden><button class="aw" data-k="plate" type="button">plate</button> · <button class="aw" data-k="f16" type="button">f-16</button> · <button class="aw" data-k="wing" id="wingword" type="button">wing</button></nav>
+<nav id="articles" aria-label="test articles" hidden><button class="aw" data-k="f16" type="button">f-16</button> · <button class="aw" data-k="a10" type="button">a-10</button> · <button class="aw" data-k="plate" type="button">plate</button></nav>
+<nav id="artmode" aria-label="aircraft or wing" hidden><button class="aw" data-m="ac" type="button">aircraft</button> · <button class="aw" data-m="wing" id="wingword" type="button">wing</button></nav>
 <div id="capstack">
   <p id="caption" hidden><span id="capbase"></span><span class="kw" id="capkw"></span><span id="capsuf"></span></p>
   <p id="gap" hidden><span id="gapm"></span><span id="gapsp"></span></p><!-- two voices, one line: measured half + the manual's half (spec voice) -->
   <!-- the TWO REASONS doors, rendered as plain text this phase (cards arrive later) -->
   <p class="spec" id="spec1" hidden><span class="k">SPEC — </span>at this scale air clings like syrup and lets go early — re ~10³ in here, ~10⁷ up there . its flow holds on to far steeper angles</p>
   <p class="spec" id="spec2" hidden><span class="k">SPEC — </span>two strakes ahead of the wing roll the air into standing vortices . lift from organized spin — invisible to a 2d tunnel</p>
+  <p class="spec" id="spec3" hidden><span class="k">SPEC — </span>the fat, deeply cambered wing . at this reynolds the camber does the holding</p>
+  <p class="spec" id="pairk" hidden><span class="k">SPEC — </span>the f-16's section quit ~2° ago at this angle . camber is doing the holding</p>
   <p class="spec" id="bridge" hidden><span class="k">SPEC — </span>this is the tunnel's crude stall . see the textbook one → wing</p>
 </div>
 <div id="speclabel" hidden>
@@ -152,6 +155,24 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 </main>
 <script type="module">
 'use strict';
+// ============================================================================
+// CHALL TUNNEL — phase 5 "test 006: the a-10 enters — THE PAIR goes live"
+// Phase 5 adds:
+//   - TEST 006, the A-10C AIRCRAFT article: the lawful FM 44-80 master (690-pt
+//     outline, sha d4c741c0…, Dist-A) embedded 12-bit-delta packed like the
+//     F-16 — one packer law (qa/f16-pack.mjs re-derives both; ART-A10 canary);
+//     solid ink, chord law (0.17·W), sting pivot 0.46 L (DATA-v1)
+//   - the ARTICLE-PAIR bar: planes radio (f-16 · a-10 · plate) + article radio
+//     (aircraft · wing) — WING shows the SELECTED plane's section: f-16 →
+//     64A204 EST stand-in, a-10 → NACA 6716 EXACT (1933 four-digit closed
+//     form, never "6-series"; 6% camber @ 0.7c, 16% thick — the anti-plate)
+//   - THE PAIR live: [ and ] cycle planes KEEPING AIR (α/power/view persist
+//     through the spooled mask swap — the keep-this-air law); pair kicker on
+//     the a-10 WING when α sits inside the measured pair window (9.0–13.5°,
+//     PAIR-GATE) while the flow is still ATTACHED
+//   - A-10 gap line: the Reynolds-flagship form (IN THIS TUNNEL : THE SECTION
+//     STALLS AT {m}° · AT FLIGHT REYNOLDS : ~17° EST · WHY →), live {m};
+//     vocabulary DOCILE — AIRCRAFT never prints STALL, the WING break does
 // ============================================================================
 // CHALL TUNNEL — phase 4 "the pressure view + the boards"
 // Phase 4 adds:
@@ -545,9 +566,9 @@ function sepWGSL(W, H, article) {
   let xi = ${f(-0.25 * article.chord)} + s * ${f(article.chord)};
   let etaUp = up * ${f(article.halfTh + 2.5)};`;
   } else if (article.type === 'wing') {
-    // the generator section (qa/sections.mjs constants, vertical-offset law):
-    // sample 2.5 cells off the local surface, camber followed
-    const c = article.chord, w = WSEC;
+    // the generator section (qa/sections.mjs constants, vertical-offset law,
+    // plane-keyed): sample 2.5 cells off the local surface, camber followed
+    const c = article.chord, w = article.sec;
     geom = `
   let xc = s;
   let xi = (xc - ${f(w.pivotFrac)}) * ${f(c)};
@@ -637,30 +658,44 @@ fn probe() {
 `;
 }
 
-// ---------- TEST 001 · the F-16 master (NASA TP-1538, re-based lawful) ----------
-// The 678-point traced outline (nose-left, y-up, origin bbox lower-left,
-// length = 1.0; master sha ae81b171d33dcc5ab5e514bdbd87be6ea706257583abe5d12ece938c8bae7a58)
+// ---------- the AIRCRAFT masters (one-master law, per plane) ----------
+// Traced outlines (nose-left, y-up, origin bbox lower-left, length = 1.0)
 // quantized to a 4096-unit grid and packed as 12-bit values: first point
-// absolute, then 677 signed deltas (+2048 bias; max |delta| measured 253),
-// two values per 3 bytes, base64. One master law: qa/f16-pack.mjs re-derives
-// this exact string from assets/f16/f16-master.json (the ART-F16 canary).
+// absolute, then n−1 signed deltas (+2048 bias), two values per 3 bytes,
+// base64. One packer law: qa/f16-pack.mjs re-derives BOTH strings from the
+// masters in assets/ (the ART-F16 / ART-A10 canaries).
+//   f16 — TEST 001, NASA TP-1538 (F-16A 3-view), 678 pts, sha ae81b171…,
+//         max |delta| 253
+//   a10 — TEST 006, FM 44-80 p18 (A-10A recognition 3-view, Dist-A; airframe
+//         A→C unchanged), 690 pts, sha d4c741c0…, max |delta| 187
 // Interiors are NOT drawn in-tunnel — solid ink (PLANE-MASTERS tunnel context).
-const F16 = {
-  serial: 'TEST 001', name: 'F-16C FIGHTING FALCON',
-  basis: 'F-16C · profile basis: NASA TP-1538 (F-16A 3-view) · EST tail-base',
-  pivotL: 0.56, // AIRCRAFT sting pivot, 0.56 L from the nose (DATA-v1, EST ±0.02 L)
-  masterSha: 'ae81b171d33dcc5ab5e514bdbd87be6ea706257583abe5d12ece938c8bae7a58',
-  packed: '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',
+const AC = {
+  f16: {
+    serial: 'TEST 001', name: 'F-16C FIGHTING FALCON',
+    basis: 'F-16C · profile basis: NASA TP-1538 (F-16A 3-view) · EST tail-base',
+    pivotL: 0.56, // AIRCRAFT sting pivot, 0.56 L from the nose (DATA-v1, EST ±0.02 L)
+    nPts: 678,
+    masterSha: 'ae81b171d33dcc5ab5e514bdbd87be6ea706257583abe5d12ece938c8bae7a58',
+    packed: '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',
+  },
+  a10: {
+    serial: 'TEST 006', name: 'A-10C THUNDERBOLT II',
+    basis: 'A-10C · profile basis: FM 44-80 (A-10A recognition 3-view) · airframe A→C unchanged',
+    pivotL: 0.46, // AIRCRAFT sting pivot, 0.46 L from the nose (DATA-v1, CG band 25–29.6% MAC)
+    nPts: 690,
+    masterSha: 'd4c741c0e62d58251950dc4d6ccedf02c66dce7e72145f4a306b515eaf92c456',
+    packed: '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',
+  },
 };
-function unpackF16() {
-  const s = atob(F16.packed);
+function unpackAC(def) {
+  const s = atob(def.packed);
   const vals = [];
   for (let i = 0; i + 2 < s.length + 1; i += 3) {
     const a = s.charCodeAt(i), b = s.charCodeAt(i + 1), c = s.charCodeAt(i + 2);
     vals.push((a << 4) | (b >> 4), ((b & 15) << 8) | c);
   }
   const pts = [[vals[0], vals[1]]];
-  for (let k = 2; k < 1356; k += 2) {
+  for (let k = 2; k < def.nPts * 2; k += 2) {
     const p = pts[pts.length - 1];
     pts.push([p[0] + vals[k] - 2048, p[1] + vals[k + 1] - 2048]);
   }
@@ -669,10 +704,11 @@ function unpackF16() {
 // body-frame bitmap (even-odd scanline fill of the closed outline) — the mask
 // rasterizer rotates grid cells INTO this; the display silhouette is the
 // vector path, never this raster (display law)
-let _f16geom = null;
-function f16Geom() {
-  if (_f16geom) return _f16geom;
-  const pts = unpackF16();
+const _acGeom = {};
+function acGeom(pk) {
+  if (_acGeom[pk]) return _acGeom[pk];
+  const def = AC[pk];
+  const pts = unpackAC(def);
   let ymax = 0;
   for (const p of pts) ymax = Math.max(ymax, p[1]);
   const w = 2048, h = Math.ceil(ymax * w) + 1;
@@ -694,7 +730,7 @@ function f16Geom() {
   }
   const yc0 = ymax / 2; // pivot line: bbox vertical center
   let maxR = 0;
-  for (const p of pts) maxR = Math.max(maxR, Math.hypot(p[0] - F16.pivotL, p[1] - yc0));
+  for (const p of pts) maxR = Math.max(maxR, Math.hypot(p[0] - def.pivotL, p[1] - yc0));
   // 64-station upper/lower surface heights (normalized, from the pivot line) —
   // the separation detector's sample-line table (x/L 0.02…0.98, tip wrap excluded)
   const up = new Array(64), dn = new Array(64);
@@ -707,40 +743,52 @@ function f16Geom() {
     up[k] = top < 0 ? 0 : (top + 0.5) / w - yc0;
     dn[k] = bot < 0 ? 0 : yc0 - (bot + 0.5) / w;
   }
-  _f16geom = { pts, ymax, yc0, bmp: { w, h, data }, upN: up, dnN: dn, maxRN: maxR };
-  return _f16geom;
+  _acGeom[pk] = { pts, ymax, yc0, bmp: { w, h, data }, upN: up, dnN: dn, maxRN: maxR };
+  return _acGeom[pk];
 }
 
-// ---------- the WING section (qa/sections.mjs mirror — one generator law) ----------
-// NACA 64A204, TEST 001 wing: DOCUMENTED designation, NO published ordinates —
-// EST 4-digit stand-in per DATA-v1 (t 0.04 + camber 0.011 @ 0.5c approximating
-// the a=0.8 mean line at design cl 0.2). Closed-TE coefficient −0.1036.
-// Vertical-offset thickness (the oracle mask law), tFloor by the rasterizer only.
-const WSEC = Object.freeze({
-  name: 'NACA 64A204', est: true,
-  m: 0.011, p: 0.5, t: 0.04, c4: -0.1036,
-  pivotFrac: 0.35, // WING sting pivot 0.35c (sting-pivot law)
+// ---------- the WING sections (qa/sections.mjs mirror — one generator law) ----------
+// Per-plane, plane-keyed (the article-pair law: WING shows the SELECTED
+// plane's section). Closed-TE coefficient −0.1036 on both; vertical-offset
+// thickness (the oracle mask law); tFloor by the rasterizer only.
+//   f16 — NACA 64A204, TEST 001: DOCUMENTED designation, NO published
+//         ordinates — EST 4-digit stand-in per DATA-v1 (t 0.04 + camber
+//         0.011 @ 0.5c approximating the a=0.8 mean line at design cl 0.2).
+//   a10 — NACA 6716, TEST 006: 1933 FOUR-DIGIT family, EXACT closed form
+//         (never "6-series" — that is the F-16's later laminar-flow family).
+//         m 0.06 @ p 0.7, t 0.16 — the anti-plate, THE PAIR's other half.
+const SEC = Object.freeze({
+  f16: Object.freeze({
+    name: 'NACA 64A204', est: true,
+    m: 0.011, p: 0.5, t: 0.04, c4: -0.1036,
+    pivotFrac: 0.35, // WING sting pivot 0.35c (sting-pivot law)
+  }),
+  a10: Object.freeze({
+    name: 'NACA 6716', est: false,
+    m: 0.06, p: 0.7, t: 0.16, c4: -0.1036,
+    pivotFrac: 0.35,
+  }),
 });
-function wYt(xc) { // HALF-thickness, unit chord (4-digit closed-TE form)
-  return 5 * WSEC.t * (0.2969 * Math.sqrt(xc) - 0.1260 * xc - 0.3516 * xc * xc
-    + 0.2843 * xc * xc * xc + WSEC.c4 * xc * xc * xc * xc);
+function secYt(sec, xc) { // HALF-thickness, unit chord (4-digit closed-TE form)
+  return 5 * sec.t * (0.2969 * Math.sqrt(xc) - 0.1260 * xc - 0.3516 * xc * xc
+    + 0.2843 * xc * xc * xc + sec.c4 * xc * xc * xc * xc);
 }
-function wYc(xc) { // camber line, unit chord
-  const { m, p } = WSEC;
+function secYc(sec, xc) { // camber line, unit chord
+  const { m, p } = sec;
   return xc < p
     ? (m / (p * p)) * (2 * p * xc - xc * xc)
     : (m / ((1 - p) * (1 - p))) * ((1 - 2 * p) + 2 * p * xc - xc * xc);
 }
-function wingOutline(n = 120) { // closed, TE → upper → LE → lower → TE, cosine-spaced
+function wingOutline(sec, n = 120) { // closed, TE → upper → LE → lower → TE, cosine-spaced
   const half = Math.floor(n / 2);
   const pts = [];
   for (let k = 0; k <= half; k++) {
     const xc = 0.5 * (1 + Math.cos(Math.PI * k / half));
-    pts.push([xc, wYc(xc) + wYt(xc)]);
+    pts.push([xc, secYc(sec, xc) + secYt(sec, xc)]);
   }
   for (let k = 1; k <= half; k++) {
     const xc = 0.5 * (1 - Math.cos(Math.PI * k / half));
-    pts.push([xc, wYc(xc) - wYt(xc)]);
+    pts.push([xc, secYc(sec, xc) - secYt(sec, xc)]);
   }
   pts.push([...pts[0]]);
   return pts;
@@ -748,8 +796,8 @@ function wingOutline(n = 120) { // closed, TE → upper → LE → lower → TE,
 
 // ---------- solver ----------
 // article: { type:'cyl', cx, cy, r } | { type:'plate', px, py, chord, halfTh }
-//        | { type:'wing', px, py, chord, tFloor }             (pivot 0.35c — sting law)
-//        | { type:'ac', px, py, L, pivotL, ymax, yc0, bmp, sepUp, sepDn, maxR }
+//        | { type:'wing', pk, sec, px, py, chord, tFloor }    (pivot 0.35c — sting law)
+//        | { type:'ac', pk, px, py, L, pivotL, ymax, yc0, bmp, sepUp, sepDn, maxR }
 // (plate pivot at quarter-chord: ξ ∈ [−c/4, 3c/4] in the plate frame)
 function defaultProbe(article) {
   switch (article.type) {
@@ -846,13 +894,14 @@ class Solver {
       xi0 = -0.25 * chord; xi1 = 0.75 * chord; e0 = -halfTh; e1 = halfTh;
       test = (xi, eta) => xi >= xi0 && xi <= xi1 && Math.abs(eta) <= halfTh;
     } else if (A.type === 'wing') {
-      // qa/sections.mjs sectionMask law: vertical-offset thickness, tFloor in cells
-      const c = A.chord, tf = A.tFloor, em = 0.04 * c + tf;
-      xi0 = -WSEC.pivotFrac * c; xi1 = (1 - WSEC.pivotFrac) * c; e0 = -em; e1 = em;
+      // qa/sections.mjs sectionMask law: vertical-offset thickness, tFloor in
+      // cells; per-plane section (em bounds the scan — mask decided by test())
+      const sec = A.sec, c = A.chord, tf = A.tFloor, em = (0.5 * sec.t + sec.m + 0.01) * c + tf;
+      xi0 = -sec.pivotFrac * c; xi1 = (1 - sec.pivotFrac) * c; e0 = -em; e1 = em;
       test = (xi, eta) => {
         if (xi < xi0 || xi > xi1) return false;
         const xc = (xi - xi0) / c;
-        return Math.abs(-eta - c * wYc(xc)) <= Math.max(c * wYt(xc), tf);
+        return Math.abs(-eta - c * secYc(sec, xc)) <= Math.max(c * secYt(sec, xc), tf);
       };
     } else { // 'ac' — body-frame bitmap lookup (the packed TP-1538 master)
       const { L, pivotL, ymax, yc0, bmp } = A;
@@ -1324,6 +1373,7 @@ const dom = {
   ac: document.getElementById('ac'),
   wing: document.getElementById('wing'),
   articles: document.getElementById('articles'),
+  artmode: document.getElementById('artmode'),
   wingword: document.getElementById('wingword'),
   capstack: document.getElementById('capstack'),
   caption: document.getElementById('caption'),
@@ -1335,6 +1385,8 @@ const dom = {
   gapsp: document.getElementById('gapsp'),
   spec1: document.getElementById('spec1'),
   spec2: document.getElementById('spec2'),
+  spec3: document.getElementById('spec3'),
+  pairk: document.getElementById('pairk'),
   bridge: document.getElementById('bridge'),
   speclabel: document.getElementById('speclabel'),
   sl1: document.getElementById('sl1'),
@@ -1393,13 +1445,14 @@ function crossHz(samples, dts) { // upward mean-crossings; 0 until a real, regul
 }
 
 const T = { // __TUNNEL — the __PARK contract lineage
-  version: '0.4.0',
+  version: '0.5.0',
   tier: 'boot',
   dir: DIR, // the direction token sheet in force (boards law; default archive ≡ incumbent)
   press: PRESS, // the duotone canary — PRESS-LUM computes luminance-silence from these
   grid: null,
   article: null, // {type, ...geometry, alpha} — set by the live boot
-  articleKind: null, // 'plate' | 'f16' | 'wing' | 'cyl'
+  articleKind: null, // 'plate' | 'f16' | 'a10' | 'f16-wing' | 'a10-wing' | 'cyl'
+  plane: null, // the selected plane ('f16' | 'a10') — THE PAIR ring
   constants: C,
   qaResult: null,
   qaProgress: '',
@@ -1407,7 +1460,8 @@ const T = { // __TUNNEL — the __PARK contract lineage
   _err: null,
   capLog: [], // [{t, s, article}] caption-state transitions (QA: hysteresis, no flicker)
   // the caption-state table IS the reachable measured-voice space (VOCAB law:
-  // AIRCRAFT-class articles never print STALL in measured voice; WING owns it)
+  // AIRCRAFT-class articles never print STALL in measured voice — the A-10's
+  // DOCILE character included; each plane's WING owns the word at its break)
   vocab: {
     aircraft: {
       attached: 'the air follows the skin — FLOW ATTACHED',
@@ -1415,13 +1469,21 @@ const T = { // __TUNNEL — the __PARK contract lineage
       separated: 'the air lets go — FLOW SEPARATED',
     },
     wing: {
-      attached: 'the air follows the skin — FLOW ATTACHED',
-      spreading: 'the air starts letting go — SEPARATION SPREADING',
-      separated: 'the thin section quits — STALL · α {m}°',
+      f16: {
+        attached: 'the air follows the skin — FLOW ATTACHED',
+        spreading: 'the air starts letting go — SEPARATION SPREADING',
+        separated: 'the thin section quits — STALL · α {m}°',
+      },
+      a10: {
+        attached: 'the air follows the skin — FLOW ATTACHED',
+        spreading: 'the air starts letting go — SEPARATION SPREADING',
+        separated: 'the thick section quits — STALL · α {m}°',
+      },
     },
   },
   f16: { packed: '', masterSha: '' }, // filled at boot — the ART-F16 canary handles
-  wingOutline: (n) => wingOutline(n || 120), // the generator's points — QA cross-checks vs qa/sections.mjs
+  a10: { packed: '', masterSha: '' }, // filled at boot — the ART-A10 canary handles
+  wingOutline: (n, pk) => wingOutline(SEC[pk || 'f16'], n || 120), // the generator's points — QA cross-checks vs qa/sections.mjs
   powerState: () => ({ applied: 0, target: 0 }), // light poll (no GPU readback) — QA slew lane
   stats: async () => ({}),
   tick: async () => {},
@@ -1460,26 +1522,30 @@ async function gpuProbe() {
 }
 
 // article factories (LAYOUT law: LE at 0.22·W, chord 0.17·W; pivots: plate
-// quarter-chord, WING 0.35c, AIRCRAFT 0.56 L — the sting laws; plate
-// half-thickness 2 cells / wing tFloor 1.5 / ac 1× dilation ⇒ ≥3-cell minimum
-// feature at every α; worst-α blockage ≤30% cap holds at ±32° on every rung)
+// quarter-chord, WING 0.35c, AIRCRAFT F-16 0.56 L / A-10 0.46 L — the sting
+// laws; plate half-thickness 2 cells / wing tFloor 1.5 / ac 1× dilation ⇒
+// ≥3-cell minimum feature at every α; worst-α blockage ≤30% cap holds at ±32°)
+const PLANES = ['f16', 'a10']; // THE PAIR ring — [ and ] cycle this, keeping air
+const isWing = (k) => k === 'f16-wing' || k === 'a10-wing';
+const planeOf = (k) => (k === 'f16' || k === 'a10') ? k : (isWing(k) ? k.slice(0, 3) : null);
 function makeArticle(kind, W, H) {
   if (kind === 'cyl') return { type: 'cyl', cx: W / 4 + 0.5, cy: H / 2 + 0.5, r: Math.round(H / 14) };
   const chord = Math.round(0.17 * W);
   const py = H / 2 + 0.5;
-  if (kind === 'f16') {
-    const g = f16Geom(), L = chord;
+  if (kind === 'f16' || kind === 'a10') {
+    const def = AC[kind], g = acGeom(kind), L = chord;
     return {
-      type: 'ac', px: Math.round(0.22 * W + F16.pivotL * L) + 0.5, py,
-      L, pivotL: F16.pivotL, ymax: g.ymax, yc0: g.yc0, bmp: g.bmp,
+      type: 'ac', pk: kind, px: Math.round(0.22 * W + def.pivotL * L) + 0.5, py,
+      L, pivotL: def.pivotL, ymax: g.ymax, yc0: g.yc0, bmp: g.bmp,
       sepUp: g.upN.map((v) => v * L), sepDn: g.dnN.map((v) => v * L),
       maxR: g.maxRN * L,
     };
   }
-  if (kind === 'wing') {
+  if (isWing(kind)) {
+    const pk = planeOf(kind), sec = SEC[pk];
     return {
-      type: 'wing', px: Math.round(0.22 * W + WSEC.pivotFrac * chord) + 0.5, py,
-      chord, tFloor: 1.5, maxR: (1 - WSEC.pivotFrac) * chord,
+      type: 'wing', pk, sec, px: Math.round(0.22 * W + sec.pivotFrac * chord) + 0.5, py,
+      chord, tFloor: 1.5, maxR: (1 - sec.pivotFrac) * chord,
     };
   }
   return { type: 'plate', px: Math.round(0.22 * W + 0.25 * chord) + 0.5, py, chord, halfTh: 2, maxR: 0.75 * chord };
@@ -1498,8 +1564,13 @@ async function bootLive(g) {
   const { device, hasTS } = g;
   const SETTLE = 1.2245; // measured boost→plateau thermal ratio (SPIKE-REPORT §5) — pin R₀ at plateau
   const budgetMs = 10.4;
-  const KINDS = ['plate', 'f16', 'wing', 'cyl']; // bar words plate · f-16 · wing; cylinder unlisted (?article=cyl)
-  let kind = KINDS.includes(Q.get('article')) ? Q.get('article') : 'plate';
+  // the ARTICLE-PAIR bar: planes radio (f-16 · a-10 · plate) + article radio
+  // (aircraft · wing); cylinder unlisted (?article=cyl); ?article=wing is the
+  // phase-3 legacy alias for the F-16's section
+  const KINDS = ['plate', 'f16', 'a10', 'f16-wing', 'a10-wing', 'cyl'];
+  let qk = Q.get('article'); if (qk === 'wing') qk = 'f16-wing';
+  let kind = KINDS.includes(qk) ? qk : 'plate';
+  let plane = planeOf(kind) || 'f16'; // sticky plane selection — the ring boots at the F-16
 
   // ---- POWER state (boot tuple: power 60 — DATA-v1; the plant IS the easing) ----
   let powerTarget = 60, powerApplied = 60;
@@ -1534,7 +1605,8 @@ async function bootLive(g) {
   let swapping = false;
   T.tier = rung.name;
   T.grid = `${GW}×${GH}`;
-  T.f16 = { packed: F16.packed, masterSha: F16.masterSha }; // ART-F16 canary handles
+  T.f16 = { packed: AC.f16.packed, masterSha: AC.f16.masterSha }; // ART-F16 canary handles
+  T.a10 = { packed: AC.a10.packed, masterSha: AC.a10.masterSha }; // ART-A10 canary handles
   const ctx = dom.gpu.getContext('webgpu');
   if (!ctx) { S.destroy(); device.destroy(); return stills(); }
   const format = navigator.gpu.getPreferredCanvasFormat();
@@ -1569,35 +1641,54 @@ async function bootLive(g) {
   let capState = null, capCand = null, capCandT = 0;
   let mBreak = null; // WING: this run's detector crossing (0.5° rounding) — the gap line's {m}
   let bridgeTicked = false; // the wing bar word's one-shot --accd tick
-  const CAPS = { // measured voice — the AIRCRAFT-class table (STALL never printed here; vocabulary law)
+  const CAPS = { // measured voice — the AIRCRAFT-class table (STALL never printed here; vocabulary law — the A-10's DOCILE character included)
     attached: ['the air follows the skin — ', 'FLOW ATTACHED'],
     spreading: ['the air starts letting go — ', 'SEPARATION SPREADING'],
     separated: ['the air lets go — ', 'FLOW SEPARATED'],
   };
-  const WING_BREAK = ['the thin section quits — ', 'STALL']; // WING owns the word (dossier line 4)
+  const WING_BREAK = { // each plane's WING owns the word at its break (dossier law)
+    f16: ['the thin section quits — ', 'STALL'],
+    a10: ['the thick section quits — ', 'STALL'],
+  };
   const fmtDeg = (v) => (v % 1 === 0 ? String(v) : v.toFixed(1));
 
-  function syncAnnex() { // gap line + spec beats + bridge — latest-wins, article-scoped
+  function syncAnnex() { // gap line + spec beats + bridge + pair kicker — latest-wins, article-scoped
     const sep = capState === 'separated';
-    const gapOn = kind === 'wing' && sep && powerApplied >= 15 && mBreak !== null; // POWER-GATE suppresses the gap
+    const wpk = isWing(kind) ? planeOf(kind) : null;
+    const gapOn = wpk !== null && sep && powerApplied >= 15 && mBreak !== null; // POWER-GATE suppresses the gap
     dom.gap.hidden = !gapOn;
-    if (gapOn) { // two voices in one line: the measured half (#gapm) vs the manual's half (#gapsp — spec voice)
-      dom.gapm.textContent = `IN THIS TUNNEL : STALLS AT ${fmtDeg(mBreak)}°`;
-      dom.gapsp.textContent = ' · THE REAL JET FLIES TO ITS 25° LIMITER · TWO REASONS →';
+    if (gapOn) { // two voices in one line: the measured half (#gapm) vs the spec half (#gapsp)
+      if (wpk === 'a10') { // the Reynolds-flagship form (DECISIONS: the A-10 gap-line law)
+        dom.gapm.textContent = `IN THIS TUNNEL : THE SECTION STALLS AT ${fmtDeg(mBreak)}°`;
+        dom.gapsp.textContent = ' · AT FLIGHT REYNOLDS : ~17° EST · WHY →';
+      } else { // the F-16 two-reasons form
+        dom.gapm.textContent = `IN THIS TUNNEL : STALLS AT ${fmtDeg(mBreak)}°`;
+        dom.gapsp.textContent = ' · THE REAL JET FLIES TO ITS 25° LIMITER · TWO REASONS →';
+      }
     }
     dom.spec1.hidden = !gapOn; // beat 1 — the reynolds note (door renders as plain text this phase)
-    dom.spec2.hidden = !gapOn; // beat 2 — the strakes spec line
-    const bridgeOn = kind === 'f16' && sep; // the bridge kicker — AIRCRAFT article, after separation
+    dom.spec2.hidden = !(gapOn && wpk === 'f16'); // beat 2 — the strakes line (the f-16's second reason)
+    dom.spec3.hidden = !(gapOn && wpk === 'a10'); // beat 2' — the camber line (the a-10's WHY)
+    const bridgeOn = (kind === 'f16' || kind === 'a10') && sep; // the bridge kicker — AIRCRAFT articles, after separation
     dom.bridge.hidden = !bridgeOn;
     if (bridgeOn && !bridgeTicked) { bridgeTicked = true; dom.wingword.classList.add('tick'); }
+    // THE PAIR kicker: the a-10 WING holding inside the measured pair window
+    // (9.0–13.5° — PAIR-GATE) — the story, at the moment it shows. HOLDING =
+    // the gate's two-state ATTACHED mapped onto this instrument's finer ladder:
+    // not SEPARATED (the 6716's docile TE creep reads as SPREADING here — the
+    // gate's latch, excess < 0.30 over 6,000-step holds, called that attached)
+    const pairOn = wpk === 'a10' && (capState === 'attached' || capState === 'spreading')
+      && powerApplied >= 15 && S.alphaApplied >= 9.0 && S.alphaApplied <= 13.5;
+    dom.pairk.hidden = !pairOn;
   }
   function setCap(s) { // arbitration: latest-wins, no queue
     capState = s;
     T.capLog.push({ t: performance.now(), s, article: kind });
-    if (kind === 'wing' && s === 'separated') {
+    if (isWing(kind) && s === 'separated') {
+      const wb = WING_BREAK[planeOf(kind)];
       mBreak = Math.round(S.alphaApplied * 2) / 2; // {m}: the LIVE crossing of THIS run
-      dom.capbase.textContent = WING_BREAK[0];
-      dom.capkw.textContent = WING_BREAK[1];
+      dom.capbase.textContent = wb[0];
+      dom.capkw.textContent = wb[1];
       dom.capsuf.textContent = ` · α ${fmtDeg(mBreak)}°`;
     } else {
       dom.capbase.textContent = CAPS[s][0];
@@ -1657,6 +1748,7 @@ async function bootLive(g) {
     dom.etch.height = Math.max(2, Math.round(h * dpr));
     const stTop = Math.round((innerHeight - h) / 2);
     dom.articles.style.top = (stTop + 6) + 'px';
+    dom.artmode.style.top = (stTop + 24) + 'px'; // the article-pair row, under the planes
     dom.capstack.style.top = Math.round((innerHeight + h) / 2 + 10) + 'px';
     dom.speclabel.style.right = Math.round((innerWidth - w) / 2 + 14) + 'px';
     dom.speclabel.style.bottom = (stTop + 12) + 'px';
@@ -1668,7 +1760,7 @@ async function bootLive(g) {
   // ---- article mount (DOM) — the silhouettes are VECTOR, on top, device px ----
   let silEl = null;
   function acPathD() { // the master outline in grid coords at α=0 (rotation is a transform)
-    const geo = f16Geom(), L = A.L;
+    const geo = acGeom(A.pk), L = A.L;
     let d = '';
     for (let i = 0; i < geo.pts.length - 1; i++) {
       const gx = A.px + (geo.pts[i][0] - A.pivotL) * L;
@@ -1678,22 +1770,34 @@ async function bootLive(g) {
     return d + 'Z';
   }
   function wingPathD() { // the generator section (~120 pts), TE→upper→LE→lower
-    const c = A.chord, pts = wingOutline(120);
+    const c = A.chord, pts = wingOutline(A.sec, 120);
     let d = '';
     for (let i = 0; i < pts.length - 1; i++) {
-      const gx = A.px + (pts[i][0] - WSEC.pivotFrac) * c;
+      const gx = A.px + (pts[i][0] - A.sec.pivotFrac) * c;
       const gy = A.py - pts[i][1] * c;
       d += (i ? 'L' : 'M') + gx.toFixed(2) + ' ' + gy.toFixed(2);
     }
     return d + 'Z';
   }
+  const CLINES = { // card copy per article (the camber-honest law: TEST 006 says fat, deeply cambered)
+    f16: 'TEST 001 · AIRCRAFT: F-16C FIGHTING FALCON . drag it — find where the air lets go',
+    a10: 'TEST 006 · AIRCRAFT: A-10C THUNDERBOLT II . drag it — find where the air lets go',
+    'f16-wing': "TEST 001 · WING: the f-16's thin section — NACA 64A204 (EST) . drag it — find the textbook stall",
+    'a10-wing': "TEST 006 · WING: the a-10's fat, deeply cambered section — NACA 6716 . drag it — find the docile stall",
+  };
+  const WING_SL = { // specimen label per plane's section (data law: EST vs EXACT declared)
+    f16: ['TEST 001 · WING — NACA 64A204', 'SECTION EST · from published thickness/camber (t 4% · camber 1.1% @ 0.5c)'],
+    a10: ['TEST 006 · WING — NACA 6716', 'SECTION EXACT · 1933 four-digit closed form (t 16% · camber 6% @ 0.7c)'],
+  };
   function applyArticleDom() {
     A = S.article;
     T.articleKind = kind;
+    plane = planeOf(kind) || plane; // the sticky plane follows the mounted article
+    T.plane = plane;
     T.article = A.type === 'cyl' ? { type: 'cyl', cx: A.cx, cy: A.cy, r: A.r }
       : A.type === 'plate' ? { type: 'plate', px: A.px, py: A.py, chord: A.chord, halfTh: A.halfTh }
-        : A.type === 'wing' ? { type: 'wing', px: A.px, py: A.py, chord: A.chord, tFloor: A.tFloor }
-          : { type: 'ac', px: A.px, py: A.py, L: A.L, pivotL: A.pivotL };
+        : A.type === 'wing' ? { type: 'wing', pk: A.pk, px: A.px, py: A.py, chord: A.chord, tFloor: A.tFloor }
+          : { type: 'ac', pk: A.pk, px: A.px, py: A.py, L: A.L, pivotL: A.pivotL };
     for (const el of [dom.body, dom.plate, dom.ac, dom.wing]) el.setAttribute('hidden', '');
     silEl = null;
     if (kind === 'cyl') {
@@ -1709,30 +1813,36 @@ async function bootLive(g) {
       dom.plate.setAttribute('height', 2 * A.halfTh);
       silEl = dom.plate;
       dom.cline.textContent = 'TEST ARTICLE: FLAT PLATE (the honest first wing) . drag it — find where the air lets go';
-    } else if (kind === 'f16') {
+    } else if (A.type === 'ac') {
       dom.ac.removeAttribute('hidden');
       dom.ac.setAttribute('d', acPathD());
       silEl = dom.ac;
-      dom.cline.textContent = 'TEST 001 · AIRCRAFT: F-16C FIGHTING FALCON . drag it — find where the air lets go';
+      dom.cline.textContent = CLINES[kind];
     } else {
       dom.wing.removeAttribute('hidden');
       dom.wing.setAttribute('d', wingPathD());
       silEl = dom.wing;
-      dom.cline.textContent = "TEST 001 · WING: the f-16's thin section — NACA 64A204 (EST) . drag it — find the textbook stall";
+      dom.cline.textContent = CLINES[kind];
     }
     if (silEl) silEl.setAttribute('transform', `rotate(${S.alphaApplied.toFixed(3)} ${A.px} ${A.py})`);
-    if (kind === 'f16') { // specimen label, lower-right — the profile-basis caveat prints wherever the shape does
-      dom.sl1.textContent = 'TEST 001 · F-16C FIGHTING FALCON';
-      dom.sl2.textContent = F16.basis;
+    if (A.type === 'ac') { // specimen label, lower-right — the profile-basis caveat prints wherever the shape does
+      dom.sl1.textContent = `${AC[A.pk].serial} · ${AC[A.pk].name}`;
+      dom.sl2.textContent = AC[A.pk].basis;
       dom.speclabel.hidden = false;
-    } else if (kind === 'wing') {
-      dom.sl1.textContent = 'TEST 001 · WING — NACA 64A204';
-      dom.sl2.textContent = 'SECTION EST · from published thickness/camber (t 4% · camber 1.1% @ 0.5c)';
+    } else if (A.type === 'wing') {
+      dom.sl1.textContent = WING_SL[A.pk][0];
+      dom.sl2.textContent = WING_SL[A.pk][1];
       dom.speclabel.hidden = false;
     } else dom.speclabel.hidden = true;
     dom.alphaline.hidden = !hasAlpha();
-    for (const b of dom.articles.querySelectorAll('.aw')) {
-      const on = b.dataset.k === kind;
+    for (const b of dom.articles.querySelectorAll('.aw')) { // planes radio: the plane stays lit on its WING too
+      const on = b.dataset.k === (kind === 'plate' ? 'plate' : planeOf(kind));
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    const mode = isWing(kind) ? 'wing' : (A.type === 'ac' ? 'ac' : null);
+    for (const b of dom.artmode.querySelectorAll('.aw')) { // article radio: aircraft · wing
+      const on = b.dataset.m === mode;
       b.classList.toggle('on', on);
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
     }
@@ -1742,13 +1852,13 @@ async function bootLive(g) {
     dom.capsuf.textContent = '';
     syncAnnex();
   }
-  async function swapArticle(k) { // behind the spool: α/power persist, detector re-arms
+  async function swapArticle(k) { // behind the spool: α/power/view persist (keep-this-air law), detector re-arms
     if (swapping || k === kind || !KINDS.includes(k)) return;
     swapping = true;
     kind = k;
     dom.readout.textContent = 'spooling up —';
     dom.caption.hidden = true;
-    dom.gap.hidden = dom.spec1.hidden = dom.spec2.hidden = dom.bridge.hidden = true;
+    dom.gap.hidden = dom.spec1.hidden = dom.spec2.hidden = dom.spec3.hidden = dom.pairk.hidden = dom.bridge.hidden = true;
     try {
       await device.queue.onSubmittedWorkDone();
       ink.destroy(); S.destroy();
@@ -1767,6 +1877,15 @@ async function bootLive(g) {
     history.replaceState(null, '', url);
     lastT = performance.now(); // the spool is not a frame
     swapping = false;
+  }
+  // THE PAIR: [ and ] cycle the plane ring KEEPING AIR — α/power/view ride
+  // through the spooled mask swap untouched (only the mask changes). From
+  // plate/cyl the keys enter the ring at the selected plane's AIRCRAFT.
+  function cyclePlane(dir) {
+    if (swapping) return;
+    if (kind === 'plate' || kind === 'cyl') { swapArticle(plane); return; }
+    const nx = PLANES[(PLANES.indexOf(planeOf(kind)) + (dir > 0 ? 1 : PLANES.length - 1)) % PLANES.length];
+    swapArticle(isWing(kind) ? `${nx}-wing` : nx);
   }
 
   // ---- POWER: etched ruled scale (120px hairline, ink ticks 0/25/50/75/100,
@@ -1806,9 +1925,11 @@ async function bootLive(g) {
     const pup = () => { pdrag = false; };
     dom.pscale.addEventListener('pointerup', pup);
     dom.pscale.addEventListener('pointercancel', pup);
-    addEventListener('keydown', (e) => { // keys ←/→ nudge the plant target 5%
+    addEventListener('keydown', (e) => { // keys ←/→ nudge the plant target 5%; [ ] cycle THE PAIR keeping air
       if (e.key === 'ArrowLeft') { setPowerTarget(powerTarget - 5); e.preventDefault(); }
       else if (e.key === 'ArrowRight') { setPowerTarget(powerTarget + 5); e.preventDefault(); }
+      else if (e.key === '[') { cyclePlane(-1); e.preventDefault(); }
+      else if (e.key === ']') { cyclePlane(1); e.preventDefault(); }
     });
   }
 
@@ -1820,11 +1941,19 @@ async function bootLive(g) {
   dom.stage.hidden = false;
   dom.card.hidden = false;
   dom.articles.hidden = false;
+  dom.artmode.hidden = false;
   dom.power.hidden = false;
   dom.viewsrow.hidden = false;
   requestAnimationFrame(() => dom.card.classList.add('on'));
-  for (const b of dom.articles.querySelectorAll('.aw'))
-    b.addEventListener('click', () => { swapArticle(b.dataset.k); });
+  for (const b of dom.articles.querySelectorAll('.aw')) // planes radio: a plane keeps the article mode; plate is itself
+    b.addEventListener('click', () => {
+      const k = b.dataset.k;
+      swapArticle(k === 'plate' ? 'plate' : (isWing(kind) ? `${k}-wing` : k));
+    });
+  for (const b of dom.artmode.querySelectorAll('.aw')) // article radio: the SELECTED plane's aircraft or wing
+    b.addEventListener('click', () => {
+      swapArticle(b.dataset.m === 'wing' ? `${plane}-wing` : plane);
+    });
   for (const b of dom.views.querySelectorAll('.vw'))
     b.addEventListener('click', () => { setView(b.dataset.v); });
 
@@ -1842,7 +1971,7 @@ async function bootLive(g) {
 
   const frameDts = [];
   let frames = 0, lastT = performance.now(), running = true, ticking = false;
-  let lastReadout = 0;
+  let lastReadout = 0, lastAB = null; // lastAB: quarter-degree α bucket — the pair kicker's window edges re-check
 
   function encodeFrame(dtS, timed) {
     const wantSep = hasAlpha() && ++sepEvery >= 6 && !sepBusy && S.t >= 2400;
@@ -1924,6 +2053,8 @@ async function bootLive(g) {
         if (silEl) silEl.setAttribute('transform', `rotate(${S.alphaApplied.toFixed(3)} ${A.px} ${A.py})`);
         const av = Math.abs(alphaTarget) < 0.05 ? 0 : alphaTarget;
         dom.alphaline.textContent = `α ${av.toFixed(1)}°`; // values snap same-frame; the needle is physical
+        const ab = Math.round(S.alphaApplied * 4); // α-gated annex (the pair kicker window) tracks the applied angle
+        if (ab !== lastAB) { lastAB = ab; syncAnnex(); }
         if (etchOn) drawEtch();
       }
       if (frames % 90 === 0 && !covBusy) {
@@ -1999,7 +2130,7 @@ async function bootLive(g) {
       const xi = dx * ca + dy * sa, eta = -dx * sa + dy * ca;
       let onBody; // body bbox + halo per article
       if (A.type === 'plate') onBody = xi >= -0.25 * A.chord - halo && xi <= 0.75 * A.chord + halo && Math.abs(eta) <= A.halfTh + halo;
-      else if (A.type === 'wing') onBody = xi >= -0.35 * A.chord - halo && xi <= 0.65 * A.chord + halo && Math.abs(eta) <= 0.04 * A.chord + A.tFloor + halo;
+      else if (A.type === 'wing') onBody = xi >= -A.sec.pivotFrac * A.chord - halo && xi <= (1 - A.sec.pivotFrac) * A.chord + halo && Math.abs(eta) <= (0.5 * A.sec.t + A.sec.m) * A.chord + A.tFloor + halo;
       else onBody = xi >= -A.pivotL * A.L - halo && xi <= (1 - A.pivotL) * A.L + halo && Math.abs(eta) <= 0.5 * A.ymax * A.L + halo;
       if (onBody) drag = { mode: 'rot', th0: Math.atan2(dy, dx), a0: alphaTarget };
       else if (e.pointerType === 'touch') drag = { mode: 'pan', y0: e.clientY, a0: alphaTarget };
