@@ -469,8 +469,18 @@ async function boot() {
   });
 
   // public hooks (QA + future phases)
+
+  // PHASE 12: kill cam — render-side only. On death: 4s orbit of the crash
+  // point (captured from the last frame BEFORE the sim reset teleported the
+  // jet home). On match end: a continuous victory/defeat orbit of the jet.
+  let killCam = null; // { c: Vector3, until: ms }
+  let kcCrashes = player ? player.crashes : 0;
+  const lastJetPos = new THREE.Vector3();
+  const kcPos = new THREE.Vector3();
+
   Object.assign(state, {
     sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud, player, battlefield, match,
+    kc: () => killCam,
     cloudImmersion: () => clouds.immersion,
     setTimeOfDay: (h) => atmosphere.setTime(h),
     setFront: (f) => atmosphere.setFront(String(f).toUpperCase()),
@@ -554,9 +564,27 @@ async function boot() {
     player?.feedInput(input);
     const alpha = sim.advance(dtMs / 1000);
     if (player) {
+      // kill cam trigger: crashes incremented this frame -> orbit where the
+      // jet WAS (lastJetPos still holds the pre-reset position)
+      if (player.crashes !== kcCrashes) {
+        kcCrashes = player.crashes;
+        killCam = { c: lastJetPos.clone(), until: now + 4000 };
+      }
+      if (killCam && killCam.until && now > killCam.until) killCam = null;
+      const matchOrbit = match && match.over !== 0;
+      const cine = !!killCam || matchOrbit;
       const parked = world.fixYaw !== null;
       if (parked) world.renderParkedCamera(camera);
-      player.render(alpha, camera, parked);
+      player.render(alpha, camera, parked || cine);
+      if (!parked && cine) {
+        const center = matchOrbit ? world.jet.position : killCam.c;
+        const th = now * 0.00045;
+        kcPos.set(center.x + Math.cos(th) * 170, center.y + 55, center.z + Math.sin(th) * 170);
+        camera.position.lerp(kcPos, 0.08);
+        camera.up.set(0, 1, 0);
+        camera.lookAt(center);
+      }
+      if (!cine) lastJetPos.copy(world.jet.position);
       flightfx?.update(player.fm.out, player.throttleCmd, dtMs / 1000, camera);
       if (audio) {
         audio.engine.setState({
@@ -580,6 +608,11 @@ async function boot() {
     cloudClock += dtMs / 1000;
     clouds.update(camera, cloudClock);
     if (vol) { vol.uTime.value = cloudClock; vol.VC.updateCamera?.(camera); }
+    const hudEl = hud.canvas || hud.svg;
+    if (hudEl && flags.get("hud") !== "0" && flags.get("chrome") !== "0") {
+      if (!hudEl.style.transition) hudEl.style.transition = "opacity 0.3s";
+      hudEl.style.opacity = killCam ? "0" : "1"; // death cinematic flies clean
+    }
     hud.update(player ? player.hudState() : testworldHudState(world, alpha));
     atmosphere.update(camera);
     if (atmoH) atmoH.uCamPos.value.copy(camera.position);
