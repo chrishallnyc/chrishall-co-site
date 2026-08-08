@@ -1,11 +1,12 @@
 {
-  "updated": "2026-08-07T16:40:00-07:00",
-  "version": "v0.17.0",
-  "now": "polish pass 2 of 3 — fresh judge panel over the fixed build",
+  "updated": "2026-08-07T18:30:00-07:00",
+  "version": "v0.18.0",
+  "now": "final polish pass 3 of 3, then match modes — the sandbox becomes a war",
   "nowPhase": 14,
   "paused": false,
-  "pushes": 38,
+  "pushes": 43,
   "ledger": [
+    "2026-08-07 v0.18.0 — PASS TWO: the second judge panel widened every measurement and caught two of our own pass-1 fixes only holding where we'd measured them — both re-fixed globally (including under camera motion). Plus: combat finally LOOKS like combat (muzzle flash, hot tracers, impact sparks), the ocean lost its denim moire, and the golden-hour fjord mirrors the orange sky.",
     "2026-08-07 v0.17.0 — PASS ONE: a six-judge panel tore the game apart frame by frame and all 8 findings got fixed with measurements: cloud dot-lattice root-caused to a shadow term (10x cleaner), Nevada's air un-blued, the sun disc warms at sunset, HUD readable against clouds, living water with real glints, organic coastlines, and the phase-1 scale pylons finally retired from the ocean.",
     "2026-08-07 v0.16.2 — THROTTLE, PERFECTED (per Chris): hold W to 100%, keep holding for afterburner, let go and it settles at 100% — exactly like War Thunder. Mouse never touches the throttle.",
     "2026-08-07 v0.16.1 — NEW AIRFRAME: the F-22 rebuilt at 4x the detail — smooth blended fuselage, real chines, gold bubble canopy, thrust-vectoring nozzles. The builder critiqued its own screenshots through six rounds before showing it.",
@@ -115,8 +116,8 @@
     {
       "n": 14,
       "name": "Max fidelity pass",
-      "pct": 85,
-      "note": "pass 1/3 complete: 8 judge-panel fixes landed with measured acceptance"
+      "pct": 92,
+      "note": "pass 2/3: regressions caught by global sweeps, all re-fixed with motion-proof acceptance"
     },
     {
       "n": 15,
@@ -127,8 +128,8 @@
     {
       "n": 16,
       "name": "QA hardening",
-      "pct": 65,
-      "note": "16 batteries, 130 gates, judge panels + pixel forensics standing"
+      "pct": 70,
+      "note": "13 batteries, 130 gates, global-sweep acceptance protocol"
     },
     {
       "n": 17,
