@@ -14,7 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#f6f4ee">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f6f4ee'/%3E%3Cpath d='M1.5 19.4 L30.5 16.4' stroke='%23989690' stroke-width='1'/%3E%3Cpath d='M3.5 19 C6.5 12.6 13.5 10.6 19.5 12 C24.5 13.2 28 15.4 29 16.6 C26 18.2 18.5 20.6 11.5 20.9 C7.5 21 4.5 20.3 3.5 19 Z' fill='%2318181c'/%3E%3Ccircle cx='4.2' cy='19' r='2.4' fill='%23e8b46f'/%3E%3C/svg%3E">
-<!-- CHALL TUNNEL v0.8.0 · phase 8 — THE MODEL SHOP OPENS (phase 1, "the drop"): scan-anything enters the live page — drag a file (or the hangar's `load an object →` door), the mesh is read in a Worker and thrown away (magic bytes, typed refusals, never a throw), three ink sections print (silhouette / center slice / ground — never the mesh), the pencil traces the pick stroke-by-stroke, U-NNN accessions to THE SHELF (IndexedDB, cap 24, serials append-only, strikes leave tombstones), MODEL CHANGE spool → your wake in the same air as the sixteen; ground mode = free-slip floor at the wheel line, state printed on the specimen line; share = outline in the URL FRAGMENT only (#u=, ≤2000 chars, 12-bit deflate; the share-moment line prints beside the copied link); receiving #u= = rename-before-keep; METHODS gains the shop privacy paragraph verbatim. Comparison counts do NOT ship this phase — no drag numbers print. · on phase 7 — THE RECORD SURFACES: wind-off portraits (LAW 6b: power→0 seals the page, the trace develops ~3.5 s, done-beat) + PLATE exports (3200×2000 offscreen re-render, honesty microline verbatim, serial accession, filename law) + THE STILLS DIGNITY TIER (no-webgpu / prefers-reduced-motion / ?force=stills → one composed static state: paper + TEST 001 + a time-averaged impression from this instrument's own cpu oracle) + storage-throw boot + device-loss relight · on phase 6 (RISO lock + METHODS + hangar wall) + phase 5 (A-10 + THE PAIR) + phase 4 (pressure view) -->
+<!-- CHALL TUNNEL v0.9.0 · phase 9 — THE MODEL SHOP, PHASE 2 (the pencil, the reference row, and the lawful counts): THE REFERENCE ROW R-001…R-008 joins the hangar wall as row citizens (drawn clean, one verbatim lesson each; `test →` mounts keeping air; the cylinder and flat plate keep their analytic in-tunnel masks — REF-CAL and LAYOUT laws unchanged); THE PENCIL — the drafting table, literal: wind-off, the outline lies flat with control points, the verb set CLOSED at {move, add, delete, smooth} (PENCIL-CAP is structural — the frozen tuple IS the tool), ≤50 undo session-scoped, `revert to trace` always present, blank-paper `draw →` door (a seeded 12-point blob, same four verbs); the original row is IMMUTABLE — edits bake through the spooled swap to a MOD accession (U-NNN/A · mod of U-NNN · the pencil; reference edits fork to fresh U-NNN), A/B = the existing held-air [ ] swap cycling the specimen family; THE COUNTS under the COMPARISON LAW (DECISIONS R2.5): `measure against the row →` re-measures up to three reference bodies LIVE this session at EQUAL FRONTAL HEIGHT and identical settings (one rake column, staircase settle, wake-rake momentum deficit), prints ONLY dimensionless ratios at one decimal under the verbatim chrome line — operands never print anywhere, seed spread demotes the print to ≈, a body too long for the wake at equal height gets the refusal card (never a silent rescale), and THE AIRCRAFT NEVER JOIN THE LINEUP (the picker is built from the reference row and nothing else — absent by construction). · on phase 8 — THE MODEL SHOP OPENS (phase 1, "the drop"): scan-anything enters the live page — drag a file (or the hangar's `load an object →` door), the mesh is read in a Worker and thrown away (magic bytes, typed refusals, never a throw), three ink sections print (silhouette / center slice / ground — never the mesh), the pencil traces the pick stroke-by-stroke, U-NNN accessions to THE SHELF (IndexedDB, cap 24, serials append-only, strikes leave tombstones), MODEL CHANGE spool → your wake in the same air as the sixteen; ground mode = free-slip floor at the wheel line, state printed on the specimen line; share = outline in the URL FRAGMENT only (#u=, ≤2000 chars, 12-bit deflate; the share-moment line prints beside the copied link); receiving #u= = rename-before-keep; METHODS gains the shop privacy paragraph verbatim. Comparison counts do NOT ship this phase — no drag numbers print. · on phase 7 — THE RECORD SURFACES: wind-off portraits (LAW 6b: power→0 seals the page, the trace develops ~3.5 s, done-beat) + PLATE exports (3200×2000 offscreen re-render, honesty microline verbatim, serial accession, filename law) + THE STILLS DIGNITY TIER (no-webgpu / prefers-reduced-motion / ?force=stills → one composed static state: paper + TEST 001 + a time-averaged impression from this instrument's own cpu oracle) + storage-throw boot + device-loss relight · on phase 6 (RISO lock + METHODS + hangar wall) + phase 5 (A-10 + THE PAIR) + phase 4 (pressure view) -->
 <style>
 :root { --bg:#f6f4ee; --ink:#18181c; --mid:#56565e; --dim:#69675f; --hair:#989690; --acc:#e8b46f; --accd:#8a5d0c; --spec:#255079; }
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -177,6 +177,27 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 .srow svg { flex:0 0 auto; }
 .srow .doors { margin-top:4px; }
 .srow.struck .hname { text-decoration:line-through; color:var(--dim); }
+/* —— SHOP PHASE 2 (phase 9): the drafting table, the reference row, the counts —— */
+#pencilsvg { position:absolute; inset:0; width:100%; height:100%; touch-action:none; }
+#pencilbar { position:fixed; z-index:6; left:50%; transform:translateX(-50%); bottom:26px; text-align:center; }
+#pencilbar .doors { font-size:11px; }
+#pencilbar .mfine { margin-top:4px; font-size:9px; letter-spacing:.5px; color:var(--dim); }
+.pnhit { fill:transparent; stroke:none; cursor:grab; }
+.pnh { fill:var(--bg); stroke:var(--ink); stroke-width:1; cursor:grab; pointer-events:none; }
+.pnh.sel { fill:var(--ink); }
+.pnmid { fill:var(--bg); stroke:var(--hair); stroke-width:1; cursor:copy; }
+#countsline { font-size:11px; letter-spacing:.5px; color:var(--mid); white-space:nowrap; }
+#cntpick { display:flex; gap:10px; flex-wrap:wrap; margin:12px 0 4px; }
+.cnt {
+  background:none; border:1px solid var(--hair); padding:8px 8px 6px;
+  cursor:pointer; font:inherit; color:var(--dim); text-align:center;
+}
+.cnt:hover { border-color:var(--ink); color:var(--ink); }
+.cnt.on { border-color:var(--ink); color:var(--ink); }
+.cnt:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
+.cnt svg { display:block; margin:0 auto 4px; }
+#cntratios { font-size:14px; color:var(--ink); }
+#cntchrome { letter-spacing:1.5px; }
 [hidden] { display:none !important; }
 @media (prefers-reduced-motion: reduce) { #card { transition:none; } }
 @media (max-width:600px) { #card { left:12px; bottom:12px; right:12px; max-width:none; } }
@@ -194,6 +215,7 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
     <path id="utrace" fill="none" stroke="#18181c" stroke-width="1.4" stroke-linejoin="round" vector-effect="non-scaling-stroke" hidden/><!-- THE TRACE: the pencil draws the user outline (Class B one-shot) -->
   </svg>
   <canvas id="etch" aria-hidden="true" hidden></canvas>
+  <svg id="pencilsvg" aria-hidden="true" hidden></svg><!-- THE PENCIL (phase 9): the drafting table's editing layer — handles + diamonds, four verbs, nothing else -->
 </div>
 <nav id="articles" aria-label="test articles" hidden><button class="aw" data-k="f16" type="button">f-16</button> · <button class="aw" data-k="a10" type="button">a-10</button> · <button class="aw" data-k="plate" type="button">plate</button></nav>
 <nav id="artmode" aria-label="aircraft or wing" hidden><button class="aw" data-m="ac" type="button">aircraft</button> · <button class="aw" data-m="wing" id="wingword" type="button">wing</button></nav>
@@ -207,8 +229,18 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
   <p class="spec" id="pairk" hidden><span class="k">SPEC — </span>the f-16's section quit ~2° ago at this angle . camber is doing the holding</p>
   <p class="spec" id="bridge" hidden><span class="k">SPEC — </span>this is the tunnel's crude stall . see the textbook one → wing</p>
   <p class="spec" id="shopspec" hidden><span class="k">SPEC — </span>a 2d section at toy reynolds — direction is real, road numbers don't exist here</p>
+  <p id="countsline" hidden><span id="cntprog"></span> · <button class="door" id="cntcancel" type="button">cancel ×</button></p><!-- THE COUNTS progress — the quiet record line; the lineup runs in front of you -->
 </div>
 <p id="dropline" hidden>receiving specimen…</p>
+<!-- —— THE PENCIL bar (phase 9, UX §2): the four verbs are the whole tool —
+     move a point, add at a diamond, select + x deletes, smooth fairs the run.
+     Nothing else ships, forever (PENCIL-CAP). The pencil never grades you and
+     never suggests a shape — the person is the aerodynamicist, or nothing is. -->
+<div id="pencilbar" hidden>
+  <p class="spec" id="pencilspec"><span class="k">SPEC — </span>this is the job . fairings, boat tails, chopped mirrors — every drag count a truck ever lost was lost like this: trace, test, revise, re-test . the tail matters more than the nose</p>
+  <p class="doors"><button class="door" id="pensmooth" type="button">smooth</button> · <button class="door" id="penundo" type="button">undo ↩</button> · <button class="door" id="penrevert" type="button">revert to trace</button> · <button class="door" id="pendone" type="button">done — wind on →</button> · <button class="door" id="pencancel" type="button">cancel ×</button></p>
+  <p class="mfine">move a point · add at a diamond · select + x deletes · smooth fairs the run — four verbs, the whole tool . z undoes, 50 deep</p>
+</div>
 <div id="speclabel" hidden>
   <div class="sl1" id="sl1"></div>
   <div class="sl2" id="sl2"></div>
@@ -223,7 +255,7 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
     <nav id="views" aria-label="views"><button class="vw on" data-v="smoke" type="button" aria-pressed="true">smoke</button> · <button class="vw" data-v="specks" type="button" aria-pressed="false">specks</button> · <button class="vw" data-v="pressure" type="button" aria-pressed="false">pressure</button></nav>
     <p id="pressline" hidden>pressure view · warm = compression · cool = suction · magnitude is density, hue is sign only</p>
   </div>
-  <p class="doors"><span id="groundword" hidden><button class="door" id="grounddoor" type="button">ground</button> · </span><button class="door" id="platedoor" type="button">plate ↓</button> · <button class="door" id="methodsdoor" type="button">methods →</button> · <button class="door" id="hangardoor" type="button">hangar →</button></p>
+  <p class="doors"><span id="groundword" hidden><button class="door" id="grounddoor" type="button">ground</button> · </span><span id="countsword" hidden><button class="door" id="countsdoor" type="button">measure against the row →</button> · </span><button class="door" id="platedoor" type="button">plate ↓</button> · <button class="door" id="methodsdoor" type="button">methods →</button> · <button class="door" id="hangardoor" type="button">hangar →</button></p>
   <a class="cwatch" href="https://admin.chall.net/tunnel-mission">watch it being built → admin.chall.net/tunnel-mission</a>
 </aside>
 <!-- —— METHODS: the instrument's own paper, in-page (R1 assembly; zero requests —
@@ -273,6 +305,14 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
   <p class="mfine">the wall grows as planes land . one scale, one rail — true size is the composition . reference shapes hang at their declared size.</p>
   <div id="hscale"></div>
   <div id="hangarrows"></div>
+  <!-- —— THE REFERENCE ROW (phase 9): the eight drawn-clean bodies, R-001…R-008,
+       row citizens under the aircraft wall. One lesson each (DATA-v1, verbatim);
+       the counts lineup measures against these and NOTHING ELSE — the aircraft
+       never join (UX §3 clause 6). The row itself is immutable (accession law):
+       pencil edits fork to the USER shelf as fresh serials. —— -->
+  <hr class="ovrule">
+  <p class="mfine"><span class="hserial">THE REFERENCE ROW</span> — drawn clean · mount them, measure against them · the row never changes</p>
+  <div id="refrows"></div>
   <!-- —— THE SHELF (phase 8): user specimens join the wall under their own rule.
        Shelf-local scale (a truck at fighter scale would be a smudge — METHODS
        notes the shelf scale is its own); rows exist only for real accessions;
@@ -280,7 +320,7 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
   <hr class="ovrule">
   <p class="mfine"><span class="hserial">YOUR SHELF</span> — user specimens · kept in this browser only · a struck row keeps its serial forever</p>
   <div id="shelfrows"></div>
-  <p class="mfine"><button class="door" id="shopdoor" type="button" hidden>load an object →</button></p>
+  <p class="mfine"><button class="door" id="shopdoor" type="button" hidden>load an object →</button> <span id="drawword" hidden>· <button class="door" id="drawdoor" type="button">no scanner? draw it →</button></span></p>
   <p class="mfine" id="shopmoment" hidden></p>
   <input id="shopfile" type="file" accept=".stl,.obj,.glb" aria-label="load an object" hidden>
 </section>
@@ -299,6 +339,27 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
     <p class="mfine">lowercase a–z · 0–9 · space · dash · 24 max · plain text, label register only</p>
   </div>
   <p class="mfine" id="shopfine">your scan is read in this browser and thrown away . only the ink outline remains .</p>
+</section>
+<!-- —— THE COUNTS (phase 9, DECISIONS R2.5 COMPARISON LAW): relative drag
+     prints ONLY as a dimensionless ratio of two drags measured by this tunnel
+     in this session at identical settings. Ratios one decimal; operands never
+     print; the chrome line below is VERBATIM LAW and never renders apart from
+     its ratios (SHOP-CHROME-MICROLINE). The picker is built from the reference
+     row and nothing else — the aircraft are absent by construction. —— -->
+<section class="ov" id="counts" role="dialog" aria-label="the counts" hidden>
+  <div class="ovhead"><span class="ovbrand">THE COUNTS</span><button class="ovclose" type="button" data-close="counts">close ×</button></div>
+  <hr class="ovrule">
+  <p class="mp" id="cntline"></p>
+  <div id="cntpick" hidden></div>
+  <p class="mfine" id="cntpickfine" hidden>up to three . each body is re-measured live, in this session — never a stored constant . the aircraft are not on this sheet and never will be .</p>
+  <p class="mp doors" id="cntrun" hidden><button class="door" id="cntgo" type="button">run the lineup →</button></p>
+  <div id="cntresult" hidden>
+    <p id="cntratios"></p>
+    <p class="mfine" id="cntreveal">scaled to equal height — this compares shape, not size .</p>
+    <p class="mfine" id="cntpins"></p>
+    <p class="mfine" id="cntchrome">2D SECTION · TUNNEL RE ~10³–10⁴ · RELATIVE ONLY · equal height · same tunnel settings · in this tunnel</p>
+    <p class="mfine" id="cntrefused" hidden></p>
+  </div>
 </section>
 <main class="sheet" id="sheet">
   <svg class="glyph" viewBox="0 0 32 32" aria-hidden="true">
@@ -359,8 +420,24 @@ var B=Object.freeze({TOO_LARGE:"too-large",TRUNCATED:"truncated",UNRECOGNIZED:"u
 //     a query param, so the shape never reaches any server; the share-moment
 //     line prints beside the copied link. A received #u= link opens
 //     rename-before-keep. METHODS gains the shop privacy paragraph verbatim.
-//   - NOT this phase: the comparison law (counts need the reference row) —
-//     no drag number prints anywhere, and the pencil is not built yet.
+//   - (superseded at phase 9: the comparison law now ships — ratios only,
+//     under the verbatim chrome; the pencil and the reference row are built.)
+// ============================================================================
+// CHALL TUNNEL — phase 9 "the model shop, phase 2"
+// Phase 9 adds (DECISIONS R2.5 · scanlab/UX §2-4 · scanlab/AUDIT §1):
+//   - THE REFERENCE ROW: R-001…R-008 as row citizens on the hangar wall,
+//     lessons verbatim from DATA-v1; `test →` mounts keeping air. The two
+//     live analytic articles (cylinder, plate) keep their analytic masks —
+//     the row's outline citizens serve the counts lineup.
+//   - THE PENCIL: wind-off drafting table; verbs CLOSED at {move, add,
+//     delete, smooth}; ≤50 undo; originals immutable; mods accession as
+//     U-NNN/A (refs fork to fresh U-NNN); A/B rides the held-air [ ] swap;
+//     blank paper via the shelf's draw door. No auto-fairer ships, ever.
+//   - THE COUNTS: `measure against the row →` — up to three reference bodies
+//     re-measured LIVE at one rig and EQUAL FRONTAL HEIGHT (wake-rake
+//     momentum deficit, staircase settle, cancellable); ONLY ratios print,
+//     one decimal, seed spread demotes to ≈; refusal card for bodies too
+//     long for the wake at equal height; aircraft never join the lineup.
 // ============================================================================
 // CHALL TUNNEL — phase 7 "the record surfaces + the dignity tiers"
 // Phase 7 adds:
@@ -1027,18 +1104,15 @@ const AC_INT = {
   f16: [{"id":"canopy-arc","pen":"W2","pts":[[0.2247,0.1067],[0.2333,0.1068],[0.2364,0.1061],[0.2401,0.1065],[0.2584,0.1062],[0.2724,0.1068],[0.2876,0.1083],[0.2979,0.1105],[0.3142,0.1125],[0.317,0.1134],[0.325,0.1139],[0.327,0.1148],[0.3559,0.1194],[0.3599,0.1196],[0.3662,0.1208],[0.3685,0.122],[0.3905,0.1242],[0.3925,0.1251],[0.4102,0.1276]]},{"id":"intake-lip","pen":"W2","pts":[[0.3225,0.0544],[0.3416,0.055],[0.3736,0.0569],[0.3771,0.0577],[0.3882,0.0577],[0.4091,0.0592]]},{"id":"strake-line","pen":"W3","pts":[[0.213,0.0698],[0.2753,0.0675],[0.277,0.0678],[0.279,0.0695],[0.2839,0.0697],[0.2936,0.0698],[0.2956,0.0692],[0.3059,0.0697],[0.3516,0.0696],[0.3536,0.0702],[0.3728,0.0698],[0.3962,0.0706],[0.4011,0.0702],[0.4079,0.0706],[0.4099,0.0712],[0.4122,0.0706],[0.4228,0.0715],[0.4294,0.071],[0.462,0.0729],[0.4648,0.0738],[0.4826,0.0752],[0.4886,0.0767],[0.4903,0.0762],[0.4929,0.0775]]},{"id":"fin-dorsal-break","pen":"W2","pts":[[0.7925,0.155],[0.8748,0.1555],[0.8816,0.1561],[0.8862,0.1583],[0.8885,0.1567],[0.8962,0.1563],[0.9008,0.1562],[0.9034,0.1571],[0.9285,0.1568]]},{"id":"ventral-tick","pen":"W3","pts":[[0.7141,0.0386],[0.7333,0.0394],[0.7401,0.039],[0.7965,0.04]]}],
   a10: [{"id":"canopy-arc","pen":"W2","pts":[[0.1774,0.1249],[0.1829,0.1257],[0.1878,0.1283],[0.1979,0.129],[0.2079,0.1322],[0.2216,0.1332],[0.2255,0.1352],[0.2326,0.1365],[0.2378,0.1365],[0.2459,0.1394],[0.2573,0.14],[0.2645,0.1429],[0.2758,0.1434]]},{"id":"gun-line","pen":"W3","pts":[[0.0016,0.0569],[0.0133,0.0565],[0.0175,0.0573]]},{"id":"engine-pod","pen":"W2","pts":[[0.6371,0.075],[0.6693,0.0727],[0.6725,0.0741],[0.6761,0.0741],[0.6784,0.0721],[0.681,0.0714],[0.693,0.0698],[0.706,0.069],[0.7135,0.0677],[0.7157,0.0664],[0.7281,0.0666],[0.7313,0.0663],[0.7326,0.0654],[0.7505,0.065],[0.7534,0.067],[0.77,0.0677],[0.7797,0.0704],[0.7891,0.0718],[0.7973,0.075],[0.8002,0.0778],[0.8012,0.0801],[0.8119,0.0811]]},{"id":"tail-group","pen":"W2","pts":[[0.8824,0.0267],[0.8921,0.0258],[0.9123,0.0285],[0.9194,0.0302],[0.9366,0.0327],[0.9467,0.0357]]}],
 };
-// datum-wall rows: landed planes in accession order + the reference stubs.
-// Unshipped planes are ABSENT — the wall grows as planes land (no coming-
-// soon). Lessons from DATA-v1; reference sizes are DECLARED and printed.
+// datum-wall rows: landed planes in accession order. Unshipped planes are
+// ABSENT — the wall grows as planes land; nothing hangs before it lands.
+// Lessons from DATA-v1. The two reference stubs that hung here through phase 8 graduated
+// into THE REFERENCE ROW (phase 9) — R-001…R-008 hang below as row citizens.
 const HROWS = [
   { pk: 'f16', k: 'f16', serial: 'TEST 001', name: 'F-16C FIGHTING FALCON', lenM: 15.09,
     lesson: 'the thin section quits early at this reynolds — the real jet flies to its 25° limiter' },
   { pk: 'a10', k: 'a10', serial: 'TEST 006', name: 'A-10C THUNDERBOLT II', lenM: 16.256,
     lesson: 'straight, thick, deeply cambered — docile stall . the reynolds flagship' },
-  { ref: 'cyl', k: 'cyl', serial: 'R-001 · REFERENCE · Ø 1 M DECLARED', name: 'THE CYLINDER', lenM: 1,
-    lesson: 'the shape this tunnel is proven on — the battery flies this circle every release and demands the same wake song . st 0.214' },
-  { ref: 'plate', k: 'plate', serial: 'R-002 · REFERENCE · 1 M CHORD DECLARED', name: 'THE FLAT PLATE', lenM: 1,
-    lesson: 'edge-on it is barely there . broadside it is everything . same shape — α is the whole story' },
 ];
 const SVGNS = 'http://www.w3.org/2000/svg';
 function svgEl(tag, attrs) {
@@ -1108,29 +1182,11 @@ function buildHangar() { // hung fresh at each open — one scale, one rail, ali
   }
   const specW = narrow ? usable : Math.round(s * 53.04);
   const labelX = narrow ? 0 : specW + 28;
-  // per-silhouette geometry: [aboveRail px, belowRail px, builder]
+  // per-silhouette geometry: [aboveRail px, belowRail px, builder] — planes
+  // only since phase 9 (the reference stubs live in THE REFERENCE ROW now)
   const geom = HROWS.map((r) => {
-    if (r.pk) {
-      const g = acGeom(r.pk), u = s * r.lenM;
-      return { above: (g.ymax - g.yc0) * u, below: g.yc0 * u, make: () => drawnPlaneSVG(r.pk, u, dpr) };
-    }
-    if (r.ref === 'cyl') {
-      const rr = s / 2;
-      return { above: rr, below: rr, make: () => {
-        const svg = svgEl('svg', { width: s + 2, height: s + 2, 'aria-hidden': 'true' });
-        const c = svgEl('circle', { cx: rr + 1, cy: rr + 1, r: rr, 'data-pen': 'W1' });
-        penStroke(c, 'W1');
-        svg.appendChild(c);
-        return svg;
-      } };
-    }
-    return { above: 1, below: 1, make: () => { // the plate, side-on at true scale, IS a line
-      const svg = svgEl('svg', { width: s, height: 2, 'aria-hidden': 'true' });
-      const l = svgEl('path', { d: `M0 1H${s}`, 'data-pen': 'W1' });
-      penStroke(l, 'W1');
-      svg.appendChild(l);
-      return svg;
-    } };
+    const g = acGeom(r.pk), u = s * r.lenM;
+    return { above: (g.ymax - g.yc0) * u, below: g.yc0 * u, make: () => drawnPlaneSVG(r.pk, u, dpr) };
   });
   const railY = Math.max(...geom.map((g) => g.above)) + 12; // equal rail offset, every row (COMP-DATUM)
   for (let i = 0; i < HROWS.length; i++) {
@@ -1173,19 +1229,19 @@ function buildHangar() { // hung fresh at each open — one scale, one rail, ali
   }
 }
 // —— overlay plumbing (the doors live in the card; Escape closes) ——
-const OVS = ['methods', 'hangar', 'shop'];
+const OVS = ['methods', 'hangar', 'shop', 'counts'];
 const ovAnyOpen = () => OVS.some((n) => !document.getElementById(n).hidden);
 function ovOpen(n) {
   for (const o of OVS) document.getElementById(o).hidden = o !== n;
   const el = document.getElementById(n);
-  if (n === 'hangar') { buildHangar(); buildShelf(); } // hung at open (needs layout); rebuilt fresh each time
+  if (n === 'hangar') { buildHangar(); buildRefRow(); buildShelf(); } // hung at open (needs layout); rebuilt fresh each time
   el.scrollTop = 0;
   const c = el.querySelector('.ovclose');
   if (c) c.focus();
 }
 function ovClose() {
   for (const o of OVS) document.getElementById(o).hidden = true;
-  if (['reading', 'pick', 'label', 'refused'].includes(SHOP.state)) SHOP.state = 'idle'; // closing the sheet abandons the arc; a mid-parse result is discarded
+  if (['reading', 'pick', 'label', 'refused', 'drawn', 'mod'].includes(SHOP.state)) SHOP.state = 'idle'; // closing the sheet abandons the arc; a mid-parse result is discarded
 }
 document.getElementById('methodsdoor').addEventListener('click', () => ovOpen('methods'));
 document.getElementById('hangardoor').addEventListener('click', () => ovOpen('hangar'));
@@ -1831,6 +1887,59 @@ function N(C,A){return{ok:!1,refusal:{code:C,message:A}}}async function w(C){let
 const shopEncodeFragment = globalThis.__SHOPSHARE.encodeFragment;
 const shopDecodeFragment = globalThis.__SHOPSHARE.decodeFragment;
 
+// ---------- THE REFERENCE ROW (phase 9) — R-001…R-008, drawn clean ----------
+// Verbatim from the brain's frozen assets/refrow (build-refrow.mjs generator;
+// check-refrow battery 8/8 GREEN: non-self-intersecting · single solid body ·
+// no enclosed voids · min-feature ≥3 solver cells NATIVE at chord 120, so the
+// dilation law never inflates a reference body at any rung ≥120). Outlines
+// are unit-chord, y centered on the bbox mid, CCW (y-up), closed implicitly
+// (last→first). frontalHeight is the α=0 anchor ONLY — at α≠0 the lineup
+// recomputes the projected height from the rotated outline (the flat plate,
+// h 0.03 edge-on and ~1.0 broadside, is why this rule exists). Each lesson is
+// the ONE caption, house voice, verbatim from DATA-v1 — immutable, like the
+// row itself: pencil edits fork to the USER shelf, the row never changes.
+const REFROW = [
+  { id: 'r001', serial: 'R-001', name: 'THE CYLINDER', groundMode: false, frontalHeight: 1,
+    lesson: 'the shape this tunnel is proven on — the battery flies this circle every release and demands the same wake song . st 0.214 .',
+    outline: [[0,0],[0.0024,-0.049],[0.0096,-0.0975],[0.0215,-0.1451],[0.0381,-0.1913],[0.059,-0.2357],[0.0843,-0.2778],[0.1135,-0.3172],[0.1464,-0.3536],[0.1828,-0.3865],[0.2222,-0.4157],[0.2643,-0.441],[0.3087,-0.4619],[0.3549,-0.4785],[0.4025,-0.4904],[0.451,-0.4976],[0.5,-0.5],[0.549,-0.4976],[0.5975,-0.4904],[0.6451,-0.4785],[0.6913,-0.4619],[0.7357,-0.441],[0.7778,-0.4157],[0.8172,-0.3865],[0.8536,-0.3536],[0.8865,-0.3172],[0.9157,-0.2778],[0.941,-0.2357],[0.9619,-0.1913],[0.9785,-0.1451],[0.9904,-0.0975],[0.9976,-0.049],[1,0],[0.9976,0.049],[0.9904,0.0975],[0.9785,0.1451],[0.9619,0.1913],[0.941,0.2357],[0.9157,0.2778],[0.8865,0.3172],[0.8536,0.3536],[0.8172,0.3865],[0.7778,0.4157],[0.7357,0.441],[0.6913,0.4619],[0.6451,0.4785],[0.5975,0.4904],[0.549,0.4976],[0.5,0.5],[0.451,0.4976],[0.4025,0.4904],[0.3549,0.4785],[0.3087,0.4619],[0.2643,0.441],[0.2222,0.4157],[0.1828,0.3865],[0.1464,0.3536],[0.1135,0.3172],[0.0843,0.2778],[0.059,0.2357],[0.0381,0.1913],[0.0215,0.1451],[0.0096,0.0975],[0.0024,0.049]] },
+  { id: 'r002', serial: 'R-002', name: 'THE FLAT PLATE', groundMode: false, frontalHeight: 0.03,
+    lesson: 'edge-on it is barely there . broadside it is everything . same shape — α is the whole story .',
+    outline: [[0,0],[0.0011,-0.0057],[0.0044,-0.0106],[0.0093,-0.0139],[0.015,-0.015],[0.985,-0.015],[0.9907,-0.0139],[0.9956,-0.0106],[0.9989,-0.0057],[1,0],[0.9989,0.0057],[0.9956,0.0106],[0.9907,0.0139],[0.985,0.015],[0.015,0.015],[0.0093,0.0139],[0.0044,0.0106],[0.0011,0.0057]] },
+  { id: 'r003', serial: 'R-003', name: 'THE TEARDROP', groundMode: false, frontalHeight: 0.3994,
+    lesson: 'the shape drag forgot . every fairing you will ever draw is trying to get here .',
+    outline: [[0,0],[0.0026,-0.0294],[0.0102,-0.0574],[0.0229,-0.0838],[0.0405,-0.1082],[0.0628,-0.1304],[0.0896,-0.1499],[0.1206,-0.1666],[0.1555,-0.18],[0.1939,-0.19],[0.2355,-0.1966],[0.2798,-0.1997],[0.3263,-0.1995],[0.3747,-0.1962],[0.4243,-0.19],[0.4747,-0.1813],[0.5253,-0.1706],[0.5757,-0.1581],[0.6253,-0.1444],[0.6737,-0.1296],[0.7202,-0.1144],[0.7645,-0.0988],[0.8061,-0.0834],[0.8445,-0.0684],[0.8794,-0.0542],[0.9104,-0.041],[0.9372,-0.0292],[0.9595,-0.0191],[0.9771,-0.0109],[0.9898,-0.0049],[0.9974,-0.0012],[1,0],[0.9974,0.0012],[0.9898,0.0049],[0.9771,0.0109],[0.9595,0.0191],[0.9372,0.0292],[0.9104,0.041],[0.8794,0.0542],[0.8445,0.0684],[0.8061,0.0834],[0.7645,0.0988],[0.7202,0.1144],[0.6737,0.1296],[0.6253,0.1444],[0.5757,0.1581],[0.5253,0.1706],[0.4747,0.1813],[0.4243,0.19],[0.3747,0.1962],[0.3263,0.1995],[0.2798,0.1997],[0.2355,0.1966],[0.1939,0.19],[0.1555,0.18],[0.1206,0.1666],[0.0896,0.1499],[0.0628,0.1304],[0.0405,0.1082],[0.0229,0.0838],[0.0102,0.0574],[0.0026,0.0294]] },
+  { id: 'r004', serial: 'R-004', name: 'THE BRICK', groundMode: false, frontalHeight: 0.5,
+    lesson: 'the air lets go at the first corner and never comes back . the honest worst case .',
+    outline: [[0,-0.21],[0.002,-0.2224],[0.0076,-0.2335],[0.0165,-0.2424],[0.0276,-0.248],[0.04,-0.25],[0.96,-0.25],[0.9724,-0.248],[0.9835,-0.2424],[0.9924,-0.2335],[0.998,-0.2224],[1,-0.21],[1,0.21],[0.998,0.2224],[0.9924,0.2335],[0.9835,0.2424],[0.9724,0.248],[0.96,0.25],[0.04,0.25],[0.0276,0.248],[0.0165,0.2424],[0.0076,0.2335],[0.002,0.2224],[0,0.21]] },
+  { id: 'r005', serial: 'R-005', name: 'THE WEDGE', groundMode: false, frontalHeight: 0.5006,
+    lesson: 'run it both ways — point first, then blunt first . the tail matters more than the nose, and this is the shape that proves it .',
+    outline: [[0,-0.244],[0.0029,-0.2486],[0.008,-0.2503],[0.9795,-0.2503],[0.9873,-0.2488],[0.994,-0.2443],[0.9984,-0.2377],[1,-0.2298],[1,0.2298],[0.9974,0.2398],[0.9903,0.2473],[0.9804,0.2503],[0.9703,0.2482],[0.0043,-0.2348],[0.0006,-0.2386]] },
+  { id: 'r006', serial: 'R-006', name: 'THE GENERIC CAR', groundMode: true, frontalHeight: 0.295,
+    lesson: 'a teardrop in a suit . look where the roofline pretends to be one .',
+    outline: [[0,-0.0575],[0.002,-0.0975],[0.1146,-0.1025],[0.1225,-0.1174],[0.1337,-0.13],[0.1475,-0.1395],[0.1633,-0.1455],[0.18,-0.1475],[0.1967,-0.1455],[0.2125,-0.1395],[0.2263,-0.13],[0.2375,-0.1174],[0.2454,-0.1025],[0.7346,-0.1025],[0.7425,-0.1174],[0.7537,-0.13],[0.7675,-0.1395],[0.7833,-0.1455],[0.8,-0.1475],[0.8167,-0.1455],[0.8325,-0.1395],[0.8463,-0.13],[0.8575,-0.1174],[0.8654,-0.1025],[0.994,-0.0955],[1,-0.0495],[0.9991,-0.0239],[0.995,0.0005],[0.9869,0.0207],[0.975,0.0365],[0.96,0.0459],[0.94,0.0515],[0.88,0.0575],[0.8409,0.0655],[0.8,0.0775],[0.725,0.1155],[0.6859,0.1305],[0.645,0.1415],[0.6006,0.1469],[0.555,0.1475],[0.5084,0.1436],[0.465,0.1345],[0.4309,0.1198],[0.4,0.0995],[0.335,0.0425],[0.3066,0.0309],[0.2066,0.0165],[0.05,-0.0005],[0.0261,-0.0099],[0.012,-0.0225],[0.0035,-0.0389]] },
+  { id: 'r007', serial: 'R-007', name: 'THE GENERIC PICKUP', groundMode: true, frontalHeight: 0.3454,
+    lesson: 'an open box in the wind . the argument about the tailgate is real — run it up and down and let this tunnel give its own answer .',
+    outline: [[0,-0.0696],[0.0021,-0.116],[0.1024,-0.1211],[0.1108,-0.1381],[0.1232,-0.1525],[0.1387,-0.1635],[0.1564,-0.1703],[0.1753,-0.1727],[0.1941,-0.1703],[0.2118,-0.1635],[0.2273,-0.1525],[0.2397,-0.1381],[0.2482,-0.1211],[0.7312,-0.1211],[0.7397,-0.1381],[0.7521,-0.1525],[0.7676,-0.1635],[0.7853,-0.1703],[0.8041,-0.1727],[0.823,-0.1703],[0.8407,-0.1635],[0.8562,-0.1525],[0.8685,-0.1381],[0.877,-0.1211],[0.9881,-0.1165],[0.9941,-0.1147],[0.9984,-0.1102],[1,-0.1041],[1,0.0459],[0.9989,0.05],[0.9918,0.0541],[0.9773,0.0541],[0.9702,0.05],[0.9691,-0.0057],[0.9674,-0.0119],[0.9629,-0.0164],[0.9567,-0.018],[0.6052,-0.018],[0.599,-0.0164],[0.5928,-0.0077],[0.5832,0.1457],[0.5814,0.152],[0.5771,0.157],[0.5619,0.1675],[0.5155,0.1727],[0.48,0.1701],[0.4433,0.1624],[0.4146,0.1487],[0.3866,0.1263],[0.3196,0.0459],[0.2922,0.0343],[0.0818,0.0154],[0.0412,0.0077],[0.0206,-0.0028],[0.0103,-0.018],[0.0031,-0.0425]] },
+  { id: 'r008', serial: 'R-008', name: 'THE CYCLIST', groundMode: true, frontalHeight: 0.7102,
+    lesson: 'the athlete is a bluff body . a deeper tuck is a pencil edit made of spine .',
+    outline: [[0,-0.1395],[0.0058,-0.2171],[0.0234,-0.2588],[0.0475,-0.2921],[0.078,-0.3192],[0.113,-0.3392],[0.1889,-0.3551],[0.2473,-0.3455],[0.294,-0.3234],[0.3306,-0.2912],[0.3607,-0.246],[0.3768,-0.195],[0.3782,-0.1457],[0.3661,-0.0959],[0.339,-0.0465],[0.4871,-0.1478],[0.5011,-0.2088],[0.4821,-0.2246],[0.4892,-0.2442],[0.4992,-0.2475],[0.5774,-0.2367],[0.5913,-0.2246],[0.5894,-0.2108],[0.578,-0.2023],[0.5413,-0.2062],[0.53,-0.1549],[0.6184,-0.1633],[0.6314,-0.2321],[0.6681,-0.2921],[0.7198,-0.3324],[0.7919,-0.3543],[0.8344,-0.3534],[0.878,-0.3417],[0.927,-0.3142],[0.9558,-0.2863],[0.9842,-0.2404],[0.9958,-0.2037],[1,-0.1645],[0.9904,-0.1061],[0.9683,-0.0594],[0.927,-0.0148],[0.877,0.0136],[0.8094,0.0261],[0.7419,0.0136],[0.6877,-0.0181],[0.6439,-0.0703],[0.6226,-0.1291],[0.5234,-0.1191],[0.5771,0.054],[0.5926,0.0803],[0.6118,0.0819],[0.6214,0.0899],[0.6239,0.1049],[0.6405,0.1216],[0.6472,0.1457],[0.643,0.1649],[0.6234,0.187],[0.4652,0.2608],[0.3974,0.2911],[0.3691,0.2913],[0.3661,0.3188],[0.3478,0.3445],[0.324,0.3551],[0.2971,0.3532],[0.2661,0.3284],[0.2585,0.3009],[0.2627,0.28],[0.2781,0.2588],[0.2932,0.2496],[0.3365,0.2446],[0.3486,0.2133],[0.2769,0.0707],[0.2742,0.0525],[0.2911,0.0006],[0.2064,0.0252],[0.1639,0.0244],[0.1074,0.0073],[0.0713,-0.0148],[0.0392,-0.0469],[0.0165,-0.084]] },
+];
+const REF_BY_ID = Object.fromEntries(REFROW.map((e) => [e.id, e]));
+// projected bbox of a unit-chord outline at mount α, in chord units — the
+// screen convention (SVG y-down; rotate(α) is the sting's own transform), so
+// the lineup's equal-height law measures exactly what the section presents.
+function projSpanChord(outline, alphaDeg) {
+  const th = alphaDeg * Math.PI / 180, c = Math.cos(th), s = Math.sin(th);
+  let xmin = Infinity, xmax = -Infinity, ymin = Infinity, ymax = -Infinity;
+  for (const [x, y] of outline) {
+    const yd = -y; // outline y-up → grid y-down (one display law)
+    const xr = x * c - yd * s, yr = x * s + yd * c;
+    if (xr < xmin) xmin = xr; if (xr > xmax) xmax = xr;
+    if (yr < ymin) ymin = yr; if (yr > ymax) ymax = yr;
+  }
+  return { w: xmax - xmin, h: ymax - ymin };
+}
+
 // ---------- THE MODEL SHOP (phase 8, "the drop") ----------
 // Privacy law (AUDIT §3, battery SHOP-PRIV): the whole path — parse, section,
 // shelf, share — makes ZERO network requests. The mesh is read in a Worker
@@ -1898,6 +2007,27 @@ async function accessionOutline(outline, name, prov, ground) { // U-NNN append-o
 // user outline (chord-normalized, y centered, from outline.mjs or a decoded
 // fragment) → master convention for geomFromPts: re-normalized defensively,
 // y-up from the bbox bottom, closed.
+async function modAccession(parent, outline, name) { // THE PENCIL's bake: U-NNN/A · append-only; letters never renumber; a struck mod keeps its letter forever
+  const rows = await shelf.all();
+  if (rows.filter((x) => !x.struck).length >= 24) {
+    return { ok: false, refusal: { code: 'shelf-full', message: SHELF_FULL_LINE } };
+  }
+  const base = parent.serial.split('/')[0];
+  let hi = 0; // the next letter is one past the highest EVER issued for this base — strikes never free one
+  for (const x of rows) {
+    const m = /^U-\d{3}\/([A-Z])$/.exec(x.serial);
+    if (m && x.serial.startsWith(base + '/')) hi = Math.max(hi, m[1].charCodeAt(0) - 64);
+  }
+  const rec = {
+    serial: `${base}/${String.fromCharCode(65 + hi)}`,
+    name: sanitizeName(name) || parent.name,
+    outline, ground: parent.ground ? { ...parent.ground } : null,
+    prov: `mod of ${base} · the pencil`, parent: base,
+    date: new Date().toISOString().slice(0, 10),
+  };
+  rec.kept = (await shelf.put(rec)) !== false;
+  return { ok: true, rec };
+}
 function userGeom(outline) {
   let xmin = Infinity, xmax = -Infinity, ymin = Infinity;
   for (const [x, y] of outline) {
@@ -1935,6 +2065,34 @@ const div = (cls, text) => { // the shop's one DOM helper — textContent always
   d.className = cls; d.textContent = text;
   return d;
 };
+function buildRefRow() { // THE REFERENCE ROW (phase 9) — rebuilt at each hangar open, same pen as everything
+  const rowsEl = E('refrows');
+  rowsEl.textContent = '';
+  for (const r of REFROW) {
+    const row = div('srow', '');
+    row.appendChild(outlineSVG(r.outline, 64, 40));
+    const lab = div('', '');
+    lab.appendChild(div('hname', `${r.serial} · ${r.name}`));
+    lab.appendChild(div('hserial', `REFERENCE · drawn clean${r.groundMode ? ' · ground default' : ''}`));
+    lab.appendChild(div('hlesson', r.lesson));
+    if (T.shopMountRef) { // live tier only — stills reads the wall; it cannot mount
+      const doors = div('doors', '');
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'door'; b.dataset.ref = r.id;
+      b.textContent = 'test →';
+      doors.appendChild(b);
+      lab.appendChild(doors);
+    }
+    row.appendChild(lab);
+    rowsEl.appendChild(row);
+  }
+}
+E('refrows').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-ref]');
+  if (!b || !T.shopMountRef) return;
+  ovClose();
+  T.shopMountRef(b.dataset.ref); // keeps air — the spooled swap law, same as every wall door
+});
 async function buildShelf() { // the wall's second section — rebuilt at each hangar open
   const rowsEl = E('shelfrows');
   rowsEl.textContent = '';
@@ -2090,9 +2248,25 @@ async function shopKeep(outline, name, prov, ground) { // U-NNN, then mount + sp
   buildShelf();
   return r;
 }
-function shopAccession() { // one keep path: a traced pick, or a received shape renamed
+async function shopKeepMod() { // the pencil's keep: append-only mod accession — the original row is NEVER touched (accession law)
+  const { parent, outline } = SHOP.mod;
+  const name = E('shopname').value;
+  const r = parent.ref
+    ? await accessionOutline(outline, name || parent.name, `mod of ${parent.serial} · the pencil`, parent.ground) // reference edits fork to the USER shelf as fresh serials — the row is immutable
+    : await modAccession(parent, outline, name);
+  if (!r.ok) { E('shopline').textContent = r.refusal.message; return r; }
+  slog('mod');
+  SHOP.state = 'mounted';
+  shopSheet(`${r.rec.serial} · accessioned beside the original`);
+  if (T.shopMount) { ovClose(); await T.shopMount(r.rec); } // the edit returns to air through the spooled swap
+  buildShelf();
+  return r;
+}
+function shopAccession() { // one keep path: a traced pick, a received shape renamed, a drawn blank, or a pencil mod
   const name = E('shopname').value;
   if (SHOP.state === 'received' && SHOP.recv) return shopKeep(SHOP.recv.outline, name, 'received', { on: false });
+  if (SHOP.state === 'drawn' && SHOP.draw) return shopKeep(SHOP.draw.outline, name, 'drawn with the pencil', { on: false });
+  if (SHOP.state === 'mod' && SHOP.mod) return shopKeepMod();
   if (SHOP.pick) return shopKeep(SHOP.pick.outline, name, 'traced from your scan', SHOP.pick.ground);
   return Promise.resolve(null);
 }
@@ -2176,6 +2350,7 @@ const dom = {
   shopspec: E('shopspec'),
   grounddoor: document.getElementById('grounddoor'),
   groundword: document.getElementById('groundword'),
+  countsword: E('countsword'),
   alphaline: document.getElementById('alphaline'),
   readout: document.getElementById('readout'),
   sheet: E('sheet'),
@@ -2223,7 +2398,7 @@ function crossHz(samples, dts) { // upward mean-crossings; 0 until a real, regul
 }
 
 const T = { // __TUNNEL — the __PARK contract lineage
-  version: '0.8.0',
+  version: '0.9.0',
   tier: 'boot',
   press: PRESS, // the duotone canary — PRESS-LUM computes luminance-silence from these
   grid: null,
@@ -2287,6 +2462,11 @@ const T = { // __TUNNEL — the __PARK contract lineage
   },
   shopMount: null, // the live boot fills this in (a mounted user specimen needs air)
   shopGround: null, // the `ground` word — free-slip floor at the wheel line
+  // SHOP PHASE 2 (phase 9) — the drafting table + the lawful counts
+  shopMountRef: null, // the reference row's `test →` door (live boot fills it; cyl/plate stay analytic)
+  pencil: null, // the pencil's QA surface { verbs, undoCap, state() } — the frozen verb tuple IS the tool (PENCIL-CAP)
+  countsLast: null, // the last lawful lineup: ratios + rig pins + refusals — NEVER operands, on any surface
+  countsLog: [], // geometry pins per measured body {serial, L, h}: the equal-height law, assertable
 };
 window.__TUNNEL = T;
 
@@ -2462,9 +2642,14 @@ const planeOf = (k) => (k === 'f16' || k === 'a10') ? k : (isWing(k) ? k.slice(0
 function mountUserGeom(rec) {
   _acGeom.user = userGeom(rec.outline);
   const ground = !!(rec.ground && rec.ground.on);
-  AC.user = {
+  const floor = ground ? 'GROUND — free-slip floor at the wheel line' : 'FREE AIR — no ground effect';
+  AC.user = rec.ref ? { // a reference row citizen on the sting — a full citizen, never an aircraft
+    serial: rec.serial, name: `${rec.name.toUpperCase()} — REFERENCE`,
+    basis: `reference row · drawn clean · ${floor}`,
+    pivotL: 0.5, nPts: rec.outline.length, ground, rec,
+  } : {
     serial: rec.serial, name: `"${rec.name.toUpperCase()}" — USER SPECIMEN`,
-    basis: `${rec.prov} · ${rec.date} · ${ground ? 'GROUND — free-slip floor at the wheel line' : 'FREE AIR — no ground effect'}`,
+    basis: `${rec.prov} · ${rec.date} · ${floor}`,
     pivotL: 0.5, nPts: rec.outline.length, ground, rec,
   };
 }
@@ -2480,6 +2665,19 @@ function makeArticle(kind, W, H) {
     const uy = def.ground ? (H - 2) - g.yc0 * L : py;
     return {
       type: 'ac', pk: 'user', px: Math.round(0.22 * W + def.pivotL * L) + 0.5, py: uy,
+      L, pivotL: def.pivotL, ymax: g.ymax, yc0: g.yc0, bmp: g.bmp,
+      sepUp: g.upN.map((v) => v * L), sepDn: g.dnN.map((v) => v * L),
+      maxR: g.maxRN * L,
+    };
+  }
+  if (kind === 'lineup' && _acGeom.lineup) {
+    // THE COUNTS rig (phase 9): a lineup body mounts by the user path exactly,
+    // except the chord follows the EQUAL FRONTAL HEIGHT law — fitL was solved
+    // from the lineup's one common height at the rig α, never the reverse.
+    const def = AC.lineup, g = _acGeom.lineup, L = def.fitL;
+    const uy = def.ground ? (H - 2) - g.yc0 * L : py;
+    return {
+      type: 'ac', pk: 'lineup', px: Math.round(0.22 * W + def.pivotL * L) + 0.5, py: uy,
       L, pivotL: def.pivotL, ymax: g.ymax, yc0: g.yc0, bmp: g.bmp,
       sepUp: g.upN.map((v) => v * L), sepDn: g.dnN.map((v) => v * L),
       maxR: g.maxRN * L,
@@ -2520,11 +2718,11 @@ async function bootLive(g) {
   // the ARTICLE-PAIR bar: planes radio (f-16 · a-10 · plate) + article radio
   // (aircraft · wing); cylinder unlisted (?article=cyl); ?article=wing is the
   // phase-3 legacy alias for the F-16's section
-  const KINDS = ['plate', 'f16', 'a10', 'f16-wing', 'a10-wing', 'cyl', 'user'];
+  const KINDS = ['plate', 'f16', 'a10', 'f16-wing', 'a10-wing', 'cyl', 'user', 'lineup'];
   let qk = Q.get('article'); if (qk === 'wing') qk = 'f16-wing';
-  // 'user' is reachable only by mounting a shelf record — never from the URL
-  // (boot state and og.png stay the aircraft forever, asserted)
-  let kind = (KINDS.includes(qk) && qk !== 'user') ? qk : 'plate';
+  // 'user' is reachable only by mounting a shelf record, 'lineup' only by the
+  // counts engine — never from the URL (boot/og stay the aircraft, asserted)
+  let kind = (KINDS.includes(qk) && qk !== 'user' && qk !== 'lineup') ? qk : 'plate';
   let plane = planeOf(kind) || 'f16'; // sticky plane selection — the ring boots at the F-16
 
   // ---- POWER state (boot tuple: power 60 — DATA-v1; the plant IS the easing) ----
@@ -2769,7 +2967,9 @@ async function bootLive(g) {
       silEl = dom.ac;
       dom.cline.textContent = kind === 'user'
         ? `${AC.user.serial} · ${AC.user.name} . drag it — find where the air lets go`
-        : CLINES[kind];
+        : kind === 'lineup'
+          ? `${AC.lineup.serial} · ${AC.lineup.name} . the lineup runs in turn — equal frontal height, same tunnel settings`
+          : CLINES[kind];
     } else {
       dom.wing.removeAttribute('hidden');
       dom.wing.setAttribute('d', wingPathD());
@@ -2792,12 +2992,13 @@ async function bootLive(g) {
       b.classList.toggle('on', on);
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
     }
-    const mode = isWing(kind) ? 'wing' : (A.type === 'ac' && A.pk !== 'user' ? 'ac' : null); // a user specimen is not an aircraft — the pair bar stays dark for it
+    const mode = isWing(kind) ? 'wing' : (A.type === 'ac' && A.pk !== 'user' && A.pk !== 'lineup' ? 'ac' : null); // a user specimen is not an aircraft — the pair bar never lights for it
     for (const b of dom.artmode.querySelectorAll('.aw')) { // article radio: aircraft · wing
       const on = b.dataset.m === mode;
       b.classList.toggle('on', on);
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
     }
+    syncArtmodeWords(); // phase 9: while a USER specimen is mounted the pair reads `test · pencil` (UX §2)
     DA_MAX = hasAlpha() ? (0.08 * R0 / A.maxR) * 180 / Math.PI : 0;
     dom.caption.hidden = true; // caption block re-arms with the article
     dom.caption.classList.remove('broke');
@@ -2807,6 +3008,9 @@ async function bootLive(g) {
     const userMounted = kind === 'user';
     dom.shopspec.hidden = dom.groundword.hidden = !userMounted;
     if (userMounted) dom.grounddoor.classList.toggle('on', !!AC.user.ground);
+    // the counts door rides USER specimens only — a reference measured against
+    // itself teaches nothing, and the aircraft never see this door at all
+    dom.countsword.hidden = !(userMounted && AC.user.rec && !AC.user.rec.ref);
     syncAnnex();
   }
   async function swapArticle(k, force) { // behind the spool: α/power/view persist (keep-this-air law), detector re-arms
@@ -2833,7 +3037,7 @@ async function bootLive(g) {
     const url = new URL(location.href);
     // user specimens never enter the URL (nor og, nor the title): the shape is
     // shared by fragment, on purpose, or not at all
-    if (k === 'plate' || k === 'user') url.searchParams.delete('article'); else url.searchParams.set('article', k);
+    if (k === 'plate' || k === 'user' || k === 'lineup') url.searchParams.delete('article'); else url.searchParams.set('article', k);
     history.replaceState(null, '', url);
     lastT = performance.now(); // the spool is not a frame
     swapping = false;
@@ -2842,8 +3046,21 @@ async function bootLive(g) {
   // through the spooled mask swap untouched (only the mask changes). From
   // plate/cyl the keys enter the ring at the selected plane's AIRCRAFT.
   function cyclePlane(dir) {
-    if (swapping) return;
-    if (kind === 'plate' || kind === 'cyl' || kind === 'user') { swapArticle(plane); return; }
+    if (swapping || countsBusy || PEN2.on) return;
+    if (kind === 'user' && AC.user.rec && !AC.user.rec.ref) {
+      // A/B (phase 9): the same held-air swap first cycles the specimen's own
+      // family — U-NNN ↔ U-NNN/A at held settings IS the before/after. A
+      // specimen with no mods falls through to the plane ring as ever.
+      shelfRows().then((rows) => {
+        const base = AC.user.rec.serial.split('/')[0];
+        const fam = rows.filter((r) => !r.struck && r.serial.split('/')[0] === base);
+        if (fam.length < 2) { swapArticle(plane); return; }
+        const i = fam.findIndex((r) => r.serial === AC.user.rec.serial);
+        T.shopMount(fam[(i + (dir > 0 ? 1 : fam.length - 1) + fam.length) % fam.length]);
+      });
+      return;
+    }
+    if (kind === 'plate' || kind === 'cyl' || kind === 'user' || kind === 'lineup') { swapArticle(plane); return; }
     const nx = PLANES[(PLANES.indexOf(planeOf(kind)) + (dir > 0 ? 1 : PLANES.length - 1)) % PLANES.length];
     swapArticle(isWing(kind) ? `${nx}-wing` : nx);
   }
@@ -2880,13 +3097,15 @@ async function bootLive(g) {
       const r = dom.pscale.getBoundingClientRect();
       setPowerTarget(((e.clientX - r.left - 4) / 120) * 100);
     };
-    dom.pscale.addEventListener('pointerdown', (e) => { pdrag = true; dom.pscale.setPointerCapture(e.pointerId); powFromEvent(e); e.preventDefault(); });
+    dom.pscale.addEventListener('pointerdown', (e) => { if (countsBusy || PEN2.on) return; pdrag = true; dom.pscale.setPointerCapture(e.pointerId); powFromEvent(e); e.preventDefault(); });
     dom.pscale.addEventListener('pointermove', (e) => { if (pdrag) powFromEvent(e); });
     const pup = () => { pdrag = false; };
     dom.pscale.addEventListener('pointerup', pup);
     dom.pscale.addEventListener('pointercancel', pup);
     addEventListener('keydown', (e) => { // keys ←/→ nudge the plant target 5%; [ ] cycle THE PAIR keeping air
       if (ovAnyOpen()) return; // an open sheet owns the keys (Escape closes it)
+      if (PEN2.on) { penKeys(e); return; } // the drafting table owns the keys — four verbs + undo, nothing else
+      if (countsBusy) { if (e.key === 'Escape') { countsCancel = true; e.preventDefault(); } return; } // the lineup runs in turn — Escape cancels it
       if (e.key === 'ArrowLeft') { setPowerTarget(powerTarget - 5); e.preventDefault(); }
       else if (e.key === 'ArrowRight') { setPowerTarget(powerTarget + 5); e.preventDefault(); }
       else if (e.key === '[') { cyclePlane(-1); e.preventDefault(); }
@@ -2896,6 +3115,445 @@ async function bootLive(g) {
       }
     });
   }
+
+
+  // ═══════════ SHOP PHASE 2 (phase 9) · THE PENCIL — the drafting table ═══════════
+  // Idiom: the drafting table, literal (UX §2). Entering the pencil = WIND-OFF:
+  // the model comes off the sting and lies flat on the paper as a line drawing
+  // with control points; the tunnel does not run while you draw (B-1B law —
+  // live mask morph REFUSED; every edit returns to air through the spooled
+  // swap). The verb set is CLOSED — {move, add, delete, smooth} IS the whole
+  // tool, forever: no free-hand stroke, no tangent handles, no layers, no parts shelf,
+  // no auto-fair button (an auto-fairer would BE the aerodynamicist and kill
+  // the star). ≤50 undo, session-scoped; the original trace is IMMUTABLE
+  // (accession law) — done bakes to a MOD accession, never an edit-in-place.
+  const PENCIL_VERBS = Object.freeze(['move', 'add', 'delete', 'smooth']);
+  const PEN2 = { on: false, pts: null, pts0: null, undo: [], sel: null, anchor: -1, drag: null, spoke: false, parent: null, map: null };
+  let penciling = false;
+  const penCell = () => 1 / Math.round(0.17 * GW); // one lattice cell in chord units at the mount — the pen's width
+  const penSnapshot = () => PEN2.pts.map((p) => [p[0], p[1]]);
+  function penPush() { PEN2.undo.push(penSnapshot()); if (PEN2.undo.length > 50) PEN2.undo.shift(); } // 50 steps, session-scoped — the cap is law
+  function penUndo() { const s = PEN2.undo.pop(); if (s) { PEN2.pts = s; PEN2.sel = null; PEN2.anchor = -1; penRender(); } }
+  function penSeed() { // blank paper: a seeded 12-point blob — the same four verbs from here (this quietly covers every visitor without a lidar phone, and every kid)
+    const pts = [];
+    for (let k = 0; k < 12; k++) {
+      const th = (k / 12) * 2 * Math.PI;
+      const r = 0.34 + 0.05 * Math.sin(3 * th + 0.7); // deterministic wobble — a drawn seed, never RNG
+      pts.push([Math.round((0.5 + r * Math.cos(th)) * 1e4) / 1e4, Math.round((0.62 * r * Math.sin(th)) * 1e4) / 1e4]);
+    }
+    return pts;
+  }
+  function syncArtmodeWords() { // UX §2: while a USER specimen is mounted, the bar's article pair reads test · pencil — the same slot, the same radio idiom the aircraft use for aircraft · wing. The sixteen never get the pencil.
+    const shopArt = kind === 'user' || kind === 'lineup';
+    const ws = dom.artmode.querySelectorAll('.aw');
+    ws[0].textContent = shopArt ? 'test' : 'aircraft';
+    ws[1].textContent = shopArt ? 'pencil' : 'wing';
+    if (shopArt) {
+      ws[0].classList.toggle('on', !PEN2.on); ws[0].setAttribute('aria-pressed', String(!PEN2.on));
+      ws[1].classList.toggle('on', PEN2.on); ws[1].setAttribute('aria-pressed', String(PEN2.on));
+    }
+  }
+  function penEnter(rec) { // rec = the mounted user/reference record, or null = blank paper
+    if (PEN2.on || swapping || plating || countsBusy || T.tier === 'stills') return;
+    PEN2.on = true; PEN2.parent = rec || null;
+    const src = rec ? rec.outline.map((p) => [p[0], p[1]]) : penSeed();
+    const f0 = src[0], l0 = src[src.length - 1];
+    if (src.length > 3 && f0[0] === l0[0] && f0[1] === l0[1]) src.pop(); // work the contour open; it closes by construction
+    PEN2.pts = src; PEN2.pts0 = penSnapshot();
+    PEN2.undo = []; PEN2.sel = null; PEN2.anchor = -1; PEN2.drag = null;
+    { // one fixed mapping per session — outline space → stage px (a live refit would swim under the hand)
+      let xmin = Infinity, xmax = -Infinity, ymin = Infinity, ymax = -Infinity;
+      for (const [x, y] of src) { if (x < xmin) xmin = x; if (x > xmax) xmax = x; if (y < ymin) ymin = y; if (y > ymax) ymax = y; }
+      const sc = Math.min(stageW * 0.66 / ((xmax - xmin) || 1), stageH * 0.56 / ((ymax - ymin) || 1));
+      PEN2.map = { sc, ox: (stageW - (xmax - xmin) * sc) / 2 - xmin * sc, oy: stageH / 2 + ((ymax + ymin) / 2) * sc };
+    }
+    penciling = true; // WIND-OFF — the solver holds while the table is out
+    dom.gpu.style.visibility = 'hidden';
+    dom.specimen.style.visibility = 'hidden';
+    dom.etch.hidden = true; etchOn = false;
+    dom.caption.hidden = true;
+    dom.gap.hidden = dom.spec1.hidden = dom.spec2.hidden = dom.spec3.hidden = dom.pairk.hidden = dom.bridge.hidden = true;
+    dom.readout.textContent = 'wind off — the drafting table is out';
+    E('pencilspec').hidden = PEN2.spoke; PEN2.spoke = true; // the teaching frame prints once a session
+    E('pencilsvg').removeAttribute('hidden'); // SVG el: the hidden PROPERTY is HTML-only
+    E('pencilbar').hidden = false;
+    syncArtmodeWords();
+    penRender();
+  }
+  function penExit() { // back to air — visuals only; whether anything mounts is the caller's business
+    if (!PEN2.on) return;
+    PEN2.on = false; PEN2.drag = null;
+    E('pencilsvg').setAttribute('hidden', ''); // SVG el: attribute, never the property
+    E('pencilbar').hidden = true;
+    dom.gpu.style.visibility = '';
+    dom.specimen.style.visibility = '';
+    lastT = performance.now(); // the table was not a frame
+    penciling = false;
+    syncArtmodeWords();
+    syncAnnex();
+  }
+  function penBake(pts) { // the pen has a width: points closer than one lattice cell merge on bake — you edit the drawing; the tunnel flies the mask
+    const cell = penCell(), out = [];
+    for (const p of pts) {
+      const q = out[out.length - 1];
+      if (!q || Math.hypot(p[0] - q[0], p[1] - q[1]) >= cell) out.push([Math.round(p[0] * 1e4) / 1e4, Math.round(p[1] * 1e4) / 1e4]);
+    }
+    while (out.length > 8 && Math.hypot(out[0][0] - out[out.length - 1][0], out[0][1] - out[out.length - 1][1]) < cell) out.pop();
+    return out;
+  }
+  function penRender() {
+    const psvg = E('pencilsvg');
+    psvg.setAttribute('viewBox', '0 0 ' + Math.max(1, Math.round(stageW)) + ' ' + Math.max(1, Math.round(stageH)));
+    psvg.textContent = '';
+    const { sc, ox, oy } = PEN2.map;
+    const X = (p) => ox + p[0] * sc, Y = (p) => oy - p[1] * sc;
+    const n = PEN2.pts.length;
+    { // the RESOLVED line beside the drawn one — the mask the tunnel will fly; both visible, never blended
+      const baked = penBake(PEN2.pts);
+      let dr = '';
+      for (let i = 0; i < baked.length; i++) dr += (i ? 'L' : 'M') + X(baked[i]).toFixed(1) + ' ' + Y(baked[i]).toFixed(1);
+      const rp = svgEl('path', { d: dr + 'Z' });
+      rp.setAttribute('fill', 'none'); rp.setAttribute('stroke', TOK.hair);
+      rp.setAttribute('stroke-width', '1'); rp.setAttribute('stroke-dasharray', '3 3');
+      psvg.appendChild(rp);
+    }
+    { // the drawn line — W1, the same pen the sixteen hang in
+      let d = '';
+      for (let i = 0; i < n; i++) d += (i ? 'L' : 'M') + X(PEN2.pts[i]).toFixed(1) + ' ' + Y(PEN2.pts[i]).toFixed(1);
+      const path = svgEl('path', { d: d + 'Z' });
+      penStroke(path, 'W1');
+      psvg.appendChild(path);
+    }
+    for (let i = 0; i < n; i++) // MOVE/DELETE hit targets first (44 px touch law), so the diamonds stay tappable above them
+      psvg.appendChild(svgEl('circle', { cx: X(PEN2.pts[i]).toFixed(1), cy: Y(PEN2.pts[i]).toFixed(1), r: 22, class: 'pnhit', 'data-pt': i }));
+    for (let i = 0; i < n; i++) { // ADD: one diamond per segment midpoint — tap adds a point there, diamonds render only in pencil mode
+      const a = PEN2.pts[i], b = PEN2.pts[(i + 1) % n];
+      const mx = (X(a) + X(b)) / 2, my = (Y(a) + Y(b)) / 2;
+      psvg.appendChild(svgEl('rect', { x: (mx - 3).toFixed(1), y: (my - 3).toFixed(1), width: 6, height: 6, transform: 'rotate(45 ' + mx.toFixed(1) + ' ' + my.toFixed(1) + ')', class: 'pnmid', 'data-mid': i }));
+    }
+    for (let i = 0; i < n; i++) { // the visible handles, on top
+      const sel = PEN2.sel && PEN2.sel.has(i);
+      psvg.appendChild(svgEl('circle', { cx: X(PEN2.pts[i]).toFixed(1), cy: Y(PEN2.pts[i]).toFixed(1), r: 4.5, class: 'pnh' + (sel ? ' sel' : ''), 'data-pt': i }));
+    }
+  }
+  function penDelete() { // DELETE: select + x — never fewer than 8 points; the contour stays closed by construction
+    if (!PEN2.sel || !PEN2.sel.size) return;
+    if (PEN2.pts.length - PEN2.sel.size < 8) return;
+    penPush();
+    PEN2.pts = PEN2.pts.filter((_, i) => !PEN2.sel.has(i));
+    PEN2.sel = null; PEN2.anchor = -1;
+    penRender();
+  }
+  function penNudge(dx, dy, fine) { // MOVE by keys: arrows nudge 1 cell, shift = ¼ cell
+    if (!PEN2.sel || !PEN2.sel.size) return;
+    penPush();
+    const st = penCell() * (fine ? 0.25 : 1);
+    for (const i of PEN2.sel) { PEN2.pts[i][0] += dx * st; PEN2.pts[i][1] += dy * st; }
+    penRender();
+  }
+  function penSmooth() { // SMOOTH: one pass of corner-cutting over the selection (or the whole line); repeatable — this is the fairing tool
+    if (!PEN2.on) return;
+    penPush();
+    const n = PEN2.pts.length, src = penSnapshot();
+    const run = PEN2.sel && PEN2.sel.size ? PEN2.sel : null;
+    for (let i = 0; i < n; i++) {
+      if (run && !run.has(i)) continue;
+      const a = src[(i - 1 + n) % n], b = src[i], c = src[(i + 1) % n];
+      PEN2.pts[i] = [(a[0] + 2 * b[0] + c[0]) / 4, (a[1] + 2 * b[1] + c[1]) / 4];
+    }
+    penRender();
+  }
+  function penKeys(e) { // the table's whole keyboard: undo, delete, nudge — and Escape hands the air back
+    const k = e.key;
+    if (k === 'z' || k === 'Z') { penUndo(); e.preventDefault(); }
+    else if (k === 'x' || k === 'X' || k === 'Backspace' || k === 'Delete') { penDelete(); e.preventDefault(); }
+    else if (k === 'ArrowLeft') { penNudge(-1, 0, e.shiftKey); e.preventDefault(); }
+    else if (k === 'ArrowRight') { penNudge(1, 0, e.shiftKey); e.preventDefault(); }
+    else if (k === 'ArrowUp') { penNudge(0, 1, e.shiftKey); e.preventDefault(); }
+    else if (k === 'ArrowDown') { penNudge(0, -1, e.shiftKey); e.preventDefault(); }
+    else if (k === 'Escape') { penExit(); e.preventDefault(); }
+  }
+  { // the table's pointer grammar — MOVE (drag a handle) and ADD (tap a diamond); paper clears the selection
+    const psvg = E('pencilsvg');
+    const toOutline = (e) => {
+      const rc = psvg.getBoundingClientRect(), vb = psvg.viewBox.baseVal;
+      const vx = (e.clientX - rc.left) * (vb.width / (rc.width || 1));
+      const vy = (e.clientY - rc.top) * (vb.height / (rc.height || 1));
+      return [(vx - PEN2.map.ox) / PEN2.map.sc, (PEN2.map.oy - vy) / PEN2.map.sc];
+    };
+    psvg.addEventListener('pointerdown', (e) => {
+      if (!PEN2.on) return;
+      const t = e.target;
+      if (t.dataset && t.dataset.mid !== undefined) { // ADD — one new point at the tap
+        const i = +t.dataset.mid;
+        penPush();
+        const a = PEN2.pts[i], b = PEN2.pts[(i + 1) % PEN2.pts.length];
+        PEN2.pts.splice(i + 1, 0, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]);
+        PEN2.sel = new Set([i + 1]); PEN2.anchor = i + 1;
+        penRender();
+        e.preventDefault();
+        return;
+      }
+      if (t.dataset && t.dataset.pt !== undefined) { // select (shift extends the run along the shorter arc) + MOVE
+        const i = +t.dataset.pt;
+        if (e.shiftKey && PEN2.anchor >= 0) {
+          const n = PEN2.pts.length, sel = new Set();
+          const fwd = (i - PEN2.anchor + n) % n, back = (PEN2.anchor - i + n) % n;
+          const len = Math.min(fwd, back), dir = fwd <= back ? 1 : -1;
+          for (let k = 0; k <= len; k++) sel.add(((PEN2.anchor + dir * k) % n + n) % n);
+          PEN2.sel = sel;
+        } else { PEN2.sel = new Set([i]); PEN2.anchor = i; }
+        PEN2.drag = { i, moved: false };
+        psvg.setPointerCapture(e.pointerId);
+        penRender();
+        e.preventDefault();
+        return;
+      }
+      PEN2.sel = null; PEN2.anchor = -1; penRender();
+    });
+    psvg.addEventListener('pointermove', (e) => {
+      if (!PEN2.on || !PEN2.drag) return;
+      if (!PEN2.drag.moved) { PEN2.drag.moved = true; penPush(); } // one undo step per drag
+      PEN2.pts[PEN2.drag.i] = toOutline(e);
+      penRender();
+    });
+    const penUp = () => { PEN2.drag = null; };
+    psvg.addEventListener('pointerup', penUp);
+    psvg.addEventListener('pointercancel', penUp);
+  }
+  E('pensmooth').addEventListener('click', penSmooth);
+  E('penundo').addEventListener('click', penUndo);
+  E('penrevert').addEventListener('click', () => { // the original trace is immutable — one door always leads back to it
+    if (!PEN2.on) return;
+    penPush();
+    PEN2.pts = PEN2.pts0.map((p) => [p[0], p[1]]);
+    PEN2.sel = null; PEN2.anchor = -1;
+    penRender();
+  });
+  E('pencancel').addEventListener('click', () => { penExit(); }); // wind on, nothing kept — the mounted article never changed
+  E('pendone').addEventListener('click', () => { // done — the bake: sub-cell points merge, then the accession sheet
+    if (!PEN2.on) return;
+    const outline = penBake(PEN2.pts);
+    if (outline.length < 3) return; // an outline is at least 3 points (the share law's own floor — a 4-point trace may still bake)
+    if (!PEN2.parent) { // blank paper → a fresh accession, provenance 'drawn with the pencil'
+      SHOP.draw = { outline };
+      SHOP.state = 'drawn';
+      E('shopname').value = '';
+      shopSheet('the pencil has it . name the specimen and it accessions to your shelf', 'shoplabelrow');
+      E('shopname').focus();
+      return; // the table stays out behind the sheet until the keep lands
+    }
+    SHOP.mod = { outline, parent: PEN2.parent };
+    SHOP.state = 'mod';
+    E('shopname').value = PEN2.parent.name || '';
+    shopSheet('the edit bakes to a mod — the original ' + PEN2.parent.serial + ' row never changes . name it', 'shoplabelrow');
+    E('shopname').focus();
+  });
+  T.pencil = Object.freeze({ // PENCIL-CAP, structural: this frozen tuple IS the tool — scope creep is a failing build, not a debate
+    verbs: PENCIL_VERBS,
+    undoCap: 50,
+    state: () => ({ on: PEN2.on, points: PEN2.pts ? PEN2.pts.length : 0, undoDepth: PEN2.undo.length, selected: PEN2.sel ? PEN2.sel.size : 0, blank: PEN2.on && !PEN2.parent }),
+  });
+
+  // ═══════════ SHOP PHASE 2 (phase 9) · THE COUNTS — the comparison law ═══════════
+  // DECISIONS R2.5 (carve-out of FULL-FORCE, og-pattern supersession): relative
+  // drag prints ONLY as a dimensionless ratio of two drags measured by THIS
+  // tunnel in THIS session at battery-asserted identical settings. Operands
+  // never print; the reference is re-measured live, never a stored constant;
+  // EQUAL FRONTAL HEIGHT normalization (chord refused — the blockage lie);
+  // one decimal max, seed spread demotes to ≈; the aircraft NEVER join the
+  // lineup — the picker below is built from REFROW and nothing else, so their
+  // absence is construction, not discipline. The balance is a wake rake: the
+  // momentum deficit ρ·u·(u∞−u) integrated across one downstream column —
+  // the period-honest instrument, and its unit cancels in the ratio.
+  let countsBusy = false, countsCancel = false;
+  const cntSel = new Set(['r003', 'r004']); // the default lineup — the two poles (teardrop · brick), R-001 one tap away
+  function cntNote(text) { E('cntprog').textContent = text; E('countsline').hidden = false; }
+  const cntProgress = (label, u) => cntNote('measuring ' + label + ' . ' + Math.round(u * 100) + '%'); // the quiet record line
+  async function rakeRead(cols) { // one balance sample: control-volume drag = (pressure + momentum) flux through the
+    // upstream plane minus the downstream rake — Σ (ρ/3 + ρ·ux²) per column. In this CONFINED section the naive
+    // wake-deficit integral is sign-degenerate (mass conservation hands the deficit back as bypass acceleration),
+    // so the balance brackets the body with two planes, the way a real tunnel rakes pressure and momentum together.
+    // Free-slip walls carry nothing; solid cells carry the ρ=0 exclusion marker and are skipped.
+    const f = await S.readFields();
+    const flux = (x) => {
+      let s = 0;
+      for (let y = 1; y < GH - 1; y++) {
+        const i = (y * GW + x) * 3, rho = f[i];
+        if (rho === 0) continue;
+        const ux = f[i + 1];
+        s += rho / 3 + rho * ux * ux;
+      }
+      return s;
+    };
+    return flux(cols.xu) - flux(cols.xr);
+  }
+  const RAKE = { reads: 10, gapMs: 190, winMin: 4, winMax: 8, settle: 0.045 }; // ~2.3 s windows — longer than any shedding period this rig produces
+  async function settleBody(cols, label) { // the staircase settle: window means step toward the established wake; stop when the last treads agree
+    const wins = [];
+    for (let w = 0; w < RAKE.winMax; w++) {
+      let acc = 0;
+      for (let k = 0; k < RAKE.reads; k++) {
+        if (countsCancel) return null;
+        acc += await rakeRead(cols);
+        await new Promise((r) => setTimeout(r, RAKE.gapMs));
+      }
+      wins.push(acc / RAKE.reads);
+      cntProgress(label, Math.min(0.95, (w + 1) / RAKE.winMax));
+      if (wins.length >= RAKE.winMin) {
+        const t3 = wins.slice(-3), m = (t3[0] + t3[1] + t3[2]) / 3;
+        if (m !== 0 && (Math.max(...t3) - Math.min(...t3)) / Math.abs(m) < RAKE.settle) break;
+      }
+    }
+    const t3 = wins.slice(-3), mean = t3.reduce((a, b) => a + b, 0) / t3.length;
+    return { mean, spread: mean ? (Math.max(...t3) - Math.min(...t3)) / (2 * Math.abs(mean)) : 1 }; // the measured seed-spread analog — it demotes the print, honestly
+  }
+  async function waitRig(rig) { // the sting and the plant settle before any sample — identical settings must be TRUE, not copy
+    for (let k = 0; k < 100; k++) {
+      if (countsCancel) return false;
+      if (Math.abs(S.alphaApplied - rig.alpha) < 1e-6 && powerApplied === rig.power) return true;
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    return false;
+  }
+  async function runLineup(ids) {
+    if (countsBusy || swapping || plating || PEN2.on || kind !== 'user' || !AC.user.rec || AC.user.rec.ref) return null;
+    if (powerTarget < 15) { cntNote('the counts need air — bring the power past 15'); setTimeout(() => { E('countsline').hidden = true; }, 4000); return null; }
+    const user = AC.user.rec;
+    const entries = ids.map((id) => REF_BY_ID[id]).filter(Boolean).slice(0, 3); // up to 3 — and only row citizens can ever arrive here
+    if (!entries.length) return null;
+    countsBusy = true; countsCancel = false;
+    alphaTarget = S.alphaApplied; // pin the hand — one rig, run in turn
+    const rig = { alpha: S.alphaApplied, power: powerTarget, ground: !!AC.user.ground, rung: GW + '×' + GH, ver: T.version };
+    const uSpan = projSpanChord(user.outline, rig.alpha);
+    // EQUAL FRONTAL HEIGHT: one common height H* for the whole lineup — the
+    // user's own presentation, capped by blockage and by every accepted
+    // body's wake invariant (nose 0.22·W · wake ≥2.5 chords). A body whose
+    // cap would drag H* under the pen for the others is REFUSED with the
+    // card — never a silent rescale of anyone (SHOP-FIT-REFUSE).
+    const fitCap = (span) => ((0.78 * GW - spongeCols(GW)) / (span.w + 2.5)) * span.h;
+    const refused = [];
+    let pool = entries.map((en) => ({ en, span: projSpanChord(en.outline, rig.alpha) }));
+    let hStar = 0;
+    for (let guard = 0; guard <= entries.length; guard++) {
+      hStar = Math.min(uSpan.h * A.L, 0.30 * GH, fitCap(uSpan));
+      for (const p of pool) hStar = Math.min(hStar, fitCap(p.span));
+      const under = Math.round(hStar / uSpan.h) < 90 || pool.some((p) => Math.round(hStar / p.span.h) < 90);
+      if (!under || !pool.length) break;
+      let worst = pool[0];
+      for (const p of pool) if (fitCap(p.span) < fitCap(worst.span)) worst = p;
+      refused.push(worst.en.name.toLowerCase() + ' — too long for the wake at equal height');
+      pool = pool.filter((p) => p !== worst);
+    }
+    const uL = Math.round(hStar / uSpan.h);
+    const plan = pool.map((p) => ({ ...p, L: Math.round(hStar / p.span.h) }));
+    T.countsLog = [];
+    const out = { ratios: [], refused, rig };
+    try {
+      if (plan.length && uL >= 8) {
+        let maxLen = uSpan.w * uL;
+        for (const p of plan) maxLen = Math.max(maxLen, p.span.w * p.L);
+        // ONE pair of balance planes for the whole lineup — identical settings by construction
+        const cols = {
+          xu: Math.round(0.10 * GW), // upstream of every nose (bodies start at 0.22·W), downstream of the inlet
+          xr: Math.min(GW - spongeCols(GW) - 6, Math.round(0.22 * GW + maxLen + 0.10 * GW)),
+        };
+        // the user specimen measures first, mounted at the lineup's own height
+        // — re-measured live in this session, exactly like every reference
+        _acGeom.lineup = userGeom(user.outline);
+        AC.lineup = { serial: user.serial, name: AC.user.name, basis: 'the lineup rig · equal frontal height · same tunnel settings', pivotL: 0.5, ground: rig.ground, fitL: uL };
+        cntProgress('your ' + user.name, 0.02);
+        await swapArticle('lineup', true);
+        if (!(await waitRig(rig))) throw 'rig';
+        T.countsLog.push({ serial: user.serial, L: uL, h: Math.round(uSpan.h * uL) });
+        const mU = await settleBody(cols, 'your ' + user.name);
+        if (!mU) throw 'cancel';
+        for (const p of plan) {
+          _acGeom.lineup = userGeom(p.en.outline);
+          AC.lineup = { serial: p.en.serial, name: p.en.name + ' — REFERENCE', basis: 're-measured live · equal frontal height · same tunnel settings', pivotL: 0.5, ground: rig.ground, fitL: p.L };
+          cntProgress(p.en.name.toLowerCase(), 0.02);
+          await swapArticle('lineup', true);
+          if (!(await waitRig(rig))) throw 'rig';
+          T.countsLog.push({ serial: p.en.serial, L: p.L, h: Math.round(p.span.h * p.L) });
+          const mR = await settleBody(cols, p.en.name.toLowerCase());
+          if (!mR) throw 'cancel';
+          if (powerApplied !== rig.power || Math.abs(S.alphaApplied - rig.alpha) > 0.01) throw 'rig'; // LINEUP-SEQ: byte-equal settings or no sheet
+          const r = mU.mean / mR.mean;
+          if (!Number.isFinite(r) || r <= 0 || mU.mean <= 0 || mR.mean <= 0) {
+            refused.push(p.en.name.toLowerCase() + ' — the rake read no clean deficit at these settings');
+          } else {
+            out.ratios.push({ serial: p.en.serial, name: p.en.name.toLowerCase(), ratio: r.toFixed(1), approx: r * (mU.spread + mR.spread) > 0.05 });
+          }
+        }
+      } else if (!refused.length) {
+        refused.push('nothing fits at one height — the lineup stands down');
+      }
+    } catch (flag) {
+      out.aborted = flag === 'cancel' ? 'cancelled' : 'the rig drifted — the lineup abandoned, nothing prints';
+    } finally {
+      if (kind !== 'user') { mountUserGeom(user); await swapArticle('user', true); } // the specimen returns through the spooled swap, whatever happened
+      E('countsline').hidden = true;
+      countsBusy = false;
+    }
+    if (!out.aborted && (out.ratios.length || out.refused.length)) {
+      T.countsLast = { ratios: out.ratios, refused: out.refused, rig: out.rig, at: Date.now() }; // ratios + pins only — operands live and die in this closure
+      cntShowResult(user, out);
+    }
+    return null; // nothing measured ever leaves this function
+  }
+  function cntShowResult(user, out) {
+    const any = out.ratios.length > 0;
+    const parts = ['your ' + user.name];
+    for (const r of out.ratios) parts.push((r.approx ? '≈' : '') + r.ratio + '× ' + r.name);
+    E('cntratios').textContent = parts.join(' · ');
+    E('cntpins').textContent = 'one rig, run in turn · ' + [user.serial].concat(out.ratios.map((r) => r.serial)).join(' · ')
+      + ' · α ' + out.rig.alpha.toFixed(1) + '° · power ' + Math.round(out.rig.power) + '% · ' + (out.rig.ground ? 'ground floor' : 'free air')
+      + ' · rung ' + out.rig.rung + ' · V' + out.rig.ver;
+    E('cntratios').hidden = E('cntreveal').hidden = E('cntpins').hidden = E('cntchrome').hidden = !any; // the chrome never renders apart from its ratios
+    const rf = E('cntrefused');
+    rf.textContent = out.refused.map((s) => 'refused — ' + s + ' . never a silent rescale').join('  ·  ');
+    rf.hidden = !out.refused.length;
+    E('cntresult').hidden = false;
+    E('cntpick').hidden = E('cntpickfine').hidden = E('cntrun').hidden = true;
+    E('cntline').textContent = any ? 'THE COUNTS — two drags from one balance, minutes apart, in front of you' : 'THE COUNTS — nothing lawful printed this run';
+    ovOpen('counts');
+  }
+  function openCounts() {
+    if (kind !== 'user' || !AC.user.rec || AC.user.rec.ref || countsBusy || PEN2.on) return;
+    const pick = E('cntpick');
+    pick.textContent = '';
+    for (const en of REFROW) { // the picker is REFROW and nothing else — no aircraft structure reaches this loop
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'cnt' + (cntSel.has(en.id) ? ' on' : '');
+      b.dataset.id = en.id;
+      b.setAttribute('aria-pressed', cntSel.has(en.id) ? 'true' : 'false');
+      b.appendChild(outlineSVG(en.outline, 72, 44));
+      b.appendChild(div('scword', en.name.replace(/^THE /, '').toLowerCase()));
+      pick.appendChild(b);
+    }
+    E('cntline').textContent = 'THE COUNTS — pick up to three of the row . each body is re-measured live at equal frontal height, then only the ratios print .';
+    E('cntpickfine').textContent = 'up to three . each body is re-measured live, in this session — never a stored constant . the aircraft are not on this sheet and never will be .';
+    E('cntresult').hidden = true;
+    E('cntpick').hidden = E('cntpickfine').hidden = E('cntrun').hidden = false;
+    ovOpen('counts');
+  }
+  E('cntpick').addEventListener('click', (e) => {
+    const b = e.target.closest('.cnt');
+    if (!b) return;
+    const id = b.dataset.id;
+    if (cntSel.has(id)) cntSel.delete(id);
+    else if (cntSel.size >= 3) { E('cntpickfine').textContent = 'three at most — the row runs in turn .'; return; }
+    else cntSel.add(id);
+    b.classList.toggle('on', cntSel.has(id));
+    b.setAttribute('aria-pressed', cntSel.has(id) ? 'true' : 'false');
+  });
+  E('cntgo').addEventListener('click', () => {
+    if (!cntSel.size) { E('cntpickfine').textContent = 'pick at least one reference body .'; return; }
+    ovClose();
+    runLineup([...cntSel]);
+  });
+  E('cntcancel').addEventListener('click', () => { countsCancel = true; }); // cancellable, always — the engine lands the specimen back on the sting
+  E('countsdoor').addEventListener('click', openCounts);
 
   // ---- mount ----
   applyArticleDom();
@@ -2911,11 +3569,19 @@ async function bootLive(g) {
   requestAnimationFrame(() => dom.card.classList.add('on'));
   for (const b of dom.articles.querySelectorAll('.aw')) // planes radio: a plane keeps the article mode; plate is itself
     b.addEventListener('click', () => {
+      if (countsBusy) return; // the lineup runs in turn — the rig is pinned
+      if (PEN2.on) penExit(); // leaving the table for an aircraft — nothing kept
       const k = b.dataset.k;
       swapArticle(k === 'plate' ? 'plate' : (isWing(kind) ? `${k}-wing` : k));
     });
-  for (const b of dom.artmode.querySelectorAll('.aw')) // article radio: the SELECTED plane's aircraft or wing
+  for (const b of dom.artmode.querySelectorAll('.aw')) // article radio: aircraft·wing — OR test·pencil while a user specimen is mounted (UX §2)
     b.addEventListener('click', () => {
+      if (countsBusy || kind === 'lineup') return;
+      if (kind === 'user') { // the drafting table's only door in — the sixteen never get the pencil
+        if (b.dataset.m === 'wing') penEnter(AC.user.rec);
+        return; // `test` is where you already are — the mounted state
+      }
+      if (PEN2.on) return; // a blank-paper session owns the stage until done or cancel
       swapArticle(b.dataset.m === 'wing' ? `${plane}-wing` : plane);
     });
   for (const b of dom.views.querySelectorAll('.vw'))
@@ -2925,7 +3591,8 @@ async function bootLive(g) {
   // (α/power/view ride through the spooled swap — the keep-this-air law)
   document.getElementById('hangarrows').addEventListener('click', (e) => {
     const b = e.target.closest('.htest');
-    if (!b) return;
+    if (!b || countsBusy) return;
+    if (PEN2.on) penExit(); // a wall door closes the drafting table — nothing kept
     ovClose();
     swapArticle(b.dataset.k);
   });
@@ -2960,21 +3627,33 @@ async function bootLive(g) {
   }
   SHOP.rig = { trace: traceUser };
   T.shopMount = async (rec) => { // MODEL CHANGE — the spool covers the geometry change, as it does for every article
+    if (countsBusy) return; // the lineup owns the sting until it lands the specimen back
+    if (PEN2.on) penExit(); // every mount closes the drafting table — the bake path arrives here on purpose
     mountUserGeom(rec);
     dom.utrace.setAttribute('hidden', ''); // the drawing hands off to the solid-ink article
     await swapArticle('user', true);
     slog('mount');
   };
+  T.shopMountRef = async (id) => { // THE REFERENCE ROW's test → door: keeps air, like every wall door
+    if (countsBusy) return;
+    if (id === 'r001') { if (PEN2.on) penExit(); return swapArticle('cyl'); } // the live St fixture stays the analytic mask — REF-CAL law unchanged
+    if (id === 'r002') { if (PEN2.on) penExit(); return swapArticle('plate'); } // the live plate article stays analytic — LAYOUT law unchanged
+    const r = REF_BY_ID[id];
+    if (!r) return;
+    await T.shopMount({ serial: r.serial, name: r.name.toLowerCase(), outline: r.outline, ground: { on: r.groundMode }, prov: 'reference', date: new Date().toISOString().slice(0, 10), ref: true });
+  };
   T.shopGround = async () => { // the `ground` word: free-slip floor on/off, behind the spool (B-1B law — no live mask morph)
-    if (kind !== 'user' || !AC.user) return null;
+    if (kind !== 'user' || !AC.user || countsBusy || PEN2.on) return null;
     const rec = AC.user.rec;
     rec.ground = { ...(rec.ground || {}), on: !AC.user.ground };
-    await shelf.put(rec);
+    if (!rec.ref) await shelf.put(rec); // the reference row is immutable — a reference's floor state is session-only
     await T.shopMount(rec);
     return !!rec.ground.on;
   };
   dom.grounddoor.addEventListener('click', () => { T.shopGround(); });
   E('shopdoor').hidden = false; // the quiet door — live tier only (stills reads the wall, it cannot mount)
+  E('drawword').hidden = false; // blank paper (phase 9): the pencil pointed at an empty trace — zero new machinery
+  E('drawdoor').addEventListener('click', () => { ovClose(); penEnter(null); });
 
   // timestamp-query τ instrument (falls back to the boot-probe value)
   const taus = [rung.tau];
@@ -3048,6 +3727,7 @@ async function bootLive(g) {
   let covBusy = false;
   function frame(now) {
     if (!running) return;
+    if (penciling) { requestAnimationFrame(frame); return; } // WIND-OFF law: the drafting table is out — the solver holds (B-1B: no live morph, no air)
     if (!ticking && !swapping) {
       const dt = Math.min(0.1, Math.max(0.001, (now - lastT) / 1000));
       lastT = now;
@@ -3165,7 +3845,7 @@ async function bootLive(g) {
     };
     let drag = null;
     dom.stage.addEventListener('pointerdown', (e) => {
-      if (!hasAlpha() || swapping) return;
+      if (!hasAlpha() || swapping || PEN2.on || countsBusy) return; // the table and the lineup both own the sting
       if (!etchOn) { etchOn = true; dom.etch.hidden = false; } // the protractor appears at first touch
       const gp = grid(e);
       const halo = 44 * GW / Math.max(1, stageW);
@@ -3418,7 +4098,7 @@ async function bootLive(g) {
     return `chall-tunnel-plate-${String(serial).padStart(2, '0')}-${cap.plane || cap.kind}-${art}-a${cap.alpha.toFixed(1)}.png`;
   };
   async function plate(opts = {}) {
-    if (plating || swapping || T.tier === 'stills') return null;
+    if (plating || swapping || PEN2.on || countsBusy || T.tier === 'stills') return null; // a lineup body is nobody's plate; the table has no air to print
     plating = true;
     const platedoor = document.getElementById('platedoor');
     const wasSealed = ink.sealed;
@@ -3510,6 +4190,8 @@ async function bootLive(g) {
       developed,
       developGain: ink.dv,
       plating,
+      penciling: PEN2.on,
+      countsBusy,
     };
   };
   T.setAlpha = (v) => { if (hasAlpha() && Number.isFinite(v)) alphaTarget = clampA(v); };
