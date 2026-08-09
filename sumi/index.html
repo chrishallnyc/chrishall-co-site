@@ -32,9 +32,7 @@ body.idle canvas#bath { cursor: none; }
 /* ── title ── */
 #title { position: fixed; top: 26px; left: 26px; z-index: 5; display: flex; gap: 14px;
   pointer-events: none; user-select: none; }
-#title .vert { writing-mode: vertical-rl; font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
-  font-size: 30px; letter-spacing: .34em; color: var(--ink); border-right: 1px solid var(--line);
-  padding-right: 12px; }
+#title h1, #title .sub, #title .pour { text-shadow: 0 0 8px var(--paper), 0 0 3px var(--paper); }
 #title h1 { font-size: 14px; font-weight: 600; letter-spacing: .5em; }
 #title .sub { font-size: 10px; letter-spacing: .3em; color: var(--mid); margin-top: 6px; }
 #title .pour { font-size: 10px; letter-spacing: .18em; color: var(--dim); margin-top: 14px;
@@ -46,15 +44,15 @@ body.idle canvas#bath { cursor: none; }
   flex-direction: column; gap: 4px; align-items: flex-end; }
 #scenes button { display: flex; align-items: center; gap: 9px; background: none; border: none;
   cursor: pointer; font: inherit; color: var(--dim); padding: 4px 2px; letter-spacing: .16em; }
-#scenes button .k { font-family: "Hiragino Mincho ProN", "Yu Mincho", serif; font-size: 17px; }
-#scenes button .n { font-size: 9px; opacity: 0; transition: opacity .25s; text-transform: lowercase; }
-#scenes button:hover .n, #scenes button[aria-pressed="true"] .n { opacity: 1; }
+#scenes button .n { font-size: 10px; letter-spacing: .22em; text-transform: lowercase;
+  text-shadow: 0 0 8px var(--paper), 0 0 3px var(--paper), 0 0 1px var(--paper); }
 #scenes button[aria-pressed="true"] { color: var(--ink); }
-#scenes button[aria-pressed="true"] .k { border-bottom: 1px solid var(--ink); }
+#scenes button[aria-pressed="true"] .n { border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
 
 /* ── dock ── */
 #dock { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 6;
-  display: flex; align-items: center; gap: 13px; padding: 11px 18px;
+  display: flex; align-items: center; flex-wrap: nowrap; gap: 11px; padding: 11px 16px;
+  max-width: calc(100vw - 24px);
   background: var(--veil); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--line); border-radius: 10px; }
 #dock .div { width: 1px; height: 20px; background: var(--line); }
@@ -64,14 +62,16 @@ body.idle canvas#bath { cursor: none; }
   transition: transform .2s cubic-bezier(.2,.9,.3,1.4); }
 #dock .well:hover { transform: scale(1.15); }
 #dock .well[aria-pressed="true"] { outline-color: var(--mid); }
-#dock .tools { display: flex; gap: 4px; }
-#dock .tools button { font-family: "Hiragino Mincho ProN", "Yu Mincho", serif; font-size: 15px; }
+#dock .tools { display: flex; gap: 4px; white-space: nowrap; }
+#dock .acts { display: flex; gap: 5px; white-space: nowrap; }
+#dock .tools button { font-size: 10.5px; letter-spacing: .18em; text-transform: lowercase; }
 #dock button { background: none; border: none; cursor: pointer; color: var(--mid); font: inherit;
   font-size: 14px; padding: 3px 6px; border-radius: 6px; line-height: 1; }
 #dock button:hover { color: var(--ink); }
 #dock button[aria-pressed="true"] { color: var(--ink); background: rgba(127,127,127,.14); }
 #dock button.live { color: #b03a2e; }
-#dock .meta button { font-family: "Hiragino Mincho ProN", "Yu Mincho", serif; font-size: 13px; color: var(--dim); }
+#dock button { font-size: 10.5px; letter-spacing: .18em; text-transform: lowercase; }
+#dock .meta button { color: var(--dim); }
 
 /* ── bench ── */
 #bench { position: fixed; left: 22px; bottom: 84px; z-index: 7; width: 250px;
@@ -134,7 +134,7 @@ body.idle canvas#bath { cursor: none; }
   #title { top: 16px; left: 16px; gap: 10px; }
   #title .vert { font-size: 22px; }
   #scenes { top: 16px; right: 12px; }
-  #scenes button .n { display: none; }
+
   #dock { bottom: max(14px, env(safe-area-inset-bottom)); gap: 8px; padding: 9px 12px;
     max-width: 96vw; overflow-x: auto; }
   #bench { left: 10px; right: 10px; width: auto; bottom: 76px; }
@@ -146,7 +146,6 @@ body.idle canvas#bath { cursor: none; }
 <canvas id="bath"></canvas>
 
 <header id="title" class="ui">
-  <div class="vert">墨流し</div>
   <div class="latin">
     <h1>SUMI</h1>
     <div class="sub">the floating world</div>
@@ -162,17 +161,17 @@ body.idle canvas#bath { cursor: none; }
   <div class="tools" id="tools"></div>
   <span class="div"></span>
   <div class="acts">
-    <button data-act="drop"  title="a drop of ink (D)">●</button>
-    <button data-act="ring"  title="a ring — ink then clear water (R)">◎</button>
-    <button data-act="wash"  title="wash the bath (X)">〜</button>
+    <button data-act="drop"  title="a drop of ink (D)">drop</button>
+    <button data-act="ring"  title="a ring — ink then clear water (R)">ring</button>
+    <button data-act="wash"  title="wash the bath (X)">wash</button>
   </div>
   <span class="div"></span>
   <div class="acts meta">
-    <button data-act="print" title="pull the print (P)">刷</button>
-    <button data-act="rec"   title="record eight seconds">録</button>
-    <button data-act="sound" title="the sound of water" aria-pressed="false">音</button>
-    <button data-act="bench" title="the bench — parameters (G)">調</button>
-    <button data-act="full"  title="fullscreen (F)">全</button>
+    <button data-act="print" title="pull the print — saves a PNG (P)">print</button>
+    <button data-act="rec"   title="record eight seconds">rec</button>
+    <button data-act="sound" title="the sound of water" aria-pressed="false">sound</button>
+    <button data-act="bench" title="the bench — parameters (G)">tune</button>
+    <button data-act="full"  title="fullscreen (F)">full</button>
   </div>
 </div>
 
@@ -769,15 +768,16 @@ function createWater(opts) {
   function onMove(e) {
     if (!pointerOn) return;
     const st = pointers.get(e.pointerId);
+    if (!st || !st.down) return;        // the water answers only a pressed hand
     const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
     let prev = st;
     for (const ev of evs) {
       const p = toUV(ev);
-      if (prev) strokes.push({ x0: prev.x, y0: prev.y, x1: p.x, y1: p.y,
-                               dt: Math.max(p.t - prev.t, 1), down: !!prev.down, pr: p.p });
-      prev = { x: p.x, y: p.y, t: p.t, down: st ? st.down : false };
+      strokes.push({ x0: prev.x, y0: prev.y, x1: p.x, y1: p.y,
+                     dt: Math.max(p.t - prev.t, 1), down: true, pr: p.p });
+      prev = { x: p.x, y: p.y, t: p.t, down: true };
     }
-    if (prev) pointers.set(e.pointerId, { ...prev, down: st ? st.down : false });
+    pointers.set(e.pointerId, prev);
     lastTouch = performance.now();
     wake();
   }
@@ -1594,7 +1594,7 @@ if (typeof module !== 'undefined') module.exports = { createWater };
     const n = $("scenes"); n.innerHTML = "";
     SCENES.forEach((sc, i) => {
       const b = document.createElement("button");
-      b.innerHTML = '<span class="n">' + sc.name + '</span><span class="k">' + sc.k + "</span>";
+      b.innerHTML = '<span class="n">' + sc.name + "</span>";
       b.setAttribute("aria-pressed", i === sceneIdx ? "true" : "false");
       b.title = sc.name + " (" + (i + 1) + ")";
       b.addEventListener("click", () => setScene(i));
@@ -1615,8 +1615,8 @@ if (typeof module !== 'undefined') module.exports = { createWater };
       n.appendChild(b);
     });
   }
-  const TOOLS = [["brush", "筆", "brush — drag to lay ink (B)"], ["water", "水", "clear water — thin the ink (W)"],
-                 ["comb", "櫛", "the comb — rake the bath (C)"], ["fan", "扇", "the fan — a wide gentle push (V)"]];
+  const TOOLS = [["brush", "brush", "drag to lay ink (B)"], ["water", "water", "clear water — thins the ink (W)"],
+                 ["comb", "comb", "rake the bath with seven tines (C)"], ["fan", "fan", "a wide gentle push (V)"]];
   function renderTools() {
     const n = $("tools"); n.innerHTML = "";
     TOOLS.forEach(([id, k, tip]) => {
