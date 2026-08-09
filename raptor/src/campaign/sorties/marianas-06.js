@@ -23,7 +23,7 @@
 //                TIMING TRICK: two tier-3 ENGAGE fighters (tag 51)
 //                spawned at START in the far SE/SW ride wide southern
 //                racetracks (standoff legs >= 17.9/13.6 km from the
-//                merge, measured per leg) until ≈ 250 s, then cut north:
+//                merge, measured per leg) until ≈ 200-207 s, then cut north:
 //                ring entry at ≈ 291/294 s — on the heels of a competent
 //                pincer kill — then merge-ring laps to ≈ 1109/1125 s of
 //                total route. ON_TIME t=255 backstop 509 calls the cut
@@ -86,7 +86,7 @@ export default {
         wpts: [[-12000, 26000], [-18000, 16000], [-8000, 18000], [-2000, 10000], [6000, 8000], ...ringLaps(4)] },
       // the ANVIL (tag 51): tier-3 ENGAGE, wide southern standoff (2
       // racetrack lap pairs, standoff legs >= 17.9 km SE / >= 13.6 km SW
-      // from the merge) to ≈ 250 s, then the cut north: ring entry at
+      // from the merge) to ≈ 200-207 s, then the cut north: ring entry at
       // 69.9 km ≈ 291 s (SE) / 70.6 km ≈ 294 s (SW); merge-ring laps to
       // ≈ 1109/1125 s of total route.
       { kind: "fighter", tier: 3, engage: true, x: 26000, y: -24000, z: 5400, headingDeg: 108, speed: 260, tag: 51, side: 0,

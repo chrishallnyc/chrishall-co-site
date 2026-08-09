@@ -123,7 +123,7 @@ export default {
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 3, lineId: 466 },   // victory
       { on: TRIG.ON_TIME, t: 1200, lineId: 511 },            // 5-min clock warning
       { on: TRIG.ON_TIME, t: 1500, lineId: 467 },            // timeout defeat
-      { on: TRIG.ON_ACE_STATE, aceId: 1, aceState: "smoking", lineId: 381 },
+      { on: TRIG.ON_ACE_STATE, aceId: 1, aceState: "smoking", lineId: 449 }, // N06's OWN taunt (batch-2 panel rider: 381's "everything you had" is untrue in an optional duel)
       { on: TRIG.ON_ACE_STATE, aceId: 1, aceState: "escaped", lineId: 382 },
       { on: TRIG.ON_ACE_STATE, aceId: 1, aceState: "killed", lineId: 383 },
     ],

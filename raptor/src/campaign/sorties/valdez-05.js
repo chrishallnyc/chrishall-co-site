@@ -97,7 +97,7 @@ export default {
       { on: TRIG.ON_TIME, t: 25, lineId: 474 },
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 1, lineId: 478 },   // the whisper on the run-in
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 2, lineId: 475 },   // THE TURN
-      { on: TRIG.ON_TIME, t: 265, lineId: 479 },             // patrol backstop, un-gated (entry ≈ 310-316 s)
+      { on: TRIG.ON_TIME, t: 250, lineId: 479 },             // patrol backstop, un-gated (entry ≈ 310-316 s; t 265->250, batch-2 panel rider)
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 3, lineId: 476 },   // victory
       { on: TRIG.ON_TIME, t: 1200, lineId: 512 },            // 5-min clock warning
       { on: TRIG.ON_TIME, t: 1500, lineId: 477 },            // timeout defeat

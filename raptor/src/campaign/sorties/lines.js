@@ -10,6 +10,8 @@
 //   400-409 V03 · 410-419 V04 · 420-429 M03 · 430-439 M04 ·
 //   450-459 N05 · 460-469 N06 · 470-479 V05 · 480-489 V06 ·
 //   490-499 M05 · 500-509 M06
+//   530-539 N07 · 540-549 N08 · 550-559 V07 · 560-569 V08 ·
+//   570-579 M07 · 580-589 M08
 //   within a block: x0 title, x1-x3 briefing card (x1 doubles as the
 //   ON_START establishing call — beat 2 fires the fiction inside 10 s),
 //   x4 ingress flavor, x5 THE TURN callout, x6 victory, x7 defeat/timeout,
@@ -19,11 +21,13 @@
 //   392-399 D-073 panel-carry patch lines (wave-2 announcement backstops,
 //   offense clock warnings, defense timeout-victory flavor) · 440-449
 //   INC-8 batch-1 extras (M01 timeout flavor, JACKAL return taunt, per-
-//   sortie overflow where a 10-wide block ran dry) · 510-529 INC-8
-//   batch-2 extras (510-519: N06 ledger-agnostic JACKAL taunt, clock
-//   warnings and backstops where a 10-wide block ran dry; 520-529: the
-//   batch-2 panel-must overflow — 520 N05 wave-1 clock, 521 V06 trough-2
-//   clock). id 449 stays free for batch 3.
+//   sortie overflow where a 10-wide block ran dry; 449 = N06's own
+//   smoking taunt, the batch-2-panel rider on the id reserved for it) ·
+//   510-529 INC-8 batch-2 extras (510-519: N06 ledger-agnostic JACKAL
+//   taunt, clock warnings and backstops where a 10-wide block ran dry;
+//   520-529: the batch-2 panel-must overflow — 520 N05 wave-1 clock,
+//   521 V06 trough-2 clock) · 590-599 INC-8 batch-3 extras (un-gated
+//   backstops + clocks where a 10-wide block ran dry; 598-599 free).
 // TYPHOON (the MARIANAS finale) is deliberately absent — his lines ship
 // with the finale sortie, not the opening batches.
 
@@ -224,16 +228,26 @@ export const SORTIE_LINES = {
   // 447 M03 / 448 V03 offense clock warnings (t=1200, the 396-398 pattern)
   447: "OVERLORD: Five minutes of light left. If anything of Tinian's is still floating, flying, or rolling — fix that.",
   448: "OVERLORD: Five minutes of window, Raptor. The ledger doesn't care how close you got.",
+  // 449 N06's OWN smoking taunt (batch-2 panel rider on the id reserved for
+  // it): reusing 381's "everything you had" was untrue in an OPTIONAL duel —
+  // the resource taunt is ammo-agnostic (time spent on him is spent either
+  // way) and points back at the column, which is the mission.
+  449: "JACKAL (guard): 'Everything you spend on me, the column keeps. Smoke's a fair trade — I'd take it again.'",
 
   // ---- N05 THE AIR BRIDGE (nellis-05) ----
   450: "THE AIR BRIDGE",
-  451: "OVERLORD: Raptor 1-1, heavy transports are coming down the northern corridor — a battalion on the pallets, bound for the desert LZ. The airlift dies tonight. All of it.",
+  // 451 batch-2 panel rider: the "All of it." briefing closer had calcified
+  // (351/371/451) — trimmed.
+  451: "OVERLORD: Raptor 1-1, heavy transports are coming down the northern corridor — a battalion on the pallets, bound for the desert LZ. The airlift dies tonight.",
   452: "Two waves confirmed: the lead pair is already through the fence line, and the second is forming up east with company — intel reads a pair of fast movers sweeping ahead of it.",
   453: "Heavies are slow, fat, and helpless. The guns riding shotgun are none of those things. Kill the freight, respect the escort, and nothing lands.",
   454: "OVERLORD: Vector gate ahead. Wave one is northeast, letting down into the corridor — big, slow returns. You'll see their landing lights before they see anything.",
   455: "OVERLORD: Wave one is burning on the desert — and wave two just answered: two more heavies out of the east, and this time their GUNS came ahead of the freight. Fast pair, committing. Fight's on, Raptor.",
-  456: "OVERLORD: Splash the airlift — every pallet, every airframe, still in the air when you killed it. The LZ stays empty tonight. Superb work, Raptor 1-1.",
-  457: "OVERLORD: Wheels down on the LZ — they're offloading under your nose. The range just grew a garrison. RTB, Raptor. This one stings.",
+  // 456/457 batch-2 panel riders: 456's middle clause now carries the clean
+  // wheels-down rhyme; 457 fires while the tripping heavy is still visibly
+  // FLYING (zone denial trips at the ring, not the dirt) — "flaring" fixes it.
+  456: "OVERLORD: Splash the airlift — every airframe killed still flying, not one wheel down, not one pallet on the dirt. The LZ stays empty tonight. Superb work, Raptor 1-1.",
+  457: "OVERLORD: They're flaring over the LZ — wheels down in moments, pallets on the dirt inside the minute. The range just grew a garrison. RTB, Raptor. This one stings.",
   458: "RAPTOR 1-1: Through the gate. Picture's building — heavy returns letting down the corridor, more traffic east.",
   459: "OVERLORD: The fast pair east is inbound your area — ahead of their freight, hunting. Whatever the state of wave one, keep your head up.",
 
@@ -244,7 +258,10 @@ export const SORTIE_LINES = {
   463: "Intel won't say whether it's the man or someone who inherited the airplane. It doesn't matter. The column is the mission — the paint is a debt, and debts are optional.",
   464: "OVERLORD: Column's on the move, steady eight meters a second, guns forward. Noon sun, no shadows to hide in — theirs or yours.",
   465: "OVERLORD: Both guns are dead on the road — and the paint just turned in off the high northwest. He's coming for you, Raptor, and the column keeps rolling while he does. Finish the iron under the hammer.",
-  466: "OVERLORD: The counterpush is burning end to end. Nothing reaches the tunnel, nothing reaches the pass — the month is ours. Outstanding, Raptor 1-1.",
+  // 466 batch-2 panel rider: pays off the won-under-the-hammer structure in
+  // the past tense, ace-agnostic (true whether JACKAL is overhead, run off,
+  // or dead — the cover ASSIGNMENT is the fact, not his current state).
+  466: "OVERLORD: The counterpush is burning end to end. They gave that column the best cover they had left and it bought them nothing — nothing reaches the tunnel, nothing reaches the pass. The month is ours, Raptor 1-1.",
   // 467 panel MUST-2: "out of light" contradicted todH 12 / 464's noon
   // sun, and the lead mover is ~12.0 of 16.7 km at t=1500 — a ridge from
   // the tunnel, not inside the approach.
@@ -256,11 +273,15 @@ export const SORTIE_LINES = {
   470: "STILL WATER",
   471: "OVERLORD: Raptor 1-1, two hulls at anchor in the lower Sound — a destroyer and the freighter she shepherds. Decks dark, guns cold, radio silent. Put them on the bottom before the light changes.",
   472: "It's 2124 local and the sun won't finish setting — glass sea, gold water, no wind. Intel has their night patrol somewhere over the gulf, due back on an unknown clock.",
-  473: "Nothing at that anchorage can touch you. Enjoy that while it's true — the moment the first hull settles, the quiet is over.",
+  // 473 batch-2 panel rider: the pair's one rail-economy clause lands here.
+  473: "Nothing at that anchorage can touch you. Enjoy that while it's true — and spend like it isn't: guns for the hulls, rails for whoever comes home. The moment the first hull settles, the quiet is over.",
   474: "OVERLORD: Sound is dead calm. Your bow wave will be the loudest thing on the water tonight. Run-in point ahead.",
   475: "OVERLORD: Both hulls are going down — and there's the answer: the night patrol, two fast contacts, coming back down the gulf straight at the anchorage. The quiet's over, Raptor. Fight's on.",
   476: "OVERLORD: Patrol splashed, hulls on the bottom, and the water's already going still again. Some sorties are paintings, Raptor 1-1. RTB in the gold.",
-  477: "OVERLORD: The light's finally gone and the anchorage still floats. We don't get this window twice. RTB.",
+  // 477 batch-2 panel rider: "the light's finally gone" broke the sortie's
+  // own midnight-sun physics (472: the sun won't finish setting) — the
+  // panel's replacement wording adopted.
+  477: "OVERLORD: The gold's gone gray and the anchorage still floats. We don't get this window twice. RTB.",
   478: "RAPTOR 1-1: Run-in point. I have the hulls — two shadows on gold water, swinging at anchor. Beginning my attack. Quietly.",
   479: "OVERLORD: Contacts east over the gulf, descending — the night patrol is coming home early. Whatever's left on the water, finish it now.",
 
@@ -293,7 +314,12 @@ export const SORTIE_LINES = {
   496: "OVERLORD: That's all four movers dead on the road and the site's a scrapheap. Tinian shipped nothing tonight but smoke. Beautiful chase, Raptor 1-1.",
   497: "OVERLORD: The light's gone and there's still iron moving on that island. Whatever went to ground tonight, we'll meet again — and it'll be shooting. RTB.",
   498: "RAPTOR 1-1: Run-in point. Tally the site on the rise — and I count four movers already rolling, two axes, getting smaller. Beginning my run.",
-  499: "OVERLORD: The alert fighter north is descending toward the strip — one contact, fast, deliberate. Whatever the state of your run, he's coming to it.",
+  // 499 batch-2 panel rider (seat-2 rewrite adopted in spirit): the
+  // "Whatever the state of..." hedge had calcified (459/499), the line was a
+  // near-rerun of M03's 429, and "fast, deliberate" collided with 469 inside
+  // the same batch. Route-true replacement: at t=275 the sentinel IS off his
+  // northern hold and descending (11 km ring entry ≈ 322 s).
+  499: "OVERLORD: The alert fighter is off the northern water — descending on the strip with intent. He didn't wait for an invitation.",
 
   // ---- M06 FOUR CORNERS (marianas-06) ----
   500: "FOUR CORNERS",
@@ -301,11 +327,17 @@ export const SORTIE_LINES = {
   502: "The pattern reads as a pincer and an anvil: two committing from the north corners first, two more holding wide south, waiting for you to be busy. No ace paint, no theatrics — just discipline. Respect it.",
   503: "Four shooters is the ceiling of what we'll ever ask you to stand in front of, Raptor. Today we're asking. High noon, clean sky, everything visible — including you.",
   504: "OVERLORD: Datum ahead. North pair is already inbound — one off each corner, converging like they've done it a hundred times. They have.",
-  505: "OVERLORD: North pair's in the water — and the south pair just came off their standoff. Two more, tier above the last, cutting north for the merge. The anvil's falling, Raptor. Stay fast, stay high, make them arrive one at a time.",
+  // 505 batch-2 panel rider: "tier above the last" was bandits.js vocabulary
+  // in OVERLORD's mouth — the panel's replacement phrase adopted.
+  505: "OVERLORD: North pair's in the water — and the south pair just came off their standoff. Two more, the better half of the four-ship, cutting north for the merge. The anvil's falling, Raptor. Stay fast, stay high, make them arrive one at a time.",
   506: "OVERLORD: FOUR FOR FOUR — their best flight is in the strait and the picture is ours from the reef to the rock. That merge belongs to the textbook now, Raptor 1-1. RTB.",
   507: "OVERLORD: Window's closed with their sweep still airborne. The strait picture goes to them tonight. Get down safe, Raptor — tomorrow we do arithmetic.",
   508: "RAPTOR 1-1: On the datum. Picture confirmed — four groups, four corners, all converging on me. ...Good.",
-  509: "OVERLORD: South pair is off the standoff and cutting north — the anvil is inbound your merge. Ninety seconds, give or take. Finish what's in front of you.",
+  // 509 batch-2 panel riders: the "ninety seconds" clock had calcified
+  // (395/439/509) AND was wrong here (real anvil-to-merge ≈ 75 s) — trimmed;
+  // and the old line asserted a live anvil to an anvil-first player — the
+  // either/or keeps it true on every path.
+  509: "OVERLORD: The south corners are empty — their second element is either inbound your merge or already in the water. Finish what's in front of you.",
 
   // ---- 510-519: INC-8 batch-2 extras ----
   // 510 N06 JACKAL guard taunt (t=45 — deliberately ledger-agnostic: works
@@ -315,8 +347,11 @@ export const SORTIE_LINES = {
   //     (t=1200, the 396-398 pattern, per-sortie fiction)
   511: "OVERLORD: Five minutes, Raptor. The column doesn't care about fair — if it's rolling at the tunnel, they win.",
   512: "OVERLORD: Five minutes of gold left, Raptor 1-1. If anything still floats or flies out there, the painting isn't finished.",
-  // 513 V06 relay-2 backstop (t=370, un-gated — ring ≈ 420-424 s)
-  513: "OVERLORD: Second relay is past the glacier line and descending on the station — two shooters, committed. However relay one is going, the clock doesn't care.",
+  // 513 V06 relay-2 backstop (t=370, un-gated — ring ≈ 420-424 s). Batch-2
+  // panel rider (seat-2 rewrite adopted in spirit): the "doesn't care"
+  // closer had calcified (448/511/513) — replaced with an honest clock
+  // (entry 420-424 s from t=370 = 50-54 s).
+  513: "OVERLORD: Second relay is past the glacier line and descending on the station — two shooters, committed. Fifty seconds out, maybe less.",
   // 514 V06 coda descent backstop (t=640, un-gated — ring ≈ 680-694 s)
   514: "OVERLORD: Their northern hold is empty — the last pair is descending NOW. Best for last, Raptor. Hold what you're holding.",
   // 515 V06 relief clock (t=900)
@@ -335,6 +370,114 @@ export const SORTIE_LINES = {
   //     on the 'authored clock-talk in the troughs' premise; t=300,
   //     un-gated, keeps 513@370)
   521: "OVERLORD: Second relay is past the midline of the Sound, still committed. Four minutes of quiet left — spend it on fuel and angles.",
+
+  // ---- N07 BIG FRIENDS (nellis-07) ----
+  530: "BIG FRIENDS",
+  531: "OVERLORD: Raptor 1-1, today the war goes north — three heavies are climbing out behind you, bound for the enemy marshalling yard. Everything they have left is coming up to stop it. You are the sweep.",
+  532: "Two committed groups on the plot: a pair already driving in from the east, and a second element holding low in the south — their best, held back for the moment the bombers are heaviest.",
+  // 533 batch-3 panel MUST-4: obj 6 is a need-1 one-shot loss and the 9X
+  // seeker has no side filter — the check-fire warning is briefed up front.
+  533: "Join at the rendezvous and take the fights out in front of the package. The heavies cannot run and they cannot shoot back — everything between them and the yard is yours to kill, and nothing wearing a friendly wing is on that list. Check fire around the package.",
+  534: "OVERLORD: Package is off the deck behind you, three abreast, steady on the corridor. The east pair is inbound and the plot is honest — fly it right and you meet them well short of the freight.",
+  535: "OVERLORD: East pair down — and the freight never even changed heading. Anything else that comes up today comes out of the south, and it comes for the yard. Stay between.",
+  536: "OVERLORD: Sweep complete — every fighter they put up is down, and the heavies are making their runs with empty sky around them. That's the whole war turning over, Raptor 1-1. Take them home.",
+  537: "OVERLORD: Hostile through the sweep — he's inside the bomber wheel and we are pulling the package out. The yard stands, the corridor closes, and we go back to defending. RTB, Raptor.",
+  538: "RAPTOR 1-1: Joined on the package — three big wings holding formation like it's an airshow. Sweep's out in front. Let's go north.",
+  539: "OVERLORD: CHECK FIRE, CHECK FIRE — a heavy is going down. There were people on that airplane, Raptor. There is no mission left in this. RTB.",
+
+  // ---- N08 FUMES (nellis-08) ----
+  540: "FUMES",
+  541: "OVERLORD: Raptor 1-1, listen to how quiet it is. Their air arm is running dry — intel puts the last of their jet fuel in four bowsers at a dispersal yard in the north basin, pumping into bladders at first light. Burn it, and their war stops flying.",
+  542: "The yard is naked — nothing that shoots within twelve klicks of it, nobody awake. What's left of their alert flight holds east over the far range, with just enough in the tanks to make one answer.",
+  543: "Fly it gentle, hit it clean, and don't linger in the smoke. If the answer comes, it comes fast and it comes angry — they'll spend everything they have left to make it count.",
+  544: "OVERLORD: First light on the basin floor. Nothing moving down there but your shadow. Yard's ahead — bowsers nose to tail at the bladders, dead asleep.",
+  // 545 batch-3 panel MUST-3: on slower-than-median runs the pair is
+  // already overhead or half-dead at the turn — state/count-agnostic form.
+  545: "OVERLORD: The fuel's burning — the last of it. Whatever's left of their alert flight has nothing to save now and nothing to lose — if they weren't already coming, they are now. They are not coming to posture, Raptor.",
+  546: "OVERLORD: Both of them, down in the dawn. That's the last sortie their air force had in it, Raptor 1-1 — the rest is arithmetic and rust. Come home in the sunlight.",
+  547: "OVERLORD: Window's spent. Anything left in that yard is under camouflage nets by tonight, and the quiet is over for good. RTB, Raptor.",
+  548: "RAPTOR 1-1: Run-in. ...It's beautiful out here, OVERLORD. Long red light, still air. You'd never know there was a war down there.",
+  549: "OVERLORD: Five minutes of window, Raptor. Sunrise doesn't wait, and neither do their recovery crews — finish it.",
+
+  // ---- V07 THE BELT (valdez-07) ----
+  550: "THE BELT",
+  551: "OVERLORD: Raptor 1-1, the western narrows are wearing a belt — two missile sites on the flats, dishes turning, covering every meter of water between them. The fleet comes home through those narrows next week. The belt comes off today.",
+  552: "Site by the shore: one dish, two rails. Site on the west flat: dish, rail, and a gun keeping it company. Six pieces of iron, Raptor — the mission is all six, and every rail is live for as long as it exists.",
+  553: "They'll see you the moment you drop into the bowl, so stop being polite about it. Break the rails and the dishes in whatever order keeps you alive — and when the last piece dies, expect their air to have opinions.",
+  554: "OVERLORD: The Sound's flat as a workbench today. Run-in ahead — you'll cross into the shore site's envelope on the way down, so keep your break in your pocket.",
+  // 555 batch-3 panel MUST-1: the median belt kill lands AFTER the pair has
+  // left its hold, so the old "up behind the glacier line... Two fighters"
+  // contradicted the radio's own picture — state/count-agnostic form.
+  555: "OVERLORD: That's six for six — the belt is scrap and the narrows are naked. Whatever they still have airborne is coming here now — there's nowhere left for it to defend. The Sound is yours to keep, Raptor — keep it.",
+  556: "OVERLORD: Splash two — their answer just ran out of sky. Nothing of theirs flies over these narrows again, Raptor 1-1. Come home when the ledger reads six and two.",
+  557: "OVERLORD: We're out of afternoon, and the narrows are still contested — that's all the book will say. The fleet holds off. RTB, Raptor.",
+  558: "RAPTOR 1-1: In the bowl. Tally both sites — dishes turning on the flats, rails trained on the water. They're wide awake, OVERLORD. Starting my work.",
+  559: "OVERLORD: Five minutes of window, Raptor 1-1. Anything on that flat or over it that answers to them has to be dead before the light goes.",
+
+  // ---- V08 SECOND WIND (valdez-08) ----
+  560: "SECOND WIND",
+  561: "OVERLORD: Raptor 1-1, the guard channel found a ghost this morning: BOREAS is checking in over the Sound again — same voice, same perch, same appetite. Whether it's the same hands on the stick, nobody will swear to. Two of his hunters are already turning inbound to flush you out.",
+  562: "The pattern is his to the letter: send the pair in low to make you spend and sweat, hold the perch high in the northwest, and come down like weather on whatever's left. High slasher. Supercruise thief. You know the file.",
+  563: "Take the station, take his hunters, and then look up, Raptor. One way or the other, the Sound is done being his.",
+  564: "OVERLORD: Station's ahead on the water. His pair is inbound from two sides — northeast and southwest, patient, like they've flushed people before. The perch hasn't moved.",
+  565: "OVERLORD: Both hunters are in the water — and the guard channel just went dead quiet. That's not relief, Raptor. That's a man taking a breath. Expect the wind.",
+  566: "OVERLORD: The Sound's high air is empty — however the wind went out, it's out. Station's yours, sky's yours, day's yours, Raptor 1-1. RTB.",
+  567: "OVERLORD: Window's closed and the Sound is still contested air. Whoever's left up there gets to tell it their way tonight. Get down safe, Raptor — this one will keep.",
+  568: "RAPTOR 1-1: On station. Two contacts converging on me — and if the file's right, one more up high I won't see until he wants me to. ...Good. I hate waiting.",
+  569: "BOREAS (guard): 'Little Raptor, back over my water. The wind never files a claim twice — it just collects. Climb when you're ready.'",
+
+  // ---- M07 THE EYE (marianas-07) ----
+  570: "THE EYE",
+  571: "OVERLORD: Raptor 1-1, the reason every move we make gets answered before we finish making it is orbiting the strait at twenty-five thousand feet — a converted heavy with a radar picture worth more than the rest of their air force. They call it the eye. Go put it out.",
+  572: "It doesn't fly alone: two guards bracket the orbit, one high side each, the best sticks they have left. And somewhere south, low over the water, a ready pair holds for the day somebody tries exactly this.",
+  573: "Kill the guards on your terms, then climb — it orbits high on purpose, and the climb is where cocky people die. The eye watches everything, Raptor. Make it watch this.",
+  574: "OVERLORD: Golden hour on the strait. The orbit track is steady on your nose, and both guards just took an interest in your heading. The plot is honest — nobody out here is hiding except the pair down south.",
+  575: "OVERLORD: Both guards are gone and nobody is answering the eye's calls. The deck pair is already moving — that's tomorrow's problem arriving early. The eye is the mission, Raptor. Climb.",
+  576: "OVERLORD: The eye is down — end over end, twenty-five thousand feet of tumbling scrap. Their whole theater just lost its sight, Raptor 1-1.",
+  577: "OVERLORD: We're out of golden hour with the job still open. Whoever's still flying up there keeps the strait tonight. RTB, Raptor — count your rails and your regrets on the way home.",
+  578: "RAPTOR 1-1: On the datum. I can see it, OVERLORD — a fat silver cross way up high, going in circles like it owns the place. The near guard is already turning in. Starting my climb.",
+  579: "OVERLORD: Five minutes of light left, Raptor. The job doesn't shrink in the dark — finish the count.",
+
+  // ---- M08 TWO DOORS (marianas-08) ----
+  580: "TWO DOORS",
+  581: "OVERLORD: Raptor 1-1, the eye is gone and they know how this ends — so they're running. Four heavies came off the north field loaded with everything worth saving: staff, spares, the last of the war they wanted to have. Two pairs, two lanes — west for the open strait, south down the island line.",
+  582: "The doors don't close together — call it six and a half minutes on the west lane, a shade under eight on the south, and you don't get to average them. Their last two fighters fly cover, one welded over each lane. The freight is the war, Raptor. The guns are just the argument.",
+  583: "Pick a lane, kill it fast, and turn. There is no version of this where you fly it patient — and no version where one out of two is worth a debrief. Both pairs. Both doors stay shut.",
+  584: "OVERLORD: The streams split off the north field before you were airborne — west pair's swinging wide over the water, south pair's down the island line, a gun riding over each. The clock is honest, Raptor. Pick.",
+  585: "OVERLORD: West freight's in the water short of the mouth — that door stays shut for good. Half their getaway just became salvage, Raptor. The other half is still a door.",
+  586: "OVERLORD: South freight is down in the shallows with the channel mouth in sight — the island line is finished as a way out. That was the sound of a theater running out of luck, Raptor 1-1.",
+  587: "OVERLORD: A heavy is through the door and gone — open water, fleet umbrella, out of reach. What just left arrives somewhere else as next year's war. RTB, Raptor. We will be meeting that cargo again.",
+  588: "OVERLORD: Clock call — anything still driving the west lane is inside two minutes of the mouth, and the south lane inside three. If you're going to be greedy, Raptor, now is the time.",
+  589: "OVERLORD: Tracking steady — west pair is wide over the water turning down the coast, south pair is threading the islands, and the guns are running the lanes ahead of the freight. Four minutes on the near math.",
+
+  // ---- 590-599: INC-8 batch-3 extras ----
+  // 590 N07 wave-A merge clock (t=175, un-gated — box entry ≈ 271-287 s;
+  //     conditional-form because a fast sweep can already have killed them)
+  590: "OVERLORD: Anything still closing from the east is under two minutes from the bomber wheel. The heavies hold course regardless — that was the deal.",
+  // 591 N07 wave-B backstop (t=395, un-gated — box entry ≈ 457-462 s;
+  //     past-tense fact + conditional: they left the hold at ≈ 267-283 s
+  //     and are killable after the turn, so the hedge is load-bearing)
+  591: "OVERLORD: Their south element came off its hold at speed. If it's still flying, it's a minute from the bomber wheel — and it will not miss the freight.",
+  // 592 N08 pair backstop (t=200, un-gated — gate crossing ≈ 206-220 s,
+  //     ring ≈ 235-249 s; they hold >= 18 km from every likely player
+  //     position until now, so an early kill is geometrically implausible)
+  592: "OVERLORD: New tracks east, descending toward the basin — two of them, fast, and they are not conserving anything. Your quiet morning has about half a minute left in it.",
+  // 593 V07 pair backstop (t=290, un-gated — ring ≈ 321-337 s)
+  593: "OVERLORD: There they come — two fast movers off the glacier line, descending on the narrows. Half a minute and they're in your sky. Sort your rails.",
+  // 594 V08 BOREAS descent (t=330, un-gated — he left the perch ≈ 222 s,
+  //     crosses the 18 km detection gate ≈ 365 s, ring ≈ 403 s: the call
+  //     lands BEFORE the HUD can see him, which is the point). Batch-3
+  //     panel MUST-2: he is killable before t=330 on a perch-first path,
+  //     so the descent claim is conditional.
+  594: "OVERLORD: The perch is empty, Raptor. If the wind still has hands, he's coming down the glacier line — high, fast, out of the noon sun — and you won't get a clean return until he's close. That's how he likes it.",
+  // 595 V08 offense clock (t=1200, the 396-398 pattern)
+  595: "OVERLORD: Five minutes, Raptor. Nobody remembers who held the station at lunch — they remember who owned the sky at the end of the day. Close it out.",
+  // 596 M07 ready-pair backstop (t=300, un-gated — hold ends ≈ 250 s,
+  //     ring ≈ 331-341 s)
+  596: "OVERLORD: The southern hold is empty — deck pair inbound, low and fast over the water, half a minute out from your fight. Two more sticks, same lesson.",
+  // 597 M08 datum call (obj 1 done — honest about the detection gate: the
+  //     south pair is inside 18 km at the datum, the west pair is not)
+  597: "RAPTOR 1-1: On the datum. South pair's on my scope already; west pair's a bearing and a promise. ...You said pick. I pick both.",
 };
 
 // alias for the authored loader (campaign/authored.js reads L.LINES first)

@@ -35,7 +35,7 @@
 //                ON_TIME t=370 backstop 513 calls them un-gated.
 //   6 CLIMAX     obj 4: the WAVE-3 CODA — their best pair (tier 3,
 //                ENGAGE, tag 62) holds a far-north racetrack (hold legs
-//                >= 34 km out) until ≈ 570 s, descends, and hits the
+//                >= 34 km out) until ≈ 500 s, descends, and hits the
 //                station ring at ≈ 680/694 s; its total route runs
 //                ≈ 1512/1513 s — it OUTLIVES the 1500 s lose timer at the
 //                letter of the D-073 LAW. 489 fires on obj 3 (the coda
@@ -97,7 +97,7 @@ export default {
           ...ringLaps([[8000, -14000], [-3000, -14000], [-3000, -23000], [8000, -23000]], 4)] },
       // the CODA (tag 62): their best pair, tier-3 ENGAGE. Far-north hold
       // (4 racetrack lap pairs, hold legs >= 34 km from the station) to
-      // ≈ 570 s, then the descent: 9 km ring at 163.3/166.4 km
+      // ≈ 500 s, then the descent: 9 km ring at 163.3/166.4 km
       // ≈ 680/694 s; total route 1512/1513 s — OUTLIVES the 1500 s timer.
       { kind: "fighter", tier: 3, engage: true, x: -8000, y: 27000, z: 5800, headingDeg: -7, speed: 260, tag: 62, side: 0,
         wpts: [...laps([-15000, 25000], [1000, 27000], 4), [-6000, 15000], [2000, 3000], [-2000, -9000],
