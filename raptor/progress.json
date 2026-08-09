@@ -1,11 +1,12 @@
 {
- "updated": "2026-08-08T16:20:00-07:00",
- "version": "v0.29.0",
- "now": "v0.29.0 THE NEMESIS \u2014 named aces that survive, escape smoking, and come back for you; authored campaign next",
+ "updated": "2026-08-08T18:45:00-07:00",
+ "version": "v0.30.0",
+ "now": "v0.30.0 THE CAMPAIGN OPENS \u2014 six authored set-piece sorties with a drama-panel stamp; 24 more coming in batches",
  "nowPhase": 12,
  "paused": false,
- "pushes": 61,
+ "pushes": 62,
  "ledger": [
+  "2026-08-08 v0.30.0 \u2014 THE CAMPAIGN OPENS: six authored sorties, two per front, each built on a seven-beat arc \u2014 briefing, ingress radio, the objective, THE TURN (an authored ambush that arrives exactly when it should), climax, resolution. FIRST BLOOD over Nevada, JACKAL'S HOUR against a live SAM ring, HOLD THE NARROWS in the fjords, a drone footrace to the fence, the reef line, and THE HORNET'S NEST with SHRIKE waiting in the haze. Linear unlock chain in the hangar; a three-judge drama panel reviewed every beat and its fixes are in. The autoplay harness that proves every sortie winnable AND losable is now the permanent content gate.",
   "2026-08-08 v0.29.0 \u2014 THE NEMESIS: the war has names now. Aces fly with red-marked jets and a star on your HUD. Your first Sidewinder leaves one smoking, not dead \u2014 and a smart ace firewalls the throttle and runs for the map edge trailing black smoke. Let him cross and the hangar remembers: NEMESIS ALIVE. He comes back in later sorties, better than before, with a grudge and a radio voice. Kill him before the fence and his name comes off their board for good.",
   "2026-08-08 v0.28.0 \u2014 THE SKY SHOOTS BACK: the first real dogfights. Fighters see you, turn in, and shoot \u2014 their missiles trip your MISSILE warning before they can hurt you, their guns only bite inside 700m, and they jink your Sidewinders off bad shots exactly like you dodge theirs. Energy is honest both ways: a bandit that turns too hard goes slow, breaks off to rebuild speed, then comes back. INTERCEPT and CAP sorties now appear in the campaign \u2014 the deeper you push the front, the harder the sky fights back.",
   "2026-08-08 v0.27.0 \u2014 THE FIRST BANDITS: enemy aircraft exist. Drones, transports and fighters fly waypoint routes with honest physics (energy bleed in hard turns, terrain-following floor), raiders dive on your convoys and shoot back at ships, and your AIM-9X finally leads a MOVING target \u2014 the guidance law that misses a 150 m/s crosser by 8 meters now kills it at 2.8. Dashed diamonds track every contact. Plus: cloud shadows reach the sea, and the valdez camera-ring artifact is root-caused and gone.",
@@ -109,7 +110,7 @@
   {
    "n": 11,
    "name": "Authored campaign (30+ sorties)",
-   "pct": 8,
+   "pct": 22,
    "note": ""
   },
   {

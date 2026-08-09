@@ -62,12 +62,20 @@ export class Script {
     });
     this.objAir = new Uint8Array(MAX_OBJ);
     this.objTag = new Int32Array(MAX_OBJ).fill(-1);
-    spec.objectives.forEach((o, i) => { if (o.air) { this.objAir[i] = 1; this.objTag[i] = o.tag; } });
+    spec.objectives.forEach((o, i) => {
+      if (o.air) { this.objAir[i] = 1; this.objTag[i] = o.tag; }
+      else if (o.tag !== undefined) this.objTag[i] = o.tag; // ground tag (INC-7)
+    });
     // INC-5: air raids are spec data — spawn the flight at mission start
     // (boot-time like battlefield placements; pool meshes already built)
     this._bSlots = []; // slots this mission spawned, for tag counting
     if (spec.bandits.length && this.bandits) {
       this._bSlots = this.bandits.spawnFlight(spec.bandits);
+    }
+    // INC-7: authored ground war — typed reserve slots + convoy paths
+    if (this.bf) {
+      if (spec.units && spec.units.length) this.bf.spawnGroup(spec.units);
+      if (spec.paths) for (const [tag, pts] of Object.entries(spec.paths)) this.bf.setPath(+tag, pts);
     }
     this._win = spec.winWhen.map((id) => this._slotOf.get(id));
     this._lose = spec.loseWhen.map((id) => this._slotOf.get(id));
@@ -110,6 +118,13 @@ export class Script {
             if (bi < 0 || B.tag[bi] !== this.objTag[i]) continue;
             if (!B.live[bi]) dead++;
           }
+        } else if (this.objTag[i] >= 0 && this.bf) { // spawned ground group by tag
+          const bf = this.bf, cap = bf.cap || bf.n;
+          for (let j = 0; j < cap; j++) {
+            if (!bf.slotUsed || !bf.slotUsed[j]) continue;
+            if (bf.tag[j] !== this.objTag[i]) continue;
+            if (bf.state[j * 5 + 4] <= 0) dead++;
+          }
         } else {
           const list = this.objIdx[i];
           if (this.bf) for (let j = 0; j < list.length; j++) if (this.bf.state[list[j] * 5 + 4] <= 0) dead++;
@@ -135,9 +150,17 @@ export class Script {
           if (this.objState[i] === 0 && !hasZone && dead >= this.objNeed[i]) this.objState[i] = 2;
           this._count[i] = dead;
         } else if (this.bf) {
-          const list = this.objIdx[i];
           let dead = 0;
-          for (let j = 0; j < list.length; j++) if (this.bf.state[list[j] * 5 + 4] <= 0) dead++;
+          if (this.objTag[i] >= 0 && !this.objIdx[i].length) {
+            const bf = this.bf, cap = bf.cap || bf.n;
+            for (let j = 0; j < cap; j++) {
+              if (!bf.slotUsed || !bf.slotUsed[j] || bf.tag[j] !== this.objTag[i]) continue;
+              if (bf.state[j * 5 + 4] <= 0) dead++;
+            }
+          } else {
+            const list = this.objIdx[i];
+            for (let j = 0; j < list.length; j++) if (this.bf.state[list[j] * 5 + 4] <= 0) dead++;
+          }
           this._count[i] = dead;
           if (dead >= this.objNeed[i]) this.objState[i] = 2;
         }

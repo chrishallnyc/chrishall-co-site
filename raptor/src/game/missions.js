@@ -215,9 +215,17 @@ function validate(spec) {
   if (!ps || !num(ps.x) || !num(ps.y) || !num(ps.alt) || !num(ps.headingDeg) || !num(ps.speed)) bad("playerSpawn needs numeric {x,y,alt,headingDeg,speed}");
   const af = spec.airfield;
   if (!af || !num(af.x) || !num(af.y) || !num(af.r)) bad("airfield needs numeric {x,y,r}");
-  // INC-1: standing battlefield only (see header)
-  if (!Array.isArray(spec.units) || spec.units.length) bad("INC-1: units must be [] (spawnGroup lands in INC-2)");
-  if (!spec.paths || typeof spec.paths !== "object" || Object.keys(spec.paths).length) bad("INC-1: paths must be {} (convoy drive lands in INC-2)");
+  // INC-7: authored sorties place their own war — units spawn from typed
+  // reserve slots at mission start, paths drive convoys
+  if (!Array.isArray(spec.units)) bad("units must be an array");
+  if (spec.units.length > 40) bad("more than 40 spawned units (reserve pool)");
+  for (const u of spec.units) {
+    if (!Array.isArray(u) || u.length < 3 || typeof u[0] !== "string" || !num(u[1]) || !num(u[2])) bad("unit rows are [type, x, y, yaw?, side?, tag?]");
+  }
+  if (!spec.paths || typeof spec.paths !== "object") bad("paths must be an object");
+  for (const [tag, pts] of Object.entries(spec.paths)) {
+    if (!Array.isArray(pts) || !pts.every((p) => Array.isArray(p) && p.length === 2 && p.every(num))) bad(`path ${tag} must be [[x,y],...]`);
+  }
   if (!Array.isArray(spec.bandits)) bad("bandits must be an array");
   if (spec.bandits.length > 8) bad("more than 8 bandits (pool cap)");
   for (const b of spec.bandits) { // INC-5: air raids are declarative data
@@ -240,8 +248,10 @@ function validate(spec) {
       if (o.air) { // INC-5: bandit objective — tag selects spawned air
         if (!num(o.tag)) bad(`objective ${o.id}: air destroy_tag needs a numeric tag`);
         if (!num(o.need) || o.need < 1) bad(`objective ${o.id}: need must be >= 1`);
+      } else if (num(o.tag)) { // INC-7: ground tag (spawned groups)
+        if (!num(o.need) || o.need < 1) bad(`objective ${o.id}: need must be >= 1`);
       } else {
-        if (!Array.isArray(o.bfIdx) || !o.bfIdx.length || !o.bfIdx.every(num)) bad(`objective ${o.id}: destroy_tag needs a non-empty numeric bfIdx list (INC-1 tag stand-in)`);
+        if (!Array.isArray(o.bfIdx) || !o.bfIdx.length || !o.bfIdx.every(num)) bad(`objective ${o.id}: destroy_tag needs bfIdx or tag`);
         if (!num(o.need) || o.need < 1 || o.need > o.bfIdx.length) bad(`objective ${o.id}: need must be 1..bfIdx.length`);
       }
     } else if (o.kind === "protect_tag") {
@@ -249,7 +259,7 @@ function validate(spec) {
       // (fails when a tagged LIVE bandit enters the zone) — §2's 5-kind
       // vocabulary held by widening, not growing.
       if (o.air) { if (!num(o.tag)) bad(`objective ${o.id}: air protect_tag needs a numeric tag`); }
-      else if (!Array.isArray(o.bfIdx) || !o.bfIdx.length || !o.bfIdx.every(num)) bad(`objective ${o.id}: protect_tag needs bfIdx (or air+tag)`);
+      else if (!num(o.tag) && (!Array.isArray(o.bfIdx) || !o.bfIdx.length || !o.bfIdx.every(num))) bad(`objective ${o.id}: protect_tag needs bfIdx, ground tag, or air+tag`);
       if (o.zone && (!num(o.zone.x) || !num(o.zone.y) || !num(o.zone.r) || o.zone.r <= 0)) bad(`objective ${o.id}: zone needs {x,y,r>0}`);
     } else if (o.kind === "kill_ace") {
       if (!num(o.aceId) || o.aceId < 0) bad(`objective ${o.id}: kill_ace needs aceId >= 0`);

@@ -17,7 +17,7 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.29.0";
+const VERSION = "0.30.0";
 const PHASE = 12;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
@@ -258,20 +258,28 @@ async function boot() {
   // PHASE 11 INC-1: ?mission=<name> loads a MissionSpec; the Script system
   // ticks AFTER player (observes the completed combat tick), BEFORE match
   // (which scores it). Script owns win/lose; match keeps tickets/rearm/boundary.
-  let match = null, script = null, missionData = null, campaign = null;
+  let match = null, script = null, missionData = null, campaign = null, authored = null;
   if (player && battlefield && flags.get("nomatch") !== "1") {
     const { Match } = await import("./game/match.js");
     const BF = await import("./game/battlefield.js");
     const pad = BF.FRONT_AIRFIELDS ? BF.FRONT_AIRFIELDS[atmosphere.frontName] : null; // INC-2 per-front pads
     match = new Match(battlefield, player, { airfield: pad });
     const mname = flags.get("mission");
-    const opFront = !mname && flags.get("op") ? atmosphere.frontName : null;
-    if (mname || opFront) {
+    const sortieId = !mname && flags.get("sortie");
+    const opFront = !mname && !sortieId && flags.get("op") ? atmosphere.frontName : null;
+    if (mname || opFront || sortieId) {
       try {
         const M = await import("./game/missions.js");
         const { Script } = await import("./game/script.js");
         let spec, extraLines = null;
-        if (opFront) { // INC-3: generated operation sortie — save -> spec, one door in
+        if (sortieId) { // INC-7: authored set-piece — module -> validated spec
+          const A = await import("./campaign/authored.js");
+          const st = await A.loadSortie(sortieId);
+          spec = st.spec;
+          extraLines = st.lines;
+          authored = { A, id: sortieId, saved: false };
+          if (!flags.get("tod") && spec.todH !== undefined) atmosphere.setTime(spec.todH);
+        } else if (opFront) { // INC-3: generated operation sortie — save -> spec, one door in
           const E = await import("./campaign/engine.js");
           const save = E.loadSave(opFront);
           spec = M.loadMission(E.genMission(save));
@@ -705,6 +713,10 @@ async function boot() {
         killCam = { c: lastJetPos.clone(), until: now + 4000 };
       }
       if (killCam && killCam.until && now > killCam.until) killCam = null;
+      if (authored && match && match.over === 1 && !authored.saved) {
+        authored.saved = true;
+        try { authored.A.markDone(authored.id); } catch (err) { console.warn("authored save failed:", err && err.message); }
+      }
       if (campaign && match && match.over !== 0 && !campaign.saved) {
         campaign.saved = true; // one write, render-side: sim never reads the save
         try {
@@ -816,6 +828,29 @@ function hangar() {
     } catch (_) { opBox.style.display = "none"; } // engine not landed yet — hide
   };
   syncOp();
+  // INC-7: the authored campaign shelf — six set-pieces, linear unlock
+  const authBox = document.getElementById("authRow");
+  (async () => {
+    if (!authBox) return;
+    try {
+      const A = await import("./campaign/authored.js");
+      const auth = A.loadAuth();
+      const cells = A.CAMPAIGN.map((c, i) => {
+        const done = !!auth.done[c.id];
+        const open = A.isUnlocked(auth, i);
+        const meta = done ? "✓" : open ? "▶" : "🔒";
+        const label = c.id + " " + meta;
+        return open && !done
+          ? `<button class="authcell live" data-id="${c.id}" data-front="${c.front}">${label}</button>`
+          : `<span class="authcell${done ? " done" : ""}">${label}</span>`;
+      }).join("");
+      authBox.innerHTML = `CAMPAIGN · ` + cells;
+      authBox.style.display = "block";
+      for (const b of authBox.querySelectorAll("button.authcell")) {
+        b.addEventListener("click", () => { location.href = "?front=" + b.dataset.front + "&sortie=" + b.dataset.id; });
+      }
+    } catch (_) { authBox.style.display = "none"; } // content not landed yet
+  })();
   for (const c of cards) c.addEventListener("click", () => { front = c.dataset.front; sync(); syncOp(); });
   for (const c of cards) c.addEventListener("dblclick", fly);
   for (const c of chips) c.addEventListener("click", () => { tod = c.dataset.tod; sync(); });
