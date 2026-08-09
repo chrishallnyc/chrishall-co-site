@@ -22,7 +22,7 @@ body { font-family: "SF Mono", ui-monospace, Menlo, monospace; color: var(--ink)
 body.dark { --paper: #101014; --ink: #e6e1d3; --mid: rgba(230,225,211,.62);
   --dim: rgba(230,225,211,.5); --line: rgba(230,225,211,.15); --veil: rgba(16,16,20,.72); }
 canvas#bath { position: fixed; inset: 0; width: 100%; height: 100%; display: block;
-  touch-action: none; cursor: crosshair; }
+  touch-action: none; cursor: crosshair; transition: opacity 1.15s ease; }
 
 .ui { transition: opacity .25s ease; }
 body.idle .ui { transition: opacity 1.1s ease; }
@@ -124,7 +124,11 @@ body.idle canvas#bath { cursor: none; }
   background: var(--veil); border: 1px solid var(--line); padding: 7px 16px;
   font-size: 10px; letter-spacing: .2em; }
 
+/* the drift: chrome breathes out, the water is the whole room */
+body.drift #dock button[data-act="drift"] { color: var(--ink); background: rgba(127,127,127,.14); }
+
 @media (prefers-reduced-motion: reduce) {
+  canvas#bath { transition: none !important; }
   .ui, #shelf a, #dock .well { transition: none !important; }
   #lift img { animation: none; opacity: 0; }
 }
@@ -167,6 +171,7 @@ body.idle canvas#bath { cursor: none; }
   </div>
   <span class="div"></span>
   <div class="acts meta">
+    <button data-act="drift" title="the water performs itself — scenes and motions, composed (A)" aria-pressed="false">drift</button>
     <button data-act="print" title="pull the print — saves a PNG (P)">print</button>
     <button data-act="rec"   title="record eight seconds">rec</button>
     <button data-act="sound" title="the sound of water" aria-pressed="false">sound</button>
@@ -758,6 +763,7 @@ function createWater(opts) {
      drag means. TOOL: stir | brush | water | comb | fan ─────── */
   let TOOL = opts.tool || 'brush';
   let brushInk = null;
+  const gestures = [];   // program-driven strokes riding the same physics
   const pointers = new Map();       // pointerId → {x,y,t,down,p}
   const strokes = [];               // pending segments this frame
   function toUV(e) {
@@ -802,6 +808,38 @@ function createWater(opts) {
   addEventListener('pointercancel', onUp, { passive: true });
   addEventListener('pointerleave', onUp, { passive: true });
 
+  function pathAt(pts, t) {
+    /* quadratic smoothing through midpoints — a calm, hand-like curve */
+    if (pts.length === 1) return pts[0];
+    const n = pts.length - 1;
+    const f = Math.min(Math.max(t, 0), 0.9999) * n;
+    const i = Math.floor(f), u = f - i;
+    const a = pts[i], b = pts[i + 1];
+    const pa = i > 0 ? pts[i - 1] : a, pb = i < n - 1 ? pts[i + 2] : b;
+    const c1 = [a[0] + (b[0] - pa[0]) / 6, a[1] + (b[1] - pa[1]) / 6];
+    const c2 = [b[0] - (pb[0] - a[0]) / 6, b[1] - (pb[1] - a[1]) / 6];
+    const w = 1 - u;
+    return [
+      w*w*w*a[0] + 3*w*w*u*c1[0] + 3*w*u*u*c2[0] + u*u*u*b[0],
+      w*w*w*a[1] + 3*w*w*u*c1[1] + 3*w*u*u*c2[1] + u*u*u*b[1],
+    ];
+  }
+  function advanceGestures(now) {
+    for (let i = gestures.length - 1; i >= 0; i--) {
+      const g = gestures[i];
+      const t = (now - g.t0) / g.dur;
+      const te = t < 0 ? 0 : t > 1 ? 1 : t * t * (3 - 2 * t);   // ease in-out
+      const pos = pathAt(g.pts, te);
+      if (g.last) {
+        strokes.push({ x0: g.last[0], y0: g.last[1], x1: pos[0], y1: pos[1],
+                       dt: Math.max(now - g.lastT, 8), down: true, pr: g.pr,
+                       tool: g.tool, ink: g.ink });
+      }
+      g.last = pos; g.lastT = now;
+      if (t >= 1) gestures.splice(i, 1);
+    }
+  }
+
   function applyStrokes() {
     if (strokes.length) activity();
     for (const s of strokes) {
@@ -817,26 +855,28 @@ function createWater(opts) {
       const px = -dy / nlen, py = dx / nlen;     // perpendicular (comb tines)
       for (let i = 1; i <= steps; i++) {
         const t = i / steps, x = s.x0 + dx * t, y = s.y0 + dy * t;
-        if (!s.down || TOOL === 'stir') {
+        const T2 = s.tool || TOOL;
+        if (!s.down || T2 === 'stir') {
           splatVel(x, y, fx * sc, fy * sc, 1.4);
           continue;
         }
-        if (TOOL === 'brush') {
+        if (T2 === 'brush') {
           splatVel(x, y, fx * sc, fy * sc, 2.0 * (0.5 + pr));
-          if (strokeInk && brushInk) {
+          const inkSel = s.ink || brushInk;
+          if ((strokeInk || s.ink) && inkSel) {
             const speed = Math.min(len * 30, 1);
-            splatDye(x, y, absorbOf(hex(INKS[brushInk] || INKS[inkKeys[0]]),
+            splatDye(x, y, absorbOf(hex(INKS[inkSel] || INKS[inkKeys[0]]),
               (0.05 + speed * 0.10) * (0.4 + 1.2 * pr) * 2.0 / steps), 0.9 * (0.5 + pr));
           }
-        } else if (TOOL === 'water') {
+        } else if (T2 === 'water') {
           splatVel(x, y, fx * sc * 0.7, fy * sc * 0.7, 1.8);
           splatDilute(x, y, 0.22 * (0.5 + pr), 1.4);
-        } else if (TOOL === 'comb') {
+        } else if (T2 === 'comb') {
           for (let k2 = -3; k2 <= 3; k2++) {
             const ox = px * k2 * 0.024, oy = py * k2 * 0.024;
             splatVel(x + ox, y + oy, fx * sc * 0.8, fy * sc * 0.8, 0.5);
           }
-        } else if (TOOL === 'fan') {
+        } else if (T2 === 'fan') {
           splatVel(x, y, fx * sc * 0.45, fy * sc * 0.45, 26);
         }
       }
@@ -1036,6 +1076,7 @@ function createWater(opts) {
       gl.beginQuery(timerExt.TIME_ELAPSED_EXT, q);
     }
     const t0 = performance.now();
+    advanceGestures(now);
     applyStrokes();
     choreo(now, dt);
     step(dt);
@@ -1054,7 +1095,7 @@ function createWater(opts) {
     /* sleep: no REAL activity in a while (autonomous stirs don't count —
        they'd keep the water awake forever). Render stops entirely; in calm
        mode one timer is left ticking so the page still lives, rarely. */
-    const still = now - Math.max(lastActivity, lastTouch) > C.SLEEP_AFTER * 1000;
+    const still = gestures.length === 0 && now - Math.max(lastActivity, lastTouch) > C.SLEEP_AFTER * 1000;
     if (still && CHOREO !== 'demo') {
       awake = false;
       if (CHOREO === 'calm' && !reduced) scheduleCalmLife();
@@ -1126,6 +1167,14 @@ function createWater(opts) {
     stir(fx, fy, x, y, r) { splatVel(x ?? 0.5, y ?? 0.5, fx, fy, r || 8); wake(); },
     setInks(v) { INKS = v; inkKeys = Object.keys(INKS); if (brushInk && !INKS[brushInk]) brushInk = inkKeys[0]; },
     setTool(t) { TOOL = t; },
+    /* a programmed hand: glide a tool along a smooth path over durMs —
+       identical physics to a human stroke */
+    gesture(pts, tool, durMs, inkKey, pressure) {
+      gestures.push({ pts, tool: tool || 'brush', dur: Math.max(durMs || 2000, 200),
+                      ink: inkKey || null, pr: pressure || 0.6,
+                      t0: performance.now(), last: null, lastT: performance.now() });
+      activity(); wake();
+    },
     setBrush(k) { brushInk = k; },
     setPaper(p1, p2, mixAmt) { PAPER = p1; PAPER2 = p2 || p1.slice(); PAPERMIX = mixAmt || 0; if (!awake && fiberTex) show(); },
     /* pull the print: re-render the display pass into a big offscreen
@@ -1207,14 +1256,17 @@ function createWater(opts) {
       brewGen++;
       const myGen = brewGen;
       let brewT = 0;
-      const one = () => {
+      const one = (j) => {
         const fade0 = C.DYE_DISSIPATION;
         /* compressed time needs compressed fade — the exact relationship
            the research sweep validated; without it everything piles to mud.
            Full pressure iterations and small steps: shortcuts here diffuse
            the veining into mush. The wandering stirs between events are
-           what stretch the ink into filaments — the sweep always had them. */
-        C.DYE_DISSIPATION = fade0 * 14;
+           what stretch the ink into filaments — the sweep always had them.
+           The FINAL two events are the pour's top layer — they run at TRUE
+           fade (fresh ink, physically right) so every seed arrives with
+           real material, not only the lucky ones. */
+        C.DYE_DISSIPATION = j >= n - 2 ? fade0 : fade0 * 14;
         const pt = spawnPt();
         const ink = pickInk();
         if (rnd() < C.RING_BIAS) {
@@ -1254,12 +1306,12 @@ function createWater(opts) {
         for (let i = 0; i < 8; i++) step(1 / 60);    // barely breathed on
         if (fiberTex) show();
       };
-      if (sync || reduced) { for (let k = 0; k < n; k++) one(); settle(); return; }
+      if (sync || reduced) { for (let k = 0; k < n; k++) one(k); settle(); return; }
       let k = 0;
       const chunk = () => {
         if (dead || myGen !== brewGen) return;   // a newer brew owns the bath
         if (k >= n) { settle(); return; }
-        one(); k += 1;
+        one(k); k += 1;
         requestAnimationFrame(chunk);
       };
       requestAnimationFrame(chunk);
@@ -1294,6 +1346,7 @@ function createWater(opts) {
       evTarget.removeEventListener('pointerdown', onDown);
       removeEventListener('pointerup', onUp);
       removeEventListener('pointercancel', onUp);
+      removeEventListener('pointerleave', onUp);
       removeEventListener('resize', resize);
       document.removeEventListener('visibilitychange', onVis);
       canvas.removeEventListener('webglcontextlost', onLost);
@@ -1528,7 +1581,8 @@ if (typeof module !== 'undefined') module.exports = { createWater };
       cv = old.cloneNode(false);          // fresh canvas, fresh context
       old.replaceWith(cv);
       armRecovery();
-      setTimeout(() => { boot(); }, 300);
+      const mine = cv;   // a scene change may replace the canvas before we fire
+      setTimeout(() => { if (cv === mine && !water) boot(); }, 300);
     }, { once: true });
   }
   armRecovery();
@@ -1549,6 +1603,12 @@ if (typeof module !== 'undefined') module.exports = { createWater };
     water.config.ZONES = plan.zones;
     if (t.radius) water.config.SPLAT_RADIUS = t.radius;
     if (t.grain != null) water.config.FIBER = t.grain;
+    /* the drift wants a stiller bath: marks sit and stay legible for beats,
+       blacks survive to the dissolve — the scene ends developed, not washed */
+    if (typeof drifting !== "undefined" && drifting) {
+      water.config.DYE_DISSIPATION = +(water.config.DYE_DISSIPATION * 0.45).toFixed(5);
+      water.config.STIR_GAIN *= 0.55;
+    }
     water.setInks(inksObj());
     water.wake();
   }
@@ -1570,14 +1630,19 @@ if (typeof module !== 'undefined') module.exports = { createWater };
     document.body.style.background = sc.paper;
     document.querySelector('meta[name="theme-color"]').setAttribute("content", sc.paper);
     kill();
-    /* a force-lost context haunts its canvas — every boot gets a fresh one */
+    if (typeof fadeT !== "undefined") clearTimeout(fadeT);
+    /* a force-lost context haunts its canvas — every boot gets a fresh one.
+       cloneNode copies inline style: opacity is decided HERE, not inherited,
+       or an interrupted dissolve would boot every later scene blank */
     const fresh = cv.cloneNode(false);
+    fresh.style.opacity = (opts && opts.fade) ? "0" : "";
     cv.replaceWith(fresh);
     cv = fresh;
     armRecovery();
     boot();
     renderWells(); renderScenes(); renderSliders(); renderTitle();
     writeHash();
+    if (typeof drifting !== "undefined" && drifting) driftDwell();
   }
   function pourAnew() {
     setScene(sceneIdx, null);
@@ -1864,6 +1929,170 @@ if (typeof module !== 'undefined') module.exports = { createWater };
     if (ac) { if (soundOn) ac.resume(); else ac.suspend(); }
   }
 
+  /* ── THE DRIFT: the water performs itself ─────────────────────
+     A conductor composes the validated gestures — ring blooms, slow
+     comb rakes, fan sweeps, rain, brush script — into paced movements,
+     dwells in each water for a minute, then dissolves to the next.
+     Touch the water and the drift ends: the brush is yours. ────── */
+  const DRIFT_SCORES = {
+    sumi:      { beat: [8000, 14000], moves: [["bloom", 3], ["script", 2], ["rake", 0.7], ["sweep", 0.5]] },
+    night:     { beat: [8500, 14000], moves: [["bloom", 3], ["script", 1.2], ["sweep", 0.6], ["rake", 0.5]] },
+    vermilion: { beat: [7000, 12000], moves: [["bloom", 4], ["script", 1.5], ["rake", 0.5], ["rain", 0.5]] },
+    seaglass:  { beat: [6500, 11000], moves: [["bloom", 2], ["rake", 1.4], ["sweep", 1], ["rain", 1]] },
+    storm:     { beat: [5000, 9000],  moves: [["rake", 2.5], ["rain", 2.5], ["sweep", 1.5], ["bloom", 1]] },
+    spring:    { beat: [6000, 10000], moves: [["rain", 3], ["bloom", 2], ["rake", 0.7], ["script", 1]] },
+    gold:      { beat: [8000, 14000], moves: [["bloom", 3], ["script", 2], ["rake", 0.7], ["sweep", 0.4]] },
+  };
+  let drifting = false, driftT = 0, dwellT = 0, fadeT = 0, driftBag = [], beatCount = 0;
+  const DR = { dwell: [46000, 76000], beat: null };   // QA can shrink time itself
+
+  const cl = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
+  function dealInk() {         // weighted well pick — the scene's own voice
+    const w = SCENES[sceneIdx].w || palette.map(() => 1);
+    let s = 0; for (const x of w) s += x;
+    let v = Math.random() * s;
+    for (let i = 0; i < palette.length; i++) { v -= (w[i] || 0.2); if (v <= 0) return "w" + i; }
+    return "w0";
+  }
+  function zonePt() {          // land inside the pour's own composition
+    const zs = plan && plan.zones;
+    if (!zs || !zs.length) return [0.2 + Math.random() * 0.6, 0.25 + Math.random() * 0.5];
+    const z = zs[Math.floor(Math.random() * zs.length)];
+    const g = () => Math.random() + Math.random() - 1;   // triangular ≈ soft gaussian
+    return [cl(z.x + g() * z.rx * 1.4, 0.07, 0.93), cl(z.y + g() * z.ry * 1.4, 0.09, 0.91)];
+  }
+  const MOVES = {
+    bloom() {                  // rings bloom where the pour lives
+      const [x, y] = zonePt();
+      water.ring(x, y, dealInk());
+      if (Math.random() < 0.22) setTimeout(() => { if (drifting && water) {
+        water.drop(cl(x + 0.1 + Math.random() * 0.08, 0.07, 0.93),
+                   cl(y + (Math.random() - 0.5) * 0.16, 0.09, 0.91),
+                   dealInk(), 0.35 + Math.random() * 0.25);
+      } }, 700 + Math.random() * 700);
+    },
+    rake() {                   // a comb pass at a hand's pace — a partial band,
+      const y0 = 0.18 + Math.random() * 0.62;      // chevrons, not a conveyor
+      const amp = 0.03 + Math.random() * 0.08;
+      const span = 0.4 + Math.random() * 0.25;
+      const x0 = 0.06 + Math.random() * (0.88 - span);
+      const ph = Math.random() * 6.28, flip = Math.random() < 0.5;
+      let xs = [0, 0.33, 0.66, 1].map(t => x0 + t * span);
+      if (flip) xs = xs.slice().reverse();
+      const pts = xs.map((x, i) => [x, cl(y0 + Math.sin(i * 1.7 + ph) * amp, 0.08, 0.92)]);
+      water.gesture(pts, "comb", 1100 + Math.random() * 700, null, 0.4 + Math.random() * 0.2);
+    },
+    sweep() {                  // a fan breath along part of one side
+      const side = Math.floor(Math.random() * 4), b = 0.12 + Math.random() * 0.1;
+      const a0 = 0.15 + Math.random() * 0.35, span = 0.35 + Math.random() * 0.2;
+      const arc = t => a0 + span * t;
+      const bow = t => b + Math.sin(t * Math.PI) * (0.08 + Math.random() * 0.05);
+      const pts = [];
+      for (let i = 0; i <= 4; i++) { const t = i / 4;
+        if (side === 0) pts.push([arc(t), bow(t)]);
+        else if (side === 1) pts.push([arc(t), 1 - bow(t)]);
+        else if (side === 2) pts.push([bow(t), arc(t)]);
+        else pts.push([1 - bow(t), arc(t)]);
+      }
+      water.gesture(pts, "fan", 1400 + Math.random() * 900, null, 0.4 + Math.random() * 0.2);
+    },
+    rain() {                   // scattered small drops
+      const n = 4 + Math.floor(Math.random() * 5);
+      for (let i = 0; i < n; i++) setTimeout(() => { if (drifting && water) {
+        const p = zonePt(); water.drop(p[0], p[1], dealInk(), 0.4 + Math.random() * 0.45);
+      } }, i * (240 + Math.random() * 220));
+    },
+    script() {                 // a brush line, ink laid along a curve
+      const [x, y] = zonePt();
+      const a0 = Math.random() * 6.28, span = 0.16 + Math.random() * 0.2;
+      const bend = (Math.random() - 0.5) * 0.24;
+      const pts = [];
+      for (let i = 0; i <= 3; i++) { const t = i / 3;
+        pts.push([cl(x + Math.cos(a0) * span * (t - 0.5) * 2 - Math.sin(a0) * bend * Math.sin(t * Math.PI), 0.07, 0.93),
+                  cl(y + Math.sin(a0) * span * (t - 0.5) * 2 + Math.cos(a0) * bend * Math.sin(t * Math.PI), 0.09, 0.91)]);
+      }
+      water.gesture(pts, "brush", 1700 + Math.random() * 1200, dealInk(), 0.5 + Math.random() * 0.3);
+    },
+  };
+  function driftBeat() {
+    if (!drifting) return;
+    if (!document.hidden && water) {
+      const score = DRIFT_SCORES[SCENES[sceneIdx].id] || DRIFT_SCORES.sumi;
+      let tw = 0; for (const m of score.moves) tw += m[1];
+      let v = Math.random() * tw, name = score.moves[0][0];
+      for (const m of score.moves) { v -= m[1]; if (v <= 0) { name = m[0]; break; } }
+      MOVES[name]();
+      beatCount++;
+    }
+    const [lo, hi] = DR.beat || (DRIFT_SCORES[SCENES[sceneIdx].id] || DRIFT_SCORES.sumi).beat;
+    clearTimeout(driftT);
+    driftT = setTimeout(driftBeat, lo + Math.random() * (hi - lo));
+  }
+  function driftDwell() {
+    clearTimeout(dwellT);
+    const [lo, hi] = DR.dwell;
+    dwellT = setTimeout(driftNextScene, lo + Math.random() * (hi - lo));
+  }
+  function driftNextScene() {
+    if (!drifting) return;
+    if (!driftBag.length) {    // a shuffle bag: every water, no repeats
+      driftBag = SCENES.map((_, i) => i).filter(i => i !== sceneIdx);
+      for (let i = driftBag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));
+        const tmp = driftBag[i]; driftBag[i] = driftBag[j]; driftBag[j] = tmp; }
+    }
+    if (document.hidden) { driftDwell(); return; }   // no unseen teardowns —
+    const next = driftBag.shift();                    // the tab waits to be watched
+    clearTimeout(driftT); clearTimeout(dwellT); clearTimeout(fadeT);
+    /* a light room and a dark room need a slow door — a 1.2s cream-to-black
+       cut is a flash on a wall; luminance crossings dissolve over ~3s */
+    const slow = !!SCENES[next].dark !== !!SCENES[sceneIdx].dark;
+    cv.style.transitionDuration = slow ? "2.9s" : "";
+    cv.style.opacity = "0";    // dissolve; the next pour arrives brewing
+    fadeT = setTimeout(() => {
+      if (!drifting) { cv.style.opacity = ""; cv.style.transitionDuration = ""; return; }
+      setScene(next, null, { fade: true });
+      if (!water) { endDrift(); return; }             // a dead bath ends the show
+      cv.style.transitionDuration = slow ? "2.9s" : "";
+      requestAnimationFrame(() => requestAnimationFrame(() => { cv.style.opacity = ""; }));
+      toast("the drift arrives at \u2039" + SCENES[sceneIdx].name + "\u203a");
+      driftDwell();
+      driftT = setTimeout(driftBeat, 2400 + Math.random() * 1800);
+    }, slow ? 3000 : 1250);
+  }
+  function startDrift(quiet) {
+    if (drifting || !water) return;
+    if (reduced) { toast("the drift needs motion \u2014 your system prefers stillness"); return; }
+    drifting = true;
+    document.body.classList.add("drift");
+    const b = document.querySelector('[data-act="drift"]');
+    if (b) b.setAttribute("aria-pressed", "true");
+    driftBag = [];
+    applyTune();               // the stiller drift water takes effect now
+    driftDwell();
+    clearTimeout(driftT);
+    driftT = setTimeout(driftBeat, 900);
+    if (!quiet) toast("the water drifts \u2014 touch it to take the brush");
+    unIdle();
+  }
+  function endDrift(msg) {
+    if (!drifting) return;
+    drifting = false;
+    clearTimeout(driftT); clearTimeout(dwellT); clearTimeout(fadeT);
+    document.body.classList.remove("drift");
+    cv.style.opacity = ""; cv.style.transitionDuration = "";
+    if (water) applyTune();    // the bath returns to its poured character
+    const b = document.querySelector('[data-act="drift"]');
+    if (b) b.setAttribute("aria-pressed", "false");
+    if (msg) toast(msg);
+    unIdle();
+  }
+  /* touch the water — the drift ends, the brush is yours */
+  addEventListener("pointerdown", e => {
+    if (drifting && e.target === cv) endDrift("the water is yours");
+  }, true);
+  window.__DRIFT = { get on() { return drifting; }, get beats() { return beatCount; },
+                     start: startDrift, end: endDrift, next: driftNextScene, DR };
+
   /* ── chrome: toast, idle fade, fullscreen, share ──────────── */
   let toastT = 0;
   function toast(msg) {
@@ -1876,7 +2105,7 @@ if (typeof module !== 'undefined') module.exports = { createWater };
   function unIdle() {
     document.body.classList.remove("idle");
     clearTimeout(idleT);
-    idleT = setTimeout(() => document.body.classList.add("idle"), 4500);
+    idleT = setTimeout(() => document.body.classList.add("idle"), drifting ? 2400 : 4500);
   }
   ["pointermove", "pointerdown", "keydown", "touchstart"].forEach(ev =>
     addEventListener(ev, unIdle, { passive: true }));
@@ -1898,6 +2127,7 @@ if (typeof module !== 'undefined') module.exports = { createWater };
     if (act === "print") pullPrint();
     if (act === "rec") record(b);
     if (act === "sound") toggleSound(b);
+    if (act === "drift") { if (drifting) endDrift("the drift ends"); else startDrift(); }
     if (act === "bench") $("bench").classList.toggle("open");
     if (act === "full") goFull();
   });
@@ -1930,6 +2160,7 @@ if (typeof module !== 'undefined') module.exports = { createWater };
     else if (k === "g") $("bench").classList.toggle("open");
     else if (k === "s") share();
     else if (k === "n") pourAnew();
+    else if (k === "a") { if (drifting) endDrift("the drift ends"); else startDrift(); }
     else if (k === "f") goFull();
   });
 
@@ -1939,6 +2170,7 @@ if (typeof module !== 'undefined') module.exports = { createWater };
   setScene(h.scene != null && h.scene >= 0 && h.scene < SCENES.length ? h.scene : 0,
            h.seed || null, (h.pal || h.tune) ? { pal: h.pal, tune: h.tune } : null);
   unIdle();
+  if (/[?&]drift(=|&|$)/.test(location.search) && !reduced) setTimeout(() => startDrift(true), 1400);
 })();
 </script>
 </body>
