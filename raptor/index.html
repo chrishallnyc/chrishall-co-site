@@ -105,6 +105,24 @@ body { color:var(--ink); font-family:"SF Mono", ui-monospace, Menlo, Consolas, m
   letter-spacing:1.5px; padding:2px 7px; white-space:nowrap; }
 #controls .chip.live { color:var(--acc); border-color:var(--acc); }
 #controls .chip.warn { color:#d08770; border-color:#d08770; }
+/* settings section (phase 15) — same visual language, .srow so the bind
+   capture machinery never sees these rows */
+#controls .srow { display:flex; justify-content:space-between; align-items:center; gap:12px;
+  padding:5px 6px; }
+#controls .srow:hover { background:rgba(232,180,111,.04); }
+#controls .schips { display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; align-items:center; }
+#controls button.chip { background:none; font:inherit; cursor:pointer; }
+#controls .chip.sel { color:var(--acc); border-color:var(--acc); }
+#controls .srange { -webkit-appearance:none; appearance:none; width:150px; height:2px;
+  background:var(--hair); outline:none; cursor:pointer; }
+#controls .srange::-webkit-slider-thumb { -webkit-appearance:none; appearance:none;
+  width:9px; height:15px; background:var(--acc); border:none; cursor:pointer; }
+#controls .srange::-moz-range-thumb { width:9px; height:15px; background:var(--acc);
+  border:none; border-radius:0; cursor:pointer; }
+#controls .sval { min-width:70px; text-align:right; color:var(--mid); font-size:10px; letter-spacing:1px; }
+#controls .sreset { background:none; border:1px solid var(--hair); color:var(--mid);
+  font:inherit; font-size:10px; letter-spacing:1.5px; padding:4px 10px; cursor:pointer; }
+#controls .sreset:hover { color:var(--ink); border-color:var(--mid); }
 </style>
 </head>
 <body>
@@ -112,7 +130,7 @@ body { color:var(--ink); font-family:"SF Mono", ui-monospace, Menlo, Consolas, m
 
 <div id="chrome">
   <div class="brand">RAPTOR</div>
-  <div class="sub">EYES THAT ADAPT · <a href="#" id="controlsLink">controls</a> · <a href="/progress.html">progress</a> · <a href="/devlog.html">devlog</a> · v0.31.0<br>
+  <div class="sub">EYES THAT ADAPT · <a href="#" id="controlsLink">controls</a> · <a href="/progress.html">progress</a> · <a href="/devlog.html">devlog</a> · v0.32.0<br>
   terrain: USGS 3DEP + NAIP · <a href="https://s2maps.eu" rel="noopener">Sentinel-2 cloudless by EOX</a></div>
 </div>
 

@@ -10,6 +10,7 @@ import { DebugOverlay } from "./engine/debug.js";
 import { TestWorld } from "./game/testworld.js";
 import { Player } from "./game/player.js";
 import { ControlsMenu } from "./game/controlsmenu.js";
+import * as SETTINGS from "./game/settings.js";
 import { Atmosphere } from "./world/daycycle.js";
 import { Terrain } from "./world/terrain.js";
 import { Water } from "./world/water.js";
@@ -17,7 +18,7 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.31.0";
+const VERSION = "0.32.0";
 const PHASE = 12;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
@@ -424,7 +425,7 @@ async function boot() {
           if (_bv.z > 1) continue; // behind the camera plane
           const sx = (_bv.x * 0.5 + 0.5) * w, sy = (-_bv.y * 0.5 + 0.5) * h;
           if (sx < -30 || sx > w + 30 || sy < -30 || sy > h + 30) continue;
-          const col = bandits.side[i] === 1 ? "#7fb4e8" : "#ff8a5c";
+          const col = bandits.side[i] === 1 ? SETTINGS.getPalette().friendly : SETTINGS.getPalette().enemy;
           ctx.strokeStyle = col;
           ctx.beginPath();
           ctx.moveTo(sx, sy - 12); ctx.lineTo(sx + 12, sy); ctx.lineTo(sx, sy + 12); ctx.lineTo(sx - 12, sy);
@@ -440,6 +441,7 @@ async function boot() {
       // taking fire: red vignette pulse
       if (player.hitFlash > 0) {
         player.hitFlash = Math.max(0, player.hitFlash - 1 / 60);
+        if (!SETTINGS.current().motionReduce) {
         ctx.save();
         const a = Math.min(player.hitFlash * 0.9, 0.4);
         const grad = ctx.createRadialGradient(w / 2, h / 2, h * 0.42, w / 2, h / 2, h * 0.75);
@@ -448,6 +450,7 @@ async function boot() {
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, w, h);
         ctx.restore();
+        }
       }
     };
 
@@ -491,7 +494,7 @@ async function boot() {
           ctx.lineWidth = 4; ctx.strokeStyle = "rgba(0,0,0,0.9)";
           ctx.strokeText("RETURN TO THE BATTLE", w / 2, h * 0.24);
           ctx.globalAlpha = pulse2;
-          ctx.fillStyle = "#ff5a3c";
+          ctx.fillStyle = SETTINGS.getPalette().warn;
           ctx.fillText("RETURN TO THE BATTLE", w / 2, h * 0.24);
           ctx.globalAlpha = 1;
         }
@@ -541,12 +544,13 @@ async function boot() {
           const text = missionData.lines[c.lineId];
           if (!text) continue;
           ctx.globalAlpha = Math.min(1, Math.max(0, (9 - age) / 2));
-          ctx.font = "11px ui-monospace, Menlo, monospace";
+          const subS = SETTINGS.subtitleScale();
+          ctx.font = Math.round(11 * subS) + "px ui-monospace, Menlo, monospace";
           ctx.strokeText("» " + text, cx, cy);
           ctx.fillStyle = "#cfe8cf";
           ctx.fillText("» " + text, cx, cy);
           ctx.globalAlpha = 1;
-          cy -= 16;
+          cy -= Math.round(16 * subS);
         }
         ctx.textAlign = "center";
       }
@@ -560,7 +564,7 @@ async function boot() {
         ctx.strokeStyle = "rgba(0,0,0,0.9)";
         ctx.strokeText("MISSILE", w / 2, h * 0.3);
         ctx.globalAlpha = pulse;
-        ctx.fillStyle = "#ff5a3c";
+        ctx.fillStyle = SETTINGS.getPalette().warn;
         ctx.fillText("MISSILE", w / 2, h * 0.3);
       }
       ctx.restore();
@@ -576,6 +580,8 @@ async function boot() {
       audio = new AudioBus(); // builds engine/gun/lock voices itself
     } catch (err) { console.warn("audio unavailable:", err && err.message); }
   }
+  // PHASE 15: settings go live (fov/renderScale/volumes/muzzle-flash gate)
+  SETTINGS.bindLive({ renderer, camera, audio, gunFlash: player ? player.gun.flash : null, baseTier: state.tier, hudLive: true });
   // MAXFI A1: TRAA + bloom + flare post chain (WebGPU only; ?post=0 keeps
   // the plain pipe for QA baselines and numeric oracles)
   let post = null;
@@ -705,7 +711,7 @@ async function boot() {
         state.bench = rec;
         if (tier !== state.tier) {
           state.tier = tier;
-          renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2) * tierParams(tier).renderScale);
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2) * SETTINGS.effectiveRenderScale(SETTINGS.current(), tier));
         }
         benchSamples = null;
       }
