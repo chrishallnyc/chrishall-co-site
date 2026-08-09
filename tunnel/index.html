@@ -14,7 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#f6f4ee">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f6f4ee'/%3E%3Cpath d='M1.5 19.4 L30.5 16.4' stroke='%23989690' stroke-width='1'/%3E%3Cpath d='M3.5 19 C6.5 12.6 13.5 10.6 19.5 12 C24.5 13.2 28 15.4 29 16.6 C26 18.2 18.5 20.6 11.5 20.9 C7.5 21 4.5 20.3 3.5 19 Z' fill='%2318181c'/%3E%3Ccircle cx='4.2' cy='19' r='2.4' fill='%23e8b46f'/%3E%3C/svg%3E">
-<!-- CHALL TUNNEL v0.12.0 · phase 12 — THE MACH PANEL (R4 "supersonic, on paper"): DRAWN MATH, never the live solver (the solver is incompressible and METHODS says so — this panel is the one place aircraft Mach numbers appear; the tunnel never prints one). A `mach →` door on each aircraft's hangar sheet (data-driven from MACHTAB — a new plane lands by adding a row of machFeatures frozen from DATA-v1): the silhouette on paper with a Mach scrub, 0 → the per-plane cap on a fixed 0–2.5 rail (the rail greys past the cap — F-16 2.05 clean; A-10 0.75 with the placard-redline copy, its supersonic pen unreachable by construction). Subsonic prints NOTHING (honest); transonic 0.7–1.2 is THE HONEST GAP — a hatched band and one line, nothing pretends; supersonic is the drawn structure: detached bow shock at the Billig 1967 standoff (Δ/R = 0.143·exp(3.24/M²) sphere / 0.386·exp(4.67/M²) cylinder — the VERIFIED forms, DATA-v1 §V2, doi:10.2514/3.28969) ahead of the nose-class radius, attached obliques ONLY where deflection < θ_max(M) solved on the θ-β-M weak branch, Prandtl-Meyer fans at convex corners (lead μ(M1) → tail μ(M2)−θ, M2 from the inverted ν), the Mach cone μ = asin(1/M). Every printed angle is the closed-form solve at two decimals; corner deflections + nose radius are EST and badged on-panel; construction ink is the drawing office's blue (cited math — the RISO second ink); measured voice stays out entirely. Ackeret prints for THIN wing sections only (F-16 64A204 t 4% — dc_l/dα = 4/√(M²−1), EST badged); the A-10's 6716 refuses with `too thick for thin-airfoil theory — ackeret declined`. While the panel is open the solve HOLDS (paper over the instrument — MACH-NO-SOLVER asserts stats frozen); the chrome line is VERBATIM LAW: `drawn from θ-β-M + Billig 1967 · not the live solver · transonic 0.7–1.2 left honest`. · on phase 11 — VOLUME (R4 · docs/limit99/VOLUME.md): real 3D airflow for scanned objects and reference solids. WGSL D3Q19 BGK+Smagorinsky at FP16S SHIFTED storage, IN-PLACE single-buffer streaming (the 2D AA/esoteric-pull pattern generalized to 19 directions), halfway bounce-back STATIC masks, equilibrium inflow ramp + deterministic +y kick, ρ-ANCHORED zero-gradient outflow, quadratic-τ sponge (3D law max(16, 0.10·W)), free-slip on all four lateral faces (FLIPY/FLIPZ specular composition) — CONSTANTS3D mirrors qa/oracle3d.mjs EXACTLY (the shared-constants law; VOL-CONST byte-compares, VOL-DIFF-3D holds L∞(u) < 1e-3 vs the oracle at 200 lockstep steps, VOL-ST-GPU re-runs the ratified 192×96×96 D=24 sphere fixture on this page's own solver). THE ARTICLE: a `volume →` door on USER-MOUNTED articles ONLY (scanned meshes voxelized from the SAME parsed triangles the drop already read — surface rasterize + interior flood fill + the ≥3-cell dilation law; reference solids from the CLOSED VOLTAB — revolve/extrude of the drawn-clean row; aircraft NEVER mount in 3D: no honest 3D models exist, and the door is absent for them by construction). V1 = 256×128×128 × ss10 @ 60, probe-gated: a measured 96³ τ-probe must clear 2.6 GLUPS or the door prints the honest refusal card and nothing else; yaw/α is DETENTED (0/±15/±30) — each detent an async re-voxelize + fresh-cell refill behind the crane line, never a live morph. The ink is ORTHOGRAPHIC 3D-TRACER ink (ray-march refused twice): 2,097,152 tracers advected in the live field (RK2, trilinear), deposited into the same device-pixel deposit pipeline, depth as engraver's line weight (far span ×0.35 alpha, half duty), governor sheds tracers first. THE HONESTY FIREWALL: the chrome prints `VOLUME · QUALITATIVE · chord 44 cells · no numbers leave this view` — the badge is the only number the volume ever emits; no detector captions, no counts lineups, no gap lines, and no plates from the 3D field in v1 (the plate door prints the honest refusal). QA flags (query = QA space): ?qa=vol3d (the pinned 64×32×32 diff geometry) · ?qa=volst (the sphere St fixture) · ?volrefuse=1 (forced refusal) · ?volglups= (forced probe verdict; the real measurement still runs and is recorded). · on phase 10 — R3 FINER AIR + THE LONG EXPOSURE: the mid-rungs land as table data — probe order H1 → W1 1536×768×58 → W2 1280×640×48 → W3 1024×512×38, accept first pass, τ-gated at the LIMIT-2D 9 ms mid-rung pick law (W1 ≤9/58, W2 ≤9/48, W3 ≤9/38 ms/substep; the governor demotes through the table at boot, timing-only, never sniffing; H1's pick line and R₀ formula are byte-unchanged; STILLS stays the floor; MEDIAN-FREEZE asserted by frozen-region sha in qa/r3-live.mjs). THE LONG EXPOSURE (AM-14 / INSTRUMENT-LOCK §1.3): a door on the plate panel — `long exposure →` — runs the CURRENT specimen at 8192×4096 = 33,554,432 TRUE cells as a deliberate offline-in-browser exposure: its own device at raised limits (the live rungs keep default limits), the 2D-dispatch law for >16.7M cells (65,535-workgroup cap — the three NC-wide kernels re-index onto a 2D grid, default OFF, live rungs byte-identical), chunked 256-substep batches with the moment field integrated every chunk (the accumulation IS the negative), one full crossing at full wind, progress printed `exposing . 33,554,432 cells . N% . ~M min left`, cancellable, the wind holds while it runs; then the portrait develops at export class 6400×4000 — the badge prints cells · grid · the MEASURED crossing minutes, row two carries the honesty microline VERBATIM + `computed in this browser · not real-time`; a device that refuses (limits check or the out-of-memory error scope) gets the honest refusal printed at the door and nothing else prints, ever. QA flags (query = QA space, never product): ?rung=h1|w1|w2|w3 · ?qatau= (forced-τ pick, RUNG-LADDER lane) · ?lxgrid= · ?lxrefuse=1 · ?qa=st gains &stbatch= / &stlx=1 (the replay re-bake law: the frozen St fixture re-runs through every touched rung, ±2% of the 0.2139 baseline). · on phase 9 — THE MODEL SHOP, PHASE 2 (the pencil, the reference row, and the lawful counts): THE REFERENCE ROW R-001…R-008 joins the hangar wall as row citizens (drawn clean, one verbatim lesson each; `test →` mounts keeping air; the cylinder and flat plate keep their analytic in-tunnel masks — REF-CAL and LAYOUT laws unchanged); THE PENCIL — the drafting table, literal: wind-off, the outline lies flat with control points, the verb set CLOSED at {move, add, delete, smooth} (PENCIL-CAP is structural — the frozen tuple IS the tool), ≤50 undo session-scoped, `revert to trace` always present, blank-paper `draw →` door (a seeded 12-point blob, same four verbs); the original row is IMMUTABLE — edits bake through the spooled swap to a MOD accession (U-NNN/A · mod of U-NNN · the pencil; reference edits fork to fresh U-NNN), A/B = the existing held-air [ ] swap cycling the specimen family; THE COUNTS under the COMPARISON LAW (DECISIONS R2.5): `measure against the row →` re-measures up to three reference bodies LIVE this session at EQUAL FRONTAL HEIGHT and identical settings (one rake column, staircase settle, wake-rake momentum deficit), prints ONLY dimensionless ratios at one decimal under the verbatim chrome line — operands never print anywhere, seed spread demotes the print to ≈, a body too long for the wake at equal height gets the refusal card (never a silent rescale), and THE AIRCRAFT NEVER JOIN THE LINEUP (the picker is built from the reference row and nothing else — absent by construction). · on phase 8 — THE MODEL SHOP OPENS (phase 1, "the drop"): scan-anything enters the live page — drag a file (or the hangar's `load an object →` door), the mesh is read in a Worker and thrown away (magic bytes, typed refusals, never a throw), three ink sections print (silhouette / center slice / ground — never the mesh), the pencil traces the pick stroke-by-stroke, U-NNN accessions to THE SHELF (IndexedDB, cap 24, serials append-only, strikes leave tombstones), MODEL CHANGE spool → your wake in the same air as the sixteen; ground mode = free-slip floor at the wheel line, state printed on the specimen line; share = outline in the URL FRAGMENT only (#u=, ≤2000 chars, 12-bit deflate; the share-moment line prints beside the copied link); receiving #u= = rename-before-keep; METHODS gains the shop privacy paragraph verbatim. Comparison counts do NOT ship this phase — no drag numbers print. · on phase 7 — THE RECORD SURFACES: wind-off portraits (LAW 6b: power→0 seals the page, the trace develops ~3.5 s, done-beat) + PLATE exports (3200×2000 offscreen re-render, honesty microline verbatim, serial accession, filename law) + THE STILLS DIGNITY TIER (no-webgpu / prefers-reduced-motion / ?force=stills → one composed static state: paper + TEST 001 + a time-averaged impression from this instrument's own cpu oracle) + storage-throw boot + device-loss relight · on phase 6 (RISO lock + METHODS + hangar wall) + phase 5 (A-10 + THE PAIR) + phase 4 (pressure view) -->
+<!-- CHALL TUNNEL v1.0.0 · phase 13 — THE WING FILLS (the last feature commit — the train's feature set is complete): four aircraft enter and the hangar holds 6 aircraft + 8 reference bodies + your shelf. F-104 STARFIGHTER (TEST 013 · RETIRED LEGEND · the tiny-wing extreme — what mach 2 cost in 1958): biconvex 3.36% WING via the ~10-line circular-arc generator mode (DOCUMENTED-parametric, the named plan amendment; the near-plate rendering is HONEST here — the one jet whose wing nearly IS a plate in the sky), MACH panel gains the NEEDLE nose class — the roster's first ATTACHED oblique shocks (θ-β-M at the cone half-angle EST; below attach-M the ledger says the shock stands off — no attached line may draw) + the textbook Ackeret section. F-117A NIGHTHAWK (TEST 014 · RETIRED LEGEND · shape-versus-air — statically unstable in pitch AND yaw, exactly two axes): the FACET-PRESERVATION law rides the master (no polyline smoothing exists in this pipeline — corners are identity; F117-FACETS counts them through the mask pipeline), WING = the actual wedge polygon (SECTION EST · faceted flat panels), the inverted-Reynolds comparator verbatim (the one jet this tunnel gets almost right), MACH greyed at 0.92 ◆ — the grey IS the lesson. C-130J SUPER HERCULES (TEST 015 · slipstream — the propeller's river): the tunnel has no propeller and SAYS so — the slipstream lives in spec voice only (the dossier caption + the takeoff-power comparator), prop disc = W4 dashed ghost in the DRAWING only, never in the mask (the disc law); E/H→J caveat printed on the specimen line; transport-class α limits ±20°; WING = 64A318 root as the EST 4-digit stand-in (the third honest thick-wing stall). V-22 OSPREY (TEST 016 · dual-mode · where wings end): a REAL airplane-mode article above the conversion floor + THE TEST DECLINED card below it (power < 40 — the corridor's own lower number on the tunnel's only speed dial; kicker + ratified card copy + corridor fine print + exactly one door, composed at the specimen anchor per the refusal grammar) — the honesty architecture extended from badging estimates to REFUSING a measurement; span basis nacelle-to-nacelle 14.0 m, NEVER rotors-turning 25.8 m (printed on the specimen line); NO wing article (Bell section proprietary) — the wing chip reads dim `wing · —` and opens the card in one gesture; disc edge = hairline dashed ink in the drawing, never in the solver mask (a spinning disc is mostly air). THE VALIDATION APPENDIX joins METHODS: V1–V6 — the zero (cylinder St), the 3D zero (sphere pair), implementation parity (lockstep diffs), thermal honesty (SOAK-20), the slow record (LONG EXPOSURE L1), the pedagogy gate (THE PAIR window) — every number measured on named hardware or cited, each row ending with what it does NOT prove, standing gaps named. · on phase 12 — THE MACH PANEL (R4 "supersonic, on paper"): DRAWN MATH, never the live solver (the solver is incompressible and METHODS says so — this panel is the one place aircraft Mach numbers appear; the tunnel never prints one). A `mach →` door on each aircraft's hangar sheet (data-driven from MACHTAB — a new plane lands by adding a row of machFeatures frozen from DATA-v1): the silhouette on paper with a Mach scrub, 0 → the per-plane cap on a fixed 0–2.5 rail (the rail greys past the cap — F-16 2.05 clean; A-10 0.75 with the placard-redline copy, its supersonic pen unreachable by construction). Subsonic prints NOTHING (honest); transonic 0.7–1.2 is THE HONEST GAP — a hatched band and one line, nothing pretends; supersonic is the drawn structure: detached bow shock at the Billig 1967 standoff (Δ/R = 0.143·exp(3.24/M²) sphere / 0.386·exp(4.67/M²) cylinder — the VERIFIED forms, DATA-v1 §V2, doi:10.2514/3.28969) ahead of the nose-class radius, attached obliques ONLY where deflection < θ_max(M) solved on the θ-β-M weak branch, Prandtl-Meyer fans at convex corners (lead μ(M1) → tail μ(M2)−θ, M2 from the inverted ν), the Mach cone μ = asin(1/M). Every printed angle is the closed-form solve at two decimals; corner deflections + nose radius are EST and badged on-panel; construction ink is the drawing office's blue (cited math — the RISO second ink); measured voice stays out entirely. Ackeret prints for THIN wing sections only (F-16 64A204 t 4% — dc_l/dα = 4/√(M²−1), EST badged); the A-10's 6716 refuses with `too thick for thin-airfoil theory — ackeret declined`. While the panel is open the solve HOLDS (paper over the instrument — MACH-NO-SOLVER asserts stats frozen); the chrome line is VERBATIM LAW: `drawn from θ-β-M + Billig 1967 · not the live solver · transonic 0.7–1.2 left honest`. · on phase 11 — VOLUME (R4 · docs/limit99/VOLUME.md): real 3D airflow for scanned objects and reference solids. WGSL D3Q19 BGK+Smagorinsky at FP16S SHIFTED storage, IN-PLACE single-buffer streaming (the 2D AA/esoteric-pull pattern generalized to 19 directions), halfway bounce-back STATIC masks, equilibrium inflow ramp + deterministic +y kick, ρ-ANCHORED zero-gradient outflow, quadratic-τ sponge (3D law max(16, 0.10·W)), free-slip on all four lateral faces (FLIPY/FLIPZ specular composition) — CONSTANTS3D mirrors qa/oracle3d.mjs EXACTLY (the shared-constants law; VOL-CONST byte-compares, VOL-DIFF-3D holds L∞(u) < 1e-3 vs the oracle at 200 lockstep steps, VOL-ST-GPU re-runs the ratified 192×96×96 D=24 sphere fixture on this page's own solver). THE ARTICLE: a `volume →` door on USER-MOUNTED articles ONLY (scanned meshes voxelized from the SAME parsed triangles the drop already read — surface rasterize + interior flood fill + the ≥3-cell dilation law; reference solids from the CLOSED VOLTAB — revolve/extrude of the drawn-clean row; aircraft NEVER mount in 3D: no honest 3D models exist, and the door is absent for them by construction). V1 = 256×128×128 × ss10 @ 60, probe-gated: a measured 96³ τ-probe must clear 2.6 GLUPS or the door prints the honest refusal card and nothing else; yaw/α is DETENTED (0/±15/±30) — each detent an async re-voxelize + fresh-cell refill behind the crane line, never a live morph. The ink is ORTHOGRAPHIC 3D-TRACER ink (ray-march refused twice): 2,097,152 tracers advected in the live field (RK2, trilinear), deposited into the same device-pixel deposit pipeline, depth as engraver's line weight (far span ×0.35 alpha, half duty), governor sheds tracers first. THE HONESTY FIREWALL: the chrome prints `VOLUME · QUALITATIVE · chord 44 cells · no numbers leave this view` — the badge is the only number the volume ever emits; no detector captions, no counts lineups, no gap lines, and no plates from the 3D field in v1 (the plate door prints the honest refusal). QA flags (query = QA space): ?qa=vol3d (the pinned 64×32×32 diff geometry) · ?qa=volst (the sphere St fixture) · ?volrefuse=1 (forced refusal) · ?volglups= (forced probe verdict; the real measurement still runs and is recorded). · on phase 10 — R3 FINER AIR + THE LONG EXPOSURE: the mid-rungs land as table data — probe order H1 → W1 1536×768×58 → W2 1280×640×48 → W3 1024×512×38, accept first pass, τ-gated at the LIMIT-2D 9 ms mid-rung pick law (W1 ≤9/58, W2 ≤9/48, W3 ≤9/38 ms/substep; the governor demotes through the table at boot, timing-only, never sniffing; H1's pick line and R₀ formula are byte-unchanged; STILLS stays the floor; MEDIAN-FREEZE asserted by frozen-region sha in qa/r3-live.mjs). THE LONG EXPOSURE (AM-14 / INSTRUMENT-LOCK §1.3): a door on the plate panel — `long exposure →` — runs the CURRENT specimen at 8192×4096 = 33,554,432 TRUE cells as a deliberate offline-in-browser exposure: its own device at raised limits (the live rungs keep default limits), the 2D-dispatch law for >16.7M cells (65,535-workgroup cap — the three NC-wide kernels re-index onto a 2D grid, default OFF, live rungs byte-identical), chunked 256-substep batches with the moment field integrated every chunk (the accumulation IS the negative), one full crossing at full wind, progress printed `exposing . 33,554,432 cells . N% . ~M min left`, cancellable, the wind holds while it runs; then the portrait develops at export class 6400×4000 — the badge prints cells · grid · the MEASURED crossing minutes, row two carries the honesty microline VERBATIM + `computed in this browser · not real-time`; a device that refuses (limits check or the out-of-memory error scope) gets the honest refusal printed at the door and nothing else prints, ever. QA flags (query = QA space, never product): ?rung=h1|w1|w2|w3 · ?qatau= (forced-τ pick, RUNG-LADDER lane) · ?lxgrid= · ?lxrefuse=1 · ?qa=st gains &stbatch= / &stlx=1 (the replay re-bake law: the frozen St fixture re-runs through every touched rung, ±2% of the 0.2139 baseline). · on phase 9 — THE MODEL SHOP, PHASE 2 (the pencil, the reference row, and the lawful counts): THE REFERENCE ROW R-001…R-008 joins the hangar wall as row citizens (drawn clean, one verbatim lesson each; `test →` mounts keeping air; the cylinder and flat plate keep their analytic in-tunnel masks — REF-CAL and LAYOUT laws unchanged); THE PENCIL — the drafting table, literal: wind-off, the outline lies flat with control points, the verb set CLOSED at {move, add, delete, smooth} (PENCIL-CAP is structural — the frozen tuple IS the tool), ≤50 undo session-scoped, `revert to trace` always present, blank-paper `draw →` door (a seeded 12-point blob, same four verbs); the original row is IMMUTABLE — edits bake through the spooled swap to a MOD accession (U-NNN/A · mod of U-NNN · the pencil; reference edits fork to fresh U-NNN), A/B = the existing held-air [ ] swap cycling the specimen family; THE COUNTS under the COMPARISON LAW (DECISIONS R2.5): `measure against the row →` re-measures up to three reference bodies LIVE this session at EQUAL FRONTAL HEIGHT and identical settings (one rake column, staircase settle, wake-rake momentum deficit), prints ONLY dimensionless ratios at one decimal under the verbatim chrome line — operands never print anywhere, seed spread demotes the print to ≈, a body too long for the wake at equal height gets the refusal card (never a silent rescale), and THE AIRCRAFT NEVER JOIN THE LINEUP (the picker is built from the reference row and nothing else — absent by construction). · on phase 8 — THE MODEL SHOP OPENS (phase 1, "the drop"): scan-anything enters the live page — drag a file (or the hangar's `load an object →` door), the mesh is read in a Worker and thrown away (magic bytes, typed refusals, never a throw), three ink sections print (silhouette / center slice / ground — never the mesh), the pencil traces the pick stroke-by-stroke, U-NNN accessions to THE SHELF (IndexedDB, cap 24, serials append-only, strikes leave tombstones), MODEL CHANGE spool → your wake in the same air as the sixteen; ground mode = free-slip floor at the wheel line, state printed on the specimen line; share = outline in the URL FRAGMENT only (#u=, ≤2000 chars, 12-bit deflate; the share-moment line prints beside the copied link); receiving #u= = rename-before-keep; METHODS gains the shop privacy paragraph verbatim. Comparison counts do NOT ship this phase — no drag numbers print. · on phase 7 — THE RECORD SURFACES: wind-off portraits (LAW 6b: power→0 seals the page, the trace develops ~3.5 s, done-beat) + PLATE exports (3200×2000 offscreen re-render, honesty microline verbatim, serial accession, filename law) + THE STILLS DIGNITY TIER (no-webgpu / prefers-reduced-motion / ?force=stills → one composed static state: paper + TEST 001 + a time-averaged impression from this instrument's own cpu oracle) + storage-throw boot + device-loss relight · on phase 6 (RISO lock + METHODS + hangar wall) + phase 5 (A-10 + THE PAIR) + phase 4 (pressure view) -->
 <style>
 :root { --bg:#f6f4ee; --ink:#18181c; --mid:#56565e; --dim:#69675f; --hair:#989690; --acc:#e8b46f; --accd:#8a5d0c; --spec:#255079; }
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -75,6 +75,17 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 .aw:focus-visible, .vw:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 @keyframes wingtick { 0%,100% { color:var(--dim); } 25%,65% { color:var(--accd); } }
 .aw.tick { animation:wingtick 1.2s ease 1; } /* the sanctioned one-shot keyframe (bridge law) */
+.aw.dim { color:var(--dim); } /* the v-22's wing chip — dim with an em-dash, always; the card is its door (M14) */
+#declined { /* the refusal grammar (COMPOSITION §6.3) — a period notice at the specimen anchor, never an error box */
+  position:absolute; left:22%; top:50%; transform:translateY(-50%);
+  max-width:44ch; padding:14px 18px 12px; z-index:4;
+  background:rgba(246,244,238,0.88); border:1px solid var(--ink);
+  outline:1px solid var(--hair); outline-offset:3px;
+}
+#declined .dk { font-size:9px; letter-spacing:2px; color:var(--dim); }
+#declined .db { margin-top:6px; font-size:11px; line-height:1.55; color:var(--ink); }
+#declined .df { margin-top:6px; font-size:9px; letter-spacing:1px; line-height:1.6; color:var(--dim); }
+#declined .doors { margin-top:6px; }
 #speclabel { position:fixed; z-index:2; text-align:right; }
 #speclabel .sl1 { font-size:10px; letter-spacing:2px; color:var(--mid); text-transform:uppercase; }
 #speclabel .sl2 { margin-top:2px; font-size:9px; letter-spacing:1px; color:var(--dim); }
@@ -145,6 +156,7 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
 .hname { font-size:11px; color:var(--ink); }
 .hserial { margin-top:2px; font-size:9px; letter-spacing:2px; color:var(--dim); text-transform:uppercase; }
 .hlesson { margin-top:4px; font-size:11px; color:var(--mid); max-width:40ch; }
+.hbadge { margin-top:3px; font-size:9px; letter-spacing:1px; color:var(--dim); text-transform:uppercase; max-width:52ch; }
 .htest, .hmach {
   display:inline-block; margin-top:4px; background:none; border:0; padding:2px 4px 2px 0;
   font:inherit; font-size:10px; letter-spacing:.5px; color:var(--dim); cursor:pointer;
@@ -227,8 +239,18 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
   </svg>
   <canvas id="etch" aria-hidden="true" hidden></canvas>
   <svg id="pencilsvg" aria-hidden="true" hidden></svg><!-- THE PENCIL (phase 9): the drafting table's editing layer — handles + diamonds, four verbs, nothing else -->
+  <!-- THE TEST DECLINED card (TEST 016 · M14 · refusal grammar, COMPOSITION §6.3):
+       composed at the specimen anchor — the honesty architecture refusing a
+       measurement as a feature. Kicker + the ratified card copy (DATA-v1,
+       verbatim) + corridor fine print + exactly one door. -->
+  <div id="declined" hidden>
+    <p class="dk">TEST DECLINED</p>
+    <p class="db">below conversion speed the osprey hangs from her rotors . this instrument measures wings . above the corridor she is tested like any other airframe . below it, an honest tunnel names what it cannot measure</p>
+    <p class="df">the corridor, cited: wing lift builds 40–80 kn · wing fully effective, rotor cyclic locked out ~100–120 kn · the tunnel cannot be honest below the conversion corridor</p>
+    <p class="doors"><button class="door" id="declineddoor" type="button">wind past conversion →</button></p>
+  </div>
 </div>
-<nav id="articles" aria-label="test articles" hidden><button class="aw" data-k="f16" type="button">f-16</button> · <button class="aw" data-k="a10" type="button">a-10</button> · <button class="aw" data-k="plate" type="button">plate</button></nav>
+<nav id="articles" aria-label="test articles" hidden><button class="aw" data-k="f16" type="button">f-16</button> · <button class="aw" data-k="a10" type="button">a-10</button> · <button class="aw" data-k="f104" type="button">f-104</button> · <button class="aw" data-k="f117" type="button">f-117</button> · <button class="aw" data-k="c130" type="button">c-130</button> · <button class="aw" data-k="v22" type="button">v-22</button> · <button class="aw" data-k="plate" type="button">plate</button></nav>
 <nav id="artmode" aria-label="aircraft or wing" hidden><button class="aw" data-m="ac" type="button">aircraft</button> · <button class="aw" data-m="wing" id="wingword" type="button">wing</button></nav>
 <div id="capstack">
   <p id="caption" hidden><span id="capbase"></span><span class="kw" id="capkw"></span><span id="capsuf"></span></p>
@@ -239,6 +261,10 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
   <p class="spec" id="spec3" hidden><span class="k">SPEC — </span>the fat, deeply cambered wing . at this reynolds the camber does the holding</p>
   <p class="spec" id="pairk" hidden><span class="k">SPEC — </span>the f-16's section quit ~2° ago at this angle . camber is doing the holding</p>
   <p class="spec" id="bridge" hidden><span class="k">SPEC — </span>this is the tunnel's crude stall . see the textbook one → wing</p>
+  <p class="spec" id="specf104" hidden><span class="k">SPEC — </span>the leading edge wears a felt cover on the ground so it doesn't cut the crew . a wing this sharp stalls like a switch, not a hinge</p>
+  <p class="spec" id="specf117" hidden><span class="k">SPEC — </span>sharp edges fix the separation point . the reynolds gap barely matters to a corner</p>
+  <p class="spec" id="specc130" hidden><span class="k">SPEC — </span>four propellers pour fast air over the wing before she moves . lift the engines make, before the sky does . no propeller turns in this tunnel — she is tested gliding</p>
+  <p class="spec" id="specv22" hidden><span class="k">SPEC — </span>the rotor discs are drawn in hairline and kept out of the solve — a spinning disc is mostly air</p>
   <p class="spec" id="shopspec" hidden><span class="k">SPEC — </span>a 2d section at toy reynolds — direction is real, road numbers don't exist here</p>
   <p id="countsline" hidden><span id="cntprog"></span> · <button class="door" id="cntcancel" type="button">cancel ×</button></p><!-- THE COUNTS progress — the quiet record line; the lineup runs in front of you -->
 </div>
@@ -284,18 +310,28 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
   <p class="mk">VALIDATION</p>
   <p class="mp">the cylinder first . a frozen fixture (400×160, d = 24, 40,000 steps) sheds vortices at a strouhal number the literature has measured for a century: the cpu oracle reads <span class="kw">0.2139</span>, the gpu instrument reads <span class="kw">0.2138</span> — agreement to 0.05% . the unbounded-cylinder literature band near this re is St ≈ 0.19–0.21 (shedding onset re ≈ 47, williamson 1996); our fixture's 15% blockage sits it at the top of the band, and the number that matters is the gpu-versus-oracle agreement, not the absolute.</p>
   <p class="mp">the pair . the f-16's thin section separates at 9.0°; the a-10's thick cambered section holds to 13.5° — a 4.5° window, measured across three seeds with zero spread, geometry never tuned . the requirement was 2°.</p>
-  <p class="mp">the batteries . L0 is the deterministic cpu-oracle battery — seven lanes (strouhal, anchor, settled state, poiseuille, moving-wall sweep, mass, layout), ~70 s in node, exits nonzero on any red . this build's page battery stands at 80/80 . the gpu-versus-oracle diff lane runs both solvers in lockstep on a pinned 128×64 geometry and holds L∞ &lt; 10⁻³ over 500 steps — 11/11.</p>
+  <p class="mp">the batteries . L0 is the deterministic cpu-oracle battery — seven lanes (strouhal, anchor, settled state, poiseuille, moving-wall sweep, mass, layout), ~70 s in node, exits nonzero on any red . this build's full board stands at 429/429 lanes across fourteen decks, run foreground before every ship . the gpu-versus-oracle diff lane runs both solvers in lockstep on a pinned 128×64 geometry and holds L∞ &lt; 10⁻³ over 500 steps — 11/11.</p>
   <p class="mp">the sphere, for the volume . a sphere at re ~300 sheds hairpin vortices at a strouhal number two independent groups measured within a percent of each other — johnson &amp; patel (jfm 378, 1999) read 0.137, tomboulides &amp; orszag (jfm 416, 2000) read 0.136 . this program's 3d cpu oracle, on the ratified fixture, reads <span class="kw">0.1354</span>; the d3q19 gpu solver on the same fixture reads <span class="kw">0.1377</span> — inside the ±15% band two different grids honestly allow, and the lockstep diff between them holds L∞ &lt; 10⁻³ over 200 steps (measured 0.000043) . the negative control matters as much: at re ~100 the same fixture goes <span class="kw">steady</span> and the seeded perturbation decays by four orders — an instrument that always sheds is not measuring anything.</p>
   <p class="mp">and the part we care most about: <span class="kw">you can run this yourself, in your own browser</span> . add <span class="kw">?qa=st</span> to the url and this page runs the frozen 40,000-step fixture on your gpu and prints the strouhal it measured . add <span class="kw">?qa=diff</span> and it boots the pinned diff geometry for inspection . add <span class="kw">?qa=volst</span> and it runs the 3d sphere fixture the same way . the validation is not a pdf — it is a mode of the instrument.</p>
+  <p class="mk">THE VALIDATION APPENDIX</p>
+  <p class="mp">v1–v6, measured . every number below is measured on named hardware or cited with its source — the two never blend . bench where not stated: apple m5 max 128 gb, chrome 151, headed, real gpu . each row ends with what it does not prove.</p>
+  <p class="mp"><span class="kw">v1 · the zero — cylinder strouhal.</span> the frozen fixture (400×160, D=24, 40,000 steps): cpu oracle St <span class="kw">0.2139</span>, the page's fp16s webgpu solver <span class="kw">0.2138</span> (0.02% apart), zero clamps . literature for an unblocked cylinder at this re: ~0.20 — our +7% is decomposed, not hidden: 15% blockage elevates St (cited), and at re 240 the fixture sits above the re≈190 mode-a transition where 2d over-predicts St vs 3d experiment by construction . the fixture is a regression anchor, recorded-never-corrected . reproducibility is public: ?qa=st re-runs the fixture on the visitor's own gpu (~35 s) and prints the St it measured; the replay re-bake ran it through all five rung paths — 5/5 within 0.00% of the default row . <span class="kw">not proven:</span> grid convergence — one point at one resolution is a zero, not a study.</p>
+  <p class="mp"><span class="kw">v2 · the 3d zero — sphere pair.</span> d3q19 sphere at re 289: cpu oracle St <span class="kw">0.1354</span>, the page's gpu bench <span class="kw">0.1377</span> — both inside the cited band (johnson &amp; patel 0.137, tomboulides &amp; orszag 0.136; program band 0.12–0.16) . negative control: sphere at re ~100 stays <span class="kw">steady</span> — the detector can say no . diameter convention stated: D_eff = D+1 under halfway bounce-back; Cd 1.234 inside the schiller-naumann ±15% band under D_eff, raw-D 1.393 retained in the record . <span class="kw">not proven:</span> any quantitative 3d claim — chord ~44 cells, re ~10³; the badge (`VOLUME · QUALITATIVE · chord 44 cells · no numbers leave this view`) is the only number the volume ever emits.</p>
+  <p class="mp"><span class="kw">v3 · implementation parity — lockstep diffs.</span> 2d: the gpu solver runs 500 steps in lockstep with the independent cpu oracle on the pinned 128×64 geometry; gate L∞(u) &lt; 1e-3, green in every gate run since first air (tick 3, 11/11) through the latest 348/348; the measured L∞ prints in every run . 3d: 200 steps vs the 3d oracle, L∞(u) = 4.28e-5, zero clamps, measured 2026-08-08 . <span class="kw">not proven:</span> physical truth — parity shows the gpu implements the same discretization as the oracle, not that either matches nature.</p>
+  <p class="mp"><span class="kw">v4 · thermal honesty — soak-20.</span> the shipped page, h1 rung, 82 samples over 20.5 continuous minutes: minute-10 mean τ 0.1219 ms/substep vs minute-20 mean 0.1247 → ratio <span class="kw">1.023</span> (law ≤1.1), 0 tier demotions, fps floor <span class="kw">119.0</span> — ~120 fps sustained for the full soak . software adapters hard-refused by the harness . <span class="kw">not proven:</span> cross-device performance — one machine, mains, lid open; on weaker silicon the governor demotes and prints it.</p>
+  <p class="mp"><span class="kw">v5 · the slow record — long exposure l1.</span> <span class="kw">33,554,432 true cells</span> (8192×4096, d2q9 fp16s), 81,920 steps — one full crossing — in <span class="kw">245.4 s</span> wall = 11.2 glups raw; repeat run 253.0 s (3.1% spread); portrait sha256 ed3a15bc…; 1600 MiB gpu buffer ledger; zero context loss — the live tunnel resumed at 120 fps . census discipline: ×2.0 the largest documented live client-side grid (roquefort 16.8M), claimed as single-run only; the live real-time cells row is not claimed — our live hero is 1.6M cells and says so . <span class="kw">not proven:</span> validation — this is a capability record, offline-in-browser, printed `computed in this browser · not real-time` on its face.</p>
+  <p class="mp"><span class="kw">v6 · the pedagogy gate — the pair window.</span> the claim under the wing lesson — thin section separates while the thick one holds — passed by numbers before it shipped: oracle window <span class="kw">[9.0, 13.5]°</span> at power 60 (width 4.5°, requirement ≥2°; f-16 across 3 seeds, spread 0.00°; re-attach hysteresis 8.5°/9.5°; geometry never tuned; re 720) . the live h1 tunnel measured its own window <span class="kw">[8.0, ~12–13.5]°</span>, and α_pair 11.25° sits inside both instruments' windows . <span class="kw">not proven:</span> aircraft stall — 2d sections, no sweep, no strake, five decades below flight re; the ORDERING is the claim, and the page's own reynolds line prints the gap.</p>
+  <p class="mfine">standing gaps, named (the panel's ask): no grid-convergence study yet (St at D=24/48/96, richardson slope), no multi-re validation matrix (St(Re) at 100/150/190 vs williamson, sub-transition), no taylor–green order-of-accuracy row, no blockage-doubling bound, no measured fp16s-vs-fp32 delta table (today's cross-precision evidence is v1/v3 oracle parity) . they are the next cheapest respect available; nothing above pretends to cover them.</p>
   <p class="mk">THE LIMITS</p>
   <p class="mp"><span class="kw">2d.</span> these are sections, not airplanes — no wingtip, no sweep relief, no strake vortex unless it is drawn in the section . real wings get three-dimensional help this tunnel cannot give . in 2d the streamwise vorticity is identically zero: tip vortices and pillar swirl are absent from the equations, not under-resolved.</p>
   <p class="mp"><span class="kw">the volume.</span> objects you load in yourself get a second solver — d3q19, the same laws in three dimensions: the same shared-constants oracle, fp16 storage streaming in place through one buffer, halfway bounce-back, the same ρ-anchored outlet . it runs 256×128×128 with a chord about 44 cells, and it is a <span class="kw">different instrument, not a better one</span> . 44 cells resolves a tailgate recirculation as structure and a pillar core as a smear; it closes the gap the silhouette card confesses, and it earns no digits doing it . so it prints none — the badge on that view says qualitative, states its own chord, and that badge is the only number the volume ever emits . the aircraft never enter it: honest 3d models of them do not exist here, and lofting one from two flat views would fabricate exactly the geometry that makes those aircraft themselves.</p>
   <p class="mp"><span class="kw">incompressible.</span> no mach effects, no shocks . supersonic lives on paper here, cited — never in the solve.</p>
   <p class="mp"><span class="kw">tunnel re.</span> 10³–10⁴, orders below flight . separation here is honest physics at THIS re, and the per-plane gap line prints what the full-scale number does differently.</p>
-  <p class="mp"><span class="kw">solid inlets.</span> engines are solid bodies; nothing flows through the nacelle . propellers do not exist here.</p>
-  <p class="mp"><span class="kw">the near-plate admission.</span> thin sections are thin: the f-16's 64a204 spans 4.8 cells at its thickest and rides the minimum-feature floor over most of its chord — in this tunnel it behaves closer to a cambered plate than to its section . thick sections resolve honestly (the a-10's 6716 spans 19.2 cells) . we print which regime each article is in rather than pretending they are the same.</p>
+  <p class="mp"><span class="kw">solid inlets.</span> engines are solid bodies; nothing flows through the nacelle . propellers do not exist here — the c-130 is tested gliding, her slipstream lives in spec voice only, and her prop disc is drawn as a dashed ghost the solver never sees.</p>
+  <p class="mp"><span class="kw">the declined test.</span> the v-22 ships as two truths . above the conversion floor she is a fixed-wing turboprop and the article measures her like any other airframe; below it she hangs from her rotors and a wing tunnel has nothing true to say — so the instrument prints a TEST DECLINED card instead of a number . she also carries no wing article: bell's section is proprietary, and her wing chip reads dim `wing · —` with the card as its door . refusing those two measurements is the strongest proof the rest are real.</p>
+  <p class="mp"><span class="kw">the near-plate admission.</span> thin sections are thin: the f-16's 64a204 spans 4.8 cells at its thickest and rides the minimum-feature floor over most of its chord — in this tunnel it behaves closer to a cambered plate than to its section . thick sections resolve honestly (the a-10's 6716 spans 19.2 cells, the c-130's 64a318 stand-in 21.6) . the f-104's biconvex 3.36% is the extreme case and the honest one: the one jet whose wing nearly is a plate in the sky — here the near-plate rendering is closest to true . we print which regime each article is in rather than pretending they are the same.</p>
   <p class="mk">SOURCES</p>
-  <p class="mp">every silhouette is traced from a public-domain us-government document; each plane's dossier records the document, figure, mirror url, access date, and sha256 . every ratio prints its basis, every sweep its datum, every aspect ratio its span convention . EST marks a literature estimate; ◆ marks sources that genuinely conflict, with the conflict documented.</p>
+  <p class="mp">every silhouette is traced from a public-domain us-government document; each plane's dossier records the document, figure, mirror url, access date, and sha256 . every ratio prints its basis, every sweep its datum, every aspect ratio its span convention . EST marks a literature estimate; ◆ marks sources that genuinely conflict, with the conflict documented . the v-22 is the one exception: no public-domain side view survived the 500-point trace law, so her profile is constructed in-house from published dimensions and us-government photographs — est-grade, and badged est wherever it prints . her span prints its basis everywhere: nacelle-to-nacelle 14.0 m, never rotors-turning 25.8 m.</p>
   <p class="mp">the sourcing law runs before the pen, and it has already fired twice . the f-16 trace came off a flight-manual mirror carrying an fms disclosure statement — the master was quarantined and re-based to nasa tp-1538, a public report, the same day . the a-10's t.o. 1a-10a-1 carries distribution c — caught before tracing began, re-based to fm 44-80, distribution a . those demotions are not embarrassments; they are the system working, and this page will keep printing them.</p>
   <p class="mk">FIRSTS · AS FAR AS WE CAN CITE</p>
   <p class="mclaim">more lattice updates per second than any browser fluid sim we can cite — 7.96 billion, sustained, at the demo rung — with 2,097,152 passive tracers coupled to the live solve. if we're wrong, tell us and this line changes.</p>
@@ -391,6 +427,7 @@ a:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
   <p class="mp" id="machread"></p>
   <p class="mfine" id="machcap"></p>
   <p class="mfine" id="machred" hidden>THE PLACARD REDLINE · 450 KIAS or M 0.75, whichever is lower — near it the manual's own compressibility text: shocks form on the thick wing (korn M_dd ≈ 0.66 at t/c 0.16) · this airframe never goes supersonic; the bow-shock pen stays dry</p>
+  <p class="mfine" id="machdark" hidden></p>
   <div id="machcorners" hidden></div>
   <p class="mfine mcs" id="machack" hidden></p>
   <p class="mfine" id="machest">nose radius + corner deflections EST — from the dossier's machFeatures corner list · every printed angle is the closed-form solve, two decimals · construction ink is the drawing office's blue</p>
@@ -1030,10 +1067,20 @@ function sepWGSL(W, H, article) {
     // the generator section (qa/sections.mjs constants, vertical-offset law,
     // plane-keyed): sample 2.5 cells off the local surface, camber followed
     const c = article.chord, w = article.sec;
+    // per-kind half-thickness, constants baked at template time (secYt mirror)
+    let ytExpr;
+    if (w.kind === 'biconvex') {
+      const h = w.t / 2, R = (0.25 + h * h) / (2 * h);
+      ytExpr = `max(sqrt(max(${f(R * R)} - (xc - 0.5) * (xc - 0.5), 0.0)) + ${f(h - R)}, 0.0)`;
+    } else if (w.kind === 'facet') {
+      ytExpr = `${f(0.5 * w.t)} * min(xc / ${f(w.xm)}, (1.0 - xc) / ${f(1 - w.xm)})`;
+    } else {
+      ytExpr = `5.0 * ${f(w.t)} * (0.2969 * sqrt(xc) - 0.1260 * xc - 0.3516 * xc * xc + 0.2843 * xc * xc * xc + ${f(w.c4)} * xc * xc * xc * xc)`;
+    }
     geom = `
   let xc = s;
   let xi = (xc - ${f(w.pivotFrac)}) * ${f(c)};
-  let ytc = max(${f(c)} * (5.0 * ${f(w.t)} * (0.2969 * sqrt(xc) - 0.1260 * xc - 0.3516 * xc * xc + 0.2843 * xc * xc * xc + ${f(w.c4)} * xc * xc * xc * xc)), ${f(article.tFloor)});
+  let ytc = max(${f(c)} * (${ytExpr}), ${f(article.tFloor)});
   let ycc = ${f(c)} * select(${f(w.m / ((1 - w.p) * (1 - w.p)))} * (${f(1 - 2 * w.p)} + ${f(2 * w.p)} * xc - xc * xc), ${f(w.m / (w.p * w.p))} * (${f(2 * w.p)} * xc - xc * xc), xc < ${f(w.p)});
   let etaUp = ycc + up * (ytc + 2.5);`;
   } else { // 'ac' — baked upper/lower surface offsets (cells from the pivot line)
@@ -1129,6 +1176,19 @@ fn probe() {
 //         max |delta| 253
 //   a10 — TEST 006, FM 44-80 p18 (A-10A recognition 3-view, Dist-A; airframe
 //         A→C unchanged), 690 pts, sha d4c741c0…, max |delta| 187
+//   f104 — TEST 013, FM 44-80 p42 (F-104 recognition 3-view, Dist-A; CLEAN —
+//          tip tanks OFF, landmine 2), 701 pts, sha c49072f4…, max |delta| 333
+//   f117 — TEST 014, FM 44-80 p46 (F-117A recognition 3-view, Dist-A; the
+//          FACET-PRESERVATION law rides the master — no smoothing exists in
+//          this pipeline), 701 pts, sha 3b0247d5…, max |delta| 810
+//   c130 — TEST 015, FM 44-80 p166 (C-130E/H recognition 3-view, Dist-A;
+//          airframe E/H→J unchanged — J deltas are powerplant dress), 701 pts,
+//          sha d17c0efd…, max |delta| 1924
+//   v22 — TEST 016, IN-HOUSE construction (b): published dims + US-gov photos
+//         (TC 3-01.80 armature refused at the 500-pt law) · EST-grade profile,
+//         badged everywhere · airplane mode, nacelles 0° · disc NEVER in the
+//         mask (nacelle+spinner only — the disc law), 651 pts, sha a3a8e986…,
+//         max |delta| 15
 // Interiors are NOT drawn in-tunnel — solid ink (PLANE-MASTERS tunnel
 // context); the HANGAR WALL prints the DRAWN inking of the same master.
 const AC = {
@@ -1147,6 +1207,38 @@ const AC = {
     nPts: 690,
     masterSha: 'd4c741c0e62d58251950dc4d6ccedf02c66dce7e72145f4a306b515eaf92c456',
     packed: '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',
+  },
+  f104: {
+    serial: 'TEST 013', name: 'F-104 STARFIGHTER',
+    basis: 'F-104 · profile basis: FM 44-80 (F-104 recognition 3-view) · clean — tip tanks off',
+    pivotL: 0.52, // AIRCRAFT sting pivot EST (R5 calibration pending)
+    nPts: 701,
+    masterSha: 'c49072f469d0f8d5a55f39bbc460f12ef46d9f705637c59f1d81e5b7eaefb5d2',
+    packed: '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',
+  },
+  f117: {
+    serial: 'TEST 014', name: 'F-117A NIGHTHAWK',
+    basis: 'F-117A · profile basis: FM 44-80 (F-117A recognition 3-view) · facet corners preserved — no smoothing exists in this pipeline',
+    pivotL: 0.50, // AIRCRAFT sting pivot EST (R5 calibration pending)
+    nPts: 701,
+    masterSha: '3b0247d5e74f8affe0a808a5ab7f084dbb613a219f8d651d6adc7dc0bcab540e',
+    packed: '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',
+  },
+  c130: {
+    serial: 'TEST 015', name: 'C-130J SUPER HERCULES',
+    basis: 'C-130J · profile basis: FM 44-80 (C-130E/H recognition 3-view) · airframe E/H→J unchanged — the J deltas are powerplant dress',
+    pivotL: 0.45, // AIRCRAFT sting pivot EST (R5 calibration pending)
+    nPts: 701,
+    masterSha: 'd17c0efda2207c2c7999d84951e0b4dc11b797f199e9de9ae955c9e5318aa5cd',
+    packed: '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',
+  },
+  v22: {
+    serial: 'TEST 016', name: 'V-22 OSPREY',
+    basis: 'V-22 · profile basis: IN-HOUSE (b) — published dims + US-gov photos · EST · airplane mode, nacelles 0° · span basis nacelle-to-nacelle 14.0 m — never rotors-turning 25.8 m',
+    pivotL: 0.48, // AIRCRAFT sting pivot EST (R5 calibration pending)
+    nPts: 651,
+    masterSha: 'a3a8e986bc087d1211c4db0b8f547aed5c39609a115c64c034ec565260b9eb26',
+    packed: 'AAF9gGgNgFgOgGgNgGgNgGgNgIgMgJgMgKgKgLgKgLgJgMgIgMgHgNgIgNgHgMgHgNgGgNgHgNgGgNgHgNgGgNgHgNgGgNgHgNgHgMgGgNgHgNgHgNgGgNgGgNgHgNgGgOgFgNgGgOgFgNgGgOgEgOgEgOgEgOgDgOgCgPgBgOgBgPgBgOf/gPgAgOf/gPgAgOf/gPgAgOgAgPgAgOf/gOgAgPf/gOgAgPf/gHgJgCgOgCgOgDgPgFgMgLgJgMgJgLgKgLgJgLgJgMgJgLgJgLgJgMgJgMgIgLgJgMgIgNgHgNgHgMgHgOgGgNgFgPgCgOgBgOgBgPgAgOgAgPgBgOgAgPf/gOgAgPf/gOgAgPf/gOf/gPgAgOf/gPf/gOf/gPf/gOf/gOf/gPf/gOgAgPf/gOf/gPf/gOf/gPgAgOf/gPf/gOgAgPf/gOgAgPf/gOgAgPgAgOf/gPgAgOgAgOf/gPgAgOgAgPf/gOgAgPgAgOf/gPgAgOgAgPf/gOgAgPgAgOf/gPgAgOf/gPgAgOf/gPf/gOgAgPf/gOf/gPf/gOf/gOf/gPf/gOf/gPf+gOf/gPf/gOf+gOf/gPf+gOf+gPf+gOf+gOf+gOf+gPf9gOf9gOf9gOf8gOf9gOf8gOf7gOf8gNf7gOf7gOf9gOf9gOf+gPf8gOf9gOf8gOf9gOf8gOf7gNf8gOf8gOf8gOf8gOf7gOf8gNf8gOf7gOf7gNf7gOf7gNf7gOf6gNf7gOf7gNf7gOf7gOf7gNf7gOf7gOf8gOf8gOf8gOf9gOf9gOf9gOf9gPf9gOf+gOf9gPf+gOf+gOf/gPf+gOf+gPf/gOf/gOf/gPf/gOf/gPf/gOf/gPgAgOf/gPf/gOf/gPgAgOf/gPgAgOf/gPgAgOf/gPgAgOf/gOgAgPgAgOf/gPgAgOgAgPf/gOgAgPgAgOf/gPgAgOgAgPgAgOgAgPf/gOgAgPgAgOgAgPgAgOgAgPf/gOgAgPgAgOgAgPgAgOgAgPgAgOgAgPgAgOgAgPgAgOgAgPgAgOgAgPgAgOgAgPgAgOgAgOgAgOgFgLgJgKgKgLgJgLgKgLgJgLgKgLgKgKgKgLgKgKgKgKgKgKgLgKgLgJgLgJgLgJgLgIgMgIgMgIgMgIgNgHgMgIgNgHgMgHgNgHgNgHgMgHgNgGgNgHgNgHgNgGgNgHgMgHgNgGgNgHgNgHgNgGgNgHgMgHgNgIgNgHgMgIgMgLgKgOgBgOf9gOf+gOf9gPf+gOf9gJf5gCfygBfxgCfygBfygCfxgBfygBfxgCfygBfygCfxgBfygBfxgCfygBfxgBfygCfygBfxgBfygBfxgBfygCfxgBfygBfxgBfygBfygBfxgBfygBfxgBfygBfxgBfygBfxf8f0f2f2f2f1f2f2f2f1f2f2f2f2f2f1f1f2f2f2f1f2f1f3f1f2f1f3f0f4f0f3f0f5fzf6fyf6fzf8fxf9fyf+fyf/fxgAfyf/fxgAfygAfxf/fyf/fxf+fyf+fyf9fyf9fyf8fyf7fyf8fyf8fzf7fyf7fyf7fzf7fyf7fzf7fyf7fzf7fyf7fyf6fzf7fyf7fzf7fyf7fzf6fyf7fzf7fyf7fzf7fyf6fzf7fyf7fyf7fzf8fyf7fzf7fyf7fyf7fzf7fyf8fyf7fzf7fyf7fyf7fzf8fyf7fyf7fzf7fyf8fyf7fyf7fzf7fyf8fyf7fzf7fyf7fyf8fzf7fyf7fyf8fyf7fzf8fyf7fyf7fzf7fyf8fyf7fzf7fyf7fyf7fzf7fyf7fyf8fzf7fyf7fyf8fyf7fzf7fyf8fyf8fyf8fyf8fyf8fyf8fyf9fyf8fyf9fyf9fyf9fyf8fxf9fyf9fyf+fyf9fxf+fyf9fyf+fxf/fyf+fyf+fxf/fyf/fxf/fyf/fxf/fyf/fxf/fygAfyf/fxf/fygAfxf/fygAfxf/fygAfxgAfyf/fxgAfygAfxgAfygAfxf/fygAfxgAfygAfxgAfygAfxgAfygAfxgAfygAfxgAfygAfxgAfygAfxgAfygAfxgAfygAfxgAfygAfygAfxgAfygAfxgAfygAfxgAfygAfxgAfygBfxgAfygAfxgAfygAfxgAfygAfxgAfygAfxgAfygAfxgAfygAfxgAfygAfxgAfygAfxgBfygAfxgAfygAfxgAfygAfxgAfygAfxgAfygAfxgAfygBfxgAfygAfxgAfygAfygAfxgAfygBfxgAfygAfxgAfygAfxgAfygBfxgAfygAfxgAfygBfxgAfygAfxgBfygAfxgAfygBfxgAfygAfxgBfygAfxgBfygAfxgBfygBfxgAfygBfygBfxgBfygBfxgBfygCfxgCfygBfygCfxgDfygCfygCfxgCfygDfygCfygDfxgDfygDfygDfygEfygDfygEfygDfygEfygDfygEfygDfygDfxgDfygDfygCfxgAfygAfxf/fyf+fyf/fxgAfygCfygEfzgGfzgHf0gIf0gIf0gJf1gJf1gJf1gKf1gJf2gKf2gLf2gKf2gLf2gKf3gMf3gLf3gMf5gMf4gNf6gMf5gNf6gNf5gNf6gNf6gOf6gNf6gN',
   },
 };
 function unpackAC(def) {
@@ -1223,10 +1315,19 @@ function geomFromPts(pts, pivotL) {
 // silhouette); the mask rasterizer never sees them (§2.4 — the drawing is
 // ink, not geometry). Pens by CSS px, non-scaling strokes so the ladder
 // holds at any wall scale; in-tunnel the article stays SOLID ink.
-const PEN = { W1: 1.4, W2: 1.0, W3: 0.6 };
+const PEN = { W1: 1.4, W2: 1.0, W3: 0.6, W4: 0.35 }; // W4 = ghosted internals (PLANE-MASTERS §2.1); the pen set is CLOSED — no fifth width exists
+// THE DISC LAW (LAW-OF-LAWS, made load-bearing at TEST 015/016): a spinning
+// disc is mostly air — disc edges draw as DASHED hairline ink and are NEVER
+// in the solver mask (the masters carry nacelle+spinner only).
+const DASHED_INT = new Set(['prop-disc-ghost', 'disc-arc-hint']);
 const AC_INT = {
   f16: [{"id":"canopy-arc","pen":"W2","pts":[[0.2247,0.1067],[0.2333,0.1068],[0.2364,0.1061],[0.2401,0.1065],[0.2584,0.1062],[0.2724,0.1068],[0.2876,0.1083],[0.2979,0.1105],[0.3142,0.1125],[0.317,0.1134],[0.325,0.1139],[0.327,0.1148],[0.3559,0.1194],[0.3599,0.1196],[0.3662,0.1208],[0.3685,0.122],[0.3905,0.1242],[0.3925,0.1251],[0.4102,0.1276]]},{"id":"intake-lip","pen":"W2","pts":[[0.3225,0.0544],[0.3416,0.055],[0.3736,0.0569],[0.3771,0.0577],[0.3882,0.0577],[0.4091,0.0592]]},{"id":"strake-line","pen":"W3","pts":[[0.213,0.0698],[0.2753,0.0675],[0.277,0.0678],[0.279,0.0695],[0.2839,0.0697],[0.2936,0.0698],[0.2956,0.0692],[0.3059,0.0697],[0.3516,0.0696],[0.3536,0.0702],[0.3728,0.0698],[0.3962,0.0706],[0.4011,0.0702],[0.4079,0.0706],[0.4099,0.0712],[0.4122,0.0706],[0.4228,0.0715],[0.4294,0.071],[0.462,0.0729],[0.4648,0.0738],[0.4826,0.0752],[0.4886,0.0767],[0.4903,0.0762],[0.4929,0.0775]]},{"id":"fin-dorsal-break","pen":"W2","pts":[[0.7925,0.155],[0.8748,0.1555],[0.8816,0.1561],[0.8862,0.1583],[0.8885,0.1567],[0.8962,0.1563],[0.9008,0.1562],[0.9034,0.1571],[0.9285,0.1568]]},{"id":"ventral-tick","pen":"W3","pts":[[0.7141,0.0386],[0.7333,0.0394],[0.7401,0.039],[0.7965,0.04]]}],
   a10: [{"id":"canopy-arc","pen":"W2","pts":[[0.1774,0.1249],[0.1829,0.1257],[0.1878,0.1283],[0.1979,0.129],[0.2079,0.1322],[0.2216,0.1332],[0.2255,0.1352],[0.2326,0.1365],[0.2378,0.1365],[0.2459,0.1394],[0.2573,0.14],[0.2645,0.1429],[0.2758,0.1434]]},{"id":"gun-line","pen":"W3","pts":[[0.0016,0.0569],[0.0133,0.0565],[0.0175,0.0573]]},{"id":"engine-pod","pen":"W2","pts":[[0.6371,0.075],[0.6693,0.0727],[0.6725,0.0741],[0.6761,0.0741],[0.6784,0.0721],[0.681,0.0714],[0.693,0.0698],[0.706,0.069],[0.7135,0.0677],[0.7157,0.0664],[0.7281,0.0666],[0.7313,0.0663],[0.7326,0.0654],[0.7505,0.065],[0.7534,0.067],[0.77,0.0677],[0.7797,0.0704],[0.7891,0.0718],[0.7973,0.075],[0.8002,0.0778],[0.8012,0.0801],[0.8119,0.0811]]},{"id":"tail-group","pen":"W2","pts":[[0.8824,0.0267],[0.8921,0.0258],[0.9123,0.0285],[0.9194,0.0302],[0.9366,0.0327],[0.9467,0.0357]]}],
+
+  f104: [{"id":"canopy-line","pen":"W2","pts":[[0.247415,0.106228],[0.250615,0.101428],[0.252585,0.096012],[0.252831,0.089857],[0.274495,0.090103],[0.278434,0.091827],[0.280158,0.093796],[0.28582,0.09355],[0.288528,0.095273],[0.289759,0.095273],[0.290251,0.098966],[0.292221,0.100935],[0.29616,0.102659],[0.296898,0.102659],[0.297883,0.089857],[0.301083,0.089857],[0.301329,0.12063],[0.309946,0.120138]]},{"id":"wing-line","pen":"W2","pts":[[0.553668,0.09872],[0.562038,0.098931],[0.564008,0.097841],[0.578779,0.100056],[0.584687,0.099001],[0.593058,0.100496],[0.605367,0.101059],[0.606105,0.101867],[0.633432,0.096451],[0.639094,0.096205],[0.644018,0.094306],[0.657804,0.092337],[0.664943,0.090473],[0.679222,0.08878],[0.682176,0.081241],[0.67873,0.081592],[0.666667,0.080555],[0.662728,0.081118],[0.658543,0.080573],[0.638848,0.080907],[0.635401,0.079887],[0.622354,0.079834],[0.62063,0.078849],[0.614229,0.078111],[0.608567,0.079746],[0.592811,0.07841],[0.589857,0.079254],[0.584441,0.079394],[0.579764,0.078533],[0.570901,0.078462],[0.570162,0.077355],[0.558346,0.076968],[0.557607,0.075772],[0.553668,0.075825]]},{"id":"tail-junction","pen":"W2","pts":[[0.880601,0.217258],[0.887986,0.224766],[0.893156,0.228213],[0.89808,0.228951],[0.902757,0.228459],[0.903988,0.229197],[0.905958,0.228459],[0.915805,0.228951],[0.917282,0.227474],[0.935007,0.228213]]}],
+  f117: [{"id":"canopy-glass","pen":"W2","pts":[[0.183934,0.072681],[0.18744,0.071406],[0.188715,0.068537],[0.192541,0.06758],[0.192859,0.0781],[0.194772,0.078419],[0.195091,0.06758],[0.197322,0.06758],[0.206886,0.070768],[0.219637,0.072043],[0.225375,0.074912],[0.2343,0.07555],[0.241313,0.0781],[0.249602,0.078738],[0.252789,0.08065]]},{"id":"nose-break","pen":"W2","pts":[[0.046541,0.020322],[0.087663,0.034155],[0.091807,0.034769],[0.097864,0.037638],[0.106471,0.039551],[0.115397,0.039756],[0.11731,0.041486],[0.120816,0.041896],[0.128467,0.047065],[0.133886,0.049274],[0.153969,0.06478],[0.160982,0.06778]]},{"id":"wing-le","pen":"W2","pts":[[0.590373,0.066465],[0.595473,0.066214],[0.600574,0.063118],[0.607906,0.062662],[0.610456,0.05977],[0.619063,0.05911],[0.622569,0.056287],[0.631814,0.055649],[0.636277,0.052507],[0.643927,0.052143],[0.644884,0.050868],[0.648071,0.050435],[0.649028,0.049114],[0.65636,0.048773],[0.657316,0.047452],[0.660504,0.047019],[0.66146,0.045744],[0.670704,0.045107],[0.676442,0.040724]]},{"id":"exhaust-shelf","pen":"W2","pts":[[0.66656,0.045426],[0.670704,0.045107],[0.675486,0.041122],[0.687918,0.042192],[0.69015,0.044925],[0.744979,0.044902],[0.752311,0.047543],[0.772394,0.047315],[0.777176,0.049934],[0.778132,0.048135],[0.781957,0.047566],[0.784826,0.045813],[0.812241,0.045312],[0.816385,0.044765],[0.81766,0.042329],[0.836149,0.04094],[0.837106,0.03987],[0.843162,0.040006]]},{"id":"far-ruddervator","pen":"W2","pts":[[0.90883,0.136117],[0.915206,0.133248],[0.906917,0.128467],[0.765062,0.068218],[0.757093,0.069493],[0.90883,0.135799],[0.90883,0.136117]]}],
+  c130: [{"id":"deck-step","pen":"W2","pts":[[0.081102,0.10031],[0.083818,0.101281],[0.086535,0.100893],[0.090803,0.096624],[0.096624,0.098176],[0.101281,0.095072],[0.105549,0.094684],[0.110206,0.097012],[0.112922,0.0974],[0.117579,0.094684],[0.124563,0.09546],[0.128832,0.092744]]},{"id":"nacelle-group","pen":"W2","pts":[[0.322856,0.083818],[0.324408,0.082654],[0.327901,0.081878],[0.33799,0.081878],[0.344587,0.07761],[0.355452,0.077998],[0.359721,0.079162],[0.362049,0.074893],[0.374466,0.074893],[0.374854,0.079938],[0.376795,0.082266],[0.38378,0.08343],[0.38766,0.085759],[0.398525,0.086535],[0.406286,0.089251]]},{"id":"tail-group","pen":"W2","pts":[[0.839736,0.126698],[0.846721,0.12922],[0.849049,0.128832],[0.849437,0.118743],[0.851766,0.118743],[0.852154,0.11331],[0.914629,0.11331],[0.927435,0.116026],[0.939076,0.116802],[0.948002,0.120295],[0.955763,0.120683],[0.967016,0.124563],[0.982926,0.124951],[0.98603,0.12534],[0.990687,0.12728]]},{"id":"prop-disc-ghost","pen":"W4","pts":[[0.308196,0.184797],[0.308196,0.065796]]}],
+  v22: [{"id":"nacelle-pod","pen":"W2","pts":[[0.205,0.16],[0.245,0.144],[0.33,0.143],[0.43,0.144],[0.495,0.148],[0.54,0.152],[0.578,0.157]]},{"id":"disc-arc-hint","pen":"W3","pts":[[0.245,0.511395],[0.247209,0.508438],[0.249378,0.499621],[0.251469,0.485099],[0.253444,0.465133],[0.255269,0.440079],[0.256911,0.410384],[0.25834,0.376577],[0.259531,0.339263],[0.260463,0.299106],[0.261118,0.256824],[0.261487,0.213171],[0.261561,0.168926],[0.261339,0.124879],[0.260826,0.081816],[0.26003,0.040504],[0.258967,0.001682],[0.257654,-0.033958],[0.256115,-0.06578],[0.254378,-0.093216],[0.252473,-0.115777],[0.250435,-0.133059],[0.2483,-0.144755],[0.246107,-0.150655],[0.243893,-0.150655],[0.2417,-0.144755],[0.239565,-0.133059],[0.237527,-0.115777],[0.235622,-0.093216],[0.233885,-0.06578],[0.232346,-0.033958],[0.231033,0.001682],[0.22997,0.040504],[0.229174,0.081816],[0.228661,0.124879],[0.228439,0.168926],[0.228513,0.213171],[0.228882,0.256824],[0.229537,0.299106],[0.230469,0.339263],[0.23166,0.376577],[0.233089,0.410384],[0.234731,0.440079],[0.236556,0.465133],[0.238531,0.485099],[0.240622,0.499621],[0.242791,0.508438],[0.245,0.511395]]},{"id":"tail-group","pen":"W2","pts":[[0.878,0.148],[0.912,0.147],[0.955,0.149],[0.996,0.152]]},{"id":"sponson-chine","pen":"W3","pts":[[0.15,0.052],[0.22,0.058],[0.38,0.06],[0.52,0.056],[0.62,0.04]]}],
 };
 // datum-wall rows: landed planes in accession order. Unshipped planes are
 // ABSENT — the wall grows as planes land; nothing hangs before it lands.
@@ -1237,6 +1338,16 @@ const HROWS = [
     lesson: 'the thin section quits early at this reynolds — the real jet flies to its 25° limiter' },
   { pk: 'a10', k: 'a10', serial: 'TEST 006', name: 'A-10C THUNDERBOLT II', lenM: 16.256,
     lesson: 'straight, thick, deeply cambered — docile stall . the reynolds flagship' },
+  { pk: 'f104', k: 'f104', serial: 'TEST 013', name: 'F-104 STARFIGHTER', lenM: 16.6878,
+    lesson: 'the tiny-wing extreme — what mach 2 cost in 1958 . a wing so sharp it wears felt covers on the ground',
+    badge: 'RETIRED LEGEND · last us flight 1994, nasa · italy flew the f-104s to 2004' },
+  { pk: 'f117', k: 'f117', serial: 'TEST 014', name: 'F-117A NIGHTHAWK', lenM: 20.0914,
+    lesson: 'drawn by radar equations, not by the air — statically unstable in pitch and yaw; four flight computers out-vote the airframe',
+    badge: 'RETIRED LEGEND · retired 2008 · still flies at tonopah as the aggressor' },
+  { pk: 'c130', k: 'c130', serial: 'TEST 015', name: 'C-130J SUPER HERCULES', lenM: 29.7942,
+    lesson: "slipstream — the propeller's river . the only propeller in this hangar, and the only aircraft here pulled through the sky" },
+  { pk: 'v22', k: 'v22', serial: 'TEST 016', name: 'V-22 OSPREY', lenM: 17.4752,
+    lesson: 'where wings end — below conversion she hangs from her rotors; above it she is tested like any other airframe' },
 ];
 const SVGNS = 'http://www.w3.org/2000/svg';
 function svgEl(tag, attrs) {
@@ -1268,12 +1379,14 @@ function drawnPlaneSVG(pk, u, dpr) { // u = px per master length-unit; DRAWN ink
   // withdrawn cleanly — an outline, never a smudge.
   const dpx = u * dpr;
   if (dpx >= 90) for (const f of AC_INT[pk]) {
-    if (dpx < 180 && f.id !== 'canopy-arc') continue;
+    if (dpx < 180 && !f.id.startsWith('canopy')) continue; // the ≥90 dpx tier is the canopy line (canopy-arc/-line/-glass); planes without one print outline-only there
+
     let p = '';
     for (let i = 0; i < f.pts.length; i++)
       p += (i ? 'L' : 'M') + f.pts[i][0] + ' ' + (geo.ymax - f.pts[i][1]).toFixed(4);
     const line = svgEl('path', { d: p, 'data-pen': f.pen, 'data-int': f.id });
     penStroke(line, f.pen);
+    if (DASHED_INT.has(f.id)) line.setAttribute('stroke-dasharray', '3 3'); // the disc law: dashed hairline — a spinning disc is mostly air
     svg.appendChild(line);
   }
   return svg;
@@ -1338,10 +1451,12 @@ function buildHangar() { // hung fresh at each open — one scale, one rail, ali
     const nm = document.createElement('div'); nm.className = 'hname'; nm.textContent = r.name;
     const se = document.createElement('div'); se.className = 'hserial'; se.textContent = r.serial;
     const le = document.createElement('div'); le.className = 'hlesson'; le.textContent = r.lesson;
+    let bd = null;
+    if (r.badge) { bd = document.createElement('div'); bd.className = 'hbadge'; bd.textContent = r.badge; } // badges are fine-print words (hangar grammar law)
     const bt = document.createElement('button');
     bt.type = 'button'; bt.className = 'htest'; bt.dataset.k = r.k;
     bt.textContent = 'test →';
-    lab.appendChild(nm); lab.appendChild(se); lab.appendChild(le);
+    lab.appendChild(nm); lab.appendChild(se); if (bd) lab.appendChild(bd); lab.appendChild(le);
     if (T.tier !== 'stills') lab.appendChild(bt); // stills: the wall reads; it cannot mount
     if (MACHTAB[r.pk]) { // the MACH door — DATA-DRIVEN: a plane carries it iff its machFeatures row exists (paper works in every tier, its own class — never a mount door)
       const mb = document.createElement('button');
@@ -1424,6 +1539,47 @@ const MACHTAB = Object.freeze({
       Object.freeze({ id: 'engine-pod lip', xL: 0.64, kind: 'comp', thetaDeg: 10 }),
     ]),
   }),
+  f104: Object.freeze({
+    // TEST 013 — the MACH flagship (DATA-v1): sharp cone nose + razor LE →
+    // the roster's first ATTACHED oblique shocks; the biconvex is the
+    // textbook Ackeret section. Cap M 2.0 — inlet-temperature limited.
+    cap: 2.0, capLine: 'cap M 2.0 — inlet-temperature limited, not thrust · the rail greys past the cap',
+    noseClass: 'NEEDLE', noseKind: 'cone', noseThetaDeg: 9, // cone half-angle EST — below its attach-M the ledger says the shock stands off
+    noseForm: 'sphere', noseRL: 0.001, // schema completeness — the needle class never draws a Billig bow
+    wing: Object.freeze({ name: 'BICONVEX 3.36%', tPct: 3.36, thin: true }),
+    corners: Object.freeze([
+      Object.freeze({ id: 'windscreen', xL: 0.24, kind: 'comp', thetaDeg: 14 }),
+      Object.freeze({ id: 'canopy crest', xL: 0.31, kind: 'exp', thetaDeg: 6 }),
+      Object.freeze({ id: 'wing LE (razor)', xL: 0.55, kind: 'comp', thetaDeg: 2 }),
+      Object.freeze({ id: 'tailplane LE', xL: 0.90, kind: 'comp', thetaDeg: 3 }),
+      Object.freeze({ id: 'boattail', xL: 0.93, kind: 'exp', thetaDeg: 6 }),
+    ]),
+  }),
+  f117: Object.freeze({
+    // TEST 014 — greyed at 0.92 ◆, and the grey IS the lesson (DATA-v1).
+    cap: 0.92, capLine: 'cap M 0.92 ◆ — high subsonic, no afterburner · the rail greys past the cap',
+    dark: 'she never goes supersonic . speed was part of the price of the shape',
+    noseClass: 'FACETED', noseForm: 'cylinder', noseRL: 0.02, // schema completeness — the supersonic pen is unreachable by construction
+    wing: Object.freeze({ name: 'FACETED FLAT PANELS', tPct: null, thin: false }),
+    corners: Object.freeze([]),
+  }),
+  c130: Object.freeze({
+    // TEST 015 — greyed at ~0.6; the one qualitative line (DATA-v1: helical
+    // tip Mach stays qualitative — no number was sourced).
+    cap: 0.6, capLine: 'cap M ~0.6 — cruise class · the rail greys past the cap',
+    dark: 'her blade tips flirt with the speed of sound before she ever could',
+    noseClass: 'BLUNT', noseForm: 'cylinder', noseRL: 0.03,
+    wing: Object.freeze({ name: 'NACA 64A318 (root)', tPct: 18, thin: false }),
+    corners: Object.freeze([]),
+  }),
+  v22: Object.freeze({
+    // TEST 016 — greyed; one line (DATA-v1). Cap EST from cruise 240–270 kn ◆.
+    cap: 0.45, capLine: 'cap M ~0.45 EST — from cruise 240–270 kn ◆, airplane mode · the rail greys past the cap',
+    dark: 'her rotor tips outrun her — the blades meet the air faster than the airframe ever will',
+    noseClass: 'BLUNT', noseForm: 'cylinder', noseRL: 0.03,
+    wing: Object.freeze({ name: '—', tPct: null, thin: false }),
+    corners: Object.freeze([]),
+  }),
 });
 const MACH_CHROME = 'drawn from θ-β-M + Billig 1967 · not the live solver · transonic 0.7–1.2 left honest'; // VERBATIM LAW (MACH-CHROME byte-compares)
 const MACH_GAP_LABEL = 'THE HONEST GAP · transonic M 0.7–1.2 — mixed flow, no closed form on paper · nothing is drawn';
@@ -1437,14 +1593,19 @@ function machSolve(pk, Mreq) { // PURE — the QA battery cross-checks this agai
   const band = M < MACH_GAP_LO ? 'sub' : (M <= MACH_GAP_HI ? 'gap' : 'sup');
   const st = {
     pk, M, cap: t.cap, capped: Mreq > t.cap + 1e-12, band, noseClass: t.noseClass,
-    mu: null, bow: null, thetaMaxDeg: null, corners: [], ackeret: null,
+    mu: null, bow: null, nose: null, thetaMaxDeg: null, corners: [], ackeret: null,
     redline: !!t.redline && M >= t.cap - 1e-9,
     gapLabel: band === 'gap' ? MACH_GAP_LABEL : null, chrome: MACH_CHROME,
   };
   if (band !== 'sup') return st;
   st.mu = MM.muRad(M) * R2D;
-  const doR = MM.billig(M, t.noseForm);
-  st.bow = { form: t.noseForm, RL: t.noseRL, doR, deltaL: doR * t.noseRL };
+  if (t.noseKind === 'cone') { // the NEEDLE class (TEST 013): θ-β-M at the cone half-angle EST — attached where it may be, standing off where it may not
+    const b = MM.betaWeak(M, t.noseThetaDeg / R2D);
+    st.nose = { kind: 'cone', thetaDeg: t.noseThetaDeg, attached: b !== null, betaDeg: b === null ? null : b * R2D };
+  } else {
+    const doR = MM.billig(M, t.noseForm);
+    st.bow = { form: t.noseForm, RL: t.noseRL, doR, deltaL: doR * t.noseRL };
+  }
   const mx = MM.thetaMax(M);
   st.thetaMaxDeg = mx.theta * R2D;
   st.betaAtThetaMaxDeg = mx.beta * R2D;
@@ -1517,16 +1678,26 @@ function machRender() { // rebuilt per scrub step — pure function of (pk, Mreq
       cone.appendChild(machDrawInk(svgEl('path', { d: `M${nx.toFixed(1)} ${ny.toFixed(1)} l${(600 * Math.cos(muR)).toFixed(1)} ${(-sgn * 600 * Math.sin(muR)).toFixed(1)}` }), { 'stroke-dasharray': '5 4' }, true));
     svg.appendChild(cone);
     svg.appendChild(machText(nx + 168 * Math.cos(muR) + 4, ny - 168 * Math.sin(muR) - 4, `μ ${st.mu.toFixed(2)}°`, 'spec'));
-    // the bow — vertex at the Billig standoff, asymptotes at μ (the arc between is a drawing)
-    const dpx = st.bow.deltaL * S, b = Math.max(6, (t.noseRL + st.bow.deltaL) * S * 2);
-    let bd = '';
-    for (let i = 0; i <= 60; i++) {
-      const yoff = (i / 30 - 1) * 150;
-      const x = nx - dpx + (Math.hypot(b, yoff * cot) - b);
-      bd += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + (ny + yoff).toFixed(1);
+    if (st.bow) { // the bow — vertex at the Billig standoff, asymptotes at μ (the arc between is a drawing)
+      const dpx = st.bow.deltaL * S, b = Math.max(6, (t.noseRL + st.bow.deltaL) * S * 2);
+      let bd = '';
+      for (let i = 0; i <= 60; i++) {
+        const yoff = (i / 30 - 1) * 150;
+        const x = nx - dpx + (Math.hypot(b, yoff * cot) - b);
+        bd += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + (ny + yoff).toFixed(1);
+      }
+      svg.appendChild(machDrawInk(svgEl('path', { d: bd, class: 'mbow' }), {}, true));
+      svg.appendChild(machText(nx - 8, ny - 100, `bow · Δ/R ${st.bow.doR.toFixed(2)} (billig, ${st.bow.form} form · R ${st.bow.RL} L EST)`, 'spec'));
+    } else if (st.nose) { // the NEEDLE class — attached oblique pair from the nose tip, or the honest stand-off mark
+      if (st.nose.attached) {
+        const bR = st.nose.betaDeg / R2D, L = 150;
+        for (const sgn of [1, -1])
+          svg.appendChild(machDrawInk(svgEl('path', { d: `M${nx.toFixed(1)} ${ny.toFixed(1)} l${(L * Math.cos(bR)).toFixed(1)} ${(-sgn * L * Math.sin(bR)).toFixed(1)}`, class: 'mshk mnose', 'data-id': 'nose cone' }), {}, true));
+        svg.appendChild(machText(nx + 0.72 * L * Math.cos(bR) + 3, ny - 0.72 * L * Math.sin(bR) - 3, `nose β ${st.nose.betaDeg.toFixed(2)}°`, 'spec'));
+      } else { // below attach-M even the needle's shock stands off — no attached line may draw (θ-β-M law)
+        svg.appendChild(machDrawInk(svgEl('circle', { cx: nx.toFixed(1), cy: ny.toFixed(1), r: 2.5, class: 'mdet mnose', 'data-id': 'nose cone' }), { stroke: TOK.hair }, false));
+      }
     }
-    svg.appendChild(machDrawInk(svgEl('path', { d: bd, class: 'mbow' }), {}, true));
-    svg.appendChild(machText(nx - 8, ny - 100, `bow · Δ/R ${st.bow.doR.toFixed(2)} (billig, ${st.bow.form} form · R ${st.bow.RL} L EST)`, 'spec'));
     // corners: attached obliques on the weak branch · Prandtl-Meyer fans · detached marks
     for (const row of st.corners) {
       const cy = yOf(machUpperY(geo, row.xL)), cx = xOf(row.xL);
@@ -1562,13 +1733,28 @@ function machRender() { // rebuilt per scrub step — pure function of (pk, Mreq
   const read = document.getElementById('machread');
   if (st.band === 'sub') read.textContent = `M ${st.M.toFixed(2)} · subsonic — no shocks exist here · nothing to draw`;
   else if (st.band === 'gap') read.textContent = `M ${st.M.toFixed(2)} · the honest gap`;
-  else read.textContent = `M ${st.M.toFixed(2)} · μ ${st.mu.toFixed(2)}° · bow Δ/R ${st.bow.doR.toFixed(2)} · θmax ${st.thetaMaxDeg.toFixed(2)}°`;
+  else read.textContent = st.bow
+    ? `M ${st.M.toFixed(2)} · μ ${st.mu.toFixed(2)}° · bow Δ/R ${st.bow.doR.toFixed(2)} · θmax ${st.thetaMaxDeg.toFixed(2)}°`
+    : `M ${st.M.toFixed(2)} · μ ${st.mu.toFixed(2)}° · nose ${st.nose.attached ? 'β ' + st.nose.betaDeg.toFixed(2) + '° attached' : 'detached — stands off'} · θmax ${st.thetaMaxDeg.toFixed(2)}°`;
   document.getElementById('machcap').textContent = t.capLine;
+  { // the greyed planes' one line — the grey IS the lesson (DATA-v1 TEST 014/015/016)
+    const dk = document.getElementById('machdark');
+    dk.hidden = !t.dark;
+    dk.textContent = t.dark || '';
+  }
   document.getElementById('machred').hidden = !st.redline;
   const led = document.getElementById('machcorners');
   led.textContent = '';
   led.hidden = !(st.band === 'sup' || MACH.pk === 'a10');
   if (st.band === 'sup') {
+    if (st.nose) { // the needle's own ledger row leads (TEST 013)
+      const p = document.createElement('p');
+      p.className = 'mfine mcs';
+      p.textContent = st.nose.attached
+        ? `nose cone · compression θ ${st.nose.thetaDeg.toFixed(2)}° EST → oblique ATTACHED (weak) · β ${st.nose.betaDeg.toFixed(2)}° — the roster's first attached nose shock`
+        : `nose cone · compression θ ${st.nose.thetaDeg.toFixed(2)}° EST → beyond θmax ${st.thetaMaxDeg.toFixed(2)}° — the shock stands off; no attached line may draw`;
+      led.appendChild(p);
+    }
     for (const row of st.corners) {
       const p = document.createElement('p');
       p.className = 'mfine mcs';
@@ -1674,10 +1860,50 @@ const SEC = Object.freeze({
     m: 0.06, p: 0.7, t: 0.16, c4: -0.1036,
     pivotFrac: 0.35,
   }),
+  //   f104 — BICONVEX 3.36%, TEST 013: DOCUMENTED-parametric (UIUC row
+  //          re-confirmed 2026-08-07) — the ~10-line circular-arc closed form
+  //          from t/c alone (the named plan amendment). Symmetric; the
+  //          near-plate rendering is HONEST here: the one jet whose wing
+  //          nearly IS a plate in the sky.
+  f104: Object.freeze({
+    name: 'BICONVEX 3.36%', est: false, kind: 'biconvex',
+    m: 0, p: 0.5, t: 0.0336, c4: -0.1036,
+    pivotFrac: 0.35,
+  }),
+  //   f117 — FACETED FLAT PANELS, TEST 014: SECTION EST — no curves exist;
+  //          the actual wedge polygon (double wedge, crest 0.45c, t 10% EST).
+  //          The facet corners are FIXED separation edges — the pedagogy
+  //          renders at any grid res (corner separation, not boundary-layer
+  //          subtlety); sharp-edge separation is Re-ROBUST.
+  f117: Object.freeze({
+    name: 'FACETED FLAT PANELS', est: true, kind: 'facet',
+    m: 0, p: 0.5, t: 0.10, xm: 0.45, c4: -0.1036,
+    pivotFrac: 0.35,
+  }),
+  //   c130 — NACA 64A318 (root), TEST 015: DOCUMENTED designation (UIUC row,
+  //          the J kept the legacy wing), NO published ordinates — the same
+  //          EST 4-digit stand-in law as the F-16's 64A204: t 0.18 + camber
+  //          0.017 @ 0.5c approximating design cl 0.3. 18% thick — joins the
+  //          A-10 in the genuinely-resolving set (the third honest thick-wing
+  //          stall).
+  c130: Object.freeze({
+    name: 'NACA 64A318 (root)', est: true,
+    m: 0.017, p: 0.5, t: 0.18, c4: -0.1036,
+    pivotFrac: 0.35,
+  }),
 });
-function secYt(sec, xc) { // HALF-thickness, unit chord (4-digit closed-TE form)
+// NOTE (M14, named plan deviation): the V-22 has NO WING SECTION here — Bell's
+// custom section is proprietary and unverified; the wing chip reads dim
+// `wing · —` and opens THE TEST DECLINED card instead. METHODS carries the line.
+function secYt(sec, xc) { // HALF-thickness, unit chord — per section kind
+  if (sec.kind === 'biconvex') { // the ~10-line circular-arc mode (TEST 013, named plan amendment): arc through (0,0),(0.5,t/2),(1,0)
+    const h = sec.t / 2, R = (0.25 + h * h) / (2 * h);
+    return Math.max(0, Math.sqrt(Math.max(0, R * R - (xc - 0.5) * (xc - 0.5))) + h - R);
+  }
+  if (sec.kind === 'facet') // the wedge polygon (TEST 014): flat panels, sharp crest — no curves exist
+    return 0.5 * sec.t * Math.min(xc / sec.xm, (1 - xc) / (1 - sec.xm));
   return 5 * sec.t * (0.2969 * Math.sqrt(xc) - 0.1260 * xc - 0.3516 * xc * xc
-    + 0.2843 * xc * xc * xc + sec.c4 * xc * xc * xc * xc);
+    + 0.2843 * xc * xc * xc + sec.c4 * xc * xc * xc * xc); // 4-digit closed-TE form
 }
 function secYc(sec, xc) { // camber line, unit chord
   const { m, p } = sec;
@@ -3722,6 +3948,10 @@ const dom = {
   spec3: document.getElementById('spec3'),
   pairk: document.getElementById('pairk'),
   bridge: document.getElementById('bridge'),
+  specf104: document.getElementById('specf104'),
+  specf117: document.getElementById('specf117'),
+  specc130: document.getElementById('specc130'),
+  specv22: document.getElementById('specv22'),
   speclabel: document.getElementById('speclabel'),
   sl1: document.getElementById('sl1'),
   sl2: document.getElementById('sl2'),
@@ -3784,13 +4014,13 @@ function crossHz(samples, dts) { // upward mean-crossings; 0 until a real, regul
 }
 
 const T = { // __TUNNEL — the __PARK contract lineage
-  version: '0.12.0',
+  version: '1.0.0',
   tier: 'boot',
   press: PRESS, // the duotone canary — PRESS-LUM computes luminance-silence from these
   grid: null,
   article: null, // {type, ...geometry, alpha} — set by the live boot
-  articleKind: null, // 'plate' | 'f16' | 'a10' | 'f16-wing' | 'a10-wing' | 'cyl'
-  plane: null, // the selected plane ('f16' | 'a10') — THE PAIR ring
+  articleKind: null, // 'plate' | <plane> | '<plane>-wing' | 'cyl' (planes: f16 a10 f104 f117 c130 v22; the v22 has no wing kind — the card is its door)
+  plane: null, // the selected plane — THE PAIR ring, six wide since phase 13
   constants: C,
   constants3d: C3, // the 3D shared-constants object — VOL-CONST byte-compares this against qa/oracle3d.mjs
   vol: null, // VOLUME (phase 11) — the live boot fills this in; stills never (the door cannot render there)
@@ -3819,10 +4049,29 @@ const T = { // __TUNNEL — the __PARK contract lineage
         spreading: 'the air starts letting go — SEPARATION SPREADING',
         separated: 'the thick section quits — STALL · α {m}°',
       },
+      f104: {
+        attached: 'the air follows the skin — FLOW ATTACHED',
+        spreading: 'the air starts letting go — SEPARATION SPREADING',
+        separated: 'the razor section quits like a switch — STALL · α {m}°',
+      },
+      f117: {
+        attached: 'the air follows the skin — FLOW ATTACHED',
+        spreading: 'the air starts letting go — SEPARATION SPREADING',
+        separated: 'the corners pick the point — STALL · α {m}°',
+      },
+      c130: {
+        attached: 'the air follows the skin — FLOW ATTACHED',
+        spreading: 'the air starts letting go — SEPARATION SPREADING',
+        separated: 'the deep transport section quits — STALL · α {m}°',
+      },
     },
   },
   f16: { packed: '', masterSha: '' }, // filled at boot — the ART-F16 canary handles
   a10: { packed: '', masterSha: '' }, // filled at boot — the ART-A10 canary handles
+  f104: { packed: '', masterSha: '' }, // filled at boot — the ART-F104 canary handles
+  f117: { packed: '', masterSha: '' }, // filled at boot — the ART-F117 canary handles (facet-preservation law)
+  c130: { packed: '', masterSha: '' }, // filled at boot — the ART-C130 canary handles
+  v22: { packed: '', masterSha: '' }, // filled at boot — the ART-V22 canary handles
   wingOutline: (n, pk) => wingOutline(SEC[pk || 'f16'], n || 120), // the generator's points — QA cross-checks vs qa/sections.mjs
   powerState: () => ({ applied: 0, target: 0 }), // light poll (no GPU readback) — QA slew lane
   stats: async () => ({}),
@@ -4035,9 +4284,12 @@ async function gpuProbe() {
 // quarter-chord, WING 0.35c, AIRCRAFT F-16 0.56 L / A-10 0.46 L — the sting
 // laws; plate half-thickness 2 cells / wing tFloor 1.5 / ac 1× dilation ⇒
 // ≥3-cell minimum feature at every α; worst-α blockage ≤30% cap holds at ±32°)
-const PLANES = ['f16', 'a10']; // THE PAIR ring — [ and ] cycle this, keeping air
-const isWing = (k) => k === 'f16-wing' || k === 'a10-wing';
-const planeOf = (k) => (k === 'f16' || k === 'a10') ? k : (isWing(k) ? k.slice(0, 3) : null);
+const PLANES = ['f16', 'a10', 'f104', 'f117', 'c130', 'v22']; // the plane ring, accession order — [ and ] cycle this, keeping air
+const isWing = (k) => typeof k === 'string' && k.endsWith('-wing');
+const planeOf = (k) => PLANES.includes(k) ? k : (isWing(k) ? k.slice(0, -5) : null);
+// per-plane α limits (DATA-v1 class law): fighters ±32°; the C-130 is the
+// transport class at ±20° (blockage margin holds by construction)
+const ALIM = (pk) => (pk === 'c130' ? 20 : 32);
 // THE MODEL SHOP mount (phase 8): a user record becomes an ARTICLE by the
 // aircraft path exactly — same body-frame bitmap, same 1× dilation, same
 // detector tables, same sting. It is NOT an aircraft: the bar never lights
@@ -4086,7 +4338,7 @@ function makeArticle(kind, W, H) {
       maxR: g.maxRN * L,
     };
   }
-  if (kind === 'f16' || kind === 'a10') {
+  if (PLANES.includes(kind)) {
     const def = AC[kind], g = acGeom(kind), L = chord;
     return {
       type: 'ac', pk: kind, px: Math.round(0.22 * W + def.pivotL * L) + 0.5, py,
@@ -4121,7 +4373,9 @@ async function bootLive(g) {
   // the ARTICLE-PAIR bar: planes radio (f-16 · a-10 · plate) + article radio
   // (aircraft · wing); cylinder unlisted (?article=cyl); ?article=wing is the
   // phase-3 legacy alias for the F-16's section
-  const KINDS = ['plate', 'f16', 'a10', 'f16-wing', 'a10-wing', 'cyl', 'user', 'lineup'];
+  // every plane mounts as AIRCRAFT; wings exist only where a lawful section
+  // does (SEC) — the V-22 deliberately has none (the card is its door, M14)
+  const KINDS = ['plate', 'f16', 'a10', 'f104', 'f117', 'c130', 'v22', 'f16-wing', 'a10-wing', 'f104-wing', 'f117-wing', 'c130-wing', 'cyl', 'user', 'lineup'];
   let qk = Q.get('article'); if (qk === 'wing') qk = 'f16-wing';
   // 'user' is reachable only by mounting a shelf record, 'lineup' only by the
   // counts engine — never from the URL (boot/og stay the aircraft, asserted)
@@ -4135,6 +4389,43 @@ async function bootLive(g) {
   // duotone is a VIEW, never the default (COLOR-SCIENCE §2b deployment law) ----
   let view = 'smoke';
   const VIEWM = { smoke: 0, pressure: 1, specks: 2 };
+
+  // ———— THE TEST DECLINED card (TEST 016 · M14 · the honesty architecture
+  // refusing a measurement): below the conversion floor the V-22 hangs from
+  // her rotors and a wing tunnel has nothing true to say — the instrument
+  // declines, prints why, and offers one door. The floor rides the tunnel's
+  // only speed dial: power 40, the corridor's own lower number (wing lift
+  // builds 40–80 kn — the numbers live in the card's fine print, cited).
+  // Above the floor the airplane-mode article is tested like any other
+  // airframe; the stamp it earns is a normal separation stamp. ————
+  const V22_FLOOR = 40;
+  const DECLINED = { chip: false }; // chip = opened via the dim `wing · —` chip (one gesture, any power)
+  const declinedEl = document.getElementById('declined');
+  function declinedActive() {
+    return kind === 'v22' && !sealed && !swapping && (powerApplied < V22_FLOOR || DECLINED.chip);
+  }
+  function syncDeclined() {
+    const on = declinedActive();
+    if (on === !declinedEl.hidden) return;
+    declinedEl.hidden = !on;
+    if (on) { // the measurement is refused — measured voice withdraws while the card prints
+      dom.caption.hidden = true;
+      dom.gap.hidden = true;
+    } else if (capState) setCap(capState); // the card lifts — the measured caption returns as printed
+  }
+  function declinedChip() { DECLINED.chip = true; syncDeclined(); }
+  document.getElementById('declineddoor').addEventListener('click', () => { // exactly one door (refusal grammar)
+    DECLINED.chip = false;
+    setPowerTarget(Math.max(powerTarget, 60)); // wind past conversion — the plant slews, the card lifts at the floor
+    syncDeclined(); // a chip-opened card at held power lifts NOW — the plant may have nothing to slew
+  });
+  T.declined = () => ({ // QA surface — byte-comparable card strings + the floor
+    on: !declinedEl.hidden, floor: V22_FLOOR, chip: DECLINED.chip,
+    kicker: declinedEl.querySelector('.dk').textContent,
+    body: declinedEl.querySelector('.db').textContent,
+    fine: declinedEl.querySelector('.df').textContent,
+    door: document.getElementById('declineddoor').textContent,
+  });
 
   // ---- WIND-OFF state (LAW 6b): power→0 seals; the portrait develops ----
   let sealed = false, sealT0 = 0, developed = false, plating = false;
@@ -4197,6 +4488,7 @@ async function bootLive(g) {
   T.rung = { name: rung.name, tau: rung.tau, R0 }; // the boot pick, measured — QA + the record read this
   T.f16 = { packed: AC.f16.packed, masterSha: AC.f16.masterSha }; // ART-F16 canary handles
   T.a10 = { packed: AC.a10.packed, masterSha: AC.a10.masterSha }; // ART-A10 canary handles
+  for (const xpk of ['f104', 'f117', 'c130', 'v22']) T[xpk] = { packed: AC[xpk].packed, masterSha: AC[xpk].masterSha }; // ART-* canary handles, phase 13
   const ctx = dom.gpu.getContext('webgpu');
   if (!ctx) { S.destroy(); device.destroy(); return stills(); }
   const format = navigator.gpu.getPreferredCanvasFormat();
@@ -4218,7 +4510,7 @@ async function bootLive(g) {
   }
 
   // ---- the HAND: α state — persists across article swaps ----
-  const clampA = (v) => Math.max(-32, Math.min(32, v)); // α limits ±32° hard (fighter law)
+  const clampA = (v) => { const l = ALIM(planeOf(kind)); return Math.max(-l, Math.min(l, v)); }; // α limits per class (fighter ±32° / transport ±20° — DATA-v1)
   // per-frame Δα cap keeping wall-tip speed ≤ 0.08 lattice u — the MEASURED
   // stability envelope (oracle protocol; 0.08 carries FP16 margin). Set per
   // article from its true max pivot radius.
@@ -4239,6 +4531,9 @@ async function bootLive(g) {
   const WING_BREAK = { // each plane's WING owns the word at its break (dossier law)
     f16: ['the thin section quits — ', 'STALL'],
     a10: ['the thick section quits — ', 'STALL'],
+    f104: ['the razor section quits like a switch — ', 'STALL'],
+    f117: ['the corners pick the point — ', 'STALL'],
+    c130: ['the deep transport section quits — ', 'STALL'],
   };
   const fmtDeg = (v) => (v % 1 === 0 ? String(v) : v.toFixed(1));
 
@@ -4251,15 +4546,28 @@ async function bootLive(g) {
       if (wpk === 'a10') { // the Reynolds-flagship form (DECISIONS: the A-10 gap-line law)
         dom.gapm.textContent = `IN THIS TUNNEL : THE SECTION STALLS AT ${fmtDeg(mBreak)}°`;
         dom.gapsp.textContent = ' · AT FLIGHT REYNOLDS : ~17° EST · WHY →';
+      } else if (wpk === 'f104') { // the razor form — abrupt here, abrupt there (DATA-v1: switch, not hinge)
+        dom.gapm.textContent = `IN THIS TUNNEL : STALLS AT ${fmtDeg(mBreak)}°`;
+        dom.gapsp.textContent = ' · AT FLIGHT REYNOLDS : STILL A SWITCH, NOT A HINGE — near-zero warning, by design · WHY →';
+      } else if (wpk === 'f117') { // the inverted-Reynolds comparator (named plan amendment, VERBATIM — gap ≈ none)
+        dom.gapm.textContent = 'IN THIS TUNNEL : THE FACETS PICK THE SEPARATION POINT';
+        dom.gapsp.textContent = ' · AT FLIGHT REYNOLDS : THE CORNERS STILL DECIDE — the one jet this tunnel gets almost right . WHY →';
+      } else if (wpk === 'c130') { // the slipstream comparator (named plan amendment, VERBATIM — the tunnel has no propeller and says so)
+        dom.gapm.textContent = 'IN THIS TUNNEL : the wing flies in still air';
+        dom.gapsp.textContent = ' · AT TAKEOFF POWER : the props pour their river over it before the wheels move · WHY →';
       } else { // the F-16 two-reasons form
         dom.gapm.textContent = `IN THIS TUNNEL : STALLS AT ${fmtDeg(mBreak)}°`;
         dom.gapsp.textContent = ' · THE REAL JET FLIES TO ITS 25° LIMITER · TWO REASONS →';
       }
     }
-    dom.spec1.hidden = !gapOn; // beat 1 — the reynolds note (door renders as plain text this phase)
+    dom.spec1.hidden = !(gapOn && wpk !== 'f117'); // beat 1 — the reynolds note (the f-117 inverts it: its corners get their own beat)
     dom.spec2.hidden = !(gapOn && wpk === 'f16'); // beat 2 — the strakes line (the f-16's second reason)
     dom.spec3.hidden = !(gapOn && wpk === 'a10'); // beat 2' — the camber line (the a-10's WHY)
-    const bridgeOn = (kind === 'f16' || kind === 'a10') && sep; // the bridge kicker — AIRCRAFT articles, after separation
+    dom.specf104.hidden = !(gapOn && wpk === 'f104'); // the felt-cover line (dossier caption sample, spec voice)
+    dom.specf117.hidden = !(gapOn && wpk === 'f117'); // the Re-robust beat — the one regime this tunnel gets almost right
+    dom.specc130.hidden = kind !== 'c130'; // the slipstream lives in SPEC voice on the mounted C-130 (measured voice never implies prop-wash)
+    dom.specv22.hidden = kind !== 'v22'; // the disc-split admission — hairline ink, never in the mask (the B-2 blade-admission pattern)
+    const bridgeOn = PLANES.includes(kind) && kind !== 'v22' && sep; // the bridge kicker — AIRCRAFT articles with a WING to bridge to (the v-22's chip is the card)
     dom.bridge.hidden = !bridgeOn;
     if (bridgeOn && !bridgeTicked) { bridgeTicked = true; dom.wingword.classList.add('tick'); }
     // THE PAIR kicker: the a-10 WING holding inside the measured pair window
@@ -4290,6 +4598,7 @@ async function bootLive(g) {
     syncAnnex();
   }
   function detectorUpdate(m) {
+    if (declinedActive()) return; // TEST DECLINED: the measurement is refused — the detector holds under the card
     if (powerApplied < 15) return; // POWER-GATE law: below 15% the detector HOLDS — captions freeze
     if (!m.sepTot) return;
     const frac = m.sepRev / m.sepTot;
@@ -4365,10 +4674,20 @@ async function bootLive(g) {
     a10: 'TEST 006 · AIRCRAFT: A-10C THUNDERBOLT II . drag it — find where the air lets go',
     'f16-wing': "TEST 001 · WING: the f-16's thin section — NACA 64A204 (EST) . drag it — find the textbook stall",
     'a10-wing': "TEST 006 · WING: the a-10's fat, deeply cambered section — NACA 6716 . drag it — find the docile stall",
+    f104: 'TEST 013 · AIRCRAFT: F-104 STARFIGHTER . drag it — find where the air lets go',
+    f117: 'TEST 014 · AIRCRAFT: F-117A NIGHTHAWK . drag it — find where the air lets go',
+    c130: 'TEST 015 · AIRCRAFT: C-130J SUPER HERCULES . drag it — find where the air lets go',
+    v22: 'TEST 016 · AIRCRAFT: V-22 OSPREY — airplane mode, nacelles 0° . drag it — find where the air lets go',
+    'f104-wing': "TEST 013 · WING: the f-104's razor biconvex — 3.36% circular arcs . drag it — find the switch",
+    'f117-wing': "TEST 014 · WING: the f-117's faceted flat panels (EST) . drag it — the corners pick the point",
+    'c130-wing': "TEST 015 · WING: the c-130's deep transport section — 64A318 root (EST) . drag it — find the docile stall",
   };
-  const WING_SL = { // specimen label per plane's section (data law: EST vs EXACT declared)
+  const WING_SL = { // specimen label per plane's section (data law: EST vs EXACT vs DOCUMENTED declared)
     f16: ['TEST 001 · WING — NACA 64A204', 'SECTION EST · from published thickness/camber (t 4% · camber 1.1% @ 0.5c)'],
     a10: ['TEST 006 · WING — NACA 6716', 'SECTION EXACT · 1933 four-digit closed form (t 16% · camber 6% @ 0.7c)'],
+    f104: ['TEST 013 · WING — BICONVEX 3.36%', 'SECTION DOCUMENTED · circular-arc closed form from t/c (t 3.36% · symmetric) — nearly a plate in this tunnel, honestly'],
+    f117: ['TEST 014 · WING — FACETED FLAT PANELS', 'SECTION EST · faceted flat panels'],
+    c130: ['TEST 015 · WING — NACA 64A318 (root)', 'SECTION EST · from published designation (t 18% · camber 1.7% @ 0.5c stand-in)'],
   };
   function applyArticleDom() {
     A = S.article;
@@ -4432,6 +4751,8 @@ async function bootLive(g) {
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
     }
     syncArtmodeWords(); // phase 9: while a USER specimen is mounted the pair reads `test · pencil` (UX §2)
+    DECLINED.chip = false; // a fresh article never inherits the chip-opened card
+    syncDeclined();
     DA_MAX = hasAlpha() ? (0.08 * R0 / A.maxR) * 180 / Math.PI : 0;
     dom.caption.hidden = true; // caption block re-arms with the article
     dom.caption.classList.remove('broke');
@@ -4498,8 +4819,14 @@ async function bootLive(g) {
       return;
     }
     if (kind === 'plate' || kind === 'cyl' || kind === 'user' || kind === 'lineup') { swapArticle(plane); return; }
-    const nx = PLANES[(PLANES.indexOf(planeOf(kind)) + (dir > 0 ? 1 : PLANES.length - 1)) % PLANES.length];
-    swapArticle(isWing(kind) ? `${nx}-wing` : nx);
+    let ri = PLANES.indexOf(planeOf(kind));
+    for (let step = 0; step < PLANES.length; step++) { // the wing ring skips planes without a lawful section (the v-22 — its card is the door)
+      ri = (ri + (dir > 0 ? 1 : PLANES.length - 1) + PLANES.length) % PLANES.length;
+      const nx = PLANES[ri];
+      if (isWing(kind) && !SEC[nx]) continue;
+      swapArticle(isWing(kind) ? `${nx}-wing` : nx);
+      return;
+    }
   }
 
   // ---- POWER: etched ruled scale (120px hairline, ink ticks 0/25/50/75/100,
@@ -4584,8 +4911,11 @@ async function bootLive(g) {
   function syncArtmodeWords() { // UX §2: while a USER specimen is mounted, the bar's article pair reads test · pencil — the same slot, the same radio idiom the aircraft use for aircraft · wing. The sixteen never get the pencil.
     const shopArt = kind === 'user' || kind === 'lineup';
     const ws = dom.artmode.querySelectorAll('.aw');
+    const noWing = !shopArt && planeOf(kind) === 'v22'; // M14 named deviation: no wing article — dim chip, em-dash, the card is its door
     ws[0].textContent = shopArt ? 'test' : 'aircraft';
-    ws[1].textContent = shopArt ? 'pencil' : 'wing';
+    ws[1].textContent = shopArt ? 'pencil' : (noWing ? 'wing · —' : 'wing');
+    ws[1].classList.toggle('dim', noWing);
+    ws[1].title = noWing ? "no wing article — bell's section is proprietary · the test declined card is its door" : '';
     if (shopArt) {
       ws[0].classList.toggle('on', !PEN2.on); ws[0].setAttribute('aria-pressed', String(!PEN2.on));
       ws[1].classList.toggle('on', PEN2.on); ws[1].setAttribute('aria-pressed', String(PEN2.on));
@@ -5020,6 +5350,7 @@ async function bootLive(g) {
         return; // `test` is where you already are — the mounted state
       }
       if (PEN2.on) return; // a blank-paper session owns the stage until done or cancel
+      if (b.dataset.m === 'wing' && plane === 'v22') { declinedChip(); return; } // one gesture, no dead tap (M14 + the UX-critique spec): the chip opens the card
       swapArticle(b.dataset.m === 'wing' ? `${plane}-wing` : plane);
     });
   for (const b of dom.views.querySelectorAll('.vw'))
@@ -5179,13 +5510,16 @@ async function bootLive(g) {
         S.setPow(powerApplied / 100);
         drawPower();
         syncAnnex(); // POWER-GATE: gap line suppressed below 15%
+        syncDeclined(); // TEST DECLINED: the card follows the plant across the conversion floor
       }
       // —— LAW 6b wind-off: the seal, the develop, the honest reset ——
       if (!sealed && powerApplied === 0 && powerTarget === 0) {
         sealed = true; developed = false; sealT0 = now; // the page seals — pen up, absorption frozen
+        syncDeclined(); // wind-off owns the stage — the card yields to the portrait (LAW 6b)
         ink.setSealed(true);
       } else if (sealed && powerTarget > 0) { // power returns: the spool covers the reset
         sealed = false; developed = false;
+        syncDeclined(); // the card re-checks its floor as the wind returns
         ink.setSealed(false); ink.setDevelop(1);
         ink.clearDeposit(); // the trace clears honestly — a set portrait never rides new air
         dom.caption.hidden = true; dom.caption.classList.remove('broke');
@@ -6189,6 +6523,7 @@ fn accumulate(@builtin(global_invocation_id) gid: vec3<u32>) {
       dom.etch.hidden = true; etchOn = false;
       dom.caption.hidden = true;
       dom.gap.hidden = dom.spec1.hidden = dom.spec2.hidden = dom.spec3.hidden = dom.pairk.hidden = dom.bridge.hidden = true;
+      dom.specf104.hidden = dom.specf117.hidden = dom.specc130.hidden = dom.specv22.hidden = true;
       dom.shopspec.hidden = true;
       dom.viewsrow.hidden = true;
       dom.groundword.hidden = true;
