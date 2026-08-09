@@ -14,7 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#f6f4ee">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f6f4ee'/%3E%3Cpath d='M1.5 19.4 L30.5 16.4' stroke='%23989690' stroke-width='1'/%3E%3Cpath d='M3.5 19 C6.5 12.6 13.5 10.6 19.5 12 C24.5 13.2 28 15.4 29 16.6 C26 18.2 18.5 20.6 11.5 20.9 C7.5 21 4.5 20.3 3.5 19 Z' fill='%2318181c'/%3E%3Ccircle cx='4.2' cy='19' r='2.4' fill='%23e8b46f'/%3E%3C/svg%3E">
-<!-- CHALL TUNNEL v1.0.0 · phase 13 — THE WING FILLS (the last feature commit — the train's feature set is complete): four aircraft enter and the hangar holds 6 aircraft + 8 reference bodies + your shelf. F-104 STARFIGHTER (TEST 013 · RETIRED LEGEND · the tiny-wing extreme — what mach 2 cost in 1958): biconvex 3.36% WING via the ~10-line circular-arc generator mode (DOCUMENTED-parametric, the named plan amendment; the near-plate rendering is HONEST here — the one jet whose wing nearly IS a plate in the sky), MACH panel gains the NEEDLE nose class — the roster's first ATTACHED oblique shocks (θ-β-M at the cone half-angle EST; below attach-M the ledger says the shock stands off — no attached line may draw) + the textbook Ackeret section. F-117A NIGHTHAWK (TEST 014 · RETIRED LEGEND · shape-versus-air — statically unstable in pitch AND yaw, exactly two axes): the FACET-PRESERVATION law rides the master (no polyline smoothing exists in this pipeline — corners are identity; F117-FACETS counts them through the mask pipeline), WING = the actual wedge polygon (SECTION EST · faceted flat panels), the inverted-Reynolds comparator verbatim (the one jet this tunnel gets almost right), MACH greyed at 0.92 ◆ — the grey IS the lesson. C-130J SUPER HERCULES (TEST 015 · slipstream — the propeller's river): the tunnel has no propeller and SAYS so — the slipstream lives in spec voice only (the dossier caption + the takeoff-power comparator), prop disc = W4 dashed ghost in the DRAWING only, never in the mask (the disc law); E/H→J caveat printed on the specimen line; transport-class α limits ±20°; WING = 64A318 root as the EST 4-digit stand-in (the third honest thick-wing stall). V-22 OSPREY (TEST 016 · dual-mode · where wings end): a REAL airplane-mode article above the conversion floor + THE TEST DECLINED card below it (power < 40 — the corridor's own lower number on the tunnel's only speed dial; kicker + ratified card copy + corridor fine print + exactly one door, composed at the specimen anchor per the refusal grammar) — the honesty architecture extended from badging estimates to REFUSING a measurement; span basis nacelle-to-nacelle 14.0 m, NEVER rotors-turning 25.8 m (printed on the specimen line); NO wing article (Bell section proprietary) — the wing chip reads dim `wing · —` and opens the card in one gesture; disc edge = hairline dashed ink in the drawing, never in the solver mask (a spinning disc is mostly air). THE VALIDATION APPENDIX joins METHODS: V1–V6 — the zero (cylinder St), the 3D zero (sphere pair), implementation parity (lockstep diffs), thermal honesty (SOAK-20), the slow record (LONG EXPOSURE L1), the pedagogy gate (THE PAIR window) — every number measured on named hardware or cited, each row ending with what it does NOT prove, standing gaps named. · on phase 12 — THE MACH PANEL (R4 "supersonic, on paper"): DRAWN MATH, never the live solver (the solver is incompressible and METHODS says so — this panel is the one place aircraft Mach numbers appear; the tunnel never prints one). A `mach →` door on each aircraft's hangar sheet (data-driven from MACHTAB — a new plane lands by adding a row of machFeatures frozen from DATA-v1): the silhouette on paper with a Mach scrub, 0 → the per-plane cap on a fixed 0–2.5 rail (the rail greys past the cap — F-16 2.05 clean; A-10 0.75 with the placard-redline copy, its supersonic pen unreachable by construction). Subsonic prints NOTHING (honest); transonic 0.7–1.2 is THE HONEST GAP — a hatched band and one line, nothing pretends; supersonic is the drawn structure: detached bow shock at the Billig 1967 standoff (Δ/R = 0.143·exp(3.24/M²) sphere / 0.386·exp(4.67/M²) cylinder — the VERIFIED forms, DATA-v1 §V2, doi:10.2514/3.28969) ahead of the nose-class radius, attached obliques ONLY where deflection < θ_max(M) solved on the θ-β-M weak branch, Prandtl-Meyer fans at convex corners (lead μ(M1) → tail μ(M2)−θ, M2 from the inverted ν), the Mach cone μ = asin(1/M). Every printed angle is the closed-form solve at two decimals; corner deflections + nose radius are EST and badged on-panel; construction ink is the drawing office's blue (cited math — the RISO second ink); measured voice stays out entirely. Ackeret prints for THIN wing sections only (F-16 64A204 t 4% — dc_l/dα = 4/√(M²−1), EST badged); the A-10's 6716 refuses with `too thick for thin-airfoil theory — ackeret declined`. While the panel is open the solve HOLDS (paper over the instrument — MACH-NO-SOLVER asserts stats frozen); the chrome line is VERBATIM LAW: `drawn from θ-β-M + Billig 1967 · not the live solver · transonic 0.7–1.2 left honest`. · on phase 11 — VOLUME (R4 · docs/limit99/VOLUME.md): real 3D airflow for scanned objects and reference solids. WGSL D3Q19 BGK+Smagorinsky at FP16S SHIFTED storage, IN-PLACE single-buffer streaming (the 2D AA/esoteric-pull pattern generalized to 19 directions), halfway bounce-back STATIC masks, equilibrium inflow ramp + deterministic +y kick, ρ-ANCHORED zero-gradient outflow, quadratic-τ sponge (3D law max(16, 0.10·W)), free-slip on all four lateral faces (FLIPY/FLIPZ specular composition) — CONSTANTS3D mirrors qa/oracle3d.mjs EXACTLY (the shared-constants law; VOL-CONST byte-compares, VOL-DIFF-3D holds L∞(u) < 1e-3 vs the oracle at 200 lockstep steps, VOL-ST-GPU re-runs the ratified 192×96×96 D=24 sphere fixture on this page's own solver). THE ARTICLE: a `volume →` door on USER-MOUNTED articles ONLY (scanned meshes voxelized from the SAME parsed triangles the drop already read — surface rasterize + interior flood fill + the ≥3-cell dilation law; reference solids from the CLOSED VOLTAB — revolve/extrude of the drawn-clean row; aircraft NEVER mount in 3D: no honest 3D models exist, and the door is absent for them by construction). V1 = 256×128×128 × ss10 @ 60, probe-gated: a measured 96³ τ-probe must clear 2.6 GLUPS or the door prints the honest refusal card and nothing else; yaw/α is DETENTED (0/±15/±30) — each detent an async re-voxelize + fresh-cell refill behind the crane line, never a live morph. The ink is ORTHOGRAPHIC 3D-TRACER ink (ray-march refused twice): 2,097,152 tracers advected in the live field (RK2, trilinear), deposited into the same device-pixel deposit pipeline, depth as engraver's line weight (far span ×0.35 alpha, half duty), governor sheds tracers first. THE HONESTY FIREWALL: the chrome prints `VOLUME · QUALITATIVE · chord 44 cells · no numbers leave this view` — the badge is the only number the volume ever emits; no detector captions, no counts lineups, no gap lines, and no plates from the 3D field in v1 (the plate door prints the honest refusal). QA flags (query = QA space): ?qa=vol3d (the pinned 64×32×32 diff geometry) · ?qa=volst (the sphere St fixture) · ?volrefuse=1 (forced refusal) · ?volglups= (forced probe verdict; the real measurement still runs and is recorded). · on phase 10 — R3 FINER AIR + THE LONG EXPOSURE: the mid-rungs land as table data — probe order H1 → W1 1536×768×58 → W2 1280×640×48 → W3 1024×512×38, accept first pass, τ-gated at the LIMIT-2D 9 ms mid-rung pick law (W1 ≤9/58, W2 ≤9/48, W3 ≤9/38 ms/substep; the governor demotes through the table at boot, timing-only, never sniffing; H1's pick line and R₀ formula are byte-unchanged; STILLS stays the floor; MEDIAN-FREEZE asserted by frozen-region sha in qa/r3-live.mjs). THE LONG EXPOSURE (AM-14 / INSTRUMENT-LOCK §1.3): a door on the plate panel — `long exposure →` — runs the CURRENT specimen at 8192×4096 = 33,554,432 TRUE cells as a deliberate offline-in-browser exposure: its own device at raised limits (the live rungs keep default limits), the 2D-dispatch law for >16.7M cells (65,535-workgroup cap — the three NC-wide kernels re-index onto a 2D grid, default OFF, live rungs byte-identical), chunked 256-substep batches with the moment field integrated every chunk (the accumulation IS the negative), one full crossing at full wind, progress printed `exposing . 33,554,432 cells . N% . ~M min left`, cancellable, the wind holds while it runs; then the portrait develops at export class 6400×4000 — the badge prints cells · grid · the MEASURED crossing minutes, row two carries the honesty microline VERBATIM + `computed in this browser · not real-time`; a device that refuses (limits check or the out-of-memory error scope) gets the honest refusal printed at the door and nothing else prints, ever. QA flags (query = QA space, never product): ?rung=h1|w1|w2|w3 · ?qatau= (forced-τ pick, RUNG-LADDER lane) · ?lxgrid= · ?lxrefuse=1 · ?qa=st gains &stbatch= / &stlx=1 (the replay re-bake law: the frozen St fixture re-runs through every touched rung, ±2% of the 0.2139 baseline). · on phase 9 — THE MODEL SHOP, PHASE 2 (the pencil, the reference row, and the lawful counts): THE REFERENCE ROW R-001…R-008 joins the hangar wall as row citizens (drawn clean, one verbatim lesson each; `test →` mounts keeping air; the cylinder and flat plate keep their analytic in-tunnel masks — REF-CAL and LAYOUT laws unchanged); THE PENCIL — the drafting table, literal: wind-off, the outline lies flat with control points, the verb set CLOSED at {move, add, delete, smooth} (PENCIL-CAP is structural — the frozen tuple IS the tool), ≤50 undo session-scoped, `revert to trace` always present, blank-paper `draw →` door (a seeded 12-point blob, same four verbs); the original row is IMMUTABLE — edits bake through the spooled swap to a MOD accession (U-NNN/A · mod of U-NNN · the pencil; reference edits fork to fresh U-NNN), A/B = the existing held-air [ ] swap cycling the specimen family; THE COUNTS under the COMPARISON LAW (DECISIONS R2.5): `measure against the row →` re-measures up to three reference bodies LIVE this session at EQUAL FRONTAL HEIGHT and identical settings (one rake column, staircase settle, wake-rake momentum deficit), prints ONLY dimensionless ratios at one decimal under the verbatim chrome line — operands never print anywhere, seed spread demotes the print to ≈, a body too long for the wake at equal height gets the refusal card (never a silent rescale), and THE AIRCRAFT NEVER JOIN THE LINEUP (the picker is built from the reference row and nothing else — absent by construction). · on phase 8 — THE MODEL SHOP OPENS (phase 1, "the drop"): scan-anything enters the live page — drag a file (or the hangar's `load an object →` door), the mesh is read in a Worker and thrown away (magic bytes, typed refusals, never a throw), three ink sections print (silhouette / center slice / ground — never the mesh), the pencil traces the pick stroke-by-stroke, U-NNN accessions to THE SHELF (IndexedDB, cap 24, serials append-only, strikes leave tombstones), MODEL CHANGE spool → your wake in the same air as the sixteen; ground mode = free-slip floor at the wheel line, state printed on the specimen line; share = outline in the URL FRAGMENT only (#u=, ≤2000 chars, 12-bit deflate; the share-moment line prints beside the copied link); receiving #u= = rename-before-keep; METHODS gains the shop privacy paragraph verbatim. Comparison counts do NOT ship this phase — no drag numbers print. · on phase 7 — THE RECORD SURFACES: wind-off portraits (LAW 6b: power→0 seals the page, the trace develops ~3.5 s, done-beat) + PLATE exports (3200×2000 offscreen re-render, honesty microline verbatim, serial accession, filename law) + THE STILLS DIGNITY TIER (no-webgpu / prefers-reduced-motion / ?force=stills → one composed static state: paper + TEST 001 + a time-averaged impression from this instrument's own cpu oracle) + storage-throw boot + device-loss relight · on phase 6 (RISO lock + METHODS + hangar wall) + phase 5 (A-10 + THE PAIR) + phase 4 (pressure view) -->
+<!-- CHALL TUNNEL v1.1.0 · pass 1 — MEASURED, THEN MADE BETTER (R5; bench record docs/pass1/MEASURE.md): VOLUME rides both vsync intervals on fast panels (6+4 substep split, parity kept — p99 17.2 → 10.2 ms measured); the LONG EXPOSURE answers the door first and develops in ≤12 ms slices on a CPU-backed canvas (the one >50 ms block — compose+toBlob raster flush, not the setup — gone); counts bank the same last-3-tread operands in 6 treads not 8 (stationary from tread 2, measured; sheet prints while the crane returns — 33.5 → ~24 s, ratio inside seed spread); the drop arc overlaps naming with the pencil stroke + the accession write with the mount spool (3.45 → ~1 s); PASS1-* pins the greens (TTFI ≤500 bench · idle p95 ≤12 · brotli ≤200 KB · leak ±10% · VOL p99 ≤16.7 · LX <50 ms · drop ≤2.5 s · counts ≤26 s). · on phase 13 — THE WING FILLS (the last feature commit — the train's feature set is complete): four aircraft enter and the hangar holds 6 aircraft + 8 reference bodies + your shelf. F-104 STARFIGHTER (TEST 013 · RETIRED LEGEND · the tiny-wing extreme — what mach 2 cost in 1958): biconvex 3.36% WING via the ~10-line circular-arc generator mode (DOCUMENTED-parametric, the named plan amendment; the near-plate rendering is HONEST here — the one jet whose wing nearly IS a plate in the sky), MACH panel gains the NEEDLE nose class — the roster's first ATTACHED oblique shocks (θ-β-M at the cone half-angle EST; below attach-M the ledger says the shock stands off — no attached line may draw) + the textbook Ackeret section. F-117A NIGHTHAWK (TEST 014 · RETIRED LEGEND · shape-versus-air — statically unstable in pitch AND yaw, exactly two axes): the FACET-PRESERVATION law rides the master (no polyline smoothing exists in this pipeline — corners are identity; F117-FACETS counts them through the mask pipeline), WING = the actual wedge polygon (SECTION EST · faceted flat panels), the inverted-Reynolds comparator verbatim (the one jet this tunnel gets almost right), MACH greyed at 0.92 ◆ — the grey IS the lesson. C-130J SUPER HERCULES (TEST 015 · slipstream — the propeller's river): the tunnel has no propeller and SAYS so — the slipstream lives in spec voice only (the dossier caption + the takeoff-power comparator), prop disc = W4 dashed ghost in the DRAWING only, never in the mask (the disc law); E/H→J caveat printed on the specimen line; transport-class α limits ±20°; WING = 64A318 root as the EST 4-digit stand-in (the third honest thick-wing stall). V-22 OSPREY (TEST 016 · dual-mode · where wings end): a REAL airplane-mode article above the conversion floor + THE TEST DECLINED card below it (power < 40 — the corridor's own lower number on the tunnel's only speed dial; kicker + ratified card copy + corridor fine print + exactly one door, composed at the specimen anchor per the refusal grammar) — the honesty architecture extended from badging estimates to REFUSING a measurement; span basis nacelle-to-nacelle 14.0 m, NEVER rotors-turning 25.8 m (printed on the specimen line); NO wing article (Bell section proprietary) — the wing chip reads dim `wing · —` and opens the card in one gesture; disc edge = hairline dashed ink in the drawing, never in the solver mask (a spinning disc is mostly air). THE VALIDATION APPENDIX joins METHODS: V1–V6 — the zero (cylinder St), the 3D zero (sphere pair), implementation parity (lockstep diffs), thermal honesty (SOAK-20), the slow record (LONG EXPOSURE L1), the pedagogy gate (THE PAIR window) — every number measured on named hardware or cited, each row ending with what it does NOT prove, standing gaps named. · on phase 12 — THE MACH PANEL (R4 "supersonic, on paper"): DRAWN MATH, never the live solver (the solver is incompressible and METHODS says so — this panel is the one place aircraft Mach numbers appear; the tunnel never prints one). A `mach →` door on each aircraft's hangar sheet (data-driven from MACHTAB — a new plane lands by adding a row of machFeatures frozen from DATA-v1): the silhouette on paper with a Mach scrub, 0 → the per-plane cap on a fixed 0–2.5 rail (the rail greys past the cap — F-16 2.05 clean; A-10 0.75 with the placard-redline copy, its supersonic pen unreachable by construction). Subsonic prints NOTHING (honest); transonic 0.7–1.2 is THE HONEST GAP — a hatched band and one line, nothing pretends; supersonic is the drawn structure: detached bow shock at the Billig 1967 standoff (Δ/R = 0.143·exp(3.24/M²) sphere / 0.386·exp(4.67/M²) cylinder — the VERIFIED forms, DATA-v1 §V2, doi:10.2514/3.28969) ahead of the nose-class radius, attached obliques ONLY where deflection < θ_max(M) solved on the θ-β-M weak branch, Prandtl-Meyer fans at convex corners (lead μ(M1) → tail μ(M2)−θ, M2 from the inverted ν), the Mach cone μ = asin(1/M). Every printed angle is the closed-form solve at two decimals; corner deflections + nose radius are EST and badged on-panel; construction ink is the drawing office's blue (cited math — the RISO second ink); measured voice stays out entirely. Ackeret prints for THIN wing sections only (F-16 64A204 t 4% — dc_l/dα = 4/√(M²−1), EST badged); the A-10's 6716 refuses with `too thick for thin-airfoil theory — ackeret declined`. While the panel is open the solve HOLDS (paper over the instrument — MACH-NO-SOLVER asserts stats frozen); the chrome line is VERBATIM LAW: `drawn from θ-β-M + Billig 1967 · not the live solver · transonic 0.7–1.2 left honest`. · on phase 11 — VOLUME (R4 · docs/limit99/VOLUME.md): real 3D airflow for scanned objects and reference solids. WGSL D3Q19 BGK+Smagorinsky at FP16S SHIFTED storage, IN-PLACE single-buffer streaming (the 2D AA/esoteric-pull pattern generalized to 19 directions), halfway bounce-back STATIC masks, equilibrium inflow ramp + deterministic +y kick, ρ-ANCHORED zero-gradient outflow, quadratic-τ sponge (3D law max(16, 0.10·W)), free-slip on all four lateral faces (FLIPY/FLIPZ specular composition) — CONSTANTS3D mirrors qa/oracle3d.mjs EXACTLY (the shared-constants law; VOL-CONST byte-compares, VOL-DIFF-3D holds L∞(u) < 1e-3 vs the oracle at 200 lockstep steps, VOL-ST-GPU re-runs the ratified 192×96×96 D=24 sphere fixture on this page's own solver). THE ARTICLE: a `volume →` door on USER-MOUNTED articles ONLY (scanned meshes voxelized from the SAME parsed triangles the drop already read — surface rasterize + interior flood fill + the ≥3-cell dilation law; reference solids from the CLOSED VOLTAB — revolve/extrude of the drawn-clean row; aircraft NEVER mount in 3D: no honest 3D models exist, and the door is absent for them by construction). V1 = 256×128×128 × ss10 @ 60, probe-gated: a measured 96³ τ-probe must clear 2.6 GLUPS or the door prints the honest refusal card and nothing else; yaw/α is DETENTED (0/±15/±30) — each detent an async re-voxelize + fresh-cell refill behind the crane line, never a live morph. The ink is ORTHOGRAPHIC 3D-TRACER ink (ray-march refused twice): 2,097,152 tracers advected in the live field (RK2, trilinear), deposited into the same device-pixel deposit pipeline, depth as engraver's line weight (far span ×0.35 alpha, half duty), governor sheds tracers first. THE HONESTY FIREWALL: the chrome prints `VOLUME · QUALITATIVE · chord 44 cells · no numbers leave this view` — the badge is the only number the volume ever emits; no detector captions, no counts lineups, no gap lines, and no plates from the 3D field in v1 (the plate door prints the honest refusal). QA flags (query = QA space): ?qa=vol3d (the pinned 64×32×32 diff geometry) · ?qa=volst (the sphere St fixture) · ?volrefuse=1 (forced refusal) · ?volglups= (forced probe verdict; the real measurement still runs and is recorded). · on phase 10 — R3 FINER AIR + THE LONG EXPOSURE: the mid-rungs land as table data — probe order H1 → W1 1536×768×58 → W2 1280×640×48 → W3 1024×512×38, accept first pass, τ-gated at the LIMIT-2D 9 ms mid-rung pick law (W1 ≤9/58, W2 ≤9/48, W3 ≤9/38 ms/substep; the governor demotes through the table at boot, timing-only, never sniffing; H1's pick line and R₀ formula are byte-unchanged; STILLS stays the floor; MEDIAN-FREEZE asserted by frozen-region sha in qa/r3-live.mjs). THE LONG EXPOSURE (AM-14 / INSTRUMENT-LOCK §1.3): a door on the plate panel — `long exposure →` — runs the CURRENT specimen at 8192×4096 = 33,554,432 TRUE cells as a deliberate offline-in-browser exposure: its own device at raised limits (the live rungs keep default limits), the 2D-dispatch law for >16.7M cells (65,535-workgroup cap — the three NC-wide kernels re-index onto a 2D grid, default OFF, live rungs byte-identical), chunked 256-substep batches with the moment field integrated every chunk (the accumulation IS the negative), one full crossing at full wind, progress printed `exposing . 33,554,432 cells . N% . ~M min left`, cancellable, the wind holds while it runs; then the portrait develops at export class 6400×4000 — the badge prints cells · grid · the MEASURED crossing minutes, row two carries the honesty microline VERBATIM + `computed in this browser · not real-time`; a device that refuses (limits check or the out-of-memory error scope) gets the honest refusal printed at the door and nothing else prints, ever. QA flags (query = QA space, never product): ?rung=h1|w1|w2|w3 · ?qatau= (forced-τ pick, RUNG-LADDER lane) · ?lxgrid= · ?lxrefuse=1 · ?qa=st gains &stbatch= / &stlx=1 (the replay re-bake law: the frozen St fixture re-runs through every touched rung, ±2% of the 0.2139 baseline). · on phase 9 — THE MODEL SHOP, PHASE 2 (the pencil, the reference row, and the lawful counts): THE REFERENCE ROW R-001…R-008 joins the hangar wall as row citizens (drawn clean, one verbatim lesson each; `test →` mounts keeping air; the cylinder and flat plate keep their analytic in-tunnel masks — REF-CAL and LAYOUT laws unchanged); THE PENCIL — the drafting table, literal: wind-off, the outline lies flat with control points, the verb set CLOSED at {move, add, delete, smooth} (PENCIL-CAP is structural — the frozen tuple IS the tool), ≤50 undo session-scoped, `revert to trace` always present, blank-paper `draw →` door (a seeded 12-point blob, same four verbs); the original row is IMMUTABLE — edits bake through the spooled swap to a MOD accession (U-NNN/A · mod of U-NNN · the pencil; reference edits fork to fresh U-NNN), A/B = the existing held-air [ ] swap cycling the specimen family; THE COUNTS under the COMPARISON LAW (DECISIONS R2.5): `measure against the row →` re-measures up to three reference bodies LIVE this session at EQUAL FRONTAL HEIGHT and identical settings (one rake column, staircase settle, wake-rake momentum deficit), prints ONLY dimensionless ratios at one decimal under the verbatim chrome line — operands never print anywhere, seed spread demotes the print to ≈, a body too long for the wake at equal height gets the refusal card (never a silent rescale), and THE AIRCRAFT NEVER JOIN THE LINEUP (the picker is built from the reference row and nothing else — absent by construction). · on phase 8 — THE MODEL SHOP OPENS (phase 1, "the drop"): scan-anything enters the live page — drag a file (or the hangar's `load an object →` door), the mesh is read in a Worker and thrown away (magic bytes, typed refusals, never a throw), three ink sections print (silhouette / center slice / ground — never the mesh), the pencil traces the pick stroke-by-stroke, U-NNN accessions to THE SHELF (IndexedDB, cap 24, serials append-only, strikes leave tombstones), MODEL CHANGE spool → your wake in the same air as the sixteen; ground mode = free-slip floor at the wheel line, state printed on the specimen line; share = outline in the URL FRAGMENT only (#u=, ≤2000 chars, 12-bit deflate; the share-moment line prints beside the copied link); receiving #u= = rename-before-keep; METHODS gains the shop privacy paragraph verbatim. Comparison counts do NOT ship this phase — no drag numbers print. · on phase 7 — THE RECORD SURFACES: wind-off portraits (LAW 6b: power→0 seals the page, the trace develops ~3.5 s, done-beat) + PLATE exports (3200×2000 offscreen re-render, honesty microline verbatim, serial accession, filename law) + THE STILLS DIGNITY TIER (no-webgpu / prefers-reduced-motion / ?force=stills → one composed static state: paper + TEST 001 + a time-averaged impression from this instrument's own cpu oracle) + storage-throw boot + device-loss relight · on phase 6 (RISO lock + METHODS + hangar wall) + phase 5 (A-10 + THE PAIR) + phase 4 (pressure view) -->
 <style>
 :root { --bg:#f6f4ee; --ink:#18181c; --mid:#56565e; --dim:#69675f; --hair:#989690; --acc:#e8b46f; --accd:#8a5d0c; --spec:#255079; }
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -3608,7 +3608,9 @@ async function accessionOutline(outline, name, prov, ground) { // U-NNN append-o
     outline, ground: ground || null, prov,
     date: new Date().toISOString().slice(0, 10),
   };
-  rec.kept = (await shelf.put(rec)) !== false; // false = this browser refused storage — the honest-storage law prints it
+  const putP = shelf.put({ ...rec }); // pass 1: the write rides beside the mount spool (the clone precedes kept — stored shape unchanged)
+  rec.kept = true; // provisional for one spool; the landed truth follows
+  putP.then((v) => { rec.kept = v !== false; }); // false = storage refused — the honest-storage law prints it on the shelf row
   return { ok: true, rec };
 }
 // user outline (chord-normalized, y centered, from outline.mjs or a decoded
@@ -3840,9 +3842,12 @@ async function shopChoose(k) { // THE TRACE, then the label prompt
   SHOP.state = 'trace';
   E('shopcards').hidden = E('shopclean').hidden = true;
   slog('trace');
-  if (SHOP.rig) await SHOP.rig.trace(SHOP.pick.outline, SHOP.pick.ground); // the pencil draws it; reduced motion lands it in one frame
+  // pass 1 (the awaited stroke was the 3.45 s arc's tail): naming rides
+  // beside the pencil; the line stays honest in both tenses
+  const traceP = SHOP.rig ? SHOP.rig.trace(SHOP.pick.outline, SHOP.pick.ground) : Promise.resolve(); // the pencil draws it; reduced motion lands it in one frame
   SHOP.state = 'label';
-  shopSheet('the pencil has it . name the specimen and it accessions to your shelf', 'shoplabelrow');
+  shopSheet('the pencil traces it . name the specimen and it accessions to your shelf', 'shoplabelrow');
+  Promise.resolve(traceP).then(() => { if (SHOP.state === 'label') shopSheet('the pencil has it . name the specimen and it accessions to your shelf', 'shoplabelrow'); });
   const nm = E('shopname');
   nm.value = '';
   nm.focus();
@@ -4014,7 +4019,7 @@ function crossHz(samples, dts) { // upward mean-crossings; 0 until a real, regul
 }
 
 const T = { // __TUNNEL — the __PARK contract lineage
-  version: '1.0.0',
+  version: '1.1.0',
   tier: 'boot',
   press: PRESS, // the duotone canary — PRESS-LUM computes luminance-silence from these
   grid: null,
@@ -4436,6 +4441,7 @@ async function bootLive(g) {
     on: false, busy: false, hold: false, dev: null, S3: null, ink3: null, ctx3: null,
     alpha: 0, alphaT: 0, px: 0, py: 0, glups: null, vox: null, refusal: null,
     frames: 0, dts: [], covBusy: false, shedSpoke: false, clineBase: '', log: [],
+    split: false, // pass 1: the vsync split (≥~105 Hz panels, measured at mount)
   };
   const DEVELOP_S = 3.5, DEVELOP_GAIN = 1.6; // ~3-4 s ramp; the comp caps under LAW 1's 0.55
 
@@ -5156,15 +5162,15 @@ async function bootLive(g) {
     };
     return flux(cols.xu) - flux(cols.xr);
   }
-  const RAKE = { reads: 10, gapMs: 190, winMin: 4, winMax: 8, settle: 0.045 }; // ~2.3 s windows — longer than any shedding period this rig produces
+  const RAKE = { reads: 10, gapMs: 190, winMin: 4, winMax: 6, settle: 0.045 }; // ~2 s windows ≫ any shedding period here . winMax 6 (pass 1, measured): means stationary from tread 2 at every lawful setting — treads 7-8 re-sampled the same wake, moving the ratio less than the printed seed spread; the 4.5% exit still ends a quiet flow at 4
   async function settleBody(cols, label) { // the staircase settle: window means step toward the established wake; stop when the last treads agree
     const wins = [];
     for (let w = 0; w < RAKE.winMax; w++) {
       let acc = 0;
       for (let k = 0; k < RAKE.reads; k++) {
         if (countsCancel) return null;
-        acc += await rakeRead(cols);
-        await new Promise((r) => setTimeout(r, RAKE.gapMs));
+        const [v] = await Promise.all([rakeRead(cols), new Promise((r) => setTimeout(r, RAKE.gapMs))]); // the readback rides the gap — the 190 ms sampling grid is exact now (pass 1)
+        acc += v;
       }
       wins.push(acc / RAKE.reads);
       cntProgress(label, Math.min(0.95, (w + 1) / RAKE.winMax));
@@ -5259,13 +5265,13 @@ async function bootLive(g) {
     } catch (flag) {
       out.aborted = flag === 'cancel' ? 'cancelled' : 'the rig drifted — the lineup abandoned, nothing prints';
     } finally {
-      if (kind !== 'user') { mountUserGeom(user); await swapArticle('user', true); } // the specimen returns through the spooled swap, whatever happened
       E('countsline').hidden = true;
+      if (!out.aborted && (out.ratios.length || out.refused.length)) {
+        T.countsLast = { ratios: out.ratios, refused: out.refused, rig: out.rig, at: Date.now() }; // ratios + pins only — operands live and die in this closure
+        cntShowResult(user, out); // the sheet prints first — every operand is already banked; the crane works behind it (pass 1)
+      }
+      if (kind !== 'user') { mountUserGeom(user); await swapArticle('user', true); } // the specimen returns through the spooled swap, whatever happened
       countsBusy = false;
-    }
-    if (!out.aborted && (out.ratios.length || out.refused.length)) {
-      T.countsLast = { ratios: out.ratios, refused: out.refused, rig: out.rig, at: Date.now() }; // ratios + pins only — operands live and die in this closure
-      cntShowResult(user, out);
     }
     return null; // nothing measured ever leaves this function
   }
@@ -6009,6 +6015,9 @@ async function bootLive(g) {
     T.lxProgress = null;
     lxcancel.hidden = false;
     lxdoor.textContent = 'preparing the exposure …';
+    // pass 1: the door's word paints before any allocation work (the
+    // timeout keeps an occluded window moving)
+    await new Promise((res) => { const tm = setTimeout(res, 250); requestAnimationFrame(() => requestAnimationFrame(() => { clearTimeout(tm); res(); })); });
     let LS = null, accum = null, ldev = null;
     try {
       const [LW, LH] = lxGrid();
@@ -6094,6 +6103,10 @@ fn accumulate(@builtin(global_invocation_id) gid: vec3<u32>) {
       await ldev.queue.onSubmittedWorkDone();
       const acc = new Float32Array(await LS.readBuf(accum, CELLS * 4));
       const wallMs = performance.now() - T0;
+      // pass 1 (measured): the arc's one >50 ms block lived HERE — compose +
+      // toBlob raster-flush as one task (68 ms at QA grid, larger at L1).
+      // Now: breathe, then a sliced compose on a CPU-backed canvas.
+      await new Promise((res) => { const tm = setTimeout(res, 250); requestAnimationFrame(() => { clearTimeout(tm); res(); }); });
       const serial = (parseInt(store.get('challtunnel.lxserial'), 10) || 0) + 1;
       store.set('challtunnel.lxserial', String(serial));
       const capx = {
@@ -6102,7 +6115,7 @@ fn accumulate(@builtin(global_invocation_id) gid: vec3<u32>) {
         sl1: dom.speclabel.hidden ? '' : dom.sl1.textContent,
         date: new Date().toISOString().slice(0, 10),
       };
-      const cv = composeExposure(capx, acc);
+      const cv = await composeExposure(capx, acc);
       const blob = await new Promise((res) => cv.toBlob(res, 'image/png'));
       const sha256 = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', await blob.arrayBuffer())))
         .map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -6136,18 +6149,29 @@ fn accumulate(@builtin(global_invocation_id) gid: vec3<u32>) {
       lastT = performance.now(); // the live wind resumes on a clean clock
     }
   }
-  function composeExposure(capx, acc) { // the portrait — export class, layout at 1600×1000 ×4
+  async function composeExposure(capx, acc) { // the portrait — export class, layout at 1600×1000 ×4
     const PW = 6400, PH = 4000, ps = 4;
     const { LW, LH, samples } = capx;
     const cv = document.createElement('canvas');
     cv.width = PW; cv.height = PH;
-    const g = cv.getContext('2d');
+    const g = cv.getContext('2d', { willReadFrequently: true }); // CPU-backed on purpose (pass 1, measured): toBlob's sync span drops 63 ms → 0.1 — the encode leaves the main thread entirely
     const FONT = (px, wt) => `${wt ? wt + ' ' : ''}${px}px "SF Mono", ui-monospace, Menlo, Consolas, monospace`;
+    // every long stretch of CPU raster below breathes at ≤12 ms — the develop
+    // never blocks a frame (pass 1; the timeout keeps an occluded page moving)
+    let slice0 = performance.now();
+    const breathe = async () => {
+      if (performance.now() - slice0 <= 12) return;
+      g.getImageData(0, 0, 1, 1); // flush the raster NOW, sliced — otherwise every op flushes inside toBlob as one ~70-90 ms task (measured; with this: zero longtasks)
+      await new Promise((res) => { const tm = setTimeout(res, 100); requestAnimationFrame(() => { clearTimeout(tm); res(); }); });
+      slice0 = performance.now();
+    };
     g.scale(ps, ps);
     g.fillStyle = '#f6f4ee'; g.fillRect(0, 0, 1600, 1000);
     g.fillStyle = TOK.hair; g.globalAlpha = 0.5;
-    for (let y = 20; y < 1000; y += 20)
+    for (let y = 20; y < 1000; y += 20) {
+      await breathe();
       for (let x = 20; x < 1600; x += 20) { g.beginPath(); g.arc(x, y, 0.75, 0, 6.2832); g.fill(); }
+    }
     g.globalAlpha = 1;
     const FX0 = 31, FX1 = 1569, FY0 = 31, FY1 = 880;
     const devW = (FX1 - FX0) * ps, devH = (FY1 - FY0) * ps;
@@ -6171,6 +6195,7 @@ fn accumulate(@builtin(global_invocation_id) gid: vec3<u32>) {
       for (let x = (0.10 * ow) | 0; x < 0.90 * ow; x += 4) { vRef += vAt(x, y); nRef++; }
     vRef = nRef ? Math.max(0.05, vRef / nRef) : 1;
     for (let y = 0; y < oh; y++) {
+      await breathe();
       for (let x = 0; x < ow; x++) {
         const d = Math.max(0, 1 - vAt(x, y) / vRef); // deficit vs the field's own freestream (og-v2 grammar)
         const a = Math.min(INK.cap, 0.9 * Math.pow(d, 1.2));
@@ -6188,9 +6213,11 @@ fn accumulate(@builtin(global_invocation_id) gid: vec3<u32>) {
     g.imageSmoothingEnabled = false; // 1:1 — no resample exists on this path
     g.drawImage(tmp, devX, devY);
     g.restore();
+    await breathe();
     const cell = ow / LW / ps, fx0 = devX / ps, fy0 = devY / ps;
     const fw = ow / ps, fh = oh / ps;
     // the silhouette — solid ink, LAST among flow layers (LAW 0 by paint order)
+    await breathe();
     g.save();
     g.translate(fx0 + capx.A.px * cell, fy0 + capx.A.py * cell);
     g.rotate(capx.alpha * Math.PI / 180);
@@ -6226,6 +6253,7 @@ fn accumulate(@builtin(global_invocation_id) gid: vec3<u32>) {
     g.fillStyle = '#255079'; g.font = FONT(9); g.letterSpacing = '1px';
     g.fillText(`time-integrated speed deficit vs the field's own freestream · one crossing from rest · ${samples} samples`, fx0 + fw - 14, fy0 + fh - 12);
     // caption band, ruled by a hairline
+    await breathe();
     const st = plateStrings({ ...capx, power: 100, view: 'smoke' });
     g.textBaseline = 'alphabetic';
     g.strokeStyle = TOK.hair; g.lineWidth = 0.5;
@@ -6266,11 +6294,13 @@ fn accumulate(@builtin(global_invocation_id) gid: vec3<u32>) {
       g.fillText('1 CHORD', x1 + 8, 956);
     }
     g.letterSpacing = '0px';
+    await breathe();
     // the double hairline frame — LAST, over everything
     g.strokeStyle = TOK.ink; g.lineWidth = 1;
     g.strokeRect(26, 26, 1548, 948);
     g.strokeStyle = TOK.hair;
     g.strokeRect(30, 30, 1540, 940);
+    g.getImageData(0, 0, 1, 1); // the last flush — the encode starts from a settled raster
     return cv;
   }
   E('lxword').hidden = false; // THE LONG EXPOSURE door — live tier only (stills cannot expose)
@@ -6445,9 +6475,17 @@ fn accumulate(@builtin(global_invocation_id) gid: vec3<u32>) {
         drawPower();
       }
       try {
+        // THE VSYNC SPLIT (pass 1, measured twice): the one-tick ss10 encode
+        // rode the 2-vsync line at 120 Hz (p99 17.2 vs the ≤16.7 law). On
+        // ≥~105 Hz panels the ten substeps ride BOTH vsync intervals — 6 one
+        // tick, 4 the next — ink presenting EVERY tick (half-rate presents
+        // measured worse: an adaptive panel follows content down). Even
+        // counts keep frame-boundary parity (swapMask law); physics stays
+        // ss10 @ 60, exact at 120 Hz. Slower panels: single-tick, unchanged.
         const enc = VOL.dev.createCommandEncoder();
         { const pass = enc.beginComputePass();
-          for (let i = 0; i < VOL_GRID.SS; i++) VOL.S3.encodeSubstep(pass);
+          const nSS = VOL.split ? (VOL.frames % 2 === 0 ? 4 : 6) : VOL_GRID.SS;
+          for (let i = 0; i < nSS; i++) VOL.S3.encodeSubstep(pass);
           VOL.S3.encodeFields(pass); // the moment field the tracers ride
           pass.end(); }
         VOL.ink3.encodeFrame(enc, VOL.ctx3.getCurrentTexture().createView(), dt);
@@ -6513,7 +6551,18 @@ fn accumulate(@builtin(global_invocation_id) gid: vec3<u32>) {
       VOL.ctx3 = cv3.getContext('webgpu');
       VOL.ctx3.configure({ device: dev, format, alphaMode: 'premultiplied' });
       ink3.resize(cv3.width, cv3.height);
+      const hzP = new Promise((res) => { // panel cadence, measured during the spool (timing-only, never sniffing); an occluded window answers null via the race below
+        const ts = [];
+        const f = (t) => { ts.push(t); if (ts.length < 25) requestAnimationFrame(f); else res(ts); };
+        requestAnimationFrame(f);
+      });
       await S3.stepN(600); // the spool covers the ramp — the article arrives in moving air
+      { const ts = await Promise.race([hzP, new Promise((res) => setTimeout(() => res(null), 1500))]);
+        if (ts && ts.length >= 3) {
+          const ds = []; for (let i = 1; i < ts.length; i++) ds.push(ts[i] - ts[i - 1]);
+          ds.sort((a, b) => a - b);
+          VOL.split = ds[ds.length >> 1] < 9.5; // ≥ ~105 Hz: the substeps ride both vsync intervals (pass 1); slower panels have the 2-vsync headroom already
+        } else VOL.split = false; }
       // —— the chrome swap + THE FIREWALL: badge on, every measured-voice
       // surface of the 2D section off; the badge is the only number ——
       VOL.on = true;
@@ -6591,6 +6640,7 @@ fn accumulate(@builtin(global_invocation_id) gid: vec3<u32>) {
     },
     state: () => ({
       on: VOL.on, busy: VOL.busy, grid: `${VOL_GRID.W}×${VOL_GRID.H}×${VOL_GRID.D}`, ss: VOL_GRID.SS,
+      split: VOL.split, // pass 1: the vsync split, measured at mount — QA verifies engagement
       chordCells: volChord(), alpha: VOL.alpha, alphaT: VOL.alphaT,
       tracers: VOL.ink3 ? VOL.ink3.npDraw : 0, glups: VOL.glups,
       badge: VOL_BADGE(), refusal: VOL.refusal, vox: VOL.vox,
