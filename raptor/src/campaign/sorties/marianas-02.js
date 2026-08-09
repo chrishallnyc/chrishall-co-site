@@ -8,7 +8,9 @@
 //   1 BRIEF      351-353 — the group, the hull math, the name in the haze
 //   2 SPAWN      ON_START 351
 //   3 INGRESS    spawn (8000,-14000) -> push point (-8000,-2000) ≈ 20 km ≈
-//                90 s, carrier station 24 km beyond; 354 at t25, 359 at t70
+//                90 s, carrier station ≈ 6 km beyond (the boot rows sit at
+//                (-13000,1600)/(-12800,3400) — D-073 SHOULD fixed the old
+//                "24 km" figure); 354 at t25, 359 at t70
 //   4 OBJ A      obj 2: carrier (hp 250) + destroyer screen (hp 120) —
 //                boot rows 0,1; a real multi-pass rearm mission in play
 //   5 THE TURN   ON_OBJECTIVE_DONE(2) -> 355 + SHRIKE guard taunt 388.
@@ -91,10 +93,12 @@ export default {
       { on: TRIG.ON_START, lineId: 351 },
       { on: TRIG.ON_TIME, t: 25, lineId: 354 },
       { on: TRIG.ON_TIME, t: 70, lineId: 359 },              // the screen wakes up
+      { on: TRIG.ON_TIME, t: 290, lineId: 392 },             // SHRIKE descent tracking warning, un-gated (D-073 SHOULD)
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 1, lineId: 358 },   // tally the group
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 2, lineId: 355 },   // THE TURN
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 2, lineId: 388 },   // SHRIKE on guard
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 4, lineId: 356 },   // victory
+      { on: TRIG.ON_TIME, t: 1200, lineId: 398 },            // 5-min clock warning (D-073 SHOULD)
       { on: TRIG.ON_TIME, t: 1500, lineId: 357 },            // timeout defeat
       { on: TRIG.ON_ACE_STATE, aceId: 4, aceState: "smoking", lineId: 389 },
       { on: TRIG.ON_ACE_STATE, aceId: 4, aceState: "escaped", lineId: 390 },

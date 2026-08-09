@@ -86,10 +86,12 @@ export default {
       { on: TRIG.ON_START, lineId: 341 },
       { on: TRIG.ON_TIME, t: 25, lineId: 344 },
       { on: TRIG.ON_TIME, t: 85, lineId: 349 },              // contacts east
+      { on: TRIG.ON_TIME, t: 255, lineId: 393 },             // wave-2 backstop, un-gated (D-073 SHOULD; dive ≈ 280-290 s)
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 1, lineId: 348 },   // on station
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 2, lineId: 345 },   // THE TURN
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 3, lineId: 346 },   // victory
       { on: TRIG.ON_OBJECTIVE_FAILED, obj: 4, lineId: 347 }, // hull loss
+      { on: TRIG.ON_TIME, t: 1500, lineId: 440 },            // defense timeout = VICTORY flavor (D-073 SHOULD)
     ],
     scoreKm: 2.5,
   },

@@ -93,7 +93,8 @@ export default {
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 1, lineId: 308 },   // tally call
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 2, lineId: 305 },   // THE TURN
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 3, lineId: 306 },   // victory
-      { on: TRIG.ON_TIME, t: 1500, lineId: 307 },            // timeout defeat
+      { on: TRIG.ON_TIME, t: 1200, lineId: 396 },            // 5-min clock warning (D-073 SHOULD)
+      { on: TRIG.ON_TIME, t: 1500, lineId: 307 },            // timeout defeat (state-agnostic reword, D-073 SHOULD)
     ],
     scoreKm: 2.0,
   },

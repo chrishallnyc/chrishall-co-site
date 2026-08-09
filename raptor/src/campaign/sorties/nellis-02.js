@@ -95,6 +95,7 @@ export default {
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 1, lineId: 318 },   // contact the site
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 2, lineId: 315 },   // THE TURN
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 3, lineId: 316 },   // victory
+      { on: TRIG.ON_TIME, t: 1200, lineId: 397 },            // 5-min clock warning (D-073 SHOULD)
       { on: TRIG.ON_TIME, t: 1500, lineId: 317 },            // timeout defeat
       { on: TRIG.ON_ACE_STATE, aceId: 1, aceState: "smoking", lineId: 381 },
       { on: TRIG.ON_ACE_STATE, aceId: 1, aceState: "escaped", lineId: 382 },

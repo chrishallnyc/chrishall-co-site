@@ -16,10 +16,17 @@
 //                so an imperfect first intercept wounds, never loses)
 //   5 THE TURN   ON_OBJECTIVE_DONE(2) -> 325: the second stream was always
 //                airborne. AMBUSH TIMING TRICK: wave 2 spawns at START on
-//                ~75 km glacier-line dog-legs (≈ 314 s at cruise + dive) —
-//                it arrives as the real push at ~5.5 min, and it targets
-//                the TANKERS (hp 80: two hits kill — now the intercept has
-//                to be clean).
+//                ~75 km glacier-line dog-legs. DIVE COMMIT ≈ 281 s: the
+//                route crosses ATTACK_R (8 km from the tankers) at ~67 km
+//                cumulative, on the (-12000,-27000)->(-4000,-25000) leg —
+//                the full 75.4 km route-to-target figure (≈ 314 s) is the
+//                UNCOMMITTED walk, not the dive (D-073 SHOULD: this header
+//                is the template for the next 24 sorties — document the
+//                commit crossing, not the terminus). The push lands at
+//                ~4.7 min targeting the TANKERS (hp 80: two hits kill —
+//                now the intercept has to be clean). ON_TIME t=270
+//                backstop 394 announces it even if obj 2 froze on a
+//                wave-1 egresser (D-073 SHOULD).
 //   6 CLIMAX     obj 3: three-ship stream against the tankers
 //   7 RESOLUTION 326 victory / 327 hull-loss defeat (protect need 1)
 //
@@ -61,7 +68,8 @@ export default {
       { kind: "fighter", tier: 1, x: -26000, y: -27500, z: 1100, headingDeg: 0, speed: 250, tag: 20, side: 0, attackTag: 11,
         wpts: [[-14000, -26500], [-4000, -24800], [1200, -24500]] },
       // wave 2 (tag 21): ~75 km glacier-line dog-legs at the TANKERS
-      // (cumulative km: 8.3/20/31.3/42.1/51.5/61.7/69.9/75.4 -> ≈ 314 s)
+      // (cumulative km: 8.2/19.9/31.2/42.0/51.4/61.6/69.9/75.4; ATTACK_R
+      // crossed at ~67.3 km on the 7th leg -> dive commit ≈ 281 s)
       { kind: "fighter", tier: 2, x: -28000, y: -22000, z: 1000, headingDeg: 20, speed: 250, tag: 21, side: 0, attackTag: 10,
         wpts: [[-26000, -14000], [-16000, -8000], [-24000, -16000], [-14000, -20000], [-22000, -25000], [-12000, -27000], [-4000, -25000], [1500, -25500]] },
       { kind: "fighter", tier: 2, x: -29000, y: -20500, z: 1300, headingDeg: 20, speed: 250, tag: 21, side: 0, attackTag: 10,
@@ -81,10 +89,12 @@ export default {
       { on: TRIG.ON_START, lineId: 321 },
       { on: TRIG.ON_TIME, t: 25, lineId: 324 },
       { on: TRIG.ON_TIME, t: 80, lineId: 329 },              // skimmers confirmed
+      { on: TRIG.ON_TIME, t: 270, lineId: 394 },             // wave-2 backstop, un-gated (D-073 SHOULD)
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 1, lineId: 328 },   // on station
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 2, lineId: 325 },   // THE TURN
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 3, lineId: 326 },   // victory
       { on: TRIG.ON_OBJECTIVE_FAILED, obj: 4, lineId: 327 }, // hull loss
+      { on: TRIG.ON_TIME, t: 1500, lineId: 399 },            // defense timeout = VICTORY flavor (D-073 SHOULD)
     ],
     scoreKm: 2.5,
   },

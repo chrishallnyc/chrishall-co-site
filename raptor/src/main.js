@@ -17,7 +17,7 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.30.0";
+const VERSION = "0.31.0";
 const PHASE = 12;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
@@ -411,6 +411,15 @@ async function boot() {
           if (!bandits.live[i]) continue;
           const o = i * 14;
           const bx = bandits.state[o], by = bandits.state[o + 1], bz = bandits.state[o + 2];
+          // detection gate (D-073 panel enabler): a contact earns its diamond
+          // by closing inside 18 km or by maneuvering against you — so an
+          // authored "pop-up" reveal can actually pop. ?alldiamonds=1 reverts.
+          if (!seenB[i] && flags.get("alldiamonds") !== "1") {
+            const bs = bandits.state[o + 7];
+            const close = Math.hypot(bx - st[0], by - st[1], bz - st[2]) < 18000;
+            if (close || (bs >= 1 && bs <= 3)) seenB[i] = 1;
+            else continue;
+          }
           _bv.set(bx, bz, by).project(camera); // ENU -> three -> NDC
           if (_bv.z > 1) continue; // behind the camera plane
           const sx = (_bv.x * 0.5 + 0.5) * w, sy = (-_bv.y * 0.5 + 0.5) * h;
@@ -616,6 +625,7 @@ async function boot() {
   // point (captured from the last frame BEFORE the sim reset teleported the
   // jet home). On match end: a continuous victory/defeat orbit of the jet.
   let killCam = null; // { c: Vector3, until: ms }
+  const seenB = new Uint8Array(8); // HUD detection latch per bandit slot (render-side; slots never recycle)
   let kcCrashes = player ? player.crashes : 0;
   const lastJetPos = new THREE.Vector3();
   const kcPos = new THREE.Vector3();
