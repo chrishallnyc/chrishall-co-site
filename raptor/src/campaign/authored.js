@@ -21,11 +21,19 @@ export const CAMPAIGN = [
   { id: "V04", front: "VALDEZ" },
   { id: "M03", front: "MARIANAS" },
   { id: "M04", front: "MARIANAS" },
+  // INC-8 batch 2 (D-074 NEXT): the escalation circuit — the middle third
+  { id: "N05", front: "NELLIS" },
+  { id: "N06", front: "NELLIS" },
+  { id: "V05", front: "VALDEZ" },
+  { id: "V06", front: "VALDEZ" },
+  { id: "M05", front: "MARIANAS" },
+  { id: "M06", front: "MARIANAS" },
 ];
 
 const FILE = {
   N01: "nellis-01", N02: "nellis-02", V01: "valdez-01", V02: "valdez-02", M01: "marianas-01", M02: "marianas-02",
   N03: "nellis-03", N04: "nellis-04", V03: "valdez-03", V04: "valdez-04", M03: "marianas-03", M04: "marianas-04",
+  N05: "nellis-05", N06: "nellis-06", V05: "valdez-05", V06: "valdez-06", M05: "marianas-05", M06: "marianas-06",
 };
 const KEY = "raptor.auth.v1";
 

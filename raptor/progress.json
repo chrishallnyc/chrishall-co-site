@@ -1,11 +1,12 @@
 {
- "updated": "2026-08-08T23:20:00-07:00",
- "version": "v0.32.0",
- "now": "v0.32.0 \u2014 a real settings menu: graphics quality, FOV, audio mixer, motion reduction, colorblind-safe markers",
+ "updated": "2026-08-09T00:55:00-07:00",
+ "version": "v0.33.0",
+ "now": "v0.33.0 \u2014 eighteen sorties deep: the campaign's middle third, from silent midnight harbors to the first 4-v-1",
  "nowPhase": 12,
  "paused": false,
- "pushes": 64,
+ "pushes": 65,
  "ledger": [
+  "2026-08-09 v0.33.0 \u2014 EIGHTEEN DEEP: the campaign's escalating middle third. THE AIR BRIDGE (strangle an airlift before wheels-down), THE COUNTERPUSH (for once the ground wins the war \u2014 you just keep JACKAL off their backs), STILL WATER (a silent midnight-sun harbor raid), HOLD UNTIL RELIEVED (a station-defense marathon with three relays and a coda), SCATTER (SEAD, then chase the survivors down two roads), and FOUR CORNERS \u2014 the campaign's first honest 4-v-1. A second drama panel reviewed every beat; its fixes are in, including radio that never lies about the clock.",
   "2026-08-08 v0.32.0 \u2014 YOUR COCKPIT, YOUR RULES: a real settings menu inside Esc \u2014 graphics quality with honest live/reload labels, render scale and field-of-view sliders that apply instantly, a three-channel audio mixer, motion reduction for flash-sensitive pilots, subtitle scaling, and colorblind-safe HUD marker palettes (deuteranopia/tritanopia). Auto quality still benchmarks your machine on first run; now you can overrule it.",
   "2026-08-08 v0.31.0 \u2014 TWELVE SORTIES DEEP: the authored campaign doubles \u2014 six new set-pieces including night convoy work and friendly escort duty, plus every fix the drama panel ordered on the first six. Contacts now EARN their HUD diamond: you see a bandit when it closes inside 18km or turns against you, so when OVERLORD calls a pop-up group, it actually pops up.",
   "2026-08-08 v0.30.0 \u2014 THE CAMPAIGN OPENS: six authored sorties, two per front, each built on a seven-beat arc \u2014 briefing, ingress radio, the objective, THE TURN (an authored ambush that arrives exactly when it should), climax, resolution. FIRST BLOOD over Nevada, JACKAL'S HOUR against a live SAM ring, HOLD THE NARROWS in the fjords, a drone footrace to the fence, the reef line, and THE HORNET'S NEST with SHRIKE waiting in the haze. Linear unlock chain in the hangar; a three-judge drama panel reviewed every beat and its fixes are in. The autoplay harness that proves every sortie winnable AND losable is now the permanent content gate.",
@@ -112,7 +113,7 @@
   {
    "n": 11,
    "name": "Authored campaign (30+ sorties)",
-   "pct": 40,
+   "pct": 60,
    "note": ""
   },
   {
