@@ -168,6 +168,9 @@ export class ControlsMenu {
     h += slider("masterVol", "MASTER VOLUME", 0, 1, 0.05, s.masterVol, Math.round(s.masterVol * 100) + "%", audioOn);
     h += slider("engineVol", "ENGINE VOLUME", 0, 1, 0.05, s.engineVol, Math.round(s.engineVol * 100) + "%", audioOn);
     h += slider("uiVol", "UI / TONES VOLUME", 0, 1, 0.05, s.uiVol, Math.round(s.uiVol * 100) + "%", audioOn);
+    h += `<div class="srow"><span class="rlabel">RADIO VOICE (TTS)</span><span class="schips">${liveChip(hasLive("voice"))}
+      <button type="button" class="chip voicechip${!s.voice ? " sel" : ""}" data-v="0">OFF</button>
+      <button type="button" class="chip voicechip${s.voice ? " sel" : ""}" data-v="1">ON</button></span></div>`;
     h += `<div class="srow"><span class="rlabel">MOTION REDUCTION</span><span class="schips">${liveChip(hudOn || hasLive("gunFlash"))}
       <button type="button" class="chip motionchip${!s.motionReduce ? " sel" : ""}" data-v="0">OFF</button>
       <button type="button" class="chip motionchip${s.motionReduce ? " sel" : ""}" data-v="1">ON</button></span></div>`;
@@ -184,6 +187,8 @@ export class ControlsMenu {
       b.addEventListener("click", () => { saveSettings({ tier: b.dataset.tier }); this._render(); }));
     this.el.querySelectorAll(".motionchip").forEach((b) =>
       b.addEventListener("click", () => { saveSettings({ motionReduce: b.dataset.v === "1" }); this._render(); }));
+    this.el.querySelectorAll(".voicechip").forEach((b) =>
+      b.addEventListener("click", () => { saveSettings({ voice: b.dataset.v === "1" }); this._render(); }));
     this.el.querySelectorAll(".palchip").forEach((b) =>
       b.addEventListener("click", () => { saveSettings({ markerPalette: b.dataset.pal }); this._render(); }));
     this.el.querySelectorAll(".srange").forEach((r) =>

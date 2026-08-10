@@ -1,11 +1,12 @@
 {
- "updated": "2026-08-09T22:05:00-07:00",
- "version": "v0.35.0",
- "now": "Road to v1.0: voice spike in flight, polish list burning down. Multiplayer is cut \u2014 this is a single-pilot war, by design.",
+ "updated": "2026-08-09T22:45:00-07:00",
+ "version": "v0.36.0",
+ "now": "v0.36.0 THE VOICE \u2014 the radio can speak (experimental toggle in settings). Remaining to v1.0: marianas inpaint, gun fader, PWA shell.",
  "nowPhase": 12,
  "paused": false,
- "pushes": 68,
+ "pushes": 69,
  "ledger": [
+  "2026-08-09 v0.36.0 \u2014 THE VOICE (experimental): flip RADIO VOICE in settings and the war talks \u2014 OVERLORD gets a measured British calm, enemy aces get a low deliberate menace (an ace is never hurried \u2014 urgent calls speed up for everyone else, never for them), and your own pilot answers in kind. All 410 radio lines cast automatically. Ships OFF by default: it's built on the voices your machine already has, and honesty about that is the feature.",
   "2026-08-09 \u2014 SCOPE CUT (Chris): multiplayer is out \u2014 no P2P duels, no server battles. RAPTOR ships v1.0 as a complete single-pilot war: the campaign, the operation, the aces. The determinism foundation stays (it's what makes replays and the hash-gated QA possible), but nobody's building netcode.",
   "2026-08-09 v0.35.1 \u2014 polish riders: VIPER's escape chase now announces itself in its window, TYPHOON's objective reads NO ESCAPE on the HUD, M10's turn line is true on every path, JACKAL's dawn geometry corrected, V10's clock honest to the second. The finale panel's top five, all in.",
   "2026-08-09 v0.35.0 \u2014 THE FINALE: the campaign is complete. Thirty authored sorties across three real fronts, ending in three campaign closers \u2014 PAID IN FULL (everything NELLIS taught you converges while JACKAL's ledger closes), THE HOMECOMING (defend the fleet you escorted in sortie three, by the same lamp), and TYPHOON: the last boss over the sinking flagship, the campaign's only mandatory ace kill \u2014 let him reach the fence and the war ends unfinished. Victory cards now speak: OVERLORD's actual closing words replace the generic banner on every mission. Four drama panels reviewed all thirty; the radio never lied once.",
@@ -129,7 +130,7 @@
   {
    "n": 13,
    "name": "Audio & voice",
-   "pct": 55,
+   "pct": 80,
    "note": "engine, gun, seeker growl + lock tones live in-game"
   },
   {
@@ -141,7 +142,7 @@
   {
    "n": 15,
    "name": "Settings, accessibility, PWA",
-   "pct": 60,
+   "pct": 75,
    "note": "rebind menu live"
   },
   {

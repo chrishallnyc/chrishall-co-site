@@ -18,7 +18,7 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.35.0";
+const VERSION = "0.36.0";
 const PHASE = 12;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
@@ -604,8 +604,20 @@ async function boot() {
       audio = new AudioBus(); // builds engine/gun/lock voices itself
     } catch (err) { console.warn("audio unavailable:", err && err.message); }
   }
+  // PHASE 13 VOICE SPIKE: the radio gets a voice (settings toggle, default
+  // OFF). Voice reads settings.current() per utterance, so the bindLive ctx
+  // entry is only the LIVE-chip honesty signal for the menu row — it stays
+  // null (row honestly STORED) in free flight / when speechSynthesis is absent.
+  let voice = null;
+  if (script && missionData && "speechSynthesis" in window) {
+    try {
+      const V = await import("./game/voice.js");
+      voice = new V.Voice(SETTINGS);
+      V.hookComms(script, missionData, voice); // 300ms poll on script.commsHead
+    } catch (err) { console.warn("voice unavailable:", err && err.message); }
+  }
   // PHASE 15: settings go live (fov/renderScale/volumes/muzzle-flash gate)
-  SETTINGS.bindLive({ renderer, camera, audio, gunFlash: player ? player.gun.flash : null, baseTier: state.tier, hudLive: true });
+  SETTINGS.bindLive({ renderer, camera, audio, gunFlash: player ? player.gun.flash : null, baseTier: state.tier, hudLive: true, voice });
   // MAXFI A1: TRAA + bloom + flare post chain (WebGPU only; ?post=0 keeps
   // the plain pipe for QA baselines and numeric oracles)
   let post = null;

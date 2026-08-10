@@ -33,6 +33,7 @@ export const DEFAULTS = Object.freeze({
   masterVol: 1,        // 0-1, scales AudioBus.master (x0.9 shipped headroom)
   engineVol: 1,        // 0-1 -> EngineVoice.dry
   uiVol: 1,            // 0-1 -> LockTones.dry (RWR/seeker beeps)
+  voice: false,        // radio TTS (phase-13 voice spike) — OFF until judged by ear; volume rides uiVol
   motionReduce: false, // kills hit-flash vignette + muzzle-flash pulse
   subtitleScale: 1,    // 0.8-1.6, scales the comms-feed font in the HUD
   markerPalette: "default",
@@ -53,6 +54,7 @@ export function validate(raw) {
     masterVol: num(r.masterVol, 0, 1, DEFAULTS.masterVol),
     engineVol: num(r.engineVol, 0, 1, DEFAULTS.engineVol),
     uiVol: num(r.uiVol, 0, 1, DEFAULTS.uiVol),
+    voice: !!r.voice,
     motionReduce: !!r.motionReduce,
     subtitleScale: num(r.subtitleScale, 0.8, 1.6, DEFAULTS.subtitleScale),
     markerPalette: PALETTES[r.markerPalette] ? r.markerPalette : DEFAULTS.markerPalette,
