@@ -282,7 +282,8 @@ export class GunVoice {
     this.burstGain.gain.value = 0;
     this.distFilter = biquad(ctx, "lowpass", 20000, 0.7);
     this.distGain = ctx.createGain();
-    this.src.connect(this.burstGain).connect(this.distFilter).connect(this.distGain).connect(destination);
+    this.dry = ctx.createGain(); // group fader (settings weapons channel, D-081) — burstGain stays the fire gate
+    this.src.connect(this.burstGain).connect(this.distFilter).connect(this.distGain).connect(this.dry).connect(destination);
     this._distNode = { gainNode: this.distGain, filterNode: this.distFilter };
 
     this.src.start();

@@ -167,6 +167,7 @@ export class ControlsMenu {
     h += slider("fov", "FIELD OF VIEW", 45, 90, 1, s.fov, Math.round(s.fov) + "°", hasLive("camera"));
     h += slider("masterVol", "MASTER VOLUME", 0, 1, 0.05, s.masterVol, Math.round(s.masterVol * 100) + "%", audioOn);
     h += slider("engineVol", "ENGINE VOLUME", 0, 1, 0.05, s.engineVol, Math.round(s.engineVol * 100) + "%", audioOn);
+    h += slider("weaponsVol", "WEAPONS VOLUME", 0, 1, 0.05, s.weaponsVol, Math.round(s.weaponsVol * 100) + "%", audioOn);
     h += slider("uiVol", "UI / TONES VOLUME", 0, 1, 0.05, s.uiVol, Math.round(s.uiVol * 100) + "%", audioOn);
     h += `<div class="srow"><span class="rlabel">RADIO VOICE (TTS)</span><span class="schips">${liveChip(hasLive("voice"))}
       <button type="button" class="chip voicechip${!s.voice ? " sel" : ""}" data-v="0">OFF</button>

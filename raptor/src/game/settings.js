@@ -32,7 +32,8 @@ export const DEFAULTS = Object.freeze({
   fov: 60,             // degrees; 45-90 (main.js constructs the camera at 60)
   masterVol: 1,        // 0-1, scales AudioBus.master (x0.9 shipped headroom)
   engineVol: 1,        // 0-1 -> EngineVoice.dry
-  uiVol: 1,            // 0-1 -> LockTones.dry (RWR/seeker beeps)
+  uiVol: 1,
+  weaponsVol: 1,       // 0-1 -> GunVoice.dry (cannon; D-081 mixer gap closed)            // 0-1 -> LockTones.dry (RWR/seeker beeps)
   voice: false,        // radio TTS (phase-13 voice spike) — OFF until judged by ear; volume rides uiVol
   motionReduce: false, // kills hit-flash vignette + muzzle-flash pulse
   subtitleScale: 1,    // 0.8-1.6, scales the comms-feed font in the HUD
@@ -54,6 +55,7 @@ export function validate(raw) {
     masterVol: num(r.masterVol, 0, 1, DEFAULTS.masterVol),
     engineVol: num(r.engineVol, 0, 1, DEFAULTS.engineVol),
     uiVol: num(r.uiVol, 0, 1, DEFAULTS.uiVol),
+    weaponsVol: num(r.weaponsVol, 0, 1, DEFAULTS.weaponsVol),
     voice: !!r.voice,
     motionReduce: !!r.motionReduce,
     subtitleScale: num(r.subtitleScale, 0.8, 1.6, DEFAULTS.subtitleScale),
@@ -144,6 +146,7 @@ export function applySettings(s, ctx = live) {
     a.master.gain.setTargetAtTime(0.9 * s.masterVol, t0, 0.02); // 0.9 = shipped headroom
     if (a.engine && a.engine.dry) a.engine.dry.gain.setTargetAtTime(s.engineVol, t0, 0.02);
     if (a.locks && a.locks.dry) a.locks.dry.gain.setTargetAtTime(s.uiVol, t0, 0.02);
+    if (a.gun && a.gun.dry) a.gun.dry.gain.setTargetAtTime(s.weaponsVol, t0, 0.02);
   }
   if (ctx.gunFlash) ctx.gunFlash.visible = !s.motionReduce;
   return s;
