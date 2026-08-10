@@ -51,9 +51,12 @@
 //                radius. (t26's static phase model books engage air
 //                post-turn; this header carries the real overlap, the
 //                M07/N02 precedent.)
-//   5 THE TURN   ON_OBJECTIVE_DONE(2) -> 655 ("the flagship is alone...
-//                whatever the sky above her still holds" — TYPHOON-state
-//                agnostic: he may already be dead on a duel-first path).
+//   5 THE TURN   ON_OBJECTIVE_DONE(2) -> 655 — TYPHOON-state agnostic (he
+//                may already be dead on a duel-first path) AND
+//                flagship-state agnostic per the polish rider: "whatever
+//                of that fleet still floats" reads true on the
+//                flagship-first path too, where the old line narrated a
+//                ship already underwater.
 //   6 CLIMAX     obj 3 THE FLAGSHIP (boot carrier row 0, hp 250 — the
 //                M02 multi-pass rearm fantasy at finale scale) and obj 4
 //                TYPHOON, in whichever order the fight allows. 659
@@ -153,7 +156,7 @@ export default {
       { on: TRIG.ON_TIME, t: 45, lineId: 664 },              // TYPHOON's first words
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 1, lineId: 658 },   // the datum (conditional-survival form)
       { on: TRIG.ON_TIME, t: 150, lineId: 669 },             // descent backstop, un-gated (gate ≈ 164 s, ring ≈ 198 s)
-      { on: TRIG.ON_OBJECTIVE_DONE, obj: 2, lineId: 655 },   // THE TURN (ace-state agnostic)
+      { on: TRIG.ON_OBJECTIVE_DONE, obj: 2, lineId: 655 },   // THE TURN (fleet- and ace-state agnostic)
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 3, lineId: 659 },   // the flagship goes down (scoped, path-true)
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 4, lineId: 656 },   // confirmed (scoped; masked when it is the win tick)
       { on: TRIG.ON_TIME, t: 1200, lineId: 670 },            // clock warning (varied shape)

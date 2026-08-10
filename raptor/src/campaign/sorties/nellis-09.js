@@ -149,7 +149,8 @@ export default {
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 4, lineId: 606 },   // victory (students-scoped)
       { on: TRIG.ON_TIME, t: 1200, lineId: 671 },            // clock warning (varied shape)
       { on: TRIG.ON_TIME, t: 1500, lineId: 607 },            // timeout defeat
-      { on: TRIG.ON_ACE_STATE, aceId: 0, aceState: "smoking", lineId: 661 },
+      { on: TRIG.ON_ACE_STATE, aceId: 0, aceState: "smoking", lineId: 661 }, // gun path only (40 <= hp < 60)
+      { on: TRIG.ON_ACE_STATE, aceId: 0, aceState: "bingo", lineId: 717 },   // the optional chase, visible in its window (polish rider 1)
       { on: TRIG.ON_ACE_STATE, aceId: 0, aceState: "escaped", lineId: 662 },
       { on: TRIG.ON_ACE_STATE, aceId: 0, aceState: "killed", lineId: 663 },
     ],

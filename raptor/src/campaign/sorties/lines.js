@@ -41,7 +41,8 @@
 //   690-715 LABEL BANK (objective labelId -> HUD row text, the D-078
 //   enabler; shared across sorties by design — one id, one utterance,
 //   VO-ready) ·
-//   716-717 finale-panel riders (716 = N10 JACKAL bingo beat; 717 free).
+//   716-717 finale-panel riders (716 = N10 JACKAL bingo beat; 717 = N09
+//   VIPER bingo beat).
 // TYPHOON ships HERE (M10) and nowhere else — the reserve held for 24
 // sorties and the finale spends it.
 
@@ -591,7 +592,10 @@ export const SORTIE_LINES = {
   652: "The mission is two names, one water: put the flagship group on the bottom — screen first, if you plan on growing old — and put TYPHOON in the water beside it. Hear that part twice, Raptor: HIM, in the water. Driven off has always been enough. Not today. If he leaves this map alive, the war doesn't end — it just moves somewhere we can't follow, and waits.",
   653: "What the file says: he takes a hit that folds better men and keeps flying — and when he's hurt, he doesn't defend, he RUNS: cold, flat-out, for the edge of the map, and nobody has ever caught him. So get close before you get greedy, fight him over the fleet where the light is yours, and when you finally hurt him — finish it in the same breath. Fastest hands in either hemisphere. Fly perfect, Raptor. He will.",
   654: "OVERLORD: Golden hour, glass strait. Datum's ahead, the fleet beyond it — and mind the last Saipan gun on the straight line home: dogleg your rearm runs. Quiet from here to the push, Raptor. Let's not tell him more than he already knows.",
-  655: "OVERLORD: The screen is gone — three hulls down, and the flagship is alone on open water with the whole golden hour left. Whatever the sky above her still holds, Raptor, the ship can't run and he can't save her. Take the war apart.",
+  // 655: polish rider 2 — fleet-state agnostic (on a flagship-first path
+  //     the old line narrated a ship already underwater); the seat's
+  //     dark-true form adopted.
+  655: "OVERLORD: The screen is gone — three hulls down, and whatever of that fleet still floats is alone with the whole golden hour left. Wherever he is, Raptor — the water or the sky — he can't save any of it. Take the war apart.",
   656: "OVERLORD: Confirmed, Raptor — TYPHOON is in the water. The best they ever made just ran out of sky and excuses in the same minute. Anything of that fleet still floating floats blind, deaf, and last. Finish the ledger and come home.",
   657: "OVERLORD: Time, Raptor. The gold's gone, and the piece of this war we didn't finish is still out there in the dark. Get down. Nobody sleeps tonight.",
   658: "RAPTOR 1-1: On the datum. I can see them, OVERLORD — the whole last fleet in one square of gold water. If the file is right, he's up there somewhere deciding how this ends. Let's go disappoint him. Starting my run.",
@@ -657,9 +661,14 @@ export const SORTIE_LINES = {
   681: "OVERLORD: Keep the count in your head, Raptor — one rail, one dish, two hulls. Every one still on the board is a bolt half-thrown. Work.",
   // 682 N10 JACKAL descent backstop (t=305, un-gated — descent legs begin
   //     ≈ 270-315 s, 11 km corridor-ring entry ≈ 341 s)
-  682: "OVERLORD: The paint's sweep line has gone quiet, Raptor. If it's still flying, it's descending out of the northwest with the sun on its back — and it's about to find you.",
+  // 682: polish rider 4 — dawn-geometry honesty (todH 7.5, sun EAST: a
+  //     northwest descent puts the dawn in JACKAL's face, not on his back).
+  682: "OVERLORD: The paint's sweep line has gone quiet, Raptor. If it's still flying, it's descending out of the northwest with the dawn full in its face — and it's coming anyway.",
   // 683 V10 wave-2 backstop (t=390, un-gated — dive commit ≈ 420-429 s)
-  683: "OVERLORD: Raid two is through the west-arm turns — anything of it still flying is on the deck, tracking the tankers, with sixty seconds of water in front of it.",
+  // 683: polish rider 5 — clock honesty (fires t=390 vs dive commits
+  //     420-429 s: "less than a minute" is true across the band; the
+  //     banned "half a minute" stays banned).
+  683: "OVERLORD: Raid two is through the west-arm turns — anything of it still flying is on the deck, tracking the tankers, with less than a minute of water in front of it.",
   // 684 V10 wave-3 backstop (t=490, un-gated — 18 km gate ≈ 465-470 s,
   //     dive commit ≈ 508-512 s)
   // 684: panel MUST-5 — the wave-3 target split is briefed, not withheld
@@ -679,12 +688,16 @@ export const SORTIE_LINES = {
   //     ≈ 235-251 s, 11 km station-ring entry ≈ 281-286 s)
   689: "OVERLORD: Their fighters just came off the hold east of you — two, fast, wide abeam the raid line. They're not escorting anymore, Raptor. They're coming to clear the sky for it — and the sky is you.",
 
-  // ---- 716-717: finale-panel riders (D-079 MUSTs; 717 reserved) ----
+  // ---- 716-717: finale-panel riders (D-079 MUSTs + polish riders) ----
   // 716 N10 JACKAL bingo beat (panel MUST-2): on the median 9X path
   //     120 -> 30 skips the smoking band, so 676 never fires and the
   //     NELLIS finale duel would resolve with zero rendered radio — the
   //     bingo hook renders on every hit path, ~40+ s before resolution.
   716: "OVERLORD: The paint is hit — it's broken off and running for the fence with everything the engine has left. Let it cross and driven off is done; the column still gets its dawn. But the debt crosses with it, Raptor. Collect it now or carry it forever. Your ledger.",
+  // 717 N09 VIPER bingo beat (polish rider 1): makes the OPTIONAL
+  //     for-keeps chase visible during its window — unlike N10/M10, letting
+  //     him cross costs nothing but the ledger, and the line says so.
+  717: "OVERLORD: VIPER's hit and running for the fence. Let him carry the lesson home, Raptor — or go write the last line of the syllabus yourself. Your fuel, your call.",
 
   // ---- 690-715: LABEL BANK (objective labelId -> HUD row text; shared
   // across sorties by design — one id, one utterance, VO-ready; PROTECT
@@ -710,7 +723,7 @@ export const SORTIE_LINES = {
   708: "ON STATION",
   709: "THE SCREEN",
   710: "THE FLAGSHIP",
-  711: "TYPHOON",
+  711: "TYPHOON — NO ESCAPE", // polish rider 3: the mandatory-kill/loseWhen stakes on the HUD (M10-only label, vs N09's optional chase)
   712: "THE DATUM",
   713: "THE PAINT",
   714: "FIRST STRIKE",
