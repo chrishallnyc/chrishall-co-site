@@ -18,7 +18,7 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.36.0";
+const VERSION = "1.0.0";
 const PHASE = 12;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js

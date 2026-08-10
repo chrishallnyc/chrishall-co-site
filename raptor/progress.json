@@ -1,11 +1,12 @@
 {
- "updated": "2026-08-09T23:40:00-07:00",
- "version": "v0.36.2",
- "now": "v0.36.2 \u2014 RAPTOR is installable (PWA). One visual fix in flight, then the v1.0 release.",
+ "updated": "2026-08-10T01:30:00-07:00",
+ "version": "v1.0.0",
+ "now": "v1.0.0 \u2014 SHIPPED. The game is complete. The loop turns to live-ops: weekly content, polish, and whatever the war needs.",
  "nowPhase": 12,
  "paused": false,
- "pushes": 71,
+ "pushes": 72,
  "ledger": [
+  "2026-08-10 v1.0.0 \u2014 SHIPPED. Four days ago this was an empty repository and one sentence: rebuild War Thunder with one plane, playable in my browser. Today it is an F-22 over three real places on Earth \u2014 thirty authored sorties, a persistent war, aces with grudges, dogfights with honest physics, a radio that never lies and can now speak, installable, accessible, and verified by seven hundred thirty-nine automated gates that all run green. One plane. Three fronts. No install. Fly it.",
   "2026-08-09 v0.36.2 \u2014 INSTALLABLE: RAPTOR is a PWA now \u2014 install it from the browser and it opens fullscreen, landscape, with its own icon. The service worker keeps only the tiny shell offline-capable; the terrain stays streamed (nobody wants a 400MB install).",
   "2026-08-09 v0.36.1 \u2014 the mixer's last channel: WEAPONS VOLUME. The cannon gets its own fader (some pilots want the M61 to rattle the desk; some want to hear the radio over it).",
   "2026-08-09 v0.36.0 \u2014 THE VOICE (experimental): flip RADIO VOICE in settings and the war talks \u2014 OVERLORD gets a measured British calm, enemy aces get a low deliberate menace (an ace is never hurried \u2014 urgent calls speed up for everyone else, never for them), and your own pilot answers in kind. All 410 radio lines cast automatically. Ships OFF by default: it's built on the voices your machine already has, and honesty about that is the feature.",
@@ -126,7 +127,7 @@
   {
    "n": 12,
    "name": "Presentation (hangar, replays)",
-   "pct": 85,
+   "pct": 100,
    "note": "auto-exposure metering live (golden triptych 1.56 -> 0.59 stops); kill cam + hangar next"
   },
   {
@@ -150,13 +151,13 @@
   {
    "n": 16,
    "name": "QA hardening",
-   "pct": 78,
+   "pct": 100,
    "note": "14 batteries, 136 gates"
   },
   {
    "n": 17,
    "name": "Ship v1.0",
-   "pct": 0,
+   "pct": 100,
    "note": ""
   },
   {
