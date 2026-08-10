@@ -31,8 +31,11 @@
 //                perch (hold legs 49.2-52.0 km from the station — far
 //                outside the 18 km gate, unhuntable) until ≈ 222 s, then
 //                descends: gate crossing ≈ 365 s, 9 km station ring
-//                ≈ 403 s. Un-gated 594 at t=330 calls the descent BEFORE
-//                the HUD can paint him (568 sets that up in fiction).
+//                ≈ 403 s. D-078 HEADER-TRUTH RIDER: his descent is
+//                CLOCK-driven at ≈ 222 s, NOT turn-gated — the turn line
+//                reveals it, it does not cause it. Un-gated 594 at t=330
+//                calls the descent BEFORE the HUD can paint him (568
+//                sets that up in fiction).
 //   6 CLIMAX     obj 3: the wind himself — tier 4 (the amendment-1
 //                +tier return escalation on his V02 tier 3), destroy_tag
 //                need 1 on his tag counts !live (kill 387 / smoking BINGO
@@ -49,15 +52,18 @@
 // ROUTE LAW (D-073): both win-required air objectives are ENGAGE-capable;
 // the hunters loiter to ≈ 986/993 s and BOREAS's route runs 411.3 km
 // ≈ 1714 s — it OUTLIVES the 1500 s timer (the V06 coda letter-of-the-LAW
-// precedent). No stranding path. STACKED-LOITER NOTE (batch-3 SHOULD):
-// the hunters' NW box and BOREAS's wider SE ring never host two live
-// waves at once by construction — the turn (both hunters dead) is the
-// gate that summons him — so no same-box peeling ambiguity exists.
+// precedent). No stranding path. STACKED-LOITER NOTE (re-documented,
+// D-078 header-truth rider): the hunters' loiter box sits INSIDE the
+// footprint of BOREAS's wider SE ring — the separation is TEMPORAL, not
+// geometric: his descent is on the 222 s clock and his ring laps begin
+// ≈ 403 s, after the median hunters kill; on slow paths the waves CAN
+// share that airspace (see the guardrail census below).
 //
-// GUARDRAILS (amendment 5): duel census is honest — hunters phase 2 <= 4,
-// BOREAS phase 1 <= 4, worst case (a dragged hunter surviving into his
-// descent is impossible: obj 2 done = both dead; the true worst case is
-// hunters 2 while he holds 45+ km out) = 2 <= 4. Zero ground shooters
+// GUARDRAILS (amendment 5, census re-documented per the D-078
+// header-truth rider): hunters phase 2 <= 4, BOREAS phase 1 <= 4 — and
+// because his descent is clock-driven, the honest SLOW-PATH worst case
+// is both hunters still alive when he reaches the station ring at
+// ≈ 403 s: 2 + 1 = 3 <= 4, all telegraphed. Zero ground shooters
 // within 5 km of any center (nearest boot: tel 6 at 8.6 km from the
 // station). Bandits 3 <= 8; engage 3 <= 4. Tier 4 is composition (the
 // return escalation), not a stat override. LINE AUDIT (batch-3 SHOULD):

@@ -34,11 +34,14 @@
 //                outside the 18 km gate) until ≈ 250 s, then cut north:
 //                11 km orbit-ring entry at ≈ 331/341 s — on the heels of a
 //                competent guard kill (~200-280 s). Un-gated 596 at t=300.
-//                Their post-entry loiter is a DISTINCT south box
-//                ((19000,-10000)-(9000,-12000)) — 5+ km separated from
-//                both guard flank tracks and the orbit line, so a slow
-//                player can peel the stack by geometry (the M06-legs
-//                model, batch-3 SHOULD).
+//                Their post-entry loiter boxes are DISTINCT from the
+//                guard tracks — RE-SCOPED per the D-078 header-truth
+//                rider: the separation claim holds against the NORTH
+//                flank track and the orbit line (5+ km), but the second
+//                pair member's box sits 4.7 km minimum from the SOUTH
+//                flank track — inside ENGAGE_R 10 km — so peel-by-
+//                geometry is guaranteed only against the north track;
+//                the census stays 4 <= 4 either way.
 //   6 CLIMAX     obj 3: THE EYE — destroy_tag need 1 on the orbiter, a
 //                25,000 ft climb with whatever is left of the stack on
 //                your back. The ready pair is NOT win-required (alive at
@@ -48,10 +51,13 @@
 //                577 timeout (someone IS still flying whenever the win
 //                never landed; offense cap; t=1200 clock 579)
 // ENVELOPE: median session ≈ 7-8 min (datum ~55 s, guards ~200-280 s,
-// ready pair ~331-341 s, the climb + eye ~300-450 s); THE TURN ≈ 45-55%.
+// ready pair ~331-341 s, the climb + eye ~300-450 s); THE TURN
+// re-documented ≈ 44-62% of median (D-078 header-truth rider — the top
+// edge is a documented exception, the V05/V07 precedent).
 //
 // ROUTE LAW (D-073): the win-required guards are ENGAGE-capable AND loiter
-// to ≈ 1051/1041 s; the win-required EYE is engage-less, so its route must
+// to ≈ 1051/1219 s (the 1041 figure was a transcription slip — D-078
+// header-truth rider); the win-required EYE is engage-less, so its route must
 // outlive the timer — 259.8 km at transport cruise 150 ≈ 1732 s > 1500 s
 // (measured). No stranding path.
 //
@@ -63,8 +69,13 @@
 // spawn is 6.4 km from tel 7 and 7.8 km from zsu 3; both flank tracks
 // hold >= 7.1/11.1 km from tel 7 — outside the 6 km SAM envelope, so the
 // stack fight stays over water, measured). Bandits 1+2+2 = 5 <= 8. LINE
-// AUDIT (batch-3 SHOULD): no calcified formulas; "the better half" jargon
-// lesson applied (572 says "the best sticks they have left").
+// AUDIT (batch-3 SHOULD, amended by the D-078 riders): "the better half"
+// jargon lesson applied (572 says "the best sticks they have left");
+// 574's "the plot is honest", 575's pre-killable deck-pair claim, 577's
+// "whoever's still flying" and 596's "half a minute" were all varied or
+// hedged by the batch-4 calcification sweep, and 579 is now the table's
+// ONE surviving "Five minutes" clock (panel-accepted single use — 549
+// and 559 varied).
 
 import { TRIG } from "../../game/missions.js";
 
@@ -97,8 +108,9 @@ export default {
       // the GUARDS (tag 48): tier-3 ENGAGE, one flank track each (north +
       // south of the orbit line, 7.1/11.1 km from tel 7 — outside the SAM
       // envelope). Cum walks at cruise 240: north 8.9/16.8 km -> track,
-      // laps to 252.2 km ≈ 1051 s; south 8.1/16.6/25.8 km -> track, laps
-      // to 292.5 km ≈ 1219 s. Spawns straddle: each 21.4 km from their
+      // laps to 252.2 km ≈ 1051 s; south 8.1/16.6/24.2 km -> track, laps
+      // to 292.5 km ≈ 1219 s (24.2 corrected per the D-078 header-truth
+      // rider). Spawns straddle: each 21.4 km from their
       // centroid (20000,-1000), 29.5/17.1 km from the datum, 23.8+ km
       // from the player spawn.
       { kind: "fighter", tier: 3, engage: true, x: 24000, y: 20000, z: 5400, headingDeg: -117, speed: 260, tag: 48, side: 0,

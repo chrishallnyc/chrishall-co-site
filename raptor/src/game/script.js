@@ -248,6 +248,7 @@ export class Script {
       out.push({
         id: this.objId[i],
         kind: KIND_NAME[this.objKind[i]],
+      labelId: this.spec.objectives[i] ? this.spec.objectives[i].labelId : undefined,
         done: this.objState[i] === 1,
         failed: this.objState[i] === 2,
         count: this._count[i],

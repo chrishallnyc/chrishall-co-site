@@ -1,8 +1,9 @@
-// Authored campaign (phase-11 INC-7): the scripted set-piece chain. Six
-// sorties for now (2 per front), unlocking linearly; INC-8 batches grow the
-// registry to 30+. Sortie MODULES (spec + lineIds) live in ./sorties/ and are
-// the content agent's lane; this file is the registry, the unlock chain, and
-// the raptor.auth.v1 save. Meta-world: strings and localStorage are fine
+// Authored campaign (phase-11 INC-7): the scripted set-piece chain —
+// COMPLETE at 30 sorties (10 per front) as of INC-8 batch 4 (the finale
+// trio closes each front; TYPHOON flies in M10 and nowhere else). Sortie
+// MODULES (spec + lineIds) live in ./sorties/ and are the content agent's
+// lane; this file is the registry, the unlock chain, and the
+// raptor.auth.v1 save. Meta-world: strings and localStorage are fine
 // here — the sim only ever sees the validated MissionSpec.
 
 import { loadMission } from "../game/missions.js";
@@ -35,6 +36,15 @@ export const CAMPAIGN = [
   { id: "V08", front: "VALDEZ" },
   { id: "M07", front: "MARIANAS" },
   { id: "M08", front: "MARIANAS" },
+  // INC-8 batch 4 (D-078 NEXT): THE FINALE — the last pushes (25-27) and
+  // the front-closing trio (28-30; fiction reads frontKm >= +14, the
+  // unlock stays linear; TYPHOON unsealed in M10 only)
+  { id: "N09", front: "NELLIS" },
+  { id: "N10", front: "NELLIS" },
+  { id: "V09", front: "VALDEZ" },
+  { id: "V10", front: "VALDEZ" },
+  { id: "M09", front: "MARIANAS" },
+  { id: "M10", front: "MARIANAS" },
 ];
 
 const FILE = {
@@ -42,6 +52,7 @@ const FILE = {
   N03: "nellis-03", N04: "nellis-04", V03: "valdez-03", V04: "valdez-04", M03: "marianas-03", M04: "marianas-04",
   N05: "nellis-05", N06: "nellis-06", V05: "valdez-05", V06: "valdez-06", M05: "marianas-05", M06: "marianas-06",
   N07: "nellis-07", N08: "nellis-08", V07: "valdez-07", V08: "valdez-08", M07: "marianas-07", M08: "marianas-08",
+  N09: "nellis-09", N10: "nellis-10", V09: "valdez-09", V10: "valdez-10", M09: "marianas-09", M10: "marianas-10",
 };
 const KEY = "raptor.auth.v1";
 

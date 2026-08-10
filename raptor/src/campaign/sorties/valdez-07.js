@@ -33,9 +33,12 @@
 //                path) / 557 timeout (state-agnostic "contested"; offense
 //                sead; t=1200 clock 559)
 // ENVELOPE: median session ≈ 7.5-8 min (run-in ~69 s, site A ~130-210 s,
-// crossing ~45 s, site B ~250-330 s, pair ~340-470 s); THE TURN ≈ 55-60%
-// of median — the top of the window by design, documented (the V05
-// precedent): the belt IS the sortie, the air answer is its coda.
+// crossing ~45 s, site B ~250-330 s, pair ~340-470 s); THE TURN
+// re-documented ≈ 52-70% of median (D-078 header-truth rider — a
+// documented exception past the 30-60% window, the V05 precedent): the
+// belt IS the sortie, the air answer is its coda. The 220 s mid-belt
+// trough is filled by 599 at t=160 (the chair's id assignment, the V06
+// trough law).
 //
 // ROUTE LAW (D-073): the belt is ground (never despawns); the win-required
 // pair is ENGAGE-capable AND rides FOUR 58 km belt-ring laps to
@@ -114,6 +117,7 @@ export default {
       { on: TRIG.ON_START, lineId: 551 },
       { on: TRIG.ON_TIME, t: 25, lineId: 554 },
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 1, lineId: 558 },   // tally both sites
+      { on: TRIG.ON_TIME, t: 160, lineId: 599 },             // mid-belt clock, un-gated, state-agnostic (D-078 chair rider)
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 2, lineId: 555 },   // THE TURN
       { on: TRIG.ON_TIME, t: 290, lineId: 593 },             // pair backstop, un-gated (ring ≈ 321-337 s)
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 3, lineId: 556 },   // victory

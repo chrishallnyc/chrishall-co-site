@@ -243,6 +243,7 @@ function validate(spec) {
     if (ids.has(o.id)) bad(`duplicate objective id ${o.id}`);
     ids.add(o.id);
     if (OBJ_KIND[o.kind] === undefined) bad(`objective ${o.id}: unknown kind "${o.kind}"`);
+    if (o.labelId !== undefined && !num(o.labelId)) bad(`objective ${o.id}: labelId must be numeric`); // INC-8 finale enabler (D-078)
     if (!INC1_KINDS.has(o.kind)) bad(`objective ${o.id}: kind "${o.kind}" not yet implemented (kill_ace: INC-6)`);
     if (o.kind === "destroy_tag") {
       if (o.air) { // INC-5: bandit objective — tag selects spawned air

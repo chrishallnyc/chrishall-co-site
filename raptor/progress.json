@@ -1,11 +1,12 @@
 {
- "updated": "2026-08-09T03:30:00-07:00",
- "version": "v0.34.0",
- "now": "v0.34.0 \u2014 twenty-four sorties: escort your bombers through their intercept, hunt BOREAS through his return, hold two doors at once. The finale batch is next: TYPHOON awaits.",
+ "updated": "2026-08-09T17:50:00-07:00",
+ "version": "v0.35.0",
+ "now": "v0.35.0 THE FINALE \u2014 the 30-sortie campaign is COMPLETE. TYPHOON waits over the sinking flagship. Road to v1.0: voice, polish, ship.",
  "nowPhase": 12,
  "paused": false,
- "pushes": 66,
+ "pushes": 67,
  "ledger": [
+  "2026-08-09 v0.35.0 \u2014 THE FINALE: the campaign is complete. Thirty authored sorties across three real fronts, ending in three campaign closers \u2014 PAID IN FULL (everything NELLIS taught you converges while JACKAL's ledger closes), THE HOMECOMING (defend the fleet you escorted in sortie three, by the same lamp), and TYPHOON: the last boss over the sinking flagship, the campaign's only mandatory ace kill \u2014 let him reach the fence and the war ends unfinished. Victory cards now speak: OVERLORD's actual closing words replace the generic banner on every mission. Four drama panels reviewed all thirty; the radio never lied once.",
   "2026-08-09 v0.34.0 \u2014 TWENTY-FOUR DEEP: the tightening third. BIG FRIENDS (escort friendly heavies through an enemy intercept \u2014 check fire around the package), FUMES (a dawn raid answered by the campaign's first non-ace tier-4s), THE BELT (VALDEZ's first spawned SAM belt), SECOND WIND (BOREAS comes back for you \u2014 if the wind still has hands), THE EYE (a guarded high-value orbiter), and TWO DOORS (hold two intercept doors at once, each with a gun waiting on the lane). Third drama panel signed off; the radio still never lies. Six sorties remain \u2014 and TYPHOON.",
   "2026-08-09 v0.33.0 \u2014 EIGHTEEN DEEP: the campaign's escalating middle third. THE AIR BRIDGE (strangle an airlift before wheels-down), THE COUNTERPUSH (for once the ground wins the war \u2014 you just keep JACKAL off their backs), STILL WATER (a silent midnight-sun harbor raid), HOLD UNTIL RELIEVED (a station-defense marathon with three relays and a coda), SCATTER (SEAD, then chase the survivors down two roads), and FOUR CORNERS \u2014 the campaign's first honest 4-v-1. A second drama panel reviewed every beat; its fixes are in, including radio that never lies about the clock.",
   "2026-08-08 v0.32.0 \u2014 YOUR COCKPIT, YOUR RULES: a real settings menu inside Esc \u2014 graphics quality with honest live/reload labels, render scale and field-of-view sliders that apply instantly, a three-channel audio mixer, motion reduction for flash-sensitive pilots, subtitle scaling, and colorblind-safe HUD marker palettes (deuteranopia/tritanopia). Auto quality still benchmarks your machine on first run; now you can overrule it.",
@@ -114,13 +115,13 @@
   {
    "n": 11,
    "name": "Authored campaign (30+ sorties)",
-   "pct": 80,
+   "pct": 100,
    "note": ""
   },
   {
    "n": 12,
    "name": "Presentation (hangar, replays)",
-   "pct": 75,
+   "pct": 85,
    "note": "auto-exposure metering live (golden triptych 1.56 -> 0.59 stops); kill cam + hangar next"
   },
   {

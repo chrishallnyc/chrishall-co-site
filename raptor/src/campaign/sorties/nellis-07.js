@@ -20,10 +20,15 @@
 //   4 OBJ A      obj 2: wave A (tag 70) — two tier-2 ENGAGE fighters
 //                converging on the bomber wheel from NE and ESE on
 //                68.9/65.0 km routes; wheel-box entry (r 4000 at
-//                (14000,14000)) at 65.0/61.0 km ≈ 271/254 s (measured),
-//                every pre-terminal leg >= 5.6 km OUTSIDE the box (no
-//                accidental early denial). Un-gated 590 at t=175 is the
-//                merge clock (79-96 s to the box: "under two minutes").
+//                (14000,14000)) at 61.0/65.0 km ≈ 254/271 s (measured —
+//                the ESE ship trips first; D-078 header-truth rider),
+//                every pre-terminal leg >= 5.6 km from the box CENTER
+//                (= 1.6 km outside the r4000 ring; tier-2 turn radius
+//                ~1.1 km — D-078 rider, the honest margin). Un-gated 590
+//                at t=175 is the merge clock (79-96 s to the box: "under
+//                two minutes"). 598 at t=90 is the PACKAGE LEAD's join
+//                call (the D-078 chair's id assignment — cashes the
+//                title, sets up 590's "that was the deal").
 //   5 THE TURN   ON_OBJECTIVE_DONE(2) -> 535. AMBUSH TIMING TRICK: wave B
 //                (tag 71) — two tier-3 ENGAGE — spawned at START on far-SE
 //                holds (5 hold legs each; every hold leg >= 29.7/30.1 km
@@ -38,14 +43,16 @@
 //   7 RESOLUTION 536 victory (obj 3) / 537 zone denial (obj 4/5, shared
 //                lineId — the V02/N05 pattern) / 539 friendly loss (obj 6,
 //                the V04 418 beat — only the player can kill a bomber).
-//                NO t=1500 row: wave A trips the wheel at ≈ 271 s and wave
+//                NO t=1500 row: wave A trips the wheel at ≈ 254 s and wave
 //                B at ≈ 457 s unopposed, and a dead intercept IS the win —
 //                the clock can never expire first (N05 precedent). Type
 //                escort = defense timeout WOULD be victory; unreachable,
 //                documented.
 // ENVELOPE: median session ≈ 8-9 min (join ~65 s, wave-A merge from
 // ~130 s, killed ~200-280 s, wave-B cut ~267-283 s, killed ~460-540 s);
-// THE TURN ≈ 45-55% of median.
+// THE TURN ≈ 45-55% of median. The 535->591 radio lull is ACCEPTED and
+// documented (D-078): the bombers visibly arriving at the wheel at
+// 267-293 s are the beat — the 598 join call shortens the front half.
 //
 // ORDER NOTE (the M06 anvil-first lesson, designed against): killing wave
 // B before wave A requires flying past a committed wave A into a >= 29 km
@@ -140,7 +147,8 @@ export default {
       { on: TRIG.ON_START, lineId: 531 },
       { on: TRIG.ON_TIME, t: 25, lineId: 534 },
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 1, lineId: 538 },   // joined on the package
-      { on: TRIG.ON_TIME, t: 175, lineId: 590 },             // wave-A merge clock, un-gated (entry ≈ 271-287 s)
+      { on: TRIG.ON_TIME, t: 90, lineId: 598 },              // PACKAGE LEAD's deal (D-078 chair rider)
+      { on: TRIG.ON_TIME, t: 175, lineId: 590 },             // wave-A merge clock, un-gated (entry ≈ 254-271 s)
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 2, lineId: 535 },   // THE TURN
       { on: TRIG.ON_TIME, t: 395, lineId: 591 },             // wave-B backstop, un-gated (entry ≈ 457-462 s)
       { on: TRIG.ON_OBJECTIVE_DONE, obj: 3, lineId: 536 },   // victory

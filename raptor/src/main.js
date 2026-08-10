@@ -18,7 +18,7 @@ import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
 
-const VERSION = "0.34.0";
+const VERSION = "0.35.0";
 const PHASE = 12;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
@@ -509,10 +509,30 @@ async function boot() {
           ctx.fillText(title, w / 2, h * 0.42);
           ctx.font = "13px ui-monospace, Menlo, monospace";
           ctx.fillStyle = "#e8e6df";
-          const sub = script ? (match.over > 0 ? "mission complete" : "mission failed")
-            : match.over > 0 ? "the ground war is broken — every target destroyed" : "no aircraft remaining — the war goes on without you";
-          ctx.lineWidth = 3; ctx.strokeText(sub, w / 2, h * 0.42 + 34);
-          ctx.fillText(sub, w / 2, h * 0.42 + 34);
+          // D-079 end-card un-mask: the comms feed hides at match.over, which
+          // ate every authored victory/defeat line. The line written on the
+          // SAME sim tick as the outcome is the mission's closing words —
+          // render it as the card's sub-text (up to 3 wrapped rows).
+          if (overSimT === null) overSimT = sim.time;
+          let rows = null;
+          if (script && missionData) {
+            const c0 = script.readComms()[0];
+            if (c0 && Math.abs(c0.t - overSimT) <= 0.25 && missionData.lines[c0.lineId]) {
+              const words = missionData.lines[c0.lineId].split(" ");
+              rows = [""];
+              for (const wd of words) {
+                if ((rows[rows.length - 1] + " " + wd).length > 90 && rows.length < 3) rows.push(wd);
+                else rows[rows.length - 1] = (rows[rows.length - 1] ? rows[rows.length - 1] + " " : "") + wd;
+              }
+            }
+          }
+          if (!rows) rows = [script ? (match.over > 0 ? "mission complete" : "mission failed")
+            : match.over > 0 ? "the ground war is broken — every target destroyed" : "no aircraft remaining — the war goes on without you"];
+          ctx.lineWidth = 3;
+          rows.forEach((r, ri) => {
+            ctx.strokeText(r, w / 2, h * 0.42 + 34 + ri * 18);
+            ctx.fillText(r, w / 2, h * 0.42 + 34 + ri * 18);
+          });
         }
       }
 
@@ -526,9 +546,13 @@ async function boot() {
         for (const o of script.objectiveSummary()) {
           const mark = o.done ? "✓" : o.failed ? "✗" : "◦";
           const count = o.need > 1 ? ` ${o.count}/${o.need}` : "";
-          const line = `${mark} ${VERB[o.kind] || o.kind.toUpperCase()}${count}`;
+          // D-078 enabler: authored labels beat bare verbs; PROTECT rows are
+          // lose-conditions, not tasks — amber while pending
+          const label = (o.labelId !== undefined && missionData.lines[o.labelId]) || VERB[o.kind] || o.kind.toUpperCase();
+          const line = `${mark} ${label}${count}`;
           ctx.strokeText(line, 18, oy);
-          ctx.fillStyle = o.done ? "rgba(155,232,155,0.55)" : o.failed ? "#ff5a3c" : "#9be89b";
+          const pending = o.kind === "protect_tag" ? "#e8b46f" : "#9be89b";
+          ctx.fillStyle = o.done ? "rgba(155,232,155,0.55)" : o.failed ? SETTINGS.getPalette().warn : pending;
           ctx.fillText(line, 18, oy);
           oy += 15;
         }
@@ -632,6 +656,7 @@ async function boot() {
   // jet home). On match end: a continuous victory/defeat orbit of the jet.
   let killCam = null; // { c: Vector3, until: ms }
   const seenB = new Uint8Array(8); // HUD detection latch per bandit slot (render-side; slots never recycle)
+  let overSimT = null; // sim.time latched at match.over — the end-card un-mask window (D-079)
   let kcCrashes = player ? player.crashes : 0;
   const lastJetPos = new THREE.Vector3();
   const kcPos = new THREE.Vector3();

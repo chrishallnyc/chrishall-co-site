@@ -198,7 +198,11 @@ function gen(save) {
   // INC-6 ace draws — unconditional (stream stability)
   const aceRoll = rng.f();
   const acePickDraw = rng.int(8);
-  const living = (save.aces || []).filter((a) => a.state !== "killed");
+  const living = (save.aces || []).filter((a) => {
+    if (a.state === "killed") return false;
+    const meta = (ACES[save.front] || []).find((m) => m.id === a.id);
+    return !(meta && meta.finale); // finale aces never fly generated ops (D-079: TYPHOON stays sealed for M10)
+  });
   const nem = living.find((a) => a.id === save.nemesisId);
   const aceP = nem ? 0.5 : 0.25;
   const aceEntry = nem || (living.length ? living[acePickDraw % living.length] : null);
