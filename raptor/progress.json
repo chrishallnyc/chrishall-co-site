@@ -1,11 +1,12 @@
 {
- "updated": "2026-08-09T23:15:00-07:00",
- "version": "v0.36.0",
- "now": "v0.36.0 THE VOICE \u2014 the radio can speak (experimental toggle in settings). Remaining to v1.0: marianas inpaint, gun fader, PWA shell.",
+ "updated": "2026-08-09T23:40:00-07:00",
+ "version": "v0.36.2",
+ "now": "v0.36.2 \u2014 RAPTOR is installable (PWA). One visual fix in flight, then the v1.0 release.",
  "nowPhase": 12,
  "paused": false,
- "pushes": 70,
+ "pushes": 71,
  "ledger": [
+  "2026-08-09 v0.36.2 \u2014 INSTALLABLE: RAPTOR is a PWA now \u2014 install it from the browser and it opens fullscreen, landscape, with its own icon. The service worker keeps only the tiny shell offline-capable; the terrain stays streamed (nobody wants a 400MB install).",
   "2026-08-09 v0.36.1 \u2014 the mixer's last channel: WEAPONS VOLUME. The cannon gets its own fader (some pilots want the M61 to rattle the desk; some want to hear the radio over it).",
   "2026-08-09 v0.36.0 \u2014 THE VOICE (experimental): flip RADIO VOICE in settings and the war talks \u2014 OVERLORD gets a measured British calm, enemy aces get a low deliberate menace (an ace is never hurried \u2014 urgent calls speed up for everyone else, never for them), and your own pilot answers in kind. All 410 radio lines cast automatically. Ships OFF by default: it's built on the voices your machine already has, and honesty about that is the feature.",
   "2026-08-09 \u2014 SCOPE CUT (Chris): multiplayer is out \u2014 no P2P duels, no server battles. RAPTOR ships v1.0 as a complete single-pilot war: the campaign, the operation, the aces. The determinism foundation stays (it's what makes replays and the hash-gated QA possible), but nobody's building netcode.",
@@ -143,7 +144,7 @@
   {
    "n": 15,
    "name": "Settings, accessibility, PWA",
-   "pct": 75,
+   "pct": 100,
    "note": "rebind menu live"
   },
   {

@@ -13,6 +13,8 @@
 <meta property="og:description" content="One aircraft, three real fronts. Built for the browser.">
 <meta property="og:url" content="https://raptor.chall.net/">
 <meta name="theme-color" content="#101014">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/assets/icon-192.png">
 <style>
 :root { --bg:#101014; --panel:#16161c; --ink:#e8e6df; --mid:#9a988f; --dim:#6e6c64; --hair:#2e2e36; --acc:#e8b46f; }
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -212,5 +214,11 @@ body { color:var(--ink); font-family:"SF Mono", ui-monospace, Menlo, Consolas, m
 }
 </script>
 <script type="module" src="/src/main.js"></script>
+<script>
+// PWA shell (phase 15): register after load; never blocks or races boot
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  addEventListener("load", () => { navigator.serviceWorker.register("/sw.js").catch(() => {}); });
+}
+</script>
 </body>
 </html>

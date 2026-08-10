@@ -1,0 +1,14 @@
+{
+  "name": "RAPTOR — F-22 air combat",
+  "short_name": "RAPTOR",
+  "description": "One aircraft, three real fronts. An F-22 air combat sim built for the browser.",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#101014",
+  "theme_color": "#101014",
+  "icons": [
+    { "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/assets/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
