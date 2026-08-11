@@ -1,0 +1,523 @@
+{
+ "room": "vincent",
+ "works": [
+  {
+   "artist": "Vincent van Gogh",
+   "title": "The Starry Night",
+   "year": "1889",
+   "museum": "MoMA · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Van Gogh - Starry Night - Google Art Project.jpg",
+   "w": 3840,
+   "h": 3041,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/3840px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1920px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "Google Art Project scan of the MoMA painting; PD-Art, Copyrighted:False"
+  },
+  {
+   "artist": "Vincent van Gogh",
+   "title": "The Bedroom",
+   "year": "1889",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "28560",
+   "w": 3000,
+   "h": 2348,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/6644829f-f292-c5c4-a73c-0356a6fdbf0d/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/6644829f-f292-c5c4-a73c-0356a6fdbf0d/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Vincent van Gogh",
+   "title": "Self-Portrait",
+   "year": "1887",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "80607",
+   "w": 2354,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/47c5bcb8-62ef-e5d7-55e7-f5121f409a30/full/full/0/default.jpg",
+     "w": 2354
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/47c5bcb8-62ef-e5d7-55e7-f5121f409a30/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Vincent van Gogh",
+   "title": "Wheat Field with Cypresses",
+   "year": "1889",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "436535",
+   "w": 4000,
+   "h": 3184,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-42549-001.jpg",
+     "w": 4000
+    }
+   ]
+  },
+  {
+   "artist": "Vincent van Gogh",
+   "title": "Irises",
+   "year": "1890",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "436528",
+   "w": 4000,
+   "h": 3172,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP346474.jpg",
+     "w": 4000
+    }
+   ]
+  },
+  {
+   "artist": "Vincent van Gogh",
+   "title": "Self-Portrait with a Straw Hat",
+   "year": "1887",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "436532",
+   "w": 2829,
+   "h": 3520,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT1502_cropped2.jpg",
+     "w": 2829
+    }
+   ]
+  },
+  {
+   "artist": "Vincent van Gogh",
+   "title": "The Night Café",
+   "year": "1888",
+   "museum": "Yale University Art Gallery",
+   "source": "yuag",
+   "sourceId": "obj/12507",
+   "w": 3840,
+   "h": 3031,
+   "srcs": [
+    {
+     "u": "https://images.collections.yale.edu/iiif/2/yuag:3b072179-2fc7-42bc-87cc-9ee4d782b270/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://images.collections.yale.edu/iiif/2/yuag:3b072179-2fc7-42bc-87cc-9ee4d782b270/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "note": "Manifest rights CC0; native master 7408x5848"
+  },
+  {
+   "artist": "Vincent van Gogh",
+   "title": "Cypresses",
+   "year": "1889",
+   "museum": "The Met · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Vincent van Gogh - Cypresses.jpg",
+   "w": 2848,
+   "h": 3616,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Vincent_van_Gogh_-_Cypresses.jpg",
+     "w": 2848
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Vincent_van_Gogh_-_Cypresses.jpg/1920px-Vincent_van_Gogh_-_Cypresses.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "Met painting 49.30; Commons PD scan used because the Met's own image is only 1476px"
+  },
+  {
+   "artist": "Vincent van Gogh",
+   "title": "Oleanders",
+   "year": "1888",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "436530",
+   "w": 3811,
+   "h": 3130,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT1494.jpg",
+     "w": 3811
+    }
+   ]
+  },
+  {
+   "artist": "Vincent van Gogh",
+   "title": "L'Arlésienne: Madame Joseph-Michel Ginoux",
+   "year": "1888–89",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "436529",
+   "w": 2957,
+   "h": 3722,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT1396.jpg",
+     "w": 2957
+    }
+   ]
+  },
+  {
+   "artist": "Vincent van Gogh",
+   "title": "Olive Trees",
+   "year": "1889",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "437998",
+   "w": 3811,
+   "h": 3040,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT1946.jpg",
+     "w": 3811
+    }
+   ]
+  },
+  {
+   "artist": "Vincent van Gogh",
+   "title": "First Steps, after Millet",
+   "year": "1890",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "436526",
+   "w": 1931,
+   "h": 1531,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP124808.jpg",
+     "w": 1931
+    }
+   ],
+   "note": "Smallest master in the room (1931px) but passes the 1600px gate; beloved subject"
+  },
+  {
+   "artist": "Vincent van Gogh",
+   "title": "The Poet's Garden",
+   "year": "1888",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "14586",
+   "w": 3000,
+   "h": 2370,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/d4bc1723-7cbc-d36d-a9cb-f84553f2a6f6/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/d4bc1723-7cbc-d36d-a9cb-f84553f2a6f6/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Vincent van Gogh",
+   "title": "Fishing in Spring, the Pont de Clichy (Asnières)",
+   "year": "1887",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "109314",
+   "w": 3000,
+   "h": 2503,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/5512cee9-6d00-d01b-b0be-ac7843cc8f76/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/5512cee9-6d00-d01b-b0be-ac7843cc8f76/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Paul Cézanne",
+   "title": "The Basket of Apples",
+   "year": "c. 1893",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "111436",
+   "w": 3000,
+   "h": 2396,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/52ac8996-3460-cf71-cb42-5c4d0aa29b74/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/52ac8996-3460-cf71-cb42-5c4d0aa29b74/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Paul Cézanne",
+   "title": "Madame Cézanne in a Yellow Chair",
+   "year": "1888–90",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "62371",
+   "w": 2369,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/4822cd01-44ac-041a-36b8-c0542377b750/full/full/0/default.jpg",
+     "w": 2369
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/4822cd01-44ac-041a-36b8-c0542377b750/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Paul Cézanne",
+   "title": "The Bay of Marseille, Seen from L'Estaque",
+   "year": "c. 1885",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "16487",
+   "w": 3000,
+   "h": 2404,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/d4ca6321-8656-3d3f-a362-2ee297b2b813/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/d4ca6321-8656-3d3f-a362-2ee297b2b813/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Paul Cézanne",
+   "title": "The Card Players",
+   "year": "1890–92",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "435868",
+   "w": 3909,
+   "h": 3112,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP231550.jpg",
+     "w": 3909
+    }
+   ]
+  },
+  {
+   "artist": "Paul Cézanne",
+   "title": "Still Life with Apples and a Pot of Primroses",
+   "year": "c. 1890",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "435882",
+   "w": 3807,
+   "h": 3021,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT47.jpg",
+     "w": 3807
+    }
+   ]
+  },
+  {
+   "artist": "Paul Cézanne",
+   "title": "Mount Sainte-Victoire",
+   "year": "c. 1904",
+   "museum": "Cleveland Museum of Art",
+   "source": "cma",
+   "sourceId": "1958.21",
+   "w": 3400,
+   "h": 2709,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1958.21/1958.21_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1958.21/1958.21_web.jpg",
+     "w": 900
+    }
+   ],
+   "note": "CC0"
+  },
+  {
+   "artist": "Paul Gauguin",
+   "title": "Ia Orana Maria (Hail Mary)",
+   "year": "1891",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "438821",
+   "w": 2928,
+   "h": 3722,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT1025.jpg",
+     "w": 2928
+    }
+   ]
+  },
+  {
+   "artist": "Paul Gauguin",
+   "title": "Two Tahitian Women",
+   "year": "1899",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "436446",
+   "w": 2884,
+   "h": 3722,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT1342.jpg",
+     "w": 2884
+    }
+   ]
+  },
+  {
+   "artist": "Paul Gauguin",
+   "title": "Mahana no atua (Day of the God)",
+   "year": "1894",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "27943",
+   "w": 3000,
+   "h": 2238,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/a4bef587-48a4-d186-813d-f297441b1ab3/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/a4bef587-48a4-d186-813d-f297441b1ab3/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Paul Gauguin",
+   "title": "Arlésiennes (Mistral)",
+   "year": "1888",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "19339",
+   "w": 3000,
+   "h": 2372,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/ae6ac285-6887-dd76-4570-d379c786dfae/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/ae6ac285-6887-dd76-4570-d379c786dfae/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Paul Gauguin",
+   "title": "No te aha oe riri (Why Are You Angry?)",
+   "year": "1896",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "16496",
+   "w": 3000,
+   "h": 2195,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/2adb35ce-8e94-cda5-210e-b04d488bbdc8/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/2adb35ce-8e94-cda5-210e-b04d488bbdc8/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Henri de Toulouse-Lautrec",
+   "title": "At the Moulin Rouge",
+   "year": "1892–95",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "61128",
+   "w": 3000,
+   "h": 2622,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/defb4004-b500-218d-3d9b-9a02423f097d/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/defb4004-b500-218d-3d9b-9a02423f097d/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Henri de Toulouse-Lautrec",
+   "title": "Equestrienne (At the Cirque Fernando)",
+   "year": "1887–88",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "16146",
+   "w": 3000,
+   "h": 1889,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/65db9e21-83c3-1cc6-7240-1e1996d87f52/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/65db9e21-83c3-1cc6-7240-1e1996d87f52/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Henri Rousseau",
+   "title": "The Repast of the Lion",
+   "year": "c. 1907",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "438822",
+   "w": 3811,
+   "h": 2683,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT50.jpg",
+     "w": 3811
+    }
+   ],
+   "note": "Met highlight; verifies isPublicDomain:true"
+  }
+ ]
+}

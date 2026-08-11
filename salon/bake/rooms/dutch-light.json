@@ -1,0 +1,493 @@
+{
+ "room": "dutch-light",
+ "works": [
+  {
+   "artist": "Johannes Vermeer",
+   "title": "The Milkmaid",
+   "year": "c. 1660",
+   "museum": "Rijksmuseum",
+   "source": "rijks",
+   "sourceId": "SK-A-2344",
+   "w": 3448,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/QkOGy/full/!3840,3840/0/default.jpg",
+     "w": 3448
+    },
+    {
+     "u": "https://iiif.micr.io/QkOGy/full/!2048,2048/0/default.jpg",
+     "w": 1839
+    }
+   ]
+  },
+  {
+   "artist": "Rembrandt van Rijn",
+   "title": "The Night Watch",
+   "year": "1642",
+   "museum": "Rijksmuseum",
+   "source": "rijks",
+   "sourceId": "SK-C-5",
+   "w": 3840,
+   "h": 3188,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/PJEZO/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/PJEZO/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ]
+  },
+  {
+   "artist": "Johannes Vermeer",
+   "title": "View of Houses in Delft, Known as 'The Little Street'",
+   "year": "c. 1658",
+   "museum": "Rijksmuseum",
+   "source": "rijks",
+   "sourceId": "SK-A-2860",
+   "w": 3141,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/VWEov/full/!3840,3840/0/default.jpg",
+     "w": 3141
+    },
+    {
+     "u": "https://iiif.micr.io/VWEov/full/!2048,2048/0/default.jpg",
+     "w": 1675
+    }
+   ]
+  },
+  {
+   "artist": "Johannes Vermeer",
+   "title": "Woman Reading a Letter",
+   "year": "c. 1663",
+   "museum": "Rijksmuseum",
+   "source": "rijks",
+   "sourceId": "SK-C-251",
+   "w": 3215,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/aehHx/full/!3840,3840/0/default.jpg",
+     "w": 3215
+    },
+    {
+     "u": "https://iiif.micr.io/aehHx/full/!2048,2048/0/default.jpg",
+     "w": 1715
+    }
+   ]
+  },
+  {
+   "artist": "Johannes Vermeer",
+   "title": "The Love Letter",
+   "year": "c. 1669–70",
+   "museum": "Rijksmuseum",
+   "source": "rijks",
+   "sourceId": "SK-A-1595",
+   "w": 3336,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/hqxQG/full/!3840,3840/0/default.jpg",
+     "w": 3336
+    },
+    {
+     "u": "https://iiif.micr.io/hqxQG/full/!2048,2048/0/default.jpg",
+     "w": 1779
+    }
+   ]
+  },
+  {
+   "artist": "Rembrandt van Rijn",
+   "title": "Isaac and Rebecca, Known as 'The Jewish Bride'",
+   "year": "c. 1665–69",
+   "museum": "Rijksmuseum",
+   "source": "rijks",
+   "sourceId": "SK-C-216",
+   "w": 3840,
+   "h": 2793,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/uRWXq/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/uRWXq/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ]
+  },
+  {
+   "artist": "Rembrandt van Rijn",
+   "title": "The Sampling Officials of the Amsterdam Drapers' Guild, Known as 'The Syndics'",
+   "year": "1662",
+   "museum": "Rijksmuseum",
+   "source": "rijks",
+   "sourceId": "SK-C-6",
+   "w": 3840,
+   "h": 2602,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/cWWQE/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/cWWQE/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ]
+  },
+  {
+   "artist": "Rembrandt van Rijn",
+   "title": "Self-Portrait as the Apostle Paul",
+   "year": "1661",
+   "museum": "Rijksmuseum",
+   "source": "rijks",
+   "sourceId": "SK-A-4050",
+   "w": 3247,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/wqcDn/full/!3840,3840/0/default.jpg",
+     "w": 3247
+    },
+    {
+     "u": "https://iiif.micr.io/wqcDn/full/!2048,2048/0/default.jpg",
+     "w": 1732
+    }
+   ]
+  },
+  {
+   "artist": "Johannes Vermeer",
+   "title": "Young Woman with a Water Pitcher",
+   "year": "c. 1662",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "437881",
+   "w": 3437,
+   "h": 3866,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP353257.jpg",
+     "w": 3437
+    }
+   ]
+  },
+  {
+   "artist": "Johannes Vermeer",
+   "title": "A Maid Asleep",
+   "year": "c. 1656–57",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "437878",
+   "w": 3365,
+   "h": 3861,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP355525.jpg",
+     "w": 3365
+    }
+   ]
+  },
+  {
+   "artist": "Johannes Vermeer",
+   "title": "Study of a Young Woman",
+   "year": "c. 1665–67",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "437879",
+   "w": 3454,
+   "h": 3866,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP353256.jpg",
+     "w": 3454
+    }
+   ]
+  },
+  {
+   "artist": "Johannes Vermeer",
+   "title": "Young Woman with a Lute",
+   "year": "c. 1662–63",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "437880",
+   "w": 3374,
+   "h": 3870,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP354965.jpg",
+     "w": 3374
+    }
+   ]
+  },
+  {
+   "artist": "Johannes Vermeer",
+   "title": "Allegory of the Catholic Faith",
+   "year": "c. 1670–72",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "437877",
+   "w": 2904,
+   "h": 3721,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP145924.jpg",
+     "w": 2904
+    }
+   ]
+  },
+  {
+   "artist": "Rembrandt van Rijn",
+   "title": "Aristotle with a Bust of Homer",
+   "year": "1653",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "437394",
+   "w": 3792,
+   "h": 4000,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-30758-001.jpg",
+     "w": 3792
+    }
+   ]
+  },
+  {
+   "artist": "Rembrandt van Rijn",
+   "title": "Self-Portrait",
+   "year": "1660",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "437397",
+   "w": 3298,
+   "h": 4000,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-16323-001.jpg",
+     "w": 3298
+    }
+   ]
+  },
+  {
+   "artist": "Rembrandt van Rijn",
+   "title": "The Standard Bearer (Floris Soop)",
+   "year": "1654",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "437395",
+   "w": 3135,
+   "h": 3789,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP121330.jpg",
+     "w": 3135
+    }
+   ]
+  },
+  {
+   "artist": "Frans Hals",
+   "title": "The Merry Drinker",
+   "year": "c. 1628–30",
+   "museum": "Rijksmuseum",
+   "source": "rijks",
+   "sourceId": "SK-A-135",
+   "w": 3209,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/CgrHr/full/!3840,3840/0/default.jpg",
+     "w": 3209
+    },
+    {
+     "u": "https://iiif.micr.io/CgrHr/full/!2048,2048/0/default.jpg",
+     "w": 1712
+    }
+   ]
+  },
+  {
+   "artist": "Frans Hals",
+   "title": "Marriage Portrait of Isaac Massa and Beatrix van der Laen",
+   "year": "c. 1622",
+   "museum": "Rijksmuseum",
+   "source": "rijks",
+   "sourceId": "SK-A-133",
+   "w": 3840,
+   "h": 3266,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/ZrjcE/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/ZrjcE/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ]
+  },
+  {
+   "artist": "Jan Asselijn",
+   "title": "The Threatened Swan",
+   "year": "c. 1650",
+   "museum": "Rijksmuseum",
+   "source": "rijks",
+   "sourceId": "SK-A-4",
+   "w": 3840,
+   "h": 3195,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/hZepb/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/hZepb/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ]
+  },
+  {
+   "artist": "Hendrick Avercamp",
+   "title": "Winter Landscape with Ice Skaters",
+   "year": "c. 1608",
+   "museum": "Rijksmuseum",
+   "source": "rijks",
+   "sourceId": "SK-A-1718",
+   "w": 3840,
+   "h": 2226,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/aXnzA/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/aXnzA/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ]
+  },
+  {
+   "artist": "Jacob van Ruisdael",
+   "title": "The Windmill at Wijk bij Duurstede",
+   "year": "c. 1668–70",
+   "museum": "Rijksmuseum",
+   "source": "rijks",
+   "sourceId": "SK-C-211",
+   "w": 3840,
+   "h": 3255,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/XWEFp/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/XWEFp/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ]
+  },
+  {
+   "artist": "Jan Steen",
+   "title": "The Merry Family",
+   "year": "1668",
+   "museum": "Rijksmuseum",
+   "source": "rijks",
+   "sourceId": "SK-C-229",
+   "w": 3840,
+   "h": 3019,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/SbsFC/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/SbsFC/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ]
+  },
+  {
+   "artist": "Jan Steen",
+   "title": "The Feast of St Nicholas",
+   "year": "1665–68",
+   "museum": "Rijksmuseum",
+   "source": "rijks",
+   "sourceId": "SK-A-385",
+   "w": 3305,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/WZzyz/full/!3840,3840/0/default.jpg",
+     "w": 3305
+    },
+    {
+     "u": "https://iiif.micr.io/WZzyz/full/!2048,2048/0/default.jpg",
+     "w": 1763
+    }
+   ]
+  },
+  {
+   "artist": "Pieter de Hooch",
+   "title": "Figures in a Courtyard behind a House",
+   "year": "c. 1663–65",
+   "museum": "Rijksmuseum",
+   "source": "rijks",
+   "sourceId": "SK-C-150",
+   "w": 2983,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/SOvaQ/full/!3840,3840/0/default.jpg",
+     "w": 2983
+    },
+    {
+     "u": "https://iiif.micr.io/SOvaQ/full/!2048,2048/0/default.jpg",
+     "w": 1591
+    }
+   ]
+  },
+  {
+   "artist": "Pieter de Hooch",
+   "title": "A Mother's Duty",
+   "year": "c. 1660–61",
+   "museum": "Rijksmuseum",
+   "source": "rijks",
+   "sourceId": "SK-C-149",
+   "w": 3840,
+   "h": 3325,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/SgpJY/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/SgpJY/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ]
+  },
+  {
+   "artist": "Pieter de Hooch",
+   "title": "Interior with Women beside a Linen Cupboard",
+   "year": "1663",
+   "museum": "Rijksmuseum",
+   "source": "rijks",
+   "sourceId": "SK-C-1191",
+   "w": 3840,
+   "h": 3510,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/NYvCK/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/NYvCK/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ]
+  }
+ ]
+}

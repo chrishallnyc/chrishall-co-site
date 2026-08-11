@@ -1,0 +1,652 @@
+{
+ "room": "floating-world",
+ "works": [
+  {
+   "artist": "Katsushika Hokusai",
+   "title": "Under the Wave off Kanagawa (The Great Wave)",
+   "year": "c. 1830–32",
+   "museum": "The Metropolitan Museum of Art",
+   "source": "met",
+   "sourceId": "45434",
+   "w": 3859,
+   "h": 2594,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/as/original/DP130155.jpg",
+     "w": 3859
+    }
+   ],
+   "note": "From Thirty-six Views of Mount Fuji. Met impression (JP1847) kept over AIC 24645 — 3859px vs 3000px delivered."
+  },
+  {
+   "artist": "Katsushika Hokusai",
+   "title": "A Mild Breeze on a Fine Day (Red Fuji)",
+   "year": "c. 1830–33",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "77328",
+   "w": 3000,
+   "h": 2025,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/50c2eac7-be49-7daa-294d-068b9e8f2a9d/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/50c2eac7-be49-7daa-294d-068b9e8f2a9d/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "Gaifu kaisei, from Thirty-six Views of Mount Fuji; 9649px master scan."
+  },
+  {
+   "artist": "Katsushika Hokusai",
+   "title": "Shower Below the Summit",
+   "year": "c. 1830–33",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "87008",
+   "w": 3000,
+   "h": 2076,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/bbb6d024-f931-2e2f-eb95-750991834b1c/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/bbb6d024-f931-2e2f-eb95-750991834b1c/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "Sanka hakuu (Rainstorm Beneath the Summit), from Thirty-six Views of Mount Fuji."
+  },
+  {
+   "artist": "Katsushika Hokusai",
+   "title": "Ejiri in Suruga Province",
+   "year": "c. 1830–33",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "24800",
+   "w": 3000,
+   "h": 2042,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/5f3cc8e1-a024-9d9c-4d75-a18c5fcbbe65/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/5f3cc8e1-a024-9d9c-4d75-a18c5fcbbe65/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "Travelers caught in a gust of wind; from Thirty-six Views of Mount Fuji."
+  },
+  {
+   "artist": "Katsushika Hokusai",
+   "title": "Kajikazawa in Kai Province",
+   "year": "c. 1830–33",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "18969",
+   "w": 3000,
+   "h": 2074,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/81114385-3f62-e1ad-64d3-9dcc2b07b2b0/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/81114385-3f62-e1ad-64d3-9dcc2b07b2b0/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "From Thirty-six Views of Mount Fuji."
+  },
+  {
+   "artist": "Katsushika Hokusai",
+   "title": "Ono Falls on the Kisokaido Road",
+   "year": "c. 1833",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "25183",
+   "w": 2040,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/6610ddf3-b8d5-a8fa-5a03-a803e7e76042/full/full/0/default.jpg",
+     "w": 2040
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/6610ddf3-b8d5-a8fa-5a03-a803e7e76042/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "From A Tour of Waterfalls in Various Provinces."
+  },
+  {
+   "artist": "Katsushika Hokusai",
+   "title": "Amida Falls in the Far Reaches of the Kisokaido",
+   "year": "c. 1833",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "25201",
+   "w": 2093,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/778f5ecd-af29-b0d0-6c15-6b4a603dfa0d/full/full/0/default.jpg",
+     "w": 2093
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/778f5ecd-af29-b0d0-6c15-6b4a603dfa0d/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "The round-eyed cascade; from A Tour of Waterfalls in Various Provinces."
+  },
+  {
+   "artist": "Katsushika Hokusai",
+   "title": "Kirifuri Falls at Mount Kurokami",
+   "year": "c. 1833",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "25186",
+   "w": 2100,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/222db246-4eae-d023-5bba-11af5bbd4e82/full/full/0/default.jpg",
+     "w": 2100
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/222db246-4eae-d023-5bba-11af5bbd4e82/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "From A Tour of Waterfalls in Various Provinces."
+  },
+  {
+   "artist": "Katsushika Hokusai",
+   "title": "Yoro Waterfall in Mino Province",
+   "year": "c. 1833",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "13255",
+   "w": 2044,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/d0e64f27-a884-a994-7962-f5b1dd863edb/full/full/0/default.jpg",
+     "w": 2044
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/d0e64f27-a884-a994-7962-f5b1dd863edb/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "From A Tour of Waterfalls in Various Provinces."
+  },
+  {
+   "artist": "Katsushika Hokusai",
+   "title": "Chrysanthemum and Horsefly",
+   "year": "c. 1831–33",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "25110",
+   "w": 3000,
+   "h": 2062,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/e81e632c-2e27-d79c-527d-365519796f9f/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/e81e632c-2e27-d79c-527d-365519796f9f/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "From the untitled series of Large Flowers."
+  },
+  {
+   "artist": "Katsushika Hokusai",
+   "title": "Hydrangea and Swallow",
+   "year": "c. 1833–34",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "25117",
+   "w": 3000,
+   "h": 2047,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/9bc87079-663c-f320-2da5-29dcd86c68f4/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/9bc87079-663c-f320-2da5-29dcd86c68f4/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "From the untitled series of Large Flowers."
+  },
+  {
+   "artist": "Katsushika Hokusai",
+   "title": "Whaling off the Coast of the Goto Islands",
+   "year": "c. 1831–33",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "100626",
+   "w": 3000,
+   "h": 2216,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/ecf15def-563f-2fc1-f793-7ebdae5cd68a/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/ecf15def-563f-2fc1-f793-7ebdae5cd68a/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "From One Thousand Pictures of the Ocean."
+  },
+  {
+   "artist": "Katsushika Hokusai",
+   "title": "Kohada Koheiji",
+   "year": "1831–32",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "47398",
+   "w": 2157,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/792d6c6e-1782-dc76-f75a-35e8d1a60357/full/full/0/default.jpg",
+     "w": 2157
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/792d6c6e-1782-dc76-f75a-35e8d1a60357/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "The grinning skeleton ghost, from One Hundred Ghost Tales."
+  },
+  {
+   "artist": "Utagawa Hiroshige",
+   "title": "Sudden Shower over Shin-Ohashi Bridge and Atake",
+   "year": "1857",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "64447",
+   "w": 2055,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/7e3923a9-e254-8d3f-b377-68d86f6083df/full/full/0/default.jpg",
+     "w": 2055
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/7e3923a9-e254-8d3f-b377-68d86f6083df/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "From One Hundred Famous Views of Edo; the print Van Gogh copied."
+  },
+  {
+   "artist": "Utagawa Hiroshige",
+   "title": "Plum Garden at Kameido",
+   "year": "1857",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "26577",
+   "w": 2037,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/89a2332f-be15-8e05-bc79-778738fdc1ef/full/full/0/default.jpg",
+     "w": 2037
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/89a2332f-be15-8e05-bc79-778738fdc1ef/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "Kameido Umeyashiki, from One Hundred Famous Views of Edo."
+  },
+  {
+   "artist": "Utagawa Hiroshige",
+   "title": "Kanbara: Evening Snow",
+   "year": "c. 1833–34",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "25613",
+   "w": 3000,
+   "h": 1947,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/c287562e-816e-096c-022a-b05199ba4b8f/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/c287562e-816e-096c-022a-b05199ba4b8f/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "From Fifty-three Stations of the Tokaido (Hoeido edition)."
+  },
+  {
+   "artist": "Utagawa Hiroshige",
+   "title": "Shono: Driving Rain",
+   "year": "c. 1833–34",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "25761",
+   "w": 3000,
+   "h": 2028,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/998c262b-75e6-b711-1586-5bb33ddb74ce/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/998c262b-75e6-b711-1586-5bb33ddb74ce/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "From Fifty-three Stations of the Tokaido (Hoeido edition)."
+  },
+  {
+   "artist": "Utagawa Hiroshige",
+   "title": "Mishima: Morning Mist",
+   "year": "c. 1833–34",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "10926",
+   "w": 3000,
+   "h": 1921,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/c047003a-949c-a581-7c5a-2c415e8cac75/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/c047003a-949c-a581-7c5a-2c415e8cac75/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "From Fifty-three Stations of the Tokaido (Hoeido edition)."
+  },
+  {
+   "artist": "Utagawa Hiroshige",
+   "title": "Fox Fires on New Year's Eve at the Changing Tree in Oji",
+   "year": "1857",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "13183",
+   "w": 1993,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/23218ff9-8008-5318-f7dd-52e6a1471599/full/full/0/default.jpg",
+     "w": 1993
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/23218ff9-8008-5318-f7dd-52e6a1471599/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "From One Hundred Famous Views of Edo; the series' famous night finale."
+  },
+  {
+   "artist": "Utagawa Hiroshige",
+   "title": "The Whirlpools in Naruto Strait, Awa Province",
+   "year": "1857",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "21625",
+   "w": 3000,
+   "h": 1450,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/dedda7df-41b0-49c1-7255-935123ba6d93/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/dedda7df-41b0-49c1-7255-935123ba6d93/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "Panoramic triptych; 11158px master scan."
+  },
+  {
+   "artist": "Utagawa Hiroshige",
+   "title": "Awa Province: Naruto Whirlpools",
+   "year": "1855",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "130577",
+   "w": 2003,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/e51dec75-e984-b564-869e-143c739eb372/full/full/0/default.jpg",
+     "w": 2003
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/e51dec75-e984-b564-869e-143c739eb372/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "From Famous Places in the Sixty-odd Provinces."
+  },
+  {
+   "artist": "Utagawa Hiroshige",
+   "title": "Drum Bridge and Yuhi Hill at Meguro",
+   "year": "1857",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "26615",
+   "w": 2032,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/723f833f-19f7-89e0-60ad-ad7ffc33ca4d/full/full/0/default.jpg",
+     "w": 2032
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/723f833f-19f7-89e0-60ad-ad7ffc33ca4d/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "Snow scene from One Hundred Famous Views of Edo."
+  },
+  {
+   "artist": "Utagawa Hiroshige",
+   "title": "Kinryuzan Temple at Asakusa",
+   "year": "1856",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "34096",
+   "w": 2036,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/15e90d2e-ba4f-4fff-f784-fc84f4bbfe0a/full/full/0/default.jpg",
+     "w": 2036
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/15e90d2e-ba4f-4fff-f784-fc84f4bbfe0a/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "Red temple gate against falling snow; from One Hundred Famous Views of Edo."
+  },
+  {
+   "artist": "Utagawa Hiroshige",
+   "title": "Suido Bridge and Surugadai",
+   "year": "1857",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "34252",
+   "w": 2053,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/98cec643-d12d-ef62-9de0-df2194d1556f/full/full/0/default.jpg",
+     "w": 2053
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/98cec643-d12d-ef62-9de0-df2194d1556f/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "The great carp banner over Edo; from One Hundred Famous Views of Edo."
+  },
+  {
+   "artist": "Utagawa Hiroshige",
+   "title": "Asakusa Rice Fields and Torinomachi Festival",
+   "year": "1857",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "13192",
+   "w": 2063,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/72b3d0cf-f10b-3679-cf9f-b7fc211766fa/full/full/0/default.jpg",
+     "w": 2063
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/72b3d0cf-f10b-3679-cf9f-b7fc211766fa/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "The cat at the window; from One Hundred Famous Views of Edo."
+  },
+  {
+   "artist": "Kitagawa Utamaro",
+   "title": "Takashima Ohisa",
+   "year": "c. 1795",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "23868",
+   "w": 2051,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/d3840ed2-3198-84e4-9086-8be16631a452/full/full/0/default.jpg",
+     "w": 2051
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/d3840ed2-3198-84e4-9086-8be16631a452/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "Portrait of the celebrated teahouse beauty; mica-ground bust portrait."
+  },
+  {
+   "artist": "Kitagawa Utamaro",
+   "title": "Woman Exhaling Smoke from a Pipe",
+   "year": "c. 1792–93",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "8185",
+   "w": 2003,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/6e45350c-69a4-0a0c-28d1-6acc131931da/full/full/0/default.jpg",
+     "w": 2003
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/6e45350c-69a4-0a0c-28d1-6acc131931da/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "From Ten Classes of Women's Physiognomy."
+  },
+  {
+   "artist": "Kitagawa Utamaro",
+   "title": "The Courtesan Arihara of the Tsuruya",
+   "year": "c. 1797",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "19236",
+   "w": 2012,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/2b9f4057-ec33-864f-7c14-665da35a05bc/full/full/0/default.jpg",
+     "w": 2012
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/2b9f4057-ec33-864f-7c14-665da35a05bc/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "With child attendants Aoe and Sekiya."
+  },
+  {
+   "artist": "Utagawa Kuniyoshi",
+   "title": "Lu Zhishen, Originally Named Lu Da",
+   "year": "c. 1827",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "130716",
+   "w": 2098,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/b34d2656-72dd-37c4-a002-2b9f2be83037/full/full/0/default.jpg",
+     "w": 2098
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/b34d2656-72dd-37c4-a002-2b9f2be83037/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "Tattooed hero from One Hundred and Eight Heroes of the Water Margin."
+  },
+  {
+   "artist": "Utagawa Kuniyoshi",
+   "title": "The Young Yoshitsune Defeats Benkei at Gojo Bridge",
+   "year": "c. 1848",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "49141",
+   "w": 3000,
+   "h": 1475,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/c4db3a2b-3724-704a-8d55-35de0ddca050/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/c4db3a2b-3724-704a-8d55-35de0ddca050/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "Moonlit duel triptych."
+  },
+  {
+   "artist": "Utagawa Kuniyoshi",
+   "title": "The Utter Defeat of the Taira Clan at Akama Bay",
+   "year": "c. 1845",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "46990",
+   "w": 3000,
+   "h": 1496,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/bc536ff1-e0bc-24e9-6fd7-0812406e9cd3/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/bc536ff1-e0bc-24e9-6fd7-0812406e9cd3/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "Genpei War naval battle triptych."
+  }
+ ]
+}

@@ -1,0 +1,425 @@
+{
+ "room": "the-americans",
+ "works": [
+  {
+   "artist": "John Singer Sargent",
+   "title": "Madame X (Virginie Amélie Avegno Gautreau)",
+   "year": "1883–84",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "12127",
+   "w": 2336,
+   "h": 4000,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DP-29006-001.jpg",
+     "w": 2336
+    }
+   ]
+  },
+  {
+   "artist": "Emanuel Leutze",
+   "title": "Washington Crossing the Delaware",
+   "year": "1851",
+   "museum": "The Met · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Washington Crossing the Delaware by Emanuel Leutze, MMA-NYC, 1851.jpg",
+   "w": 3840,
+   "h": 2460,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Washington_Crossing_the_Delaware_by_Emanuel_Leutze%2C_MMA-NYC%2C_1851.jpg/3840px-Washington_Crossing_the_Delaware_by_Emanuel_Leutze%2C_MMA-NYC%2C_1851.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Washington_Crossing_the_Delaware_by_Emanuel_Leutze%2C_MMA-NYC%2C_1851.jpg/1920px-Washington_Crossing_the_Delaware_by_Emanuel_Leutze%2C_MMA-NYC%2C_1851.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "Frederic Edwin Church",
+   "title": "Heart of the Andes",
+   "year": "1859",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "10481",
+   "w": 3811,
+   "h": 2099,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DT78.jpg",
+     "w": 3811
+    }
+   ]
+  },
+  {
+   "artist": "Frederic Edwin Church",
+   "title": "Twilight in the Wilderness",
+   "year": "1860",
+   "museum": "Cleveland Museum of Art",
+   "source": "cma",
+   "sourceId": "1965.233",
+   "w": 3400,
+   "h": 2123,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1965.233/1965.233_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1965.233/1965.233_web.jpg",
+     "w": 900
+    }
+   ]
+  },
+  {
+   "artist": "Frederic Edwin Church",
+   "title": "View of Cotopaxi",
+   "year": "1857",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "76571",
+   "w": 3000,
+   "h": 1992,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/33fc29fc-097b-576b-c9e6-c3352d9d3f15/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/33fc29fc-097b-576b-c9e6-c3352d9d3f15/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Thomas Cole",
+   "title": "View from Mount Holyoke, Northampton, Massachusetts, after a Thunderstorm—The Oxbow",
+   "year": "1836",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "10497",
+   "w": 4000,
+   "h": 2733,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DP-12550-001.jpg",
+     "w": 4000
+    }
+   ]
+  },
+  {
+   "artist": "Thomas Cole",
+   "title": "View of Schroon Mountain, Essex County, New York, After a Storm",
+   "year": "1838",
+   "museum": "Cleveland Museum of Art",
+   "source": "cma",
+   "sourceId": "1917.1335",
+   "w": 3400,
+   "h": 2086,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1917.1335/1917.1335_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1917.1335/1917.1335_web.jpg",
+     "w": 1263
+    }
+   ]
+  },
+  {
+   "artist": "Albert Bierstadt",
+   "title": "The Rocky Mountains, Lander's Peak",
+   "year": "1863",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "10154",
+   "w": 3811,
+   "h": 2284,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DT82.jpg",
+     "w": 3811
+    }
+   ]
+  },
+  {
+   "artist": "Albert Bierstadt",
+   "title": "Mount Starr King, Yosemite",
+   "year": "1866",
+   "museum": "Cleveland Museum of Art",
+   "source": "cma",
+   "sourceId": "1922.684",
+   "w": 3400,
+   "h": 2303,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1922.684/1922.684_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1922.684/1922.684_web.jpg",
+     "w": 1263
+    }
+   ]
+  },
+  {
+   "artist": "Winslow Homer",
+   "title": "The Gulf Stream",
+   "year": "1899; reworked by 1906",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "11122",
+   "w": 4000,
+   "h": 2468,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DP-20821-001.jpg",
+     "w": 4000
+    }
+   ]
+  },
+  {
+   "artist": "Winslow Homer",
+   "title": "Northeaster",
+   "year": "1895; reworked by 1901",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "11130",
+   "w": 3811,
+   "h": 2613,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DT1545.jpg",
+     "w": 3811
+    }
+   ]
+  },
+  {
+   "artist": "Winslow Homer",
+   "title": "The Herring Net",
+   "year": "1885",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "25865",
+   "w": 3000,
+   "h": 1846,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/5dca7347-c6dc-24dd-d073-d705b9cdc575/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/5dca7347-c6dc-24dd-d073-d705b9cdc575/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Winslow Homer",
+   "title": "Croquet Scene",
+   "year": "1866",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "44018",
+   "w": 3000,
+   "h": 1829,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/f7b2db45-f393-653c-07ef-84319b0cdb92/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/f7b2db45-f393-653c-07ef-84319b0cdb92/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Winslow Homer",
+   "title": "Early Morning After a Storm at Sea",
+   "year": "1900–1903",
+   "museum": "Cleveland Museum of Art",
+   "source": "cma",
+   "sourceId": "1924.195",
+   "w": 3400,
+   "h": 2050,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1924.195/1924.195_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1924.195/1924.195_web.jpg",
+     "w": 1263
+    }
+   ]
+  },
+  {
+   "artist": "Thomas Eakins",
+   "title": "The Champion Single Sculls (Max Schmitt in a Single Scull)",
+   "year": "1871",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "10819",
+   "w": 3811,
+   "h": 2667,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DT86.jpg",
+     "w": 3811
+    }
+   ]
+  },
+  {
+   "artist": "Thomas Eakins",
+   "title": "The Biglin Brothers Turning the Stake",
+   "year": "1873",
+   "museum": "Cleveland Museum of Art",
+   "source": "cma",
+   "sourceId": "1927.1984",
+   "w": 3400,
+   "h": 2247,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1927.1984/1927.1984_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1927.1984/1927.1984_web.jpg",
+     "w": 1263
+    }
+   ]
+  },
+  {
+   "artist": "James McNeill Whistler",
+   "title": "Nocturne: Blue and Gold—Southampton Water",
+   "year": "1872",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "56905",
+   "w": 3000,
+   "h": 1982,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/50034c7f-ce51-00f1-430e-a6f7efc233fc/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/50034c7f-ce51-00f1-430e-a6f7efc233fc/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "James McNeill Whistler",
+   "title": "Cremorne Gardens, No. 2",
+   "year": "c. 1870–80",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "13223",
+   "w": 3811,
+   "h": 1950,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DT2780.jpg",
+     "w": 3811
+    }
+   ]
+  },
+  {
+   "artist": "John Singer Sargent",
+   "title": "Mrs. George Swinton (Elizabeth Ebsworth)",
+   "year": "1897",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "4749",
+   "w": 1594,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/074c1b1b-fe92-01ce-9e62-cc99369142dd/full/full/0/default.jpg",
+     "w": 1594
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/074c1b1b-fe92-01ce-9e62-cc99369142dd/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "John Singer Sargent",
+   "title": "The Fountain, Villa Torlonia, Frascati, Italy",
+   "year": "1907",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "69780",
+   "w": 2340,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/3f9aa9db-61e1-7060-fdb0-bfd7e41ddd08/full/full/0/default.jpg",
+     "w": 2340
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/3f9aa9db-61e1-7060-fdb0-bfd7e41ddd08/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "William Merritt Chase",
+   "title": "At the Seaside",
+   "year": "c. 1892",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "10464",
+   "w": 3811,
+   "h": 2288,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DT95.jpg",
+     "w": 3811
+    }
+   ]
+  },
+  {
+   "artist": "William Merritt Chase",
+   "title": "For the Little One",
+   "year": "c. 1896",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "10468",
+   "w": 3369,
+   "h": 3850,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DP161212.jpg",
+     "w": 3369
+    }
+   ]
+  },
+  {
+   "artist": "William Merritt Chase",
+   "title": "Portrait of Dora Wheeler",
+   "year": "1882–83",
+   "museum": "Cleveland Museum of Art",
+   "source": "cma",
+   "sourceId": "1921.1239",
+   "w": 3400,
+   "h": 3254,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1921.1239/1921.1239_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1921.1239/1921.1239_web.jpg",
+     "w": 939
+    }
+   ]
+  }
+ ]
+}

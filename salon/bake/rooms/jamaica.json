@@ -1,0 +1,355 @@
+{
+ "room": "jamaica",
+ "works": [
+  {
+   "artist": "George Robertson (engraved by Daniel Lerpinière)",
+   "title": "A View in the Island of Jamaica, of Part of the River Cobre near Spanish Town",
+   "year": "1778",
+   "museum": "New Britain Museum of American Art · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "Robertson Lerpiniere A View in the Island of Jamaica, of Part of the River Cobre near Spanish Town.jpg",
+   "w": 3840,
+   "h": 2563,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Robertson_Lerpiniere_A_View_in_the_Island_of_Jamaica%2C_of_Part_of_the_River_Cobre_near_Spanish_Town.jpg/3840px-Robertson_Lerpiniere_A_View_in_the_Island_of_Jamaica%2C_of_Part_of_the_River_Cobre_near_Spanish_Town.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Robertson_Lerpiniere_A_View_in_the_Island_of_Jamaica%2C_of_Part_of_the_River_Cobre_near_Spanish_Town.jpg/1920px-Robertson_Lerpiniere_A_View_in_the_Island_of_Jamaica%2C_of_Part_of_the_River_Cobre_near_Spanish_Town.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "From Boydell's set of six Jamaica views — the island's first great landscape suite, drawn on the spot in the 1770s."
+  },
+  {
+   "artist": "George Robertson (engraved by James Mason)",
+   "title": "A View in the Island of Jamaica, of the Spring-head of Roaring River",
+   "year": "1778",
+   "museum": "Yale Center for British Art · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "James Mason - A View in the Island of Jamaica, of the Spring-head of Roaring River on the Estate of William Beckford - B2001.2.1522 - Yale Center for British Art.jpg",
+   "w": 1920,
+   "h": 1407,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/d/d9/James_Mason_-_A_View_in_the_Island_of_Jamaica%2C_of_the_Spring-head_of_Roaring_River_on_the_Estate_of_William_Beckford_-_B2001.2.1522_-_Yale_Center_for_British_Art.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "William Berryman",
+   "title": "Sugar Estate, Cutting Cane",
+   "year": "c. 1808–1815",
+   "museum": "Library of Congress · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "Sugar estate - Negros cutting cane LCCN96516495.jpg",
+   "w": 3840,
+   "h": 2928,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Sugar_estate_-_Negros_cutting_cane_LCCN96516495.jpg/3840px-Sugar_estate_-_Negros_cutting_cane_LCCN96516495.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Sugar_estate_-_Negros_cutting_cane_LCCN96516495.jpg/1920px-Sugar_estate_-_Negros_cutting_cane_LCCN96516495.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "Watercolor from Berryman's Jamaica sketchbooks — over 300 on-the-spot studies of island life before emancipation."
+  },
+  {
+   "artist": "William Berryman",
+   "title": "Woman Beating Cassava",
+   "year": "c. 1808–1815",
+   "museum": "Library of Congress · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "Woman beating cassava, Jamaica slightly restored.tif",
+   "w": 1920,
+   "h": 2911,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Woman_beating_cassava%2C_Jamaica_slightly_restored.tif/lossy-page1-1920px-Woman_beating_cassava%2C_Jamaica_slightly_restored.tif.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "James Hakewill",
+   "title": "King's Square, St. Jago de la Vega (Spanish Town)",
+   "year": "1825",
+   "museum": "Internet Archive · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "Hakewill, A Picturesque Tour of the Island of Jamaica, Plate 01.jpg",
+   "w": 3159,
+   "h": 1535,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_01.jpg",
+     "w": 3159
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_01.jpg/1920px-Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_01.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "From 'A Picturesque Tour of the Island of Jamaica' — hand-colored aquatints after Hakewill's 1820–21 tour."
+  },
+  {
+   "artist": "James Hakewill",
+   "title": "Kingston and Port Royal from Windsor Farm",
+   "year": "1825",
+   "museum": "Internet Archive · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "Hakewill, A Picturesque Tour of the Island of Jamaica, Plate 03.jpg",
+   "w": 2515,
+   "h": 2063,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_03.jpg",
+     "w": 2515
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_03.jpg/1920px-Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_03.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "James Hakewill",
+   "title": "Harbour Street, Kingston",
+   "year": "1825",
+   "museum": "Internet Archive · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "Hakewill, A Picturesque Tour of the Island of Jamaica, Plate 04.jpg",
+   "w": 2505,
+   "h": 1663,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/f/f6/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_04.jpg",
+     "w": 2505
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_04.jpg/1920px-Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_04.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "James Hakewill",
+   "title": "Waterfall on the Windward Road, near Kingston",
+   "year": "1825",
+   "museum": "Internet Archive · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "Hakewill, A Picturesque Tour of the Island of Jamaica, Plate 05.jpg",
+   "w": 1581,
+   "h": 2411,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/5/55/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_05.jpg",
+     "w": 1581
+    }
+   ]
+  },
+  {
+   "artist": "James Hakewill",
+   "title": "The Bog Walk",
+   "year": "1825",
+   "museum": "Internet Archive · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "Hakewill, A Picturesque Tour of the Island of Jamaica, Plate 15.jpg",
+   "w": 2461,
+   "h": 1620,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/6/60/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_15.jpg",
+     "w": 2461
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_15.jpg/1920px-Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_15.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "James Hakewill",
+   "title": "Montego Bay, from Reading Hill",
+   "year": "1825",
+   "museum": "Internet Archive · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "Hakewill, A Picturesque Tour of the Island of Jamaica, Plate 18.jpg",
+   "w": 2559,
+   "h": 1590,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/9/93/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_18.jpg",
+     "w": 2559
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_18.jpg/1920px-Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_18.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "Isaac Mendes Belisario",
+   "title": "Koo, Koo, or Actor-Boy",
+   "year": "1837–38",
+   "museum": "British Museum · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "\"Koo, Koo, Or Actor-Boy\" (BM 2006,0929.48).jpg",
+   "w": 1791,
+   "h": 2500,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/4/4f/%22Koo%2C_Koo%2C_Or_Actor-Boy%22_%28BM_2006%2C0929.48%29.jpg",
+     "w": 1791
+    }
+   ],
+   "note": "From 'Sketches of Character' — the Jamaican-born artist's celebrated record of the Jonkonnu masquerade, published in Kingston."
+  },
+  {
+   "artist": "Frederic Edwin Church",
+   "title": "Wild Sugar Cane, Jamaica",
+   "year": "1865",
+   "museum": "Cooper Hewitt, Smithsonian Design Museum · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "Painting, Wild Sugar Cane, Jamaica, 1865 (CH 18200603).jpg",
+   "w": 3840,
+   "h": 3623,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Painting%2C_Wild_Sugar_Cane%2C_Jamaica%2C_1865_%28CH_18200603%29.jpg/3840px-Painting%2C_Wild_Sugar_Cane%2C_Jamaica%2C_1865_%28CH_18200603%29.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Painting%2C_Wild_Sugar_Cane%2C_Jamaica%2C_1865_%28CH_18200603%29.jpg/1920px-Painting%2C_Wild_Sugar_Cane%2C_Jamaica%2C_1865_%28CH_18200603%29.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "Church spent five months painting in Jamaica's Blue Mountains in 1865."
+  },
+  {
+   "artist": "Frederic Edwin Church",
+   "title": "Sunset in Jamaica, West Indies",
+   "year": "1865–66",
+   "museum": "Cooper Hewitt, Smithsonian Design Museum · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "Drawing, Sunset in Jamaica, West Indies, 1865–66 (CH 18192687).jpg",
+   "w": 3840,
+   "h": 3073,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Drawing%2C_Sunset_in_Jamaica%2C_West_Indies%2C_1865%E2%80%9366_%28CH_18192687%29.jpg/3840px-Drawing%2C_Sunset_in_Jamaica%2C_West_Indies%2C_1865%E2%80%9366_%28CH_18192687%29.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Drawing%2C_Sunset_in_Jamaica%2C_West_Indies%2C_1865%E2%80%9366_%28CH_18192687%29.jpg/1920px-Drawing%2C_Sunset_in_Jamaica%2C_West_Indies%2C_1865%E2%80%9366_%28CH_18192687%29.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "Frederic Edwin Church",
+   "title": "Rain Forest, Jamaica, West Indies",
+   "year": "1865",
+   "museum": "Cooper Hewitt, Smithsonian Design Museum · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "Drawing, Rain Forest, Jamaica, West Indies, April–August 1865 (CH 18200617).jpg",
+   "w": 3840,
+   "h": 2351,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Drawing%2C_Rain_Forest%2C_Jamaica%2C_West_Indies%2C_April%E2%80%93August_1865_%28CH_18200617%29.jpg/3840px-Drawing%2C_Rain_Forest%2C_Jamaica%2C_West_Indies%2C_April%E2%80%93August_1865_%28CH_18200617%29.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Drawing%2C_Rain_Forest%2C_Jamaica%2C_West_Indies%2C_April%E2%80%93August_1865_%28CH_18200617%29.jpg/1920px-Drawing%2C_Rain_Forest%2C_Jamaica%2C_West_Indies%2C_April%E2%80%93August_1865_%28CH_18200617%29.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "Frederic Edwin Church",
+   "title": "Bamboo Grove, Jamaica",
+   "year": "1865",
+   "museum": "Cooper Hewitt, Smithsonian Design Museum · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "Drawing, Bamboo Grove, Jamaica, 1865 (CH 18200609).jpg",
+   "w": 3840,
+   "h": 2458,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Drawing%2C_Bamboo_Grove%2C_Jamaica%2C_1865_%28CH_18200609%29.jpg/3840px-Drawing%2C_Bamboo_Grove%2C_Jamaica%2C_1865_%28CH_18200609%29.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Drawing%2C_Bamboo_Grove%2C_Jamaica%2C_1865_%28CH_18200609%29.jpg/1920px-Drawing%2C_Bamboo_Grove%2C_Jamaica%2C_1865_%28CH_18200609%29.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "Frederic Edwin Church",
+   "title": "Sky at Sunset, Jamaica, West Indies",
+   "year": "1865",
+   "museum": "Cooper Hewitt, Smithsonian Design Museum · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "Frederic Edwin Church - Sky at sunset, Jamaica, West Indies - Google Art Project.jpg",
+   "w": 3840,
+   "h": 2268,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Frederic_Edwin_Church_-_Sky_at_sunset%2C_Jamaica%2C_West_Indies_-_Google_Art_Project.jpg/3840px-Frederic_Edwin_Church_-_Sky_at_sunset%2C_Jamaica%2C_West_Indies_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Frederic_Edwin_Church_-_Sky_at_sunset%2C_Jamaica%2C_West_Indies_-_Google_Art_Project.jpg/1920px-Frederic_Edwin_Church_-_Sky_at_sunset%2C_Jamaica%2C_West_Indies_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "A. Duperly & Sons",
+   "title": "Kingston, Jamaica",
+   "year": "c. 1890",
+   "museum": "Caribbean Photo Archive · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "A. Duperly & Sons - Kingston, Jamaica 8323736250.jpg",
+   "w": 3600,
+   "h": 2616,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/3/37/A._Duperly_%26_Sons_-_Kingston%2C_Jamaica_8323736250.jpg",
+     "w": 3600
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/A._Duperly_%26_Sons_-_Kingston%2C_Jamaica_8323736250.jpg/1920px-A._Duperly_%26_Sons_-_Kingston%2C_Jamaica_8323736250.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "The Duperly firm — founded by daguerreotypist Adolphe Duperly in the 1840s — photographed the island for half a century."
+  },
+  {
+   "artist": "A. Duperly & Sons",
+   "title": "King Street, Kingston",
+   "year": "c. 1890",
+   "museum": "Caribbean Photo Archive · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "A. Duperly & Sons - King Street, Kingston, Jamaica 8323735890.jpg",
+   "w": 3840,
+   "h": 2302,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/A._Duperly_%26_Sons_-_King_Street%2C_Kingston%2C_Jamaica_8323735890.jpg/3840px-A._Duperly_%26_Sons_-_King_Street%2C_Kingston%2C_Jamaica_8323735890.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/A._Duperly_%26_Sons_-_King_Street%2C_Kingston%2C_Jamaica_8323735890.jpg/1920px-A._Duperly_%26_Sons_-_King_Street%2C_Kingston%2C_Jamaica_8323735890.jpg",
+     "w": 1920
+    }
+   ]
+  }
+ ]
+}

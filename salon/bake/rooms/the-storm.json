@@ -1,0 +1,432 @@
+{
+ "room": "the-storm",
+ "works": [
+  {
+   "artist": "Ivan Aivazovsky",
+   "title": "The Ninth Wave",
+   "year": "1850",
+   "museum": "Russian Museum · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Hovhannes Aivazovsky - The Ninth Wave - Google Art Project.jpg",
+   "w": 3840,
+   "h": 2580,
+   "note": "Survivors cling to mast wreckage at dawn as the legendary ninth wave rises — the room's anchor.",
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Hovhannes_Aivazovsky_-_The_Ninth_Wave_-_Google_Art_Project.jpg/3840px-Hovhannes_Aivazovsky_-_The_Ninth_Wave_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Hovhannes_Aivazovsky_-_The_Ninth_Wave_-_Google_Art_Project.jpg/1920px-Hovhannes_Aivazovsky_-_The_Ninth_Wave_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "Joseph Mallord William Turner",
+   "title": "Snow Storm — Steam-Boat off a Harbour's Mouth",
+   "year": "1842",
+   "museum": "Tate Britain · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:J.M.W. Turner – Snow Storm - Steam-Boat off a Harbour's Mouth.jpg",
+   "w": 3840,
+   "h": 2887,
+   "note": "Turner claimed he was lashed to the mast for four hours to see it — the vortex painting.",
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/J.M.W._Turner_%E2%80%93_Snow_Storm_-_Steam-Boat_off_a_Harbour%27s_Mouth.jpg/3840px-J.M.W._Turner_%E2%80%93_Snow_Storm_-_Steam-Boat_off_a_Harbour%27s_Mouth.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/J.M.W._Turner_%E2%80%93_Snow_Storm_-_Steam-Boat_off_a_Harbour%27s_Mouth.jpg/1920px-J.M.W._Turner_%E2%80%93_Snow_Storm_-_Steam-Boat_off_a_Harbour%27s_Mouth.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "Rembrandt van Rijn",
+   "title": "Christ in the Storm on the Sea of Galilee",
+   "year": "1633",
+   "museum": "Isabella Stewart Gardner Museum · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Rembrandt Christ in the Storm on the Lake of Galilee.jpg",
+   "w": 3002,
+   "h": 3731,
+   "note": "Rembrandt's only seascape; stolen from the Gardner in 1990 and still missing.",
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/f/f3/Rembrandt_Christ_in_the_Storm_on_the_Lake_of_Galilee.jpg",
+     "w": 3002
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Rembrandt_Christ_in_the_Storm_on_the_Lake_of_Galilee.jpg/1920px-Rembrandt_Christ_in_the_Storm_on_the_Lake_of_Galilee.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "Winslow Homer",
+   "title": "The Gulf Stream",
+   "year": "1899; reworked by 1906",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "11122",
+   "w": 4000,
+   "h": 2468,
+   "note": "A dismasted sloop, sharks circling, a waterspout on the horizon.",
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DP-20821-001.jpg",
+     "w": 4000
+    }
+   ]
+  },
+  {
+   "artist": "Winslow Homer",
+   "title": "Northeaster",
+   "year": "1895; reworked by 1901",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "11130",
+   "w": 3811,
+   "h": 2613,
+   "note": "The Maine coast under a wall of weather — Homer at his most elemental.",
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DT1545.jpg",
+     "w": 3811
+    }
+   ]
+  },
+  {
+   "artist": "Ivan Aivazovsky",
+   "title": "The Black Sea (A Storm Begins to Whip Up)",
+   "year": "1881",
+   "museum": "Tretyakov Gallery · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Иван Константинович Айвазовский - Черное море (на Черном море начинает разыгрываться буря) - Google Art Project.jpg",
+   "w": 3840,
+   "h": 2755,
+   "note": "Nothing but swell and sky — the storm still gathering.",
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/%D0%98%D0%B2%D0%B0%D0%BD_%D0%9A%D0%BE%D0%BD%D1%81%D1%82%D0%B0%D0%BD%D1%82%D0%B8%D0%BD%D0%BE%D0%B2%D0%B8%D1%87_%D0%90%D0%B9%D0%B2%D0%B0%D0%B7%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9_-_%D0%A7%D0%B5%D1%80%D0%BD%D0%BE%D0%B5_%D0%BC%D0%BE%D1%80%D0%B5_%28%D0%BD%D0%B0_%D0%A7%D0%B5%D1%80%D0%BD%D0%BE%D0%BC_%D0%BC%D0%BE%D1%80%D0%B5_%D0%BD%D0%B0%D1%87%D0%B8%D0%BD%D0%B0%D0%B5%D1%82_%D1%80%D0%B0%D0%B7%D1%8B%D0%B3%D1%80%D1%8B%D0%B2%D0%B0%D1%82%D1%8C%D1%81%D1%8F_%D0%B1%D1%83%D1%80%D1%8F%29_-_Google_Art_Project.jpg/3840px-thumbnail.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/%D0%98%D0%B2%D0%B0%D0%BD_%D0%9A%D0%BE%D0%BD%D1%81%D1%82%D0%B0%D0%BD%D1%82%D0%B8%D0%BD%D0%BE%D0%B2%D0%B8%D1%87_%D0%90%D0%B9%D0%B2%D0%B0%D0%B7%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9_-_%D0%A7%D0%B5%D1%80%D0%BD%D0%BE%D0%B5_%D0%BC%D0%BE%D1%80%D0%B5_%28%D0%BD%D0%B0_%D0%A7%D0%B5%D1%80%D0%BD%D0%BE%D0%BC_%D0%BC%D0%BE%D1%80%D0%B5_%D0%BD%D0%B0%D1%87%D0%B8%D0%BD%D0%B0%D0%B5%D1%82_%D1%80%D0%B0%D0%B7%D1%8B%D0%B3%D1%80%D1%8B%D0%B2%D0%B0%D1%82%D1%8C%D1%81%D1%8F_%D0%B1%D1%83%D1%80%D1%8F%29_-_Google_Art_Project.jpg/1920px-thumbnail.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "Joseph Mallord William Turner",
+   "title": "The Burning of the Houses of Lords and Commons, 16 October 1834",
+   "year": "1835",
+   "museum": "Cleveland Museum of Art",
+   "source": "cma",
+   "sourceId": "122351",
+   "w": 3400,
+   "h": 2525,
+   "note": "A firestorm over the Thames, painted from memory of the night itself.",
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1942.647/1942.647_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1942.647/1942.647_web.jpg",
+     "w": 900
+    }
+   ]
+  },
+  {
+   "artist": "Claude-Joseph Vernet",
+   "title": "The Shipwreck",
+   "year": "1772",
+   "museum": "National Gallery of Art · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Vernet, Claude Joseph - The Shipwreck - 1772FXD.jpg",
+   "w": 3840,
+   "h": 2666,
+   "note": "Survivors haul a line ashore under lightning — the 18th century's storm master.",
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Vernet%2C_Claude_Joseph_-_The_Shipwreck_-_1772FXD.jpg/3840px-Vernet%2C_Claude_Joseph_-_The_Shipwreck_-_1772FXD.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Vernet%2C_Claude_Joseph_-_The_Shipwreck_-_1772FXD.jpg/1920px-Vernet%2C_Claude_Joseph_-_The_Shipwreck_-_1772FXD.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "Willem van de Velde the Younger",
+   "title": "A Ship on the High Seas Caught by a Squall (The Gust)",
+   "year": "c. 1680",
+   "museum": "Rijksmuseum · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Een schip in volle zee bij vliegende storm, bekend als ‘De windstoot’ Rijksmuseum SK-A-1848.jpeg",
+   "w": 3840,
+   "h": 4703,
+   "note": "De Windstoot — the Dutch Golden Age storm piece.",
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Een_schip_in_volle_zee_bij_vliegende_storm%2C_bekend_als_%E2%80%98De_windstoot%E2%80%99_Rijksmuseum_SK-A-1848.jpeg/3840px-Een_schip_in_volle_zee_bij_vliegende_storm%2C_bekend_als_%E2%80%98De_windstoot%E2%80%99_Rijksmuseum_SK-A-1848.jpeg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Een_schip_in_volle_zee_bij_vliegende_storm%2C_bekend_als_%E2%80%98De_windstoot%E2%80%99_Rijksmuseum_SK-A-1848.jpeg/1920px-Een_schip_in_volle_zee_bij_vliegende_storm%2C_bekend_als_%E2%80%98De_windstoot%E2%80%99_Rijksmuseum_SK-A-1848.jpeg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "Eugène Delacroix",
+   "title": "Christ Asleep during the Tempest",
+   "year": "ca. 1853",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "436176",
+   "w": 4000,
+   "h": 3296,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-14343-001.jpg",
+     "w": 4000
+    }
+   ]
+  },
+  {
+   "artist": "Joseph Mallord William Turner",
+   "title": "Whalers",
+   "year": "ca. 1845",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "437854",
+   "w": 3958,
+   "h": 2967,
+   "note": "Late Turner — ship, whale, and weather dissolving into one another.",
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-13360-001.jpg",
+     "w": 3958
+    }
+   ]
+  },
+  {
+   "artist": "Joseph Mallord William Turner",
+   "title": "The Slave Ship (Slavers Throwing Overboard the Dead and Dying, Typhoon Coming On)",
+   "year": "1840",
+   "museum": "Museum of Fine Arts, Boston · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Slave-ship.jpg",
+   "w": 2152,
+   "h": 1616,
+   "note": "Typhoon coming on — Ruskin thought it Turner's greatest work.",
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/2/26/Slave-ship.jpg",
+     "w": 2152
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Slave-ship.jpg/1920px-Slave-ship.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "Albert Bierstadt",
+   "title": "A Storm in the Rocky Mountains, Mt. Rosalie",
+   "year": "1866",
+   "museum": "Brooklyn Museum · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Albert Bierstadt - A Storm in the Rocky Mountains, Mt. Rosalie - Google Art Project.jpg",
+   "w": 3840,
+   "h": 2222,
+   "note": "A continental wall of weather rolling over the Rockies.",
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Albert_Bierstadt_-_A_Storm_in_the_Rocky_Mountains%2C_Mt._Rosalie_-_Google_Art_Project.jpg/3840px-Albert_Bierstadt_-_A_Storm_in_the_Rocky_Mountains%2C_Mt._Rosalie_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Albert_Bierstadt_-_A_Storm_in_the_Rocky_Mountains%2C_Mt._Rosalie_-_Google_Art_Project.jpg/1920px-Albert_Bierstadt_-_A_Storm_in_the_Rocky_Mountains%2C_Mt._Rosalie_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "Martin Johnson Heade",
+   "title": "Approaching Thunder Storm",
+   "year": "1859",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "11050",
+   "w": 1959,
+   "h": 1245,
+   "note": "Black water, green light — the held breath before the storm.",
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DP248013.jpg",
+     "w": 1959
+    }
+   ]
+  },
+  {
+   "artist": "Katsushika Hokusai",
+   "title": "Shower Below the Summit (Sanka hakuu)",
+   "year": "c. 1830–33",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "77331",
+   "w": 3000,
+   "h": 2018,
+   "note": "Lightning cracks across Fuji's flank — the storm print of the Thirty-Six Views.",
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/d00ee3ae-f8f1-6a79-d912-cf5dc8ba1701/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/d00ee3ae-f8f1-6a79-d912-cf5dc8ba1701/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Katsushika Hokusai",
+   "title": "Under the Wave off Kanagawa (The Great Wave)",
+   "year": "1830/33",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "24645",
+   "w": 3000,
+   "h": 2056,
+   "note": "The sea in rage, claws out over the boats.",
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/b3974542-b9b4-7568-fc4b-966738f61d78/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/b3974542-b9b4-7568-fc4b-966738f61d78/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Gustave Courbet",
+   "title": "Marine: The Waterspout",
+   "year": "1870",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "436006",
+   "w": 3811,
+   "h": 2641,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT1965.jpg",
+     "w": 3811
+    }
+   ]
+  },
+  {
+   "artist": "Winslow Homer",
+   "title": "Hurricane, Bahamas",
+   "year": "1898",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "11124",
+   "w": 4000,
+   "h": 2763,
+   "note": "Watercolor — palms bent flat under the coming hurricane.",
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DP-17779-001.jpg",
+     "w": 4000
+    }
+   ]
+  },
+  {
+   "artist": "Winslow Homer",
+   "title": "Cannon Rock",
+   "year": "1895",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "11113",
+   "w": 1894,
+   "h": 1893,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/ap06.1281.jpg",
+     "w": 1894
+    }
+   ]
+  },
+  {
+   "artist": "Winslow Homer",
+   "title": "Early Morning After a Storm at Sea",
+   "year": "1900–1903",
+   "museum": "Cleveland Museum of Art",
+   "source": "cma",
+   "sourceId": "106088",
+   "w": 3400,
+   "h": 2050,
+   "note": "The sea still heaving after the night's storm.",
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1924.195/1924.195_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1924.195/1924.195_web.jpg",
+     "w": 900
+    }
+   ]
+  },
+  {
+   "artist": "Ivan Aivazovsky",
+   "title": "The Storm at Cape Aya",
+   "year": "1899",
+   "museum": "Dagestan Museum of Fine Arts · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Иван К. Айвазовский - Буря (1899).jpg",
+   "w": 3840,
+   "h": 5478,
+   "note": "Painted the year before his death — a towering vertical sea.",
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/%D0%98%D0%B2%D0%B0%D0%BD_%D0%9A._%D0%90%D0%B9%D0%B2%D0%B0%D0%B7%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9_-_%D0%91%D1%83%D1%80%D1%8F_%281899%29.jpg/3840px-%D0%98%D0%B2%D0%B0%D0%BD_%D0%9A._%D0%90%D0%B9%D0%B2%D0%B0%D0%B7%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9_-_%D0%91%D1%83%D1%80%D1%8F_%281899%29.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/%D0%98%D0%B2%D0%B0%D0%BD_%D0%9A._%D0%90%D0%B9%D0%B2%D0%B0%D0%B7%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9_-_%D0%91%D1%83%D1%80%D1%8F_%281899%29.jpg/1920px-%D0%98%D0%B2%D0%B0%D0%BD_%D0%9A._%D0%90%D0%B9%D0%B2%D0%B0%D0%B7%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9_-_%D0%91%D1%83%D1%80%D1%8F_%281899%29.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "Frederic Edwin Church",
+   "title": "Rainy Season in the Tropics",
+   "year": "1866",
+   "museum": "Fine Arts Museums of San Francisco · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Frederic Edwin Church - Rainy Season in the Tropics - Google Art Project.jpg",
+   "w": 3840,
+   "h": 2546,
+   "note": "The room's exit: rain veils parting into a double rainbow — after the storm.",
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Frederic_Edwin_Church_-_Rainy_Season_in_the_Tropics_-_Google_Art_Project.jpg/3840px-Frederic_Edwin_Church_-_Rainy_Season_in_the_Tropics_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Frederic_Edwin_Church_-_Rainy_Season_in_the_Tropics_-_Google_Art_Project.jpg/1920px-Frederic_Edwin_Church_-_Rainy_Season_in_the_Tropics_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ]
+  }
+ ]
+}

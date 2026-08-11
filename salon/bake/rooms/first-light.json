@@ -1,0 +1,478 @@
+{
+ "room": "first-light",
+ "works": [
+  {
+   "artist": "Sandro Botticelli",
+   "title": "Primavera",
+   "year": "c. 1480",
+   "museum": "Uffizi Gallery · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Sandro Botticelli - La Primavera - Google Art Project.jpg",
+   "w": 3840,
+   "h": 2551,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Sandro_Botticelli_-_La_Primavera_-_Google_Art_Project.jpg/3840px-Sandro_Botticelli_-_La_Primavera_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Sandro_Botticelli_-_La_Primavera_-_Google_Art_Project.jpg/1920px-Sandro_Botticelli_-_La_Primavera_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "Google Art Project scan of the Uffizi allegory of spring"
+  },
+  {
+   "artist": "Sandro Botticelli",
+   "title": "The Birth of Venus",
+   "year": "c. 1485",
+   "museum": "Uffizi Gallery · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Sandro Botticelli - La nascita di Venere - Google Art Project - edited.jpg",
+   "w": 3840,
+   "h": 2412,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg/3840px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg/1920px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "Edited Google Art Project gigapixel (30000px master)"
+  },
+  {
+   "artist": "Titian",
+   "title": "Bacchus and Ariadne",
+   "year": "1522–23",
+   "museum": "National Gallery, London · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Titian Bacchus and Ariadne.jpg",
+   "w": 3840,
+   "h": 3475,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Titian_Bacchus_and_Ariadne.jpg/3840px-Titian_Bacchus_and_Ariadne.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Titian_Bacchus_and_Ariadne.jpg/1920px-Titian_Bacchus_and_Ariadne.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "Post-restoration National Gallery scan — the famous ultramarine sky"
+  },
+  {
+   "artist": "Titian",
+   "title": "Venus of Urbino",
+   "year": "1538",
+   "museum": "Uffizi Gallery · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Tiziano - Venere di Urbino - Google Art Project.jpg",
+   "w": 3000,
+   "h": 2110,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/b/bb/Tiziano_-_Venere_di_Urbino_-_Google_Art_Project.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Tiziano_-_Venere_di_Urbino_-_Google_Art_Project.jpg/1920px-Tiziano_-_Venere_di_Urbino_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "Titian",
+   "title": "Venus and Adonis",
+   "year": "1550s",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "437826",
+   "w": 4000,
+   "h": 3234,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-19299-001.jpg",
+     "w": 4000
+    }
+   ],
+   "note": "Met highlight — Titian's poesie subject painted for Philip II"
+  },
+  {
+   "artist": "Pieter Bruegel the Elder",
+   "title": "Netherlandish Proverbs",
+   "year": "1559",
+   "museum": "Gemäldegalerie, Berlin · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Pieter Brueghel the Elder - The Dutch Proverbs - Google Art Project.jpg",
+   "w": 3840,
+   "h": 2719,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Pieter_Brueghel_the_Elder_-_The_Dutch_Proverbs_-_Google_Art_Project.jpg/3840px-Pieter_Brueghel_the_Elder_-_The_Dutch_Proverbs_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Pieter_Brueghel_the_Elder_-_The_Dutch_Proverbs_-_Google_Art_Project.jpg/1920px-Pieter_Brueghel_the_Elder_-_The_Dutch_Proverbs_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "Over a hundred proverbs acted out in one village"
+  },
+  {
+   "artist": "Pieter Bruegel the Elder",
+   "title": "The Tower of Babel",
+   "year": "1563",
+   "museum": "Kunsthistorisches Museum, Vienna · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Pieter Bruegel the Elder - The Tower of Babel (Vienna) - Google Art Project - edited.jpg",
+   "w": 3840,
+   "h": 2810,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Pieter_Bruegel_the_Elder_-_The_Tower_of_Babel_%28Vienna%29_-_Google_Art_Project_-_edited.jpg/3840px-Pieter_Bruegel_the_Elder_-_The_Tower_of_Babel_%28Vienna%29_-_Google_Art_Project_-_edited.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Pieter_Bruegel_the_Elder_-_The_Tower_of_Babel_%28Vienna%29_-_Google_Art_Project_-_edited.jpg/1920px-Pieter_Bruegel_the_Elder_-_The_Tower_of_Babel_%28Vienna%29_-_Google_Art_Project_-_edited.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "Edited Google Art Project gigapixel (30000px master)"
+  },
+  {
+   "artist": "Pieter Bruegel the Elder",
+   "title": "Hunters in the Snow",
+   "year": "1565",
+   "museum": "Kunsthistorisches Museum, Vienna · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Pieter Bruegel the Elder - Hunters in the Snow (Winter) - Google Art Project.jpg",
+   "w": 3840,
+   "h": 2733,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Pieter_Bruegel_the_Elder_-_Hunters_in_the_Snow_%28Winter%29_-_Google_Art_Project.jpg/3840px-Pieter_Bruegel_the_Elder_-_Hunters_in_the_Snow_%28Winter%29_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Pieter_Bruegel_the_Elder_-_Hunters_in_the_Snow_%28Winter%29_-_Google_Art_Project.jpg/1920px-Pieter_Bruegel_the_Elder_-_Hunters_in_the_Snow_%28Winter%29_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "Winter, from the cycle of the seasons"
+  },
+  {
+   "artist": "Pieter Bruegel the Elder",
+   "title": "The Harvesters",
+   "year": "1565",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "435809",
+   "w": 3811,
+   "h": 2809,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP119115.jpg",
+     "w": 3811
+    }
+   ],
+   "note": "August–September from the same seasons cycle as Hunters in the Snow"
+  },
+  {
+   "artist": "Pieter Bruegel the Elder",
+   "title": "The Peasant Wedding",
+   "year": "c. 1567",
+   "museum": "Kunsthistorisches Museum, Vienna · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Pieter Bruegel the Elder - Peasant Wedding - Google Art Project 2.jpg",
+   "w": 3840,
+   "h": 2654,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Pieter_Bruegel_the_Elder_-_Peasant_Wedding_-_Google_Art_Project_2.jpg/3840px-Pieter_Bruegel_the_Elder_-_Peasant_Wedding_-_Google_Art_Project_2.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Pieter_Bruegel_the_Elder_-_Peasant_Wedding_-_Google_Art_Project_2.jpg/1920px-Pieter_Bruegel_the_Elder_-_Peasant_Wedding_-_Google_Art_Project_2.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "El Greco",
+   "title": "The Assumption of the Virgin",
+   "year": "1577–79",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "87479",
+   "w": 1569,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/47fd1564-93f5-f30b-7786-013421133b4a/full/full/0/default.jpg",
+     "w": 1569
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/47fd1564-93f5-f30b-7786-013421133b4a/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "Thirteen-foot altarpiece from Santo Domingo el Antiguo, Toledo"
+  },
+  {
+   "artist": "Caravaggio",
+   "title": "The Musicians",
+   "year": "1597",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "435844",
+   "w": 4000,
+   "h": 3105,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-687-001.jpg",
+     "w": 4000
+    }
+   ],
+   "note": "Met highlight — painted for Cardinal del Monte"
+  },
+  {
+   "artist": "El Greco",
+   "title": "View of Toledo",
+   "year": "c. 1599–1600",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "436575",
+   "w": 3496,
+   "h": 3934,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP349564.jpg",
+     "w": 3496
+    }
+   ],
+   "note": "The storm-green sky over Toledo — his only surviving pure landscape"
+  },
+  {
+   "artist": "El Greco",
+   "title": "Cardinal Fernando Niño de Guevara",
+   "year": "c. 1600",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "436573",
+   "w": 3000,
+   "h": 4000,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-17777-001.jpg",
+     "w": 3000
+    }
+   ],
+   "note": "The scarlet-robed Grand Inquisitor"
+  },
+  {
+   "artist": "Caravaggio",
+   "title": "The Crucifixion of Saint Andrew",
+   "year": "1606–7",
+   "museum": "Cleveland Museum of Art",
+   "source": "cma",
+   "sourceId": "1976.2",
+   "w": 2563,
+   "h": 3400,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1976.2/1976.2_print.jpg",
+     "w": 2563
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1976.2/1976.2_web.jpg",
+     "w": 678
+    }
+   ]
+  },
+  {
+   "artist": "El Greco",
+   "title": "The Vision of Saint John",
+   "year": "c. 1608–14",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "436576",
+   "w": 3557,
+   "h": 4000,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-17641-001.jpg",
+     "w": 3557
+    }
+   ],
+   "note": "The late apocalyptic canvas that inspired Picasso's Demoiselles"
+  },
+  {
+   "artist": "Caravaggio",
+   "title": "The Denial of Saint Peter",
+   "year": "1610",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "437986",
+   "w": 3904,
+   "h": 2904,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-12413-001.jpg",
+     "w": 3904
+    }
+   ],
+   "note": "One of his final paintings"
+  },
+  {
+   "artist": "Peter Paul Rubens",
+   "title": "Portrait of Isabella Brant",
+   "year": "c. 1620–25",
+   "museum": "Cleveland Museum of Art",
+   "source": "cma",
+   "sourceId": "1947.207",
+   "w": 2877,
+   "h": 3400,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1947.207/1947.207_print.jpg",
+     "w": 2877
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1947.207/1947.207_web.jpg",
+     "w": 900
+    }
+   ],
+   "note": "The painter's first wife"
+  },
+  {
+   "artist": "Peter Paul Rubens",
+   "title": "Rubens, Helena Fourment, and Their Son Frans",
+   "year": "c. 1635",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "437532",
+   "w": 3090,
+   "h": 3973,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-14286-003.jpg",
+     "w": 3090
+    }
+   ],
+   "note": "Met highlight — the family self-portrait in the garden of love"
+  },
+  {
+   "artist": "Peter Paul Rubens",
+   "title": "Venus and Adonis",
+   "year": "mid-1630s",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "437535",
+   "w": 3809,
+   "h": 3089,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT2737.jpg",
+     "w": 3809
+    }
+   ],
+   "note": "Rubens's answer to the Titian hanging nearby in this room"
+  },
+  {
+   "artist": "Diego Velázquez",
+   "title": "Juan de Pareja",
+   "year": "1650",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "437869",
+   "w": 3427,
+   "h": 3968,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-14286-001.jpg",
+     "w": 3427
+    }
+   ],
+   "note": "Met highlight — painted in Rome to announce his arrival"
+  },
+  {
+   "artist": "Diego Velázquez",
+   "title": "Las Meninas",
+   "year": "1656",
+   "museum": "Museo del Prado · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Las Meninas, by Diego Velázquez, from Prado in Google Earth.jpg",
+   "w": 3840,
+   "h": 4420,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Las_Meninas%2C_by_Diego_Vel%C3%A1zquez%2C_from_Prado_in_Google_Earth.jpg/3840px-Las_Meninas%2C_by_Diego_Vel%C3%A1zquez%2C_from_Prado_in_Google_Earth.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Las_Meninas%2C_by_Diego_Vel%C3%A1zquez%2C_from_Prado_in_Google_Earth.jpg/1920px-Las_Meninas%2C_by_Diego_Vel%C3%A1zquez%2C_from_Prado_in_Google_Earth.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "Prado Google Earth gigapixel (30000px master)"
+  },
+  {
+   "artist": "Francisco Goya",
+   "title": "Manuel Osorio Manrique de Zuñiga",
+   "year": "1787–88",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "436545",
+   "w": 2855,
+   "h": 3873,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP287624.jpg",
+     "w": 2855
+    }
+   ],
+   "note": "The Red Boy — Met highlight"
+  },
+  {
+   "artist": "Francisco Goya",
+   "title": "José Costa y Bonells, Called Pepito",
+   "year": "c. 1810",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "436546",
+   "w": 3063,
+   "h": 3800,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP123853.jpg",
+     "w": 3063
+    }
+   ]
+  },
+  {
+   "artist": "Francisco Goya",
+   "title": "The Third of May 1808",
+   "year": "1814",
+   "museum": "Museo del Prado · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:El Tres de Mayo, by Francisco de Goya, from Prado thin black margin.jpg",
+   "w": 3840,
+   "h": 2966,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/El_Tres_de_Mayo%2C_by_Francisco_de_Goya%2C_from_Prado_thin_black_margin.jpg/3840px-El_Tres_de_Mayo%2C_by_Francisco_de_Goya%2C_from_Prado_thin_black_margin.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/El_Tres_de_Mayo%2C_by_Francisco_de_Goya%2C_from_Prado_thin_black_margin.jpg/1920px-El_Tres_de_Mayo%2C_by_Francisco_de_Goya%2C_from_Prado_thin_black_margin.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "Prado gigapixel scan (29294px master)"
+  }
+ ]
+}

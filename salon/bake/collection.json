@@ -1,0 +1,5537 @@
+{
+ "v": 20676,
+ "rooms": [
+  {
+   "slug": "dutch-light",
+   "label": "DUTCH LIGHT"
+  },
+  {
+   "slug": "the-impression",
+   "label": "THE IMPRESSION"
+  },
+  {
+   "slug": "vincent",
+   "label": "VINCENT & AFTER"
+  },
+  {
+   "slug": "floating-world",
+   "label": "THE FLOATING WORLD"
+  },
+  {
+   "slug": "the-storm",
+   "label": "THE STORM"
+  },
+  {
+   "slug": "quiet-north",
+   "label": "THE QUIET NORTH"
+  },
+  {
+   "slug": "first-light",
+   "label": "OLD MASTERS"
+  },
+  {
+   "slug": "the-americans",
+   "label": "THE AMERICANS"
+  },
+  {
+   "slug": "gold",
+   "label": "VIENNA GOLD"
+  },
+  {
+   "slug": "jamaica",
+   "label": "JAMAICA"
+  }
+ ],
+ "works": [
+  {
+   "id": "rijks-sk-a-133",
+   "room": "dutch-light",
+   "artist": "Frans Hals",
+   "title": "Marriage Portrait of Isaac Massa and Beatrix van der Laen",
+   "year": "c. 1622",
+   "museum": "Rijksmuseum",
+   "w": 3840,
+   "h": 3266,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/ZrjcE/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/ZrjcE/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "rijks",
+   "sourceId": "SK-A-133"
+  },
+  {
+   "id": "rijks-sk-a-135",
+   "room": "dutch-light",
+   "artist": "Frans Hals",
+   "title": "The Merry Drinker",
+   "year": "c. 1628–30",
+   "museum": "Rijksmuseum",
+   "w": 3209,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/CgrHr/full/!3840,3840/0/default.jpg",
+     "w": 3209
+    },
+    {
+     "u": "https://iiif.micr.io/CgrHr/full/!2048,2048/0/default.jpg",
+     "w": 1712
+    }
+   ],
+   "source": "rijks",
+   "sourceId": "SK-A-135"
+  },
+  {
+   "id": "rijks-sk-a-1718",
+   "room": "dutch-light",
+   "artist": "Hendrick Avercamp",
+   "title": "Winter Landscape with Ice Skaters",
+   "year": "c. 1608",
+   "museum": "Rijksmuseum",
+   "w": 3840,
+   "h": 2226,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/aXnzA/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/aXnzA/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "rijks",
+   "sourceId": "SK-A-1718"
+  },
+  {
+   "id": "rijks-sk-c-211",
+   "room": "dutch-light",
+   "artist": "Jacob van Ruisdael",
+   "title": "The Windmill at Wijk bij Duurstede",
+   "year": "c. 1668–70",
+   "museum": "Rijksmuseum",
+   "w": 3840,
+   "h": 3255,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/XWEFp/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/XWEFp/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "rijks",
+   "sourceId": "SK-C-211"
+  },
+  {
+   "id": "rijks-3410c72053",
+   "room": "dutch-light",
+   "artist": "Jan Asselijn",
+   "title": "The Threatened Swan",
+   "year": "c. 1650",
+   "museum": "Rijksmuseum",
+   "w": 3840,
+   "h": 3195,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/hZepb/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/hZepb/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "rijks",
+   "sourceId": "SK-A-4"
+  },
+  {
+   "id": "rijks-sk-a-385",
+   "room": "dutch-light",
+   "artist": "Jan Steen",
+   "title": "The Feast of St Nicholas",
+   "year": "1665–68",
+   "museum": "Rijksmuseum",
+   "w": 3305,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/WZzyz/full/!3840,3840/0/default.jpg",
+     "w": 3305
+    },
+    {
+     "u": "https://iiif.micr.io/WZzyz/full/!2048,2048/0/default.jpg",
+     "w": 1763
+    }
+   ],
+   "source": "rijks",
+   "sourceId": "SK-A-385"
+  },
+  {
+   "id": "rijks-sk-c-229",
+   "room": "dutch-light",
+   "artist": "Jan Steen",
+   "title": "The Merry Family",
+   "year": "1668",
+   "museum": "Rijksmuseum",
+   "w": 3840,
+   "h": 3019,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/SbsFC/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/SbsFC/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "rijks",
+   "sourceId": "SK-C-229"
+  },
+  {
+   "id": "met-fa5fae12a5",
+   "room": "dutch-light",
+   "artist": "Johannes Vermeer",
+   "title": "A Maid Asleep",
+   "year": "c. 1656–57",
+   "museum": "The Met",
+   "w": 3365,
+   "h": 3861,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP355525.jpg",
+     "w": 3365
+    }
+   ],
+   "source": "met",
+   "sourceId": "437878"
+  },
+  {
+   "id": "rijks-sk-a-2860",
+   "room": "dutch-light",
+   "artist": "Johannes Vermeer",
+   "title": "View of Houses in Delft, Known as 'The Little Street'",
+   "year": "c. 1658",
+   "museum": "Rijksmuseum",
+   "w": 3141,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/VWEov/full/!3840,3840/0/default.jpg",
+     "w": 3141
+    },
+    {
+     "u": "https://iiif.micr.io/VWEov/full/!2048,2048/0/default.jpg",
+     "w": 1675
+    }
+   ],
+   "source": "rijks",
+   "sourceId": "SK-A-2860"
+  },
+  {
+   "id": "rijks-sk-a-2344",
+   "room": "dutch-light",
+   "artist": "Johannes Vermeer",
+   "title": "The Milkmaid",
+   "year": "c. 1660",
+   "museum": "Rijksmuseum",
+   "w": 3448,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/QkOGy/full/!3840,3840/0/default.jpg",
+     "w": 3448
+    },
+    {
+     "u": "https://iiif.micr.io/QkOGy/full/!2048,2048/0/default.jpg",
+     "w": 1839
+    }
+   ],
+   "source": "rijks",
+   "sourceId": "SK-A-2344"
+  },
+  {
+   "id": "met-ef802dba80",
+   "room": "dutch-light",
+   "artist": "Johannes Vermeer",
+   "title": "Young Woman with a Water Pitcher",
+   "year": "c. 1662",
+   "museum": "The Met",
+   "w": 3437,
+   "h": 3866,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP353257.jpg",
+     "w": 3437
+    }
+   ],
+   "source": "met",
+   "sourceId": "437881"
+  },
+  {
+   "id": "met-4ee13c0d71",
+   "room": "dutch-light",
+   "artist": "Johannes Vermeer",
+   "title": "Young Woman with a Lute",
+   "year": "c. 1662–63",
+   "museum": "The Met",
+   "w": 3374,
+   "h": 3870,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP354965.jpg",
+     "w": 3374
+    }
+   ],
+   "source": "met",
+   "sourceId": "437880"
+  },
+  {
+   "id": "rijks-sk-c-251",
+   "room": "dutch-light",
+   "artist": "Johannes Vermeer",
+   "title": "Woman Reading a Letter",
+   "year": "c. 1663",
+   "museum": "Rijksmuseum",
+   "w": 3215,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/aehHx/full/!3840,3840/0/default.jpg",
+     "w": 3215
+    },
+    {
+     "u": "https://iiif.micr.io/aehHx/full/!2048,2048/0/default.jpg",
+     "w": 1715
+    }
+   ],
+   "source": "rijks",
+   "sourceId": "SK-C-251"
+  },
+  {
+   "id": "met-dda589678f",
+   "room": "dutch-light",
+   "artist": "Johannes Vermeer",
+   "title": "Study of a Young Woman",
+   "year": "c. 1665–67",
+   "museum": "The Met",
+   "w": 3454,
+   "h": 3866,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP353256.jpg",
+     "w": 3454
+    }
+   ],
+   "source": "met",
+   "sourceId": "437879"
+  },
+  {
+   "id": "rijks-sk-a-1595",
+   "room": "dutch-light",
+   "artist": "Johannes Vermeer",
+   "title": "The Love Letter",
+   "year": "c. 1669–70",
+   "museum": "Rijksmuseum",
+   "w": 3336,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/hqxQG/full/!3840,3840/0/default.jpg",
+     "w": 3336
+    },
+    {
+     "u": "https://iiif.micr.io/hqxQG/full/!2048,2048/0/default.jpg",
+     "w": 1779
+    }
+   ],
+   "source": "rijks",
+   "sourceId": "SK-A-1595"
+  },
+  {
+   "id": "met-a3047b2760",
+   "room": "dutch-light",
+   "artist": "Johannes Vermeer",
+   "title": "Allegory of the Catholic Faith",
+   "year": "c. 1670–72",
+   "museum": "The Met",
+   "w": 2904,
+   "h": 3721,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP145924.jpg",
+     "w": 2904
+    }
+   ],
+   "source": "met",
+   "sourceId": "437877"
+  },
+  {
+   "id": "rijks-sk-c-1191",
+   "room": "dutch-light",
+   "artist": "Pieter de Hooch",
+   "title": "Interior with Women beside a Linen Cupboard",
+   "year": "1663",
+   "museum": "Rijksmuseum",
+   "w": 3840,
+   "h": 3510,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/NYvCK/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/NYvCK/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "rijks",
+   "sourceId": "SK-C-1191"
+  },
+  {
+   "id": "rijks-sk-c-149",
+   "room": "dutch-light",
+   "artist": "Pieter de Hooch",
+   "title": "A Mother's Duty",
+   "year": "c. 1660–61",
+   "museum": "Rijksmuseum",
+   "w": 3840,
+   "h": 3325,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/SgpJY/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/SgpJY/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "rijks",
+   "sourceId": "SK-C-149"
+  },
+  {
+   "id": "rijks-sk-c-150",
+   "room": "dutch-light",
+   "artist": "Pieter de Hooch",
+   "title": "Figures in a Courtyard behind a House",
+   "year": "c. 1663–65",
+   "museum": "Rijksmuseum",
+   "w": 2983,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/SOvaQ/full/!3840,3840/0/default.jpg",
+     "w": 2983
+    },
+    {
+     "u": "https://iiif.micr.io/SOvaQ/full/!2048,2048/0/default.jpg",
+     "w": 1591
+    }
+   ],
+   "source": "rijks",
+   "sourceId": "SK-C-150"
+  },
+  {
+   "id": "rijks-9706939641",
+   "room": "dutch-light",
+   "artist": "Rembrandt van Rijn",
+   "title": "The Night Watch",
+   "year": "1642",
+   "museum": "Rijksmuseum",
+   "w": 3840,
+   "h": 3188,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/PJEZO/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/PJEZO/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "rijks",
+   "sourceId": "SK-C-5"
+  },
+  {
+   "id": "met-4b1ea40b93",
+   "room": "dutch-light",
+   "artist": "Rembrandt van Rijn",
+   "title": "Aristotle with a Bust of Homer",
+   "year": "1653",
+   "museum": "The Met",
+   "w": 3792,
+   "h": 4000,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-30758-001.jpg",
+     "w": 3792
+    }
+   ],
+   "source": "met",
+   "sourceId": "437394"
+  },
+  {
+   "id": "met-144f9be5e9",
+   "room": "dutch-light",
+   "artist": "Rembrandt van Rijn",
+   "title": "The Standard Bearer (Floris Soop)",
+   "year": "1654",
+   "museum": "The Met",
+   "w": 3135,
+   "h": 3789,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP121330.jpg",
+     "w": 3135
+    }
+   ],
+   "source": "met",
+   "sourceId": "437395"
+  },
+  {
+   "id": "met-3d119bd561",
+   "room": "dutch-light",
+   "artist": "Rembrandt van Rijn",
+   "title": "Self-Portrait",
+   "year": "1660",
+   "museum": "The Met",
+   "w": 3298,
+   "h": 4000,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-16323-001.jpg",
+     "w": 3298
+    }
+   ],
+   "source": "met",
+   "sourceId": "437397"
+  },
+  {
+   "id": "rijks-sk-a-4050",
+   "room": "dutch-light",
+   "artist": "Rembrandt van Rijn",
+   "title": "Self-Portrait as the Apostle Paul",
+   "year": "1661",
+   "museum": "Rijksmuseum",
+   "w": 3247,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/wqcDn/full/!3840,3840/0/default.jpg",
+     "w": 3247
+    },
+    {
+     "u": "https://iiif.micr.io/wqcDn/full/!2048,2048/0/default.jpg",
+     "w": 1732
+    }
+   ],
+   "source": "rijks",
+   "sourceId": "SK-A-4050"
+  },
+  {
+   "id": "rijks-2642211551",
+   "room": "dutch-light",
+   "artist": "Rembrandt van Rijn",
+   "title": "The Sampling Officials of the Amsterdam Drapers' Guild, Known as 'The Syndics'",
+   "year": "1662",
+   "museum": "Rijksmuseum",
+   "w": 3840,
+   "h": 2602,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/cWWQE/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/cWWQE/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "rijks",
+   "sourceId": "SK-C-6"
+  },
+  {
+   "id": "rijks-sk-c-216",
+   "room": "dutch-light",
+   "artist": "Rembrandt van Rijn",
+   "title": "Isaac and Rebecca, Known as 'The Jewish Bride'",
+   "year": "c. 1665–69",
+   "museum": "Rijksmuseum",
+   "w": 3840,
+   "h": 2793,
+   "srcs": [
+    {
+     "u": "https://iiif.micr.io/uRWXq/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iiif.micr.io/uRWXq/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "rijks",
+   "sourceId": "SK-C-216"
+  },
+  {
+   "id": "met-808ccd4c99",
+   "room": "the-impression",
+   "artist": "Alfred Sisley",
+   "title": "The Bridge at Villeneuve-la-Garenne",
+   "year": "1872",
+   "museum": "The Metropolitan Museum of Art",
+   "w": 4000,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-14936-041.jpg",
+     "w": 4000
+    }
+   ],
+   "source": "met",
+   "sourceId": "437680"
+  },
+  {
+   "id": "aic-a7b9174ecd",
+   "room": "the-impression",
+   "artist": "Alfred Sisley",
+   "title": "The Seine at Port-Marly, Piles of Sand",
+   "year": "1875",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2143,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/c4425cb6-d8b5-6390-603d-7f802406d05d/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/c4425cb6-d8b5-6390-603d-7f802406d05d/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "16633"
+  },
+  {
+   "id": "cma-1961-262",
+   "room": "the-impression",
+   "artist": "Alfred Sisley",
+   "title": "Saint-Mammès, Loing Canal",
+   "year": "1885",
+   "museum": "Cleveland Museum of Art",
+   "w": 3400,
+   "h": 2846,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1961.262/1961.262_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1961.262/1961.262_web.jpg",
+     "w": 1067
+    }
+   ],
+   "source": "cma",
+   "sourceId": "1961.262"
+  },
+  {
+   "id": "aic-58d60da3b7",
+   "room": "the-impression",
+   "artist": "Alfred Sisley",
+   "title": "Street in Moret",
+   "year": "c. 1890",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2395,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/c233d88b-fe56-6b9e-d5c2-47b9a7386756/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/c233d88b-fe56-6b9e-d5c2-47b9a7386756/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "81561"
+  },
+  {
+   "id": "cma-331eb749f7",
+   "room": "the-impression",
+   "artist": "Berthe Morisot",
+   "title": "Reading",
+   "year": "1873",
+   "museum": "Cleveland Museum of Art",
+   "w": 3400,
+   "h": 2174,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1950.89/1950.89_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1950.89/1950.89_web.jpg",
+     "w": 900
+    }
+   ],
+   "source": "cma",
+   "sourceId": "1950.89"
+  },
+  {
+   "id": "aic-513b39dbad",
+   "room": "the-impression",
+   "artist": "Berthe Morisot",
+   "title": "Woman at Her Toilette",
+   "year": "1875–80",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2246,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/78c80988-6524-cec7-c661-a4c0a706d06f/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/78c80988-6524-cec7-c661-a4c0a706d06f/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "11723"
+  },
+  {
+   "id": "met-dccf251ec8",
+   "room": "the-impression",
+   "artist": "Camille Pissarro",
+   "title": "Jalais Hill, Pontoise",
+   "year": "1867",
+   "museum": "The Metropolitan Museum of Art",
+   "w": 3811,
+   "h": 2907,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT1859.jpg",
+     "w": 3811
+    }
+   ],
+   "source": "met",
+   "sourceId": "437299"
+  },
+  {
+   "id": "aic-e828727c2d",
+   "room": "the-impression",
+   "artist": "Camille Pissarro",
+   "title": "The Crystal Palace",
+   "year": "1871",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 1905,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/4eb368b5-3b66-ae2c-bd4a-2643015e05fc/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/4eb368b5-3b66-ae2c-bd4a-2643015e05fc/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "110541"
+  },
+  {
+   "id": "aic-41870ef67d",
+   "room": "the-impression",
+   "artist": "Camille Pissarro",
+   "title": "The Place du Havre, Paris",
+   "year": "1893",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2446,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/0ff20364-c795-c2ca-c1e8-e5a848f09554/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/0ff20364-c795-c2ca-c1e8-e5a848f09554/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "81551"
+  },
+  {
+   "id": "met-3ec16cd56a",
+   "room": "the-impression",
+   "artist": "Camille Pissarro",
+   "title": "The Garden of the Tuileries on a Spring Morning",
+   "year": "1899",
+   "museum": "The Metropolitan Museum of Art",
+   "w": 3811,
+   "h": 3049,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT1042.jpg",
+     "w": 3811
+    }
+   ],
+   "source": "met",
+   "sourceId": "437313"
+  },
+  {
+   "id": "commons-file-claude-monet-jardin-sainte-adresse-jpg",
+   "room": "the-impression",
+   "artist": "Claude Monet",
+   "title": "Garden at Sainte-Adresse",
+   "year": "1867",
+   "museum": "The Metropolitan Museum of Art · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2879,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Claude_Monet_-_Jardin_%C3%A0_Sainte-Adresse.jpg/3840px-Claude_Monet_-_Jardin_%C3%A0_Sainte-Adresse.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Claude_Monet_-_Jardin_%C3%A0_Sainte-Adresse.jpg/1920px-Claude_Monet_-_Jardin_%C3%A0_Sainte-Adresse.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Claude Monet - Jardin à Sainte-Adresse.jpg"
+  },
+  {
+   "id": "aic-0187f0c034",
+   "room": "the-impression",
+   "artist": "Claude Monet",
+   "title": "The Beach at Sainte-Adresse",
+   "year": "1867",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2217,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/95be2572-b53d-8e7b-abc9-10eb48d4fa5d/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/95be2572-b53d-8e7b-abc9-10eb48d4fa5d/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "14598"
+  },
+  {
+   "id": "commons-file-monet-impression-sunrise-jpg",
+   "room": "the-impression",
+   "artist": "Claude Monet",
+   "title": "Impression, Sunrise",
+   "year": "1872",
+   "museum": "Musée Marmottan Monet · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2979,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Monet_-_Impression%2C_Sunrise.jpg/3840px-Monet_-_Impression%2C_Sunrise.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Monet_-_Impression%2C_Sunrise.jpg/1920px-Monet_-_Impression%2C_Sunrise.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Monet - Impression, Sunrise.jpg"
+  },
+  {
+   "id": "aic-cd994fe8cb",
+   "room": "the-impression",
+   "artist": "Claude Monet",
+   "title": "Arrival of the Normandy Train, Gare Saint-Lazare",
+   "year": "1877",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2251,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/0f1cc0e0-e42e-be16-3f71-2022da38cb93/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/0f1cc0e0-e42e-be16-3f71-2022da38cb93/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "16571"
+  },
+  {
+   "id": "aic-492df98ff6",
+   "room": "the-impression",
+   "artist": "Claude Monet",
+   "title": "Cliff Walk at Pourville",
+   "year": "1882",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2402,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/b0effb1c-ff23-bbaa-f809-9fd94e31c1a0/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/b0effb1c-ff23-bbaa-f809-9fd94e31c1a0/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "14620"
+  },
+  {
+   "id": "aic-b7117bd168",
+   "room": "the-impression",
+   "artist": "Claude Monet",
+   "title": "Rocks at Port-Goulphar, Belle-Île",
+   "year": "1886",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2401,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/2765aee9-3d78-ec6c-5c66-a1d9dc8173f6/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/2765aee9-3d78-ec6c-5c66-a1d9dc8173f6/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "20545"
+  },
+  {
+   "id": "cma-1916-1044",
+   "room": "the-impression",
+   "artist": "Claude Monet",
+   "title": "Gardener's House at Antibes",
+   "year": "1888",
+   "museum": "Cleveland Museum of Art",
+   "w": 3400,
+   "h": 2418,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1916.1044/1916.1044_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1916.1044/1916.1044_web.jpg",
+     "w": 900
+    }
+   ],
+   "source": "cma",
+   "sourceId": "1916.1044"
+  },
+  {
+   "id": "aic-54e2be81d3",
+   "room": "the-impression",
+   "artist": "Claude Monet",
+   "title": "Stacks of Wheat (End of Summer)",
+   "year": "1890–91",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 1773,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/a38e2828-ec6f-ece1-a30f-70243449197b/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/a38e2828-ec6f-ece1-a30f-70243449197b/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "64818"
+  },
+  {
+   "id": "commons-file-bridge-over-a-pond-of-water-lilies-met-dt1854-jpg",
+   "room": "the-impression",
+   "artist": "Claude Monet",
+   "title": "Bridge over a Pond of Water Lilies",
+   "year": "1899",
+   "museum": "The Metropolitan Museum of Art · via Wikimedia Commons",
+   "w": 2966,
+   "h": 3722,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/5/53/Bridge_over_a_Pond_of_Water_Lilies_MET_DT1854.jpg",
+     "w": 2966
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Bridge_over_a_Pond_of_Water_Lilies_MET_DT1854.jpg/1920px-Bridge_over_a_Pond_of_Water_Lilies_MET_DT1854.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Bridge over a Pond of Water Lilies MET DT1854.jpg"
+  },
+  {
+   "id": "aic-7664f1070f",
+   "room": "the-impression",
+   "artist": "Claude Monet",
+   "title": "Water Lilies",
+   "year": "1906",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2881,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/3c27b499-af56-f0d5-93b5-a7f2f1ad5813/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/3c27b499-af56-f0d5-93b5-a7f2f1ad5813/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "16568"
+  },
+  {
+   "id": "cma-5b1796edea",
+   "room": "the-impression",
+   "artist": "Claude Monet",
+   "title": "The Red Kerchief",
+   "year": "c. 1868–73",
+   "museum": "Cleveland Museum of Art",
+   "w": 2732,
+   "h": 3400,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1958.39/1958.39_print.jpg",
+     "w": 2732
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1958.39/1958.39_web.jpg",
+     "w": 723
+    }
+   ],
+   "source": "cma",
+   "sourceId": "1958.39"
+  },
+  {
+   "id": "cma-1078042ca7",
+   "room": "the-impression",
+   "artist": "Claude Monet",
+   "title": "Water Lilies (Agapanthus)",
+   "year": "c. 1915–26",
+   "museum": "Cleveland Museum of Art",
+   "w": 3400,
+   "h": 1581,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1960.81/1960.81_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1960.81/1960.81_web.jpg",
+     "w": 900
+    }
+   ],
+   "source": "cma",
+   "sourceId": "1960.81"
+  },
+  {
+   "id": "met-c4e9e59e9c",
+   "room": "the-impression",
+   "artist": "Édouard Manet",
+   "title": "Boating",
+   "year": "1874",
+   "museum": "The Metropolitan Museum of Art",
+   "w": 4000,
+   "h": 3052,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-25466-001.jpg",
+     "w": 4000
+    }
+   ],
+   "source": "met",
+   "sourceId": "436947"
+  },
+  {
+   "id": "commons-file-un-bar-aux-folies-berg-re-by-douard-manet-1882-jpg",
+   "room": "the-impression",
+   "artist": "Édouard Manet",
+   "title": "A Bar at the Folies-Bergère",
+   "year": "1882",
+   "museum": "The Courtauld Gallery · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2819,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/%22Un_Bar_aux_Folies-Berg%C3%A8re%22_by_%C3%89douard_Manet_%281882%29.jpg/3840px-%22Un_Bar_aux_Folies-Berg%C3%A8re%22_by_%C3%89douard_Manet_%281882%29.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/%22Un_Bar_aux_Folies-Berg%C3%A8re%22_by_%C3%89douard_Manet_%281882%29.jpg/1920px-%22Un_Bar_aux_Folies-Berg%C3%A8re%22_by_%C3%89douard_Manet_%281882%29.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:\"Un Bar aux Folies-Bergère\" by Édouard Manet (1882).jpg"
+  },
+  {
+   "id": "met-8d445d39ff",
+   "room": "the-impression",
+   "artist": "Edgar Degas",
+   "title": "The Dance Class",
+   "year": "1874",
+   "museum": "The Metropolitan Museum of Art",
+   "w": 3710,
+   "h": 4000,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-20101-001.jpg",
+     "w": 3710
+    }
+   ],
+   "source": "met",
+   "sourceId": "438817"
+  },
+  {
+   "id": "aic-8879f458a3",
+   "room": "the-impression",
+   "artist": "Edgar Degas",
+   "title": "Yellow Dancers (In the Wings)",
+   "year": "1874–76",
+   "museum": "Art Institute of Chicago",
+   "w": 2420,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/8fe022ba-e358-5cda-aa70-d96edd0b4f20/full/full/0/default.jpg",
+     "w": 2420
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/8fe022ba-e358-5cda-aa70-d96edd0b4f20/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "18951"
+  },
+  {
+   "id": "met-611f231b26",
+   "room": "the-impression",
+   "artist": "Edgar Degas",
+   "title": "Dancers Practicing at the Barre",
+   "year": "1877",
+   "museum": "The Metropolitan Museum of Art",
+   "w": 3783,
+   "h": 3496,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT840.jpg",
+     "w": 3783
+    }
+   ],
+   "source": "met",
+   "sourceId": "436139"
+  },
+  {
+   "id": "aic-2205d0d92a",
+   "room": "the-impression",
+   "artist": "Edgar Degas",
+   "title": "The Millinery Shop",
+   "year": "1879–86",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2724,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/6f513908-03cc-b974-633b-adfce56b7936/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/6f513908-03cc-b974-633b-adfce56b7936/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "14572"
+  },
+  {
+   "id": "cma-8d4dd444c1",
+   "room": "the-impression",
+   "artist": "Edgar Degas",
+   "title": "Frieze of Dancers",
+   "year": "c. 1895",
+   "museum": "Cleveland Museum of Art",
+   "w": 3400,
+   "h": 1187,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1946.83/1946.83_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1946.83/1946.83_web.jpg",
+     "w": 900
+    }
+   ],
+   "source": "cma",
+   "sourceId": "1946.83"
+  },
+  {
+   "id": "aic-dbac3b6e1c",
+   "room": "the-impression",
+   "artist": "Georges Seurat",
+   "title": "A Sunday on La Grande Jatte — 1884",
+   "year": "1884–86",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2010,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/2d484387-2509-5e8e-2c43-22f9981972eb/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/2d484387-2509-5e8e-2c43-22f9981972eb/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "27992"
+  },
+  {
+   "id": "met-0cdc3cccfb",
+   "room": "the-impression",
+   "artist": "Georges Seurat",
+   "title": "Circus Sideshow (Parade de cirque)",
+   "year": "1887–88",
+   "museum": "The Metropolitan Museum of Art",
+   "w": 3920,
+   "h": 2621,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP375450_cropped.jpg",
+     "w": 3920
+    }
+   ],
+   "source": "met",
+   "sourceId": "437654"
+  },
+  {
+   "id": "aic-07751c4ffe",
+   "room": "the-impression",
+   "artist": "Gustave Caillebotte",
+   "title": "Paris Street; Rainy Day",
+   "year": "1877",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2330,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/f8fd76e9-c396-5678-36ed-6a348c904d27/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/f8fd76e9-c396-5678-36ed-6a348c904d27/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "20684"
+  },
+  {
+   "id": "aic-a9abfd62cf",
+   "room": "the-impression",
+   "artist": "Mary Cassatt",
+   "title": "The Child's Bath",
+   "year": "1893",
+   "museum": "Art Institute of Chicago",
+   "w": 1977,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/3b885ae0-4d46-5fe4-d70a-00474827f02c/full/full/0/default.jpg",
+     "w": 1977
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/3b885ae0-4d46-5fe4-d70a-00474827f02c/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "111442"
+  },
+  {
+   "id": "commons-file-mary-cassatt-the-boating-party-google-art-project-j",
+   "room": "the-impression",
+   "artist": "Mary Cassatt",
+   "title": "The Boating Party",
+   "year": "1893–94",
+   "museum": "National Gallery of Art · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2945,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Mary_Cassatt_-_The_Boating_Party_-_Google_Art_Project.jpg/3840px-Mary_Cassatt_-_The_Boating_Party_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Mary_Cassatt_-_The_Boating_Party_-_Google_Art_Project.jpg/1920px-Mary_Cassatt_-_The_Boating_Party_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Mary Cassatt - The Boating Party - Google Art Project.jpg"
+  },
+  {
+   "id": "cma-1942-1065",
+   "room": "the-impression",
+   "artist": "Pierre-Auguste Renoir",
+   "title": "Romaine Lacaux",
+   "year": "1864",
+   "museum": "Cleveland Museum of Art",
+   "w": 2706,
+   "h": 3400,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1942.1065/1942.1065_print.jpg",
+     "w": 2706
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1942.1065/1942.1065_web.jpg",
+     "w": 716
+    }
+   ],
+   "source": "cma",
+   "sourceId": "1942.1065"
+  },
+  {
+   "id": "met-039ad5a829",
+   "room": "the-impression",
+   "artist": "Pierre-Auguste Renoir",
+   "title": "Madame Georges Charpentier and Her Children",
+   "year": "1878",
+   "museum": "The Metropolitan Museum of Art",
+   "w": 4000,
+   "h": 3254,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-35674-001.jpg",
+     "w": 4000
+    }
+   ],
+   "source": "met",
+   "sourceId": "438815"
+  },
+  {
+   "id": "aic-4786ea9795",
+   "room": "the-impression",
+   "artist": "Pierre-Auguste Renoir",
+   "title": "Acrobats at the Cirque Fernando (Francisca and Angelina Wartenberg)",
+   "year": "1879",
+   "museum": "Art Institute of Chicago",
+   "w": 2244,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/321c45f5-22a3-84a2-44cc-cf66642d4cf2/full/full/0/default.jpg",
+     "w": 2244
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/321c45f5-22a3-84a2-44cc-cf66642d4cf2/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "81558"
+  },
+  {
+   "id": "aic-67a79f6257",
+   "room": "the-impression",
+   "artist": "Pierre-Auguste Renoir",
+   "title": "Two Sisters (On the Terrace)",
+   "year": "1881",
+   "museum": "Art Institute of Chicago",
+   "w": 2418,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/3a608f55-d76e-fa96-d0b1-0789fbc48f1e/full/full/0/default.jpg",
+     "w": 2418
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/3a608f55-d76e-fa96-d0b1-0789fbc48f1e/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "14655"
+  },
+  {
+   "id": "aic-8e41862733",
+   "room": "vincent",
+   "artist": "Henri de Toulouse-Lautrec",
+   "title": "Equestrienne (At the Cirque Fernando)",
+   "year": "1887–88",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 1889,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/65db9e21-83c3-1cc6-7240-1e1996d87f52/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/65db9e21-83c3-1cc6-7240-1e1996d87f52/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "16146"
+  },
+  {
+   "id": "aic-f76c1f2ea3",
+   "room": "vincent",
+   "artist": "Henri de Toulouse-Lautrec",
+   "title": "At the Moulin Rouge",
+   "year": "1892–95",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2622,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/defb4004-b500-218d-3d9b-9a02423f097d/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/defb4004-b500-218d-3d9b-9a02423f097d/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "61128"
+  },
+  {
+   "id": "met-4afa54cd95",
+   "room": "vincent",
+   "artist": "Henri Rousseau",
+   "title": "The Repast of the Lion",
+   "year": "c. 1907",
+   "museum": "The Met",
+   "w": 3811,
+   "h": 2683,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT50.jpg",
+     "w": 3811
+    }
+   ],
+   "source": "met",
+   "sourceId": "438822"
+  },
+  {
+   "id": "aic-a66e5c9f6f",
+   "room": "vincent",
+   "artist": "Paul Cézanne",
+   "title": "Madame Cézanne in a Yellow Chair",
+   "year": "1888–90",
+   "museum": "Art Institute of Chicago",
+   "w": 2369,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/4822cd01-44ac-041a-36b8-c0542377b750/full/full/0/default.jpg",
+     "w": 2369
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/4822cd01-44ac-041a-36b8-c0542377b750/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "62371"
+  },
+  {
+   "id": "met-40eef43c0b",
+   "room": "vincent",
+   "artist": "Paul Cézanne",
+   "title": "The Card Players",
+   "year": "1890–92",
+   "museum": "The Met",
+   "w": 3909,
+   "h": 3112,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP231550.jpg",
+     "w": 3909
+    }
+   ],
+   "source": "met",
+   "sourceId": "435868"
+  },
+  {
+   "id": "aic-4a2ae8790b",
+   "room": "vincent",
+   "artist": "Paul Cézanne",
+   "title": "The Bay of Marseille, Seen from L'Estaque",
+   "year": "c. 1885",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2404,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/d4ca6321-8656-3d3f-a362-2ee297b2b813/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/d4ca6321-8656-3d3f-a362-2ee297b2b813/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "16487"
+  },
+  {
+   "id": "met-30bd39d817",
+   "room": "vincent",
+   "artist": "Paul Cézanne",
+   "title": "Still Life with Apples and a Pot of Primroses",
+   "year": "c. 1890",
+   "museum": "The Met",
+   "w": 3807,
+   "h": 3021,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT47.jpg",
+     "w": 3807
+    }
+   ],
+   "source": "met",
+   "sourceId": "435882"
+  },
+  {
+   "id": "aic-9a386e30f0",
+   "room": "vincent",
+   "artist": "Paul Cézanne",
+   "title": "The Basket of Apples",
+   "year": "c. 1893",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2396,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/52ac8996-3460-cf71-cb42-5c4d0aa29b74/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/52ac8996-3460-cf71-cb42-5c4d0aa29b74/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "111436"
+  },
+  {
+   "id": "cma-1f6d6ee89d",
+   "room": "vincent",
+   "artist": "Paul Cézanne",
+   "title": "Mount Sainte-Victoire",
+   "year": "c. 1904",
+   "museum": "Cleveland Museum of Art",
+   "w": 3400,
+   "h": 2709,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1958.21/1958.21_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1958.21/1958.21_web.jpg",
+     "w": 900
+    }
+   ],
+   "source": "cma",
+   "sourceId": "1958.21"
+  },
+  {
+   "id": "aic-a01af65709",
+   "room": "vincent",
+   "artist": "Paul Gauguin",
+   "title": "Arlésiennes (Mistral)",
+   "year": "1888",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2372,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/ae6ac285-6887-dd76-4570-d379c786dfae/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/ae6ac285-6887-dd76-4570-d379c786dfae/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "19339"
+  },
+  {
+   "id": "met-d6042d5614",
+   "room": "vincent",
+   "artist": "Paul Gauguin",
+   "title": "Ia Orana Maria (Hail Mary)",
+   "year": "1891",
+   "museum": "The Met",
+   "w": 2928,
+   "h": 3722,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT1025.jpg",
+     "w": 2928
+    }
+   ],
+   "source": "met",
+   "sourceId": "438821"
+  },
+  {
+   "id": "aic-59dc43d881",
+   "room": "vincent",
+   "artist": "Paul Gauguin",
+   "title": "Mahana no atua (Day of the God)",
+   "year": "1894",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2238,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/a4bef587-48a4-d186-813d-f297441b1ab3/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/a4bef587-48a4-d186-813d-f297441b1ab3/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "27943"
+  },
+  {
+   "id": "aic-c56fea7ed3",
+   "room": "vincent",
+   "artist": "Paul Gauguin",
+   "title": "No te aha oe riri (Why Are You Angry?)",
+   "year": "1896",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2195,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/2adb35ce-8e94-cda5-210e-b04d488bbdc8/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/2adb35ce-8e94-cda5-210e-b04d488bbdc8/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "16496"
+  },
+  {
+   "id": "met-9422ee047a",
+   "room": "vincent",
+   "artist": "Paul Gauguin",
+   "title": "Two Tahitian Women",
+   "year": "1899",
+   "museum": "The Met",
+   "w": 2884,
+   "h": 3722,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT1342.jpg",
+     "w": 2884
+    }
+   ],
+   "source": "met",
+   "sourceId": "436446"
+  },
+  {
+   "id": "aic-cda348a6e2",
+   "room": "vincent",
+   "artist": "Vincent van Gogh",
+   "title": "Self-Portrait",
+   "year": "1887",
+   "museum": "Art Institute of Chicago",
+   "w": 2354,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/47c5bcb8-62ef-e5d7-55e7-f5121f409a30/full/full/0/default.jpg",
+     "w": 2354
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/47c5bcb8-62ef-e5d7-55e7-f5121f409a30/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "80607"
+  },
+  {
+   "id": "met-a167d228b1",
+   "room": "vincent",
+   "artist": "Vincent van Gogh",
+   "title": "Self-Portrait with a Straw Hat",
+   "year": "1887",
+   "museum": "The Met",
+   "w": 2829,
+   "h": 3520,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT1502_cropped2.jpg",
+     "w": 2829
+    }
+   ],
+   "source": "met",
+   "sourceId": "436532"
+  },
+  {
+   "id": "aic-8082c471f7",
+   "room": "vincent",
+   "artist": "Vincent van Gogh",
+   "title": "Fishing in Spring, the Pont de Clichy (Asnières)",
+   "year": "1887",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2503,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/5512cee9-6d00-d01b-b0be-ac7843cc8f76/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/5512cee9-6d00-d01b-b0be-ac7843cc8f76/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "109314"
+  },
+  {
+   "id": "yuag-obj-12507",
+   "room": "vincent",
+   "artist": "Vincent van Gogh",
+   "title": "The Night Café",
+   "year": "1888",
+   "museum": "Yale University Art Gallery",
+   "w": 3840,
+   "h": 3031,
+   "srcs": [
+    {
+     "u": "https://images.collections.yale.edu/iiif/2/yuag:3b072179-2fc7-42bc-87cc-9ee4d782b270/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://images.collections.yale.edu/iiif/2/yuag:3b072179-2fc7-42bc-87cc-9ee4d782b270/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "yuag",
+   "sourceId": "obj/12507"
+  },
+  {
+   "id": "met-3ff89c3683",
+   "room": "vincent",
+   "artist": "Vincent van Gogh",
+   "title": "Oleanders",
+   "year": "1888",
+   "museum": "The Met",
+   "w": 3811,
+   "h": 3130,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT1494.jpg",
+     "w": 3811
+    }
+   ],
+   "source": "met",
+   "sourceId": "436530"
+  },
+  {
+   "id": "aic-a46c668e15",
+   "room": "vincent",
+   "artist": "Vincent van Gogh",
+   "title": "The Poet's Garden",
+   "year": "1888",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2370,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/d4bc1723-7cbc-d36d-a9cb-f84553f2a6f6/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/d4bc1723-7cbc-d36d-a9cb-f84553f2a6f6/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "14586"
+  },
+  {
+   "id": "met-f85048cd2f",
+   "room": "vincent",
+   "artist": "Vincent van Gogh",
+   "title": "L'Arlésienne: Madame Joseph-Michel Ginoux",
+   "year": "1888–89",
+   "museum": "The Met",
+   "w": 2957,
+   "h": 3722,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT1396.jpg",
+     "w": 2957
+    }
+   ],
+   "source": "met",
+   "sourceId": "436529"
+  },
+  {
+   "id": "commons-file-van-gogh-starry-night-google-art-project-jpg",
+   "room": "vincent",
+   "artist": "Vincent van Gogh",
+   "title": "The Starry Night",
+   "year": "1889",
+   "museum": "MoMA · via Wikimedia Commons",
+   "w": 3840,
+   "h": 3041,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/3840px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1920px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Van Gogh - Starry Night - Google Art Project.jpg"
+  },
+  {
+   "id": "aic-d916ff192e",
+   "room": "vincent",
+   "artist": "Vincent van Gogh",
+   "title": "The Bedroom",
+   "year": "1889",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2348,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/6644829f-f292-c5c4-a73c-0356a6fdbf0d/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/6644829f-f292-c5c4-a73c-0356a6fdbf0d/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "28560"
+  },
+  {
+   "id": "met-0abda1b576",
+   "room": "vincent",
+   "artist": "Vincent van Gogh",
+   "title": "Wheat Field with Cypresses",
+   "year": "1889",
+   "museum": "The Met",
+   "w": 4000,
+   "h": 3184,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-42549-001.jpg",
+     "w": 4000
+    }
+   ],
+   "source": "met",
+   "sourceId": "436535"
+  },
+  {
+   "id": "commons-file-vincent-van-gogh-cypresses-jpg",
+   "room": "vincent",
+   "artist": "Vincent van Gogh",
+   "title": "Cypresses",
+   "year": "1889",
+   "museum": "The Met · via Wikimedia Commons",
+   "w": 2848,
+   "h": 3616,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Vincent_van_Gogh_-_Cypresses.jpg",
+     "w": 2848
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Vincent_van_Gogh_-_Cypresses.jpg/1920px-Vincent_van_Gogh_-_Cypresses.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Vincent van Gogh - Cypresses.jpg"
+  },
+  {
+   "id": "met-55e3d00be5",
+   "room": "vincent",
+   "artist": "Vincent van Gogh",
+   "title": "Olive Trees",
+   "year": "1889",
+   "museum": "The Met",
+   "w": 3811,
+   "h": 3040,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT1946.jpg",
+     "w": 3811
+    }
+   ],
+   "source": "met",
+   "sourceId": "437998"
+  },
+  {
+   "id": "met-a5af3d39d9",
+   "room": "vincent",
+   "artist": "Vincent van Gogh",
+   "title": "Irises",
+   "year": "1890",
+   "museum": "The Met",
+   "w": 4000,
+   "h": 3172,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP346474.jpg",
+     "w": 4000
+    }
+   ],
+   "source": "met",
+   "sourceId": "436528"
+  },
+  {
+   "id": "met-3ef2ad9da5",
+   "room": "vincent",
+   "artist": "Vincent van Gogh",
+   "title": "First Steps, after Millet",
+   "year": "1890",
+   "museum": "The Met",
+   "w": 1931,
+   "h": 1531,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP124808.jpg",
+     "w": 1931
+    }
+   ],
+   "source": "met",
+   "sourceId": "436526"
+  },
+  {
+   "id": "aic-bd6530aab5",
+   "room": "floating-world",
+   "artist": "Katsushika Hokusai",
+   "title": "Kohada Koheiji",
+   "year": "1831–32",
+   "museum": "Art Institute of Chicago",
+   "w": 2157,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/792d6c6e-1782-dc76-f75a-35e8d1a60357/full/full/0/default.jpg",
+     "w": 2157
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/792d6c6e-1782-dc76-f75a-35e8d1a60357/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "47398"
+  },
+  {
+   "id": "met-a16478ed5d",
+   "room": "floating-world",
+   "artist": "Katsushika Hokusai",
+   "title": "Under the Wave off Kanagawa (The Great Wave)",
+   "year": "c. 1830–32",
+   "museum": "The Metropolitan Museum of Art",
+   "w": 3859,
+   "h": 2594,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/as/original/DP130155.jpg",
+     "w": 3859
+    }
+   ],
+   "source": "met",
+   "sourceId": "45434"
+  },
+  {
+   "id": "aic-32cc497381",
+   "room": "floating-world",
+   "artist": "Katsushika Hokusai",
+   "title": "A Mild Breeze on a Fine Day (Red Fuji)",
+   "year": "c. 1830–33",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2025,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/50c2eac7-be49-7daa-294d-068b9e8f2a9d/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/50c2eac7-be49-7daa-294d-068b9e8f2a9d/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "77328"
+  },
+  {
+   "id": "aic-cb497f90a5",
+   "room": "floating-world",
+   "artist": "Katsushika Hokusai",
+   "title": "Shower Below the Summit",
+   "year": "c. 1830–33",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2076,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/bbb6d024-f931-2e2f-eb95-750991834b1c/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/bbb6d024-f931-2e2f-eb95-750991834b1c/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "87008"
+  },
+  {
+   "id": "aic-f4233bc528",
+   "room": "floating-world",
+   "artist": "Katsushika Hokusai",
+   "title": "Ejiri in Suruga Province",
+   "year": "c. 1830–33",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2042,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/5f3cc8e1-a024-9d9c-4d75-a18c5fcbbe65/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/5f3cc8e1-a024-9d9c-4d75-a18c5fcbbe65/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "24800"
+  },
+  {
+   "id": "aic-e4824877cf",
+   "room": "floating-world",
+   "artist": "Katsushika Hokusai",
+   "title": "Kajikazawa in Kai Province",
+   "year": "c. 1830–33",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2074,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/81114385-3f62-e1ad-64d3-9dcc2b07b2b0/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/81114385-3f62-e1ad-64d3-9dcc2b07b2b0/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "18969"
+  },
+  {
+   "id": "aic-f9889801ec",
+   "room": "floating-world",
+   "artist": "Katsushika Hokusai",
+   "title": "Chrysanthemum and Horsefly",
+   "year": "c. 1831–33",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2062,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/e81e632c-2e27-d79c-527d-365519796f9f/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/e81e632c-2e27-d79c-527d-365519796f9f/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "25110"
+  },
+  {
+   "id": "aic-ab833dcf88",
+   "room": "floating-world",
+   "artist": "Katsushika Hokusai",
+   "title": "Whaling off the Coast of the Goto Islands",
+   "year": "c. 1831–33",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2216,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/ecf15def-563f-2fc1-f793-7ebdae5cd68a/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/ecf15def-563f-2fc1-f793-7ebdae5cd68a/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "100626"
+  },
+  {
+   "id": "aic-e602365d57",
+   "room": "floating-world",
+   "artist": "Katsushika Hokusai",
+   "title": "Ono Falls on the Kisokaido Road",
+   "year": "c. 1833",
+   "museum": "Art Institute of Chicago",
+   "w": 2040,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/6610ddf3-b8d5-a8fa-5a03-a803e7e76042/full/full/0/default.jpg",
+     "w": 2040
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/6610ddf3-b8d5-a8fa-5a03-a803e7e76042/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "25183"
+  },
+  {
+   "id": "aic-977ec970d6",
+   "room": "floating-world",
+   "artist": "Katsushika Hokusai",
+   "title": "Amida Falls in the Far Reaches of the Kisokaido",
+   "year": "c. 1833",
+   "museum": "Art Institute of Chicago",
+   "w": 2093,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/778f5ecd-af29-b0d0-6c15-6b4a603dfa0d/full/full/0/default.jpg",
+     "w": 2093
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/778f5ecd-af29-b0d0-6c15-6b4a603dfa0d/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "25201"
+  },
+  {
+   "id": "aic-4a6c24188c",
+   "room": "floating-world",
+   "artist": "Katsushika Hokusai",
+   "title": "Kirifuri Falls at Mount Kurokami",
+   "year": "c. 1833",
+   "museum": "Art Institute of Chicago",
+   "w": 2100,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/222db246-4eae-d023-5bba-11af5bbd4e82/full/full/0/default.jpg",
+     "w": 2100
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/222db246-4eae-d023-5bba-11af5bbd4e82/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "25186"
+  },
+  {
+   "id": "aic-93efbd11bf",
+   "room": "floating-world",
+   "artist": "Katsushika Hokusai",
+   "title": "Yoro Waterfall in Mino Province",
+   "year": "c. 1833",
+   "museum": "Art Institute of Chicago",
+   "w": 2044,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/d0e64f27-a884-a994-7962-f5b1dd863edb/full/full/0/default.jpg",
+     "w": 2044
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/d0e64f27-a884-a994-7962-f5b1dd863edb/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "13255"
+  },
+  {
+   "id": "aic-98701436ca",
+   "room": "floating-world",
+   "artist": "Katsushika Hokusai",
+   "title": "Hydrangea and Swallow",
+   "year": "c. 1833–34",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2047,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/9bc87079-663c-f320-2da5-29dcd86c68f4/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/9bc87079-663c-f320-2da5-29dcd86c68f4/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "25117"
+  },
+  {
+   "id": "aic-d29bd0ef9b",
+   "room": "floating-world",
+   "artist": "Kitagawa Utamaro",
+   "title": "Woman Exhaling Smoke from a Pipe",
+   "year": "c. 1792–93",
+   "museum": "Art Institute of Chicago",
+   "w": 2003,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/6e45350c-69a4-0a0c-28d1-6acc131931da/full/full/0/default.jpg",
+     "w": 2003
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/6e45350c-69a4-0a0c-28d1-6acc131931da/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "8185"
+  },
+  {
+   "id": "aic-c717d5ce98",
+   "room": "floating-world",
+   "artist": "Kitagawa Utamaro",
+   "title": "Takashima Ohisa",
+   "year": "c. 1795",
+   "museum": "Art Institute of Chicago",
+   "w": 2051,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/d3840ed2-3198-84e4-9086-8be16631a452/full/full/0/default.jpg",
+     "w": 2051
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/d3840ed2-3198-84e4-9086-8be16631a452/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "23868"
+  },
+  {
+   "id": "aic-dc7be0ebca",
+   "room": "floating-world",
+   "artist": "Kitagawa Utamaro",
+   "title": "The Courtesan Arihara of the Tsuruya",
+   "year": "c. 1797",
+   "museum": "Art Institute of Chicago",
+   "w": 2012,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/2b9f4057-ec33-864f-7c14-665da35a05bc/full/full/0/default.jpg",
+     "w": 2012
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/2b9f4057-ec33-864f-7c14-665da35a05bc/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "19236"
+  },
+  {
+   "id": "aic-e95401c175",
+   "room": "floating-world",
+   "artist": "Utagawa Hiroshige",
+   "title": "Awa Province: Naruto Whirlpools",
+   "year": "1855",
+   "museum": "Art Institute of Chicago",
+   "w": 2003,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/e51dec75-e984-b564-869e-143c739eb372/full/full/0/default.jpg",
+     "w": 2003
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/e51dec75-e984-b564-869e-143c739eb372/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "130577"
+  },
+  {
+   "id": "aic-4864af7dc2",
+   "room": "floating-world",
+   "artist": "Utagawa Hiroshige",
+   "title": "Kinryuzan Temple at Asakusa",
+   "year": "1856",
+   "museum": "Art Institute of Chicago",
+   "w": 2036,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/15e90d2e-ba4f-4fff-f784-fc84f4bbfe0a/full/full/0/default.jpg",
+     "w": 2036
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/15e90d2e-ba4f-4fff-f784-fc84f4bbfe0a/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "34096"
+  },
+  {
+   "id": "aic-b2ec239dd7",
+   "room": "floating-world",
+   "artist": "Utagawa Hiroshige",
+   "title": "Sudden Shower over Shin-Ohashi Bridge and Atake",
+   "year": "1857",
+   "museum": "Art Institute of Chicago",
+   "w": 2055,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/7e3923a9-e254-8d3f-b377-68d86f6083df/full/full/0/default.jpg",
+     "w": 2055
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/7e3923a9-e254-8d3f-b377-68d86f6083df/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "64447"
+  },
+  {
+   "id": "aic-fab64c96e2",
+   "room": "floating-world",
+   "artist": "Utagawa Hiroshige",
+   "title": "Plum Garden at Kameido",
+   "year": "1857",
+   "museum": "Art Institute of Chicago",
+   "w": 2037,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/89a2332f-be15-8e05-bc79-778738fdc1ef/full/full/0/default.jpg",
+     "w": 2037
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/89a2332f-be15-8e05-bc79-778738fdc1ef/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "26577"
+  },
+  {
+   "id": "aic-7d7b1a7f33",
+   "room": "floating-world",
+   "artist": "Utagawa Hiroshige",
+   "title": "Fox Fires on New Year's Eve at the Changing Tree in Oji",
+   "year": "1857",
+   "museum": "Art Institute of Chicago",
+   "w": 1993,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/23218ff9-8008-5318-f7dd-52e6a1471599/full/full/0/default.jpg",
+     "w": 1993
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/23218ff9-8008-5318-f7dd-52e6a1471599/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "13183"
+  },
+  {
+   "id": "aic-11f9d5f92d",
+   "room": "floating-world",
+   "artist": "Utagawa Hiroshige",
+   "title": "The Whirlpools in Naruto Strait, Awa Province",
+   "year": "1857",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 1450,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/dedda7df-41b0-49c1-7255-935123ba6d93/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/dedda7df-41b0-49c1-7255-935123ba6d93/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "21625"
+  },
+  {
+   "id": "aic-f2d0cdd4d9",
+   "room": "floating-world",
+   "artist": "Utagawa Hiroshige",
+   "title": "Drum Bridge and Yuhi Hill at Meguro",
+   "year": "1857",
+   "museum": "Art Institute of Chicago",
+   "w": 2032,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/723f833f-19f7-89e0-60ad-ad7ffc33ca4d/full/full/0/default.jpg",
+     "w": 2032
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/723f833f-19f7-89e0-60ad-ad7ffc33ca4d/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "26615"
+  },
+  {
+   "id": "aic-788ab1f326",
+   "room": "floating-world",
+   "artist": "Utagawa Hiroshige",
+   "title": "Suido Bridge and Surugadai",
+   "year": "1857",
+   "museum": "Art Institute of Chicago",
+   "w": 2053,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/98cec643-d12d-ef62-9de0-df2194d1556f/full/full/0/default.jpg",
+     "w": 2053
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/98cec643-d12d-ef62-9de0-df2194d1556f/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "34252"
+  },
+  {
+   "id": "aic-6518eacc22",
+   "room": "floating-world",
+   "artist": "Utagawa Hiroshige",
+   "title": "Asakusa Rice Fields and Torinomachi Festival",
+   "year": "1857",
+   "museum": "Art Institute of Chicago",
+   "w": 2063,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/72b3d0cf-f10b-3679-cf9f-b7fc211766fa/full/full/0/default.jpg",
+     "w": 2063
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/72b3d0cf-f10b-3679-cf9f-b7fc211766fa/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "13192"
+  },
+  {
+   "id": "aic-3a3fbce0fa",
+   "room": "floating-world",
+   "artist": "Utagawa Hiroshige",
+   "title": "Kanbara: Evening Snow",
+   "year": "c. 1833–34",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 1947,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/c287562e-816e-096c-022a-b05199ba4b8f/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/c287562e-816e-096c-022a-b05199ba4b8f/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "25613"
+  },
+  {
+   "id": "aic-ee7be3bf23",
+   "room": "floating-world",
+   "artist": "Utagawa Hiroshige",
+   "title": "Shono: Driving Rain",
+   "year": "c. 1833–34",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2028,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/998c262b-75e6-b711-1586-5bb33ddb74ce/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/998c262b-75e6-b711-1586-5bb33ddb74ce/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "25761"
+  },
+  {
+   "id": "aic-d0ef714b4f",
+   "room": "floating-world",
+   "artist": "Utagawa Hiroshige",
+   "title": "Mishima: Morning Mist",
+   "year": "c. 1833–34",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 1921,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/c047003a-949c-a581-7c5a-2c415e8cac75/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/c047003a-949c-a581-7c5a-2c415e8cac75/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "10926"
+  },
+  {
+   "id": "aic-682e0c742f",
+   "room": "floating-world",
+   "artist": "Utagawa Kuniyoshi",
+   "title": "Lu Zhishen, Originally Named Lu Da",
+   "year": "c. 1827",
+   "museum": "Art Institute of Chicago",
+   "w": 2098,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/b34d2656-72dd-37c4-a002-2b9f2be83037/full/full/0/default.jpg",
+     "w": 2098
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/b34d2656-72dd-37c4-a002-2b9f2be83037/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "130716"
+  },
+  {
+   "id": "aic-db1c386579",
+   "room": "floating-world",
+   "artist": "Utagawa Kuniyoshi",
+   "title": "The Utter Defeat of the Taira Clan at Akama Bay",
+   "year": "c. 1845",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 1496,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/bc536ff1-e0bc-24e9-6fd7-0812406e9cd3/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/bc536ff1-e0bc-24e9-6fd7-0812406e9cd3/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "46990"
+  },
+  {
+   "id": "aic-a49010101c",
+   "room": "floating-world",
+   "artist": "Utagawa Kuniyoshi",
+   "title": "The Young Yoshitsune Defeats Benkei at Gojo Bridge",
+   "year": "c. 1848",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 1475,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/c4db3a2b-3724-704a-8d55-35de0ddca050/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/c4db3a2b-3724-704a-8d55-35de0ddca050/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "49141"
+  },
+  {
+   "id": "commons-file-albert-bierstadt-a-storm-in-the-rocky-mountains-mt-",
+   "room": "the-storm",
+   "artist": "Albert Bierstadt",
+   "title": "A Storm in the Rocky Mountains, Mt. Rosalie",
+   "year": "1866",
+   "museum": "Brooklyn Museum · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2222,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Albert_Bierstadt_-_A_Storm_in_the_Rocky_Mountains%2C_Mt._Rosalie_-_Google_Art_Project.jpg/3840px-Albert_Bierstadt_-_A_Storm_in_the_Rocky_Mountains%2C_Mt._Rosalie_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Albert_Bierstadt_-_A_Storm_in_the_Rocky_Mountains%2C_Mt._Rosalie_-_Google_Art_Project.jpg/1920px-Albert_Bierstadt_-_A_Storm_in_the_Rocky_Mountains%2C_Mt._Rosalie_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Albert Bierstadt - A Storm in the Rocky Mountains, Mt. Rosalie - Google Art Project.jpg"
+  },
+  {
+   "id": "commons-file-vernet-claude-joseph-the-shipwreck-1772fxd-jpg",
+   "room": "the-storm",
+   "artist": "Claude-Joseph Vernet",
+   "title": "The Shipwreck",
+   "year": "1772",
+   "museum": "National Gallery of Art · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2666,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Vernet%2C_Claude_Joseph_-_The_Shipwreck_-_1772FXD.jpg/3840px-Vernet%2C_Claude_Joseph_-_The_Shipwreck_-_1772FXD.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Vernet%2C_Claude_Joseph_-_The_Shipwreck_-_1772FXD.jpg/1920px-Vernet%2C_Claude_Joseph_-_The_Shipwreck_-_1772FXD.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Vernet, Claude Joseph - The Shipwreck - 1772FXD.jpg"
+  },
+  {
+   "id": "met-6caead7d03",
+   "room": "the-storm",
+   "artist": "Eugène Delacroix",
+   "title": "Christ Asleep during the Tempest",
+   "year": "ca. 1853",
+   "museum": "The Met",
+   "w": 4000,
+   "h": 3296,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-14343-001.jpg",
+     "w": 4000
+    }
+   ],
+   "source": "met",
+   "sourceId": "436176"
+  },
+  {
+   "id": "commons-file-frederic-edwin-church-rainy-season-in-the-tropics-g",
+   "room": "the-storm",
+   "artist": "Frederic Edwin Church",
+   "title": "Rainy Season in the Tropics",
+   "year": "1866",
+   "museum": "Fine Arts Museums of San Francisco · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2546,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Frederic_Edwin_Church_-_Rainy_Season_in_the_Tropics_-_Google_Art_Project.jpg/3840px-Frederic_Edwin_Church_-_Rainy_Season_in_the_Tropics_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Frederic_Edwin_Church_-_Rainy_Season_in_the_Tropics_-_Google_Art_Project.jpg/1920px-Frederic_Edwin_Church_-_Rainy_Season_in_the_Tropics_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Frederic Edwin Church - Rainy Season in the Tropics - Google Art Project.jpg"
+  },
+  {
+   "id": "ycba-ycba-obj-5009",
+   "room": "the-storm",
+   "artist": "George Stubbs",
+   "title": "Zebra",
+   "year": "1763",
+   "museum": "Yale Center for British Art",
+   "w": 3840,
+   "h": 3062,
+   "srcs": [
+    {
+     "u": "https://images.collections.yale.edu/iiif/2/ycba:9af3e295-a373-4ee9-bdd8-dc075114e7fe/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://images.collections.yale.edu/iiif/2/ycba:9af3e295-a373-4ee9-bdd8-dc075114e7fe/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "ycba",
+   "sourceId": "ycba/obj/5009"
+  },
+  {
+   "id": "met-0e3292806e",
+   "room": "the-storm",
+   "artist": "Gustave Courbet",
+   "title": "Marine: The Waterspout",
+   "year": "1870",
+   "museum": "The Met",
+   "w": 3811,
+   "h": 2641,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT1965.jpg",
+     "w": 3811
+    }
+   ],
+   "source": "met",
+   "sourceId": "436006"
+  },
+  {
+   "id": "commons-file-ivan-constantinovich-aivazovsky-battle-of-esme-at-n",
+   "room": "the-storm",
+   "artist": "Ivan Aivazovsky",
+   "title": "Battle of Çesme at Night",
+   "year": "1848",
+   "museum": "Aivazovsky National Art Gallery, Feodosia · via Wikimedia Commons",
+   "w": 1876,
+   "h": 2000,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/8/83/Ivan_Constantinovich_Aivazovsky_-_Battle_of_%C3%87esme_at_Night.JPG",
+     "w": 1876
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Ivan Constantinovich Aivazovsky - Battle of Çesme at Night.JPG"
+  },
+  {
+   "id": "commons-file-hovhannes-aivazovsky-the-ninth-wave-google-art-proj",
+   "room": "the-storm",
+   "artist": "Ivan Aivazovsky",
+   "title": "The Ninth Wave",
+   "year": "1850",
+   "museum": "State Russian Museum · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2580,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Hovhannes_Aivazovsky_-_The_Ninth_Wave_-_Google_Art_Project.jpg/3840px-Hovhannes_Aivazovsky_-_The_Ninth_Wave_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Hovhannes_Aivazovsky_-_The_Ninth_Wave_-_Google_Art_Project.jpg/1920px-Hovhannes_Aivazovsky_-_The_Ninth_Wave_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Hovhannes Aivazovsky - The Ninth Wave - Google Art Project.jpg"
+  },
+  {
+   "id": "commons-file-aivazovsky-view-of-constantinople-and-the-bosphorus",
+   "room": "the-storm",
+   "artist": "Ivan Aivazovsky",
+   "title": "View of Constantinople and the Bosphorus",
+   "year": "1856",
+   "museum": "Private collection · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2409,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Aivazovsky_-_View_of_Constantinople_and_the_Bosphorus.jpg/3840px-Aivazovsky_-_View_of_Constantinople_and_the_Bosphorus.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Aivazovsky_-_View_of_Constantinople_and_the_Bosphorus.jpg/1920px-Aivazovsky_-_View_of_Constantinople_and_the_Bosphorus.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Aivazovsky - View of Constantinople and the Bosphorus.jpg"
+  },
+  {
+   "id": "commons-file-google-art-project-jpg",
+   "room": "the-storm",
+   "artist": "Ivan Aivazovsky",
+   "title": "The Black Sea",
+   "year": "1881",
+   "museum": "Tretyakov Gallery · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2755,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/%D0%98%D0%B2%D0%B0%D0%BD_%D0%9A%D0%BE%D0%BD%D1%81%D1%82%D0%B0%D0%BD%D1%82%D0%B8%D0%BD%D0%BE%D0%B2%D0%B8%D1%87_%D0%90%D0%B9%D0%B2%D0%B0%D0%B7%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9_-_%D0%A7%D0%B5%D1%80%D0%BD%D0%BE%D0%B5_%D0%BC%D0%BE%D1%80%D0%B5_%28%D0%BD%D0%B0_%D0%A7%D0%B5%D1%80%D0%BD%D0%BE%D0%BC_%D0%BC%D0%BE%D1%80%D0%B5_%D0%BD%D0%B0%D1%87%D0%B8%D0%BD%D0%B0%D0%B5%D1%82_%D1%80%D0%B0%D0%B7%D1%8B%D0%B3%D1%80%D1%8B%D0%B2%D0%B0%D1%82%D1%8C%D1%81%D1%8F_%D0%B1%D1%83%D1%80%D1%8F%29_-_Google_Art_Project.jpg/3840px-thumbnail.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/%D0%98%D0%B2%D0%B0%D0%BD_%D0%9A%D0%BE%D0%BD%D1%81%D1%82%D0%B0%D0%BD%D1%82%D0%B8%D0%BD%D0%BE%D0%B2%D0%B8%D1%87_%D0%90%D0%B9%D0%B2%D0%B0%D0%B7%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9_-_%D0%A7%D0%B5%D1%80%D0%BD%D0%BE%D0%B5_%D0%BC%D0%BE%D1%80%D0%B5_%28%D0%BD%D0%B0_%D0%A7%D0%B5%D1%80%D0%BD%D0%BE%D0%BC_%D0%BC%D0%BE%D1%80%D0%B5_%D0%BD%D0%B0%D1%87%D0%B8%D0%BD%D0%B0%D0%B5%D1%82_%D1%80%D0%B0%D0%B7%D1%8B%D0%B3%D1%80%D1%8B%D0%B2%D0%B0%D1%82%D1%8C%D1%81%D1%8F_%D0%B1%D1%83%D1%80%D1%8F%29_-_Google_Art_Project.jpg/1920px-thumbnail.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Иван Константинович Айвазовский - Черное море (на Черном море начинает разыгрываться буря) - Google Art Project.jpg"
+  },
+  {
+   "id": "commons-file-ivan-konstantinovich-aivazovsky-a-view-of-the-bospo",
+   "room": "the-storm",
+   "artist": "Ivan Aivazovsky",
+   "title": "A View of the Bosporus with the Hagia Sophia and the Maiden's Tower in the Moonlight",
+   "year": "1884",
+   "museum": "Private collection · via Wikimedia Commons",
+   "w": 2922,
+   "h": 1746,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/5/57/Ivan_Konstantinovich_Aivazovsky_-_A_View_of_the_Bosporus_with_the_Hagia_Sophia_and_the_Maiden%27s_Tower_in_the_Moonlight.jpg",
+     "w": 2922
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Ivan_Konstantinovich_Aivazovsky_-_A_View_of_the_Bosporus_with_the_Hagia_Sophia_and_the_Maiden%27s_Tower_in_the_Moonlight.jpg/1920px-Ivan_Konstantinovich_Aivazovsky_-_A_View_of_the_Bosporus_with_the_Hagia_Sophia_and_the_Maiden%27s_Tower_in_the_Moonlight.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Ivan Konstantinovich Aivazovsky - A View of the Bosporus with the Hagia Sophia and the Maiden's Tower in the Moonlight.jpg"
+  },
+  {
+   "id": "commons-file-jpg",
+   "room": "the-storm",
+   "artist": "Ivan Aivazovsky",
+   "title": "The Wave",
+   "year": "1889",
+   "museum": "State Russian Museum · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2212,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/%D0%90%D0%B9%D0%B2%D0%B0%D0%B7%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9_%D0%98.%D0%9A._%D0%92%D0%BE%D0%BB%D0%BD%D0%B0.jpg/3840px-%D0%90%D0%B9%D0%B2%D0%B0%D0%B7%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9_%D0%98.%D0%9A._%D0%92%D0%BE%D0%BB%D0%BD%D0%B0.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/%D0%90%D0%B9%D0%B2%D0%B0%D0%B7%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9_%D0%98.%D0%9A._%D0%92%D0%BE%D0%BB%D0%BD%D0%B0.jpg/1920px-%D0%90%D0%B9%D0%B2%D0%B0%D0%B7%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9_%D0%98.%D0%9A._%D0%92%D0%BE%D0%BB%D0%BD%D0%B0.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Айвазовский И.К. Волна.jpg"
+  },
+  {
+   "id": "commons-file-ivan-konstantinovich-aivazovsky-st-rmische-see-im-a",
+   "room": "the-storm",
+   "artist": "Ivan Aivazovsky",
+   "title": "Stormy Sea at Sunset",
+   "year": "1896",
+   "museum": "Private collection · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2654,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Ivan_Konstantinovich_Aivazovsky_-_St%C3%BCrmische_See_im_Abendrot%2C_1896.jpg/3840px-Ivan_Konstantinovich_Aivazovsky_-_St%C3%BCrmische_See_im_Abendrot%2C_1896.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Ivan_Konstantinovich_Aivazovsky_-_St%C3%BCrmische_See_im_Abendrot%2C_1896.jpg/1920px-Ivan_Konstantinovich_Aivazovsky_-_St%C3%BCrmische_See_im_Abendrot%2C_1896.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Ivan Konstantinovich Aivazovsky - Stürmische See im Abendrot, 1896.jpg"
+  },
+  {
+   "id": "commons-file-ivan-konstantinovich-aivazovsky-among-the-waves-189",
+   "room": "the-storm",
+   "artist": "Ivan Aivazovsky",
+   "title": "Among the Waves",
+   "year": "1898",
+   "museum": "Aivazovsky National Art Gallery, Feodosia · via Wikimedia Commons",
+   "w": 1980,
+   "h": 1226,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/4/4e/Ivan_Konstantinovich_Aivazovsky_-_Among_the_Waves%2C_1898.jpg",
+     "w": 1980
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Ivan_Konstantinovich_Aivazovsky_-_Among_the_Waves%2C_1898.jpg/1920px-Ivan_Konstantinovich_Aivazovsky_-_Among_the_Waves%2C_1898.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Ivan Konstantinovich Aivazovsky - Among the Waves, 1898.jpg"
+  },
+  {
+   "id": "commons-file-1899-jpg",
+   "room": "the-storm",
+   "artist": "Ivan Aivazovsky",
+   "title": "The Storm at Cape Aya",
+   "year": "1899",
+   "museum": "Dagestan Museum of Fine Arts · via Wikimedia Commons",
+   "w": 3840,
+   "h": 5478,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/%D0%98%D0%B2%D0%B0%D0%BD_%D0%9A._%D0%90%D0%B9%D0%B2%D0%B0%D0%B7%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9_-_%D0%91%D1%83%D1%80%D1%8F_%281899%29.jpg/3840px-%D0%98%D0%B2%D0%B0%D0%BD_%D0%9A._%D0%90%D0%B9%D0%B2%D0%B0%D0%B7%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9_-_%D0%91%D1%83%D1%80%D1%8F_%281899%29.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/%D0%98%D0%B2%D0%B0%D0%BD_%D0%9A._%D0%90%D0%B9%D0%B2%D0%B0%D0%B7%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9_-_%D0%91%D1%83%D1%80%D1%8F_%281899%29.jpg/1920px-%D0%98%D0%B2%D0%B0%D0%BD_%D0%9A._%D0%90%D0%B9%D0%B2%D0%B0%D0%B7%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9_-_%D0%91%D1%83%D1%80%D1%8F_%281899%29.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Иван К. Айвазовский - Буря (1899).jpg"
+  },
+  {
+   "id": "met-080d605d93",
+   "room": "the-storm",
+   "artist": "J.M.W. Turner",
+   "title": "Saltash with the Water Ferry, Cornwall",
+   "year": "1811",
+   "museum": "The Met",
+   "w": 3915,
+   "h": 2961,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP169566.jpg",
+     "w": 3915
+    }
+   ],
+   "source": "met",
+   "sourceId": "437852"
+  },
+  {
+   "id": "ycba-ycba-obj-34",
+   "room": "the-storm",
+   "artist": "J.M.W. Turner",
+   "title": "Dort or Dordrecht: The Dort Packet-Boat from Rotterdam Becalmed",
+   "year": "1818",
+   "museum": "Yale Center for British Art",
+   "w": 3840,
+   "h": 2582,
+   "srcs": [
+    {
+     "u": "https://images.collections.yale.edu/iiif/2/ycba:4f227f08-7842-46cc-b05a-e3c6a4614cc1/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://images.collections.yale.edu/iiif/2/ycba:4f227f08-7842-46cc-b05a-e3c6a4614cc1/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "ycba",
+   "sourceId": "ycba/obj/34"
+  },
+  {
+   "id": "ycba-ycba-obj-5018",
+   "room": "the-storm",
+   "artist": "J.M.W. Turner",
+   "title": "Staffa, Fingal's Cave",
+   "year": "1832",
+   "museum": "Yale Center for British Art",
+   "w": 3840,
+   "h": 2875,
+   "srcs": [
+    {
+     "u": "https://images.collections.yale.edu/iiif/2/ycba:76324c8c-635d-430a-b3db-c5da6b510151/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://images.collections.yale.edu/iiif/2/ycba:76324c8c-635d-430a-b3db-c5da6b510151/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "ycba",
+   "sourceId": "ycba/obj/5018"
+  },
+  {
+   "id": "ycba-ycba-obj-45",
+   "room": "the-storm",
+   "artist": "J.M.W. Turner",
+   "title": "Wreckers — Coast of Northumberland, with a Steam-Boat Assisting a Ship off Shore",
+   "year": "1834",
+   "museum": "Yale Center for British Art",
+   "w": 3840,
+   "h": 2856,
+   "srcs": [
+    {
+     "u": "https://images.collections.yale.edu/iiif/2/ycba:fcb3b175-96b4-472e-ab6f-d4d6bea65f81/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://images.collections.yale.edu/iiif/2/ycba:fcb3b175-96b4-472e-ab6f-d4d6bea65f81/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "ycba",
+   "sourceId": "ycba/obj/45"
+  },
+  {
+   "id": "cma-1942-647",
+   "room": "the-storm",
+   "artist": "J.M.W. Turner",
+   "title": "The Burning of the Houses of Lords and Commons, 16 October 1834",
+   "year": "1835",
+   "museum": "Cleveland Museum of Art",
+   "w": 3400,
+   "h": 2525,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1942.647/1942.647_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1942.647/1942.647_web.jpg",
+     "w": 900
+    }
+   ],
+   "source": "cma",
+   "sourceId": "1942.647"
+  },
+  {
+   "id": "met-710635a2c8",
+   "room": "the-storm",
+   "artist": "J.M.W. Turner",
+   "title": "Venice, from the Porch of Madonna della Salute",
+   "year": "ca. 1835",
+   "museum": "The Met",
+   "w": 1959,
+   "h": 1461,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP169568.jpg",
+     "w": 1959
+    }
+   ],
+   "source": "met",
+   "sourceId": "437853"
+  },
+  {
+   "id": "met-d7197ed840",
+   "room": "the-storm",
+   "artist": "J.M.W. Turner",
+   "title": "Whalers",
+   "year": "ca. 1845",
+   "museum": "The Met",
+   "w": 3958,
+   "h": 2967,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-13360-001.jpg",
+     "w": 3958
+    }
+   ],
+   "source": "met",
+   "sourceId": "437854"
+  },
+  {
+   "id": "ycba-ycba-obj-5001",
+   "room": "the-storm",
+   "artist": "John Constable",
+   "title": "Hadleigh Castle, The Mouth of the Thames — Morning after a Stormy Night",
+   "year": "1829",
+   "museum": "Yale Center for British Art",
+   "w": 3840,
+   "h": 2833,
+   "srcs": [
+    {
+     "u": "https://images.collections.yale.edu/iiif/2/ycba:6e961789-58ac-49de-a51e-5c7f268c7f5f/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://images.collections.yale.edu/iiif/2/ycba:6e961789-58ac-49de-a51e-5c7f268c7f5f/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "ycba",
+   "sourceId": "ycba/obj/5001"
+  },
+  {
+   "id": "met-61db92339f",
+   "room": "the-storm",
+   "artist": "John Constable",
+   "title": "Stoke-by-Nayland",
+   "year": "ca. 1810–11",
+   "museum": "The Met",
+   "w": 3911,
+   "h": 3077,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP164805.jpg",
+     "w": 3911
+    }
+   ],
+   "source": "met",
+   "sourceId": "435923"
+  },
+  {
+   "id": "met-7793566d7e",
+   "room": "the-storm",
+   "artist": "John Constable",
+   "title": "Salisbury Cathedral from the Bishop's Grounds",
+   "year": "ca. 1825",
+   "museum": "The Met",
+   "w": 1955,
+   "h": 1541,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP164837.jpg",
+     "w": 1955
+    }
+   ],
+   "source": "met",
+   "sourceId": "435922"
+  },
+  {
+   "id": "commons-file-slave-ship-jpg",
+   "room": "the-storm",
+   "artist": "Joseph Mallord William Turner",
+   "title": "The Slave Ship (Slavers Throwing Overboard the Dead and Dying, Typhoon Coming On)",
+   "year": "1840",
+   "museum": "Museum of Fine Arts, Boston · via Wikimedia Commons",
+   "w": 2152,
+   "h": 1616,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/2/26/Slave-ship.jpg",
+     "w": 2152
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Slave-ship.jpg/1920px-Slave-ship.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Slave-ship.jpg"
+  },
+  {
+   "id": "commons-file-j-m-w-turner-snow-storm-steam-boat-off-a-harbour-s-",
+   "room": "the-storm",
+   "artist": "Joseph Mallord William Turner",
+   "title": "Snow Storm — Steam-Boat off a Harbour's Mouth",
+   "year": "1842",
+   "museum": "Tate Britain · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2887,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/J.M.W._Turner_%E2%80%93_Snow_Storm_-_Steam-Boat_off_a_Harbour%27s_Mouth.jpg/3840px-J.M.W._Turner_%E2%80%93_Snow_Storm_-_Steam-Boat_off_a_Harbour%27s_Mouth.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/J.M.W._Turner_%E2%80%93_Snow_Storm_-_Steam-Boat_off_a_Harbour%27s_Mouth.jpg/1920px-J.M.W._Turner_%E2%80%93_Snow_Storm_-_Steam-Boat_off_a_Harbour%27s_Mouth.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:J.M.W. Turner – Snow Storm - Steam-Boat off a Harbour's Mouth.jpg"
+  },
+  {
+   "id": "aic-d6149cad2a",
+   "room": "the-storm",
+   "artist": "Katsushika Hokusai",
+   "title": "Shower Below the Summit (Sanka hakuu)",
+   "year": "c. 1830–33",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 2018,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/d00ee3ae-f8f1-6a79-d912-cf5dc8ba1701/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/d00ee3ae-f8f1-6a79-d912-cf5dc8ba1701/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "77331"
+  },
+  {
+   "id": "met-a99356133e",
+   "room": "the-storm",
+   "artist": "Martin Johnson Heade",
+   "title": "Approaching Thunder Storm",
+   "year": "1859",
+   "museum": "The Met",
+   "w": 1959,
+   "h": 1245,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DP248013.jpg",
+     "w": 1959
+    }
+   ],
+   "source": "met",
+   "sourceId": "11050"
+  },
+  {
+   "id": "commons-file-rembrandt-christ-in-the-storm-on-the-lake-of-galile",
+   "room": "the-storm",
+   "artist": "Rembrandt van Rijn",
+   "title": "Christ in the Storm on the Sea of Galilee",
+   "year": "1633",
+   "museum": "Isabella Stewart Gardner Museum · via Wikimedia Commons",
+   "w": 3002,
+   "h": 3731,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/f/f3/Rembrandt_Christ_in_the_Storm_on_the_Lake_of_Galilee.jpg",
+     "w": 3002
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Rembrandt_Christ_in_the_Storm_on_the_Lake_of_Galilee.jpg/1920px-Rembrandt_Christ_in_the_Storm_on_the_Lake_of_Galilee.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Rembrandt Christ in the Storm on the Lake of Galilee.jpg"
+  },
+  {
+   "id": "commons-file-een-schip-in-volle-zee-bij-vliegende-storm-bekend-a",
+   "room": "the-storm",
+   "artist": "Willem van de Velde the Younger",
+   "title": "A Ship on the High Seas Caught by a Squall (The Gust)",
+   "year": "c. 1680",
+   "museum": "Rijksmuseum · via Wikimedia Commons",
+   "w": 3840,
+   "h": 4703,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Een_schip_in_volle_zee_bij_vliegende_storm%2C_bekend_als_%E2%80%98De_windstoot%E2%80%99_Rijksmuseum_SK-A-1848.jpeg/3840px-Een_schip_in_volle_zee_bij_vliegende_storm%2C_bekend_als_%E2%80%98De_windstoot%E2%80%99_Rijksmuseum_SK-A-1848.jpeg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Een_schip_in_volle_zee_bij_vliegende_storm%2C_bekend_als_%E2%80%98De_windstoot%E2%80%99_Rijksmuseum_SK-A-1848.jpeg/1920px-Een_schip_in_volle_zee_bij_vliegende_storm%2C_bekend_als_%E2%80%98De_windstoot%E2%80%99_Rijksmuseum_SK-A-1848.jpeg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Een schip in volle zee bij vliegende storm, bekend als ‘De windstoot’ Rijksmuseum SK-A-1848.jpeg"
+  },
+  {
+   "id": "met-d6924985fb",
+   "room": "the-storm",
+   "artist": "William Blake",
+   "title": "Pity",
+   "year": "ca. 1795",
+   "museum": "The Met",
+   "w": 3681,
+   "h": 2944,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/dp/original/DP108219.jpg",
+     "w": 3681
+    }
+   ],
+   "source": "met",
+   "sourceId": "347416"
+  },
+  {
+   "id": "met-014b017597",
+   "room": "the-storm",
+   "artist": "William Blake",
+   "title": "God Judging Adam",
+   "year": "ca. 1795",
+   "museum": "The Met",
+   "w": 4000,
+   "h": 3268,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/dp/original/DP116401.jpg",
+     "w": 4000
+    }
+   ],
+   "source": "met",
+   "sourceId": "347414"
+  },
+  {
+   "id": "met-e485348e31",
+   "room": "the-storm",
+   "artist": "William Blake",
+   "title": "Angel of the Revelation (Book of Revelation, chapter 10)",
+   "year": "ca. 1803–5",
+   "museum": "The Met",
+   "w": 2429,
+   "h": 3625,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/dp/original/DP805380.jpg",
+     "w": 2429
+    }
+   ],
+   "source": "met",
+   "sourceId": "340852"
+  },
+  {
+   "id": "met-9b1250eaf1",
+   "room": "the-storm",
+   "artist": "Winslow Homer",
+   "title": "Cannon Rock",
+   "year": "1895",
+   "museum": "The Met",
+   "w": 1894,
+   "h": 1893,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/ap06.1281.jpg",
+     "w": 1894
+    }
+   ],
+   "source": "met",
+   "sourceId": "11113"
+  },
+  {
+   "id": "met-771210a07e",
+   "room": "the-storm",
+   "artist": "Winslow Homer",
+   "title": "Hurricane, Bahamas",
+   "year": "1898",
+   "museum": "The Met",
+   "w": 4000,
+   "h": 2763,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DP-17779-001.jpg",
+     "w": 4000
+    }
+   ],
+   "source": "met",
+   "sourceId": "11124"
+  },
+  {
+   "id": "smk-76f53221f7",
+   "room": "quiet-north",
+   "artist": "Anna Ancher",
+   "title": "Interior with a Young Girl Braiding Her Hair",
+   "year": "1901",
+   "museum": "SMK, Copenhagen",
+   "w": 3171,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/wh246w49j_kms3827.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3171
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/wh246w49j_kms3827.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 1691
+    }
+   ],
+   "source": "smk",
+   "sourceId": "KMS3827"
+  },
+  {
+   "id": "smk-16027ba707",
+   "room": "quiet-north",
+   "artist": "Anna Ancher",
+   "title": "The Artist's Mother, Ane Hedvig Brøndum, in the Red Room",
+   "year": "1909",
+   "museum": "SMK, Copenhagen",
+   "w": 3840,
+   "h": 2485,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/g445ch47r_KMS8654.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/g445ch47r_KMS8654.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "smk",
+   "sourceId": "KMS8654"
+  },
+  {
+   "id": "smk-4f7e321393",
+   "room": "quiet-north",
+   "artist": "C.W. Eckersberg",
+   "title": "View through Three Arches of the Third Storey of the Colosseum",
+   "year": "1815",
+   "museum": "SMK, Copenhagen",
+   "w": 3840,
+   "h": 2442,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/hm50tw13v_KMS3123_-_lille.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/hm50tw13v_KMS3123_-_lille.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "smk",
+   "sourceId": "KMS3123"
+  },
+  {
+   "id": "smk-c5b059a1d9",
+   "room": "quiet-north",
+   "artist": "C.W. Eckersberg",
+   "title": "The Russian Ship of the Line 'Asow' and a Frigate at Anchor near Elsinore",
+   "year": "1828",
+   "museum": "SMK, Copenhagen",
+   "w": 3141,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/7h149v115_kms608.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3141
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/7h149v115_kms608.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 1675
+    }
+   ],
+   "source": "smk",
+   "sourceId": "KMS608"
+  },
+  {
+   "id": "smk-bc29d88b6f",
+   "room": "quiet-north",
+   "artist": "C.W. Eckersberg",
+   "title": "Langebro, Copenhagen, in Moonlight with Running Figures",
+   "year": "1836",
+   "museum": "SMK, Copenhagen",
+   "w": 2773,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/qr46r399j_KMS7284.TIF.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 2773
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/qr46r399j_KMS7284.TIF.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 1479
+    }
+   ],
+   "source": "smk",
+   "sourceId": "KMS7284"
+  },
+  {
+   "id": "commons-file-caspar-david-friedrich-der-m-nch-am-meer-google-art",
+   "room": "quiet-north",
+   "artist": "Caspar David Friedrich",
+   "title": "The Monk by the Sea",
+   "year": "1808–10",
+   "museum": "Alte Nationalgalerie, Berlin · via Wikimedia Commons",
+   "w": 3543,
+   "h": 2254,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/2/21/Caspar_David_Friedrich_-_Der_M%C3%B6nch_am_Meer_-_Google_Art_Project.jpg",
+     "w": 3543
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Caspar_David_Friedrich_-_Der_M%C3%B6nch_am_Meer_-_Google_Art_Project.jpg/1920px-Caspar_David_Friedrich_-_Der_M%C3%B6nch_am_Meer_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Caspar David Friedrich - Der Mönch am Meer - Google Art Project.jpg"
+  },
+  {
+   "id": "commons-file-caspar-david-friedrich-abtei-im-eichwald-google-art",
+   "room": "quiet-north",
+   "artist": "Caspar David Friedrich",
+   "title": "The Abbey in the Oakwood",
+   "year": "1809–10",
+   "museum": "Alte Nationalgalerie, Berlin · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2460,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Caspar_David_Friedrich_-_Abtei_im_Eichwald_-_Google_Art_Project.jpg/3840px-Caspar_David_Friedrich_-_Abtei_im_Eichwald_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Caspar_David_Friedrich_-_Abtei_im_Eichwald_-_Google_Art_Project.jpg/1920px-Caspar_David_Friedrich_-_Abtei_im_Eichwald_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Caspar David Friedrich - Abtei im Eichwald - Google Art Project.jpg"
+  },
+  {
+   "id": "commons-file-caspar-david-friedrich-wanderer-above-the-sea-of-fo",
+   "room": "quiet-north",
+   "artist": "Caspar David Friedrich",
+   "title": "Wanderer above the Sea of Fog",
+   "year": "c. 1817",
+   "museum": "Hamburger Kunsthalle · via Wikimedia Commons",
+   "w": 3840,
+   "h": 4926,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Caspar_David_Friedrich_-_Wanderer_above_the_Sea_of_Fog.jpeg/3840px-Caspar_David_Friedrich_-_Wanderer_above_the_Sea_of_Fog.jpeg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Caspar_David_Friedrich_-_Wanderer_above_the_Sea_of_Fog.jpeg/1920px-Caspar_David_Friedrich_-_Wanderer_above_the_Sea_of_Fog.jpeg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Caspar David Friedrich - Wanderer above the Sea of Fog.jpeg"
+  },
+  {
+   "id": "met-94cfcd84f2",
+   "room": "quiet-north",
+   "artist": "Caspar David Friedrich",
+   "title": "Two Men Contemplating the Moon",
+   "year": "ca. 1825–30",
+   "museum": "The Met, New York",
+   "w": 4000,
+   "h": 3237,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-31997-001-NEW.jpg",
+     "w": 4000
+    }
+   ],
+   "source": "met",
+   "sourceId": "438417"
+  },
+  {
+   "id": "smk-0f3736fd5a",
+   "room": "quiet-north",
+   "artist": "Christen Købke",
+   "title": "The Roof Ridge of Frederiksborg Castle",
+   "year": "1833–34",
+   "museum": "SMK, Copenhagen",
+   "w": 3735,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/qr46r3104_dep691.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3735
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/qr46r3104_dep691.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 1992
+    }
+   ],
+   "source": "smk",
+   "sourceId": "DEP691"
+  },
+  {
+   "id": "smk-eea1250a41",
+   "room": "quiet-north",
+   "artist": "Christen Købke",
+   "title": "View of Østerbro in Morning Light",
+   "year": "1836",
+   "museum": "SMK, Copenhagen",
+   "w": 3840,
+   "h": 2483,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/8336h501h_kms844.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/8336h501h_kms844.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "smk",
+   "sourceId": "KMS844"
+  },
+  {
+   "id": "smk-f8d6b21a51",
+   "room": "quiet-north",
+   "artist": "Christen Købke",
+   "title": "View from Dosseringen near Lake Sortedam towards Nørrebro",
+   "year": "1838",
+   "museum": "SMK, Copenhagen",
+   "w": 3840,
+   "h": 2778,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/gt54kq89w_KMSKMS359.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/gt54kq89w_KMSKMS359.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "smk",
+   "sourceId": "KMS359"
+  },
+  {
+   "id": "smk-27de5d900d",
+   "room": "quiet-north",
+   "artist": "Christen Købke",
+   "title": "Motif from Capri, Shortly after Sunrise",
+   "year": "1841–43",
+   "museum": "SMK, Copenhagen",
+   "w": 3840,
+   "h": 2554,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/cj82kb687_kms445.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/cj82kb687_kms445.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "smk",
+   "sourceId": "KMS445"
+  },
+  {
+   "id": "smk-511696d78d",
+   "room": "quiet-north",
+   "artist": "L.A. Ring",
+   "title": "At the French Windows. The Artist's Wife",
+   "year": "1897",
+   "museum": "SMK, Copenhagen",
+   "w": 2899,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/1544bs13w_kms3716.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 2899
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/1544bs13w_kms3716.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 1546
+    }
+   ],
+   "source": "smk",
+   "sourceId": "KMS3716"
+  },
+  {
+   "id": "smk-e762096576",
+   "room": "quiet-north",
+   "artist": "L.A. Ring",
+   "title": "Waiting for the Train. Level Crossing by Roskilde Highway",
+   "year": "1914",
+   "museum": "SMK, Copenhagen",
+   "w": 3840,
+   "h": 3116,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/gb19f9360_KMSdep535.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/gb19f9360_KMSdep535.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "smk",
+   "sourceId": "DEP535"
+  },
+  {
+   "id": "smk-08de0565cc",
+   "room": "quiet-north",
+   "artist": "Vilhelm Hammershøi",
+   "title": "Amalienborg Square, Copenhagen",
+   "year": "1896",
+   "museum": "SMK, Copenhagen",
+   "w": 3840,
+   "h": 3819,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/jq085p313_KMS1542.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/jq085p313_KMS1542.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "smk",
+   "sourceId": "KMS1542"
+  },
+  {
+   "id": "smk-d51e3f22e4",
+   "room": "quiet-north",
+   "artist": "Vilhelm Hammershøi",
+   "title": "Interior in Strandgade, Sunlight on the Floor",
+   "year": "1901",
+   "museum": "SMK, Copenhagen",
+   "w": 3840,
+   "h": 3371,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/3197xr831_KMS3696.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/3197xr831_KMS3696.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "smk",
+   "sourceId": "KMS3696"
+  },
+  {
+   "id": "smk-06915c7b5c",
+   "room": "quiet-north",
+   "artist": "Vilhelm Hammershøi",
+   "title": "Evening in the Drawing Room",
+   "year": "1904",
+   "museum": "SMK, Copenhagen",
+   "w": 3840,
+   "h": 3142,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/5x21tg258_KMS6658.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/5x21tg258_KMS6658.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "smk",
+   "sourceId": "KMS6658"
+  },
+  {
+   "id": "smk-0038995715",
+   "room": "quiet-north",
+   "artist": "Vilhelm Hammershøi",
+   "title": "From Christianshavn Canal",
+   "year": "1905",
+   "museum": "SMK, Copenhagen",
+   "w": 3840,
+   "h": 3088,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/b8515r46k_KMSKMS8415.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/b8515r46k_KMSKMS8415.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "smk",
+   "sourceId": "KMS8415"
+  },
+  {
+   "id": "smk-bd04ad1551",
+   "room": "quiet-north",
+   "artist": "Vilhelm Hammershøi",
+   "title": "St. Peter's Church, Copenhagen",
+   "year": "1906",
+   "museum": "SMK, Copenhagen",
+   "w": 3391,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/3x816q86w_KMS2051.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3391
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/3x816q86w_KMS2051.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 1808
+    }
+   ],
+   "source": "smk",
+   "sourceId": "KMS2051"
+  },
+  {
+   "id": "smk-8303181023",
+   "room": "quiet-north",
+   "artist": "Vilhelm Hammershøi",
+   "title": "Ida Hammershøi, the Artist's Wife, with a Teacup",
+   "year": "1907",
+   "museum": "SMK, Copenhagen",
+   "w": 3054,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/pn89d956v_KMS3352-cropped.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3054
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/pn89d956v_KMS3352-cropped.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 1629
+    }
+   ],
+   "source": "smk",
+   "sourceId": "KMS3352"
+  },
+  {
+   "id": "smk-51dd9bee97",
+   "room": "quiet-north",
+   "artist": "Vilhelm Hammershøi",
+   "title": "Interior. Artificial Light",
+   "year": "1909",
+   "museum": "SMK, Copenhagen",
+   "w": 3840,
+   "h": 2753,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/5h73q024j_KMS8677-cropped.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/5h73q024j_KMS8677-cropped.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "source": "smk",
+   "sourceId": "KMS8677"
+  },
+  {
+   "id": "smk-2e6b272483",
+   "room": "quiet-north",
+   "artist": "Vilhelm Hammershøi",
+   "title": "Interior with the Artist's Easel",
+   "year": "1910",
+   "museum": "SMK, Copenhagen",
+   "w": 3150,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/rx913s91d_KMS7444.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3150
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/rx913s91d_KMS7444.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 1680
+    }
+   ],
+   "source": "smk",
+   "sourceId": "KMS7444"
+  },
+  {
+   "id": "smk-1d943289e7",
+   "room": "quiet-north",
+   "artist": "Vilhelm Hammershøi",
+   "title": "Interior with Open Doors",
+   "year": "1911",
+   "museum": "SMK, Copenhagen",
+   "w": 3391,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/p2677147q_kms9204.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3391
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/p2677147q_kms9204.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 1809
+    }
+   ],
+   "source": "smk",
+   "sourceId": "KMS9204"
+  },
+  {
+   "id": "met-1b511b9c69",
+   "room": "first-light",
+   "artist": "Caravaggio",
+   "title": "The Musicians",
+   "year": "1597",
+   "museum": "The Met",
+   "w": 4000,
+   "h": 3105,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-687-001.jpg",
+     "w": 4000
+    }
+   ],
+   "source": "met",
+   "sourceId": "435844"
+  },
+  {
+   "id": "cma-3dc5c98d41",
+   "room": "first-light",
+   "artist": "Caravaggio",
+   "title": "The Crucifixion of Saint Andrew",
+   "year": "1606–7",
+   "museum": "Cleveland Museum of Art",
+   "w": 2563,
+   "h": 3400,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1976.2/1976.2_print.jpg",
+     "w": 2563
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1976.2/1976.2_web.jpg",
+     "w": 678
+    }
+   ],
+   "source": "cma",
+   "sourceId": "1976.2"
+  },
+  {
+   "id": "met-fcdb449c99",
+   "room": "first-light",
+   "artist": "Caravaggio",
+   "title": "The Denial of Saint Peter",
+   "year": "1610",
+   "museum": "The Met",
+   "w": 3904,
+   "h": 2904,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-12413-001.jpg",
+     "w": 3904
+    }
+   ],
+   "source": "met",
+   "sourceId": "437986"
+  },
+  {
+   "id": "met-070e4bcbb5",
+   "room": "first-light",
+   "artist": "Diego Velázquez",
+   "title": "Juan de Pareja",
+   "year": "1650",
+   "museum": "The Met",
+   "w": 3427,
+   "h": 3968,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-14286-001.jpg",
+     "w": 3427
+    }
+   ],
+   "source": "met",
+   "sourceId": "437869"
+  },
+  {
+   "id": "commons-file-las-meninas-by-diego-vel-zquez-from-prado-in-google",
+   "room": "first-light",
+   "artist": "Diego Velázquez",
+   "title": "Las Meninas",
+   "year": "1656",
+   "museum": "Museo del Prado · via Wikimedia Commons",
+   "w": 3840,
+   "h": 4420,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Las_Meninas%2C_by_Diego_Vel%C3%A1zquez%2C_from_Prado_in_Google_Earth.jpg/3840px-Las_Meninas%2C_by_Diego_Vel%C3%A1zquez%2C_from_Prado_in_Google_Earth.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Las_Meninas%2C_by_Diego_Vel%C3%A1zquez%2C_from_Prado_in_Google_Earth.jpg/1920px-Las_Meninas%2C_by_Diego_Vel%C3%A1zquez%2C_from_Prado_in_Google_Earth.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Las Meninas, by Diego Velázquez, from Prado in Google Earth.jpg"
+  },
+  {
+   "id": "aic-6abcb83f3f",
+   "room": "first-light",
+   "artist": "El Greco",
+   "title": "The Assumption of the Virgin",
+   "year": "1577–79",
+   "museum": "Art Institute of Chicago",
+   "w": 1569,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/47fd1564-93f5-f30b-7786-013421133b4a/full/full/0/default.jpg",
+     "w": 1569
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/47fd1564-93f5-f30b-7786-013421133b4a/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "87479"
+  },
+  {
+   "id": "met-352f4c7fd7",
+   "room": "first-light",
+   "artist": "El Greco",
+   "title": "View of Toledo",
+   "year": "c. 1599–1600",
+   "museum": "The Met",
+   "w": 3496,
+   "h": 3934,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP349564.jpg",
+     "w": 3496
+    }
+   ],
+   "source": "met",
+   "sourceId": "436575"
+  },
+  {
+   "id": "met-77ca163640",
+   "room": "first-light",
+   "artist": "El Greco",
+   "title": "Cardinal Fernando Niño de Guevara",
+   "year": "c. 1600",
+   "museum": "The Met",
+   "w": 3000,
+   "h": 4000,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-17777-001.jpg",
+     "w": 3000
+    }
+   ],
+   "source": "met",
+   "sourceId": "436573"
+  },
+  {
+   "id": "met-109a0f38ec",
+   "room": "first-light",
+   "artist": "El Greco",
+   "title": "The Vision of Saint John",
+   "year": "c. 1608–14",
+   "museum": "The Met",
+   "w": 3557,
+   "h": 4000,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-17641-001.jpg",
+     "w": 3557
+    }
+   ],
+   "source": "met",
+   "sourceId": "436576"
+  },
+  {
+   "id": "met-3cc8c30676",
+   "room": "first-light",
+   "artist": "Francisco Goya",
+   "title": "Manuel Osorio Manrique de Zuñiga",
+   "year": "1787–88",
+   "museum": "The Met",
+   "w": 2855,
+   "h": 3873,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP287624.jpg",
+     "w": 2855
+    }
+   ],
+   "source": "met",
+   "sourceId": "436545"
+  },
+  {
+   "id": "commons-file-el-tres-de-mayo-by-francisco-de-goya-from-prado-thi",
+   "room": "first-light",
+   "artist": "Francisco Goya",
+   "title": "The Third of May 1808",
+   "year": "1814",
+   "museum": "Museo del Prado · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2966,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/El_Tres_de_Mayo%2C_by_Francisco_de_Goya%2C_from_Prado_thin_black_margin.jpg/3840px-El_Tres_de_Mayo%2C_by_Francisco_de_Goya%2C_from_Prado_thin_black_margin.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/El_Tres_de_Mayo%2C_by_Francisco_de_Goya%2C_from_Prado_thin_black_margin.jpg/1920px-El_Tres_de_Mayo%2C_by_Francisco_de_Goya%2C_from_Prado_thin_black_margin.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:El Tres de Mayo, by Francisco de Goya, from Prado thin black margin.jpg"
+  },
+  {
+   "id": "met-5be8cdbdee",
+   "room": "first-light",
+   "artist": "Francisco Goya",
+   "title": "José Costa y Bonells, Called Pepito",
+   "year": "c. 1810",
+   "museum": "The Met",
+   "w": 3063,
+   "h": 3800,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP123853.jpg",
+     "w": 3063
+    }
+   ],
+   "source": "met",
+   "sourceId": "436546"
+  },
+  {
+   "id": "cma-1947-207",
+   "room": "first-light",
+   "artist": "Peter Paul Rubens",
+   "title": "Portrait of Isabella Brant",
+   "year": "c. 1620–25",
+   "museum": "Cleveland Museum of Art",
+   "w": 2877,
+   "h": 3400,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1947.207/1947.207_print.jpg",
+     "w": 2877
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1947.207/1947.207_web.jpg",
+     "w": 900
+    }
+   ],
+   "source": "cma",
+   "sourceId": "1947.207"
+  },
+  {
+   "id": "met-468c232cbe",
+   "room": "first-light",
+   "artist": "Peter Paul Rubens",
+   "title": "Rubens, Helena Fourment, and Their Son Frans",
+   "year": "c. 1635",
+   "museum": "The Met",
+   "w": 3090,
+   "h": 3973,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-14286-003.jpg",
+     "w": 3090
+    }
+   ],
+   "source": "met",
+   "sourceId": "437532"
+  },
+  {
+   "id": "met-ab48b9a119",
+   "room": "first-light",
+   "artist": "Peter Paul Rubens",
+   "title": "Venus and Adonis",
+   "year": "mid-1630s",
+   "museum": "The Met",
+   "w": 3809,
+   "h": 3089,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT2737.jpg",
+     "w": 3809
+    }
+   ],
+   "source": "met",
+   "sourceId": "437535"
+  },
+  {
+   "id": "commons-file-pieter-brueghel-the-elder-the-dutch-proverbs-google",
+   "room": "first-light",
+   "artist": "Pieter Bruegel the Elder",
+   "title": "Netherlandish Proverbs",
+   "year": "1559",
+   "museum": "Gemäldegalerie, Berlin · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2719,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Pieter_Brueghel_the_Elder_-_The_Dutch_Proverbs_-_Google_Art_Project.jpg/3840px-Pieter_Brueghel_the_Elder_-_The_Dutch_Proverbs_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Pieter_Brueghel_the_Elder_-_The_Dutch_Proverbs_-_Google_Art_Project.jpg/1920px-Pieter_Brueghel_the_Elder_-_The_Dutch_Proverbs_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Pieter Brueghel the Elder - The Dutch Proverbs - Google Art Project.jpg"
+  },
+  {
+   "id": "commons-file-pieter-bruegel-the-elder-the-tower-of-babel-vienna-",
+   "room": "first-light",
+   "artist": "Pieter Bruegel the Elder",
+   "title": "The Tower of Babel",
+   "year": "1563",
+   "museum": "Kunsthistorisches Museum, Vienna · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2810,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Pieter_Bruegel_the_Elder_-_The_Tower_of_Babel_%28Vienna%29_-_Google_Art_Project_-_edited.jpg/3840px-Pieter_Bruegel_the_Elder_-_The_Tower_of_Babel_%28Vienna%29_-_Google_Art_Project_-_edited.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Pieter_Bruegel_the_Elder_-_The_Tower_of_Babel_%28Vienna%29_-_Google_Art_Project_-_edited.jpg/1920px-Pieter_Bruegel_the_Elder_-_The_Tower_of_Babel_%28Vienna%29_-_Google_Art_Project_-_edited.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Pieter Bruegel the Elder - The Tower of Babel (Vienna) - Google Art Project - edited.jpg"
+  },
+  {
+   "id": "commons-file-pieter-bruegel-the-elder-hunters-in-the-snow-winter",
+   "room": "first-light",
+   "artist": "Pieter Bruegel the Elder",
+   "title": "Hunters in the Snow",
+   "year": "1565",
+   "museum": "Kunsthistorisches Museum, Vienna · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2733,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Pieter_Bruegel_the_Elder_-_Hunters_in_the_Snow_%28Winter%29_-_Google_Art_Project.jpg/3840px-Pieter_Bruegel_the_Elder_-_Hunters_in_the_Snow_%28Winter%29_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Pieter_Bruegel_the_Elder_-_Hunters_in_the_Snow_%28Winter%29_-_Google_Art_Project.jpg/1920px-Pieter_Bruegel_the_Elder_-_Hunters_in_the_Snow_%28Winter%29_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Pieter Bruegel the Elder - Hunters in the Snow (Winter) - Google Art Project.jpg"
+  },
+  {
+   "id": "met-cdd92e0f28",
+   "room": "first-light",
+   "artist": "Pieter Bruegel the Elder",
+   "title": "The Harvesters",
+   "year": "1565",
+   "museum": "The Met",
+   "w": 3811,
+   "h": 2809,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP119115.jpg",
+     "w": 3811
+    }
+   ],
+   "source": "met",
+   "sourceId": "435809"
+  },
+  {
+   "id": "commons-file-pieter-bruegel-the-elder-peasant-wedding-google-art",
+   "room": "first-light",
+   "artist": "Pieter Bruegel the Elder",
+   "title": "The Peasant Wedding",
+   "year": "c. 1567",
+   "museum": "Kunsthistorisches Museum, Vienna · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2654,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Pieter_Bruegel_the_Elder_-_Peasant_Wedding_-_Google_Art_Project_2.jpg/3840px-Pieter_Bruegel_the_Elder_-_Peasant_Wedding_-_Google_Art_Project_2.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Pieter_Bruegel_the_Elder_-_Peasant_Wedding_-_Google_Art_Project_2.jpg/1920px-Pieter_Bruegel_the_Elder_-_Peasant_Wedding_-_Google_Art_Project_2.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Pieter Bruegel the Elder - Peasant Wedding - Google Art Project 2.jpg"
+  },
+  {
+   "id": "commons-file-sandro-botticelli-la-primavera-google-art-project-j",
+   "room": "first-light",
+   "artist": "Sandro Botticelli",
+   "title": "Primavera",
+   "year": "c. 1480",
+   "museum": "Uffizi Gallery · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2551,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Sandro_Botticelli_-_La_Primavera_-_Google_Art_Project.jpg/3840px-Sandro_Botticelli_-_La_Primavera_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Sandro_Botticelli_-_La_Primavera_-_Google_Art_Project.jpg/1920px-Sandro_Botticelli_-_La_Primavera_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Sandro Botticelli - La Primavera - Google Art Project.jpg"
+  },
+  {
+   "id": "commons-file-sandro-botticelli-la-nascita-di-venere-google-art-p",
+   "room": "first-light",
+   "artist": "Sandro Botticelli",
+   "title": "The Birth of Venus",
+   "year": "c. 1485",
+   "museum": "Uffizi Gallery · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2412,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg/3840px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg/1920px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Sandro Botticelli - La nascita di Venere - Google Art Project - edited.jpg"
+  },
+  {
+   "id": "commons-file-titian-bacchus-and-ariadne-jpg",
+   "room": "first-light",
+   "artist": "Titian",
+   "title": "Bacchus and Ariadne",
+   "year": "1522–23",
+   "museum": "National Gallery, London · via Wikimedia Commons",
+   "w": 3840,
+   "h": 3475,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Titian_Bacchus_and_Ariadne.jpg/3840px-Titian_Bacchus_and_Ariadne.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Titian_Bacchus_and_Ariadne.jpg/1920px-Titian_Bacchus_and_Ariadne.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Titian Bacchus and Ariadne.jpg"
+  },
+  {
+   "id": "commons-file-tiziano-venere-di-urbino-google-art-project-jpg",
+   "room": "first-light",
+   "artist": "Titian",
+   "title": "Venus of Urbino",
+   "year": "1538",
+   "museum": "Uffizi Gallery · via Wikimedia Commons",
+   "w": 3000,
+   "h": 2110,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/b/bb/Tiziano_-_Venere_di_Urbino_-_Google_Art_Project.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Tiziano_-_Venere_di_Urbino_-_Google_Art_Project.jpg/1920px-Tiziano_-_Venere_di_Urbino_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Tiziano - Venere di Urbino - Google Art Project.jpg"
+  },
+  {
+   "id": "met-3fbd8ef86b",
+   "room": "first-light",
+   "artist": "Titian",
+   "title": "Venus and Adonis",
+   "year": "1550s",
+   "museum": "The Met",
+   "w": 4000,
+   "h": 3234,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-19299-001.jpg",
+     "w": 4000
+    }
+   ],
+   "source": "met",
+   "sourceId": "437826"
+  },
+  {
+   "id": "met-ff97f126b2",
+   "room": "the-americans",
+   "artist": "Albert Bierstadt",
+   "title": "The Rocky Mountains, Lander's Peak",
+   "year": "1863",
+   "museum": "The Met",
+   "w": 3811,
+   "h": 2284,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DT82.jpg",
+     "w": 3811
+    }
+   ],
+   "source": "met",
+   "sourceId": "10154"
+  },
+  {
+   "id": "cma-1922-684",
+   "room": "the-americans",
+   "artist": "Albert Bierstadt",
+   "title": "Mount Starr King, Yosemite",
+   "year": "1866",
+   "museum": "Cleveland Museum of Art",
+   "w": 3400,
+   "h": 2303,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1922.684/1922.684_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1922.684/1922.684_web.jpg",
+     "w": 1263
+    }
+   ],
+   "source": "cma",
+   "sourceId": "1922.684"
+  },
+  {
+   "id": "commons-file-washington-crossing-the-delaware-by-emanuel-leutze-",
+   "room": "the-americans",
+   "artist": "Emanuel Leutze",
+   "title": "Washington Crossing the Delaware",
+   "year": "1851",
+   "museum": "The Met · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2460,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Washington_Crossing_the_Delaware_by_Emanuel_Leutze%2C_MMA-NYC%2C_1851.jpg/3840px-Washington_Crossing_the_Delaware_by_Emanuel_Leutze%2C_MMA-NYC%2C_1851.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Washington_Crossing_the_Delaware_by_Emanuel_Leutze%2C_MMA-NYC%2C_1851.jpg/1920px-Washington_Crossing_the_Delaware_by_Emanuel_Leutze%2C_MMA-NYC%2C_1851.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Washington Crossing the Delaware by Emanuel Leutze, MMA-NYC, 1851.jpg"
+  },
+  {
+   "id": "aic-eac8191f5a",
+   "room": "the-americans",
+   "artist": "Frederic Edwin Church",
+   "title": "View of Cotopaxi",
+   "year": "1857",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 1992,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/33fc29fc-097b-576b-c9e6-c3352d9d3f15/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/33fc29fc-097b-576b-c9e6-c3352d9d3f15/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "76571"
+  },
+  {
+   "id": "met-c70efe82ca",
+   "room": "the-americans",
+   "artist": "Frederic Edwin Church",
+   "title": "Heart of the Andes",
+   "year": "1859",
+   "museum": "The Met",
+   "w": 3811,
+   "h": 2099,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DT78.jpg",
+     "w": 3811
+    }
+   ],
+   "source": "met",
+   "sourceId": "10481"
+  },
+  {
+   "id": "cma-1965-233",
+   "room": "the-americans",
+   "artist": "Frederic Edwin Church",
+   "title": "Twilight in the Wilderness",
+   "year": "1860",
+   "museum": "Cleveland Museum of Art",
+   "w": 3400,
+   "h": 2123,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1965.233/1965.233_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1965.233/1965.233_web.jpg",
+     "w": 900
+    }
+   ],
+   "source": "cma",
+   "sourceId": "1965.233"
+  },
+  {
+   "id": "aic-2be4ebd5d9",
+   "room": "the-americans",
+   "artist": "James McNeill Whistler",
+   "title": "Nocturne: Blue and Gold—Southampton Water",
+   "year": "1872",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 1982,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/50034c7f-ce51-00f1-430e-a6f7efc233fc/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/50034c7f-ce51-00f1-430e-a6f7efc233fc/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "56905"
+  },
+  {
+   "id": "met-3897888bfb",
+   "room": "the-americans",
+   "artist": "James McNeill Whistler",
+   "title": "Cremorne Gardens, No. 2",
+   "year": "c. 1870–80",
+   "museum": "The Met",
+   "w": 3811,
+   "h": 1950,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DT2780.jpg",
+     "w": 3811
+    }
+   ],
+   "source": "met",
+   "sourceId": "13223"
+  },
+  {
+   "id": "met-9b29e1e837",
+   "room": "the-americans",
+   "artist": "John Singer Sargent",
+   "title": "Madame X (Virginie Amélie Avegno Gautreau)",
+   "year": "1883–84",
+   "museum": "The Met",
+   "w": 2336,
+   "h": 4000,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DP-29006-001.jpg",
+     "w": 2336
+    }
+   ],
+   "source": "met",
+   "sourceId": "12127"
+  },
+  {
+   "id": "aic-7844c0a595",
+   "room": "the-americans",
+   "artist": "John Singer Sargent",
+   "title": "Mrs. George Swinton (Elizabeth Ebsworth)",
+   "year": "1897",
+   "museum": "Art Institute of Chicago",
+   "w": 1594,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/074c1b1b-fe92-01ce-9e62-cc99369142dd/full/full/0/default.jpg",
+     "w": 1594
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/074c1b1b-fe92-01ce-9e62-cc99369142dd/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "4749"
+  },
+  {
+   "id": "aic-2874ee0b23",
+   "room": "the-americans",
+   "artist": "John Singer Sargent",
+   "title": "The Fountain, Villa Torlonia, Frascati, Italy",
+   "year": "1907",
+   "museum": "Art Institute of Chicago",
+   "w": 2340,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/3f9aa9db-61e1-7060-fdb0-bfd7e41ddd08/full/full/0/default.jpg",
+     "w": 2340
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/3f9aa9db-61e1-7060-fdb0-bfd7e41ddd08/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "69780"
+  },
+  {
+   "id": "met-4555698024",
+   "room": "the-americans",
+   "artist": "Thomas Cole",
+   "title": "View from Mount Holyoke, Northampton, Massachusetts, after a Thunderstorm—The Oxbow",
+   "year": "1836",
+   "museum": "The Met",
+   "w": 4000,
+   "h": 2733,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DP-12550-001.jpg",
+     "w": 4000
+    }
+   ],
+   "source": "met",
+   "sourceId": "10497"
+  },
+  {
+   "id": "cma-1917-1335",
+   "room": "the-americans",
+   "artist": "Thomas Cole",
+   "title": "View of Schroon Mountain, Essex County, New York, After a Storm",
+   "year": "1838",
+   "museum": "Cleveland Museum of Art",
+   "w": 3400,
+   "h": 2086,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1917.1335/1917.1335_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1917.1335/1917.1335_web.jpg",
+     "w": 1263
+    }
+   ],
+   "source": "cma",
+   "sourceId": "1917.1335"
+  },
+  {
+   "id": "met-ec99f97b8a",
+   "room": "the-americans",
+   "artist": "Thomas Eakins",
+   "title": "The Champion Single Sculls (Max Schmitt in a Single Scull)",
+   "year": "1871",
+   "museum": "The Met",
+   "w": 3811,
+   "h": 2667,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DT86.jpg",
+     "w": 3811
+    }
+   ],
+   "source": "met",
+   "sourceId": "10819"
+  },
+  {
+   "id": "cma-1927-1984",
+   "room": "the-americans",
+   "artist": "Thomas Eakins",
+   "title": "The Biglin Brothers Turning the Stake",
+   "year": "1873",
+   "museum": "Cleveland Museum of Art",
+   "w": 3400,
+   "h": 2247,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1927.1984/1927.1984_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1927.1984/1927.1984_web.jpg",
+     "w": 1263
+    }
+   ],
+   "source": "cma",
+   "sourceId": "1927.1984"
+  },
+  {
+   "id": "cma-1921-1239",
+   "room": "the-americans",
+   "artist": "William Merritt Chase",
+   "title": "Portrait of Dora Wheeler",
+   "year": "1882–83",
+   "museum": "Cleveland Museum of Art",
+   "w": 3400,
+   "h": 3254,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1921.1239/1921.1239_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1921.1239/1921.1239_web.jpg",
+     "w": 939
+    }
+   ],
+   "source": "cma",
+   "sourceId": "1921.1239"
+  },
+  {
+   "id": "met-d6256a34dc",
+   "room": "the-americans",
+   "artist": "William Merritt Chase",
+   "title": "At the Seaside",
+   "year": "c. 1892",
+   "museum": "The Met",
+   "w": 3811,
+   "h": 2288,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DT95.jpg",
+     "w": 3811
+    }
+   ],
+   "source": "met",
+   "sourceId": "10464"
+  },
+  {
+   "id": "met-27df3bc84a",
+   "room": "the-americans",
+   "artist": "William Merritt Chase",
+   "title": "For the Little One",
+   "year": "c. 1896",
+   "museum": "The Met",
+   "w": 3369,
+   "h": 3850,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DP161212.jpg",
+     "w": 3369
+    }
+   ],
+   "source": "met",
+   "sourceId": "10468"
+  },
+  {
+   "id": "aic-b3233852fb",
+   "room": "the-americans",
+   "artist": "Winslow Homer",
+   "title": "Croquet Scene",
+   "year": "1866",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 1829,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/f7b2db45-f393-653c-07ef-84319b0cdb92/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/f7b2db45-f393-653c-07ef-84319b0cdb92/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "44018"
+  },
+  {
+   "id": "aic-c83cd1dbeb",
+   "room": "the-americans",
+   "artist": "Winslow Homer",
+   "title": "The Herring Net",
+   "year": "1885",
+   "museum": "Art Institute of Chicago",
+   "w": 3000,
+   "h": 1846,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/5dca7347-c6dc-24dd-d073-d705b9cdc575/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/5dca7347-c6dc-24dd-d073-d705b9cdc575/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "25865"
+  },
+  {
+   "id": "met-6a58d5e097",
+   "room": "the-americans",
+   "artist": "Winslow Homer",
+   "title": "Northeaster",
+   "year": "1895; reworked by 1901",
+   "museum": "The Met",
+   "w": 3811,
+   "h": 2613,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DT1545.jpg",
+     "w": 3811
+    }
+   ],
+   "source": "met",
+   "sourceId": "11130"
+  },
+  {
+   "id": "met-289ceabb72",
+   "room": "the-americans",
+   "artist": "Winslow Homer",
+   "title": "The Gulf Stream",
+   "year": "1899; reworked by 1906",
+   "museum": "The Met",
+   "w": 4000,
+   "h": 2468,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ad/original/DP-20821-001.jpg",
+     "w": 4000
+    }
+   ],
+   "source": "met",
+   "sourceId": "11122"
+  },
+  {
+   "id": "cma-1924-195",
+   "room": "the-americans",
+   "artist": "Winslow Homer",
+   "title": "Early Morning After a Storm at Sea",
+   "year": "1900–1903",
+   "museum": "Cleveland Museum of Art",
+   "w": 3400,
+   "h": 2050,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1924.195/1924.195_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1924.195/1924.195_web.jpg",
+     "w": 1263
+    }
+   ],
+   "source": "cma",
+   "sourceId": "1924.195"
+  },
+  {
+   "id": "met-0382725ec1",
+   "room": "gold",
+   "artist": "Egon Schiele",
+   "title": "Self-Portrait",
+   "year": "1911",
+   "museum": "The Met",
+   "w": 2735,
+   "h": 3868,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ma/original/DP279450.jpg",
+     "w": 2735
+    }
+   ],
+   "source": "met",
+   "sourceId": "483438"
+  },
+  {
+   "id": "commons-file-egon-schiele-self-portrait-with-physalis-google-art",
+   "room": "gold",
+   "artist": "Egon Schiele",
+   "title": "Self-Portrait with Physalis",
+   "year": "1912",
+   "museum": "Leopold Museum, Vienna · via Wikimedia Commons",
+   "w": 3781,
+   "h": 3062,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Egon_Schiele_-_Self-Portrait_with_Physalis_-_Google_Art_Project.jpg",
+     "w": 3781
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Egon_Schiele_-_Self-Portrait_with_Physalis_-_Google_Art_Project.jpg/1920px-Egon_Schiele_-_Self-Portrait_with_Physalis_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Egon Schiele - Self-Portrait with Physalis - Google Art Project.jpg"
+  },
+  {
+   "id": "commons-file-egon-schiele-portrait-of-wally-neuzil-google-art-pr",
+   "room": "gold",
+   "artist": "Egon Schiele",
+   "title": "Portrait of Wally Neuzil",
+   "year": "1912",
+   "museum": "Leopold Museum, Vienna · via Wikimedia Commons",
+   "w": 3053,
+   "h": 2480,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/6/66/Egon_Schiele_-_Portrait_of_Wally_Neuzil_-_Google_Art_Project.jpg",
+     "w": 3053
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Egon_Schiele_-_Portrait_of_Wally_Neuzil_-_Google_Art_Project.jpg/1920px-Egon_Schiele_-_Portrait_of_Wally_Neuzil_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Egon Schiele - Portrait of Wally Neuzil - Google Art Project.jpg"
+  },
+  {
+   "id": "commons-file-egon-schiele-vier-b-ume-3917-sterreichische-galerie",
+   "room": "gold",
+   "artist": "Egon Schiele",
+   "title": "Four Trees",
+   "year": "1917",
+   "museum": "Belvedere, Vienna · via Wikimedia Commons",
+   "w": 3508,
+   "h": 2754,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/e/eb/Egon_Schiele_-_Vier_B%C3%A4ume_-_3917_-_%C3%96sterreichische_Galerie_Belvedere.jpg",
+     "w": 3508
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Egon_Schiele_-_Vier_B%C3%A4ume_-_3917_-_%C3%96sterreichische_Galerie_Belvedere.jpg/1920px-Egon_Schiele_-_Vier_B%C3%A4ume_-_3917_-_%C3%96sterreichische_Galerie_Belvedere.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Egon Schiele - Vier Bäume - 3917 - Österreichische Galerie Belvedere.jpg"
+  },
+  {
+   "id": "aic-4b773a6b84",
+   "room": "gold",
+   "artist": "Ferdinand Hodler",
+   "title": "Day (Truth)",
+   "year": "1896–98",
+   "museum": "Art Institute of Chicago",
+   "w": 1558,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/ba6ef7ee-677c-0bcd-8150-ef7487f17a36/full/full/0/default.jpg",
+     "w": 1558
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/ba6ef7ee-677c-0bcd-8150-ef7487f17a36/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "181460"
+  },
+  {
+   "id": "aic-f8c592d57c",
+   "room": "gold",
+   "artist": "Ferdinand Hodler",
+   "title": "James Vibert, Sculptor",
+   "year": "1907",
+   "museum": "Art Institute of Chicago",
+   "w": 2252,
+   "h": 2250,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/caf7fb08-39ef-7bd8-b81a-181ee31cc324/full/full/0/default.jpg",
+     "w": 2252
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/caf7fb08-39ef-7bd8-b81a-181ee31cc324/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "source": "aic",
+   "sourceId": "27962"
+  },
+  {
+   "id": "met-59ca5dbf38",
+   "room": "gold",
+   "artist": "Gustav Klimt",
+   "title": "Serena Pulitzer Lederer",
+   "year": "1899",
+   "museum": "The Met",
+   "w": 1961,
+   "h": 4000,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-18885-001.jpg",
+     "w": 1961
+    }
+   ],
+   "source": "met",
+   "sourceId": "436820"
+  },
+  {
+   "id": "commons-file-judith-1-jpg",
+   "room": "gold",
+   "artist": "Gustav Klimt",
+   "title": "Judith and the Head of Holofernes (Judith I)",
+   "year": "1901",
+   "museum": "Belvedere, Vienna · via Wikimedia Commons",
+   "w": 1769,
+   "h": 3508,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/d/d8/Judith_1.jpg",
+     "w": 1769
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Judith 1.jpg"
+  },
+  {
+   "id": "commons-file-gustav-klimt-portr-t-der-adele-bloch-bauer-i-1907-j",
+   "room": "gold",
+   "artist": "Gustav Klimt",
+   "title": "Portrait of Adele Bloch-Bauer I",
+   "year": "1907",
+   "museum": "Neue Galerie New York · via Wikimedia Commons",
+   "w": 2801,
+   "h": 2801,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Gustav_Klimt_-_Portr%C3%A4t_der_Adele_Bloch-Bauer_I_%281907%29.jpg",
+     "w": 2801
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Gustav_Klimt_-_Portr%C3%A4t_der_Adele_Bloch-Bauer_I_%281907%29.jpg/1920px-Gustav_Klimt_-_Portr%C3%A4t_der_Adele_Bloch-Bauer_I_%281907%29.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Gustav Klimt - Porträt der Adele Bloch-Bauer I (1907).jpg"
+  },
+  {
+   "id": "commons-file-the-kiss-gustav-klimt-google-cultural-institute-jpg",
+   "room": "gold",
+   "artist": "Gustav Klimt",
+   "title": "The Kiss",
+   "year": "1907–08",
+   "museum": "Belvedere, Vienna · via Wikimedia Commons",
+   "w": 3840,
+   "h": 3853,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg/3840px-The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg/1920px-The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:The Kiss - Gustav Klimt - Google Cultural Institute.jpg"
+  },
+  {
+   "id": "commons-file-gustav-klimt-death-and-life-google-art-project-jpg",
+   "room": "gold",
+   "artist": "Gustav Klimt",
+   "title": "Death and Life",
+   "year": "1910–15",
+   "museum": "Leopold Museum, Vienna · via Wikimedia Commons",
+   "w": 3840,
+   "h": 3342,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Gustav_Klimt_-_Death_and_Life_-_Google_Art_Project.jpg/3840px-Gustav_Klimt_-_Death_and_Life_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Gustav_Klimt_-_Death_and_Life_-_Google_Art_Project.jpg/1920px-Gustav_Klimt_-_Death_and_Life_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Gustav Klimt - Death and Life - Google Art Project.jpg"
+  },
+  {
+   "id": "commons-file-gustav-klimt-allee-zum-schloss-kammer-2892-sterreic",
+   "room": "gold",
+   "artist": "Gustav Klimt",
+   "title": "Avenue in the Park of Schloss Kammer",
+   "year": "1912",
+   "museum": "Belvedere, Vienna · via Wikimedia Commons",
+   "w": 3504,
+   "h": 3508,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Gustav_Klimt_-_Allee_zum_Schloss_Kammer_-_2892_-_%C3%96sterreichische_Galerie_Belvedere.jpg",
+     "w": 3504
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Gustav_Klimt_-_Allee_zum_Schloss_Kammer_-_2892_-_%C3%96sterreichische_Galerie_Belvedere.jpg/1920px-Gustav_Klimt_-_Allee_zum_Schloss_Kammer_-_2892_-_%C3%96sterreichische_Galerie_Belvedere.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Gustav Klimt - Allee zum Schloss Kammer - 2892 - Österreichische Galerie Belvedere.jpg"
+  },
+  {
+   "id": "met-79f038a821",
+   "room": "gold",
+   "artist": "Gustav Klimt",
+   "title": "Mäda Primavesi",
+   "year": "1912–13",
+   "museum": "The Met",
+   "w": 2876,
+   "h": 3877,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP243354.jpg",
+     "w": 2876
+    }
+   ],
+   "source": "met",
+   "sourceId": "436819"
+  },
+  {
+   "id": "commons-file-gustav-klimt-035-jpg",
+   "room": "gold",
+   "artist": "Gustav Klimt",
+   "title": "Farm Garden with Sunflowers",
+   "year": "c. 1907",
+   "museum": "Belvedere, Vienna · via Wikimedia Commons",
+   "w": 2024,
+   "h": 2058,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/4/4d/Gustav_Klimt_035.jpg",
+     "w": 2024
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Gustav_Klimt_035.jpg/1920px-Gustav_Klimt_035.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "File:Gustav Klimt 035.jpg"
+  },
+  {
+   "id": "commons-a-duperly-sons-kingston-jamaica-8323736250-jpg",
+   "room": "jamaica",
+   "artist": "A. Duperly & Sons",
+   "title": "Kingston, Jamaica",
+   "year": "c. 1890",
+   "museum": "Caribbean Photo Archive · via Wikimedia Commons",
+   "w": 3600,
+   "h": 2616,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/3/37/A._Duperly_%26_Sons_-_Kingston%2C_Jamaica_8323736250.jpg",
+     "w": 3600
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/A._Duperly_%26_Sons_-_Kingston%2C_Jamaica_8323736250.jpg/1920px-A._Duperly_%26_Sons_-_Kingston%2C_Jamaica_8323736250.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "A. Duperly & Sons - Kingston, Jamaica 8323736250.jpg"
+  },
+  {
+   "id": "commons-a-duperly-sons-king-street-kingston-jamaica-8323735890-j",
+   "room": "jamaica",
+   "artist": "A. Duperly & Sons",
+   "title": "King Street, Kingston",
+   "year": "c. 1890",
+   "museum": "Caribbean Photo Archive · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2302,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/A._Duperly_%26_Sons_-_King_Street%2C_Kingston%2C_Jamaica_8323735890.jpg/3840px-A._Duperly_%26_Sons_-_King_Street%2C_Kingston%2C_Jamaica_8323735890.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/A._Duperly_%26_Sons_-_King_Street%2C_Kingston%2C_Jamaica_8323735890.jpg/1920px-A._Duperly_%26_Sons_-_King_Street%2C_Kingston%2C_Jamaica_8323735890.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "A. Duperly & Sons - King Street, Kingston, Jamaica 8323735890.jpg"
+  },
+  {
+   "id": "commons-painting-wild-sugar-cane-jamaica-1865-ch-18200603-jpg",
+   "room": "jamaica",
+   "artist": "Frederic Edwin Church",
+   "title": "Wild Sugar Cane, Jamaica",
+   "year": "1865",
+   "museum": "Cooper Hewitt, Smithsonian Design Museum · via Wikimedia Commons",
+   "w": 3840,
+   "h": 3623,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Painting%2C_Wild_Sugar_Cane%2C_Jamaica%2C_1865_%28CH_18200603%29.jpg/3840px-Painting%2C_Wild_Sugar_Cane%2C_Jamaica%2C_1865_%28CH_18200603%29.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Painting%2C_Wild_Sugar_Cane%2C_Jamaica%2C_1865_%28CH_18200603%29.jpg/1920px-Painting%2C_Wild_Sugar_Cane%2C_Jamaica%2C_1865_%28CH_18200603%29.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "Painting, Wild Sugar Cane, Jamaica, 1865 (CH 18200603).jpg"
+  },
+  {
+   "id": "commons-drawing-rain-forest-jamaica-west-indies-april-august-186",
+   "room": "jamaica",
+   "artist": "Frederic Edwin Church",
+   "title": "Rain Forest, Jamaica, West Indies",
+   "year": "1865",
+   "museum": "Cooper Hewitt, Smithsonian Design Museum · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2351,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Drawing%2C_Rain_Forest%2C_Jamaica%2C_West_Indies%2C_April%E2%80%93August_1865_%28CH_18200617%29.jpg/3840px-Drawing%2C_Rain_Forest%2C_Jamaica%2C_West_Indies%2C_April%E2%80%93August_1865_%28CH_18200617%29.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Drawing%2C_Rain_Forest%2C_Jamaica%2C_West_Indies%2C_April%E2%80%93August_1865_%28CH_18200617%29.jpg/1920px-Drawing%2C_Rain_Forest%2C_Jamaica%2C_West_Indies%2C_April%E2%80%93August_1865_%28CH_18200617%29.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "Drawing, Rain Forest, Jamaica, West Indies, April–August 1865 (CH 18200617).jpg"
+  },
+  {
+   "id": "commons-drawing-bamboo-grove-jamaica-1865-ch-18200609-jpg",
+   "room": "jamaica",
+   "artist": "Frederic Edwin Church",
+   "title": "Bamboo Grove, Jamaica",
+   "year": "1865",
+   "museum": "Cooper Hewitt, Smithsonian Design Museum · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2458,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Drawing%2C_Bamboo_Grove%2C_Jamaica%2C_1865_%28CH_18200609%29.jpg/3840px-Drawing%2C_Bamboo_Grove%2C_Jamaica%2C_1865_%28CH_18200609%29.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Drawing%2C_Bamboo_Grove%2C_Jamaica%2C_1865_%28CH_18200609%29.jpg/1920px-Drawing%2C_Bamboo_Grove%2C_Jamaica%2C_1865_%28CH_18200609%29.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "Drawing, Bamboo Grove, Jamaica, 1865 (CH 18200609).jpg"
+  },
+  {
+   "id": "commons-frederic-edwin-church-sky-at-sunset-jamaica-west-indies-",
+   "room": "jamaica",
+   "artist": "Frederic Edwin Church",
+   "title": "Sky at Sunset, Jamaica, West Indies",
+   "year": "1865",
+   "museum": "Cooper Hewitt, Smithsonian Design Museum · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2268,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Frederic_Edwin_Church_-_Sky_at_sunset%2C_Jamaica%2C_West_Indies_-_Google_Art_Project.jpg/3840px-Frederic_Edwin_Church_-_Sky_at_sunset%2C_Jamaica%2C_West_Indies_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Frederic_Edwin_Church_-_Sky_at_sunset%2C_Jamaica%2C_West_Indies_-_Google_Art_Project.jpg/1920px-Frederic_Edwin_Church_-_Sky_at_sunset%2C_Jamaica%2C_West_Indies_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "Frederic Edwin Church - Sky at sunset, Jamaica, West Indies - Google Art Project.jpg"
+  },
+  {
+   "id": "commons-drawing-sunset-in-jamaica-west-indies-1865-66-ch-1819268",
+   "room": "jamaica",
+   "artist": "Frederic Edwin Church",
+   "title": "Sunset in Jamaica, West Indies",
+   "year": "1865–66",
+   "museum": "Cooper Hewitt, Smithsonian Design Museum · via Wikimedia Commons",
+   "w": 3840,
+   "h": 3073,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Drawing%2C_Sunset_in_Jamaica%2C_West_Indies%2C_1865%E2%80%9366_%28CH_18192687%29.jpg/3840px-Drawing%2C_Sunset_in_Jamaica%2C_West_Indies%2C_1865%E2%80%9366_%28CH_18192687%29.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Drawing%2C_Sunset_in_Jamaica%2C_West_Indies%2C_1865%E2%80%9366_%28CH_18192687%29.jpg/1920px-Drawing%2C_Sunset_in_Jamaica%2C_West_Indies%2C_1865%E2%80%9366_%28CH_18192687%29.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "Drawing, Sunset in Jamaica, West Indies, 1865–66 (CH 18192687).jpg"
+  },
+  {
+   "id": "commons-robertson-lerpiniere-a-view-in-the-island-of-jamaica-of-",
+   "room": "jamaica",
+   "artist": "George Robertson (engraved by Daniel Lerpinière)",
+   "title": "A View in the Island of Jamaica, of Part of the River Cobre near Spanish Town",
+   "year": "1778",
+   "museum": "New Britain Museum of American Art · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2563,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Robertson_Lerpiniere_A_View_in_the_Island_of_Jamaica%2C_of_Part_of_the_River_Cobre_near_Spanish_Town.jpg/3840px-Robertson_Lerpiniere_A_View_in_the_Island_of_Jamaica%2C_of_Part_of_the_River_Cobre_near_Spanish_Town.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Robertson_Lerpiniere_A_View_in_the_Island_of_Jamaica%2C_of_Part_of_the_River_Cobre_near_Spanish_Town.jpg/1920px-Robertson_Lerpiniere_A_View_in_the_Island_of_Jamaica%2C_of_Part_of_the_River_Cobre_near_Spanish_Town.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "Robertson Lerpiniere A View in the Island of Jamaica, of Part of the River Cobre near Spanish Town.jpg"
+  },
+  {
+   "id": "commons-james-mason-a-view-in-the-island-of-jamaica-of-the-sprin",
+   "room": "jamaica",
+   "artist": "George Robertson (engraved by James Mason)",
+   "title": "A View in the Island of Jamaica, of the Spring-head of Roaring River",
+   "year": "1778",
+   "museum": "Yale Center for British Art · via Wikimedia Commons",
+   "w": 1920,
+   "h": 1407,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/d/d9/James_Mason_-_A_View_in_the_Island_of_Jamaica%2C_of_the_Spring-head_of_Roaring_River_on_the_Estate_of_William_Beckford_-_B2001.2.1522_-_Yale_Center_for_British_Art.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "James Mason - A View in the Island of Jamaica, of the Spring-head of Roaring River on the Estate of William Beckford - B2001.2.1522 - Yale Center for British Art.jpg"
+  },
+  {
+   "id": "commons-koo-koo-or-actor-boy-bm-2006-0929-48-jpg",
+   "room": "jamaica",
+   "artist": "Isaac Mendes Belisario",
+   "title": "Koo, Koo, or Actor-Boy",
+   "year": "1837–38",
+   "museum": "British Museum · via Wikimedia Commons",
+   "w": 1791,
+   "h": 2500,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/4/4f/%22Koo%2C_Koo%2C_Or_Actor-Boy%22_%28BM_2006%2C0929.48%29.jpg",
+     "w": 1791
+    }
+   ],
+   "source": "commons",
+   "sourceId": "\"Koo, Koo, Or Actor-Boy\" (BM 2006,0929.48).jpg"
+  },
+  {
+   "id": "commons-hakewill-a-picturesque-tour-of-the-island-of-jamaica-pla",
+   "room": "jamaica",
+   "artist": "James Hakewill",
+   "title": "King's Square, St. Jago de la Vega (Spanish Town)",
+   "year": "1825",
+   "museum": "Internet Archive · via Wikimedia Commons",
+   "w": 3159,
+   "h": 1535,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_01.jpg",
+     "w": 3159
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_01.jpg/1920px-Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_01.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "Hakewill, A Picturesque Tour of the Island of Jamaica, Plate 01.jpg"
+  },
+  {
+   "id": "commons-hakewill-a-picturesque-tour-of-the-island-of-jamaica-pla-1",
+   "room": "jamaica",
+   "artist": "James Hakewill",
+   "title": "Kingston and Port Royal from Windsor Farm",
+   "year": "1825",
+   "museum": "Internet Archive · via Wikimedia Commons",
+   "w": 2515,
+   "h": 2063,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_03.jpg",
+     "w": 2515
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_03.jpg/1920px-Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_03.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "Hakewill, A Picturesque Tour of the Island of Jamaica, Plate 03.jpg"
+  },
+  {
+   "id": "commons-hakewill-a-picturesque-tour-of-the-island-of-jamaica-pla-2",
+   "room": "jamaica",
+   "artist": "James Hakewill",
+   "title": "Harbour Street, Kingston",
+   "year": "1825",
+   "museum": "Internet Archive · via Wikimedia Commons",
+   "w": 2505,
+   "h": 1663,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/f/f6/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_04.jpg",
+     "w": 2505
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_04.jpg/1920px-Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_04.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "Hakewill, A Picturesque Tour of the Island of Jamaica, Plate 04.jpg"
+  },
+  {
+   "id": "commons-hakewill-a-picturesque-tour-of-the-island-of-jamaica-pla-3",
+   "room": "jamaica",
+   "artist": "James Hakewill",
+   "title": "Waterfall on the Windward Road, near Kingston",
+   "year": "1825",
+   "museum": "Internet Archive · via Wikimedia Commons",
+   "w": 1581,
+   "h": 2411,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/5/55/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_05.jpg",
+     "w": 1581
+    }
+   ],
+   "source": "commons",
+   "sourceId": "Hakewill, A Picturesque Tour of the Island of Jamaica, Plate 05.jpg"
+  },
+  {
+   "id": "commons-hakewill-a-picturesque-tour-of-the-island-of-jamaica-pla-4",
+   "room": "jamaica",
+   "artist": "James Hakewill",
+   "title": "The Bog Walk",
+   "year": "1825",
+   "museum": "Internet Archive · via Wikimedia Commons",
+   "w": 2461,
+   "h": 1620,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/6/60/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_15.jpg",
+     "w": 2461
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_15.jpg/1920px-Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_15.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "Hakewill, A Picturesque Tour of the Island of Jamaica, Plate 15.jpg"
+  },
+  {
+   "id": "commons-hakewill-a-picturesque-tour-of-the-island-of-jamaica-pla-5",
+   "room": "jamaica",
+   "artist": "James Hakewill",
+   "title": "Montego Bay, from Reading Hill",
+   "year": "1825",
+   "museum": "Internet Archive · via Wikimedia Commons",
+   "w": 2559,
+   "h": 1590,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/9/93/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_18.jpg",
+     "w": 2559
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_18.jpg/1920px-Hakewill%2C_A_Picturesque_Tour_of_the_Island_of_Jamaica%2C_Plate_18.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "Hakewill, A Picturesque Tour of the Island of Jamaica, Plate 18.jpg"
+  },
+  {
+   "id": "commons-sugar-estate-negros-cutting-cane-lccn96516495-jpg",
+   "room": "jamaica",
+   "artist": "William Berryman",
+   "title": "Sugar Estate, Cutting Cane",
+   "year": "c. 1808–1815",
+   "museum": "Library of Congress · via Wikimedia Commons",
+   "w": 3840,
+   "h": 2928,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Sugar_estate_-_Negros_cutting_cane_LCCN96516495.jpg/3840px-Sugar_estate_-_Negros_cutting_cane_LCCN96516495.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Sugar_estate_-_Negros_cutting_cane_LCCN96516495.jpg/1920px-Sugar_estate_-_Negros_cutting_cane_LCCN96516495.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "Sugar estate - Negros cutting cane LCCN96516495.jpg"
+  },
+  {
+   "id": "commons-woman-beating-cassava-jamaica-slightly-restored-tif",
+   "room": "jamaica",
+   "artist": "William Berryman",
+   "title": "Woman Beating Cassava",
+   "year": "c. 1808–1815",
+   "museum": "Library of Congress · via Wikimedia Commons",
+   "w": 1920,
+   "h": 2911,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Woman_beating_cassava%2C_Jamaica_slightly_restored.tif/lossy-page1-1920px-Woman_beating_cassava%2C_Jamaica_slightly_restored.tif.jpg",
+     "w": 1920
+    }
+   ],
+   "source": "commons",
+   "sourceId": "Woman beating cassava, Jamaica slightly restored.tif"
+  }
+ ]
+}

@@ -1,0 +1,494 @@
+{
+ "room": "quiet-north",
+ "works": [
+  {
+   "artist": "Vilhelm Hammershøi",
+   "title": "Interior in Strandgade, Sunlight on the Floor",
+   "year": "1901",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "KMS3696",
+   "w": 3840,
+   "h": 3371,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/3197xr831_KMS3696.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/3197xr831_KMS3696.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "note": "The room's anchor — 477MP master scan served via SMK IIIF"
+  },
+  {
+   "artist": "Vilhelm Hammershøi",
+   "title": "Ida Hammershøi, the Artist's Wife, with a Teacup",
+   "year": "1907",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "KMS3352",
+   "w": 3054,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/pn89d956v_KMS3352-cropped.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3054
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/pn89d956v_KMS3352-cropped.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 1629
+    }
+   ]
+  },
+  {
+   "artist": "Vilhelm Hammershøi",
+   "title": "Interior with Open Doors",
+   "year": "1911",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "KMS9204",
+   "w": 3391,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/p2677147q_kms9204.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3391
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/p2677147q_kms9204.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 1809
+    }
+   ]
+  },
+  {
+   "artist": "Vilhelm Hammershøi",
+   "title": "Evening in the Drawing Room",
+   "year": "1904",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "KMS6658",
+   "w": 3840,
+   "h": 3142,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/5x21tg258_KMS6658.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/5x21tg258_KMS6658.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ]
+  },
+  {
+   "artist": "Vilhelm Hammershøi",
+   "title": "Interior with the Artist's Easel",
+   "year": "1910",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "KMS7444",
+   "w": 3150,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/rx913s91d_KMS7444.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3150
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/rx913s91d_KMS7444.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 1680
+    }
+   ]
+  },
+  {
+   "artist": "Vilhelm Hammershøi",
+   "title": "Interior. Artificial Light",
+   "year": "1909",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "KMS8677",
+   "w": 3840,
+   "h": 2753,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/5h73q024j_KMS8677-cropped.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/5h73q024j_KMS8677-cropped.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "note": "Candlelit nocturne — visually confirmed in session"
+  },
+  {
+   "artist": "Vilhelm Hammershøi",
+   "title": "Amalienborg Square, Copenhagen",
+   "year": "1896",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "KMS1542",
+   "w": 3840,
+   "h": 3819,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/jq085p313_KMS1542.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/jq085p313_KMS1542.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ]
+  },
+  {
+   "artist": "Vilhelm Hammershøi",
+   "title": "From Christianshavn Canal",
+   "year": "1905",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "KMS8415",
+   "w": 3840,
+   "h": 3088,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/b8515r46k_KMSKMS8415.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/b8515r46k_KMSKMS8415.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ]
+  },
+  {
+   "artist": "Vilhelm Hammershøi",
+   "title": "St. Peter's Church, Copenhagen",
+   "year": "1906",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "KMS2051",
+   "w": 3391,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/3x816q86w_KMS2051.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3391
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/3x816q86w_KMS2051.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 1808
+    }
+   ],
+   "note": "Visually confirmed in session — misty spire, strong full-screen"
+  },
+  {
+   "artist": "Christen Købke",
+   "title": "View from Dosseringen near Lake Sortedam towards Nørrebro",
+   "year": "1838",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "KMS359",
+   "w": 3840,
+   "h": 2778,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/gt54kq89w_KMSKMS359.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/gt54kq89w_KMSKMS359.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "note": "Danish Golden Age icon"
+  },
+  {
+   "artist": "Christen Købke",
+   "title": "View of Østerbro in Morning Light",
+   "year": "1836",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "KMS844",
+   "w": 3840,
+   "h": 2483,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/8336h501h_kms844.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/8336h501h_kms844.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ]
+  },
+  {
+   "artist": "Christen Købke",
+   "title": "The Roof Ridge of Frederiksborg Castle",
+   "year": "1833–34",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "DEP691",
+   "w": 3735,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/qr46r3104_dep691.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3735
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/qr46r3104_dep691.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 1992
+    }
+   ]
+  },
+  {
+   "artist": "Christen Købke",
+   "title": "Motif from Capri, Shortly after Sunrise",
+   "year": "1841–43",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "KMS445",
+   "w": 3840,
+   "h": 2554,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/cj82kb687_kms445.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/cj82kb687_kms445.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "note": "Warm sunrise color to balance the room's cool palette"
+  },
+  {
+   "artist": "C.W. Eckersberg",
+   "title": "View through Three Arches of the Third Storey of the Colosseum",
+   "year": "1815",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "KMS3123",
+   "w": 3840,
+   "h": 2442,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/hm50tw13v_KMS3123_-_lille.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/hm50tw13v_KMS3123_-_lille.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ]
+  },
+  {
+   "artist": "C.W. Eckersberg",
+   "title": "Langebro, Copenhagen, in Moonlight with Running Figures",
+   "year": "1836",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "KMS7284",
+   "w": 2773,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/qr46r399j_KMS7284.TIF.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 2773
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/qr46r399j_KMS7284.TIF.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 1479
+    }
+   ]
+  },
+  {
+   "artist": "C.W. Eckersberg",
+   "title": "The Russian Ship of the Line 'Asow' and a Frigate at Anchor near Elsinore",
+   "year": "1828",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "KMS608",
+   "w": 3141,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/7h149v115_kms608.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3141
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/7h149v115_kms608.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 1675
+    }
+   ]
+  },
+  {
+   "artist": "L.A. Ring",
+   "title": "At the French Windows. The Artist's Wife",
+   "year": "1897",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "KMS3716",
+   "w": 2899,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/1544bs13w_kms3716.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 2899
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/1544bs13w_kms3716.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 1546
+    }
+   ],
+   "note": "SMK public_domain:true (Ring exception per legal gate)"
+  },
+  {
+   "artist": "L.A. Ring",
+   "title": "Waiting for the Train. Level Crossing by Roskilde Highway",
+   "year": "1914",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "DEP535",
+   "w": 3840,
+   "h": 3116,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/gb19f9360_KMSdep535.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/gb19f9360_KMSdep535.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "note": "SMK public_domain:true (Ring exception per legal gate)"
+  },
+  {
+   "artist": "Anna Ancher",
+   "title": "The Artist's Mother, Ane Hedvig Brøndum, in the Red Room",
+   "year": "1909",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "KMS8654",
+   "w": 3840,
+   "h": 2485,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/g445ch47r_KMS8654.tif.reconstructed.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/g445ch47r_KMS8654.tif.reconstructed.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 2048
+    }
+   ],
+   "note": "SMK public_domain:true (Ancher exception per legal gate)"
+  },
+  {
+   "artist": "Anna Ancher",
+   "title": "Interior with a Young Girl Braiding Her Hair",
+   "year": "1901",
+   "museum": "SMK, Copenhagen",
+   "source": "smk",
+   "sourceId": "KMS3827",
+   "w": 3171,
+   "h": 3840,
+   "srcs": [
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/wh246w49j_kms3827.tif.jp2/full/!3840,3840/0/default.jpg",
+     "w": 3171
+    },
+    {
+     "u": "https://iip.smk.dk/iiif/jp2/wh246w49j_kms3827.tif.jp2/full/!2048,2048/0/default.jpg",
+     "w": 1691
+    }
+   ],
+   "note": "SMK public_domain:true (Ancher exception per legal gate)"
+  },
+  {
+   "artist": "Caspar David Friedrich",
+   "title": "Wanderer above the Sea of Fog",
+   "year": "c. 1817",
+   "museum": "Hamburger Kunsthalle · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Caspar David Friedrich - Wanderer above the Sea of Fog.jpeg",
+   "w": 3840,
+   "h": 4926,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Caspar_David_Friedrich_-_Wanderer_above_the_Sea_of_Fog.jpeg/3840px-Caspar_David_Friedrich_-_Wanderer_above_the_Sea_of_Fog.jpeg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Caspar_David_Friedrich_-_Wanderer_above_the_Sea_of_Fog.jpeg/1920px-Caspar_David_Friedrich_-_Wanderer_above_the_Sea_of_Fog.jpeg",
+     "w": 1920
+    }
+   ],
+   "note": "PD-Art verified (LicenseShortName: Public domain, Copyrighted: False); 5256x6742 master"
+  },
+  {
+   "artist": "Caspar David Friedrich",
+   "title": "Two Men Contemplating the Moon",
+   "year": "ca. 1825–30",
+   "museum": "The Met, New York",
+   "source": "met",
+   "sourceId": "438417",
+   "w": 4000,
+   "h": 3237,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-31997-001-NEW.jpg",
+     "w": 4000
+    }
+   ],
+   "note": "Met isPublicDomain:true; original JPEG measured 4000x3237"
+  },
+  {
+   "artist": "Caspar David Friedrich",
+   "title": "The Monk by the Sea",
+   "year": "1808–10",
+   "museum": "Alte Nationalgalerie, Berlin · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Caspar David Friedrich - Der Mönch am Meer - Google Art Project.jpg",
+   "w": 3543,
+   "h": 2254,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/2/21/Caspar_David_Friedrich_-_Der_M%C3%B6nch_am_Meer_-_Google_Art_Project.jpg",
+     "w": 3543
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Caspar_David_Friedrich_-_Der_M%C3%B6nch_am_Meer_-_Google_Art_Project.jpg/1920px-Caspar_David_Friedrich_-_Der_M%C3%B6nch_am_Meer_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "Google Art Project scan; primary is the Commons original (master is 3543px — below the 3840 bucket). Higher-res alternates were cropped gallery photos with glare"
+  },
+  {
+   "artist": "Caspar David Friedrich",
+   "title": "The Abbey in the Oakwood",
+   "year": "1809–10",
+   "museum": "Alte Nationalgalerie, Berlin · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Caspar David Friedrich - Abtei im Eichwald - Google Art Project.jpg",
+   "w": 3840,
+   "h": 2460,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Caspar_David_Friedrich_-_Abtei_im_Eichwald_-_Google_Art_Project.jpg/3840px-Caspar_David_Friedrich_-_Abtei_im_Eichwald_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Caspar_David_Friedrich_-_Abtei_im_Eichwald_-_Google_Art_Project.jpg/1920px-Caspar_David_Friedrich_-_Abtei_im_Eichwald_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "PD-Art verified (Public domain / Copyrighted: False)"
+  }
+ ]
+}

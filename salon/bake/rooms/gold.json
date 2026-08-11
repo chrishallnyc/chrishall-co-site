@@ -1,0 +1,281 @@
+{
+ "room": "gold",
+ "works": [
+  {
+   "artist": "Gustav Klimt",
+   "title": "The Kiss",
+   "year": "1907–08",
+   "museum": "Belvedere, Vienna · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:The Kiss - Gustav Klimt - Google Cultural Institute.jpg",
+   "w": 3840,
+   "h": 3853,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg/3840px-The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg/1920px-The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "The icon of the Wiener Werkstätte golden style — 7376px Google Art Project master scan."
+  },
+  {
+   "artist": "Gustav Klimt",
+   "title": "Portrait of Adele Bloch-Bauer I",
+   "year": "1907",
+   "museum": "Neue Galerie New York · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Gustav Klimt - Porträt der Adele Bloch-Bauer I (1907).jpg",
+   "w": 2801,
+   "h": 2801,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Gustav_Klimt_-_Portr%C3%A4t_der_Adele_Bloch-Bauer_I_%281907%29.jpg",
+     "w": 2801
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Gustav_Klimt_-_Portr%C3%A4t_der_Adele_Bloch-Bauer_I_%281907%29.jpg/1920px-Gustav_Klimt_-_Portr%C3%A4t_der_Adele_Bloch-Bauer_I_%281907%29.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "The Woman in Gold."
+  },
+  {
+   "artist": "Gustav Klimt",
+   "title": "Judith and the Head of Holofernes (Judith I)",
+   "year": "1901",
+   "museum": "Belvedere, Vienna · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Judith 1.jpg",
+   "w": 1769,
+   "h": 3508,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/d/d8/Judith_1.jpg",
+     "w": 1769
+    }
+   ],
+   "note": "Gold-ground femme fatale, shown with its original inscribed frame — a dramatic 1:2 vertical."
+  },
+  {
+   "artist": "Gustav Klimt",
+   "title": "Mäda Primavesi",
+   "year": "1912–13",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "436819",
+   "w": 2876,
+   "h": 3877,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP243354.jpg",
+     "w": 2876
+    }
+   ],
+   "note": "Met highlight — the defiant nine-year-old against a riot of Secession pattern."
+  },
+  {
+   "artist": "Gustav Klimt",
+   "title": "Death and Life",
+   "year": "1910–15",
+   "museum": "Leopold Museum, Vienna · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Gustav Klimt - Death and Life - Google Art Project.jpg",
+   "w": 3840,
+   "h": 3342,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Gustav_Klimt_-_Death_and_Life_-_Google_Art_Project.jpg/3840px-Gustav_Klimt_-_Death_and_Life_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Gustav_Klimt_-_Death_and_Life_-_Google_Art_Project.jpg/1920px-Gustav_Klimt_-_Death_and_Life_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "Gustav Klimt",
+   "title": "Avenue in the Park of Schloss Kammer",
+   "year": "1912",
+   "museum": "Belvedere, Vienna · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Gustav Klimt - Allee zum Schloss Kammer - 2892 - Österreichische Galerie Belvedere.jpg",
+   "w": 3504,
+   "h": 3508,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Gustav_Klimt_-_Allee_zum_Schloss_Kammer_-_2892_-_%C3%96sterreichische_Galerie_Belvedere.jpg",
+     "w": 3504
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Gustav_Klimt_-_Allee_zum_Schloss_Kammer_-_2892_-_%C3%96sterreichische_Galerie_Belvedere.jpg/1920px-Gustav_Klimt_-_Allee_zum_Schloss_Kammer_-_2892_-_%C3%96sterreichische_Galerie_Belvedere.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "Belvedere's own digitization — the mosaic tunnel of trees at Attersee."
+  },
+  {
+   "artist": "Gustav Klimt",
+   "title": "Farm Garden with Sunflowers",
+   "year": "c. 1907",
+   "museum": "Belvedere, Vienna · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Gustav Klimt 035.jpg",
+   "w": 2024,
+   "h": 2058,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/4/4d/Gustav_Klimt_035.jpg",
+     "w": 2024
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Gustav_Klimt_035.jpg/1920px-Gustav_Klimt_035.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "Gustav Klimt",
+   "title": "Serena Pulitzer Lederer",
+   "year": "1899",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "436820",
+   "w": 1961,
+   "h": 4000,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-18885-001.jpg",
+     "w": 1961
+    }
+   ],
+   "note": "Whistler-esque white-on-white full-length from Klimt's pre-gold years — an extreme vertical."
+  },
+  {
+   "artist": "Egon Schiele",
+   "title": "Self-Portrait",
+   "year": "1911",
+   "museum": "The Met",
+   "source": "met",
+   "sourceId": "483438",
+   "w": 2735,
+   "h": 3868,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ma/original/DP279450.jpg",
+     "w": 2735
+    }
+   ],
+   "note": "Met highlight — watercolor and gouache self-portrait at full electric intensity."
+  },
+  {
+   "artist": "Egon Schiele",
+   "title": "Self-Portrait with Physalis",
+   "year": "1912",
+   "museum": "Leopold Museum, Vienna · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Egon Schiele - Self-Portrait with Physalis - Google Art Project.jpg",
+   "w": 3781,
+   "h": 3062,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Egon_Schiele_-_Self-Portrait_with_Physalis_-_Google_Art_Project.jpg",
+     "w": 3781
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Egon_Schiele_-_Self-Portrait_with_Physalis_-_Google_Art_Project.jpg/1920px-Egon_Schiele_-_Self-Portrait_with_Physalis_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "Schiele's most famous self-portrait, with the lantern-fruit sprig."
+  },
+  {
+   "artist": "Egon Schiele",
+   "title": "Portrait of Wally Neuzil",
+   "year": "1912",
+   "museum": "Leopold Museum, Vienna · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Egon Schiele - Portrait of Wally Neuzil - Google Art Project.jpg",
+   "w": 3053,
+   "h": 2480,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/6/66/Egon_Schiele_-_Portrait_of_Wally_Neuzil_-_Google_Art_Project.jpg",
+     "w": 3053
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Egon_Schiele_-_Portrait_of_Wally_Neuzil_-_Google_Art_Project.jpg/1920px-Egon_Schiele_-_Portrait_of_Wally_Neuzil_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "Pendant to the Physalis self-portrait — Wally's blue-eyed gaze."
+  },
+  {
+   "artist": "Egon Schiele",
+   "title": "Four Trees",
+   "year": "1917",
+   "museum": "Belvedere, Vienna · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Egon Schiele - Vier Bäume - 3917 - Österreichische Galerie Belvedere.jpg",
+   "w": 3508,
+   "h": 2754,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/e/eb/Egon_Schiele_-_Vier_B%C3%A4ume_-_3917_-_%C3%96sterreichische_Galerie_Belvedere.jpg",
+     "w": 3508
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Egon_Schiele_-_Vier_B%C3%A4ume_-_3917_-_%C3%96sterreichische_Galerie_Belvedere.jpg/1920px-Egon_Schiele_-_Vier_B%C3%A4ume_-_3917_-_%C3%96sterreichische_Galerie_Belvedere.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "Banded sunset landscape — Belvedere's own digitization."
+  },
+  {
+   "artist": "Ferdinand Hodler",
+   "title": "James Vibert, Sculptor",
+   "year": "1907",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "27962",
+   "w": 2252,
+   "h": 2250,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/caf7fb08-39ef-7bd8-b81a-181ee31cc324/full/full/0/default.jpg",
+     "w": 2252
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/caf7fb08-39ef-7bd8-b81a-181ee31cc324/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "Parallelist portrait against a saturated teal ground."
+  },
+  {
+   "artist": "Ferdinand Hodler",
+   "title": "Day (Truth)",
+   "year": "1896–98",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "181460",
+   "w": 1558,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/ba6ef7ee-677c-0bcd-8150-ef7487f17a36/full/full/0/default.jpg",
+     "w": 1558
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/ba6ef7ee-677c-0bcd-8150-ef7487f17a36/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ],
+   "note": "Monumental Symbolist vertical — a counterpoint to the room's gold."
+  }
+ ]
+}

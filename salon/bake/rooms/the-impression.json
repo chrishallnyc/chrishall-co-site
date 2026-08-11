@@ -1,0 +1,736 @@
+{
+ "room": "the-impression",
+ "works": [
+  {
+   "artist": "Claude Monet",
+   "title": "Impression, Sunrise",
+   "year": "1872",
+   "museum": "Musée Marmottan Monet · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Monet - Impression, Sunrise.jpg",
+   "w": 3840,
+   "h": 2979,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Monet_-_Impression%2C_Sunrise.jpg/3840px-Monet_-_Impression%2C_Sunrise.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Monet_-_Impression%2C_Sunrise.jpg/1920px-Monet_-_Impression%2C_Sunrise.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "The painting that named the movement."
+  },
+  {
+   "artist": "Gustave Caillebotte",
+   "title": "Paris Street; Rainy Day",
+   "year": "1877",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "20684",
+   "w": 3000,
+   "h": 2330,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/f8fd76e9-c396-5678-36ed-6a348c904d27/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/f8fd76e9-c396-5678-36ed-6a348c904d27/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Georges Seurat",
+   "title": "A Sunday on La Grande Jatte — 1884",
+   "year": "1884–86",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "27992",
+   "w": 3000,
+   "h": 2010,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/2d484387-2509-5e8e-2c43-22f9981972eb/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/2d484387-2509-5e8e-2c43-22f9981972eb/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Claude Monet",
+   "title": "Bridge over a Pond of Water Lilies",
+   "year": "1899",
+   "museum": "The Metropolitan Museum of Art · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Bridge over a Pond of Water Lilies MET DT1854.jpg",
+   "w": 2966,
+   "h": 3722,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/5/53/Bridge_over_a_Pond_of_Water_Lilies_MET_DT1854.jpg",
+     "w": 2966
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Bridge_over_a_Pond_of_Water_Lilies_MET_DT1854.jpg/1920px-Bridge_over_a_Pond_of_Water_Lilies_MET_DT1854.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "MET record 437127; MET API currently returns isPublicDomain:false with no image, so served from MET's own CC0 scan on Commons."
+  },
+  {
+   "artist": "Claude Monet",
+   "title": "Garden at Sainte-Adresse",
+   "year": "1867",
+   "museum": "The Metropolitan Museum of Art · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Claude Monet - Jardin à Sainte-Adresse.jpg",
+   "w": 3840,
+   "h": 2879,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Claude_Monet_-_Jardin_%C3%A0_Sainte-Adresse.jpg/3840px-Claude_Monet_-_Jardin_%C3%A0_Sainte-Adresse.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Claude_Monet_-_Jardin_%C3%A0_Sainte-Adresse.jpg/1920px-Claude_Monet_-_Jardin_%C3%A0_Sainte-Adresse.jpg",
+     "w": 1920
+    }
+   ],
+   "note": "MET record 437133; MET API currently returns isPublicDomain:false with no image, so served from the PD scan on Commons."
+  },
+  {
+   "artist": "Édouard Manet",
+   "title": "Boating",
+   "year": "1874",
+   "museum": "The Metropolitan Museum of Art",
+   "source": "met",
+   "sourceId": "436947",
+   "w": 4000,
+   "h": 3052,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-25466-001.jpg",
+     "w": 4000
+    }
+   ]
+  },
+  {
+   "artist": "Édouard Manet",
+   "title": "A Bar at the Folies-Bergère",
+   "year": "1882",
+   "museum": "The Courtauld Gallery · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:\"Un Bar aux Folies-Bergère\" by Édouard Manet (1882).jpg",
+   "w": 3840,
+   "h": 2819,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/%22Un_Bar_aux_Folies-Berg%C3%A8re%22_by_%C3%89douard_Manet_%281882%29.jpg/3840px-%22Un_Bar_aux_Folies-Berg%C3%A8re%22_by_%C3%89douard_Manet_%281882%29.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/%22Un_Bar_aux_Folies-Berg%C3%A8re%22_by_%C3%89douard_Manet_%281882%29.jpg/1920px-%22Un_Bar_aux_Folies-Berg%C3%A8re%22_by_%C3%89douard_Manet_%281882%29.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "Edgar Degas",
+   "title": "The Dance Class",
+   "year": "1874",
+   "museum": "The Metropolitan Museum of Art",
+   "source": "met",
+   "sourceId": "438817",
+   "w": 3710,
+   "h": 4000,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-20101-001.jpg",
+     "w": 3710
+    }
+   ]
+  },
+  {
+   "artist": "Edgar Degas",
+   "title": "Dancers Practicing at the Barre",
+   "year": "1877",
+   "museum": "The Metropolitan Museum of Art",
+   "source": "met",
+   "sourceId": "436139",
+   "w": 3783,
+   "h": 3496,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT840.jpg",
+     "w": 3783
+    }
+   ]
+  },
+  {
+   "artist": "Georges Seurat",
+   "title": "Circus Sideshow (Parade de cirque)",
+   "year": "1887–88",
+   "museum": "The Metropolitan Museum of Art",
+   "source": "met",
+   "sourceId": "437654",
+   "w": 3920,
+   "h": 2621,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP375450_cropped.jpg",
+     "w": 3920
+    }
+   ]
+  },
+  {
+   "artist": "Pierre-Auguste Renoir",
+   "title": "Madame Georges Charpentier and Her Children",
+   "year": "1878",
+   "museum": "The Metropolitan Museum of Art",
+   "source": "met",
+   "sourceId": "438815",
+   "w": 4000,
+   "h": 3254,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-35674-001.jpg",
+     "w": 4000
+    }
+   ]
+  },
+  {
+   "artist": "Camille Pissarro",
+   "title": "The Garden of the Tuileries on a Spring Morning",
+   "year": "1899",
+   "museum": "The Metropolitan Museum of Art",
+   "source": "met",
+   "sourceId": "437313",
+   "w": 3811,
+   "h": 3049,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT1042.jpg",
+     "w": 3811
+    }
+   ]
+  },
+  {
+   "artist": "Camille Pissarro",
+   "title": "Jalais Hill, Pontoise",
+   "year": "1867",
+   "museum": "The Metropolitan Museum of Art",
+   "source": "met",
+   "sourceId": "437299",
+   "w": 3811,
+   "h": 2907,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DT1859.jpg",
+     "w": 3811
+    }
+   ]
+  },
+  {
+   "artist": "Alfred Sisley",
+   "title": "The Bridge at Villeneuve-la-Garenne",
+   "year": "1872",
+   "museum": "The Metropolitan Museum of Art",
+   "source": "met",
+   "sourceId": "437680",
+   "w": 4000,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://images.metmuseum.org/CRDImages/ep/original/DP-14936-041.jpg",
+     "w": 4000
+    }
+   ]
+  },
+  {
+   "artist": "Claude Monet",
+   "title": "Water Lilies",
+   "year": "1906",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "16568",
+   "w": 3000,
+   "h": 2881,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/3c27b499-af56-f0d5-93b5-a7f2f1ad5813/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/3c27b499-af56-f0d5-93b5-a7f2f1ad5813/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Claude Monet",
+   "title": "Stacks of Wheat (End of Summer)",
+   "year": "1890–91",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "64818",
+   "w": 3000,
+   "h": 1773,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/a38e2828-ec6f-ece1-a30f-70243449197b/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/a38e2828-ec6f-ece1-a30f-70243449197b/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Claude Monet",
+   "title": "Arrival of the Normandy Train, Gare Saint-Lazare",
+   "year": "1877",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "16571",
+   "w": 3000,
+   "h": 2251,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/0f1cc0e0-e42e-be16-3f71-2022da38cb93/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/0f1cc0e0-e42e-be16-3f71-2022da38cb93/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Claude Monet",
+   "title": "Cliff Walk at Pourville",
+   "year": "1882",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "14620",
+   "w": 3000,
+   "h": 2402,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/b0effb1c-ff23-bbaa-f809-9fd94e31c1a0/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/b0effb1c-ff23-bbaa-f809-9fd94e31c1a0/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Claude Monet",
+   "title": "The Beach at Sainte-Adresse",
+   "year": "1867",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "14598",
+   "w": 3000,
+   "h": 2217,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/95be2572-b53d-8e7b-abc9-10eb48d4fa5d/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/95be2572-b53d-8e7b-abc9-10eb48d4fa5d/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Claude Monet",
+   "title": "Rocks at Port-Goulphar, Belle-Île",
+   "year": "1886",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "20545",
+   "w": 3000,
+   "h": 2401,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/2765aee9-3d78-ec6c-5c66-a1d9dc8173f6/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/2765aee9-3d78-ec6c-5c66-a1d9dc8173f6/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Pierre-Auguste Renoir",
+   "title": "Two Sisters (On the Terrace)",
+   "year": "1881",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "14655",
+   "w": 2418,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/3a608f55-d76e-fa96-d0b1-0789fbc48f1e/full/full/0/default.jpg",
+     "w": 2418
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/3a608f55-d76e-fa96-d0b1-0789fbc48f1e/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Pierre-Auguste Renoir",
+   "title": "Acrobats at the Cirque Fernando (Francisca and Angelina Wartenberg)",
+   "year": "1879",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "81558",
+   "w": 2244,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/321c45f5-22a3-84a2-44cc-cf66642d4cf2/full/full/0/default.jpg",
+     "w": 2244
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/321c45f5-22a3-84a2-44cc-cf66642d4cf2/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Mary Cassatt",
+   "title": "The Child's Bath",
+   "year": "1893",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "111442",
+   "w": 1977,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/3b885ae0-4d46-5fe4-d70a-00474827f02c/full/full/0/default.jpg",
+     "w": 1977
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/3b885ae0-4d46-5fe4-d70a-00474827f02c/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Mary Cassatt",
+   "title": "The Boating Party",
+   "year": "1893–94",
+   "museum": "National Gallery of Art · via Wikimedia Commons",
+   "source": "commons",
+   "sourceId": "File:Mary Cassatt - The Boating Party - Google Art Project.jpg",
+   "w": 3840,
+   "h": 2945,
+   "srcs": [
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Mary_Cassatt_-_The_Boating_Party_-_Google_Art_Project.jpg/3840px-Mary_Cassatt_-_The_Boating_Party_-_Google_Art_Project.jpg",
+     "w": 3840
+    },
+    {
+     "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Mary_Cassatt_-_The_Boating_Party_-_Google_Art_Project.jpg/1920px-Mary_Cassatt_-_The_Boating_Party_-_Google_Art_Project.jpg",
+     "w": 1920
+    }
+   ]
+  },
+  {
+   "artist": "Berthe Morisot",
+   "title": "Woman at Her Toilette",
+   "year": "1875–80",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "11723",
+   "w": 3000,
+   "h": 2246,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/78c80988-6524-cec7-c661-a4c0a706d06f/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/78c80988-6524-cec7-c661-a4c0a706d06f/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Camille Pissarro",
+   "title": "The Crystal Palace",
+   "year": "1871",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "110541",
+   "w": 3000,
+   "h": 1905,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/4eb368b5-3b66-ae2c-bd4a-2643015e05fc/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/4eb368b5-3b66-ae2c-bd4a-2643015e05fc/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Camille Pissarro",
+   "title": "The Place du Havre, Paris",
+   "year": "1893",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "81551",
+   "w": 3000,
+   "h": 2446,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/0ff20364-c795-c2ca-c1e8-e5a848f09554/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/0ff20364-c795-c2ca-c1e8-e5a848f09554/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Alfred Sisley",
+   "title": "The Seine at Port-Marly, Piles of Sand",
+   "year": "1875",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "16633",
+   "w": 3000,
+   "h": 2143,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/c4425cb6-d8b5-6390-603d-7f802406d05d/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/c4425cb6-d8b5-6390-603d-7f802406d05d/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Alfred Sisley",
+   "title": "Street in Moret",
+   "year": "c. 1890",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "81561",
+   "w": 3000,
+   "h": 2395,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/c233d88b-fe56-6b9e-d5c2-47b9a7386756/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/c233d88b-fe56-6b9e-d5c2-47b9a7386756/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Edgar Degas",
+   "title": "The Millinery Shop",
+   "year": "1879–86",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "14572",
+   "w": 3000,
+   "h": 2724,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/6f513908-03cc-b974-633b-adfce56b7936/full/full/0/default.jpg",
+     "w": 3000
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/6f513908-03cc-b974-633b-adfce56b7936/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Edgar Degas",
+   "title": "Yellow Dancers (In the Wings)",
+   "year": "1874–76",
+   "museum": "Art Institute of Chicago",
+   "source": "aic",
+   "sourceId": "18951",
+   "w": 2420,
+   "h": 3000,
+   "srcs": [
+    {
+     "u": "https://www.artic.edu/iiif/2/8fe022ba-e358-5cda-aa70-d96edd0b4f20/full/full/0/default.jpg",
+     "w": 2420
+    },
+    {
+     "u": "https://www.artic.edu/iiif/2/8fe022ba-e358-5cda-aa70-d96edd0b4f20/full/843,/0/default.jpg",
+     "w": 843
+    }
+   ]
+  },
+  {
+   "artist": "Claude Monet",
+   "title": "Water Lilies (Agapanthus)",
+   "year": "c. 1915–26",
+   "museum": "Cleveland Museum of Art",
+   "source": "cma",
+   "sourceId": "1960.81",
+   "w": 3400,
+   "h": 1581,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1960.81/1960.81_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1960.81/1960.81_web.jpg",
+     "w": 900
+    }
+   ]
+  },
+  {
+   "artist": "Claude Monet",
+   "title": "The Red Kerchief",
+   "year": "c. 1868–73",
+   "museum": "Cleveland Museum of Art",
+   "source": "cma",
+   "sourceId": "1958.39",
+   "w": 2732,
+   "h": 3400,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1958.39/1958.39_print.jpg",
+     "w": 2732
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1958.39/1958.39_web.jpg",
+     "w": 723
+    }
+   ]
+  },
+  {
+   "artist": "Claude Monet",
+   "title": "Gardener's House at Antibes",
+   "year": "1888",
+   "museum": "Cleveland Museum of Art",
+   "source": "cma",
+   "sourceId": "1916.1044",
+   "w": 3400,
+   "h": 2418,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1916.1044/1916.1044_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1916.1044/1916.1044_web.jpg",
+     "w": 900
+    }
+   ]
+  },
+  {
+   "artist": "Berthe Morisot",
+   "title": "Reading",
+   "year": "1873",
+   "museum": "Cleveland Museum of Art",
+   "source": "cma",
+   "sourceId": "1950.89",
+   "w": 3400,
+   "h": 2174,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1950.89/1950.89_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1950.89/1950.89_web.jpg",
+     "w": 900
+    }
+   ]
+  },
+  {
+   "artist": "Edgar Degas",
+   "title": "Frieze of Dancers",
+   "year": "c. 1895",
+   "museum": "Cleveland Museum of Art",
+   "source": "cma",
+   "sourceId": "1946.83",
+   "w": 3400,
+   "h": 1187,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1946.83/1946.83_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1946.83/1946.83_web.jpg",
+     "w": 900
+    }
+   ]
+  },
+  {
+   "artist": "Pierre-Auguste Renoir",
+   "title": "Romaine Lacaux",
+   "year": "1864",
+   "museum": "Cleveland Museum of Art",
+   "source": "cma",
+   "sourceId": "1942.1065",
+   "w": 2706,
+   "h": 3400,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1942.1065/1942.1065_print.jpg",
+     "w": 2706
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1942.1065/1942.1065_web.jpg",
+     "w": 716
+    }
+   ]
+  },
+  {
+   "artist": "Alfred Sisley",
+   "title": "Saint-Mammès, Loing Canal",
+   "year": "1885",
+   "museum": "Cleveland Museum of Art",
+   "source": "cma",
+   "sourceId": "1961.262",
+   "w": 3400,
+   "h": 2846,
+   "srcs": [
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1961.262/1961.262_print.jpg",
+     "w": 3400
+    },
+    {
+     "u": "https://openaccess-cdn.clevelandart.org/1961.262/1961.262_web.jpg",
+     "w": 1067
+    }
+   ]
+  }
+ ]
+}
