@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NYC Subway — Live Map · chall.net</title>
+<meta name="description" content="Every NYC subway train, live on the map. Positions from the MTA's real-time feeds, refreshed every 15 seconds.">
+<meta name="theme-color" content="#101114">
+<link rel="canonical" href="https://chall.net/subway/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="NYC Subway — Live Map">
+<meta property="og:description" content="Every NYC subway train, live on the map. Positions from the MTA's real-time feeds, refreshed every 15 seconds.">
+<meta property="og:url" content="https://chall.net/subway/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='16' fill='%230062CF'/%3E%3Ctext x='16' y='22' font-family='Helvetica,Arial' font-size='17' font-weight='bold' fill='%23fff' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="leaflet.css">
+<style>
+  :root {
+    --panel-bg: rgba(16, 17, 20, .88);
+    --ink: #e8e6e1;
+    --mid: #9a978f;
+    --dim: #64625c;
+    --acc: #e8b46f;
+    --err: #d98a7a;
+    --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { font-family: var(--mono); background: #101114; }
+  #map { position: fixed; inset: 0; background: #101114; }
+  .leaflet-container { font-family: var(--mono); }
+
+  /* ---- chrome ---- */
+  #panel {
+    position: fixed; z-index: 1000;
+    top: max(14px, env(safe-area-inset-top)); left: max(14px, env(safe-area-inset-left));
+    background: var(--panel-bg); color: var(--ink);
+    border: 1px solid rgba(232, 230, 225, .14);
+    padding: 12px 16px 11px; min-width: 218px;
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  }
+  #panel h1 {
+    margin: 0 0 7px; font-size: 11px; font-weight: 500;
+    letter-spacing: .24em; text-transform: uppercase;
+  }
+  #panel h1 .live { color: var(--acc); }
+  #stats { font-size: 10px; letter-spacing: .12em; color: var(--mid); text-transform: uppercase; line-height: 1.9; }
+  #stats b { color: var(--ink); font-weight: 500; }
+  #stats .err { color: var(--err); }
+  #foot {
+    margin-top: 8px; padding-top: 7px; border-top: 1px solid rgba(232, 230, 225, .12);
+    font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--mid);
+  }
+  #foot a { color: var(--mid); text-decoration: none; }
+  #foot a:hover { color: var(--acc); }
+  @media (max-width: 480px) {
+    #panel { top: max(10px, env(safe-area-inset-top)); left: max(10px, env(safe-area-inset-left)); right: auto; padding: 10px 12px 9px; min-width: 0; }
+    #panel h1 { font-size: 10px; }
+  }
+
+  /* ---- train bullets ---- */
+  .train { background: none; border: none; }
+  .train span {
+    display: block; width: 18px; height: 18px; border-radius: 50%;
+    color: #fff; font-family: var(--mono); font-size: 10px; font-weight: 700;
+    line-height: 18px; text-align: center;
+    box-shadow: 0 0 0 1.5px rgba(0, 0, 0, .55), 0 1px 4px rgba(0, 0, 0, .5);
+  }
+  .train.moving span { box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .7), 0 1px 4px rgba(0, 0, 0, .5); }
+  .train span.yb { color: #101114; }
+  .train span.sir { font-size: 7px; letter-spacing: 0; }
+
+  .leaflet-tooltip.traintip {
+    background: var(--panel-bg); color: var(--ink); border: 1px solid rgba(232,230,225,.16);
+    border-radius: 0; font-family: var(--mono); font-size: 10.5px; letter-spacing: .04em;
+    padding: 7px 10px; box-shadow: 0 2px 10px rgba(0,0,0,.45);
+  }
+  .leaflet-tooltip.traintip::before { display: none; }
+  .traintip .tt-route { color: var(--ink); font-weight: 700; letter-spacing: .18em; text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; gap: 7px; }
+  .traintip .tt-bullet { display: inline-block; width: 14px; height: 14px; border-radius: 50%; color: #fff; font-size: 8px; font-weight: 700; line-height: 14px; text-align: center; letter-spacing: 0; flex: none; }
+  .traintip .tt-bullet.yb { color: #101114; }
+  .traintip .tt-bullet.sir { font-size: 5.5px; }
+  .traintip .tt-dim { color: var(--mid); }
+  .leaflet-control-attribution { background: rgba(16,17,20,.75) !important; color: var(--mid) !important; font-size: 9px !important; }
+  .leaflet-control-attribution a { color: var(--mid) !important; }
+  .leaflet-bar, .leaflet-bar a { border-radius: 0 !important; }
+  .leaflet-control-zoom a { background: var(--panel-bg) !important; color: var(--ink) !important; border-color: rgba(232,230,225,.14) !important; }
+  .leaflet-control-zoom a:hover { color: var(--acc) !important; }
+  .leaflet-top.leaflet-right { top: env(safe-area-inset-top); right: env(safe-area-inset-right); }
+  .leaflet-bottom.leaflet-right { bottom: env(safe-area-inset-bottom); right: env(safe-area-inset-right); }
+</style>
+</head>
+<body>
+<div id="map" role="application" aria-label="Live map of NYC subway trains (train details require a pointer)"></div>
+<div id="panel">
+  <h1>NYC Subway <span class="live">· Live</span></h1>
+  <div id="stats" aria-live="polite"><b id="count">—</b> trains tracked<br><span id="feedwarn" class="err"></span><span id="age">connecting to MTA…</span></div>
+  <div id="foot"><a href="/">chall.net</a> · data: <a href="https://api.mta.info" rel="noopener">MTA GTFS-RT</a> · 15s refresh</div>
+</div>
+<script src="leaflet.js"></script>
+<script src="lines.js"></script>
+<script>
+'use strict';
+const prm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const map = L.map('map', {
+  zoomControl: false, attributionControl: true,
+  zoomAnimation: !prm, fadeAnimation: !prm, markerZoomAnimation: !prm,
+}).setView([40.734, -73.955], 12);
+L.control.zoom({ position: 'topright' }).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  subdomains: 'abcd', maxZoom: 19,
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+}).addTo(map);
+
+const DISPLAY_COLOR = { SI: '#3f51c1' };  // GTFS #08179C is invisible on the dark map
+function routeColor(r) {
+  const base = r.replace(/X$/, '');
+  return DISPLAY_COLOR[base] || SUBWAY_LINES.routes[r] || SUBWAY_LINES.routes[base] || '#808183';
+}
+
+// route lines under the trains
+const lineLayer = L.layerGroup().addTo(map);
+for (const l of SUBWAY_LINES.lines) {
+  L.polyline(l.pts, { color: routeColor(l.r), weight: 1.8, opacity: .45, interactive: false }).addTo(lineLayer);
+}
+
+const YELLOW = new Set(['N', 'Q', 'R', 'W']);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function displayRoute(r) {
+  if (r === 'GS' || r === 'FS' || r === 'H') return 'S';
+  if (r === 'SI') return 'SIR';
+  const d = r.replace(/X$/, '');
+  return /^[A-Z0-9]{1,3}$/.test(d) ? d : '·';  // whitelist: feed data goes into innerHTML
+}
+function bulletCls(d) { return (YELLOW.has(d) ? ' yb' : '') + (d.length > 2 ? ' sir' : ''); }
+function icon(t) {
+  const d = displayRoute(t.r);
+  return L.divIcon({
+    className: 'train' + (t.m ? ' moving' : ''),
+    iconSize: [18, 18], iconAnchor: [9, 9],
+    html: `<span class="${bulletCls(d)}" style="background:${routeColor(t.r)}">${d}</span>`
+  });
+}
+function tipHtml(t) {
+  const d = displayRoute(t.r);
+  const eta = t.eta === 0 ? 'arriving now' : t.eta === null ? '' : `${t.eta} min`;
+  return `<div class="tt-route"><span class="tt-bullet${bulletCls(d)}" style="background:${routeColor(t.r)}">${d}</span>${t.d === 'N' ? 'northbound' : 'southbound'}</div>` +
+         `<div>${t.m ? 'next stop' : 'at station'}: <b>${esc(t.n)}</b></div>` +
+         (t.m && eta ? `<div class="tt-dim">${eta}</div>` : '');
+}
+
+const markers = new Map(); // train id -> marker
+let lastFetch = 0, lastTs = 0, inflight = false;
+const countEl = document.getElementById('count');
+const warnEl = document.getElementById('feedwarn');
+const ageEl = document.getElementById('age');
+
+async function refresh() {
+  if (inflight || document.hidden) return;
+  inflight = true;
+  try {
+    const r = await fetch('/api/subway', { signal: AbortSignal.timeout(12000) });
+    if (!r.ok) throw new Error('http ' + r.status);
+    const data = await r.json();
+    if (data.ts < lastTs) return;                 // out-of-order response — ignore
+    lastTs = data.ts;
+    lastFetch = Date.now();
+    if (data.feedsOk === 0 || data.count === 0) { // MTA outage: hold last known trains
+      warnEl.textContent = 'feeds down — holding last positions · ';
+      return;
+    }
+    const seen = new Set();
+    for (const t of data.trains) {
+      seen.add(t.id);
+      const key = t.r + '|' + t.m;
+      let m = markers.get(t.id);
+      if (m) {
+        m.setLatLng([t.lat, t.lon]);
+        if (m._iconKey !== key) { m.setIcon(icon(t)); m._iconKey = key; }
+        m._traindata = t;
+        if (m.isTooltipOpen()) m.setTooltipContent(tipHtml(t));
+      } else {
+        m = L.marker([t.lat, t.lon], { icon: icon(t), keyboard: false });
+        m._iconKey = key;
+        m._traindata = t;
+        m.bindTooltip(() => tipHtml(m._traindata), { className: 'traintip', direction: 'top', offset: [0, -10], sticky: false });
+        m.addTo(map);
+        markers.set(t.id, m);
+      }
+    }
+    for (const [id, m] of markers) {
+      if (!seen.has(id)) { map.removeLayer(m); markers.delete(id); }
+    }
+    countEl.textContent = data.count;
+    warnEl.textContent = data.feedsOk < 8 ? `${8 - data.feedsOk}/8 feeds down · ` : '';
+  } catch (e) {
+    warnEl.textContent = 'feed error — retrying · ';
+  } finally {
+    inflight = false;
+  }
+}
+
+// "updated Ns ago" ticker — age keeps ticking even while a warning is shown
+setInterval(() => {
+  if (!lastFetch) return;
+  ageEl.textContent = `updated ${Math.round((Date.now() - lastFetch) / 1000)}s ago`;
+}, 1000);
+
+refresh();
+setInterval(refresh, 15000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - lastFetch > 15000) refresh(); });
+</script>
+</body>
+</html>
