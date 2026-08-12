@@ -196,7 +196,7 @@ module.exports = async (req, res) => {
     }
   });
   if (dropped) console.error('trains dropped (stop id not in baked data):', dropped);
-  res.setHeader('Cache-Control', 'public, s-maxage=15, stale-while-revalidate=45');
+  res.setHeader('Cache-Control', 'public, s-maxage=5, stale-while-revalidate=25');
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.status(200).json({ ts: now, feedsOk, dropped, count: trains.length, trains });
 };

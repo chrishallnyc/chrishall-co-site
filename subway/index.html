@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>NYC Subway — Live Map · chall.net</title>
-<meta name="description" content="Every NYC subway train, live on the map. Positions from the MTA's real-time feeds, refreshed every 15 seconds.">
+<meta name="description" content="Every NYC subway train, live on the map. Positions from the MTA's real-time feeds, refreshed every 5 seconds.">
 <meta name="theme-color" content="#101114">
 <link rel="canonical" href="https://chall.net/subway/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="NYC Subway — Live Map">
-<meta property="og:description" content="Every NYC subway train, live on the map. Positions from the MTA's real-time feeds, refreshed every 15 seconds.">
+<meta property="og:description" content="Every NYC subway train, live on the map. Positions from the MTA's real-time feeds, refreshed every 5 seconds.">
 <meta property="og:url" content="https://chall.net/subway/">
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='16' fill='%230062CF'/%3E%3Ctext x='16' y='22' font-family='Helvetica,Arial' font-size='17' font-weight='bold' fill='%23fff' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
@@ -95,7 +95,7 @@
 <div id="panel">
   <h1>NYC Subway <span class="live">· Live</span></h1>
   <div id="stats" aria-live="polite"><b id="count">—</b> trains tracked<br><span id="feedwarn" class="err"></span><span id="age">connecting to MTA…</span></div>
-  <div id="foot"><a href="/">chall.net</a> · data: <a href="https://api.mta.info" rel="noopener">MTA GTFS-RT</a> · 15s refresh</div>
+  <div id="foot"><a href="/">chall.net</a> · data: <a href="https://api.mta.info" rel="noopener">MTA GTFS-RT</a> · 5s refresh</div>
 </div>
 <script src="/subway/leaflet.js"></script>
 <script src="/subway/lines.js"></script>
@@ -207,8 +207,8 @@ setInterval(() => {
 }, 1000);
 
 refresh();
-setInterval(refresh, 15000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - lastFetch > 15000) refresh(); });
+setInterval(refresh, 5000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - lastFetch > 5000) refresh(); });
 </script>
 </body>
 </html>
