@@ -8,7 +8,8 @@ api/_data.js:
   prev:  { routeId: { dirStopId: prevDirStopId } }    (most-frequent predecessor
                                                        per directional stop, per route)
 routes/colors go to subway/lines.js:
-  SUBWAY_LINES = { routes: { id: color }, lines: [{r, c, pts:[[lat,lon],...]}] }
+  SUBWAY_LINES = { routes: { id: color }, lines: [{r, c, pts:[[lat,lon],...]}],
+                   stops: [[lat, lon, "Name"], ...] }                (station dots)
 """
 import csv, json, math, os, sys
 from collections import defaultdict, Counter
@@ -160,7 +161,8 @@ print(f"wrote {out1} ({len(data_js)//1024} KB)", file=sys.stderr)
 
 lines_js = ("// baked from MTA static GTFS by subway/tools/bake.py — do not hand-edit\n"
             "const SUBWAY_LINES = %s;\n") % json.dumps(
-    {"routes": colors, "lines": lines}, separators=(",", ":"))
+    {"routes": colors, "lines": lines,
+     "stops": sorted(stops.values(), key=lambda s: (s[0], s[1]))}, separators=(",", ":"))
 out2 = os.path.join(REPO, "subway", "lines.js")
 os.makedirs(os.path.dirname(out2), exist_ok=True)
 open(out2, "w").write(lines_js)
