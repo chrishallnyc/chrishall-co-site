@@ -99,8 +99,15 @@ try {
 
   await search('SF', 'San Francisco');
   check('SF shortcut selects a California city view', (await info()).code === 'CA' && (await info()).layer === 'geography' && (await page.textContent('#state-title')) === 'San Francisco');
-  await page.waitForFunction(() => window.__TERRAIN.info().view.zoom > 11);
-  check('city focus actually zooms the 3D camera', (await info()).view.zoom > 11);
+  // City focus now frames the Bay Area, including its headlands and islands.
+  // Assert the real regional camera rather than the old city-point zoom value.
+  await page.waitForFunction(() => {
+    const view = window.__TERRAIN.info().view;
+    return view.renderer === 'detail' && view.zoom > 10;
+  }, null, {timeout: 45000});
+  const cityView = (await info()).view;
+  check('city focus opens a closer regional terrain camera', cityView.renderer === 'detail' && cityView.zoom > 10
+    && cityView.center[0] > -122.6 && cityView.center[0] < -122.1 && cityView.center[1] > 37.6 && cityView.center[1] < 38);
   await page.click('#close-story');
   check('closing a search-origin story returns to the search button', await page.evaluate(() => document.activeElement.id === 'open-search'));
   await search('Austin', 'Austin');

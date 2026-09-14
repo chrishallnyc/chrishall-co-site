@@ -3,13 +3,14 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { STATES, CITIES, FEATURES } from '../data/geography.js';
 import { HISTORY_PLACES, HISTORY_THEMES, HISTORY_ERAS, HISTORY_TRAILS } from '../data/history.js';
+import { CITY_DETAILS, CITY_FOCUS } from '../data/city-details.js';
 
 const stateCodes = 'AL AK AZ AR CA CO CT DE FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY'.split(' ').sort();
 const boundaries = JSON.parse(readFileSync(new URL('../data/states.geojson', import.meta.url), 'utf8'));
 const stateByCode = new Map(STATES.map(state => [state.code, state]));
 const geometryByCode = new Map(boundaries.features.map(feature => [feature.properties.code, feature.geometry]));
 const historyById = new Map(HISTORY_PLACES.map(place => [place.id, place]));
-const allPlaces = [...CITIES, ...FEATURES, ...HISTORY_PLACES];
+const allPlaces = [...CITIES, ...FEATURES, ...CITY_DETAILS, ...HISTORY_PLACES];
 
 function unique(values, label) {
   assert.equal(new Set(values).size, values.length, `${label} must be unique`);
@@ -119,6 +120,24 @@ test('San Francisco, Austin, and New York City have distinct, prioritized destin
     assert.ok(place.lng >= west && place.lng <= east && place.lat >= south && place.lat <= north, `${name}: expected metro area`);
     assert.ok(place.labelPriority > 0, `${name}: labels must survive ordinary city decluttering`);
   }
+});
+
+test('city focus regions resolve their local features and keep every new anchor in its city region', () => {
+  const byId = new Map(allPlaces.map(place => [place.id, place]));
+  for (const [cityId, focus] of Object.entries(CITY_FOCUS)) {
+    assert.equal(byId.get(cityId)?.state, focus.state);
+    assert.ok(focus.featureIds.length >= 4);
+    unique(focus.featureIds, `${cityId}: regional features`);
+    for (const id of focus.featureIds) assert.equal(byId.get(id)?.state, focus.state, `${id}: referenced feature in correct state`);
+  }
+  for (const place of CITY_DETAILS) {
+    const focus = CITY_FOCUS[place.cityId];
+    assert.ok(focus?.featureIds.includes(place.id), `${place.id}: discoverable from its city`);
+    const [[west, south], [east, north]] = focus.bounds;
+    assert.ok(place.lng >= west && place.lng <= east && place.lat >= south && place.lat <= north, `${place.id}: within camera region`);
+    assert.equal(new URL(place.coordinateSourceUrl).protocol, 'https:');
+  }
+  assert.equal(CITY_DETAILS.filter(place => place.kind === 'borough').length, 5, 'all five NYC boroughs are labeled');
 });
 
 test('history themes and contiguous eras support every story', () => {

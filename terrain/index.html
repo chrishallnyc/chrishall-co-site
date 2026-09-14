@@ -6,12 +6,13 @@
   <base href="/terrain/">
   <title>TERRAIN — An American atlas · CHALL.NET</title>
   <meta name="description" content="Explore the geography and history of all 50 states. Discover real 3D terrain, cities, historical places, and journeys through the American landscape.">
-  <meta name="theme-color" content="#101210">
+  <meta name="theme-color" content="#090b0c">
   <link rel="canonical" href="https://chall.net/terrain/">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23101210'/%3E%3Cpath d='m4 24 9-16 5 9 3-5 7 12Z' fill='none' stroke='%23e8b46f' stroke-width='1.5'/%3E%3C/svg%3E">
-  <link rel="preload" href="../fonts/fraunces-v38-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="vendor/cormorant-garamond-300.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="vendor/maplibre-gl.css">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="theater.css">
 </head>
 <body>
   <a class="skip-link" href="#explorer">Skip to places and filters</a>
@@ -20,13 +21,12 @@
 
   <header class="masthead">
     <div class="brand"><a href="/" aria-label="CHALL.NET home">CHALL<span>.</span>NET</a><span class="brand-slash">/</span><a href="./" class="brand-project">TERRAIN</a></div>
-    <p class="mast-tagline">An American atlas</p>
-    <button class="search-launch" id="open-search" aria-label="Find a state, city, or story"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span>Find a state, city, or story</span><kbd>/</kbd></button>
-    <button class="icon-button about-button" id="open-about" aria-label="About this atlas">i</button>
+    <button class="search-launch" id="open-search" aria-label="Find a state, city, or story"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span>Search states, cities & stories</span><kbd>/</kbd></button>
+    <button class="about-button" id="open-about" aria-label="About this atlas">About</button>
   </header>
 
   <main id="explorer" class="explorer" tabindex="-1">
-    <button class="state-switch eyebrow" id="choose-state"><span>THE UNITED STATES</span><span class="state-code" id="state-code">CA</span><span aria-hidden="true">⌄</span></button>
+    <button class="state-switch eyebrow" id="choose-state"><span id="state-breadcrumb">THE UNITED STATES, IN RELIEF</span><span class="state-code" id="state-code">CA</span><span aria-hidden="true">⌄</span></button>
     <div class="state-heading"><h1 id="state-title">California</h1><button id="toggle-panel" class="icon-button mobile-only" aria-label="Expand explorer" aria-expanded="false">+</button></div>
     <p class="state-description" id="state-description">The land beneath the story.</p>
     <button id="back-overview" class="text-button" hidden>← State overview</button>
@@ -37,13 +37,32 @@
     </div>
 
     <div class="explorer-body">
+  <aside id="story-panel" class="story-panel" aria-label="Selected place" hidden>
+    <div class="story-topline"><span id="story-kicker" class="eyebrow">A PLACE IN HISTORY</span><button id="close-story" class="icon-button" aria-label="Close place details">×</button></div>
+    <p id="story-period" class="story-period"></p>
+    <h2 id="story-title"></h2>
+    <div id="story-tags" class="story-tags"></div>
+    <p id="story-summary" class="story-summary"></p>
+    <div id="landscape-connection" class="landscape-connection"><h3>WHY HERE?</h3><p id="story-landscape"></p></div>
+    <a id="story-source" class="source-link" target="_blank" rel="noopener noreferrer">Read the source <span aria-hidden="true">↗</span></a>
+    <div class="story-actions"><button id="closer-view" class="outline-button">A closer look <span aria-hidden="true">↗</span></button><button id="story-state-view" class="quiet-button">State view</button></div>
+    <div id="journey-navigation" class="journey-navigation" hidden><span id="journey-progress" class="eyebrow"></span><div><button id="previous-stop" class="outline-button">← Previous</button><button id="next-stop" class="outline-button">Next place →</button></div></div>
+  </aside>
       <section id="geography-panel" aria-label="Geographic places">
-        <div class="visibility-toggles"><label><input type="checkbox" id="show-cities" checked><span>Cities</span></label><label><input type="checkbox" id="show-features" checked><span>Land & water</span></label></div>
-        <div class="section-heading"><h2>CITIES TO EXPLORE</h2><span id="city-count"></span></div>
+        <div id="city-preview" class="city-preview">
+          <span class="eyebrow">A LITTLE CLOSER</span>
+          <h2 id="preview-city-name">San Francisco</h2>
+          <p id="preview-city-description">Hills, headlands, and the bay.</p>
+          <button id="explore-featured-city" class="outline-button"><span id="preview-city-action">Explore the Bay Area</span><span aria-hidden="true">↗</span></button>
+        </div>
+        <div class="visibility-toggles"><label><input type="checkbox" id="show-cities" checked><span>Cities</span></label><label><input type="checkbox" id="show-features" checked><span>Features</span></label></div>
+        <details id="places-browser" class="places-browser"><summary><span id="places-browser-label">Cities & landscapes</span><span aria-hidden="true">+</span></summary>
+        <div class="section-heading city-list-heading"><h2>CITIES TO EXPLORE</h2><span id="city-count"></span></div>
         <div id="city-list" class="place-list"></div>
         <div class="section-heading"><h2>THE LANDSCAPE</h2><span class="tiny-diamond" aria-hidden="true">◇</span></div>
         <div id="feature-list" class="place-list feature-list"></div>
-        <button class="history-invitation" id="history-invitation"><span class="eyebrow">THERE'S A STORY HERE</span><span class="invitation-title" id="invitation-title">Explore California's history <span aria-hidden="true">↗</span></span><span class="invitation-copy">Discover the places that shaped this state.</span></button>
+        </details>
+        <button class="history-invitation" id="history-invitation"><span class="eyebrow">THERE'S A STORY HERE</span><span class="invitation-title" id="invitation-title">Explore California's history <span aria-hidden="true">↗</span></span><span class="invitation-copy">Explore the history held in this landscape.</span></button>
       </section>
 
       <section id="history-panel" aria-label="History filters and places" hidden>
@@ -58,20 +77,10 @@
         <p class="collection-note">A growing, curated collection. Every story has a source.</p>
       </section>
     </div>
-    <footer class="explorer-footer"><button id="all-states" class="text-button">All 50 states <span aria-hidden="true">↗</span></button><button id="share-view" class="quiet-button">Share view</button></footer>
+    <footer class="explorer-footer"><button id="all-states" class="text-button"><span aria-hidden="true">←</span> All 50 states <span aria-hidden="true">↗</span></button><button id="share-view" class="quiet-button">Share view</button></footer>
   </main>
 
-  <aside id="story-panel" class="story-panel" aria-label="Selected place" hidden>
-    <div class="story-topline"><span id="story-kicker" class="eyebrow">A PLACE IN HISTORY</span><button id="close-story" class="icon-button" aria-label="Close place details">×</button></div>
-    <p id="story-period" class="story-period"></p>
-    <h2 id="story-title"></h2>
-    <div id="story-tags" class="story-tags"></div>
-    <p id="story-summary" class="story-summary"></p>
-    <div id="landscape-connection" class="landscape-connection"><h3>WHY HERE?</h3><p id="story-landscape"></p></div>
-    <a id="story-source" class="source-link" target="_blank" rel="noopener noreferrer">Read the source <span aria-hidden="true">↗</span></a>
-    <div class="story-actions"><button id="closer-view" class="outline-button">A closer look <span aria-hidden="true">↗</span></button><button id="story-state-view" class="quiet-button">State view</button></div>
-    <div id="journey-navigation" class="journey-navigation" hidden><span id="journey-progress" class="eyebrow"></span><div><button id="previous-stop" class="outline-button">← Previous</button><button id="next-stop" class="outline-button">Next place →</button></div></div>
-  </aside>
+
 
   <nav class="camera-controls" aria-label="Camera controls">
     <div class="control-stack"><button id="zoom-in" class="icon-button" aria-label="Zoom in">+</button><button id="zoom-out" class="icon-button" aria-label="Zoom out">−</button></div>
@@ -80,13 +89,18 @@
     <button id="fullscreen" class="icon-button" aria-label="Enter fullscreen" title="Fullscreen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg></button>
   </nav>
 
+  <button id="compass" class="compass" aria-label="Return to the state overview" title="Return to the state overview">
+    <span class="compass-n">N</span><span class="compass-e">E</span><span class="compass-s">S</span><span class="compass-w">W</span>
+    <svg id="compass-rose" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="35"/><path class="compass-faint" d="M50 5v90M5 50h90M21 21l58 58M21 79l58-58"/><path class="compass-light" d="m50 8 7 35-7 7-7-7Z M92 50l-35 7-7-7 7-7Z M50 92l-7-35 7-7 7 7Z M8 50l35-7 7 7-7 7Z"/><path class="compass-dark" d="m50 8 0 42-7-7Z M92 50H50l7-7Z M50 92V50l7 7Z M8 50h42l-7 7Z"/><circle cx="50" cy="50" r="2"/></svg>
+  </button>
   <div class="view-bar">
     <div class="surface-controls" role="group" aria-label="Terrain appearance"><button data-surface="natural" aria-pressed="true">Natural</button><button data-surface="elevation" aria-pressed="false">Elevation</button><button data-surface="contours" aria-pressed="false">Contours</button></div>
-    <label class="relief-control"><span>Relief</span><input id="relief" type="range" min="1" max="5" value="2" step="0.5" aria-label="Vertical terrain exaggeration"><output for="relief" id="relief-value">2×</output></label>
-    <p class="gesture-hint"><span class="desktop-hint">Drag to pan · Right-drag to rotate & tilt · Scroll to zoom</span><span class="touch-hint">Drag to pan · Pinch to zoom · Two fingers to rotate & tilt</span></p>
+    <label class="relief-control"><span>Sculpted relief</span><input id="relief" type="range" min="1" max="30" value="20" step="1" aria-label="Vertical terrain exaggeration"><output for="relief" id="relief-value">20×</output></label>
+    <span class="detail-relief-label">City terrain · 2× relief</span>
+    <p class="gesture-hint"><span class="desktop-hint">Drag to rotate · Scroll to zoom · Right-drag to pan</span><span class="touch-hint">Drag to rotate · Pinch to zoom</span></p>
   </div>
   <div id="elevation-key" class="elevation-key" hidden><span>Low</span><i aria-hidden="true"></i><span>High elevation</span></div>
-  <div id="map-loading" class="map-loading" role="status"><span class="loading-ring" aria-hidden="true"></span><span>Reading the landscape…</span></div>
+  <div id="map-loading" class="map-loading" role="status"><span class="loading-ring" aria-hidden="true"></span><span>Sculpting the landscape…</span></div>
   <div id="map-notice" class="map-notice" role="status" hidden><p id="map-notice-text"></p><button id="retry-map" class="text-button">Retry map ↗</button><button id="dismiss-notice" class="quiet-button" aria-label="Dismiss map notice">Dismiss</button></div>
   <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
   <div id="toast" class="toast" role="status" hidden></div>
@@ -107,7 +121,7 @@
     <div class="about-rule"></div>
     <h3>Reading the atlas</h3>
     <p>History pins sit on today's landscape. Dates describe the story associated with a place. Guided journeys connect related places; their lines are reading paths, not surveyed historical routes.</p>
-    <p>Relief emphasizes height to make the terrain easier to read. Set it to <strong>1×</strong> for the unexaggerated view. Use right-drag or two fingers to tilt and turn the map.</p>
+    <p>These little landscapes use real elevation data with exaggerated height, warm light, and a decorative cutaway base. The default <strong>20×</strong> sculpted relief makes mountains visible at state scale; choose <strong>1×</strong> for true proportions. Drag to turn the miniature. City views reveal more detailed terrain and imagery.</p>
     <h3>Sources & coverage</h3>
     <p id="collection-coverage"></p>
     <p>Terrain: <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener noreferrer">AWS Terrain Tiles</a>. Cities & places: <a href="https://www.geonames.org/" target="_blank" rel="noopener noreferrer">GeoNames</a> (CC BY 4.0). Boundaries: U.S. Census Bureau. Imagery credits appear on the map. Read the <a href="README.md" target="_blank" rel="noopener">atlas notes</a>. Every historical place links to its own source.</p>
