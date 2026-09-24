@@ -1,0 +1,38 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Web Audio HRTF isolation</title>
+<style>body{font:16px system-ui;max-width:820px;margin:50px auto;background:#111820;color:#eef5fa}button,select{font:inherit;padding:10px;margin:8px}pre{white-space:pre-wrap}</style>
+<h1>Web Audio HRTF isolation</h1><p>Minimal native graph. Reload between cases. Live output is muted after measurement; no listening judgment is made.</p>
+<select id="case"><option>offline-equalpower-pre</option><option>offline-hrtf-pre</option><option>offline-equalpower-dynamic</option><option>offline-hrtf-dynamic</option><option>offline-hrtf-delay</option><option>offline-hrtf-prewarm</option><option>offline-hrtf-prime</option><option>offline-hrtf-completion</option><option>live-hrtf</option><option>live-hrtf-dynamic</option></select>
+<button id="run">Run probe</button><pre id="result">Ready.</pre>
+<script type="module">
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const stats=samples=>({rms:Math.sqrt(samples.reduce((sum,v)=>sum+v*v,0)/samples.length),peak:samples.reduce((max,v)=>Math.max(max,Math.abs(v)),0),finite:samples.every(Number.isFinite)});
+window.runHrtfProbe=async name=>{
+ const started=performance.now(),result={name,browser:navigator.userAgent,at:new Date().toISOString(),trace:[]};
+ let context;
+ try{
+  if(name.startsWith('live-hrtf')){
+   context=new AudioContext({sampleRate:48000});if(name.endsWith('dynamic')){await context.resume();await sleep(300)}const panner=context.createPanner();panner.panningModel='HRTF';panner.positionX.value=-3;panner.positionZ.value=-1;
+   const source=context.createOscillator();source.type='sawtooth';source.frequency.value=330;const input=context.createGain();input.gain.value=.2;source.connect(input).connect(panner);
+   const split=context.createChannelSplitter(2),mute=context.createGain();mute.gain.value=0;mute.connect(context.destination);panner.connect(split);
+   const meters=[0,1].map(ch=>{const meter=context.createAnalyser();meter.fftSize=4096;split.connect(meter,ch);meter.connect(mute);return meter});
+   const reading=()=>meters.map(meter=>{const data=new Float32Array(meter.fftSize);meter.getFloatTimeDomainData(data);return stats(data)});
+   source.start();await context.resume();await sleep(400);result.left=reading();panner.positionX.setTargetAtTime(3,context.currentTime,.02);await sleep(450);result.right=reading();result.currentTime=context.currentTime;result.status='completed';result.signalPresent=result.left.some(channel=>channel.rms>.000001)&&result.right.some(channel=>channel.rms>.000001);source.stop();await Promise.race([context.close(),sleep(500)]);
+  }else{
+   if(name.endsWith('completion')){const warm=new OfflineAudioContext(2,128,48000),p=warm.createPanner(),osc=warm.createOscillator();p.panningModel='HRTF';osc.connect(p).connect(warm.destination);osc.start();await warm.startRendering();result.trace.push({event:'independent HRTF render completed'})}
+   context=new OfflineAudioContext(2,48000,48000);const model=name.includes('equalpower')?'equalpower':'HRTF';
+   const connectVoice=()=>{result.trace.push({event:'create voice',at:context.currentTime});const source=context.createOscillator(),panner=context.createPanner();panner.panningModel=model;panner.positionX.value=-3;panner.positionZ.value=-1;source.frequency.value=330;source.connect(panner).connect(context.destination);source.start(context.currentTime);result.trace.push({event:'voice connected',at:context.currentTime})};
+   if(name.endsWith('prewarm')||name.endsWith('prime')){const dummy=context.createPanner();dummy.panningModel='HRTF';const mute=context.createGain();mute.gain.value=0;dummy.connect(mute).connect(context.destination);if(name.endsWith('prewarm'))await sleep(750);result.trace.push({event:'dummy prewarm completed',at:context.currentTime})}
+   let suspended;
+   if(['dynamic','prewarm','prime','completion'].some(suffix=>name.endsWith(suffix)))suspended=context.suspend(.1).then(async()=>{result.trace.push({event:'suspend',at:context.currentTime});connectVoice();await context.resume();result.trace.push({event:'resume',at:context.currentTime})});
+   else connectVoice();
+   if(name.endsWith('delay')){await sleep(750);result.trace.push({event:'wait before rendering',at:context.currentTime})}
+   const rendering=Promise.all([context.startRendering(),suspended]).then(([buffer])=>{result.channels=[stats(buffer.getChannelData(0)),stats(buffer.getChannelData(1))];return'completed'});
+   result.status=await Promise.race([rendering,sleep(5000).then(()=> 'timeout')]);result.contextState=context.state;result.currentTime=context.currentTime;
+  }
+ }catch(error){result.status='error';result.error=error.stack||String(error)}
+ result.elapsedMs=Math.round(performance.now()-started);
+ await fetch('/capture/hrtf-probes/'+name+'.json',{method:'POST',body:JSON.stringify(result,null,2)});
+ return result;
+};
+document.querySelector('#run').onclick=async()=>{document.querySelector('#run').disabled=true;window.probeResult=await window.runHrtfProbe(document.querySelector('#case').value);document.querySelector('#result').textContent=JSON.stringify(window.probeResult,null,2);document.querySelector('#run').disabled=false};
+</script></html>

@@ -17,8 +17,9 @@ import { Water } from "./world/water.js";
 import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
+import { Soundscape } from "./game/soundscape.js";
 
-const VERSION = "1.0.0";
+const VERSION = "1.1.0";
 const PHASE = 12;
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
@@ -595,29 +596,42 @@ async function boot() {
     };
   }
 
-  // audio: F119 engine tracks the throttle, M61 gates on firing (phase 13
-  // first wiring; gesture-gated resume inside AudioBus)
-  let audio = null;
+  // Sound direction reads combat/flight state after camera placement; all
+  // sound remains render-side and outside the deterministic simulation.
+  let audio = null, soundscape = null;
   if (player && flags.get("audio") !== "0") {
     try {
       const { AudioBus } = await import("./engine/audio.js");
-      audio = new AudioBus(); // builds engine/gun/lock voices itself
+      audio = new AudioBus({ paused: true }); // saved mixer binds before the first audible frame
+      soundscape = new Soundscape(audio, { player, battlefield, bandits });
     } catch (err) { console.warn("audio unavailable:", err && err.message); }
   }
   // PHASE 13 VOICE SPIKE: the radio gets a voice (settings toggle, default
   // OFF). Voice reads settings.current() per utterance, so the bindLive ctx
   // entry is only the LIVE-chip honesty signal for the menu row — it stays
   // null (row honestly STORED) in free flight / when speechSynthesis is absent.
-  let voice = null;
+  let voice = null, commsAudio = null, radioSuspended = false;
   if (script && missionData && "speechSynthesis" in window) {
     try {
       const V = await import("./game/voice.js");
-      voice = new V.Voice(SETTINGS);
-      V.hookComms(script, missionData, voice); // 300ms poll on script.commsHead
+      voice = new V.Voice({ current: () => {
+        const mix = SETTINGS.current();
+        // SpeechSynthesis cannot route through Web Audio; apply both mixer
+        // faders here, and let the comms poll cancel immediately on mute.
+        return { ...mix, uiVol: mix.uiVol * mix.masterVol,
+          voice: mix.voice && mix.masterVol > 0 && mix.uiVol > 0 && !audio?.muted && !radioSuspended };
+      } });
+      commsAudio = V.hookComms(script, missionData, voice, { intervalMs: 0 });
     } catch (err) { console.warn("voice unavailable:", err && err.message); }
   }
   // PHASE 15: settings go live (fov/renderScale/volumes/muzzle-flash gate)
   SETTINGS.bindLive({ renderer, camera, audio, gunFlash: player ? player.gun.flash : null, baseTier: state.tier, hudLive: true, voice });
+  // A hidden tab may stop requesting frames entirely, so silence it here.
+  document.addEventListener("visibilitychange", () => {
+    audio?.setPaused(document.hidden || controls.open || sim.timescale === 0);
+    if (document.hidden) { radioSuspended = true; voice?.cancel(); }
+  });
+  window.addEventListener("pagehide", () => { audio?.setPaused(true); voice?.cancel(); });
   // MAXFI A1: TRAA + bloom + flare post chain (WebGPU only; ?post=0 keeps
   // the plain pipe for QA baselines and numeric oracles)
   let post = null;
@@ -674,7 +688,7 @@ async function boot() {
   const kcPos = new THREE.Vector3();
 
   Object.assign(state, {
-    sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud, player, battlefield, match, script, bandits, directory,
+    sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud, player, battlefield, match, script, bandits, directory, audio, soundscape,
     kc: () => killCam,
     cloudImmersion: () => clouds.immersion,
     setTimeOfDay: (h) => atmosphere.setTime(h),
@@ -795,18 +809,11 @@ async function boot() {
       }
       if (!cine) lastJetPos.copy(world.jet.position);
       flightfx?.update(player.fm.out, player.throttleCmd, dtMs / 1000, camera);
-      if (audio) {
-        audio.engine.setState({
-          throttle: Math.min(player.throttleCmd, 1),
-          ab: Math.max(0, (player.throttleCmd - 1) / 0.1),
-          ias: player.fm.out.V * 1.94384,
-        });
-        if (player.gun.firing !== audio.gun.firing) audio.gun.fire(player.gun.firing);
-        // launch warning owns the tones over the seeker
-        const seekMode = battlefield && battlefield.samInbound() ? "launch"
-          : player.missiles.locked() ? "lock" : (player.missiles.lockTarget >= 0 ? "scan" : "off");
-        if (audio.locks.mode !== seekMode) audio.locks.setMode(seekMode);
-      }
+      const audioPaused = document.hidden || controls.open || sim.timescale === 0;
+      soundscape?.update({ camera, time: sim.time, dt: dtMs / 1000, paused: audioPaused, cinematic: cine });
+      radioSuspended = audioPaused || !!killCam;
+      commsAudio?.poll();
+      audio?.setRadioActive(!!voice?._cur && !radioSuspended);
     } else {
       world.render(alpha, camera);
     }
