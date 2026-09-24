@@ -12,15 +12,17 @@ served static.
 - `src/engine/` — deterministic fixed-timestep sim core (120 Hz, seeded RNG,
   state hashing — replays/netcode/QA all depend on it), action-map input with
   War Thunder's default binds, quality tiers, pools, debug overlay (`?debug=1`).
-- `src/game/` — game systems (currently the phase-1 proving world).
+- `src/game/` — game systems, missions, player and enemy aircraft.
 
 Deploys via the `raptor` Vercel project (rootDirectory `raptor`) on push to main.
 
 Aircraft graphics live in `src/aircraft/`. `f22v3.js` retains the player rig's
 15 public controls; reference-derived geometry, cockpit, gear, weapon bays,
 F119 nozzles, and materials are separate modules. `bandit-models.js` builds the
-shared fighter, transport, and drone. Distance-dependent visual detail and
-livery changes preserve each aircraft's materials and rig. Flight physics,
+shared fighter, transport, and drone. Their coating textures are generated once
+at startup for the selected quality and shared across the aircraft pool.
+Distance-dependent visual detail and livery changes preserve each aircraft's
+materials and rig. Flight physics,
 hit volumes, and deterministic simulation remain independent of these meshes.
 
 The F-22 uses authored color, normal, and packed occlusion/roughness/metalness

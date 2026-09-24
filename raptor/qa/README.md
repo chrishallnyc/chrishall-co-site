@@ -1,6 +1,6 @@
 # Aircraft validation
 
-Run from anywhere with Node and an installed Playwright package/browser:
+Run from the repository root with Node and an installed Playwright package/browser:
 
 ```sh
 node raptor/qa/aircraft.mjs --out .context/aircraft-rebuild/validation/baseline
@@ -26,7 +26,9 @@ Equivalent flags are `--playwright` and `--browser`. The result records the reso
 
 ## Alternate builders and matched comparisons
 
-An F-22 builder exports `buildF22(options)` returning `{ group, parts }`; an async result or an additional `ready` promise is supported. The fixture waits for material image textures to finish loading before inspecting and capturing. Browser evaluation has an explicit timeout, including loader and GPU initialization waits. Paths are local URLs relative to the served `raptor/` root. `--export` chooses a different named export, and `--builder-options` passes JSON. The bandit builder remains `buildBanditModels()` returning `[drone, transport, fighter]` unless `--bandit-builder` specifies another module.
+An F-22 builder exports `buildF22(options)` returning `{ group, parts }`; an async result or an additional `ready` promise is supported. The fixture waits for material image textures to finish loading before inspecting and capturing. Browser evaluation has an explicit timeout, including loader and GPU initialization waits. Paths are local URLs relative to the served `raptor/` root. `--export` chooses a different named export, and `--builder-options` passes JSON; for example, `--builder-options '{"quality":"low"}'` caps the F-22's constructed geometry and textures. The fixture calls the bandit builder as `buildBanditModels()` returning `[drone, transport, fighter]` unless `--bandit-builder` specifies another module. The production API also accepts `buildBanditModels(null, { quality })` with `high`, `medium` (`med`), or `low`; this selects fleet texture resolution at construction. `--builder-options` applies only to the F-22 fixture.
+
+Fleet color/roughness/normal maps are generated once per aircraft kind and texture tier, then shared by every pool clone and livery. Across the three kinds, these maps use approximately 96/24/6 MiB at HIGH/MED/LOW, including mipmaps. This counts fleet coating textures only; geometry, effects, the F-22, and render targets are separate. Distance-based geometry changes reuse the selected texture tier.
 
 ```sh
 node raptor/qa/aircraft.mjs \
@@ -79,7 +81,7 @@ group.userData.aircraft = {
   hinges: {
     flaperonL: { axis: [1, 0, 0], minDeg: -20, maxDeg: 20 },
     gearNose: { axis: [1, 0, 0], minDeg: -90, maxDeg: 0, stowedDeg: -90, deployedDeg: 0 },
-    // Declare each of the remaining 14 parts; bay doors use local Z.
+    // Declare each of the remaining 13 parts; bay doors use local Z.
   },
 };
 ```
@@ -156,6 +158,8 @@ Aircraft shadows use the existing sun and quality map sizes, a player-centered 4
 
 Hillaire applies extinction and inscatter to the final lit aircraft color, preserving alpha and the post pipeline's velocity output; WebGL retains ordinary scene fog. The material cache preserves livery assignments and covers every prebuilt visual LOD variant at startup. Explicit aircraft effects and `fog:false` effect materials remain outside this integration. Reverse depth prevents kilometre-distance surface interference; unsupported WebGL extensions retain the renderer's normal-depth fallback.
 
-GL/GPU validation warnings fail the gate alongside browser errors and network failures. `--trace-gl 1` records the exact mesh and VAO/index-cache state for unbound indexed draws, including the first startup frame. This trace identified an existing r185 WebGL index-upload cache fault in the terrain; `engine/webgl-index-state.js` narrowly resets vertex state before index creation/update and applies only to that pinned revision. Native WebGPU is untouched. Revalidate and remove the compatibility guard when upgrading Three.js.
+GL/GPU validation warnings fail the gate alongside browser errors and network failures. `--trace-gl 1` records the exact mesh and VAO/index-cache state for unbound indexed draws, including the first startup frame. This trace identified an existing r185 WebGL index-upload cache fault in the terrain; `engine/webgl-index-state.js` narrowly resets vertex state before index creation/update and applies only to that pinned revision. This index guard does not run on native WebGPU.
+
+Reverse depth also needs `engine/reversed-depth-order.js`: r185 reverses explicit group/render priorities along with distance order, so the guard preserves the intended star/cloud draw order on either backend when reverse depth is active. The vendored `display/GTAONode.js` rejects the reverse-depth sky clear value of zero, preventing false background occlusion when `--ao 1` is enabled. Revalidate these compatibility fixes when upgrading Three.js, including the optional AO path and WebGL startup draws.
 
 Timing is warmed **rAF interval evidence**, with raw renderer counters and memory inventory. It is not GPU timestamp data, CPU-only render time, a long mission endurance test, or a universal fps claim. The full HIGH native terrain/post/cloud path can dominate the result. Run comparison cases without competing graphics jobs before attributing a small difference to the aircraft.
