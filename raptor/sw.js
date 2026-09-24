@@ -4,7 +4,7 @@
 // NEVER precached (browser HTTP cache handles them); this worker only makes
 // the app installable and the shell survivable offline. Cache is keyed by
 // version: bumping SHELL_VERSION on deploy retires the old cache.
-const SHELL_VERSION = "raptor-shell-v1";
+const SHELL_VERSION = "raptor-shell-v1.1.0";
 const SHELL = ["/", "/index.html", "/manifest.webmanifest", "/assets/icon-192.png", "/assets/icon-512.png"];
 
 self.addEventListener("install", (e) => {
@@ -13,7 +13,7 @@ self.addEventListener("install", (e) => {
 
 self.addEventListener("activate", (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== SHELL_VERSION).map((k) => caches.delete(k))))
+    caches.keys().then((keys) => Promise.all(keys.filter((k) => k.startsWith('raptor-shell-') && k !== SHELL_VERSION).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -27,10 +27,13 @@ self.addEventListener("fetch", (e) => {
         const u = new URL(e.request.url);
         if (SHELL.includes(u.pathname) && res.ok) {
           const copy = res.clone();
-          caches.open(SHELL_VERSION).then((c) => c.put(e.request, copy));
+          e.waitUntil(caches.open(SHELL_VERSION).then((c) => c.put(u.pathname, copy)).catch(() => {}));
         }
         return res;
       })
-      .catch(() => caches.match(e.request))
+      .catch(async () => {
+        const cache=await caches.open(SHELL_VERSION);
+        return await cache.match(new URL(e.request.url).pathname) || Response.error();
+      })
   );
 });

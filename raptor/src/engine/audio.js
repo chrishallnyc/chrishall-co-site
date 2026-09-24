@@ -413,7 +413,9 @@ export class AudioBus {
     this.muteGain.connect(this.limiter);
     this.limiter.connect(this.ctx.destination);
 
-    this.muted = localStorage.getItem(MUTE_KEY) === "1";
+    try { this.muted = localStorage.getItem(MUTE_KEY) === "1"; }
+    catch (_) { this.muted = false; }
+    this.paused = false;
     this.muteGain.gain.value = this.muted ? 0 : 1;
 
     this._armGestureResume();
@@ -440,8 +442,17 @@ export class AudioBus {
 
   setMute(m) {
     this.muted = !!m;
-    this.muteGain.gain.setTargetAtTime(this.muted ? 0 : 1, this.ctx.currentTime, 0.01);
-    localStorage.setItem(MUTE_KEY, this.muted ? "1" : "0");
+    this._applyMute();
+    try { localStorage.setItem(MUTE_KEY, this.muted ? "1" : "0"); } catch (_) {}
+  }
+
+  setPaused(paused) {
+    this.paused = !!paused;
+    this._applyMute();
+  }
+
+  _applyMute() {
+    this.muteGain.gain.setTargetAtTime(this.muted || this.paused ? 0 : 1, this.ctx.currentTime, 0.025);
   }
 
   toggleMute() {

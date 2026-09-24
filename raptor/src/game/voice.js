@@ -54,7 +54,7 @@ export function inferSpeaker(text) {
 }
 
 export class Voice {
-  // settingsLike: anything with current() -> { voice, uiVol } (the settings
+  // settingsLike: anything with current() -> { voice, muted, masterVol, uiVol } (the settings
   // module itself qualifies). opts.{synth,Utterance} exist for QA injection;
   // both default to the real browser globals and to null where absent.
   constructor(settingsLike, opts = {}) {
@@ -71,13 +71,13 @@ export class Voice {
   enabled() {
     if (!this.synth || !this.U) return false;
     const s = this.settings && this.settings.current ? this.settings.current() : this.settings;
-    return !!(s && s.voice);
+    return !!(s && s.voice && !s.muted && this._vol() > 0);
   }
 
   _vol() {
     const s = this.settings && this.settings.current ? this.settings.current() : this.settings;
-    const v = s && typeof s.uiVol === "number" ? s.uiVol : 1;
-    return Math.min(1, Math.max(0, v));
+    const gain = value => Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 1;
+    return gain(s?.masterVol) * gain(s?.uiVol);
   }
 
   // voices load async in Chrome — retry the cast until getVoices() answers;

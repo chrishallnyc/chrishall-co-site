@@ -55,6 +55,8 @@ const FILE = {
   N09: "nellis-09", N10: "nellis-10", V09: "valdez-09", V10: "valdez-10", M09: "marianas-09", M10: "marianas-10",
 };
 const KEY = "raptor.auth.v1";
+let lastSaveSucceeded = null;
+export function authSaveSucceeded() { return lastSaveSucceeded; }
 
 export function loadAuth() {
   try {
@@ -65,7 +67,9 @@ export function loadAuth() {
 }
 
 export function saveAuth(a) {
-  try { localStorage.setItem(KEY, JSON.stringify(a)); } catch (_) { /* private mode: session-only */ }
+  try { localStorage.setItem(KEY, JSON.stringify(a)); lastSaveSucceeded = true; }
+  catch (_) { lastSaveSucceeded = false; }
+  return lastSaveSucceeded;
 }
 
 // linear chain: a sortie is unlocked when every earlier one is done
@@ -77,6 +81,7 @@ export function isUnlocked(auth, idx) {
 export function markDone(id) {
   const a = loadAuth();
   if (!a.done[id]) { a.done[id] = 1; saveAuth(a); }
+  else lastSaveSucceeded = true;
   return a;
 }
 

@@ -44,9 +44,12 @@ export class Player {
     // render-side scratch
     this._prev = new Float64Array(this.fm.state);
     this._q = new THREE.Quaternion();
+    this._nextQ = new THREE.Quaternion();
     this._f = new THREE.Vector3(); this._u = new THREE.Vector3(); this._r = new THREE.Vector3();
     this._m = new THREE.Matrix4();
     this._camPos = new THREE.Vector3();
+    this._camOffset = new THREE.Vector3();
+    this._cameraReady = false;
   }
 
   _doSpawn() {
@@ -61,19 +64,43 @@ export class Player {
     this._mouseDx += input.mouse.dx;
     this._mouseDy += input.mouse.dy;
     const L = this._live;
-    L.rollL = input.held("roll_left") ? 1 : 0;
-    L.rollR = input.held("roll_right") ? 1 : 0;
+    const roll = input.axis?.("roll") || 0;
+    const throttle = input.axis?.("throttleRel") || 0;
+    L.rollL = Math.max(input.held("roll_left") ? 1 : 0, -roll);
+    L.rollR = Math.max(input.held("roll_right") ? 1 : 0, roll);
     L.yawL = input.held("yaw_left") ? 1 : 0;
     L.yawR = input.held("yaw_right") ? 1 : 0;
-    L.thrUp = input.held("throttle_up") ? 1 : 0;
-    L.thrDn = input.held("throttle_down") ? 1 : 0;
+    L.thrUp = Math.max(input.held("throttle_up") ? 1 : 0, throttle);
+    L.thrDn = Math.max(input.held("throttle_down") ? 1 : 0, -throttle);
     L.pitchUp = input.held("pitch_up") ? 1 : 0;
     L.pitchDn = input.held("pitch_down") ? 1 : 0;
     L.brake = input.held("wheel_brakes") ? 1 : 0;
     L.wheel += input.wheelDelta();
     if (input.pressed("gear")) L.gearEdge = 1;
-    L.fire = (input.held("fire_mguns") || input.held("fire_cannons")) ? 1 : 0;
+    L.fire = input.held("fire_mguns") ? 1 : 0;
     if (input.pressed("fire_aam")) L.aamEdge = 1;
+  }
+
+  // Input can arrive on a render frame with no fixed simulation tick. Clear
+  // that queued input at the pause/focus boundary so resuming cannot fire a
+  // missile, toggle gear, or apply mouse motion from before the menu opened.
+  clearInput() {
+    this._mouseDx = 0;
+    this._mouseDy = 0;
+    for (const key of Object.keys(this._live)) this._live[key] = 0;
+  }
+
+  // Recover a lost aim marker without changing the aircraft's attitude or
+  // throttle. Discard queued mouse movement so it cannot undo the recenter.
+  recenterAim() {
+    const st = this.fm.state;
+    this._q.set(st[S.QX], st[S.QY], st[S.QZ], st[S.QW]);
+    this._f.set(1, 0, 0).applyQuaternion(this._q);
+    this.aimHeading = Math.atan2(this._f.y, this._f.x);
+    this.aimPitch = Math.max(-AIM_PITCH_LIM, Math.min(AIM_PITCH_LIM,
+      Math.asin(Math.max(-1, Math.min(1, this._f.z)))));
+    this._mouseDx = 0;
+    this._mouseDy = 0;
   }
 
   // QA hook: drive the aim/throttle directly (batteries can't move a mouse);
@@ -88,6 +115,7 @@ export class Player {
       });
       this.aimHeading = (pos.headingDeg || 0) * Math.PI / 180;
       this._prev.set(this.fm.state);
+      this._cameraReady = false;
     }
     if (aimPitchDeg !== undefined) this.aimPitch = aimPitchDeg * Math.PI / 180;
     if (aimHeadingDeg !== undefined) this.aimHeading = aimHeadingDeg * Math.PI / 180;
@@ -101,7 +129,15 @@ export class Player {
   }
 
   // ---- sim side ----
-  reset() { this._doSpawn(); this.aimPitch = 0; this.aimHeading = this.spawn.headingRad; this.hp = 100; }
+  reset() {
+    this._doSpawn();
+    this.aimPitch = 0;
+    this.aimHeading = this.spawn.headingRad;
+    this.hp = 100;
+    // A respawn is a discontinuity, never a flight segment to interpolate.
+    this._prev?.set(this.fm.state);
+    this._cameraReady = false;
+  }
 
   tick(sim, dt) {
     this._prev.set(this.fm.state);
@@ -156,7 +192,7 @@ export class Player {
   }
 
   // ---- render side ----
-  render(alpha, camera, parked) {
+  render(alpha, camera, parked, dt = 1 / 60) {
     const a = this._prev, b = this.fm.state;
     const lp = (i) => a[i] + (b[i] - a[i]) * alpha;
     // FM ENU -> three (x=east stays, y=up from ENU z, z=north from ENU y)
@@ -164,33 +200,53 @@ export class Player {
     this.jet.position.set(px, py, pz);
 
     // orientation via basis vectors (quat can't cross an improper swap)
-    this._q.set(b[S.QX], b[S.QY], b[S.QZ], b[S.QW]);
+    // Position AND attitude must share one presentation time. Using the
+    // current tick's rotation made the jet twitch relative to its camera on
+    // displays whose refresh rate does not divide the 120 Hz simulation.
+    this._q.set(a[S.QX], a[S.QY], a[S.QZ], a[S.QW]);
+    this._nextQ.set(b[S.QX], b[S.QY], b[S.QZ], b[S.QW]);
+    this._q.slerp(this._nextQ, alpha);
     this._f.set(1, 0, 0).applyQuaternion(this._q);   // body fwd in ENU
     this._u.set(0, 0, -1).applyQuaternion(this._q);  // body up (FRD +z is down)
-    const f = new THREE.Vector3(this._f.x, this._f.z, this._f.y); // ENU->three
-    const u = new THREE.Vector3(this._u.x, this._u.z, this._u.y);
-    const r = new THREE.Vector3().crossVectors(u, f).normalize();
+    const f = this._f.set(this._f.x, this._f.z, this._f.y); // ENU->three
+    const u = this._u.set(this._u.x, this._u.z, this._u.y);
+    const r = this._r.crossVectors(u, f).normalize();
     u.crossVectors(f, r).normalize();
     this._m.makeBasis(r, u, f);
     this.jet.quaternion.setFromRotationMatrix(this._m);
 
-    this.gun.render(1 / 60, camera); // visual aging; cheap approximation of dt
-    this.missiles.render(1 / 60, camera);
+    this.gun.render(dt, camera);
+    this.missiles.render(dt, camera);
 
     if (parked) return; // QA parked-camera owns the view
-    // chase camera behind the flight path, mild smoothing
+    // Smooth the chase OFFSET, then anchor it to the interpolated aircraft.
+    // Smoothing absolute world positions creates variable translational lag:
+    // every slow frame lets a fast aircraft pull away, then snaps it back.
+    // Time-based damping retains the old 60 fps banking feel at any cadence.
     const back = 55, up = 16;
-    this._camPos.set(px - f.x * back + u.x * up, py - f.y * back + u.y * up, pz - f.z * back + u.z * up);
-    // snap on spawn/respawn (a slow lerp from the origin drags the camera
-    // underground through the basin); smooth only when already close
-    if (camera.position.distanceTo(this._camPos) > 400) camera.position.copy(this._camPos);
-    else camera.position.lerp(this._camPos, 0.35);
+    this._camPos.set(-f.x * back + u.x * up, -f.y * back + u.y * up, -f.z * back + u.z * up);
+    if (!this._cameraReady) {
+      this._camOffset.copy(this._camPos);
+      this._cameraReady = true;
+    } else {
+      this._camOffset.lerp(this._camPos, 1 - Math.pow(0.65, Math.max(0, dt) * 60));
+    }
+    camera.position.copy(this.jet.position).add(this._camOffset);
     camera.up.set(u.x * 0.35, 1, u.z * 0.35).normalize();
     camera.lookAt(px + f.x * 120, py + f.y * 120, pz + f.z * 120);
   }
 
   hudState() {
     const st = this.fm.state, out = this.fm.out;
+    // initFlight/reset establish velocity without ticking the physics. Its
+    // derived outputs can still be zero or belong to the previous flight when
+    // the welcome/pause card opens. Read the current state, including a real
+    // zero-speed state. Player.tick supplies still air, so this is airspeed.
+    const speed = Math.hypot(st[S.VX], st[S.VY], st[S.VZ]);
+    // Match flight.js's ISA temperature model without advancing the world.
+    const altitude = Math.max(-500, Math.min(30000, st[S.PZ]));
+    const temperature = altitude <= 11000 ? 288.15 - 0.0065 * altitude : 216.65;
+    const mach = speed / Math.sqrt(1.4 * 287.053 * temperature);
     // heading/pitch/roll from the body basis in ENU
     this._q.set(st[S.QX], st[S.QY], st[S.QZ], st[S.QW]);
     this._f.set(1, 0, 0).applyQuaternion(this._q);
@@ -200,12 +256,12 @@ export class Player {
     // +roll = right bank: right wing dips → its ENU z goes negative
     const roll = Math.atan2(-this._r.z, Math.hypot(this._r.x, this._r.y)) * 180 / Math.PI;
     return {
-      speedKt: out.V * 1.94384,
+      speedKt: speed * 1.94384,
       altFt: st[S.PZ] * 3.28084,
       heading: (heading + 360) % 360,
       pitch, roll,
       g: out.nz,
-      mach: out.mach,
+      mach,
       aoa: out.alphaDeg,
       throttle: Math.round(this.throttleCmd * 100),
       ammo: this.gun.ammo,

@@ -33,7 +33,7 @@ export const ACTIONS = {
   drop_guided:     { cat: "weapons", label: "drop guided bomb", binds: [["AltLeft", "Space"], ["Digit3"], ["Mouse3"]] },
   lock_guided:     { cat: "weapons", label: "lock guided bomb", binds: [["AltLeft", "KeyV"]] },
   fire_rocket:     { cat: "weapons", label: "fire rocket", binds: [["Digit4"], ["Mouse4"]] },
-  fire_aam:        { cat: "weapons", label: "fire air-to-air missile", binds: [["ControlLeft", "AltLeft"]] },
+  fire_aam:        { cat: "weapons", label: "fire air-to-air missile", binds: [["Space"], ["ControlLeft", "AltLeft"]] },
   lock_a2a:        { cat: "weapons", label: "weapon lock (air-to-air)", binds: [["AltLeft", "KeyX"]] },
   fire_agm:        { cat: "weapons", label: "fire air-to-ground missile", binds: [["Space"]] },
   lock_a2g:        { cat: "weapons", label: "weapon lock (air-to-ground)", binds: [["AltLeft", "KeyC"]] },
@@ -109,7 +109,50 @@ export const ACTIONS = {
 
   // ── raptor-only (not WT) ────────────────────────────────────────────────
   debug:           { cat: "raptor", label: "debug overlay", binds: [["Backquote"]] },
+  help:            { cat: "interface", label: "flight guide", binds: [["F1"]] },
+  recenter_aim:    { cat: "flight", label: "recenter flight aim", binds: [["KeyR"]] },
 };
+
+// The original War Thunder reference contains actions this aircraft does not
+// implement. Only real, wired actions belong in the editor or input resolver.
+// Keep the reference above for compatibility with older saved layouts.
+export const PLAYABLE_ACTIONS = {
+  throttle_up: { label: "Increase throttle", description: "Hold to accelerate. Keep holding at 100% for afterburner.", essential: true },
+  throttle_down: { label: "Decrease throttle", description: "Hold to slow the aircraft.", essential: true },
+  roll_left: { label: "Roll left", description: "Bank the wings left.", essential: true },
+  roll_right: { label: "Roll right", description: "Bank the wings right.", essential: true },
+  pitch_up: { label: "Pitch up", description: "Raise the nose using the keyboard." },
+  pitch_down: { label: "Pitch down", description: "Lower the nose using the keyboard." },
+  yaw_left: { label: "Rudder left", description: "Fine horizontal steering with the rudder." },
+  yaw_right: { label: "Rudder right", description: "Fine horizontal steering with the rudder." },
+  fire_mguns: { label: "Fire cannon", description: "Hold your cannon binding to fire. A keyboard key leaves your trackpad hand free to steer.", binds: [["KeyF"], ["Mouse0"], ["Digit1"]], essential: true },
+  fire_aam: { label: "Launch missile", description: "Aim toward a target and wait for a lock, then launch.", essential: true },
+  gear: { label: "Landing gear", description: "Toggle the landing gear up or down." },
+  wheel_brakes: { label: "Wheel brakes", description: "Hold to brake when the aircraft is on the ground." },
+  menu: { label: "Pause / flight menu", description: "Open the flight menu. Escape always stays available.", essential: true, lockedPrimary: true },
+  game_pause: { label: "Pause / resume", description: "Quickly pause or resume your flight." },
+  hide_hud: { label: "Show / hide flight HUD", description: "Toggle flight instruments and target markers." },
+  help: { label: "Flight guide", description: "Open the flight guide and quick reference.", binds: [["KeyH"], ["F1"]] },
+  recenter_aim: { label: "Recenter flight aim", description: "Bring the aim point back to the aircraft's current direction.", essential: true },
+  debug: { label: "Performance details", description: "Toggle detailed renderer and simulation statistics." },
+};
+
+export const ACTIVE_ACTIONS = Object.fromEntries(Object.entries(PLAYABLE_ACTIONS)
+  .map(([id, info]) => [id, { ...ACTIONS[id], ...info }]));
+
+const KEY_NAMES = {
+  Mouse0: "Left mouse", Mouse1: "Middle mouse", Mouse2: "Right mouse", Mouse3: "Mouse 4", Mouse4: "Mouse 5",
+  WheelUp: "Wheel up", WheelDown: "Wheel down", Space: "Space", Escape: "Esc",
+  ControlLeft: "Left Ctrl", ControlRight: "Right Ctrl", ShiftLeft: "Left Shift", ShiftRight: "Right Shift",
+  AltLeft: "Left Alt / Option", AltRight: "Right Alt / Option", MetaLeft: "Left ⌘ / Win", MetaRight: "Right ⌘ / Win",
+  ArrowUp: "↑", ArrowDown: "↓", ArrowLeft: "←", ArrowRight: "→", Backquote: "`", Minus: "−", Equal: "=",
+  NumpadAdd: "Num +", NumpadSubtract: "Num −", NumpadMultiply: "Num ×", NumpadDivide: "Num /", NumpadDecimal: "Num .",
+  BracketLeft: "[", BracketRight: "]", Semicolon: ";", Quote: "'", Period: ".", Comma: ",", Slash: "/", Backslash: "\\",
+};
+export function keyName(code) {
+  return KEY_NAMES[code] || code.replace(/^Key/, "").replace(/^Digit/, "").replace(/^Numpad/, "Num ");
+}
+export function chordName(chord) { return chord.map(keyName).join(" + "); }
 
 // WT gamepad preset pc_xinput_ma_ver1 (mouse-aim), from the same datamine.
 // Axes: standard-mapping indices; buttons: standard gamepad indices.
@@ -129,4 +172,11 @@ export const WT_GAMEPAD_MA = {
     flaps: [3, 7],
     airbrake: [2, 7],
   },
+};
+
+// Standard Gamepad API mapping. Only actions implemented by RAPTOR are wired.
+export const RAPTOR_GAMEPAD = {
+  axes: { roll: 0, throttleRel: 1, aimX: 2, aimY: 3 },
+  buttons: { fire_mguns: 7, fire_aam: 5, gear: 0, recenter_aim: 3, menu: 9, help: 8 },
+  chords: {},
 };
