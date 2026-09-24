@@ -1,0 +1,64 @@
+# RAPTOR release notes
+
+## 1.2.0 — 2026-09-24
+
+Aircraft now hold up to close inspection, with shaped airframes, detailed
+cockpits and mechanical interiors, physical coatings, and volumetric exhaust.
+The F-22 and all three enemy aircraft share quality-aware resources and switch
+to lighter geometry at a distance.
+
+- **Refine the F-22.** Rebuilt airframe surfaces, intake and weapons-bay
+  openings, pilot and instrument details, landing-gear hardware, and vectoring
+  engine nozzles preserve the existing articulated aircraft rig.
+- **Give each aircraft its own finish.** Authored paint, panel wear, glazing,
+  engine metal, and freshly baked contact shading respond to the game's sun,
+  atmosphere, and aircraft shadows.
+- **Improve the enemy fleet.** Fighters gain cockpit and exhaust interiors;
+  transports gain open cockpit windows and contoured engines; drones gain
+  shaped propellers and optical sensor apertures.
+- **Keep motion coherent.** Interpolated control surfaces, gear supports,
+  doors, and nozzles follow the visible aircraft without changing flight
+  simulation numerics. The flight setup and controls improvements from 1.1.0
+  remain intact.
+- **Inspect and reproduce the results.** The aircraft lab covers all four
+  models. Offline coating and contact-bake tools, geometry checks, and browser
+  captures exercise both WebGPU and WebGL rendering.
+
+Five further refinement passes polished coating response, canopy and engines,
+cockpit and gear, the enemy fleet, and exhaust/contact shading. Resource sharing,
+quality caps, and prebuilt distance levels keep the detail bounded.
+
+## 1.1.0 — 2026-09-24
+
+Flight setup now gives mouse and MacBook trackpad players a clear route from
+choosing controls to taking off. Preflight shows the actual essential keys,
+missing-key repair, campaign progress, and a launch button that stays available.
+Controls, Settings, Pause, and Pilot log remain within reach during flight.
+
+- **Set keys with confidence.** Search actions or keys, add alternate bindings,
+  resolve conflicts explicitly, restore one action, and Undo the last layout
+  edit. The safe test area keeps the last input result visible. Intentional
+  shared keys and existing custom layouts survive reload and migration.
+- **Tune each device.** Mouse, trackpad, and controller sensitivity save
+  independently. Trackpad steering needs no dragging; keyboard firing keeps
+  one hand free to aim. Optional pointer capture helps at window edges, and
+  Escape always releases it and opens Pause.
+- **Keep flight readable.** Practice steps respond to actual controls and
+  collapse when complete. Key reminders and the checklist can be hidden and
+  restored independently. Accessibility settings preview instrument size and
+  target colors; display settings explain which preset is running and let
+  players review a restart before applying a new one.
+- **Fly and load more reliably.** Camera and aircraft interpolation stay aligned,
+  exposure updates avoid a synchronous graphics readback, and lighter region
+  previews reduce preflight downloads. Loading shows real preparation stages;
+  failed missions offer retry or preflight instead of silently starting another
+  battle. Menus and focus loss pause the simulation and clear held input.
+- **Preserve player choices.** Setup dialogs isolate background controls and
+  restore focus. A visible mute setting includes spoken radio and retains older
+  mute preferences. Campaign briefings reopen the current mission, storage
+  failures report session-only changes, and shell updates retire only RAPTOR's
+  own caches.
+
+Native regression tests and isolated browser checks cover control editing,
+mouse/trackpad profiles, guidance, loading recovery, and mission progress.
+The game still runs as a static site with no package installation or build step.

@@ -4,6 +4,11 @@
 
 const STORE_KEY = "raptor:quality:v1";
 const BENCH_KEY = "raptor:bench:v1";
+let sessionTier = null, sessionBench = null;
+const validTier = name => typeof name === 'string' && Object.hasOwn(TIERS, name);
+function manualTier() {
+  try { const name=localStorage.getItem(STORE_KEY); return validTier(name)?name:null; } catch { return sessionTier; }
+}
 
 export const TIERS = {
   LOW:   { renderScale: 0.75, shadows: false, shadowSize: 0,    scatter: 0.25, clouds: "sky",       post: false },
@@ -13,15 +18,32 @@ export const TIERS = {
 };
 
 export function savedBench() {
-  try { return JSON.parse(localStorage.getItem(BENCH_KEY) || "null"); } catch (_) { return null; }
+  try {
+    const value=JSON.parse(localStorage.getItem(BENCH_KEY) || 'null');
+    return value && validTier(value.tier) && ['webgpu','webgl'].includes(value.backend) && Number.isFinite(value.ms) && value.ms>0 ? value : null;
+  } catch (_) { return sessionBench; }
 }
 
-export function saveBench(rec) { localStorage.setItem(BENCH_KEY, JSON.stringify(rec)); }
+export function saveBench(rec) {
+  if(!rec || !validTier(rec.tier) || !['webgpu','webgl'].includes(rec.backend) || !Number.isFinite(rec.ms) || rec.ms<=0)return;
+  sessionBench={...rec};
+  try {localStorage.setItem(BENCH_KEY, JSON.stringify(rec));}catch {}
+}
 
-export function clearBench() { localStorage.removeItem(BENCH_KEY); localStorage.removeItem(STORE_KEY); }
+export function clearBench() {
+  sessionTier=null;sessionBench=null;
+  try {localStorage.removeItem(BENCH_KEY);localStorage.removeItem(STORE_KEY);}catch {}
+}
 
 // Median frame ms from a measured run of the live scene → tier.
-export function benchPick(medianMs, backend) {
+export function benchPick(medianMs, backend, activeTier) {
+  // requestAnimationFrame is display-limited. A stable 60 Hz HIGH scene is
+  // already meeting its budget; 16.7 ms is not evidence it needs downgrading.
+  if (validTier(activeTier) && Number.isFinite(medianMs) && medianMs > 0) {
+    if (medianMs <= 18.5) return activeTier;
+    if (medianMs > 34) return 'LOW';
+    return ['HIGH','ULTRA'].includes(activeTier) ? 'MED' : 'LOW';
+  }
   if (backend === "webgpu" && medianMs < 5) return "ULTRA";
   if (medianMs < 9) return "HIGH";
   if (medianMs < 17) return "MED";
@@ -29,8 +51,8 @@ export function benchPick(medianMs, backend) {
 }
 
 export function detectTier({ backend } = {}) {
-  const saved = localStorage.getItem(STORE_KEY);
-  if (saved && TIERS[saved]) return saved;
+  const saved = manualTier();
+  if (saved) return saved;
   const bench = savedBench();
   if (bench && TIERS[bench.tier] && bench.backend === backend) return bench.tier;
   const cores = navigator.hardwareConcurrency || 4;
@@ -42,12 +64,13 @@ export function detectTier({ backend } = {}) {
   return "LOW";
 }
 
-export function hasManualTier() { return !!localStorage.getItem(STORE_KEY); }
+export function hasManualTier() { return !!manualTier(); }
 
 export function setTier(name) {
-  if (!TIERS[name]) return false;
-  localStorage.setItem(STORE_KEY, name);
+  if (!validTier(name)) return false;
+  sessionTier=name;
+  try {localStorage.setItem(STORE_KEY, name);}catch {}
   return true;
 }
 
-export function tierParams(name) { return TIERS[name] || TIERS.MED; }
+export function tierParams(name) { return validTier(name) ? TIERS[name] : TIERS.MED; }

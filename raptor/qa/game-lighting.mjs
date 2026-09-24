@@ -112,7 +112,12 @@ try {
     try {
       console.log(JSON.stringify({ case: key, phase: 'boot', url: record.url }));
       await page.goto(record.url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.bringToFront();
       await page.waitForFunction(() => window.__RAPTOR?.ready || window.__RAPTOR?.failure, {}, { timeout: Number(options.timeout ?? 180000) });
+      if (await page.evaluate(() => !!window.__RAPTOR?.failure)) throw new Error(await page.evaluate(() => String(window.__RAPTOR.failure)));
+      await page.locator('#veil').waitFor({ state: 'detached' });
+      if (await page.evaluate(() => !!window.__RAPTOR?.cockpit?.paused)) await page.locator('.pause-dialog[open] [data-resume]').click();
+      await page.waitForFunction(() => !window.__RAPTOR?.cockpit?.paused);
       record.bootMs = Date.now() - start;
       await page.evaluate(scenario => {
         const s = window.__RAPTOR;

@@ -7,7 +7,7 @@
 // "doesn't crash" tier).
 
 import * as THREE from "three";
-import { pass, mrt, output, velocity } from "three/tsl";
+import { pass, mrt, output, velocity, texture } from "three/tsl";
 import { traa } from "../../vendor/display/TRAANode.js";
 import { bloom } from "../../vendor/display/BloomNode.js";
 import { lensflare } from "../../vendor/display/LensflareNode.js";
@@ -31,7 +31,8 @@ export function buildPost(renderer, scene, camera, { flare = true, gtao = false,
     } catch (err) { console.warn("volumetric clouds node failed, billboards stay:", err && err.message); }
   }
 
-  let taa = traa(base, depth, vel, camera);
+  const taaPass = traa(base, depth, vel, camera);
+  let taa = taaPass;
   // GTAO (?ao=1, eyeball-gated): normals reconstructed from depth (null),
   // occlusion multiplied into the lit scene before bloom picks highlights
   let aoPass = null;
@@ -60,5 +61,17 @@ export function buildPost(renderer, scene, camera, { flare = true, gtao = false,
   const Pipeline = THREE.RenderPipeline || THREE.PostProcessing; // r185 rename
   const post = new Pipeline(renderer);
   post.outputNode = chain;
-  return { post, scenePass, taa, bloomPass, flarePass };
+
+  // Meter the completed effects through ordinary texture nodes. Reusing the
+  // pass nodes here would execute their scene/temporal work a second time.
+  // These are the exact same composited colors as the visible output; only
+  // the sampling resolution changes. Bloom, clouds, and flares remain live.
+  let meterNode = texture(taaPass.getTextureNode().value);
+  if (aoPass) meterNode = meterNode.mul(texture(aoPass.getTextureNode().value).r);
+  if (chainSel === "beauty") meterNode = texture(scenePass.getTexture("output"));
+  else if (chainSel !== "taa") {
+    meterNode = meterNode.add(texture(bloomPass.getTextureNode().value));
+    if (flarePass) meterNode = meterNode.add(texture(flarePass.getTextureNode().value).mul(0.35));
+  }
+  return { post, scenePass, taa, bloomPass, flarePass, meterNode };
 }
