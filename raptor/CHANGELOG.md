@@ -1,5 +1,34 @@
 # RAPTOR release notes
 
+## 1.4.0 — 2026-09-24
+
+The sky and landscape now carry substantially more detail, with shaped volumetric
+clouds, fine cirrus, a physical night sky, smaller ocean waves, and improved
+terrain relief. The aircraft, flight setup, controls and combat audio from the
+preceding releases remain integrated.
+
+- **Clouds and sky:** full-resolution cloud lighting and edge-aware filtering,
+  secondary billows, tier-aware 8K cirrus fibres, and consistent Sun/Moon lighting
+  across the atmosphere, surfaces and water reflections.
+- **Water and terrain:** a 512² fine-wave cascade on HIGH/ULTRA, filtered glints,
+  coherent long-session wave phase, joined ocean meshes, packed-height
+  interpolation, close terrain detail, snow relief, and a central 16 km Valdez
+  region using real 5 m USGS IfSAR elevations.
+- **Night and motion:** catalogued stars, a mapped Moon at its actual angular
+  size, distant terrain occlusion, correct celestial motion, resets for camera
+  cuts and resolution changes, and rejection of stale history for newly visible
+  objects and replaced celestial geometry.
+- **Aircraft and quality:** preserve coating normal maps, native self-shadows
+  and volumetric exhaust in the curved world. Live presets update rendering;
+  settings identify when boot assets and shadow-map resolution need a restart.
+  WebGL2 retains physical atmosphere, cloud cards, material detail and improved
+  depth precision.
+
+The final five refinements focus on cloud structure, cirrus, fine water, night
+clarity and aircraft integration. Native 4K is demanding; the quality presets
+and fallback renderer remain available. See [GRAPHICS.md](GRAPHICS.md) for source credits,
+rendering contracts and reproducible validation commands.
+
 ## 1.3.0 — 2026-09-24
 
 Aircraft now hold up to close inspection, with shaped airframes, detailed

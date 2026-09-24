@@ -2,7 +2,7 @@
 // during close inspections. TSL compiles the same material for both engines.
 // This is an art-directed radiance field, not a fluid simulation.
 import * as THREE from 'three';
-import { Fn, Loop, uniform, positionLocal, vec2, vec3, vec4, float, int,
+import { Fn, Loop, uniform, positionGeometry, vec2, vec3, vec4, float, int,
   normalize, min, max, clamp, mix, sin, exp, dot, length, sqrt } from 'three/tsl';
 
 const HALF_X = .84, HALF_Y = .72;
@@ -17,7 +17,9 @@ export function createEngineVolume() {
     blending: THREE.AdditiveBlending, premultipliedAlpha: true });
   material.name = 'F119-volumetric-emission';
   material.outputNode = Fn(() => {
-    const direction = normalize(positionLocal.sub(camera)).toVar();
+    // The planet adapter deforms positionLocal for rendering; this bounded
+    // radiance field stays in the original nozzle-box coordinate system.
+    const direction = normalize(positionGeometry.sub(camera)).toVar();
     const safeDirection = direction.add(vec3(.000001));
     const nearPlane = vec3(-1, -1, 0).sub(camera).div(safeDirection);
     const farPlane = vec3(1, 1, 1).sub(camera).div(safeDirection);
@@ -55,7 +57,11 @@ export function createEngineVolume() {
       radiance.addAssign(temperature.mul(energy).mul(transmittance));
       transmittance.mulAssign(exp(energy.mul(-.45)));
     });
-    return vec4(radiance, transmittance.oneMinus());
+    const emission = vec4(radiance, transmittance.oneMinus()).toVar();
+    // NodeMaterial alphaTest precedes outputNode. Discard here too so empty
+    // volume-box pixels cannot overwrite the underlying velocity MRT.
+    emission.a.lessThanEqual(1e-5).discard();
+    return emission;
   })();
   const mesh = new THREE.Mesh(bounds, material); mesh.name = 'F119-radiance-volume';
   mesh.scale.set(HALF_X, HALF_Y, 5);

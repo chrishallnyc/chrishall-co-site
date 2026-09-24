@@ -1,16 +1,19 @@
 // Aircraft integration with the actual game's sun, PBR environment and air.
 // No simulation data is read or written; the rendered Object3D pose is enough.
 import * as THREE from 'three';
-import { Fn, output, positionWorld, vec4 } from 'three/tsl';
+import { Fn, output, positionWorld, vec4, shadow } from 'three/tsl';
 
 const OPAQUE = material => (material.fog !== false || material.userData.aircraftAerial === 'hillaire')
   && !material.transparent && !(material.transmission > 0);
 
 export class AircraftLighting {
-  constructor({ renderer, atmosphere, params, aerial = null, shadows = true }) {
+  constructor({ renderer, atmosphere, params, aerial = null, shadows = true, curvature = null }) {
     this.renderer = renderer;
     this.atmosphere = atmosphere;
     this.aerial = aerial;
+    this.curvature = curvature;
+    this.receiverTransport = false;
+    this._sunVisibility = null;
     this.shadowRequested = shadows;
     this.shadows = false;
     this.bindings = [];
@@ -70,9 +73,33 @@ export class AircraftLighting {
     }
     for (const binding of this.bindings) {
       const materials = Array.isArray(binding.source) ? binding.source : [binding.source];
-      binding.mesh.castShadow = binding.mesh.receiveShadow = this.shadows && materials.some(OPAQUE);
+      binding.mesh.castShadow = this.shadows && materials.some(OPAQUE);
+      binding.mesh.receiveShadow = this.receiverTransport || binding.mesh.castShadow;
     }
-    for (const mesh of this.groundReceivers) mesh.receiveShadow = this.shadows;
+    for (const mesh of this.groundReceivers) mesh.receiveShadow = this.receiverTransport || this.shadows;
+  }
+
+  // Install once before shader compilation. A custom light.shadow.shadowNode
+  // replaces Three's native shadow, so explicitly multiply both contracts.
+  setSunVisibility(visibility) {
+    if (this._sunVisibility === visibility) return;
+    if (this._sunVisibility || !visibility?.isNode) throw new Error("Sun visibility must be installed once before rendering");
+    this._sunVisibility = visibility;
+    this.receiverTransport = true;
+    const sun = this.atmosphere.sun;
+    // LOW also compiles celestial visibility. Its native shadow node reserves
+    // the default512 target without updating it; retain that allocation on a
+    // later tier upgrade, matching the renderer's no-resize contract. Reload
+    // selects the requested higher-resolution target.
+    if (!this._shadowSize) {
+      this._shadowSize = sun.shadow.mapSize.x;
+      this.stats.allocatedShadowSize = this._shadowSize;
+    }
+    this.renderer.shadowMap.enabled = true;
+    sun.castShadow = true;
+    sun.shadow.shadowNode = visibility.mul(shadow(sun));
+    for (const binding of this.bindings) binding.mesh.receiveShadow = true;
+    for (const mesh of this.groundReceivers) mesh.receiveShadow = true;
   }
 
   material(source) {
@@ -93,7 +120,11 @@ export class AircraftLighting {
     adapted.fog = false; // Hillaire owns the full path; never double FogExp2.
     adapted.outputNode = Fn(() => {
       const lit = originalOutput ?? output;
-      return vec4(lit.rgb.mul(aerial.trans(positionWorld)).add(aerial.ins(positionWorld).mul(aerial.uSunI)), lit.a);
+      // positionWorld is already curved. Hillaire expects that rendered
+      // physical point; inverse curvature would incorrectly flatten the path.
+      const radiance = aerial.composite ? aerial.composite(positionWorld, lit.rgb)
+        : lit.rgb.mul(aerial.trans(positionWorld)).add(aerial.ins(positionWorld).mul(aerial.uSunI));
+      return vec4(radiance, lit.a);
     })();
     // Keep userData serializable: meshes/materials are cloned by LOD/liveries.
     adapted.userData = { ...source.userData, aircraftAerial: 'hillaire' };
@@ -125,18 +156,23 @@ export class AircraftLighting {
     mesh.material = binding.assigned;
     const opaque = sourceMaterials.some(OPAQUE);
     mesh.castShadow = this.shadows && opaque;
-    mesh.receiveShadow = this.shadows && opaque;
+    mesh.receiveShadow = this.receiverTransport || (this.shadows && opaque);
   }
 
   receiveGround(root) {
     if (!root) return;
-    root.traverse(mesh => { if (mesh.isMesh) { mesh.receiveShadow = this.shadows; this.groundReceivers.push(mesh); } });
+    root.traverse(mesh => { if (mesh.isMesh) { mesh.receiveShadow = this.receiverTransport || this.shadows; this.groundReceivers.push(mesh); } });
+  }
+
+  refreshMaterials() {
+    // Main calls this after LOD/livery changes and before planet bending.
+    // Identity checks preserve the upstream allocation-free steady state.
+    for (let i = 0; i < this.bindings.length; i++) this._refresh(this.bindings[i]);
   }
 
   update(aircraftRoot, terrain = null) {
-    // LOD and livery code can retain native materials; adapt changed references
-    // through the same cache without traversing or allocating each frame.
-    for (let i = 0; i < this.bindings.length; i++) this._refresh(this.bindings[i]);
+    // Retain the public upstream update contract for callers without a bender.
+    this.refreshMaterials();
     const sun = this.atmosphere.sun, shadow = sun.shadow;
     this._sun.copy(this.atmosphere.sky.uSunDir.value).normalize();
     if (!this.shadows) {
@@ -160,6 +196,9 @@ export class AircraftLighting {
       halfSpan = Math.min(48, Math.max(halfSpan, distance * .5 + 15));
       this._center.addScaledVector(this._sun, -distance * .5);
     }
+    // Terrain/contact queries above use flat map coordinates. Shadow draws
+    // use bent vertices, so snap and aim the map in that same rendered frame.
+    if (this.curvature) this.curvature.forward(this._center, this._center);
     // Quantization prevents projection scale crawling during taxi/approach.
     halfSpan = Math.ceil(halfSpan * .5) * 2;
     if (halfSpan !== this._lastSpan) {
