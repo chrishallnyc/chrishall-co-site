@@ -43,11 +43,21 @@ and distance/view fades remain unchanged. Ordinary puffs, coverage shadows and
 wind motion retain their existing behavior. These remain soft card approximations;
 they do not provide volumetric cloud detail or occlusion.
 
-`CloudPass` composes full-resolution color, cloud-aware depth, and motion in one
-march. `AdaptiveCloudPass` can integrate a smaller layer and reconstruct compatible
-pixels, while evaluating the exact full-resolution march at rejected edges and
-occluders. Scale 1 bypasses the smaller layer. Native is currently the default;
-the adaptive mode remains available for measured image comparisons.
+The default `SpatialCloudPass` integrates full-resolution radiance, depth and
+motion, then filters only compatible cloud samples. Geometry edges and opaque
+occluders constrain the filter; scene color is composed afterward. Midpoint
+samples and secondary billows improve solid cloud bodies without changing the
+seeded weather. The pass owns five full-resolution textures (44 bytes per pixel,
+about 348 MiB at 3840×2160). Native 4K is a demanding quality option, not a frame
+rate guarantee. `AdaptiveCloudPass` remains available for measured comparisons;
+its rejected edges use the full-resolution march.
+
+HIGH/ULTRA load an 8192² cirrus optical-density atlas when the GPU supports that
+size. Narrow, irregular fibres add actual detail to the same broad weather
+pattern. LOW/MED and limited devices use the 2048² atlas. The loader validates
+dimensions and releases its decode canvas; a failed 8K load falls back to 2K,
+then a clear placeholder. All sky and reflection paths share the selected field.
+The 8K R8 texture with mips adds 80 MiB over the 2K version.
 
 `TemporalResolveNode` retains the pinned TRAA lifecycle and resets from the current
 image on camera cuts, lens changes, resize, and time changes. Render-only wave and
@@ -70,9 +80,13 @@ stale results after cuts, and falls back to the atmosphere's exposure palette on
 failure. Never replace this with a canvas read in the animation loop.
 
 Water uses filtered slope moments so unresolved waves become roughness instead
-of shimmering highlights. Its fine spectral cascade supplies sub-metre surface
-detail. Near and far meshes share an exact boundary; overlapping ocean surfaces
-lose depth precision at flight distances even when they share a material.
+of shimmering highlights. HIGH/ULTRA use a 512² fine spectral cascade over a
+32 m tile; LOW/MED use 128². The larger cascade resolves smaller waves, while
+scratch FFT targets omit unused mip chains. Final filtered moment mips remain.
+Nonrepeating 512-second numerical epochs preserve wave phase during long flights;
+they do not loop the sea or reset its foam. Allocation stays fixed until reload.
+Near and far meshes share an exact boundary; overlapping ocean surfaces lose
+depth precision at flight distances even when they share a material.
 
 Terrain decodes packed height texels before interpolation, matching its CPU
 collision field. Nearby HIGH/ULTRA terrain uses a stitched grid with about 8 m
@@ -96,8 +110,8 @@ region; it does not increase the photographic imagery's resolution.
 ## Assets
 
 - `bakery/bake_cloud_noise.mjs`: deterministic standard/Ultra noise assets.
-- `bakery/bake_cirrus.mjs`: 2048² optical-density atlas of broken cirrus veils
-  and irregular fallstreaks; source notes are in `assets/clouds/ASSET-CREDITS.md`.
+- `bakery/bake_cirrus.mjs`: 2048²/8192² optical-density atlases of broken cirrus
+  veils, fine fibres, and irregular fallstreaks; source notes are in `assets/clouds/ASSET-CREDITS.md`.
 - `bakery/bake_terrain_source.py`: reproducible central Valdez height/normal
   pair, with source request, hashes and credits in `assets/terrain/source/`.
 - `assets/sky/ASSET-CREDITS.md`: lunar map source and attribution.
@@ -109,30 +123,30 @@ proper motions. A seeded field remains available if the local asset fails.
 Terrain material relief supplements the existing geographic imagery and DEM;
 it does not reconstruct geographic features absent from those source assets.
 
-## Afterburner rendering
+## Aircraft integration
 
-Each nozzle carries an axis-constrained plume ribbon and a fixed rectangular
-aperture matching the aircraft rig. The effect uses a shared 512×256 procedural
-RGBA8 atlas with ten supplied energy-aware mips: filtering preserves emitted
-RGB times alpha and accounts for alpha quantization. Both nozzles together use
-four draws/eight triangles and 699,052 bytes of texture data; there are no network
-images or extra screen passes. Per-FlightFX resources are released by the
-idempotent disposeAfterburner() method.
+The aircraft's authored normal, roughness, metalness, and ambient-occlusion maps
+remain intact. `PlanetObjectBender` resolves mapped normals in the original
+surface frame before applying curvature once. Refresh aircraft materials before
+bending when a livery changes, and update the shadow target after the current
+atmosphere observer. Aerial perspective composites completed aircraft lighting
+through the same Sun/Moon transport as the world.
 
-Throttle spool, length response, nozzle hierarchy and simulation remain
-unchanged. Stable object transforms retain the existing planet-bending and
-motion-vector path. Disabled effects have zero opacity and hidden meshes.
-The colors and compression cells are visual approximations, not measured F119
-radiometry or fluid simulation.
+Solar visibility multiplies native aircraft self-shadow with cloud and planetary
+visibility. LOW disables native shadow updates while retaining celestial
+visibility. Shadow target size stays fixed for its compiled lifetime; reload to
+allocate a larger target after upgrading from a lower boot tier.
 
-Matched native WebGPU comparisons cover night chase, daylight rear/side,
-qualified front occlusion, and 360-frame day/night sequences with axis crossing,
-roll, thrust vectoring and spool-down. Source controls, temporal cuts and sampled
-disabled color/motion fields agree. Offline material graphs cover both APIs.
-A centered distant static pixel proves nonzero terminal-mip emission; the moving
-subpixel fixture is unresolved, so stable visible emission at every distance
-is not established. Packed terminal mips also do not prove per-region angular
-energy conservation.
+Each nozzle uses the shared aircraft release's 32-step volumetric exhaust and
+aperture glow. The field samples undeformed geometry coordinates before the
+world bend. Fully transparent computed fragments are discarded before writing
+motion, keeping the surrounding sky's history intact. Exhaust shape and color
+are game effects, not measured F119 radiometry or fluid simulation.
+
+Stars and the Moon render at far depth so distant opaque terrain can occlude
+them. Their motion uses catalogue/disc positions rather than billboard corners;
+newly visible or replaced celestial geometry rejects unrelated temporal history.
+The Moon's 2K map loader preserves its neutral fallback on decode failure.
 
 ## Reproducible comparisons
 
@@ -167,7 +181,7 @@ Useful comparison flags:
 | `terrainnear=0` | Disable the near terrain grid at every quality tier. |
 | `terrainsource=0\|16` | Compare original and central 5 m Valdez elevation data. |
 | `snowdetail=0` | Disable added wind-packed snow material relief. |
-| `waterfine=0\|128\|256` | Compare the fine water cascade. |
+| `waterfine=0\|128\|256\|512` | Compare the fine water cascade. |
 | `ocean=gerstner` | Use the non-compute water fallback. |
 | `atmo=preetham` | Compare the lightweight atmosphere fallback. |
 | `vclouds=0` | Use cloud cards while retaining post processing. |
@@ -191,8 +205,8 @@ node --import ./raptor/qa/register-three.mjs --test raptor/qa/*.test.mjs
 ```
 
 These check quality selection, asynchronous exposure ownership and failure
-handling, shipped cloud-asset hashes, star-catalog validation, and conservation
-of fine-wave modes across resolutions. They also exercise source-field
+handling, shipped cloud-asset hashes, star-catalog validation, conservation of fine-wave modes across resolutions, and long-clock phase
+continuity. They also exercise source-field
 interpolation/collars/corruption fallback, actual controls, cached asset
 profiles, and near-grid allocation and transitions. Browser rendering and
 visual comparisons are still needed to accept shader or appearance changes.

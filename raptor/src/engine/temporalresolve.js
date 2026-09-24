@@ -2,7 +2,7 @@
 // from current beauty for one frame; the native history/depth copies then
 // seed the following frame without resizing or reallocating any targets.
 import TRAANode from "./rawdepthtraa.js";
-import { Vector3, Quaternion } from "three";
+import { Vector2, Vector3, Quaternion, NodeUpdateType } from "three";
 import { convertToTexture, uniform, Fn, If, vec4, uv } from "three/tsl";
 
 export class TemporalResolveNode extends TRAANode {
@@ -16,6 +16,7 @@ export class TemporalResolveNode extends TRAANode {
     this._currentPosition = new Vector3();
     this._currentRotation = new Quaternion();
     this._lastProjection = null;
+    this._drawingSize = new Vector2();
   }
 
   invalidateHistory() { this._resetPending = true; }
@@ -36,6 +37,31 @@ export class TemporalResolveNode extends TRAANode {
   }
 
   updateBefore(frame) {
+    // Runtime resize must be visible before native TRAA reads its input size.
+    // Allocate the producer target without running its update/render dependency
+    // early: the pinned node graph owns that compilation and execution order.
+    // Preserve its first lazy initialization until a native update completes.
+    const producer = this.beautyNode.passNode;
+    const scale = producer?.getResolutionScale?.() ?? 1;
+    if (this._lastProjection && scale === 1 && producer?.getUpdateBeforeType() === NodeUpdateType.FRAME) {
+      const size = frame.renderer.getDrawingBufferSize(this._drawingSize);
+      const input = producer.renderTarget, history = this._historyRenderTarget;
+      const inputChanged = input.width !== size.width || input.height !== size.height;
+      if (inputChanged || history.width !== size.width || history.height !== size.height) {
+        this._resetPending = true;
+        if (inputChanged) {
+          if (typeof producer.setSize === "function") producer.setSize(size.width, size.height);
+          else input.setSize(size.width, size.height);
+          // CloudPass normally detects resize in its own target. Because it is
+          // already sized here, explicitly retain its motion-history reset.
+          producer.invalidateHistory?.();
+          // Native TRAA seeds color before rendering its beauty dependency.
+          // Allocate the resized input so that seed has compatible dimensions;
+          // our reset branch then uses the freshly rendered current beauty.
+          frame.renderer.initRenderTarget(input);
+        }
+      }
+    }
     // Detect cuts here too: LOW/debug rendering may have no CloudPass or
     // planet adapter to notify the post chain. Temporal jitter changes only
     // view offsets, not these lens/pose fields, so it never causes a reset.

@@ -3,13 +3,18 @@
 // this module never loads or swaps a geographic field.
 import { tierParams } from './quality.js';
 
-export const ASSET_PROFILE_VERSION = 'boot-assets-v1/near-grid-v1';
+export const ASSET_PROFILE_VERSION = 'boot-assets-v2/near-grid-v1/cirrus-v4/fine-ocean-v2';
+
+export function cirrusAtlasResolution(tier, textureLimit = 8192) {
+  return (tier === 'HIGH' || tier === 'ULTRA') && textureLimit >= 8192 ? 8192 : 2048;
+}
 
 export function oceanFineResolution(tier, override = null) {
   if (override === '0') return 0;
   if (override === '128') return 128;
   if (override === '256') return 256;
-  return tier === 'HIGH' || tier === 'ULTRA' ? 256 : 128;
+  if (override === '512') return 512;
+  return tier === 'HIGH' || tier === 'ULTRA' ? 512 : 128;
 }
 
 export function terrainSourcePreset(tier, override = null, front = 'NELLIS', backend = 'webgpu') {
@@ -20,9 +25,10 @@ export function terrainSourcePreset(tier, override = null, front = 'NELLIS', bac
 }
 
 export function requestedBootAssets(tier, { backend, front, flags,
-  hasTerrain = true, hasOcean = true, sourceEnabled = false } = {}) {
+  hasTerrain = true, hasOcean = true, sourceEnabled = false, textureLimit = 8192 } = {}) {
   const noise = flags?.get('cloudnoise');
   return {
+    cirrus: cirrusAtlasResolution(tier, textureLimit),
     noise: noise === 'standard' || noise === 'ultra' ? noise : tierParams(tier).cloudNoise,
     fineOcean: hasOcean && backend === 'webgpu' && flags?.get('ocean') !== 'gerstner'
       ? oceanFineResolution(tier, flags?.get('waterfine')) : 0,
@@ -39,12 +45,14 @@ function imageSize(texture) {
 // Called only after the loaders settle. Missing/fallback data receives a
 // different profile from a successful full asset load on the next boot.
 export function describeBootAssets({ bootTier, terrain = null, water = null,
-  fftOcean = false, fineOcean = null, cloudNoise = null, cloudMode = 'billboard' } = {}) {
+  fftOcean = false, fineOcean = null, cloudNoise = null, cloudMode = 'billboard', sky = null } = {}) {
   const source = terrain?.sourceField?.meta;
   const drape = terrain?.drape;
   return Object.freeze({
     version: ASSET_PROFILE_VERSION,
     bootTier,
+    sky: sky ? { cirrus: { dimensions: imageSize(sky.cirrusAtlas),
+      source: sky.cirrusAtlas.userData.source, requested: sky.cirrusAtlas.userData.requestedResolution } } : null,
     terrain: terrain ? {
       grid: terrain.meta.grid,
       nearCapability: !!terrain.nearDetail,
@@ -68,7 +76,8 @@ export function describeBootAssets({ bootTier, terrain = null, water = null,
 }
 
 export function assetsNeedReload(bootRequest, nextRequest) {
-  return bootRequest.noise !== nextRequest.noise
+  return bootRequest.cirrus !== nextRequest.cirrus
+    || bootRequest.noise !== nextRequest.noise
     || bootRequest.fineOcean !== nextRequest.fineOcean
     || bootRequest.source !== nextRequest.source;
 }

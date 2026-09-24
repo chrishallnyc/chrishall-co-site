@@ -1,19 +1,23 @@
-// Run from any directory: node raptor/bakery/bake_cirrus.mjs
-// Original deterministic 2048² R8 optical-density atlas. Offline only;
+// Run: node raptor/bakery/bake_cirrus.mjs --size=8192 (or --size=2048)
+// Original deterministic 2048²/8192² R8 optical-density atlases. Offline only;
 // no photographs, external textures, runtime baking, or network input.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { deflateSync } from 'node:zlib';
 
-const N = 2048;
+const args = new Map(process.argv.slice(2).map(arg => arg.replace(/^--/, '').split('=')));
+const N = Number(args.get('size') || 8192);
+if (![2048, 8192].includes(N)) throw new RangeError('Cirrus size must be 2048 or 8192');
+const BASE = 2048, SCALE = N / BASE;
 const RECIPE = Object.freeze({
-  version: 2,
+  version: 4,
   seed: 0x5e173801,
   patches: 38,
   veilScale: 1.85,
   targetMean: .0075,
+  fineFibres: N === 8192,
 });
-const directory = new URL('../assets/clouds/', import.meta.url);
+const directory = new URL(args.get('output') || '../assets/clouds/', import.meta.url);
 
 function rng(seed) {
   let state = seed;
@@ -50,7 +54,7 @@ function moisturePatches() {
   // Uneven moisture regions create groups and clear gaps. Thin packets are
   // elongated at constant area instead of forming isolated cotton-like ovals.
   const groups = Array.from({ length: 8 }, () => ({
-    x: range(0, N), y: range(0, N), angle: range(-.7, .65),
+    x: range(0, BASE), y: range(0, BASE), angle: range(-.7, .65),
   }));
   const patches = [];
   for (let i = 0; i < RECIPE.patches; i++) {
@@ -63,8 +67,8 @@ function moisturePatches() {
       w = area / l;
     }
     patches.push({
-      x: (group.x + normal(random) * 155 + N * 4) % N,
-      y: (group.y + normal(random) * 105 + N * 4) % N,
+      x: (group.x + normal(random) * 155 + BASE * 4) % BASE,
+      y: (group.y + normal(random) * 105 + BASE * 4) % BASE,
       l, w, angle, c: Math.cos(angle), s: Math.sin(angle),
       seed: i * 73 + RECIPE.seed,
       opacity: range(.16, .42), bend: range(-.24, .24) * w,
@@ -80,10 +84,10 @@ function moisturePatches() {
 function brokenVeils(patches) {
   const field = new Float32Array(N * N);
   for (const p of patches) {
-    const extent = Math.ceil(p.l * 1.6 + p.w * 2.4);
-    const x0 = Math.floor(p.x - extent), y0 = Math.floor(p.y - extent);
+    const extent = Math.ceil((p.l * 1.6 + p.w * 2.4) * SCALE);
+    const x0 = Math.floor(p.x * SCALE - extent), y0 = Math.floor(p.y * SCALE - extent);
     for (let dy = 0; dy < extent * 2; dy++) for (let dx = 0; dx < extent * 2; dx++) {
-      const x = x0 + dx + .5 - p.x, y = y0 + dy + .5 - p.y;
+      const x = (x0 + dx + .5) / SCALE - p.x, y = (y0 + dy + .5) / SCALE - p.y;
       const u = x * p.c + y * p.s, v = -x * p.s + y * p.c, un = u / p.l;
       if (Math.abs(un) > 1.65) continue;
       // Slowly varying independent shear, with no global sine warp or spine.
@@ -100,10 +104,17 @@ function brokenVeils(patches) {
       const a = noise(u / 42 + 9, turbulentV / 3.1 - 5, p.seed + 7);
       const b = noise(u / 17 - 3, (turbulentV + independentShear) / 1.7 + 7, p.seed + 11);
       const c = noise(u / 6 + 8, (turbulentV - independentShear * .5) / 1.1 + 2, p.seed + 17);
+      // The 8K tier resolves a second family of ice-crystal filaments at
+      // 29 m across / 190 m along. Two texels across its smallest lattice
+      // cell keeps this structure sampleable before the runtime mip filter.
+      const d = RECIPE.fineFibres
+        ? noise(u / 3.2 - 19, (turbulentV + independentShear * .25) / .50 + 13, p.seed + 53)
+        : .5;
       const fibres = .26 * a + .44 * b + .30 * c;
       const soft = Math.pow(.62 * noise(u / 39 - 4, vv / 19 + 19, p.seed + 37)
         + .38 * noise(u / 13 + 17, vv / 9 + 3, p.seed + 41), 1.85);
-      const density = envelope * p.opacity * soft * (.32 + 1.85 * Math.pow(fibres, 1.4)) * RECIPE.veilScale;
+      const filament = RECIPE.fineFibres ? .35 + 1.65 * Math.pow(d, 1.5) : 1;
+      const density = envelope * p.opacity * soft * (.32 + 1.85 * Math.pow(fibres, 1.4)) * filament * RECIPE.veilScale;
       field[((y0 + dy + N * 4) % N) * N + (x0 + dx + N * 4) % N] += density;
     }
   }
@@ -111,6 +122,7 @@ function brokenVeils(patches) {
 }
 
 function brush(field, x, y, sigma, strength) {
+  x *= SCALE; y *= SCALE; sigma *= SCALE;
   const reach = Math.ceil(sigma * 2.8), ix = Math.floor(x), iy = Math.floor(y);
   for (let oy = -reach; oy <= reach; oy++) for (let ox = -reach; ox <= reach; ox++) {
     const dx = ix + ox + .5 - x, dy = iy + oy + .5 - y;
@@ -199,7 +211,7 @@ for (; p99 < 255; p99++) {
   if (accumulated >= density.length * .99) break;
 }
 const manifest = {
-  file: 'cirrus-density.png', generator: 'bakery/bake_cirrus.mjs', recipe: { ...RECIPE, encodingGain },
+  file: N === 8192 ? 'cirrus-density-8k.png' : 'cirrus-density.png', generator: 'bakery/bake_cirrus.mjs', referenceGrid: BASE, recipe: { ...RECIPE, encodingGain },
   width: N, height: N, channels: 1, format: 'R8', bytes: bytes.length,
   sha256: sha256(bytes), decodedSha256: sha256(density),
   mean: density.reduce((sum, v) => sum + v, 0) / density.length / 255,
@@ -212,6 +224,6 @@ const manifest = {
 };
 mkdirSync(directory, { recursive: true });
 writeFileSync(new URL(manifest.file, directory), bytes);
-writeFileSync(new URL('cirrus-density.json', directory), JSON.stringify(manifest, null, 2) + '\n');
+writeFileSync(new URL(manifest.file.replace('.png', '.json'), directory), JSON.stringify(manifest, null, 2) + '\n');
 console.log(JSON.stringify({ file: manifest.file, bytes: manifest.bytes, sha256: manifest.sha256,
   decodedSha256: manifest.decodedSha256, mean: manifest.mean }));

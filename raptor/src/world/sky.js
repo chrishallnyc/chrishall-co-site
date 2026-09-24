@@ -74,7 +74,7 @@ function totalMie(T) {
 }
 
 export class Sky {
-  constructor(radius = 45000) {
+  constructor(radius = 45000, { cirrusResolution = 2048 } = {}) {
     // tunables (judge-panel round 1: deeper zenith blue, clearer desert air)
     this.turbidity = 2.5;
     this.rayleigh = 3.0;
@@ -103,7 +103,7 @@ export class Sky {
     this.uAmbFade = uniform(1.0); // fades the 0.1·Fex airglow with sun energy
                                   // (it's scattered sunlight — judges caught it
                                   // painting the night sky warm brown)
-    this.cirrusAtlas = getCirrusAtlas();
+    this.cirrusAtlas = getCirrusAtlas(cirrusResolution);
     this._withCirrus = makeCirrusNode(this.cirrusAtlas, this.uMoonDir, this.uMoonRatio, this.uExposureGain);
 
     const mat = new THREE.MeshBasicNodeMaterial({ side: THREE.BackSide, fog: false, depthWrite: false });

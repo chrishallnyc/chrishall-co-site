@@ -1,0 +1,8 @@
+{
+  "purpose": "Preserved original prototype for development-only A/B captures; not loaded by the game. Known lifecycle/mixing flaws are intentionally retained.",
+  "sourcePath": "raptor/src/engine/audio.js",
+  "sourceCommit": "61d4bbb12f718c0a3634cb6935c8c3a147b87b4b",
+  "sha256": "368b140b918d8050626e0ee53d7ca025fa2049aea60fe158480fa7b640a4d087",
+  "preservedByteForByte": true,
+  "captureAdapter": "server.py injects OfflineAudioContext, omits gesture resume, fixes cannon RNG seed; DSP and gains remain unchanged."
+}

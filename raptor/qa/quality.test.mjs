@@ -24,7 +24,7 @@ const profile = (front = 'NELLIS', query = '') => qualityProfile({
 
 test('a stored benchmark applies only to the measured front and rendering path', () => {
   const measured = profile();
-  saveBench({ tier: 'LOW', backend: 'webgpu', profile: measured });
+  saveBench({ ms: 16.7, tier: 'LOW', backend: 'webgpu', profile: measured });
   assert.equal(detectTier({ backend: 'webgpu', profile: measured }), 'LOW');
   for (const other of [profile('MARIANAS'), profile('NELLIS', 'noterrain=1'),
     profile('NELLIS', 'vclouds=0'), profile('NELLIS', 'post=0'),
@@ -36,7 +36,7 @@ test('a stored benchmark applies only to the measured front and rendering path',
 });
 
 test('valid manual quality wins; corrupt manual values do not suppress auto selection', () => {
-  saveBench({ tier: 'LOW', backend: 'webgpu', profile: profile() });
+  saveBench({ ms: 16.7, tier: 'LOW', backend: 'webgpu', profile: profile() });
   setTier('ULTRA');
   assert.equal(hasManualTier(), true);
   assert.equal(detectTier({ backend: 'webgpu', profile: profile() }), 'ULTRA');
@@ -47,10 +47,10 @@ test('valid manual quality wins; corrupt manual values do not suppress auto sele
 
 test('water rendering overrides cannot reuse the default workload benchmark', () => {
   const measured = profile();
-  const record = { tier: 'LOW', backend: 'webgpu', profile: measured };
+  const record = { ms: 16.7, tier: 'LOW', backend: 'webgpu', profile: measured };
   saveBench(record);
   assert.equal(detectTier({ backend: 'webgpu', profile: measured }), 'LOW');
-  for (const query of ['watergrid=legacy', 'waterslopes=legacy', 'watershadow=0', 'waterenvsize=64']) {
+  for (const query of ['watergrid=legacy', 'waterslopes=legacy', 'watershadow=0', 'waterenvsize=64', 'aircraftAir=0', 'aircraftShadows=0', 'reverseDepth=0']) {
     const options = { backend: 'webgpu', profile: profile('NELLIS', query) };
     assert.equal(isCompatibleBench(record, options), false, query);
     assert.equal(detectTier(options), 'HIGH', query);
@@ -202,7 +202,7 @@ test('new default-depth policy rejects old no-flag timing records, then caches t
   assert.ok(measured.startsWith(prefix));
   // This is the previous exact key format, before the explicit policy prefix.
   const legacyProfile = measured.slice(prefix.length);
-  const legacy = { tier: 'LOW', backend: 'webgpu', profile: legacyProfile };
+  const legacy = { ms: 16.7, tier: 'LOW', backend: 'webgpu', profile: legacyProfile };
   saveBench(legacy);
   const options = { backend: 'webgpu', profile: measured };
   assert.equal(isCompatibleBench(legacy, options), false); // main instantiates a benchmark

@@ -7,7 +7,7 @@ import { cloudCelestialLight, cloudCelestialSources } from "./night-cloud-lighti
 import * as THREE from "three";
 import {
   Fn, If, Loop, Break, Continue, uniform, texture, texture3D, uv, vec3, vec4, float, int,
-  exp, pow, sqrt, dot, normalize, clamp, max, min, abs, mix, smoothstep, select,
+  exp, log, pow, sqrt, dot, normalize, clamp, max, min, abs, mix, smoothstep, select,
   fract, length, and, getViewPosition, screenCoordinate,
 } from "three/tsl";
 import { createCloudGeometry } from "./cloudgeometry.js";
@@ -25,9 +25,9 @@ const FRONTS = {
   // Cumulus profiles use taller, more varied crowns than stratocumulus.
   NELLIS: {   // scattered fair-weather cumulus, high desert bases
     coverage: 0.30, base: 2700, top: 4700,
-    covRepeat: 18000, baseRepeat: 4200, detailRepeat: 850,
+    covRepeat: 18000, baseRepeat: 3200, detailRepeat: 560,
     covSharp: 2.6, baseRound: 0.10, topSoft: 0.55, erode: 0.36,
-    sigma: 0.035, maxLen: 22000, shadow3D: true, shadowFloor: 0.45, coreSupport: 0.74,
+    sigma: 0.035, maxLen: 22000, shadow3D: true, shadowFloor: 0.45, coreSupport: 0.74, nestedBillows: 0.34,
   },
   VALDEZ: {   // broken stratocumulus deck: thin, flat, wide cells
     coverage: 0.55, base: 1100, top: 2400,
@@ -38,12 +38,12 @@ const FRONTS = {
   MARIANAS: { // trade cumulus deck + isolated towers to 5200 (tower mask ch.)
     coverage: 0.38, base: 550, top: 1900,
     towerTop: 5200, towerRepeat: 28000, towerLo: 0.72, towerHi: 0.90, towerCov: 0.45,
-    covRepeat: 18000, baseRepeat: 4200, detailRepeat: 750,
+    covRepeat: 18000, baseRepeat: 3200, detailRepeat: 520,
     // PASS-2 #6: baseRound 0.08 -> 0.13 + baseRelief 0.30 — the trade deck's
     // underside printed as a knife-straight 550m plane (base fade was 108m
     // and the shared 0.16 relief too shallow for a deck this thin)
     covSharp: 2.2, baseRound: 0.13, topSoft: 0.60, erode: 0.35, baseRelief: 0.30,
-    sigma: 0.04, maxLen: 22000, shadow3D: true, shadowFloor: 0.50, coreSupport: 0.74,
+    sigma: 0.04, maxLen: 22000, shadow3D: true, shadowFloor: 0.50, coreSupport: 0.74, nestedBillows: 0.3,
   },
 };
 
@@ -70,6 +70,69 @@ const LIGHT_SUN_ENDS = [24,60,114,195,317,499,772,1182,1797,2720,4104,6180];
 const LIGHT_SKY_ENDS = [100,600,3600];
 
 // ---------------------------------------------------------------------------
+// Pure explicit-argument helpers; no textures, camera or mutable uniforms.
+// Audited normalized inverse-absorption GL4 kernel. These constants are the
+// four Gauss–Legendre nodes and weights on [0,1], not fitted scene parameters.
+const CLOUD_GL4 = [
+  [0.9305681557970262, 0.17392742256872687],
+  [0.6699905217924281, 0.3260725774312732],
+  [0.33000947820757187, 0.3260725774312732],
+  [0.06943184420297371, 0.17392742256872687],
+];
+
+const cloudStableAbsorption = Fn(([x]) => {
+  const value = float(0.0).toVar();
+  If(x.lessThan(0.005), () => {
+    value.assign(x.sub(x.mul(x).mul(0.5)).add(x.mul(x).mul(x).div(6.0)));
+  }).Else(() => { value.assign(exp(x.negate()).oneMinus()); });
+  return value;
+}).setLayout({ name: 'cloudStableAbsorption', type: 'float', inputs: [{ name: 'x', type: 'float' }] });
+
+const cloudStableNegativeLog = Fn(([x]) => {
+  const value = float(0.0).toVar();
+  If(x.lessThan(0.005), () => {
+    value.assign(x.add(x.mul(x).div(2.0)).add(x.mul(x).mul(x).div(3.0)));
+  }).Else(() => { value.assign(log(x.oneMinus()).negate()); });
+  return value;
+}).setLayout({ name: 'cloudStableNegativeLog', type: 'float', inputs: [{ name: 'x', type: 'float' }] });
+
+const cloudLinearHalfCentroid = Fn(([p, tau]) => {
+  const result = float(0.0).toVar();
+  // Exactly zero optical mass has no moment. Positive thin optical mass keeps
+  // the identical quadrature, using the stable scalar functions above.
+  If(tau.greaterThan(0.0), () => {
+    const mass = cloudStableAbsorption(tau).toVar();
+    const a = p.mul(2.0).toVar();
+    const b = p.mul(2.0).oneMinus().mul(2.0).toVar();
+    for (const [q, weight] of CLOUD_GL4) {
+      const fraction = cloudStableNegativeLog(mass.mul(q)).div(tau).toVar();
+      const denominator = a.add(sqrt(max(a.mul(a).add(b.mul(2.0).mul(fraction)), 0.0)));
+      const u = fraction.mul(2.0).div(max(denominator, 1e-30));
+      result.addAssign(u.mul(weight));
+    }
+  });
+  return result;
+}).setLayout({ name: 'cloudLinearHalfCentroid', type: 'float', inputs: [
+  { name: 'p', type: 'float' }, { name: 'tau', type: 'float' },
+] });
+
+const cloudMidpointCentroid = Fn(([s0, sm, s1, tau0, tau1]) => {
+  const mass0 = float(0.0).toVar(), mass1 = float(0.0).toVar();
+  const moment0 = float(0.0).toVar(), moment1 = float(0.0).toVar();
+  If(tau0.greaterThan(0.0), () => {
+    mass0.assign(cloudStableAbsorption(tau0));
+    moment0.assign(mass0.mul(cloudLinearHalfCentroid(s0.div(s0.add(sm)), tau0)));
+  });
+  If(tau1.greaterThan(0.0), () => {
+    mass1.assign(exp(tau0.negate()).mul(cloudStableAbsorption(tau1)));
+    moment1.assign(mass1.mul(cloudLinearHalfCentroid(sm.div(sm.add(s1)), tau1).add(1.0)));
+  });
+  return moment0.add(moment1).div(max(mass0.add(mass1), 1e-30)).mul(0.5);
+}).setLayout({ name: 'cloudMidpointCentroid', type: 'float', inputs: [
+  { name: 's0', type: 'float' }, { name: 'sm', type: 'float' }, { name: 's1', type: 'float' },
+  { name: 'tau0', type: 'float' }, { name: 'tau1', type: 'float' },
+] });
+
 // Seeded noise bake. Local mulberry32 — NOT Math.random, NOT the sim's RNG
 // (render-side asset, but byte-identical across runs so QA can hash it).
 // ---------------------------------------------------------------------------
@@ -150,7 +213,7 @@ function cpuCoverageStage(noise, P, covQ, x, z, s4) {
   if (P.towerTop) {
     tri4(noise.detailData, noise.detailN, x / P.towerRepeat, TOWER_SLICE, z / P.towerRepeat, s4);
     const tw = sat((s4[3] - P.towerLo) / (P.towerHi - P.towerLo));
-    topL += (P.towerTop - topL) * tw;
+    topL += (P.towerTop - topL) * Math.pow(tw, .45);
     covAmt = sat(covAmt + tw * P.towerCov);
     growth = Math.max(growth, tw);
   }
@@ -195,7 +258,11 @@ export function cpuDensity(noise, front, x, y, z) {
   // in a second remap suppressed the lobes and left extruded weather slabs.
   tri4(noise.baseData, noise.baseN, x / P.baseRepeat, y / P.baseRepeat, z / P.baseRepeat, s4);
   const wfbm = s4[1] * 0.625 + s4[2] * 0.25 + s4[3] * 0.125;
-  const rawShape = Math.max(s4[0] * 0.35 + wfbm * 1.8 - 0.40, 0);
+  // Nested 100–200 m billows break up otherwise smooth 400 m faces.
+  // Center the extra bands near their canonical spatial mean, so this adds
+  // local shape contrast without simply filling the whole weather cell.
+  const nested = (P.nestedBillows ?? 0) * ((s4[2] - 0.48) * 0.8 + (s4[3] - 0.48) * 1.2);
+  const rawShape = Math.max(s4[0] * 0.35 + wfbm * 1.8 - 0.40 + nested, 0);
   // A smooth shoulder approaches 1 without clipping the brightest 6.6%
   // of billow peaks into shared plateaus. Low and middle densities retain
   // their contrast; that contrast is the actual three-dimensional shape.
@@ -211,7 +278,9 @@ export function cpuDensity(noise, front, x, y, z) {
   // 7. detail erosion: wispy at the base, billowy at the top. Erosion height
   //    uses the BASE layer span (not the tower-raised span) — both emitters.
   tri4(noise.detailData, noise.detailN, x / P.detailRepeat, y / P.detailRepeat, z / P.detailRepeat, s4);
-  const dfbm = s4[0] * 0.625 + s4[1] * 0.25 + s4[2] * 0.125;
+  const dfbm = P.nestedBillows
+    ? s4[0] * 0.40 + s4[1] * 0.35 + s4[2] * 0.25
+    : s4[0] * 0.625 + s4[1] * 0.25 + s4[2] * 0.125;
   const hfE = sat((y - P.base) / (P.top - P.base));
   const e = (dfbm + (1 - 2 * dfbm) * sat(hfE * 5)) * P.erode;
   // 8. final density 0..1
@@ -249,7 +318,7 @@ function tslDensityBuilders(noise, P, covQ) {
       const tw = clamp(texture3D(noise.detailTex,
         vec3(p.x.div(P.towerRepeat), TOWER_SLICE, p.z.div(P.towerRepeat))).a
         .sub(P.towerLo).div(P.towerHi - P.towerLo), 0.0, 1.0);
-      topL.assign(mix(topL, float(P.towerTop), tw));
+      topL.assign(mix(topL, float(P.towerTop), pow(tw, .45)));
       covAmt.assign(clamp(covAmt.add(tw.mul(P.towerCov)), 0.0, 1.0));
       growth.assign(max(growth, tw));
     }
@@ -271,7 +340,9 @@ function tslDensityBuilders(noise, P, covQ) {
     // 5. base shape
     const b = texture3D(noise.baseTex, p.div(P.baseRepeat));
     const wfbm = b.g.mul(0.625).add(b.b.mul(0.25)).add(b.a.mul(0.125));
-    const rawShape = max(b.r.mul(0.35).add(wfbm.mul(1.8)).sub(0.40), 0.0).toVar();
+    const nested = b.b.sub(0.48).mul(0.8).add(b.a.sub(0.48).mul(1.2))
+      .mul(P.nestedBillows ?? 0);
+    const rawShape = max(b.r.mul(0.35).add(wfbm.mul(1.8)).sub(0.40).add(nested), 0.0).toVar();
     const shoulder = max(rawShape.sub(0.80), 0.0).toVar();
     const shape = rawShape.sub(shoulder.mul(shoulder).div(shoulder.add(0.20)));
     // 6. coverage remap
@@ -286,7 +357,9 @@ function tslDensityBuilders(noise, P, covQ) {
   const erode8 = Fn(([p, d]) => {
     // 7. detail erosion
     const det = texture3D(noise.detailTex, p.div(P.detailRepeat));
-    const dfbm = det.r.mul(0.625).add(det.g.mul(0.25)).add(det.b.mul(0.125));
+    const dfbm = P.nestedBillows
+      ? det.r.mul(0.40).add(det.g.mul(0.35)).add(det.b.mul(0.25))
+      : det.r.mul(0.625).add(det.g.mul(0.25)).add(det.b.mul(0.125));
     const hfE = clamp(p.y.sub(P.base).div(P.top - P.base), 0.0, 1.0);
     const e = mix(dfbm, dfbm.oneMinus(), clamp(hfE.mul(5.0), 0.0, 1.0)).mul(P.erode);
     // 8. final density
@@ -302,13 +375,12 @@ function tslDensityBuilders(noise, P, covQ) {
 // Ground cloud-shadow projector — the volumetric twin of clouds.js
 // makeCloudShadowNode (bind the returned visibility to the direct light's
 // shadow node; range [shadowFloor..1]).
-// Projects from the ground point up the sun ray to the slab's mid-altitude
-// and samples the SAME GPU coverage plane the march's field() stage samples
-// (base.r on COV_SLICE at covRepeat) with the same quantile threshold +
-// covSharp remap — the shadow sits under the visible cloud by construction.
-// The coverage field is STATIC (the march never advects it; only interior
-// detail drifts with uTime), so there is NO time scroll here — flipping that
-// would be the drift bug. 1 texture tap (+1 tower tap on MARIANAS), no
+// Projects from the receiver along the sun ray to representative deck/tower
+// heights and samples the same static GPU weather planes and coverage remap
+// as the volume. This inexpensive envelope estimate is not exact occlusion: it
+// omits the local crown/base/shallow shape and density/light integration.
+// All density fields are static; uTime changes only stochastic march sampling,
+// so this projector has no time scroll. 1 texture tap (+1 tower tap on MARIANAS), no
 // loops, no If-staging: a pure smooth function of wp, jitter/TRAA-
 // independent by construction (VOLUMETRIC LAW).
 // ---------------------------------------------------------------------------
@@ -368,7 +440,7 @@ export function makeVolCloudShadowNode({ noise, front, uSunDir, curvature = null
       const tw = clamp(texture3D(noise.detailTex,
         vec3(hitT.x.div(P.towerRepeat), TOWER_SLICE, hitT.y.div(P.towerRepeat))).a
         .sub(P.towerLo).div(P.towerHi - P.towerLo), 0.0, 1.0);
-      const towerTop = mix(float(P.top), float(P.towerTop), tw);
+      const towerTop = mix(float(P.top), float(P.towerTop), pow(tw, .45));
       const towerRemaining = clamp(towerTop.sub(wp.y).div(max(towerTop.sub(P.base), 1)), 0, 1);
       covAmt = clamp(covAmt.add(tw.mul(P.towerCov).mul(towerRemaining)), 0.0, 1.0);
     }
@@ -529,6 +601,17 @@ function makeSegmentLighting(P, density, topAll, geometry = null, dualSource = f
   ] });
 }
 
+export function cloudRayPhase(seconds) {
+  if (!Number.isFinite(seconds)) return 0;
+  const cycles = seconds * 74.1638;
+  if (!Number.isFinite(cycles)) return 0;
+  return cycles - Math.floor(cycles);
+}
+export function cloudRayPhaseNode(uTime) {
+  return uniform(cloudRayPhase(uTime.value))
+    .onRenderUpdate(() => cloudRayPhase(uTime.value));
+}
+
 export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, front, noise, aerial, emit = null, curvature = null, jitterCoordinate = null }) {
   const P = FRONTS[front] || FRONTS.NELLIS;
   const covQ = covThreshold(noise, P.coverage);
@@ -543,6 +626,7 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
     aerial?.sourceTransport?.relativeOmission ?? .001);
   const uSunE = aerial ? aerial.uSunI : uniform(36.0); // unit-sun -> scene HDR scale
 
+  const rayPhase = cloudRayPhaseNode(uTime);
   const uProjInv = uniform(new THREE.Matrix4());
   const uCamWorld = uniform(new THREE.Matrix4());
   if (camera) {
@@ -599,7 +683,7 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
       // TRAA downstream integrates the march noise away
       const rayNoise = texture(noise.jitterTex, (jitterCoordinate || screenCoordinate).div(JITTER_N)).level(0).r
         .mul(255 / 256).add(0.5 / 256);
-      const jit = fract(rayNoise.add(fract(uTime.mul(74.1638))));
+      const jit = fract(rayNoise.add(rayPhase));
 
       // World-space sampling is independent of the background's depth. The
       // old sky/geometry budgets changed dt at the horizon, moving the light
@@ -658,6 +742,7 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
       // starts with the correct extinction instead of a synthetic zero.
       const pendingCoarseEnd = float(-1.0).toVar('cloudPendingCoarseEnd');
       const pendingFineEnd = float(-1.0).toVar('cloudPendingFineEnd');
+      const pendingMidpoint = float(-1.0).toVar('cloudPendingMidpoint');
       const previousSigma = float(0.0).toVar();
       const fineMode = float(0.0).toVar();
       const emptySamples = float(0.0).toVar();
@@ -694,30 +779,74 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
         const capFade = smoothstep(tCap0, tCap1, t).oneMinus();
         const sigma = sampleDensity.mul(entryFade).mul(capFade).mul(P.sigma).toVar();
         const interval = t.sub(previousT).toVar();
+        // A true staged midpoint, including intervals with two empty endpoints.
+        // Its map coordinate, density gates and fades match an endpoint sample.
+        const midpointT = previousT.add(interval.mul(0.5)).toVar('cloudMidpointT');
+        const midpointSigma = float(0.0).toVar('cloudMidpointSigma');
+        If(interval.greaterThan(0.0), () => {
+          const midpointRender = uCamPos.add(dir.mul(midpointT)).toVar();
+          const midpointMap = geometry ? geometry.toMap(midpointRender).toVar() : midpointRender;
+          const midpointField = density.field(midpointMap).toVar();
+          const midpointGrad = density.gradAt(midpointMap.y, midpointField.y, midpointField.z).toVar();
+          const midpointGate = midpointField.x.mul(midpointGrad).toVar();
+          const midpointDensity = float(0.0).toVar();
+          If(midpointGate.greaterThan(1e-3), () => {
+            const midpointShape = density.shape6(midpointMap, midpointField.x, midpointGrad).toVar();
+            If(midpointShape.greaterThan(0.002), () => {
+              midpointDensity.assign(density.erode8(midpointMap, midpointShape));
+            });
+          });
+          midpointSigma.assign(midpointDensity.mul(entryFade)
+            .mul(smoothstep(tCap0, tCap1, midpointT).oneMinus()).mul(P.sigma));
+          // Newly discovered interior support is evidence to revisit a coarse
+          // interval BEFORE scattering. Keep both its measured midpoint and
+          // rejected far endpoint; the original final budget tail stays intact.
+          If(i.lessThan(MARCH_MAX - 32).and(midpointSigma.greaterThan(0.0))
+            .and(interval.greaterThan(entryFineStep.mul(1.05))), () => {
+            pendingCoarseEnd.assign(max(pendingCoarseEnd, t));
+            pendingMidpoint.assign(max(pendingMidpoint, midpointT));
+            const revisitT = min(previousT.add(entryFineStep), min(pendingMidpoint, tOut)).toVar();
+            revisitT.assign(min(revisitT, select(pendingCoarseEnd.greaterThan(previousT), pendingCoarseEnd, tOut)));
+            revisitT.assign(min(revisitT, select(pendingFineEnd.greaterThan(previousT), pendingFineEnd, tOut)));
+            t.assign(revisitT);
+            fineMode.assign(1.0);
+            emptySamples.assign(0.0);
+            Continue();
+          });
+        });
+
         // Bound visible-front quadrature error without shrinking every step.
         // Refine ordinary fine intervals at most to half their spacing where
         // endpoint optical-depth change exceeds 0.03 and >=10% light remains.
         // Rejected endpoints never mutate previousSigma, previousT, T or acc.
-        const frontOpticalChange = abs(sigma.sub(previousSigma)).mul(interval)
-          .toVar('cloudFrontOpticalChange');
+        // Equal to the endpoint metric on a linear ramp; also sees a peak
+        // between equal endpoints. The .03/.1 thresholds are unchanged.
+        const frontOpticalChange = max(abs(midpointSigma.sub(previousSigma)), abs(sigma.sub(midpointSigma)))
+          .mul(interval).mul(2.0).toVar('cloudFrontOpticalChange');
         If(i.lessThan(MARCH_MAX - 32).and(T.greaterThan(0.1))
           .and(interval.greaterThan(entryFineStep.mul(0.55)))
           .and(interval.lessThanEqual(entryFineStep.mul(1.05)))
           .and(frontOpticalChange.greaterThan(0.03)), () => {
           pendingFineEnd.assign(max(pendingFineEnd, t));
-          t.assign(min(previousT.add(max(entryFineStep.mul(0.5), interval.mul(0.5))), tOut));
+          const frontRetry = min(previousT.add(max(entryFineStep.mul(0.5), interval.mul(0.5))), tOut).toVar();
+          // A truncated pending interval can put its actual midpoint before
+          // the old half-fine retry. Preserve that measured support directly.
+          // Its <=half-fine interval cannot re-refine under the .55 guard.
+          If(midpointSigma.greaterThan(0.0), () => { frontRetry.assign(min(frontRetry, midpointT)); });
+          t.assign(frontRetry);
           fineMode.assign(1.0);
           emptySamples.assign(0.0);
           Continue();
         });
-        const tau = sigma.add(previousSigma).mul(0.5).mul(interval).toVar();
+        const halfLength = interval.mul(0.5).toVar();
+        const tau0 = previousSigma.add(midpointSigma).mul(halfLength).mul(0.5).toVar('cloudHalfOptical0');
+        const tau1 = midpointSigma.add(sigma).mul(halfLength).mul(0.5).toVar('cloudHalfOptical1');
+        const tau = tau0.add(tau1).toVar();
         If(tau.greaterThan(1e-7), () => {
           const stepT = exp(tau.negate()).toVar();
-          // Exact scatter centroid for the homogeneous segment represented
-          // by this trapezoid. The small-tau expansion avoids cancellation.
-          const centroid = select(tau.greaterThan(0.05),
-            float(1.0).div(max(tau, 1e-5)).sub(stepT.div(max(stepT.oneMinus(), 1e-5))),
-            float(0.5).sub(tau.div(12.0)).add(tau.mul(tau).mul(tau).div(720.0)));
+          // One unchanged physical source query per accepted parent interval.
+          // The same two-half optical mass drives T, light and mean distance.
+          const centroid = cloudMidpointCentroid(previousSigma, midpointSigma, sigma, tau0, tau1);
           const scatterT = previousT.add(interval.mul(centroid)).toVar();
           const w = T.mul(stepT.oneMinus()).toVar();
           const scatterPoint = uCamPos.add(dir.mul(scatterT)).toVar();
@@ -739,6 +868,7 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
         // midpoint-only rewind followed by a full step could skip its peak.
         If(t.greaterThanEqual(pendingCoarseEnd), () => { pendingCoarseEnd.assign(-1.0); });
         If(t.greaterThanEqual(pendingFineEnd), () => { pendingFineEnd.assign(-1.0); });
+        If(t.greaterThanEqual(pendingMidpoint), () => { pendingMidpoint.assign(-1.0); });
         previousSigma.assign(sigma);
         previousT.assign(t);
         If(T.lessThan(T_MIN).or(t.greaterThanEqual(tOut)), () => { Break(); });
@@ -750,6 +880,8 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
           emptySamples.addAssign(1.0);
           If(emptySamples.greaterThanEqual(2.0), () => { fineMode.assign(0.0); });
         }).Else(() => { emptySamples.assign(0.0); });
+        // Two empty taps must not release a known interior support sample.
+        If(pendingMidpoint.greaterThan(t), () => { fineMode.assign(1.0); emptySamples.assign(0.0); });
         const fineStep = fineStepAt(t).toVar();
         const step = mix(clamp(fineStep.mul(3.5), 90.0, 280.0), fineStep, fineMode).toVar();
         If(i.equal(0), () => { step.mulAssign(jit); });
@@ -762,6 +894,7 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
         let nextEnd = min(t.add(step), tOut);
         nextEnd = min(nextEnd, select(pendingCoarseEnd.greaterThan(t), pendingCoarseEnd, tOut));
         nextEnd = min(nextEnd, select(pendingFineEnd.greaterThan(t), pendingFineEnd, tOut));
+        nextEnd = min(nextEnd, select(pendingMidpoint.greaterThan(t), pendingMidpoint, tOut));
         t.assign(nextEnd);
       });
       integrationEnd.assign(previousT);

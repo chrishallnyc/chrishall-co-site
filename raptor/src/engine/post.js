@@ -7,7 +7,7 @@
 // "doesn't crash" tier).
 
 import * as THREE from "three";
-import { pass, mrt, output, velocity, Fn, vec4, fract, screenCoordinate, renderOutput } from "three/tsl";
+import { pass, mrt, output, velocity, Fn, vec4, fract, screenCoordinate, renderOutput, texture } from "three/tsl";
 import { temporalResolve as makeTemporalResolve } from "./temporalresolve.js";
 import { bloom } from "../../vendor/display/BloomNode.js";
 import { lensflare } from "../../vendor/display/LensflareNode.js";
@@ -88,8 +88,17 @@ export function buildPost(renderer, scene, camera, { flare = false, gtao = false
       .add(screenCoordinate.y.mul(0.00583715))).mul(52.9829189)).sub(0.5).div(255);
     return vec4(display.rgb.add(noise).clamp(0, 1), display.a);
   })();
+  // Preserve the completed-effects sampler used by external render tools.
+  // Plain texture references cannot schedule the scene or temporal pass twice.
+  let meterNode = texture(temporalResolve.getTextureNode().value);
+  if (aoPass) meterNode = meterNode.mul(texture(aoPass.getTextureNode().value).r);
+  if (chainSel === "beauty") meterNode = texture(beauty.value);
+  else if (chainSel !== "taa") {
+    meterNode = meterNode.add(texture(bloomPass.getTextureNode().value));
+    if (flarePass) meterNode = meterNode.add(texture(flarePass.getTextureNode().value).mul(0.35));
+  }
   return {
-    post, scenePass, taa, bloomPass, flarePass, hasClouds, cloudPass,
+    post, scenePass, taa, bloomPass, flarePass, hasClouds, cloudPass, meterNode,
     // Return the existing GPU Texture, NEVER its PassTextureNode. Sampling
     // it after post.render() cannot schedule scene/TRAA a second time.
     getExposureTexture: () => chainSel === "beauty"

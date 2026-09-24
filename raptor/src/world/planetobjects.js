@@ -5,7 +5,9 @@ import { surfaceVelocityMRT } from "./surfacevelocitymrt.js";
 import {
   Fn, vec2, vec4, positionLocal, positionPrevious, modelWorldMatrix,
   modelWorldMatrixInverse, normalWorldGeometry, cameraViewMatrix,
-  varyingProperty, velocity, select, faceDirection, uniform,
+  varyingProperty, velocity, select, faceDirection, uniform, uv,
+  materialReference, attribute, float, max, normalViewGeometry,
+  modelViewMatrix, cameraWorldMatrix,
 } from "three/tsl";
 import { PLANET_OCEAN_EXTENT_M } from "./planetcurvature.js";
 
@@ -65,15 +67,24 @@ export class PlanetObjectBender {
       if (!material.isMeshBasicMaterial && !material.isMeshStandardMaterial && !material.isMeshPhysicalMaterial) {
         throw new Error(`Planet object material requires an explicit adapter: ${material.type}`);
       }
-      if (material.positionNode || material.normalNode || material.mrtNode || material.normalMap || material.bumpMap || material.displacementMap || material.clearcoatNormalNode || material.clearcoatNormalMap) {
+      if (material.positionNode || material.normalNode || material.mrtNode || material.bumpMap || material.displacementMap || material.clearcoatNormalNode || material.clearcoatNormalMap) {
         throw new Error(`Planet object material has an existing deformation/normal/MRT contract: ${material.type}`);
+      }
+      if (material.normalMap && (material.isMeshBasicMaterial || material.flatShading ||
+          material.normalMapType !== THREE.TangentSpaceNormalMap ||
+          material.normalMap.format !== THREE.RGBAFormat)) {
+        throw new Error("Planet mapped normals need a smooth tangent-space PBR material");
       }
       const label = "planetObject" + this._nextLabel++;
       const curvature = this.curvature;
       const staticSurface = mode === "static" ? curvature.surfaceNodes(label) : null;
       const flat = staticSurface?.flat || varyingProperty("vec3", label + "MapPosition");
+      const flatView = material.normalMap ? varyingProperty("vec3", label + "UnbentViewPosition") : null;
       material.positionNode = Fn((inputs, builder) => {
         // NodeMaterial calls this after morph, skin and instance transforms.
+        // Camera-relative derivatives avoid subtracting large map positions
+        // when resolving the coating normal at sub-pixel aircraft detail.
+        if (flatView) flatView.assign(modelViewMatrix.mul(vec4(positionLocal, 1)).xyz);
         const world = modelWorldMatrix.mul(vec4(positionLocal, 1)).xyz;
         if (staticSurface) return staticSurface.vertex(world, world);
         flat.assign(world);
@@ -90,8 +101,41 @@ export class PlanetObjectBender {
       })();
       if (!material.isMeshBasicMaterial && !material.flatShading) {
         const side = material.side === THREE.BackSide ? -1 : material.side === THREE.DoubleSide ? faceDirection : 1;
-        material.normalNode = curvature.normalNode(normalWorldGeometry.mul(side), flat).transformDirection(cameraViewMatrix);
-        if (material.isMeshPhysicalMaterial) material.clearcoatNormalNode = material.normalNode;
+        const geometric = curvature.normalNode(normalWorldGeometry.mul(side), flat).transformDirection(cameraViewMatrix);
+        material.normalNode = material.normalMap ? Fn((_, builder) => {
+          // Reconstruct the mapped normal in the ORIGINAL map frame. Stock
+          // derivative TBN uses rendered positionView, which has already been
+          // bent; bending that mapped result again would deform its basis twice.
+          const n = normalViewGeometry.mul(side).toVar();
+          let tangent, bitangent;
+          if (builder.geometry.hasAttribute("tangent")) {
+            if (builder.object.isInstancedMesh) throw new Error("Instanced authored tangent frames need an explicit planet adapter");
+            const t = attribute("tangent", "vec4");
+            tangent = modelViewMatrix.mul(vec4(t.xyz, 0)).xyz.normalize().mul(side);
+            bitangent = n.cross(tangent).mul(t.w).normalize().mul(side);
+          } else {
+            const st = uv(material.normalMap.channel);
+            const q0 = flatView.dFdx(), q1 = flatView.dFdy();
+            const st0 = st.dFdx(), st1 = st.dFdy();
+            const p1 = q1.cross(n), p0 = n.cross(q0);
+            const t = p1.mul(st0.x).add(p0.mul(st1.x)).toVar();
+            const b = p1.mul(st0.y).add(p0.mul(st1.y)).toVar();
+            const determinant = max(t.dot(t), b.dot(b)).toVar();
+            const scale = select(determinant.equal(0), float(0), determinant.inverseSqrt());
+            // Match the pinned smooth normal-map side convention, including
+            // mirrored UVs. Each derivative basis first contains n's side.
+            tangent = t.mul(scale).mul(side);
+            bitangent = b.mul(scale).mul(side);
+          }
+          const encoded = materialReference("normalMap", "texture").rgb.mul(2).sub(1).toVar();
+          const scale = materialReference("normalScale", "vec2");
+          const mapped = tangent.mul(encoded.x.mul(scale.x))
+            .add(bitangent.mul(encoded.y.mul(scale.y))).add(n.mul(encoded.z));
+          return curvature.normalNode(mapped.transformDirection(cameraWorldMatrix), flat).transformDirection(cameraViewMatrix);
+        })() : geometric;
+        // An untextured clearcoat follows the geometric surface, as it does
+        // in Three, rather than inheriting the base coating's normal map.
+        if (material.isMeshPhysicalMaterial) material.clearcoatNormalNode = geometric;
       }
       // MRT velocity has its own alpha=1. Invisible sprite corners and
       // opacity-zero plume cards would otherwise replace/add motion even

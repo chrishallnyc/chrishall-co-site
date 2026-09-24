@@ -3,11 +3,12 @@
 import * as THREE from "three";
 import { Fn, attribute, uniform, texture, vec2, vec3, vec4, float, uv, max, sqrt, dot,
   normalize, smoothstep, fwidth, atan, asin, pow, modelWorldMatrix,
-  cameraProjectionMatrix, viewportSize } from "three/tsl";
+  cameraProjectionMatrix, viewportSize, positionPrevious, materialOpacity, velocity, select } from "three/tsl";
 import { cirrusTransmission, stellarAirTransmission, horizonVisibility } from "./celestial-nodes.js";
 import { moonPosition, ZERO_MAG_LUX, SCENE_PER_LUX, SOLAR_SCENE_IRRADIANCE } from "./celestial.js";
 
 import { loadBrightStarCatalogue, starDirection, starTint, precessionAngles } from "./starcatalog.js";
+import { surfaceVelocityMRT } from "./surfacevelocitymrt.js";
 
 const R = 43000, COUNT = 6000;
 function starGeometry(stars) {
@@ -24,6 +25,25 @@ function starGeometry(stars) {
 // physical irradiance still drives atmosphere, surfaces, and phase energy.
 // This deliberately matches the existing analytic Sun's ~24-unit peak.
 const celestialHighlight = (rgb) => rgb.div(dot(rgb, vec3(.2126, .7152, .0722)).div(24).add(1));
+// Invisible additive cards must leave both scene color and velocity intact.
+// Use the actual source result and completed alpha, without a new brightness
+// threshold. A nonzero source is unchanged even when display quantization
+// makes its contribution too small to alter the current color attachment.
+function visibleCelestialSource(colorNode) {
+  return Fn(() => {
+    const source = colorNode.toVar('celestialVisibleSource');
+    return source.a.mul(materialOpacity).greaterThan(0)
+      .and(source.rgb.greaterThan(vec3(0)).any());
+  })();
+}
+
+// Angular celestial geometry is camera-centered; its finite construction
+// radius must not put a star or the Moon in front of a distant mountain.
+// Keep ordinary depth testing while evaluating against the clear far depth.
+function celestialFarDepth() {
+  return Fn((inputs, builder) => float(builder.renderer.reversedDepthBuffer ? 0 : 1))();
+}
+
 function seededRandom(seed) {
   let s = seed >>> 0;
   return () => { s = (s + 0x6d2b79f5) >>> 0; let t = Math.imul(s ^ (s >>> 15), 1 | s);
@@ -50,15 +70,26 @@ function skyTextures() {
   moon.generateMipmaps = true; moon.flipY = false; moon.needsUpdate = true;
   if (typeof document !== "undefined") {
     new THREE.ImageLoader().load(new URL("../../assets/sky/lroc-color-2k.jpg", import.meta.url).href, (image) => {
-      const canvas = document.createElement("canvas"); canvas.width = image.width; canvas.height = image.height;
-      const ctx = canvas.getContext("2d", { willReadFrequently: true }); ctx.drawImage(image, 0, 0);
-      const rgba = ctx.getImageData(0, 0, image.width, image.height).data;
-      // The placeholder may already own immutable 1x1 GPU storage. Release
-      // it before changing dimensions; the same texture/node references then
-      // recreate storage on their next upload on either renderer backend.
-      moon.dispose();
-      moon.image = { data: new Uint8Array(rgba.buffer), width: image.width, height: image.height };
-      moon.needsUpdate = true; canvas.width = canvas.height = 1;
+      let canvas;
+      try {
+        const width = image.naturalWidth ?? image.width, height = image.naturalHeight ?? image.height;
+        if (width !== 2048 || height !== 1024) return;
+        canvas = document.createElement("canvas"); canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        if (!ctx) return;
+        ctx.drawImage(image, 0, 0);
+        const rgba = ctx.getImageData(0, 0, width, height).data;
+        if (!(rgba instanceof Uint8ClampedArray) || rgba.byteLength !== width * height * 4) return;
+        const data = new Uint8Array(rgba.buffer, rgba.byteOffset, rgba.byteLength);
+        // Validate the complete image before releasing immutable 1x1 storage.
+        // Existing texture/node references recreate storage on the next upload.
+        moon.dispose();
+        moon.image = { data, width, height }; moon.needsUpdate = true;
+      } catch {
+        // Decode/canvas failures retain the neutral low-detail Moon.
+      } finally {
+        if (canvas) { canvas.width = 1; canvas.height = 1; }
+      }
     }, undefined, () => { /* neutral low-detail Moon if the asset is unavailable */ });
   }
   maps = { star, moon, profileMean: sum / (n * n) };
@@ -82,6 +113,22 @@ export function lunarDiscMean(phaseAngle) {
 export class Stars {
   constructor(seedRand = seededRandom(0x7a27c9e5), sky = null, { catalogue = true, catalogueURL } = {}) {
     this.uExposureGain = sky?.uExposureGain || uniform(1);
+    this._motionFrame = 0; this._motionCamera = null; this._motionHistory = new WeakMap();
+    // Stock velocity remembers the last draw, including one before a hidden
+    // interval or catalogue replacement. Only consecutive main-view draws of
+    // the same geometry may reuse that history. Color-only probes never bind
+    // this uniform or advance the stock velocity through SurfaceVelocityMRT.
+    this._motionHistoryValid = uniform(false).onObjectUpdate(({ object, camera, renderer }) => {
+      if (camera !== this._motionCamera || !renderer.getMRT()?.has("velocity")) return false;
+      let record = this._motionHistory.get(object);
+      if (!record || record.frame !== this._motionFrame || record.geometry !== object.geometry) {
+        const valid = !!record && record.frame === this._motionFrame - 1
+          && record.geometry === object.geometry && record.camera === camera;
+        record = { frame: this._motionFrame, geometry: object.geometry, camera, valid };
+        this._motionHistory.set(object, record);
+      }
+      return record.valid;
+    });
     this.group = new THREE.Group(); this.points = new THREE.Group();
     this.group.add(this.points); this.pointSets = []; this.mats = [];
     this.uMoonDir = uniform(new THREE.Vector3(0, -1, 0));
@@ -116,7 +163,14 @@ export class Stars {
       const geometry = starGeometry(bin.stars);
       const material = new THREE.PointsNodeMaterial({ size: bin.size, sizeAttenuation: false, transparent: true,
         opacity: 1, blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
-      material.positionNode = attribute("starCenter", "vec3");
+      material.positionNode = Fn((inputs, builder) => {
+        const center = attribute("starCenter", "vec3");
+        // Stock velocity owns prior object/camera matrices. Its previous
+        // local point must be this star, not the screen-facing unit quad.
+        // Avoid registering motion callbacks in single-color/probe draws.
+        if (builder.renderer.getMRT()?.has("velocity")) positionPrevious.assign(center);
+        return center;
+      })();
       material.colorNode = Fn(() => {
         const dir = normalize(modelWorldMatrix.mul(vec4(attribute("starCenter", "vec3"), 0)).xyz);
         const pixelAngle = float(2).div(cameraProjectionMatrix.element(1).element(1).mul(viewportSize.y));
@@ -130,6 +184,9 @@ export class Stars {
         const transmission = stellarAirTransmission(dir).mul(cirrusTransmission(dir)).mul(occultation);
         return vec4(celestialHighlight(flux.mul(this.uExposureGain)).mul(transmission), texture(tex.star).a);
       })();
+      material.maskNode = visibleCelestialSource(material.colorNode);
+      material.depthNode = celestialFarDepth();
+      material.mrtNode = surfaceVelocityMRT(select(this._motionHistoryValid, velocity, vec2(4)));
       const mesh = new THREE.Mesh(geometry, material); mesh.frustumCulled = false; mesh.renderOrder = -99;
       this.mats.push(material); this.pointSets.push(mesh); this.points.add(mesh);
     }
@@ -155,6 +212,9 @@ export class Stars {
       const displayedScale = linearScale.div(linearScale.div(9).add(1));
       return vec4(albedo.mul(ls).mul(displayedScale).mul(transmission), limb.mul(terminator));
     })();
+    moonMaterial.maskNode = visibleCelestialSource(moonMaterial.colorNode);
+    moonMaterial.depthNode = celestialFarDepth();
+    moonMaterial.mrtNode = surfaceVelocityMRT(select(this._motionHistoryValid, velocity, vec2(4)));
     this.moon = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), moonMaterial);
     this.moon.renderOrder = -98; this.moon.frustumCulled = false; this.group.add(this.moon);
     // Retained API. Atmospheric Mie scattering supplies the aureole now.
@@ -223,6 +283,7 @@ export class Stars {
   }
 
   followCamera(camera) {
+    this._motionFrame++; this._motionCamera = camera;
     this.group.position.copy(camera.position); this.group.updateMatrixWorld(true);
     this.moon.lookAt(camera.position);
     this.uMoonRight.value.set(1, 0, 0).applyQuaternion(this.moon.quaternion);

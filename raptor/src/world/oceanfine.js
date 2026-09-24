@@ -4,29 +4,37 @@
 import * as THREE from "three";
 import { Fn, uniform, textureLoad, textureStore, instanceIndex, float, int, uint, ivec2, vec2, vec4, sin, cos, sqrt, select } from "three/tsl";
 import { buildFineSpectrum } from "./oceanfinespectrum.js";
+import { OceanClock, oceanPrincipalPhase } from "./oceanclock.js";
 
 export function createFineOcean(renderer, options) {
   if (!renderer?.backend?.isWebGPUBackend || typeof renderer.compute !== "function" ||
       typeof renderer.backend.generateMipmaps !== "function") return null;
   const resources = [], nodes = [];
-  let disposed = false;
+  let clock = null, clockTexture = null, preparedForCompute = false, disposed = false;
   const dispose = () => {
     if (disposed) return;
     disposed = true;
+    preparedForCompute = false;
+    clock?.dispose(clockTexture);
     for (const node of nodes) node.dispose?.();
     for (const texture of resources) texture.dispose();
   };
   try {
     const spectrum = buildFineSpectrum(options.front, options);
-    const { N, tileM, data } = spectrum, half = N / 2, dk = 2 * Math.PI / tileM;
+    const { N, tileM } = spectrum, half = N / 2, dk = 2 * Math.PI / tileM;
     const stages = Math.log2(N);
-    const h0 = new THREE.DataTexture(data, N, N, THREE.RGBAFormat, THREE.FloatType);
+    clock = new OceanClock(spectrum.data, N, tileM, true);
+    spectrum.data = null; // Clock owns the immutable spectrum.
+    const h0 = new THREE.DataTexture(clock.data, N, N, THREE.RGBAFormat, THREE.FloatType);
+    clockTexture = h0;
     h0.needsUpdate = true;resources.push(h0);
     const storage = type => {
       const t = new THREE.StorageTexture(N, N);t.type = type;t.flipY = false;
       t.minFilter = t.magFilter = THREE.NearestFilter;resources.push(t);return t;
     };
     const ping = storage(THREE.FloatType), pong = storage(THREE.FloatType);
+    // Scratch is read only with textureLoad at mip0; no reduction chain is used.
+    ping.generateMipmaps = pong.generateMipmaps = false;
     const slopeMomentTex = storage(THREE.HalfFloatType);
     slopeMomentTex.wrapS = slopeMomentTex.wrapT = THREE.RepeatWrapping;
     slopeMomentTex.magFilter = THREE.LinearFilter;
@@ -45,7 +53,7 @@ export function createFineOcean(renderer, options) {
       const mz = select(z.lessThan(uint(half)), int(z), int(z).sub(N));
       const kx = float(mx).mul(dk), kz = float(mz).mul(dk), k = sqrt(kx.mul(kx).add(kz.mul(kz)));
       // Deep water gravity-capillary dispersion; gamma/rho≈7.22e-5 m³/s².
-      const phase = sqrt(k.mul(9.81).add(k.mul(k).mul(k).mul(.0000722))).mul(uTime);
+      const phase = oceanPrincipalPhase(sqrt(k.mul(9.81).add(k.mul(k).mul(k).mul(.0000722))).mul(uTime));
       const c = cos(phase), s = sin(phase), h = textureLoad(h0, coord);
       const hr = h.x.mul(c).sub(h.y.mul(s)).add(h.z.mul(c)).add(h.w.mul(s));
       const hi = h.x.mul(s).add(h.y.mul(c)).sub(h.z.mul(s)).add(h.w.mul(c));
@@ -80,13 +88,24 @@ export function createFineOcean(renderer, options) {
       const {coord} = coords(), slopes = textureLoad(completed, coord).xy;
       textureStore(slopeMomentTex, coord, vec4(slopes, slopes.dot(slopes), 0));
     })().compute(N * N));
-    const update = time => {
-      if (disposed) return;
-      uTime.value = time;
+    const prepareTime = time => {
+      preparedForCompute = false;
+      return !disposed && clock.prepare(time);
+    };
+    const commitTime = () => {
+      preparedForCompute = !disposed && clock.commit(h0, uTime);
+      return preparedForCompute;
+    };
+    const updatePrepared = () => {
+      if (disposed || !preparedForCompute) return;
+      preparedForCompute = false;
       renderer.compute(nodes);
       renderer.backend.generateMipmaps(slopeMomentTex);
     };
-    return { slopeMomentTex, N, tileM, update, dispose,
+    const update = time => {
+      if (prepareTime(time) && commitTime()) updatePrepared();
+    };
+    return { slopeMomentTex, N, tileM, update, dispose, prepareTime, commitTime, updatePrepared,
       totalVariance: spectrum.totalVariance, resolvedVariance: spectrum.resolvedVariance,
       tailVariance: spectrum.tailVariance, heightRMS: spectrum.heightRMS,
       minimumWavelengthM: 2 * Math.PI / spectrum.maxPresentK,

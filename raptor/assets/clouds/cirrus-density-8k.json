@@ -1,0 +1,38 @@
+{
+  "file": "cirrus-density-8k.png",
+  "generator": "bakery/bake_cirrus.mjs",
+  "referenceGrid": 2048,
+  "recipe": {
+    "version": 4,
+    "seed": 1578579969,
+    "patches": 38,
+    "veilScale": 1.85,
+    "targetMean": 0.0075,
+    "fineFibres": true,
+    "encodingGain": 1.2837238311767578
+  },
+  "width": 8192,
+  "height": 8192,
+  "channels": 1,
+  "format": "R8",
+  "bytes": 4349108,
+  "sha256": "02b529fb3f3f0ef99b2ae1ba1462e2a267bad2887f249a616376e17e6fb01bff",
+  "decodedSha256": "dbfaa9ac617f5687ac0ca155dd56ac5d1cd35d9016069d7f98a9575616bda08c",
+  "mean": 0.007469471704726126,
+  "coverageAbove8": 0.061881303787231445,
+  "coverageAbove32": 0.015170842409133911,
+  "p99": 41,
+  "maximum": 197,
+  "sampling": {
+    "flipY": false,
+    "wrap": "repeat",
+    "periodM": 120000,
+    "altitudeM": 10000,
+    "windMetersPerSecond": [
+      18,
+      7
+    ],
+    "opticalDepthScale": 0.22
+  },
+  "provenance": "Original procedural field; no photographic pixels or external bitmap input."
+}

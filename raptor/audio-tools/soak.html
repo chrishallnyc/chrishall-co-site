@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Raptor silent audio soak</title>
+<style>
+body{font:16px/1.5 system-ui,sans-serif;max-width:920px;margin:48px auto;padding:0 24px;background:#10161c;color:#e2e9ef}h1{font-size:28px}button,input,select{font:inherit;padding:8px;margin:4px 10px 4px 0}label{display:inline-block}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#19232c;padding:20px;border-radius:8px}a{color:#a9d5ff}.note{color:#b3c0ca}
+</style>
+<h1>Raptor silent audio soak</h1>
+<p>Exercises the real audio graph, including spatial aircraft, missiles, recorded engine texture, combat, and repeated disposal. Every output sample is measured before two independent silence stages. Nothing plays through the speakers.</p>
+<label>Duration <input id="duration" value="10m" size="7" aria-label="Duration, for example 10m or 24h"></label>
+<label>Capture name <input id="batch" size="30"></label>
+<button id="start">Start silent soak</button><button id="stop" disabled>Stop</button>
+<p class="note">Keep this machine awake normally. The tool does not change power settings. Browser throttling, sleep, audio interruptions, and early stops are recorded separately from a completed run. This checks stability and resource bounds, not how good the sound feels.</p>
+<pre id="status" role="status">Ready. The default run takes 10 minutes. Set 24h for a full day.</pre>
+<script type="module">
+import { startSoak } from './soak.mjs';
+const query=new URLSearchParams(location.search),duration=document.querySelector('#duration'),batch=document.querySelector('#batch'),start=document.querySelector('#start'),stop=document.querySelector('#stop'),status=document.querySelector('#status');
+duration.value=query.get('duration')||'10m';
+batch.value=query.get('batch')||`soak-${new Date().toISOString().replace(/[^0-9T]/g,'').slice(0,15)}`;
+start.onclick=async()=>{
+  start.disabled=true;stop.disabled=false;duration.disabled=true;batch.disabled=true;
+  try{
+    const run=await startSoak({duration:duration.value,batch:batch.value,recreateSeconds:Number(query.get('recreate')||300),onProgress:state=>status.textContent=JSON.stringify(state,null,2)});
+    window.raptorSoak=run;
+    stop.onclick=()=>run.stop();
+    const result=await run.done;
+    window.soakResult=result;status.textContent=JSON.stringify(result,null,2);
+  }catch(error){window.soakError=error.stack;status.textContent=error.stack;}
+  finally{start.disabled=false;stop.disabled=true;duration.disabled=false;batch.disabled=false;}
+};
+</script></html>

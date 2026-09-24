@@ -9,13 +9,17 @@ import { Input } from "./engine/input.js";
 import { GamepadInput } from "./engine/gamepad.js";
 import { detectTier, isCompatibleBench, deviceTier, bootAssetTier as chooseBootAssetTier, tierParams, setTier, TIERS, savedBench, saveBench, clearBench, hasManualTier } from "./engine/quality.js";
 import { cloudQuality, cloudOptionsFromFlags, qualityProfile, qualityWorkload } from "./engine/cloudquality.js";
-import { oceanFineResolution, terrainSourcePreset, requestedBootAssets, describeBootAssets, assetsNeedReload } from "./engine/bootassets.js";
+import { cirrusAtlasResolution, oceanFineResolution, terrainSourcePreset, requestedBootAssets, describeBootAssets, assetsNeedReload } from "./engine/bootassets.js";
 import { QualityBenchmark } from "./engine/qualitybench.js";
 import { DebugOverlay } from "./engine/debug.js";
 import { TestWorld } from "./game/testworld.js";
 import { Player } from "./game/player.js";
 import { ControlsMenu } from "./game/controlsmenu.js";
 import * as SETTINGS from "./game/settings.js";
+import { showFlightdeck } from "./game/flightdeck.js";
+import { hasFlightRequest } from "./game/flightplan.js";
+import { loadRequestedFlight, FlightLoadError, bootFailureMessage } from "./game/flightload.js";
+import { Cockpit } from "./game/cockpit.js";
 import { Atmosphere } from "./world/daycycle.js";
 import { surfaceCelestialTransport } from "./world/celestial-surface.js";
 import { Terrain } from "./world/terrain.js";
@@ -25,9 +29,18 @@ import { PlanetObjectBender, attachRaptorPlanetObjects } from "./world/planetobj
 import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
+import { AircraftLighting } from "./aircraft/lighting.js";
+import { updateF22Visuals } from "./aircraft/f22-lod.js";
+import { Soundscape } from "./game/soundscape.js";
 
-const VERSION = "1.0.0";
+const VERSION = "1.4.0";
 const PHASE = 12;
+
+// WebGPU and reverse-depth WebGL use [0,1]; ordinary WebGL uses [-1,1].
+// Behind-camera markers must be rejected under either projection convention.
+function projectedDepthVisible(z, camera) {
+  return z <= 1 && z >= (camera.reversedDepth || camera.coordinateSystem === THREE.WebGPUCoordinateSystem ? 0 : -1);
+}
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
 // (phase 7, FM-PLAN.md) is wired into gameplay. Fields not derivable from
@@ -56,10 +69,24 @@ function testworldHudState(world, alpha) {
 }
 
 const state = {
-  version: VERSION, phase: PHASE, ready: false, backend: null, tier: null,
+  version: VERSION, phase: PHASE, ready: false, paused: false, backend: null, tier: null,
   failure: null,
 };
 window.__RAPTOR = state;
+function bootStage(name,label,detail) {
+  state.bootStage=name;
+  const veil=document.getElementById('veil');
+  if(!veil)return;
+  veil.querySelector('.status').textContent=label;
+  if(detail)veil.querySelector('.boot-status-detail').textContent=detail;
+  const steps=[...veil.querySelectorAll('[data-boot-step]')];
+  const active=steps.findIndex(step=>step.dataset.bootStep===name);
+  for(const [index,step] of steps.entries()) {
+    step.dataset.state=index<active?'complete':index===active?'current':'pending';
+    if(index===active)step.setAttribute('aria-current','step');
+    else step.removeAttribute('aria-current');
+  }
+}
 
 // A canvas is one-context-forever: a failed webgpu attempt poisons it for
 // webgl2, so probe the adapter BEFORE construction and re-canvas on fallback.
@@ -72,7 +99,8 @@ function freshCanvas(old) {
 async function makeRenderer(canvas) {
   // Float depth keeps distant terrain/cloud intersections precise on WebGPU.
   // ?reversedepth=0 retains the forward path; WebGL construction stays below.
-  const reversedDepth = new URLSearchParams(location.search).get("reversedepth") !== "0";
+  const depthFlags = new URLSearchParams(location.search);
+  const reversedDepth = (depthFlags.get("reversedepth") ?? depthFlags.get("reverseDepth")) !== "0";
   let adapter = null;
   if (navigator.gpu && new URLSearchParams(location.search).get("gl") !== "1") {
     try { adapter = await navigator.gpu.requestAdapter(); } catch (_) { adapter = null; }
@@ -115,12 +143,17 @@ async function makeRenderer(canvas) {
 }
 
 async function boot() {
-  const canvas = document.getElementById("game");
-  const { renderer, backend } = await makeRenderer(canvas);
+  const flags = new URLSearchParams(location.search);
+  bootStage('mission','Checking your flight plan…','Preparing the flight you selected. Your aircraft stays on standby until everything is ready.');
+  const requested = await loadRequestedFlight(flags);
+  // A shared mission link may omit its region; the validated mission owns it.
+  if (requested?.spec.front) flags.set("front", requested.spec.front);
+  bootStage('graphics-device','Connecting to your graphics system…','Choosing the graphics renderer for this browser and your display settings.');
+  const { renderer, backend, canvas } = await makeRenderer(document.getElementById("game"));
   if (backend === "webgl") installWebGLIndexStateFix(renderer);
+  bootStage('landscape','Preparing the landscape…','Loading the terrain, sky and lighting for your chosen region.');
   state.backend = backend;
   state.depthMode = renderer.reversedDepthBuffer ? "reversed-float32" : renderer.logarithmicDepthBuffer ? "logarithmic" : "forward";
-  const flags = new URLSearchParams(location.search);
   const cloudOptions = cloudOptionsFromFlags(flags);
   const bootRenderScale = SETTINGS.current().renderScale;
   // Select static assets before consulting cached frame timings. Auto's
@@ -146,7 +179,12 @@ async function boot() {
   // The flat-map renderer remains available for controlled QA comparisons.
   const curvature = flags.get("curvature") !== "0" ? new PlanetCurvature() : null;
   state.curvature = curvature;
-  const atmosphere = new Atmosphere(scene, (flags.get("front") || "NELLIS").toUpperCase());
+  const usePost = backend === "webgpu" && flags.get("post") !== "0" && (params.post || flags.get("post") === "1");
+  const useVolume = usePost && flags.get("vclouds") !== "0";
+  const textureLimit = renderer.backend.device?.limits.maxTextureDimension2D
+    ?? renderer.backend.gl?.getParameter(renderer.backend.gl.MAX_TEXTURE_SIZE) ?? 2048;
+  const atmosphere = new Atmosphere(scene, (flags.get("front") || "NELLIS").toUpperCase(),
+    { cirrusResolution: cirrusAtlasResolution(bootAssetTier, textureLimit) });
   atmosphere.initIBL(renderer);
   if (flags.get("tod")) atmosphere.setTime(parseFloat(flags.get("tod")));
 
@@ -224,7 +262,12 @@ async function boot() {
   scene.add(clouds.group);
 
   const sim = new SimCore(1);
-  const world = new TestWorld(scene);
+  const world = new TestWorld(scene, { aircraftQuality: state.tier });
+  const aircraftFrame = { projectedPixels: Infinity, maxQuality: state.tier };
+  const aircraftLighting = new AircraftLighting({ renderer, atmosphere, params,
+    aerial: flags.get("aircraftAir") === "0" ? null : atmoH?.aerial,
+    shadows: flags.get("aircraftShadows") !== "0", curvature });
+  aircraftLighting.register(world.jet);
   sim.addSystem(world);
 
   // real-Earth ground for all three fronts. ?noterrain=1 = QA flag: sky/boot
@@ -241,7 +284,7 @@ async function boot() {
   // exist pre-Terrain.load; the post chain reuses volPre, no double bake).
   // ?cloudshadow=old keeps the billboard projector for A/B.
   let volPre = null;
-  if (backend === "webgpu" && flags.get("post") !== "0" && flags.get("vclouds") !== "0") {
+  if (useVolume) {
     try {
       const VC = await import("./world/volclouds.js");
       // Choose once, before cloud-shadow materials capture the coverage
@@ -282,18 +325,17 @@ async function boot() {
   })();
   renderer.shadowMap.enabled = true;
   atmosphere.sun.castShadow = true;
-  atmosphere.sun.shadow.shadowNode = sourceVisibility(groundCloudShadow, solarTransport);
+  aircraftLighting.setSunVisibility(sourceVisibility(groundCloudShadow, solarTransport));
   atmosphere.moonLight.castShadow = true;
   atmosphere.moonLight.shadow.shadowNode = sourceVisibility(moonCloudShadow, lunarTransport);
   atmosphere.setReceiverCelestialTransport(true);
   const fg = FRONT_GROUND[atmosphere.frontName];
   if (fg && flags.get("noterrain") !== "1") {
-    const vs = document.querySelector("#veil .status");
-    if (vs) vs.innerHTML = `<b>LOADING ${fg.label}</b> — real USGS terrain`;
+    bootStage('landscape',`Loading ${fg.label.toLowerCase()}…`,'Preparing real terrain and surface imagery. The first visit to a region may take a little longer.');
     try {
       // drape: 16k imagery on webgpu; 4k on the webgl fallback (SwiftShader
       // tops out at 8192); ?drape=0 keeps the procedural ramps for QA
-      const drape = flags.get("drape") === "0" ? null : (backend === "webgpu" ? "16k" : "4k");
+      const drape = flags.get("drape") === "0" ? null : (backend === "webgpu" && ["HIGH", "ULTRA"].includes(bootAssetTier) ? "16k" : "4k");
       const sourcePreset = terrainSourcePreset(bootAssetTier, flags.get("terrainsource"), atmosphere.frontName, backend);
       // The complete field loads before ground placement and stays fixed
       // through later Auto/menu render-quality changes.
@@ -334,6 +376,8 @@ async function boot() {
     }
   }
 
+  bootStage('systems','Preparing your aircraft and objectives…','Setting up flight controls, aircraft systems and the selected flight.');
+
   // PHASE 9: targets on the ground. ?nobattle=1 for clean scenery QA shots.
   let battlefield = null;
   if (flags.get("nobattle") !== "1") {
@@ -350,13 +394,17 @@ async function boot() {
     try {
       const BD = await import("./game/bandits.js");
       const TG = await import("./game/targets.js");
-      bandits = new BD.Bandits(scene, { terrain, battlefield });
+      bandits = new BD.Bandits(scene, { terrain, battlefield, quality: state.tier });
       sim.addSystem(bandits);
       directory = TG.makeDirectory({ battlefield, bandits });
     } catch (err) { bandits = null; directory = null; console.warn("bandits unavailable:", err && err.message); }
   }
 
   // PHASE 7: you fly. ?demo=1 keeps the old scripted circle for QA baselines.
+  if (bandits) aircraftLighting.register(bandits.root);
+  aircraftLighting.receiveGround(terrain?.group);
+  aircraftLighting.receiveGround(world.sea);
+  aircraftLighting.receiveGround(battlefield?.root);
   let player = null;
   if (flags.get("demo") !== "1") {
     world.playerMode = true;
@@ -381,42 +429,26 @@ async function boot() {
     const BF = await import("./game/battlefield.js");
     const pad = BF.FRONT_AIRFIELDS ? BF.FRONT_AIRFIELDS[atmosphere.frontName] : null; // INC-2 per-front pads
     match = new Match(battlefield, player, { airfield: pad });
-    const mname = flags.get("mission");
-    const sortieId = !mname && flags.get("sortie");
-    const opFront = !mname && !sortieId && flags.get("op") ? atmosphere.frontName : null;
-    if (mname || opFront || sortieId) {
+    if (requested) {
       try {
-        const M = await import("./game/missions.js");
         const { Script } = await import("./game/script.js");
-        let spec, extraLines = null;
-        if (sortieId) { // INC-7: authored set-piece — module -> validated spec
-          const A = await import("./campaign/authored.js");
-          const st = await A.loadSortie(sortieId);
-          spec = st.spec;
-          extraLines = st.lines;
-          authored = { A, id: sortieId, saved: false };
-          if (!flags.get("tod") && spec.todH !== undefined) atmosphere.setTime(spec.todH);
-        } else if (opFront) { // INC-3: generated operation sortie — save -> spec, one door in
-          const E = await import("./campaign/engine.js");
-          const save = E.loadSave(opFront);
-          spec = M.loadMission(E.genMission(save));
-          extraLines = E.OP_LINES || null;
-          campaign = { E, save, spec, saved: false };
-          if (!flags.get("tod") && spec.todH !== undefined) atmosphere.setTime(spec.todH);
-        } else {
-          spec = M.loadMission(mname);
-        }
+        const { spec } = requested;
+        authored = requested.authored;
+        campaign = requested.campaign;
+        if (!flags.get("tod") && spec.todH !== undefined) atmosphere.setTime(spec.todH);
         script = new Script(spec, { battlefield, player, match, terrain, bandits });
         match.scripted = true;
-        if (spec.airfield) match.airfield = spec.airfield; // mission pad overrides
-        missionData = { spec, lines: extraLines ? { ...M.COMMS_LINES, ...extraLines } : M.COMMS_LINES };
+        if (spec.airfield) match.airfield = spec.airfield;
+        missionData = { spec, lines: requested.lines };
         if (spec.playerSpawn) {
-          const ps = spec.playerSpawn; // mission spawn is also the respawn point
+          const ps = spec.playerSpawn;
           player.spawn = { x: ps.x, y: ps.y, alt: ps.alt, headingRad: (ps.headingDeg || 0) * Math.PI / 180, speed: ps.speed || 200 };
           player.debugCommand({ pos: ps, throttle: 0.8 });
         }
         sim.addSystem(script);
-      } catch (err) { campaign = null; console.warn("mission unavailable, quick match stays:", err && err.message); }
+      } catch (cause) {
+        throw new FlightLoadError('The selected mission could not be started.', { cause, request: requested.request });
+      }
     }
     sim.addSystem(match);
   }
@@ -438,8 +470,14 @@ async function boot() {
   });
 
   const input = new Input(window);
+  input.suspended = true; // Loading-screen input must never steer the first frame.
   const gamepad = new GamepadInput();
-  const controls = new ControlsMenu(input);
+  input.attachGamepad(gamepad);
+  let cockpit = null;
+  const controls = new ControlsMenu(input, {
+    onShow: () => cockpit?.onControlsOpen(),
+    onClose: () => cockpit?.onControlsClose(),
+  });
   const dbg = new DebugOverlay();
   const hud = new HUD({ parent: document.body });
   hud.setMode("arcade");
@@ -475,7 +513,7 @@ async function boot() {
       // ENU -> three (east, up, north)
       pipV.set(st[0] + pipV.x * CONV, st[2] + pipV.z * CONV - drop, st[1] + pipV.y * CONV);
       const pv = curvature ? curvature.project(pipV, camera, pipV) : pipV.project(camera);
-      if (pv.z < 1 && pv.z > -1) {
+      if (projectedDepthVisible(pv.z, camera)) {
         const px = (pv.x * 0.5 + 0.5) * w, py = (1 - (pv.y * 0.5 + 0.5)) * h;
         if (px > 8 && py > 8 && px < w - 8 && py < h - 8) {
           ctx.save();
@@ -495,7 +533,7 @@ async function boot() {
       aimV.set(Math.cos(player.aimHeading) * cp, sp, Math.sin(player.aimHeading) * cp)
         .multiplyScalar(6000).add(camera.position);
       const v = aimV.project(camera);
-      if (v.z > 1 || v.z < -1) return; // behind the camera
+      if (!projectedDepthVisible(v.z, camera)) return;
       const sx = (v.x * 0.5 + 0.5) * w, sy = (1 - (v.y * 0.5 + 0.5)) * h;
       if (sx < 8 || sy < 8 || sx > w - 8 || sy > h - 8) return;
       ctx.save();
@@ -524,7 +562,7 @@ async function boot() {
           pipV.set(battlefield.state[to], battlefield.state[to + 2], battlefield.state[to + 1]);
         }
         const tv = curvature ? curvature.project(pipV, camera, pipV) : pipV.project(camera);
-        if (tv.z < 1 && tv.z > -1) {
+        if (projectedDepthVisible(tv.z, camera)) {
           const tx = (tv.x * 0.5 + 0.5) * w, ty = (1 - (tv.y * 0.5 + 0.5)) * h;
           ctx.save();
           const locked = MS.locked();
@@ -560,7 +598,7 @@ async function boot() {
           }
           _bv.set(bx, bz, by); // ENU -> flat map -> rendered planet -> NDC
           if (curvature) curvature.project(_bv, camera, _bv); else _bv.project(camera);
-          if (_bv.z > 1) continue; // behind the camera plane
+          if (!projectedDepthVisible(_bv.z, camera)) continue;
           const sx = (_bv.x * 0.5 + 0.5) * w, sy = (-_bv.y * 0.5 + 0.5) * h;
           if (sx < -30 || sx > w + 30 || sy < -30 || sy > h + 30) continue;
           const col = bandits.side[i] === 1 ? SETTINGS.getPalette().friendly : SETTINGS.getPalette().enemy;
@@ -604,7 +642,8 @@ async function boot() {
 
       // ticket bars: blue (you) left, red (them) right — WT-style
       if (match) {
-        const bw = 170, bh = 7, gap = 14, y0 = 58;
+        const bw = Math.min(170,(w-90)/2), bh = 7, gap = 14;
+        const y0 = Math.max(86,70*(hud.uiScale||1)+12,(cockpit?.toolbarBottom||0)+9);
         const blueF = match.blue / match.blueMax, redF = match.red / match.redMax;
         ctx.fillStyle = "rgba(0,10,0,0.5)";
         ctx.fillRect(w / 2 - bw - gap / 2 - 2, y0 - 2, bw + 4, bh + 4);
@@ -678,7 +717,7 @@ async function boot() {
       if (script && missionData && (!match || match.over === 0)) {
         ctx.textAlign = "left";
         const VERB = { destroy_tag: "DESTROY", reach_zone: "REACH", survive_until: "HOLD", protect_tag: "PROTECT", kill_ace: "KILL" };
-        let oy = 92;
+        let oy = Math.max(100,(cockpit?.toolbarBottom||0)+20);
         ctx.font = "10px ui-monospace, Menlo, monospace";
         ctx.lineWidth = 3; ctx.strokeStyle = "rgba(0,10,0,0.8)";
         for (const o of script.objectiveSummary()) {
@@ -733,34 +772,47 @@ async function boot() {
     };
   }
 
-  // audio: F119 engine tracks the throttle, M61 gates on firing (phase 13
-  // first wiring; gesture-gated resume inside AudioBus)
-  let audio = null;
+  // Sound direction reads combat/flight state after camera placement; all
+  // sound remains render-side and outside the deterministic simulation.
+  let audio = null, soundscape = null;
   if (player && flags.get("audio") !== "0") {
     try {
       const { AudioBus } = await import("./engine/audio.js");
-      audio = new AudioBus(); // builds engine/gun/lock voices itself
+      audio = new AudioBus({ paused: true }); // saved mixer binds before the first audible frame
+      soundscape = new Soundscape(audio, { player, battlefield, bandits });
     } catch (err) { console.warn("audio unavailable:", err && err.message); }
   }
   // PHASE 13 VOICE SPIKE: the radio gets a voice (settings toggle, default
   // OFF). Voice reads settings.current() per utterance, so the bindLive ctx
   // entry is only the LIVE-chip honesty signal for the menu row — it stays
   // null (row honestly STORED) in free flight / when speechSynthesis is absent.
-  let voice = null;
+  let voice = null, commsAudio = null, radioSuspended = false;
   if (script && missionData && "speechSynthesis" in window) {
     try {
       const V = await import("./game/voice.js");
-      voice = new V.Voice(SETTINGS);
-      V.hookComms(script, missionData, voice); // 300ms poll on script.commsHead
+      voice = new V.Voice({ current: () => {
+        const mix = SETTINGS.current();
+        // Voice owns master/radio gain multiplication. Keep its settings
+        // contract intact and add the live audio and flight-pause gates.
+        return { ...mix, muted: mix.muted || !!audio?.muted,
+          voice: mix.voice && !radioSuspended && !cockpit?.paused };
+      } });
+      commsAudio = V.hookComms(script, missionData, voice, { intervalMs: 0 });
     } catch (err) { console.warn("voice unavailable:", err && err.message); }
   }
   // PHASE 15: settings go live (fov/renderScale/volumes/muzzle-flash gate)
-  SETTINGS.bindLive({ renderer, camera, audio, gunFlash: player ? player.gun.flash : null, baseTier: state.tier, hudLive: true, voice });
+  SETTINGS.bindLive({ renderer, camera, audio, input, hud, gunFlash: player ? player.gun.flash : null, baseTier: state.tier, hudLive: true, voice });
+  // A hidden tab may stop requesting frames entirely, so silence it here.
+  document.addEventListener("visibilitychange", () => {
+    audio?.setPaused(document.hidden || !!cockpit?.paused || controls.open || sim.timescale === 0);
+    if (document.hidden) { radioSuspended = true; voice?.cancel(); }
+  });
+  window.addEventListener("pagehide", () => { audio?.setPaused(true); voice?.cancel(); });
   // MAXFI A1: TRAA + bloom + flare post chain (WebGPU only; ?post=0 keeps
   // the plain pipe for QA baselines and numeric oracles)
   let post = null;
   let vol = null;
-  if (backend === "webgpu" && flags.get("post") !== "0") {
+  if (usePost) {
     // volumetric clouds ride the post chain (?vclouds=0 keeps billboards);
     // module + noise were hoisted pre-terrain (volPre) for the shadow node
     if (volPre) {
@@ -778,7 +830,7 @@ async function boot() {
         try {
           if (bootCloudQuality.mode === "adaptive") {
             ({ AdaptiveCloudPass: CloudPass } = await import("./world/adaptivecloudpass.js"));
-          } else ({ CloudPass } = await import("./world/cloudpass.js"));
+          } else ({ SpatialCloudPass: CloudPass } = await import("./world/spatialcloudpass.js"));
         }
         catch (err) { console.warn("cloud composition unavailable, billboards stay:", err && err.message); }
       }
@@ -805,12 +857,13 @@ async function boot() {
   state.post = !!post;
   // Loaders have settled: profile the actual field/textures/FFT, including
   // coherent fallbacks, then resolve cached render quality for that workload.
-  const assetContext = { backend, front: atmosphere.frontName, flags,
+  await atmosphere.sky.cirrusAtlas.userData.ready;
+  const assetContext = { backend, front: atmosphere.frontName, flags, textureLimit,
     hasTerrain: !!terrain, hasOcean: !!fg?.ocean && flags.get("nowater") !== "1",
     sourceEnabled: !!terrain && "sourceField" in terrain };
   const bootAssetRequest = requestedBootAssets(bootAssetTier, assetContext);
   state.bootAssetRequest = bootAssetRequest;
-  state.bootAssets = describeBootAssets({ bootTier: bootAssetTier, terrain, water,
+  state.bootAssets = describeBootAssets({ bootTier: bootAssetTier, terrain, water, sky: atmosphere.sky,
     fftOcean: state.fftOcean, fineOcean: state.fineOcean, cloudNoise: state.cloudNoise,
     cloudMode: post?.cloudPass?.mode || "billboard" });
   const benchProfile = qualityProfile({ backend, mode: cloudOptions.mode,
@@ -831,6 +884,7 @@ async function boot() {
     };
     liveQuality.applyCloudQuality = (tier) => {
       state.tier = tier; // effective live quality; bootAssetTier stays fixed
+      aircraftLighting.setQuality(tierParams(tier));
       const next = cloudQuality(tier, cloudOptions);
       post?.cloudPass?.setCloudScale?.(next.scale);
       state.cloudRendering = { mode: post?.cloudPass?.mode || "billboard",
@@ -882,7 +936,9 @@ async function boot() {
     }
   }
 
-  document.getElementById("controlsLink")?.addEventListener("click", (e) => { e.preventDefault(); controls.show(); });
+  cockpit = new Cockpit({ state, input, controls, audio, hud, flags });
+  state.cockpit = cockpit;
+  renderer.domElement.tabIndex = -1;
 
   window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -905,7 +961,8 @@ async function boot() {
   const kcPos = new THREE.Vector3();
 
   Object.assign(state, {
-    sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud, player, battlefield, match, script, bandits, directory,
+    rendering: { renderer, scene, camera, world, aircraftLighting, projectedDepthVisible },
+    sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud, player, battlefield, match, script, bandits, directory, audio, soundscape,
     cloudPass: post?.cloudPass ?? null,
     kc: () => killCam,
     cloudImmersion: () => clouds.immersion,
@@ -957,6 +1014,49 @@ async function boot() {
     }
   });
   window.addEventListener("pagehide", event => { if (!event.persisted) meter?.dispose(); });
+  bootStage('warmup','Preparing a smooth first frame…','Warming up the graphics before handing you the controls. Your flight has not started yet.');
+
+  // Prepare the actual spawn view while the loading screen is still up.
+  // In particular, this keeps LOW/MED scene compilation out of the first
+  // interactive frame, when the pilot is already trying the flight controls.
+  if (player) {
+    const parked=world.fixYaw!==null;
+    if (parked) world.renderParkedCamera(camera);
+    player.render(1,camera,parked,0);
+  } else world.render(0,camera);
+  battlefield?.render(0,camera);
+  bandits?.render(1,camera);
+  aircraftFrame.projectedPixels = Math.max(world.f22.userData.aircraft.length, world.f22.userData.aircraft.span)
+    * Math.abs(camera.projectionMatrix.elements[5]) * window.innerHeight
+    / (2 * Math.max(1, world.jet.position.distanceTo(camera.position)));
+  aircraftFrame.maxQuality = state.tier;
+  updateF22Visuals(world.f22, aircraftFrame);
+  curvature?.beginFrame(camera);
+  aircraftLighting.refreshMaterials();
+  planetObjects?.update();
+  terrain?.update(camera, 0);
+  water?.update(camera,0);
+  clouds.update(camera,0);
+  if (vol) { vol.uTime.value=0; vol.VC.updateCamera?.(camera); }
+  if (atmoH) atmoH.uCamPos.value.copy(camera.position);
+  atmosphere.update(camera);
+  aircraftLighting.update(world.jet, terrain);
+  renderer.toneMappingExposure=atmosphere.exposure;
+  if (!post) await renderer.compileAsync(scene,camera);
+  // Real draws cover the post graph's own MRT, temporal and shadow variants.
+  // No physics, input, audio or weapon effects advance during this warmup.
+  for(let pass=0;pass<2;pass++) {
+    await new Promise(requestAnimationFrame);
+    if(post)post.post.render();else renderer.render(scene,camera);
+    curvature?.endFrame();
+    if (pass === 0) {
+      curvature?.beginFrame(camera);
+      aircraftLighting.refreshMaterials();
+      planetObjects?.update();
+    }
+  }
+  await renderer.backend.device?.queue.onSubmittedWorkDone();
+  cockpit.clearInput();
 
   let last = performance.now();
   let firstFrame = true;
@@ -964,8 +1064,28 @@ async function boot() {
   let cloudClock = 0; // same convention; drives clouds AND their shadows
   function frame(now) {
     requestAnimationFrame(frame);
-    const dtMs = Math.min(now - last, 250);
+    let dtMs = state.resetFrameClock ? 0 : Math.min(now - last, 250);
+    state.resetFrameClock = false;
     last = now;
+    gamepad.update();
+    const pauseRequested=input.pressed("menu") || gamepad.pressed("menu") || input.pressed("game_pause");
+    if (pauseRequested && !controls.open && !cockpit.guide.open && !cockpit.log.open) cockpit.toggle();
+    if (input.pressed("help")) cockpit.openGuide();
+    if (cockpit.paused) {
+      // Consume presentation snapshots while the world is paused so resume
+      // cannot replay an old missile launch, impact or engine transition.
+      soundscape?.update({ camera, time: sim.time, dt: 0, paused: true, cinematic: !!killCam || !!match?.over });
+      radioSuspended = true;
+      commsAudio?.poll();
+      audio?.setRadioActive(false);
+      input.clear();
+      return; // No sim catch-up, camera drift, GPU rendering or weapon aging while paused.
+    }
+    // A gamepad can resume inside this very frame, after the clock was read.
+    if (state.resetFrameClock) { dtMs=0; state.resetFrameClock=false; }
+    input.sampleGamepad(dtMs / 1000);
+    if (input.pressed("hide_hud")) cockpit.toggleHUD();
+    if (input.pressed("recenter_aim")) { player?.recenterAim(); cockpit.toast("Aim aligned with your aircraft."); }
     frameNo++;
     if (qualityBenchmark) {
       const settings = SETTINGS.current();
@@ -991,8 +1111,6 @@ async function boot() {
         }
       }
     }
-    gamepad.update();
-    if (input.pressed("menu")) controls.toggle();
     if (input.pressed("debug")) dbg.toggle();
     player?.feedInput(input);
     const alpha = sim.advance(dtMs / 1000);
@@ -1006,7 +1124,10 @@ async function boot() {
       if (killCam && killCam.until && now > killCam.until) killCam = null;
       if (authored && match && match.over === 1 && !authored.saved) {
         authored.saved = true;
-        try { authored.A.markDone(authored.id); } catch (err) { console.warn("authored save failed:", err && err.message); }
+        try {
+          authored.A.markDone(authored.id);
+          state.progressSaved = authored.A.authSaveSucceeded();
+        } catch (err) { state.progressSaved = false; console.warn("authored save failed:", err && err.message); }
       }
       if (campaign && match && match.over !== 0 && !campaign.saved) {
         campaign.saved = true; // one write, render-side: sim never reads the save
@@ -1016,13 +1137,14 @@ async function boot() {
             { over: match.over, blueLeft: match.blue, redLeft: match.red,
               ace: aceUnit && bandits ? { id: aceUnit.aceId, status: bandits.aceStatus(aceUnit.aceId) } : undefined });
           campaign.E.saveSave(campaign.save);
-        } catch (err) { console.warn("campaign save failed:", err && err.message); }
+          state.progressSaved = true;
+        } catch (err) { state.progressSaved = false; console.warn("campaign save failed:", err && err.message); }
       }
       const matchOrbit = match && match.over !== 0;
       const cine = !!killCam || matchOrbit;
       const parked = world.fixYaw !== null;
       if (parked) world.renderParkedCamera(camera);
-      player.render(alpha, camera, parked || cine);
+      player.render(alpha, camera, parked || cine, dtMs / 1000 * sim.timescale);
       if (!parked && cine) {
         const center = matchOrbit ? world.jet.position : killCam.c;
         const th = now * 0.00045;
@@ -1033,25 +1155,24 @@ async function boot() {
       }
       if (!cine) lastJetPos.copy(world.jet.position);
       flightfx?.update(player.fm.out, player.throttleCmd, dtMs / 1000, camera);
-      if (audio) {
-        audio.engine.setState({
-          throttle: Math.min(player.throttleCmd, 1),
-          ab: Math.max(0, (player.throttleCmd - 1) / 0.1),
-          ias: player.fm.out.V * 1.94384,
-        });
-        if (player.gun.firing !== audio.gun.firing) audio.gun.fire(player.gun.firing);
-        // launch warning owns the tones over the seeker
-        const seekMode = battlefield && battlefield.samInbound() ? "launch"
-          : player.missiles.locked() ? "lock" : (player.missiles.lockTarget >= 0 ? "scan" : "off");
-        if (audio.locks.mode !== seekMode) audio.locks.setMode(seekMode);
-      }
+      const audioPaused = document.hidden || cockpit.paused || controls.open || sim.timescale === 0;
+      soundscape?.update({ camera, time: sim.time, dt: dtMs / 1000, paused: audioPaused, cinematic: cine });
+      radioSuspended = audioPaused || !!killCam;
+      commsAudio?.poll();
+      audio?.setRadioActive(!!voice?._cur && !radioSuspended);
     } else {
       world.render(alpha, camera);
     }
     battlefield?.render(dtMs / 1000, camera);
     bandits?.render(alpha, camera);
+    aircraftFrame.projectedPixels = Math.max(world.f22.userData.aircraft.length, world.f22.userData.aircraft.span)
+      * Math.abs(camera.projectionMatrix.elements[5]) * window.innerHeight
+      / (2 * Math.max(1, world.jet.position.distanceTo(camera.position)));
+    aircraftFrame.maxQuality = state.tier;
+    updateF22Visuals(world.f22, aircraftFrame);
     const planetFrame = curvature?.beginFrame(camera);
     if (planetFrame?.resetHistory) post?.invalidateHistory?.();
+    aircraftLighting.refreshMaterials();
     planetObjects?.update();
     terrain?.update(camera, dtMs / 1000);
     waterClock += dtMs / 1000;
@@ -1071,6 +1192,7 @@ async function boot() {
     hud.update(player ? player.hudState() : testworldHudState(world, alpha));
     if (atmoH) atmoH.uCamPos.value.copy(camera.position);
     atmosphere.update(camera); // IBL sees the current observer on its first capture
+    aircraftLighting.update(world.jet, terrain);
     uMoonAngularRadius.value = atmosphere.moonState.angularRadius;
     if (waterSkyEnvironment) {
       if (waterSkyEnvironment.front < 0) {
@@ -1087,96 +1209,42 @@ async function boot() {
     curvature?.endFrame();
     meter?.update({ target: atmosphere.meterTarget ?? .42 });
     dbg.frame(dtMs, { backend: state.backend, tier: state.tier, sim });
+    cockpit.update(now, dtMs);
     input.consumeFrame();
     if (firstFrame) {
       firstFrame = false;
       state.ready = true;
+      state.bootStage='ready';
+      document.getElementById('veil')?.setAttribute('aria-busy','false');
+      input.suspended = false;
       document.getElementById("veil")?.classList.add("lift");
       setTimeout(() => document.getElementById("veil")?.remove(), 900);
+      cockpit.onReady();
     }
   }
   requestAnimationFrame(frame);
 }
 
-// PHASE 12: hangar — a bare URL gets the front picker before any engine
-// spend; ANY query param (QA flags included) flies straight in unchanged.
-function hangar() {
-  document.getElementById("veil")?.remove();
-  const chrome = document.getElementById("chrome");
-  if (chrome) chrome.style.display = "none"; // the hangar carries its own brand
-  const el = document.getElementById("hangar");
-  el.style.display = "flex";
-  const cards = [...el.querySelectorAll(".fcard")];
-  const chips = [...el.querySelectorAll(".todchip")];
-  const GOLDEN = { NELLIS: 18.8, VALDEZ: 21.4, MARIANAS: 17.8 }; // solar-elevation-matched (LATITUDE LAW)
-  const TOD = { noon: () => 12, afternoon: () => 15.5, golden: (f) => GOLDEN[f] };
-  let front = "NELLIS", tod = "noon";
-  const sync = () => {
-    for (const c of cards) c.classList.toggle("sel", c.dataset.front === front);
-    for (const c of chips) c.classList.toggle("sel", c.dataset.tod === tod);
-  };
-  const fly = () => { location.href = "?front=" + front + "&tod=" + TOD[tod](front); };
-  // INC-3: persistent operation card — the war you left is still there
-  const opBox = document.getElementById("opRow");
-  const flyOp = () => { location.href = "?front=" + front + "&op=1"; };
-  let opSum = null;
-  const syncOp = async () => {
-    if (!opBox) return;
-    try {
-      const E = await import("./campaign/engine.js");
-      opSum = E.summarize(E.loadSave(front));
-      const km = opSum.frontKm > 0 ? "+" + opSum.frontKm : String(opSum.frontKm);
-      opBox.innerHTML = opSum.status !== "live"
-        ? `OPERATION ${opSum.status.toUpperCase()} — front line ${km} km · <button id="opFly">START ANEW</button>`
-        : `OPERATION · front line ${km} km · sortie ${opSum.sortieIndex + 1} · next: ${opSum.nextType ? opSum.nextType.toUpperCase() : "?"}${opSum.nextZoneName ? " — " + opSum.nextZoneName : ""}${opSum.nemesisName ? " · NEMESIS: " + opSum.nemesisName + " IS ALIVE" : ""} · <button id="opFly">FLY THE OPERATION</button>`;
-      opBox.style.display = "block";
-      document.getElementById("opFly")?.addEventListener("click", () => {
-        if (opSum.status !== "live") { try { localStorage.removeItem("raptor.op.v1:" + front); } catch (_) {} }
-        flyOp();
-      });
-    } catch (_) { opBox.style.display = "none"; } // engine not landed yet — hide
-  };
-  syncOp();
-  // INC-7: the authored campaign shelf — six set-pieces, linear unlock
-  const authBox = document.getElementById("authRow");
-  (async () => {
-    if (!authBox) return;
-    try {
-      const A = await import("./campaign/authored.js");
-      const auth = A.loadAuth();
-      const cells = A.CAMPAIGN.map((c, i) => {
-        const done = !!auth.done[c.id];
-        const open = A.isUnlocked(auth, i);
-        const meta = done ? "✓" : open ? "▶" : "🔒";
-        const label = c.id + " " + meta;
-        return open && !done
-          ? `<button class="authcell live" data-id="${c.id}" data-front="${c.front}">${label}</button>`
-          : `<span class="authcell${done ? " done" : ""}">${label}</span>`;
-      }).join("");
-      authBox.innerHTML = `CAMPAIGN · ` + cells;
-      authBox.style.display = "block";
-      for (const b of authBox.querySelectorAll("button.authcell")) {
-        b.addEventListener("click", () => { location.href = "?front=" + b.dataset.front + "&sortie=" + b.dataset.id; });
-      }
-    } catch (_) { authBox.style.display = "none"; } // content not landed yet
-  })();
-  for (const c of cards) c.addEventListener("click", () => { front = c.dataset.front; sync(); syncOp(); });
-  for (const c of cards) c.addEventListener("dblclick", fly);
-  for (const c of chips) c.addEventListener("click", () => { tod = c.dataset.tod; sync(); });
-  document.getElementById("flyBtn").addEventListener("click", fly);
-  addEventListener("keydown", (e) => {
-    const i = ["Digit1", "Digit2", "Digit3"].indexOf(e.code);
-    if (i >= 0) { front = cards[i].dataset.front; sync(); syncOp(); }
-    else if (e.code === "KeyT") { tod = chips[(chips.findIndex((c) => c.dataset.tod === tod) + 1) % chips.length].dataset.tod; sync(); }
-    else if (e.code === "Enter" || e.code === "Space") fly();
-  });
-  state.hangar = true; // QA: visible without booting
-}
-
-if (!location.search) hangar();
+// A bare URL (or an analytics-only query) opens preflight. Explicit flight
+// and development links remain directly launchable for repeatable QA.
+if (!hasFlightRequest(new URLSearchParams(location.search))) showFlightdeck(state);
 else boot().catch((err) => {
   state.failure = String(err && err.stack || err);
   console.error("RAPTOR boot failure:", err);
   const v = document.getElementById("veil");
-  if (v) v.querySelector(".status").textContent = "BOOT FAILURE — " + (err && err.message || err);
+  if (v) {
+    const message = bootFailureMessage(err, state.bootStage);
+    v.setAttribute('aria-busy','false');
+    v.dataset.failed='true';
+    v.querySelector(".status").textContent = message.title;
+    const detail = v.querySelector(".boot-status-detail");
+    if (detail) detail.textContent = message.detail;
+    const currentStep=v.querySelector('[aria-current="step"]');
+    if(currentStep)currentStep.dataset.state='failed';
+    const retry = document.createElement("button");
+    retry.className = "ui-button primary"; retry.textContent = message.retry;
+    retry.onclick = () => location.reload();
+    v.querySelector(".boot-actions")?.append(retry);
+    retry.focus();
+  }
 });

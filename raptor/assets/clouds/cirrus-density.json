@@ -1,12 +1,14 @@
 {
   "file": "cirrus-density.png",
   "generator": "bakery/bake_cirrus.mjs",
+  "referenceGrid": 2048,
   "recipe": {
-    "version": 2,
+    "version": 4,
     "seed": 1578579969,
     "patches": 38,
     "veilScale": 1.85,
     "targetMean": 0.0075,
+    "fineFibres": false,
     "encodingGain": 1.255136489868164
   },
   "width": 2048,

@@ -3,17 +3,8 @@
 import GTAONode from '../../vendor/display/GTAONode.js';
 import { Fn, If, float, uv, nodeObject } from 'three/tsl';
 
-export function installReversedDepthSort(renderer) {
-  if (!renderer.reversedDepthBuffer) return;
-  if (!renderer.backend.isWebGPUBackend) throw new Error('Reversed scene depth requires WebGPU.');
-  // These are pre-reversal comparisons. Depth retains the native reverse-Z
-  // near/far ordering; explicit group/render priorities keep their
-  // ordinary order after r185 calls reverse().
-  renderer.setOpaqueSort((a, b) => b.groupOrder - a.groupOrder
-    || b.renderOrder - a.renderOrder || a.z - b.z || b.id - a.id);
-  renderer.setTransparentSort((a, b) => b.groupOrder - a.groupOrder
-    || b.renderOrder - a.renderOrder || b.z - a.z || b.id - a.id);
-}
+// Preserve the application import while sharing the upstream idempotent guard.
+export { installReversedDepthOrderGuard as installReversedDepthSort } from "./reversed-depth-order.js";
 
 // Native GTAO r185 treats depth==1 as background. Its matrix-based geometry
 // reconstruction otherwise supports reverse Z. Guard the actual clear value

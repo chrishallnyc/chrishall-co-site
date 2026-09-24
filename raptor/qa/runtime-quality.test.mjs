@@ -12,13 +12,13 @@ const storage = new Map();
 globalThis.localStorage = { getItem:k=>storage.get(k)??null, setItem:(k,v)=>storage.set(k,String(v)), removeItem:k=>storage.delete(k) };
 Object.defineProperty(globalThis,'navigator',{value:{hardwareConcurrency:12,deviceMemory:16},configurable:true});
 globalThis.matchMedia=()=>({matches:false});
-globalThis.window={devicePixelRatio:1};
+globalThis.window={devicePixelRatio:1,dispatchEvent(){}};
 const context = {backend:'webgpu',front:'VALDEZ',flags:new URLSearchParams(),sourceEnabled:true};
-function assets(bootTier='HIGH',{source=true,fine=256,drape=true,hash='source-v1',normalHash='normal-v1'}={}) {
+function assets(bootTier='HIGH',{source=true,fine=512,drape=true,hash='source-v1',normalHash='normal-v1',cirrus=(bootTier==='HIGH'||bootTier==='ULTRA'?8192:2048)}={}) {
  return describeBootAssets({bootTier,terrain:{meta:{grid:4096},nearDetail:true,
   sourceField:source?{meta:{provenance:{sourceId:6412},sourceCrop:{row:1600,col:1600,size:3200},width:3200,height:3200,heightPackedSHA256:hash,normalPixelsSHA256:normalHash}}:null,
   drape:{albedo:drape?{image:{width:16384,height:16384}}:null}},water:{},fftOcean:true,
-  fineOcean:{N:fine,tileM:32},cloudNoise:{version:1,seed:1337,normalization:{lo:.25,hi:.875},resolution:'standard',baseN:128,detailN:64},cloudMode:'native'});
+  fineOcean:{N:fine,tileM:32},cloudNoise:{version:1,seed:1337,normalization:{lo:.25,hi:.875},resolution:'standard',baseN:128,detailN:64},cloudMode:'native',sky:{cirrusAtlas:{image:{width:cirrus,height:cirrus/2},userData:{source:'test-cirrus-v4',requestedResolution:cirrus}}}});
 }
 const profile = (loaded,query='')=>qualityProfile({backend:'webgpu',front:'VALDEZ',mode:'native',pixelRatio:1,width:1440,height:900,
   workload:qualityWorkload(new URLSearchParams(query)),assets:loaded});
@@ -26,8 +26,8 @@ beforeEach(()=>{storage.clear();settings.bindLive(null);settings.loadSettings();
 
 test('Auto reboots preserve desktop assets after selecting a lower render tier',()=>{
  const boot=bootAssetTier(context),request=requestedBootAssets(boot,context),loaded=assets(boot);
- assert.equal(boot,'HIGH');assert.deepEqual(request,{noise:'standard',fineOcean:256,source:'16'});
- saveBench({backend:'webgpu',tier:'MED',profile:profile(loaded)});
+ assert.equal(boot,'HIGH');assert.deepEqual(request,{cirrus:8192,noise:'standard',fineOcean:512,source:'16'});
+ saveBench({ms:16.7,backend:'webgpu',tier:'MED',profile:profile(loaded)});
  assert.equal(detectTier({backend:'webgpu',profile:profile(loaded)}),'MED');
  assert.equal(bootAssetTier(context),'HIGH');
  assert.deepEqual(requestedBootAssets(bootAssetTier(context),context),request);
@@ -37,18 +37,18 @@ test('Auto reboots preserve desktop assets after selecting a lower render tier',
 test('Auto upgrades on a heuristic MED device do not silently replace its asset pack',()=>{
  navigator.hardwareConcurrency=8;
  assert.equal(deviceTier(context),'MED');const boot=bootAssetTier(context);
- const loaded=assets(boot,{source:false,fine:128});saveBench({backend:'webgpu',tier:'HIGH',profile:profile(loaded)});
+ const loaded=assets(boot,{source:false,fine:128});saveBench({ms:16.7,backend:'webgpu',tier:'HIGH',profile:profile(loaded)});
  assert.equal(detectTier({backend:'webgpu',profile:profile(loaded)}),'HIGH');
- assert.deepEqual(requestedBootAssets(bootAssetTier(context),context),{noise:'standard',fineOcean:128,source:'0'});
+ assert.deepEqual(requestedBootAssets(bootAssetTier(context),context),{cirrus:2048,noise:'standard',fineOcean:128,source:'0'});
 });
 
 test('manual asset selection and explicit source/ocean overrides win over cached render quality',()=>{
- saveBench({backend:'webgpu',tier:'LOW',profile:profile(assets())});
- for(const [tier,fine,source,noise] of [['LOW',128,'0','standard'],['MED',128,'0','standard'],['HIGH',256,'16','standard'],['ULTRA',256,'16','ultra']]){
+ saveBench({ms:16.7,backend:'webgpu',tier:'LOW',profile:profile(assets())});
+ for(const [tier,fine,source,noise] of [['LOW',128,'0','standard'],['MED',128,'0','standard'],['HIGH',512,'16','standard'],['ULTRA',512,'16','ultra']]){
   setTier(tier);assert.equal(bootAssetTier(context),tier);
-  assert.deepEqual(requestedBootAssets(tier,context),{noise,fineOcean:fine,source});
+  assert.deepEqual(requestedBootAssets(tier,context),{cirrus:tier==='HIGH'||tier==='ULTRA'?8192:2048,noise,fineOcean:fine,source});
  }
- for(const value of ['0','128','256'])assert.equal(oceanFineResolution('HIGH',value),Number(value));
+ for(const value of ['0','128','256','512'])assert.equal(oceanFineResolution('HIGH',value),Number(value));
  for(const value of ['0','16'])assert.equal(terrainSourcePreset('LOW',value,'VALDEZ'),value);
  assert.equal(terrainSourcePreset('ULTRA','16','NELLIS'),'0');
  assert.equal(terrainSourcePreset('LOW','8','VALDEZ'),'0');assert.equal(terrainSourcePreset('LOW','slice','VALDEZ'),'0');
@@ -59,7 +59,7 @@ test('manual asset selection and explicit source/ocean overrides win over cached
 });
 
 test('actual source, fine-ocean and drape fallbacks cannot reuse successful asset timings',()=>{
- const full=profile(assets());saveBench({backend:'webgpu',tier:'LOW',profile:full});
+ const full=profile(assets());saveBench({ms:16.7,backend:'webgpu',tier:'LOW',profile:full});
  for(const alternate of [assets('HIGH',{source:false}),assets('HIGH',{fine:0}),assets('HIGH',{drape:false}),assets('HIGH',{hash:'source-v2'})]){
   assert.notEqual(profile(alternate),full);assert.equal(detectTier({backend:'webgpu',profile:profile(alternate)}),'HIGH');
  }
@@ -78,11 +78,12 @@ test('terrain cost overrides and policy version isolate saved workload identity'
 
 test('cache selection and benchmark-start gate agree on malformed or incompatible records',()=>{
  const key=profile(assets()),options={backend:'webgpu',profile:key};
- for(const bad of [null,{}, {tier:'BROKEN',backend:'webgpu',profile:key},
-  {tier:'LOW',backend:'webgl',profile:key},{tier:'LOW',backend:'webgpu',profile:'other-assets'}]){
+ for(const bad of [null,{}, {ms:16.7,tier:'BROKEN',backend:'webgpu',profile:key},
+  {ms:16.7,tier:'LOW',backend:'webgl',profile:key},{ms:16.7,tier:'LOW',backend:'webgpu',profile:'other-assets'},
+  ...[undefined,0,-1,NaN,Infinity].map(ms=>({ms,tier:'LOW',backend:'webgpu',profile:key}))]){
   assert.equal(isCompatibleBench(bad,options),false);saveBench(bad);assert.equal(detectTier(options),'HIGH');
  }
- const valid={tier:'MED',backend:'webgpu',profile:key};assert.equal(isCompatibleBench(valid,options),true);
+ const valid={ms:16.7,tier:'MED',backend:'webgpu',profile:key};assert.equal(isCompatibleBench(valid,options),true);
  saveBench(valid);assert.equal(detectTier(options),'MED');
 });
 
@@ -126,37 +127,41 @@ test('Auto excludes settling and upload frames without losing measurements of co
 
 function controlsHarness({bootTier='HIGH',baseTier='MED'}={}) {
  const transition=new TerrainDetailTransition(),bootRequest=requestedBootAssets(bootTier,context);
- const sourceField={id:6412},fineOcean={N:oceanFineResolution(bootTier)};const calls={tiers:[],ratios:[]};
- const state={tier:baseTier,assetReloadRequired:false,sourceField,fineOcean};window.__RAPTOR=state;
- const live={baseTier,renderer:{setPixelRatio:v=>calls.ratios.push(v)},
+ const sourceField={id:6412},fineOcean={N:oceanFineResolution(bootTier)};const calls={tiers:[],ratios:[],closed:0};
+ const state={ready:true,tier:baseTier,assetReloadRequired:false,sourceField,fineOcean};window.__RAPTOR=state;
+ let ratio=1;
+ const live={baseTier,renderer:{getPixelRatio:()=>ratio,setPixelRatio:v=>{ratio=v;calls.ratios.push(v);}},
   applyCloudQuality:tier=>{calls.tiers.push(tier);state.tier=tier;},
   applyTerrainQuality:tier=>transition.setEnabled(tierHasNearTerrain(tier)),
   applyAssetQuality:()=>{const s=settings.current();state.assetReloadRequired=assetsNeedReload(bootRequest,requestedBootAssets(s.tier==='AUTO'?deviceTier(context):s.tier,context));}};
  settings.bindLive(live);transition.advance(0);
- const buttons=['AUTO','LOW','MED','HIGH','ULTRA'].map(tier=>({dataset:{tier},addEventListener(type,fn){this[type]=fn;}}));
- const reset={addEventListener(type,fn){this[type]=fn;}};
- const menu={el:{querySelectorAll:q=>q==='.tierchip'?buttons:[],querySelector:q=>q==='#setReset'?reset:null},
-  _render(){this.html=ControlsMenu.prototype._settingsHtml.call(this);}};
- ControlsMenu.prototype._wireSettings.call(menu);menu._render();
- return{transition,sourceField,fineOcean,state,calls,live,menu,click:tier=>buttons.find(b=>b.dataset.tier===tier).click(),reset:()=>reset.click()};
+ const button=dataset=>({dataset,addEventListener(type,fn){this[type]=fn;}});
+ const buttons=['AUTO','LOW','MED','HIGH','ULTRA'].map(quality=>button({quality}));
+ const reset=button({action:'reset-settings'}),confirm=button({confirm:'reset'}),review=button({});
+ const menu=Object.assign(Object.create(ControlsMenu.prototype),{tab:'display',input:{setOptions(){}},
+  el:{querySelectorAll:q=>q==='[data-quality]'?buttons:q==='[data-action]'?[reset]:q==='[data-confirm]'?[confirm]:[],querySelector:q=>q==='[data-review-restart]'&&menu.html?.includes('data-review-restart')?review:null},
+  close(){calls.closed++;},_render(){this.html=this._settingsHtml();this._wire();}});
+ menu._render();
+ return{transition,sourceField,fineOcean,state,calls,live,menu,click:tier=>buttons.find(b=>b.dataset.quality===tier).click(),
+  review:()=>review.click(),reset:()=>{reset.click();assert.equal(menu.confirming,'settings');confirm.click();}};
 }
 
 test('real controls handlers update runtime tiers, fade down, and report only required asset reloads',()=>{
- saveBench({backend:'webgpu',tier:'MED',profile:profile(assets())});const h=controlsHarness();
- assert.match(h.menu.html,/AUTO \(MED\)/);assert.doesNotMatch(h.menu.html,/full detail after reload/);
- h.click('HIGH');assert.equal(h.transition.target,1);assert.equal(h.state.assetReloadRequired,false);assert.doesNotMatch(h.menu.html,/full detail after reload/);
+ saveBench({ms:16.7,backend:'webgpu',tier:'MED',profile:profile(assets())});const h=controlsHarness();
+ assert.match(h.menu.html,/MED is running/);assert.doesNotMatch(h.menu.html,/data-review-restart/);
+ h.click('HIGH');assert.equal(h.transition.target,1);assert.equal(h.state.assetReloadRequired,false);assert.doesNotMatch(h.menu.html,/data-review-restart/);
  h.transition.advance(.3);h.transition.advance(0);
  h.click('LOW');assert.equal(h.state.tier,'LOW');assert.equal(h.transition.target,0);assert.equal(hasManualTier(),true);assert.equal(h.state.assetReloadRequired,true);
- assert.match(h.menu.html,/full detail after reload/);h.transition.advance(.3);assert.equal(h.transition.useFine,true);h.transition.advance(0);assert.equal(h.transition.useFine,false);
+ assert.match(h.menu.html,/data-review-restart/);assert.match(h.menu.html,/unfinished flight will start over/);h.review();assert.equal(h.calls.closed,1);h.transition.advance(.3);assert.equal(h.transition.useFine,true);h.transition.advance(0);assert.equal(h.transition.useFine,false);
  assert.equal(h.calls.ratios.at(-1),.75);
  h.click('ULTRA');assert.equal(h.transition.target,1);assert.equal(h.state.assetReloadRequired,true);assert.equal(h.calls.ratios.at(-1),1.25);
- assert.equal(h.state.sourceField,h.sourceField);assert.equal(h.state.fineOcean,h.fineOcean);assert.equal(h.state.fineOcean.N,256);
+ assert.equal(h.state.sourceField,h.sourceField);assert.equal(h.state.fineOcean,h.fineOcean);assert.equal(h.state.fineOcean.N,512);
 });
 
 test('controls Auto/reset restores live base quality and never swaps boot assets',()=>{
  const h=controlsHarness();h.click('ULTRA');h.transition.advance(.3);h.click('AUTO');
  assert.equal(hasManualTier(),false);assert.equal(settings.current().tier,'AUTO');assert.equal(h.calls.tiers.at(-1),'MED');assert.equal(h.state.tier,'MED');assert.equal(h.transition.target,0);
- assert.equal(h.state.assetReloadRequired,false);assert.match(h.menu.html,/re-benchmarks after reload/);
+ assert.equal(h.state.assetReloadRequired,false);assert.match(h.menu.html,/MED is running/);assert.doesNotMatch(h.menu.html,/data-review-restart/);
  h.click('LOW');settings.saveSettings({renderScale:.6});h.reset();
  assert.equal(settings.current().renderScale,null);assert.equal(h.calls.ratios.at(-1),1);assert.equal(h.transition.target,0);
  assert.equal(h.state.sourceField,h.sourceField);assert.equal(h.state.fineOcean,h.fineOcean);
@@ -166,11 +171,68 @@ test('live Auto base-tier changes propagate through settings without restarting 
  const h=controlsHarness();const q=new QualityBenchmark({tier:'HIGH',backend:'webgpu',warmup:0,samples:2});
  q.observe(40);const change=q.observe(40);assert.equal(change.tier,'MED');
  h.live.baseTier=change.tier;h.state.tier=change.tier;settings.applySettings(settings.current(),h.live);
- assert.equal(h.transition.target,0);assert.equal(h.state.assetReloadRequired,false);assert.equal(h.state.fineOcean.N,256);
+ assert.equal(h.transition.target,0);assert.equal(h.state.assetReloadRequired,false);assert.equal(h.state.fineOcean.N,512);
  h.live.baseTier='HIGH';settings.applySettings(settings.current(),h.live);assert.equal(h.transition.target,1);
  assert.equal(h.state.sourceField,h.sourceField);
 });
 
 test("actual source normal-only revisions invalidate the loaded asset profile",()=>{
  assert.notEqual(profile(assets("HIGH",{normalHash:"normal-v1"})),profile(assets("HIGH",{normalHash:"normal-v2"})));
+});
+
+test('cirrus boot selection honors the GPU texture limit and records actual fallback identity',()=>{
+ for(const tier of ['LOW','MED'])assert.equal(requestedBootAssets(tier,context).cirrus,2048);
+ for(const tier of ['HIGH','ULTRA']){
+  assert.equal(requestedBootAssets(tier,context).cirrus,8192);
+  assert.equal(requestedBootAssets(tier,{...context,textureLimit:4096}).cirrus,2048);
+ }
+ const full=assets(),fallback=assets('HIGH',{cirrus:2048});
+ assert.notEqual(profile(full),profile(fallback));
+ assert.notEqual(profile(full),profile({...full,sky:{cirrus:{...full.sky.cirrus,source:'neutral-fallback'}}}));
+ const high=requestedBootAssets('HIGH',context),limited=requestedBootAssets('HIGH',{...context,textureLimit:4096});
+ assert.equal(assetsNeedReload(high,limited),true);assert.equal(assetsNeedReload(high,{...high}),false);
+});
+
+test('same live tier still offers explicit restart when loaded assets differ',()=>{
+ const h=controlsHarness({bootTier:'LOW',baseTier:'HIGH'});h.click('HIGH');
+ assert.equal(h.state.tier,'HIGH');assert.equal(settings.current().tier,'HIGH');assert.equal(h.state.assetReloadRequired,true);
+ assert.match(h.menu.html,/Full graphics detail needs a new flight/);assert.match(h.menu.html,/data-review-restart/);
+ h.review();assert.equal(h.calls.closed,1);assert.equal(h.state.fineOcean.N,128);
+});
+
+test('blocked storage never promises that restart will preserve new graphics settings',()=>{
+ const original=globalThis.localStorage;
+ try{
+  const h=controlsHarness({bootTier:'LOW',baseTier:'HIGH'});
+  globalThis.localStorage={getItem(){throw Error('blocked');},setItem(){throw Error('blocked');},removeItem(){throw Error('blocked');}};
+  h.click('HIGH');assert.equal(settings.storageAvailable(),false);assert.equal(h.state.assetReloadRequired,true);
+  assert.match(h.menu.html,/Browser storage is unavailable/);assert.doesNotMatch(h.menu.html,/data-review-restart/);
+  assert.match(h.menu.notice,/could not be saved/);
+ }finally{globalThis.localStorage=original;settings.loadSettings();}
+});
+
+const {Cockpit}=await import('../src/game/cockpit.js');
+function pauseHarness({tier='HIGH',next='HIGH',assetReloadRequired=false}={}){
+ settings.bindLive(null);settings.saveSettings({tier:next});
+ const buttons=new Map(),body={innerHTML:'',querySelectorAll:()=>[],querySelector(key){if(!buttons.has(key))buttons.set(key,{addEventListener(){},focus(){}});return buttons.get(key);}};
+ const h={paused:true,reason:'manual',state:{tier,assetReloadRequired},controls:{open:false},guide:{open:false},log:{open:false},input:{},flags:new URLSearchParams(),pauseDialog:{body,el:{querySelector:()=>({}),setAttribute(){}},show(){}},confirmLeave(action,title){this.confirmation={action,title};}};
+ Cockpit.prototype.showPause.call(h);return{h,body,buttons};
+}
+
+test('actual pause panel explains same-tier asset reloads and keeps restart behind confirmation',()=>{
+ const {h,body,buttons}=pauseHarness({assetReloadRequired:true});
+ assert.match(body.innerHTML,/needs a restart to load its full detail/);assert.match(body.innerHTML,/Restart with new graphics/);
+ assert.doesNotMatch(body.innerHTML,/HIGH running · HIGH on restart/);assert.equal(h.confirmation,undefined);
+ buttons.get('[data-restart]').onclick();assert.equal(h.confirmation.title,'Restart this flight?');assert.equal(typeof h.confirmation.action,'function');
+ const ordinary=pauseHarness();assert.doesNotMatch(ordinary.body.innerHTML,/pause-graphics-note/);assert.match(ordinary.body.innerHTML,/Restart this flight/);
+ const changed=pauseHarness({tier:'MED',next:'HIGH'});assert.match(changed.body.innerHTML,/MED running · HIGH on restart/);
+});
+
+test('actual pause panel reports unsaved graphics without promising a persisted preset',()=>{
+ const original=globalThis.localStorage;
+ try{
+  globalThis.localStorage={getItem(){throw Error('blocked');},setItem(){throw Error('blocked');},removeItem(){throw Error('blocked');}};
+  const {body}=pauseHarness({assetReloadRequired:true});assert.match(body.innerHTML,/restarting may restore your previous settings/);
+  assert.doesNotMatch(body.innerHTML,/Restart with new graphics/);assert.match(body.innerHTML,/Restart this flight/);
+ }finally{globalThis.localStorage=original;settings.loadSettings();}
 });

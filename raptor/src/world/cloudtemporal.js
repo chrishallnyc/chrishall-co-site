@@ -50,7 +50,12 @@ export function cloudTemporalResult(pass, { color, alpha, meanDistance, sceneDis
         const invalidProjection = cloudWeight.greaterThan(0).and(
           invalidCloudProjection.or(cloudWeight.lessThan(1).and(invalidSceneProjection)),
         );
-        const historyRejected = pass._resetHistory.or(invalidProjection);
+        // A rejected scene sample is not a motion vector. Preserve that
+        // rejection whenever the translucent result still uses its history;
+        // an opaque cloud layer may keep its independent camera motion.
+        const invalidSceneHistory = originalMotion.equal(vec2(4, 4)).all()
+          .and(cloudWeight.lessThan(1));
+        const historyRejected = pass._resetHistory.or(invalidProjection).or(invalidSceneHistory);
         const outMotion = select(curvature ? historyRejected.or(curvature.historyValid.not()) : historyRejected,
           vec2(4, 4), motion);
         return CloudResult(color, vec4(outMotion, 0, 1), outDepth);

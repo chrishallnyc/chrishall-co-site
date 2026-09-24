@@ -8,7 +8,7 @@ const CIRRUS_RADIUS_KM = PLANET_RADIUS_KM + CIRRUS_ALTITUDE_KM;
 const CIRRUS_PERIOD_M = 120000;
 
 let cirrusAtlas;
-export function getCirrusAtlas() {
+export function getCirrusAtlas(resolution = 2048) {
   if (cirrusAtlas) return cirrusAtlas;
   // An offline density atlas preserves natural tapered fibres at several
   // scales. Mip filtering integrates distant strands instead of aliasing
@@ -21,26 +21,40 @@ export function getCirrusAtlas() {
   cirrusAtlas.generateMipmaps = true;
   cirrusAtlas.flipY = false;
   cirrusAtlas.needsUpdate = true;
-  if (typeof document !== "undefined") {
-    new THREE.ImageLoader().load(new URL("../../assets/clouds/cirrus-density.png", import.meta.url).href, (image) => {
-      // DataTexture's upload contract requires typed pixels. Decode only;
-      // the atlas generation is offline and never runs in a game frame.
-      const canvas = document.createElement("canvas");
+  // This singleton is selected once by Sky at boot; celestial transmission
+  // and both atmosphere paths reuse the same object and opacity field.
+  const atlas = cirrusAtlas;
+  atlas.userData.requestedResolution = resolution;
+  atlas.userData.source = 'placeholder';
+  atlas.userData.ready = typeof document === 'undefined' ? Promise.resolve(false) : new Promise(resolve => {
+    const failed = size => {
+      if (size === 8192) load(2048);
+      else resolve(false);
+    };
+    const load = size => new THREE.ImageLoader().load(new URL(size === 8192
+      ? '../../assets/clouds/cirrus-density-8k.png' : '../../assets/clouds/cirrus-density.png', import.meta.url).href, image => {
+      let canvas = null, loaded = false;
+      try {
+      if (image.width !== size || image.height !== size) throw new Error('Unexpected cirrus dimensions');
+      canvas = document.createElement('canvas');
       canvas.width = image.width; canvas.height = image.height;
-      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
       ctx.drawImage(image, 0, 0);
       const rgba = ctx.getImageData(0, 0, image.width, image.height).data;
       const density = new Uint8Array(image.width * image.height);
       for (let i = 0; i < density.length; i++) density[i] = rgba[i * 4];
-      // The placeholder may already own immutable 1x1 GPU storage. Release
-      // it before changing dimensions; the same texture/node references then
-      // recreate storage on their next upload on either renderer backend.
-      cirrusAtlas.dispose();
-      cirrusAtlas.image = { data: density, width: image.width, height: image.height };
-      canvas.width = canvas.height = 1;
-      cirrusAtlas.needsUpdate = true;
-    }, undefined, () => { /* unavailable atlas leaves the sky clear */ });
-  }
+      // A placeholder may already own immutable 1x1 storage on either backend.
+      atlas.dispose();
+      atlas.image = { data: density, width: image.width, height: image.height };
+      atlas.userData.source = size === resolution ? 'asset' : 'fallback';
+      atlas.needsUpdate = true;
+      loaded = true;
+      } catch (_) { /* Retry the smaller atlas, then retain a clear sky. */ }
+      finally { if (canvas) canvas.width = canvas.height = 1; }
+      if (loaded) resolve(true); else failed(size);
+    }, undefined, () => failed(size));
+    load(resolution);
+  });
   return cirrusAtlas;
 }
 

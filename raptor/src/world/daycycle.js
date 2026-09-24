@@ -42,14 +42,14 @@ function paletteAt(elDeg, key, isColor) {
 }
 
 export class Atmosphere {
-  constructor(scene, frontName = "NELLIS") {
+  constructor(scene, frontName = "NELLIS", skyOptions = {}) {
     this.front = FRONTS[frontName] || FRONTS.NELLIS;
     this.frontName = frontName;
     // fixed representative date per front for now (season variety in phase 5)
     this.baseUtcMidnight = Date.UTC(2026, 5, 21); // Jun 21
     this.hours = 10.5;
 
-    this.sky = new Sky();
+    this.sky = new Sky(45000, skyOptions);
     scene.add(this.sky.mesh);
 
     this.stars = new Stars(undefined, this.sky);

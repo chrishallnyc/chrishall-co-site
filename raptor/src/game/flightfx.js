@@ -1,9 +1,40 @@
-// FlightFX consumes telemetry without writing simulation state. Wingtip and
-// nozzle anchors stay in the aircraft rig. The axial plume inherits its nozzle
-// pivot; the world-fixed particle group cancels its parent world transform.
+// FlightFX v1 — FM-driven wingtip condensation vortices, afterburner plume,
+// and a barely-there mil-power haze trail. Render-side only: consumes
+// fm.out telemetry + throttleCmd every frame, never touches sim state or
+// SimCore (it's cosmetic, not a determinism-bearing system — no hash(),
+// no tick()). Shape matches the other render-side systems in this codebase
+// (terrain/water/clouds all expose `update(camera, ...)`); this one is
+// `update(fmOut, throttleCmd, dt, camera)`.
+//
+// Anchors: rather than re-deriving wingtip/nozzle-exit world positions by
+// hand every frame, we park a few invisible Object3Ds INSIDE the F-22's own
+// scene graph — as children of the nose-flipped "f22" group and the two
+// nozzle pivot groups — so they inherit every transform (current jet
+// attitude, testworld's Math.PI nose flip, any future TVC nozzle animation)
+// for free via the normal parent/child matrix cascade.
+//
+// IMPORTANT — everything VISIBLE this class creates is parented somewhere
+// inside jetGroup's existing subtree too, NEVER added straight to `scene`.
+// Verified empirically (see devlog): this build's renderer only draws
+// objects that live under something that was already in the scene graph
+// when the render loop started — a brand-new top-level `scene.add(x)` after
+// boot silently never renders (confirmed with plain, untextured, non-
+// transparent test meshes; mutating an EXISTING object's material updates
+// instantly). The exhaust volumes are children of `parts.nozzleL/R`
+// directly (plain local coordinates — no manual world-space placement
+// needed). The vortex/smoke InstancedMeshes need to stay put in WORLD space
+// while the jet flies on, so they live under a `_worldFixed` group that IS
+// a child of jetGroup (satisfying "already in the tree") but whose local
+// matrix is reset every frame to jetGroup.matrixWorld's inverse — the two
+// cancel, so instance matrices set in absolute world coordinates (exactly
+// as before) land in the right place regardless of where the jet is.
+//
+// Current aircraft declare wingtip and exhaust anchors in model metadata.
+// Legacy models retain the original estimates below as a compatibility path.
+
 import * as THREE from "three";
 import { Pool } from "../engine/pools.js";
-import { createAfterburnerResources, createNozzlePlume, updateNozzlePlume } from "./afterburner.js";
+import { createExhaustPlume, updateExhaustPlume } from "../aircraft/exhaust-plume.js";
 
 // ---- wingtip condensation vortex ----
 const VORT_LIFE = 1.2;         // s — spec: fades over ~1.2s
@@ -18,7 +49,7 @@ const VORT_AOA_GATE = 15;      // alphaDeg >
 
 // ---- afterburner plume (throttle > 1.0) ----
 const AB_SPOOL_TAU = 0.4;      // s, EST light-off feel (f22data ENGINE.spoolTauAbS ~0.5)
-const AB_LEN_BASE = 4.2, AB_LEN_AB = 7.5; // m, plume length at abStage 0 -> 1
+const AB_LEN_BASE = 2.6, AB_LEN_AB = 5.2; // metres; maximum AB remains long and narrow
 
 // ---- mil-power haze (very faint — F119 is smokeless-ish) ----
 const SMOKE_TAU = 0.6;
@@ -26,7 +57,7 @@ const SMOKE_LIFE = 2.4;
 const SMOKE_INTERVAL = 0.12;
 const SMOKE_CAP = 48;
 const SMOKE_SIZE = 0.9;
-const SMOKE_ALPHA_MAX = 0.09;
+const SMOKE_ALPHA_MAX = 0.012;
 
 const WINGTIP = { x: 6.6, y: 0.35, z: 4.2 }; // f22-model-local, mirrored for the L side (y re-anchored to v3's drooped tip, D-052)
 const NOZZLE_EXIT_Z = 1.36;                 // nozzle-pivot-local, aft along the pivot's +Z
@@ -43,15 +74,16 @@ export class FlightFX {
 
     // ---- anchors, parked inside the model's own hierarchy ----
     const f22Group = parts.nozzleL.parent; // the Math.PI-flipped "f22" group
+    const attachments = f22Group.userData.aircraft?.attachments;
     this._tipL = new THREE.Object3D();
-    this._tipL.position.set(-WINGTIP.x, WINGTIP.y, WINGTIP.z);
+    this._tipL.position.fromArray(attachments?.wingtipL?.position ?? [-WINGTIP.x, WINGTIP.y, WINGTIP.z]);
     this._tipR = new THREE.Object3D();
-    this._tipR.position.set(WINGTIP.x, WINGTIP.y, WINGTIP.z);
+    this._tipR.position.fromArray(attachments?.wingtipR?.position ?? [WINGTIP.x, WINGTIP.y, WINGTIP.z]);
     f22Group.add(this._tipL, this._tipR);
     this._nozL = new THREE.Object3D();
-    this._nozL.position.set(0, 0, NOZZLE_EXIT_Z);
+    this._nozL.position.fromArray(attachments?.nozzleL?.position ?? [0, 0, NOZZLE_EXIT_Z]);
     this._nozR = new THREE.Object3D();
-    this._nozR.position.set(0, 0, NOZZLE_EXIT_Z);
+    this._nozR.position.fromArray(attachments?.nozzleR?.position ?? [0, 0, NOZZLE_EXIT_Z]);
     parts.nozzleL.add(this._nozL);
     parts.nozzleR.add(this._nozR);
 
@@ -68,7 +100,6 @@ export class FlightFX {
     this._pTipL = new THREE.Vector3(); this._pTipR = new THREE.Vector3();
     this._pNozL = new THREE.Vector3(); this._pNozR = new THREE.Vector3();
     this._aftL = new THREE.Vector3(); this._aftR = new THREE.Vector3();
-    this._viewTmp = new THREE.Vector3();
     this._mid = new THREE.Vector3();
     this._m4 = new THREE.Matrix4();
     this._invWorld = new THREE.Matrix4();
@@ -99,14 +130,14 @@ export class FlightFX {
     this._smokePool = new Pool(SMOKE_CAP, () => ({ x: 0, y: 0, z: 0, age: 1e9 }));
     this._smokeCooldown = 0;
 
-    // Render-only axial plume; stock materials and stable object transforms
-    // retain PlanetObjectBender's current/prior motion and probe contracts.
-    this._abResources = createAfterburnerResources();
-    this._abL = createNozzlePlume(parts.nozzleL, this._abResources);
-    this._abR = createNozzlePlume(parts.nozzleR, this._abResources);
-    // Keep diagnostic mesh lists stable across the old/new rendering paths.
-    this._plumeL = [this._abL.ribbon, this._abL.aperture];
-    this._plumeR = [this._abR.ribbon, this._abR.aperture];
+    // Longitudinal radiance follows the actual vectoring nozzles. Resource
+    // geometry and textures are shared; opacity is independent per engine.
+    this._plumeL = createExhaustPlume(this._nozL, 0);
+    this._plumeR = createExhaustPlume(this._nozR, 1);
+    this._liners = [];
+    for (const nozzle of [parts.nozzleL, parts.nozzleR]) nozzle.traverse(object => {
+      if (object.isMesh && object.material.name === 'F119-ceramic-liner') this._liners.push(object);
+    });
 
     this._t = 0;
     this._abStage = 0;
@@ -178,17 +209,16 @@ export class FlightFX {
     const machBoost = 1 + Math.min(fmOut.mach, 2) * 0.15; // plume elongates a bit at speed/altitude
     const len = (AB_LEN_BASE + (AB_LEN_AB - AB_LEN_BASE) * stage) * machBoost;
 
-    updateNozzlePlume(this._abL, { length: len, stage, time: this._t, side: 0, camera });
-    updateNozzlePlume(this._abR, { length: len, stage, time: this._t, side: 1, camera });
+    updateExhaustPlume(this._plumeL, stage, len, this._t, camera.position);
+    updateExhaustPlume(this._plumeR, stage, len, this._t, camera.position);
+    for (const mesh of this._liners) {
+      mesh.material.emissive?.setRGB(.30 * stage, .045 * stage, .005 * stage);
+    }
   }
-
-  // Idempotent release of this FlightFX instance's afterburner resources.
-  // Existing vortex/smoke lifetime is unchanged.
-  disposeAfterburner() { this._abResources.dispose(); }
 
   // ---- 3. mil-power haze (very faint, no AB) ----
   _updateSmoke(throttleCmd, dt) {
-    const target = Math.max(0, Math.min(1, (throttleCmd - 0.55) / 0.45));
+    const target = Math.max(0, Math.min(1, (throttleCmd - 0.55) / 0.45)) * (1 - this._abStage);
     this._smokeStage += (target - this._smokeStage) * Math.min(1, dt / SMOKE_TAU);
     this._smokeCooldown -= dt;
     if (this._smokeStage > 0.02 && this._smokeCooldown <= 0) {

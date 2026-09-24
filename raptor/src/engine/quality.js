@@ -4,6 +4,11 @@
 
 const STORE_KEY = "raptor:quality:v1";
 const BENCH_KEY = "raptor:bench:v3";
+let sessionTier = null, sessionBench = null;
+const validTier = name => typeof name === 'string' && Object.hasOwn(TIERS, name);
+function manualTier() {
+  try { const name=localStorage.getItem(STORE_KEY); return validTier(name)?name:null; } catch { return sessionTier; }
+}
 
 export const TIERS = {
   LOW:   { renderScale: 0.75, shadows: false, shadowSize: 0,    scatter: 0.25, clouds: "volumetric", cloudScale: .5,  cloudNoise: "standard", post: true },
@@ -13,30 +18,48 @@ export const TIERS = {
 };
 
 export function savedBench() {
-  try { return JSON.parse(localStorage.getItem(BENCH_KEY) || "null"); } catch (_) { return null; }
+  try {
+    const value=JSON.parse(localStorage.getItem(BENCH_KEY) || 'null');
+    return value && validTier(value.tier) && ['webgpu','webgl'].includes(value.backend) && Number.isFinite(value.ms) && value.ms>0 ? value : null;
+  } catch (_) { return sessionBench; }
 }
 
-export function saveBench(rec) { localStorage.setItem(BENCH_KEY, JSON.stringify(rec)); }
+export function saveBench(rec) {
+  if(!rec || !validTier(rec.tier) || !['webgpu','webgl'].includes(rec.backend) || !Number.isFinite(rec.ms) || rec.ms<=0)return;
+  sessionBench={...rec};
+  try {localStorage.setItem(BENCH_KEY, JSON.stringify(rec));}catch {}
+}
 
-export function clearBench() { localStorage.removeItem(BENCH_KEY); localStorage.removeItem(STORE_KEY); }
+export function clearBench() {
+  sessionTier=null;sessionBench=null;
+  try {localStorage.removeItem(BENCH_KEY);localStorage.removeItem(STORE_KEY);}catch {}
+}
 
 // Median frame ms from a measured run of the live scene → tier.
-export function benchPick(medianMs, backend) {
-  // 60/90/120/144 Hz all retain native resolution. Vsync measurements do
-  // not prove enough spare GPU time for supersampling, so ULTRA is opt-in.
+export function benchPick(medianMs, backend, activeTier) {
+  if (!Number.isFinite(medianMs) || medianMs <= 0) return "LOW";
+  // An already measured live preset can retain its display-limited result.
+  if (validTier(activeTier)) {
+    if (medianMs <= 18.5) return activeTier;
+    if (medianMs > 34) return "LOW";
+    return ["HIGH", "ULTRA"].includes(activeTier) ? "MED" : "LOW";
+  }
+  // Vsync alone never establishes spare capacity for supersampling.
+  // Preserve native output at 60/90/120/144 Hz; ULTRA remains opt-in.
   if (backend === "webgpu" && medianMs <= 18.5) return "HIGH";
   if (medianMs <= 30) return "MED";
   return "LOW";
 }
 
 export function isCompatibleBench(bench, { backend, profile } = {}) {
-  return !!(bench && TIERS[bench.tier] && bench.backend === backend
+  return !!(bench && validTier(bench.tier) && bench.backend === backend
+    && Number.isFinite(bench.ms) && bench.ms > 0
     && (profile === undefined || bench.profile === profile));
 }
 
 export function detectTier({ backend, profile } = {}) {
-  const saved = localStorage.getItem(STORE_KEY);
-  if (saved && TIERS[saved]) return saved;
+  const saved = manualTier();
+  if (saved) return saved;
   const bench = savedBench();
   if (isCompatibleBench(bench, { backend, profile })) return bench.tier;
   return deviceTier({ backend });
@@ -44,8 +67,8 @@ export function detectTier({ backend, profile } = {}) {
 
 // Fixed boot assets use the device/manual class, never a cached render tier.
 export function bootAssetTier({ backend } = {}) {
-  const manual = localStorage.getItem(STORE_KEY);
-  return TIERS[manual] ? manual : deviceTier({ backend });
+  const manual = manualTier();
+  return manual || deviceTier({ backend });
 }
 
 export function deviceTier({ backend } = {}) {
@@ -58,12 +81,13 @@ export function deviceTier({ backend } = {}) {
   return "LOW";
 }
 
-export function hasManualTier() { return !!TIERS[localStorage.getItem(STORE_KEY)]; }
+export function hasManualTier() { return !!manualTier(); }
 
 export function setTier(name) {
-  if (!TIERS[name]) return false;
-  localStorage.setItem(STORE_KEY, name);
+  if (!validTier(name)) return false;
+  sessionTier=name;
+  try {localStorage.setItem(STORE_KEY, name);}catch {}
   return true;
 }
 
-export function tierParams(name) { return TIERS[name] || TIERS.MED; }
+export function tierParams(name) { return validTier(name) ? TIERS[name] : TIERS.MED; }

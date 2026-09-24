@@ -5,7 +5,7 @@ import { tierParams } from './quality.js';
 
 // No-flag WebGPU now uses reversed depth + raw nearest-depth selection.
 // Old timing records measured a different default even with the same assets.
-export const QUALITY_PROFILE_VERSION = 'graphics-depth-v2';
+export const QUALITY_PROFILE_VERSION = 'graphics-atmosphere-v3';
 
 export function cloudQuality(tier, { mode = DEFAULT_CLOUD_MODE, scale, noise } = {}) {
   if (mode !== 'native' && mode !== 'adaptive') throw new Error('Unknown cloud mode');
@@ -45,7 +45,7 @@ export function qualityProfile({ backend, mode, renderScale, pixelRatio, scale, 
 export function qualityWorkload(flags) {
   return ['post', 'vclouds', 'atmo', 'curvature', 'noterrain', 'nowater', 'waterenv',
     'ocean', 'waterfine', 'watergrid', 'waterslopes', 'watershadow', 'waterenvsize',
-    'terrainnear', 'drape', 'snowdetail', 'terrainmaterials', 'terrainsource', 'cloudshadow', 'cloudtransport', 'ao', 'chain', 'reversedepth', 'logdepth', 'rawtaa', 'nobattle', 'nomatch']
+    'terrainnear', 'drape', 'snowdetail', 'terrainmaterials', 'terrainsource', 'cloudshadow', 'cloudtransport', 'ao', 'chain', 'aircraftAir', 'aircraftShadows', 'reverseDepth', 'reversedepth', 'logdepth', 'rawtaa', 'nobattle', 'nomatch']
     .filter(key => flags.has(key))
     .map(key => `${key}=${encodeURIComponent(flags.get(key))}`).join('&');
 }

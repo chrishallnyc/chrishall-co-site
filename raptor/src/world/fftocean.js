@@ -75,6 +75,7 @@
 
 import * as THREE from "three";
 import { createFineOcean } from "./oceanfine.js";
+import { OceanClock, oceanPrincipalPhase } from "./oceanclock.js";
 import {
   Fn, uniform, textureStore, textureLoad, instanceIndex,
   float, int, uint, vec3, vec4, ivec2,
@@ -299,11 +300,12 @@ export function cpuIFFT2D(complexArray, N) {
 // ---------------------------------------------------------------------------
 export function createFFTOcean(renderer, { front, N = 256, tileM = 320, seed = 1337, motionHistory = false, fineN = 128 } = {}) {
   const resources = [], computeNodes = [];
-  let fine = null, disposed = false;
+  let fine = null, clock = null, clockTexture = null, disposed = false;
   const dispose = () => {
     if (disposed) return;
     disposed = true;
     fine?.dispose();
+    clock?.dispose(clockTexture);
     for (const node of computeNodes) node.dispose?.();
     for (const texture of resources) texture.dispose();
   };
@@ -323,7 +325,10 @@ export function createFFTOcean(renderer, { front, N = 256, tileM = 320, seed = 1
     const dxm = tileM / N; // texel pitch in meters
 
     // -- textures ----------------------------------------------------------
-    const h0Tex = new THREE.DataTexture(built.data, N, N, THREE.RGBAFormat, THREE.FloatType);
+    clock = new OceanClock(built.data, N, tileM);
+    built.data = null; // Clock owns the immutable spectrum.
+    const h0Tex = new THREE.DataTexture(clock.data, N, N, THREE.RGBAFormat, THREE.FloatType);
+    clockTexture = h0Tex;
     resources.push(h0Tex);
     h0Tex.needsUpdate = true; // Nearest + flipY:false DataTexture defaults are right
 
@@ -390,7 +395,7 @@ export function createFFTOcean(renderer, { front, N = 256, tileM = 320, seed = 1
       const kLen = sqrt(kx.mul(kx).add(kz.mul(kz))).toVar();
       const kInv = select(kLen.greaterThan(1e-6), float(1.0).div(kLen), float(0.0)).toVar();
       const h0 = textureLoad(h0Tex, coord).toVar(); // rg = ĥ0(k), ba = ĥ0*(−k)
-      const wt = sqrt(kLen.mul(G)).mul(uTime).toVar();
+      const wt = oceanPrincipalPhase(sqrt(kLen.mul(G)).mul(uTime)).toVar();
       const c = cos(wt).toVar(), s = sin(wt).toVar();
       // Ĥ(k,t) = ĥ0(k)·e^{iωt} + ĥ0*(−k)·e^{−iωt}
       const hr = h0.x.mul(c).sub(h0.y.mul(s)).add(h0.z.mul(c)).add(h0.w.mul(s)).toVar();
@@ -481,7 +486,7 @@ export function createFFTOcean(renderer, { front, N = 256, tileM = 320, seed = 1
     computeNodes.push(...base, passesEven.at(-1), passesOdd.at(-1));
     if (fineN) {
       try {
-        if (fineN !== 128 && fineN !== 256) throw new RangeError("Fine ocean size must be 0, 128, or 256");
+        if (fineN !== 128 && fineN !== 256 && fineN !== 512) throw new RangeError("Fine ocean size must be 0, 128, 256, or 512");
         fine = createFineOcean(renderer, { front, N: fineN, tileM: 32, seed, macroN: N, macroTileM: tileM });
       } catch (error) {
         console.warn("Fine ocean unavailable; filtered macro waves remain:", error?.message);
@@ -491,8 +496,11 @@ export function createFFTOcean(renderer, { front, N = 256, tileM = 320, seed = 1
     // -- per-frame driver (no allocations) -----------------------------------
     let lastT = null, frame = 0;
     const update = (timeSec) => {
-      if (disposed) return;
-      uTime.value = timeSec;
+      if (disposed || !clock.prepare(timeSec)) return;
+      if (fine && !fine.prepareTime(timeSec)) return;
+      // Publish BOTH prepared epochs before either cascade submits compute.
+      clock.commit(h0Tex, uTime);
+      fine?.commitTime();
       const dt = lastT === null ? 1 / 60 : Math.min(Math.max(timeSec - lastT, 0), 0.25);
       lastT = timeSec;
       uFoamDecay.value = Math.exp(-dt / S.foamTauSec);
@@ -502,7 +510,7 @@ export function createFFTOcean(renderer, { front, N = 256, tileM = 320, seed = 1
       renderer.backend.generateMipmaps(dispTex);
       renderer.backend.generateMipmaps(slopeMomentTex);
       if (previousDispTex && frame === 0) renderer.copyTextureToTexture(dispTex, previousDispTex);
-      fine?.update(timeSec);
+      fine?.updatePrepared();
       frame++;
     };
 
