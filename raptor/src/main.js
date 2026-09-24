@@ -17,9 +17,19 @@ import { Water } from "./world/water.js";
 import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
+import { AircraftLighting } from "./aircraft/lighting.js";
+import { updateF22Visuals } from "./aircraft/f22-lod.js";
+import { installWebGLIndexStateGuard } from "./engine/webgl-index-state.js";
+import { installReversedDepthOrderGuard } from "./engine/reversed-depth-order.js";
 
-const VERSION = "1.0.0";
+const VERSION = "1.1.0";
 const PHASE = 12;
+
+// WebGPU and reverse-depth WebGL use [0,1]; ordinary WebGL uses [-1,1].
+// Behind-camera markers must be rejected under either projection convention.
+function projectedDepthVisible(z, camera) {
+  return z <= 1 && z >= (camera.reversedDepth || camera.coordinateSystem === THREE.WebGPUCoordinateSystem ? 0 : -1);
+}
 
 // HUD placeholder feed for TestWorld — replace wholesale once flight.js
 // (phase 7, FM-PLAN.md) is wired into gameplay. Fields not derivable from
@@ -62,6 +72,8 @@ function freshCanvas(old) {
 }
 
 async function makeRenderer(canvas) {
+  // Metre-scale aircraft surfaces need precision at kilometre distances.
+  const reverseDepth = new URLSearchParams(location.search).get("reverseDepth") !== "0";
   let adapter = null;
   if (navigator.gpu && new URLSearchParams(location.search).get("gl") !== "1") {
     try { adapter = await navigator.gpu.requestAdapter(); } catch (_) { adapter = null; }
@@ -72,7 +84,7 @@ async function makeRenderer(canvas) {
       // 16k texture limit is the A2 NAIP-drape prereq — clamped to what the
       // adapter actually offers so SwiftShader/low-end never fails init.
       const r = new THREE.WebGPURenderer({
-        canvas, antialias: false,
+        canvas, antialias: false, reversedDepthBuffer: reverseDepth,
         requiredLimits: {
           maxTextureDimension2D: Math.min(adapter.limits.maxTextureDimension2D, 16384),
           // the 16k albedo upload stages through a 1GB buffer — the default
@@ -87,7 +99,7 @@ async function makeRenderer(canvas) {
       canvas = freshCanvas(canvas);
     }
   }
-  const r = new THREE.WebGPURenderer({ canvas, antialias: true, forceWebGL: true });
+  const r = new THREE.WebGPURenderer({ canvas, antialias: true, forceWebGL: true, reversedDepthBuffer: reverseDepth });
   await r.init();
   return { renderer: r, backend: "webgl", canvas };
 }
@@ -95,6 +107,8 @@ async function makeRenderer(canvas) {
 async function boot() {
   const canvas = document.getElementById("game");
   const { renderer, backend } = await makeRenderer(canvas);
+  installWebGLIndexStateGuard(renderer);
+  installReversedDepthOrderGuard(renderer);
   state.backend = backend;
   state.tier = detectTier({ backend });
   const params = tierParams(state.tier);
@@ -155,7 +169,12 @@ async function boot() {
   scene.add(clouds.group);
 
   const sim = new SimCore(1);
-  const world = new TestWorld(scene);
+  const world = new TestWorld(scene, { aircraftQuality: state.tier });
+  const aircraftFrame = { projectedPixels: Infinity, maxQuality: state.tier };
+  const aircraftLighting = new AircraftLighting({ renderer, atmosphere, params,
+    aerial: flags.get("aircraftAir") === "0" ? null : atmoH?.aerial,
+    shadows: flags.get("aircraftShadows") !== "0" });
+  aircraftLighting.register(world.jet);
   sim.addSystem(world);
 
   // real-Earth ground for all three fronts. ?noterrain=1 = QA flag: sky/boot
@@ -234,13 +253,17 @@ async function boot() {
     try {
       const BD = await import("./game/bandits.js");
       const TG = await import("./game/targets.js");
-      bandits = new BD.Bandits(scene, { terrain, battlefield });
+      bandits = new BD.Bandits(scene, { terrain, battlefield, quality: state.tier });
       sim.addSystem(bandits);
       directory = TG.makeDirectory({ battlefield, bandits });
     } catch (err) { bandits = null; directory = null; console.warn("bandits unavailable:", err && err.message); }
   }
 
   // PHASE 7: you fly. ?demo=1 keeps the old scripted circle for QA baselines.
+  if (bandits) aircraftLighting.register(bandits.root);
+  aircraftLighting.receiveGround(terrain?.group);
+  aircraftLighting.receiveGround(world.sea);
+  aircraftLighting.receiveGround(battlefield?.root);
   let player = null;
   if (flags.get("demo") !== "1") {
     world.playerMode = true;
@@ -345,7 +368,7 @@ async function boot() {
       // ENU -> three (east, up, north)
       pipV.set(st[0] + pipV.x * CONV, st[2] + pipV.z * CONV - drop, st[1] + pipV.y * CONV);
       const pv = pipV.project(camera);
-      if (pv.z < 1 && pv.z > -1) {
+      if (projectedDepthVisible(pv.z, camera)) {
         const px = (pv.x * 0.5 + 0.5) * w, py = (1 - (pv.y * 0.5 + 0.5)) * h;
         if (px > 8 && py > 8 && px < w - 8 && py < h - 8) {
           ctx.save();
@@ -365,7 +388,7 @@ async function boot() {
       aimV.set(Math.cos(player.aimHeading) * cp, sp, Math.sin(player.aimHeading) * cp)
         .multiplyScalar(6000).add(camera.position);
       const v = aimV.project(camera);
-      if (v.z > 1 || v.z < -1) return; // behind the camera
+      if (!projectedDepthVisible(v.z, camera)) return;
       const sx = (v.x * 0.5 + 0.5) * w, sy = (1 - (v.y * 0.5 + 0.5)) * h;
       if (sx < 8 || sy < 8 || sx > w - 8 || sy > h - 8) return;
       ctx.save();
@@ -387,7 +410,7 @@ async function boot() {
         const to = MS.lockTarget * 5;
         pipV.set(battlefield.state[to], battlefield.state[to + 2], battlefield.state[to + 1]);
         const tv = pipV.project(camera);
-        if (tv.z < 1 && tv.z > -1) {
+        if (projectedDepthVisible(tv.z, camera)) {
           const tx = (tv.x * 0.5 + 0.5) * w, ty = (1 - (tv.y * 0.5 + 0.5)) * h;
           ctx.save();
           const locked = MS.locked();
@@ -422,7 +445,7 @@ async function boot() {
             else continue;
           }
           _bv.set(bx, bz, by).project(camera); // ENU -> three -> NDC
-          if (_bv.z > 1) continue; // behind the camera plane
+          if (!projectedDepthVisible(_bv.z, camera)) continue;
           const sx = (_bv.x * 0.5 + 0.5) * w, sy = (-_bv.y * 0.5 + 0.5) * h;
           if (sx < -30 || sx > w + 30 || sy < -30 || sy > h + 30) continue;
           const col = bandits.side[i] === 1 ? SETTINGS.getPalette().friendly : SETTINGS.getPalette().enemy;
@@ -674,6 +697,7 @@ async function boot() {
   const kcPos = new THREE.Vector3();
 
   Object.assign(state, {
+    rendering: { renderer, scene, camera, world, aircraftLighting, projectedDepthVisible },
     sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud, player, battlefield, match, script, bandits, directory,
     kc: () => killCam,
     cloudImmersion: () => clouds.immersion,
@@ -748,6 +772,7 @@ async function boot() {
         state.bench = rec;
         if (tier !== state.tier) {
           state.tier = tier;
+          aircraftLighting.setQuality(tierParams(tier));
           renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2) * SETTINGS.effectiveRenderScale(SETTINGS.current(), tier));
         }
         benchSamples = null;
@@ -812,6 +837,11 @@ async function boot() {
     }
     battlefield?.render(dtMs / 1000, camera);
     bandits?.render(alpha, camera);
+    aircraftFrame.projectedPixels = Math.max(world.f22.userData.aircraft.length, world.f22.userData.aircraft.span)
+      * Math.abs(camera.projectionMatrix.elements[5]) * window.innerHeight
+      / (2 * Math.max(1, world.jet.position.distanceTo(camera.position)));
+    aircraftFrame.maxQuality = state.tier;
+    updateF22Visuals(world.f22, aircraftFrame);
     terrain?.update(camera);
     waterClock += dtMs / 1000;
     water?.update(camera, waterClock);
@@ -825,6 +855,7 @@ async function boot() {
     }
     hud.update(player ? player.hudState() : testworldHudState(world, alpha));
     atmosphere.update(camera);
+    aircraftLighting.update(world.jet, terrain);
     if (atmoH) atmoH.uCamPos.value.copy(camera.position);
     renderer.toneMappingExposure = atmosphere.exposure * (meter ? meter.mult : 1);
     if (post) post.post.render();

@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "provisional": false,
+  "geometrySHA256": "8a1e312c09a8fee96e6a6a02f13e25a3f9afa5e2cc43e10d74c2b8746df8894e",
+  "sourceSHA256": "9003e32aec383e8e169ce210e1838d2664b276594c5a8626d5fae5888a256899",
+  "radiusMetres": 0.35,
+  "strength": 0.65,
+  "blender": "4.5.14 LTS",
+  "cyclesSamples": 64,
+  "aoNodeSamples": 16,
+  "composition": "maximum visibility among covered UV layers",
+  "filter": {
+    "type": "coverage-weighted binomial",
+    "radiusPixels": 1,
+    "sigmaPixels": 0.7071067811865476
+  },
+  "limitations": [
+    {
+      "components": [
+        "finRootFairingL",
+        "finRootFairingR"
+      ],
+      "treatment": "Opaque occluders; ambiguous shared body-atlas footprints have neutral AO.",
+      "filterFootprintPaddingPixels": 2,
+      "reason": "Steep projected fairing faces reuse boom UVs and cannot represent independent contact visibility.",
+      "retained": "Unique fin-root chart AO, other reliable body contacts and live self-shadowing."
+    }
+  ],
+  "maps": {
+    "body": {
+      "file": "body-ao.png",
+      "width": 2048,
+      "height": 1024,
+      "sha256": "abebc8ffefd66982422916d1ef9d8399f969823516c658c39591f7717ba58905"
+    },
+    "lifting": {
+      "file": "lifting-ao.png",
+      "width": 2048,
+      "height": 1024,
+      "sha256": "3cd27224fe1848551a6e50e92457e4b97f521179b3f5d58900226a889bc659ae"
+    }
+  }
+}
