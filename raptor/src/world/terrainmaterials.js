@@ -86,14 +86,24 @@ let cached=null;
 function detailTextures(includeSnow = false) {
   if(cached && (!includeSnow || cached.snow))return cached;
   cached ||= {};
-  for(const kind of includeSnow ? ['rock','aggregate','snow'] : ['rock','aggregate']){
-    if(cached[kind])continue;
-    const b=bakeTerrainDetail(kind);
-    const t=new THREE.DataTexture(b.data,b.size,b.size,THREE.RGBAFormat,THREE.HalfFloatType);
-    t.name='terrain-'+kind+'-slope-moments';t.colorSpace=THREE.NoColorSpace;
+  const configure = (t, name) => {
+    t.name=name;t.format=THREE.RGBAFormat;t.type=THREE.HalfFloatType;t.colorSpace=THREE.NoColorSpace;
     t.wrapS=t.wrapT=THREE.RepeatWrapping;t.magFilter=THREE.LinearFilter;
     t.minFilter=THREE.LinearMipmapLinearFilter;t.generateMipmaps=true;t.anisotropy=4;t.needsUpdate=true;
-    cached[kind]=t;
+    return t;
+  };
+  if(!cached.surface){
+    // Equal-size rock/aggregate fields occupy separate array layers. Their
+    // original half-float bytes, periodic UVs and mip filtering are retained,
+    // while the full terrain + native-shadow graph saves one texture binding.
+    const rock=bakeTerrainDetail('rock'),aggregate=bakeTerrainDetail('aggregate');
+    const data=new Uint16Array(rock.data.length+aggregate.data.length);
+    data.set(rock.data);data.set(aggregate.data,rock.data.length);
+    cached.surface=configure(new THREE.DataArrayTexture(data,TILE_SIZE,TILE_SIZE,2),'terrain-surface-slope-moments');
+  }
+  if(includeSnow && !cached.snow){
+    const b=bakeTerrainDetail('snow');
+    cached.snow=configure(new THREE.DataTexture(b.data,b.size,b.size),'terrain-snow-slope-moments');
   }
   return cached;
 }
@@ -147,11 +157,12 @@ export function terrainMaterialNodes({front,baseNormal,imageColor=null,coverage=
   snow=snow.toVar('terrainSnow');
   const land=smoothstep(-.5,3,wp.y).toVar('terrainLand');
   const rock=cliff.mul(.92).add(.08).mul(vegetation.oneMinus()).mul(snow.oneMinus()).toVar('terrainRock');
-  const pair=(tex,periodA,periodB,angleA,angleB,label)=>{
+  const pair=(tex,periodA,periodB,angleA,angleB,label,layer=null)=>{
     const tap=(period,angle)=>{
       const c=Math.cos(angle),s=Math.sin(angle);
       const uv=vec2(wp.x.mul(c).sub(wp.z.mul(s)),wp.x.mul(s).add(wp.z.mul(c))).div(period);
-      const t=texture(tex,uv).toVar(label+'Sample'+period);
+      const source=texture(tex,uv);
+      const t=(layer===null?source:source.depth(layer)).toVar(label+'Sample'+period);
       const slope=vec2(t.r.mul(c).add(t.g.mul(s)),t.g.mul(c).sub(t.r.mul(s)));
       return {slope,lost:max(t.b.sub(dot(t.rg,t.rg)),0)};
     };
@@ -160,8 +171,8 @@ export function terrainMaterialNodes({front,baseNormal,imageColor=null,coverage=
     const lost=a.lost.mul(.62*.62).add(b.lost.mul(.38*.38)).toVar(label+'Lost');
     return {slope,lost};
   };
-  const coarse=pair(textures.rock,96,139,.6458,-.4014,'geology');
-  const fine=pair(textures.aggregate,32,47,-.2967,.9076,'aggregate');
+  const coarse=pair(textures.surface,96,139,.6458,-.4014,'geology',0);
+  const fine=pair(textures.surface,32,47,-.2967,.9076,'aggregate',1);
   const coarseGain=rock.mul(.95).mul(land);
   const fineGain=mix(float(.7),float(.16),vegetation).mul(mix(float(1),float(.22),snow)).mul(land);
   const coarseFade=smoothstep(5,1,fp),fineFade=smoothstep(.8,.12,fp);
