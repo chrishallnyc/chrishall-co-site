@@ -1,5 +1,22 @@
 # RAPTOR release notes
 
+## 1.2.0 — 2026-09-24
+
+Flight and combat audio now follows engine spool, aircraft motion and combat
+state, with a credited afterburner recording and distinct turbine, cannon,
+missile, impact, gear and warning textures.
+
+- Hear nearby aircraft and missiles move through stereo space, with bounded
+  Doppler, distance filtering and delayed blasts.
+- Keep warning and radio cues readable with priority mixing that respects
+  master, engine, weapons and warnings/radio volume choices.
+- Audition presets and individual effects in the [audio lab](audiolab.html),
+  including its 45-second demonstration. [Sound credits](audio-credits.html)
+  identify the recording and its source.
+
+Native signal, scheduling and lifecycle checks cover headroom, pause/mute,
+source limits and cleanup. They do not establish subjective listening quality.
+
 ## 1.1.0 — 2026-09-24
 
 Flight setup now gives mouse and MacBook trackpad players a clear route from

@@ -1,0 +1,14 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Raptor audio capture</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>body{font:16px/1.6 system-ui;background:#111820;color:#edf3f8;max-width:760px;margin:60px auto;padding:24px}button,input{font:inherit;padding:10px;margin:8px;background:#263847;color:inherit;border:1px solid #668599;border-radius:6px}pre{white-space:pre-wrap;color:#b6cfdd}</style>
+<h1>Raptor audio capture</h1><p>Offline renders of identical flight and combat scenes. This page does not play audio. Captures stay on this machine.</p>
+<label>Capture name <input id="batch" value="initial"></label><button id="run">Render comparison</button><pre id="status">Ready.</pre>
+<script type="module">
+import { renderStudy } from './render.mjs';
+window.renderStudy = renderStudy;
+document.querySelector('#run').onclick = async () => {
+ const button=document.querySelector('#run'), status=document.querySelector('#status'); button.disabled=true;
+ try { window.captureResult=await renderStudy({batch:document.querySelector('#batch').value,onProgress:message=>status.textContent=message});status.textContent=JSON.stringify(window.captureResult,null,2); }
+ catch(error){status.textContent=error.stack;window.captureError=error.stack;} finally{button.disabled=false;}
+};
+</script></html>

@@ -1,11 +1,12 @@
 {
- "updated": "2026-08-10T01:30:00-07:00",
- "version": "v1.0.0",
- "now": "v1.0.0 \u2014 SHIPPED. The game is complete. The loop turns to live-ops: weekly content, polish, and whatever the war needs.",
- "nowPhase": 12,
+ "updated": "2026-09-24T18:20:05.492240+00:00",
+ "version": "v1.2.0",
+ "now": "v1.2.0: reactive flight and combat audio, with moving aircraft and missiles, layered impacts, clearer warnings, and an audio lab.",
+ "nowPhase": 13,
  "paused": false,
  "pushes": 72,
  "ledger": [
+  "2026-09-24 v1.2.0: Flight and combat audio rebuilt. Recorded afterburner texture, spool-driven turbine detail, round-aligned cannon attacks, moving aircraft and missiles, delayed blasts, gear and ground-contact sounds, and distinct threat tones. Audition the mix in the audio lab.",
   "2026-08-10 v1.0.0 \u2014 SHIPPED. Four days ago this was an empty repository and one sentence: rebuild War Thunder with one plane, playable in my browser. Today it is an F-22 over three real places on Earth \u2014 thirty authored sorties, a persistent war, aces with grudges, dogfights with honest physics, a radio that never lies and can now speak, installable, accessible, and verified by seven hundred thirty-nine automated gates that all run green. One plane. Three fronts. No install. Fly it.",
   "2026-08-09 v0.36.2 \u2014 INSTALLABLE: RAPTOR is a PWA now \u2014 install it from the browser and it opens fullscreen, landscape, with its own icon. The service worker keeps only the tiny shell offline-capable; the terrain stays streamed (nobody wants a 400MB install).",
   "2026-08-09 v0.36.1 \u2014 the mixer's last channel: WEAPONS VOLUME. The cannon gets its own fader (some pilots want the M61 to rattle the desk; some want to hear the radio over it).",
@@ -134,7 +135,7 @@
    "n": 13,
    "name": "Audio & voice",
    "pct": 85,
-   "note": "engine, gun, seeker growl + lock tones live in-game"
+   "note": "spool-driven engine, cannon, moving aircraft and missiles, delayed blasts, gear and ground sounds, threat tones and optional radio voice; audio lab and source credits"
   },
   {
    "n": 14,
