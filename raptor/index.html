@@ -15,167 +15,41 @@
 <meta name="theme-color" content="#101014">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/assets/icon-192.png">
+<link rel="stylesheet" href="/ui.css">
 <style>
-:root { --bg:#101014; --panel:#16161c; --ink:#e8e6df; --mid:#9a988f; --dim:#6e6c64; --hair:#2e2e36; --acc:#e8b46f; }
-* { margin:0; padding:0; box-sizing:border-box; }
-html,body { background:var(--bg); height:100%; overflow:hidden; }
-body { color:var(--ink); font-family:"SF Mono", ui-monospace, Menlo, Consolas, monospace; font-size:13px; }
-#game { position:fixed; inset:0; width:100%; height:100%; display:block; }
-
-/* corner chrome (evolves into the hangar UI) */
-#chrome { position:fixed; top:12px; left:14px; z-index:5; pointer-events:none; }
-#chrome .brand { font-weight:700; letter-spacing:6px; font-size:13px; color:var(--acc); }
-#chrome .sub { color:var(--dim); font-size:9px; letter-spacing:2px; margin-top:2px; }
-#chrome a { pointer-events:auto; color:var(--dim); text-decoration:none; }
-#chrome a:hover { color:var(--ink); }
-
-/* loading veil — the phase-0 planform stays as the loader */
-#veil { position:fixed; inset:0; z-index:10; background:var(--bg);
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;
-  transition:opacity .8s ease; }
-#veil.lift { opacity:0; pointer-events:none; }
-#veil .status { letter-spacing:3px; font-size:11px; color:var(--mid); }
-#veil .status b { color:var(--ink); }
-
-/* hangar — the pre-flight front picker (bare URL only; any ?param flies straight in) */
-#hangar { display:none; position:fixed; inset:0; z-index:9; background:var(--bg);
-  flex-direction:column; align-items:center; justify-content:center; gap:26px; padding:24px;
-  overflow-y:auto; }
-#hangar .hbrand { font-weight:700; letter-spacing:10px; font-size:22px; color:var(--acc); text-align:center; }
-#hangar .hsub { color:var(--dim); font-size:10px; letter-spacing:3px; text-align:center; margin-top:6px; }
-#hangar .fronts { display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 240px));
-  gap:14px; justify-content:center; width:100%; max-width:820px; }
-#hangar .fcard { border:1px solid var(--hair); background:var(--panel); cursor:pointer;
-  padding:0 0 12px; text-align:left; font:inherit; color:var(--ink); transition:border-color .15s; }
-#hangar .fcard:hover { border-color:var(--mid); }
-#hangar .fcard.sel { border-color:var(--acc); }
-#hangar .fcard .art { height:96px; margin-bottom:12px; }
-#hangar .fcard[data-front="NELLIS"] .art { background:linear-gradient(180deg,#a8bdd2 0%,#cfc0a0 52%,#8a7355 60%,#6e5a42 78%,#4a3d2e 100%); }
-#hangar .fcard[data-front="VALDEZ"] .art { background:linear-gradient(180deg,#93a9bd 0%,#c9d4dc 40%,#e8edf0 52%,#5b7a83 62%,#27424d 100%); }
-#hangar .fcard[data-front="MARIANAS"] .art { background:linear-gradient(180deg,#8fb6d9 0%,#bcd7e8 46%,#4fa6b8 56%,#1c6d8c 70%,#0d3a5c 100%); }
-#hangar .fcard .fname { color:var(--acc); font-weight:700; letter-spacing:4px; font-size:12px; padding:0 14px; }
-#hangar .fcard .fgeo { color:var(--mid); font-size:9px; letter-spacing:1.5px; padding:5px 14px 0; }
-#hangar .fcard .fline { color:var(--dim); font-size:9px; letter-spacing:1.5px; padding:3px 14px 0; }
-#hangar .todrow { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
-#hangar .todchip { background:none; border:1px solid var(--hair); color:var(--mid); font:inherit;
-  font-size:10px; letter-spacing:2px; padding:7px 16px; cursor:pointer; }
-#hangar .todchip:hover { color:var(--ink); border-color:var(--mid); }
-#hangar .todchip.sel { color:var(--acc); border-color:var(--acc); }
-#hangar .flybtn { background:var(--acc); border:none; color:#101014; font:inherit; font-weight:700;
-  letter-spacing:6px; font-size:13px; padding:13px 58px; cursor:pointer; }
-#hangar .flybtn:hover { filter:brightness(1.1); }
-#hangar .oprow { color:var(--mid); font-size:10px; letter-spacing:2px; text-align:center; }
-#hangar .oprow button { background:none; border:1px solid var(--acc); color:var(--acc); font:inherit;
-  font-size:10px; letter-spacing:2px; padding:5px 14px; cursor:pointer; margin-left:8px; }
-#hangar .oprow button:hover { background:rgba(232,180,111,.12); }
-#hangar .authcell { margin:0 4px; color:var(--dim); }
-#hangar span.authcell.done { color:var(--mid); }
-#hangar button.authcell.live { background:none; border:1px solid var(--acc); color:var(--acc); font:inherit; font-size:10px; letter-spacing:2px; padding:4px 10px; cursor:pointer; }
-#hangar button.authcell.live:hover { background:rgba(232,180,111,.12); }
-#hangar .hkeys { color:var(--dim); font-size:9px; letter-spacing:2px; }
-#hangar .hfoot { color:var(--dim); font-size:9px; letter-spacing:1.5px; text-align:center; }
-#hangar .hfoot a { color:var(--dim); }
-#hangar .hfoot a:hover { color:var(--ink); }
-
-/* debug overlay */
-#dbg { position:fixed; right:12px; top:12px; z-index:6; background:rgba(16,16,20,.82);
-  border:1px solid var(--hair); padding:8px 10px; font-size:10px; letter-spacing:1px;
-  color:var(--mid); }
-#dbg #dbgTxt { margin-bottom:6px; color:var(--ink); }
-
-/* controls screen */
-#controls { display:none; position:fixed; inset:0; z-index:8; background:rgba(16,16,20,.94);
-  overflow-y:auto; }
-#controls.open { display:block; }
-#controls .cwrap { max-width:860px; margin:40px auto 60px; padding:0 20px; }
-#controls .chead { display:flex; align-items:baseline; gap:16px; flex-wrap:wrap;
-  border-bottom:1px solid var(--hair); padding-bottom:10px; margin-bottom:8px; }
-#controls .ctitle { font-weight:700; letter-spacing:6px; color:var(--acc); font-size:14px; }
-#controls .cnote { color:var(--dim); font-size:10px; letter-spacing:1.5px; flex:1; }
-#controls .creset { background:none; border:1px solid var(--hair); color:var(--mid);
-  font:inherit; font-size:10px; letter-spacing:1.5px; padding:4px 10px; cursor:pointer; }
-#controls .creset:hover { color:var(--ink); border-color:var(--mid); }
-#controls .csec { margin:20px 0 6px; color:var(--dim); letter-spacing:3px; font-size:10px;
-  border-bottom:1px solid var(--hair); padding-bottom:4px; }
-#controls .row { display:flex; justify-content:space-between; align-items:center; gap:12px;
-  padding:5px 6px; cursor:pointer; }
-#controls .row:hover { background:rgba(232,180,111,.06); }
-#controls .row.cap { background:rgba(232,180,111,.12); }
-#controls .rlabel { color:var(--ink); font-size:11px; letter-spacing:.5px; }
-#controls .rbinds { display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
-#controls .chip { border:1px solid var(--hair); color:var(--mid); font-size:9px;
-  letter-spacing:1.5px; padding:2px 7px; white-space:nowrap; }
-#controls .chip.live { color:var(--acc); border-color:var(--acc); }
-#controls .chip.warn { color:#d08770; border-color:#d08770; }
-/* settings section (phase 15) — same visual language, .srow so the bind
-   capture machinery never sees these rows */
-#controls .srow { display:flex; justify-content:space-between; align-items:center; gap:12px;
-  padding:5px 6px; }
-#controls .srow:hover { background:rgba(232,180,111,.04); }
-#controls .schips { display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; align-items:center; }
-#controls button.chip { background:none; font:inherit; cursor:pointer; }
-#controls .chip.sel { color:var(--acc); border-color:var(--acc); }
-#controls .srange { -webkit-appearance:none; appearance:none; width:150px; height:2px;
-  background:var(--hair); outline:none; cursor:pointer; }
-#controls .srange::-webkit-slider-thumb { -webkit-appearance:none; appearance:none;
-  width:9px; height:15px; background:var(--acc); border:none; cursor:pointer; }
-#controls .srange::-moz-range-thumb { width:9px; height:15px; background:var(--acc);
-  border:none; border-radius:0; cursor:pointer; }
-#controls .sval { min-width:70px; text-align:right; color:var(--mid); font-size:10px; letter-spacing:1px; }
-#controls .sreset { background:none; border:1px solid var(--hair); color:var(--mid);
-  font:inherit; font-size:10px; letter-spacing:1.5px; padding:4px 10px; cursor:pointer; }
-#controls .sreset:hover { color:var(--ink); border-color:var(--mid); }
+html,body{height:100%;overflow:hidden}
+#game{position:fixed;inset:0;width:100%;height:100%;display:block}
+#hangar{display:none}
+#veil{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .6s ease;padding:30px}
+#veil.lift{opacity:0;pointer-events:none}
+#veil .status{letter-spacing:1px;font:600 16px var(--ui-font);color:var(--ink);text-align:center;line-height:1.5}
+#veil .status b{color:var(--ink)}
+.boot-announcement{max-width:480px;text-align:center}.boot-announcement .boot-status-detail{margin-top:10px}
+.boot-steps{display:flex;list-style:none;counter-reset:boot;padding:0;margin:5px 0 0;width:min(520px,100%);gap:8px}.boot-steps li{counter-increment:boot;flex:1;text-align:center;color:var(--dim);font-size:10px;line-height:1.4}.boot-steps li:before{content:counter(boot);display:flex;align-items:center;justify-content:center;width:24px;height:24px;margin:0 auto 8px;border:1px solid var(--hair);border-radius:50%;font:10px var(--mono)}.boot-steps [data-state=current]{color:var(--acc)}.boot-steps [data-state=current]:before{border-color:var(--acc);box-shadow:0 0 0 3px #e8b46f15}.boot-steps [data-state=complete]{color:#b6d5a7}.boot-steps [data-state=complete]:before{content:'✓';border-color:#b6d5a766}.boot-steps [data-state=failed]{color:#efb591}.boot-steps [data-state=failed]:before{content:'!';border-color:#efb591}
+#veil[data-failed=true] #plan{opacity:.5}#veil .boot-actions{flex-wrap:wrap;justify-content:center;margin-top:4px}
+@media(max-height:650px){#veil{gap:12px;padding:20px}#veil #plan{max-height:130px;width:auto!important}.boot-steps{margin-top:0}.boot-status-detail{font-size:12px}}
+#dbg{position:fixed;right:12px;top:60px;z-index:6;background:#101014dc;border:1px solid var(--hair);padding:8px 10px;font:10px var(--mono);color:var(--mid)}
+#dbg #dbgTxt{margin-bottom:6px;color:var(--ink)}
 </style>
 </head>
 <body>
 <canvas id="game" aria-label="RAPTOR flight view"></canvas>
 
-<div id="chrome">
-  <div class="brand">RAPTOR</div>
-  <div class="sub">EYES THAT ADAPT · <a href="#" id="controlsLink">controls</a> · <a href="/progress.html">progress</a> · <a href="/devlog.html">devlog</a> · v1.1.0<br>
-  terrain: USGS 3DEP + NAIP · <a href="https://s2maps.eu" rel="noopener">Sentinel-2 cloudless by EOX</a></div>
-</div>
+<div id="chrome"></div>
+<div id="hangar"></div>
 
-<div id="hangar" role="dialog" aria-label="Mission select">
-  <div>
-    <div class="hbrand">R A P T O R</div>
-    <div class="hsub">F-22 AIR COMBAT · ONE AIRCRAFT, THREE REAL FRONTS</div>
-  </div>
-  <div class="fronts">
-    <button class="fcard sel" data-front="NELLIS">
-      <div class="art"></div>
-      <div class="fname">NELLIS</div>
-      <div class="fgeo">NEVADA TEST RANGE · 36.9°N</div>
-      <div class="fline">DESERT GAUNTLET — SAM RINGS + CONVOYS</div>
-    </button>
-    <button class="fcard" data-front="VALDEZ">
-      <div class="art"></div>
-      <div class="fname">VALDEZ</div>
-      <div class="fgeo">PRINCE WILLIAM SOUND · 61.1°N</div>
-      <div class="fline">GLACIER FJORDS — SHIPPING UNDER ESCORT</div>
-    </button>
-    <button class="fcard" data-front="MARIANAS">
-      <div class="art"></div>
-      <div class="fname">MARIANAS</div>
-      <div class="fgeo">PHILIPPINE SEA · 15.2°N</div>
-      <div class="fline">CARRIER WAR — FLEET OVER THE REEF</div>
-    </button>
-  </div>
-  <div class="todrow">
-    <button class="todchip sel" data-tod="noon">HIGH NOON</button>
-    <button class="todchip" data-tod="afternoon">AFTERNOON</button>
-    <button class="todchip" data-tod="golden">GOLDEN HOUR</button>
-  </div>
-  <div class="oprow" id="opRow" style="display:none"></div>
-  <div class="oprow" id="authRow" style="display:none"></div>
-  <button class="flybtn" id="flyBtn">FLY</button>
-  <div class="hkeys">1 / 2 / 3 FRONT · T TIME · ENTER FLY</div>
-  <div class="hfoot">terrain: USGS 3DEP + NAIP · <a href="https://s2maps.eu" rel="noopener">Sentinel-2 cloudless by EOX</a> · <a href="/audio-credits.html">sound credits</a> · <a href="/devlog.html">devlog</a></div>
-</div>
-
-<div id="veil">
+<div id="veil" role="region" aria-label="Flight preparation">
   <canvas id="plan" width="360" height="360" aria-hidden="true"></canvas>
-  <div class="status"><b>SPOOLING ENGINES</b></div>
+  <div class="boot-announcement" role="status" aria-live="polite" aria-atomic="true"><div class="status">Preparing your aircraft…</div>
+  <p class="boot-status-detail">Loading the flight deck. Choose your controls and flight before you launch.</p></div>
+  <ol class="boot-steps" aria-label="Flight preparation stages">
+    <li data-boot-step="mission" data-state="current" aria-current="step">Flight plan</li>
+    <li data-boot-step="graphics-device" data-state="pending">Graphics</li>
+    <li data-boot-step="landscape" data-state="pending">Landscape</li>
+    <li data-boot-step="systems" data-state="pending">Flight systems</li>
+    <li data-boot-step="warmup" data-state="pending">Ready to fly</li>
+  </ol>
+  <div class="boot-actions"><a class="ui-button" href="/">Back to preflight</a></div>
 </div>
 
 <script>
@@ -184,7 +58,7 @@ body { color:var(--ink); font-family:"SF Mono", ui-monospace, Menlo, Consolas, m
   const cv = document.getElementById("plan"), cx = cv.getContext("2d");
   const DPR = Math.min(devicePixelRatio || 1, 2);
   cv.width = 360 * DPR; cv.height = 360 * DPR;
-  cv.style.width = "360px"; cv.style.height = "360px";
+  cv.style.width = "min(280px, 38vh, 65vw)"; cv.style.height = "auto";
   const R = [[0,0],[.045,.06],[.085,.15],[.13,.27],[.15,.36],[.5,.61],[.465,.7],[.185,.66],
              [.17,.76],[.31,.845],[.285,.93],[.095,.905],[.07,.975],[.03,1],[0,1]];
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -199,7 +73,7 @@ body { color:var(--ink); font-family:"SF Mono", ui-monospace, Menlo, Consolas, m
     cx.closePath();
     cx.fillStyle = "#16161c"; cx.strokeStyle = "#e8b46f"; cx.lineWidth = 1.4 * DPR;
     cx.fill(); cx.stroke(); cx.restore();
-    if (!reduced && document.getElementById("veil")) { t += 0.02; requestAnimationFrame(draw); }
+    if (!reduced && document.getElementById("veil") && !document.getElementById("veil").dataset.failed) { t += 0.02; requestAnimationFrame(draw); }
   })();
 })();
 </script>
@@ -213,7 +87,23 @@ body { color:var(--ink); font-family:"SF Mono", ui-monospace, Menlo, Consolas, m
   }
 }
 </script>
-<script type="module" src="/src/main.js"></script>
+<script type="module">
+// Module/network failures occur before main.js can display its graphics error.
+// Keep a usable recovery route instead of leaving the loading screen spinning.
+import('/src/main.js').catch(error => {
+  console.error('RAPTOR could not load its game files:', error);
+  const veil=document.getElementById('veil');
+  if(!veil)return;
+  veil.dataset.failed='true';
+  veil.querySelector('.status').textContent='THE GAME FILES COULDN’T LOAD';
+  const currentStep=veil.querySelector('[aria-current="step"]');
+  if(currentStep)currentStep.dataset.state='failed';
+  veil.querySelector('.boot-status-detail').textContent='A required game file could not load. Check your connection and reload to try again. Your saved progress and control settings are kept.';
+  const retry=document.createElement('button');
+  retry.className='ui-button primary';retry.textContent='Reload game';
+  retry.onclick=()=>location.reload();veil.querySelector('.boot-actions').append(retry);retry.focus();
+});
+</script>
 <script>
 // PWA shell (phase 15): register after load; never blocks or races boot
 if ("serviceWorker" in navigator && location.protocol === "https:") {

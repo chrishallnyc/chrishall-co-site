@@ -31,6 +31,7 @@ export const DEFAULTS = Object.freeze({
   renderScale: null,   // null = the active tier's default; 0.5-1.5 overrides it
   fov: 60,             // degrees; 45-90 (main.js constructs the camera at 60)
   masterVol: 1,        // 0-1, scales AudioBus.master (x0.9 shipped headroom)
+  muted: false,
   engineVol: 1,        // 0-1 -> EngineVoice.dry
   uiVol: 1,           // 0-1 -> LockTones.dry (RWR/seeker beeps)
   weaponsVol: 1,      // 0-1 -> cannon, launches, explosions, and airframe strikes
@@ -38,6 +39,15 @@ export const DEFAULTS = Object.freeze({
   motionReduce: false, // kills hit-flash vignette + muzzle-flash pulse
   subtitleScale: 1,    // 0.8-1.6, scales the comms-feed font in the HUD
   markerPalette: "default",
+  hudScale: 1,
+  showHints: true,
+  showChecklist: true,
+  showFps: false,
+  pointingDevice: "mouse", // an explicit preference: browsers report trackpad motion as mouse motion too
+  mouseSensitivity: 1,
+  trackpadSensitivity: 0.65,
+  gamepadSensitivity: 1,
+  invertY: false,
 });
 
 const num = (v, lo, hi, dflt) =>
@@ -47,31 +57,54 @@ const num = (v, lo, hi, dflt) =>
 // blob can never brick the boot — worst case is factory defaults.
 export function validate(raw) {
   const r = raw && typeof raw === "object" ? raw : {};
+  const mouseSensitivity = num(r.mouseSensitivity, 0.35, 2, DEFAULTS.mouseSensitivity);
   return {
-    tier: (r.tier === "AUTO" || TIERS[r.tier]) ? r.tier : DEFAULTS.tier,
+    tier: (r.tier === "AUTO" || Object.hasOwn(TIERS, r.tier)) ? r.tier : DEFAULTS.tier,
     renderScale: (r.renderScale === null || r.renderScale === undefined)
       ? null : num(r.renderScale, 0.5, 1.5, null),
     fov: num(r.fov, 45, 90, DEFAULTS.fov),
     masterVol: num(r.masterVol, 0, 1, DEFAULTS.masterVol),
+    muted: typeof r.muted === 'boolean' ? r.muted : DEFAULTS.muted,
     engineVol: num(r.engineVol, 0, 1, DEFAULTS.engineVol),
     uiVol: num(r.uiVol, 0, 1, DEFAULTS.uiVol),
     weaponsVol: num(r.weaponsVol, 0, 1, DEFAULTS.weaponsVol),
     voice: !!r.voice,
     motionReduce: !!r.motionReduce,
     subtitleScale: num(r.subtitleScale, 0.8, 1.6, DEFAULTS.subtitleScale),
-    markerPalette: PALETTES[r.markerPalette] ? r.markerPalette : DEFAULTS.markerPalette,
+    markerPalette: Object.hasOwn(PALETTES, r.markerPalette) ? r.markerPalette : DEFAULTS.markerPalette,
+    hudScale: num(r.hudScale, 0.8, 1.4, DEFAULTS.hudScale),
+    showHints: typeof r.showHints === 'boolean' ? r.showHints : DEFAULTS.showHints,
+    // Preserve an old decision to hide both overlays during migration.
+    showChecklist: typeof r.showChecklist === 'boolean' ? r.showChecklist : r.showHints !== false,
+    showFps: typeof r.showFps === 'boolean' ? r.showFps : DEFAULTS.showFps,
+    pointingDevice: r.pointingDevice === "trackpad" ? "trackpad" : DEFAULTS.pointingDevice,
+    mouseSensitivity,
+    trackpadSensitivity: num(r.trackpadSensitivity, 0.35, 2, DEFAULTS.trackpadSensitivity),
+    // Older settings used mouseSensitivity for both pointer and controller.
+    // Preserve that controller feel on migration, then store both separately.
+    gamepadSensitivity: num(r.gamepadSensitivity, 0.35, 2,
+      r.gamepadSensitivity === undefined ? mouseSensitivity : DEFAULTS.gamepadSensitivity),
+    invertY: typeof r.invertY === 'boolean' ? r.invertY : DEFAULTS.invertY,
   };
 }
 
 let cache = null; // last validated settings
 let live = null;  // bindLive ctx
+let persistenceAvailable = true; // outcome of the most recent storage operation
 
 export function loadSettings() {
-  let raw = null, stored = false;
+  let raw = null, stored = false, serialized = null;
   try {
-    const s = localStorage.getItem(KEY);
-    if (s !== null) { stored = true; raw = JSON.parse(s); }
-  } catch (_) { raw = null; } // corrupt JSON / storage denied -> defaults
+    serialized = localStorage.getItem(KEY);
+    stored = serialized !== null;
+    persistenceAvailable = true;
+  } catch (_) { persistenceAvailable = false; }
+  try { if (stored) raw = JSON.parse(serialized); } catch (_) { /* malformed data does not mean storage is blocked */ }
+  // The audio lab's older global mute must be visible and reversible here.
+  if (typeof raw?.muted !== 'boolean') {
+    try { raw={...raw,muted:localStorage.getItem('raptor:mute')==='1'}; }
+    catch (_) { persistenceAvailable=false; }
+  }
   cache = validate(raw);
   // first run: adopt a pre-existing manual tier (set via __RAPTOR.setTier or
   // older builds) so the menu reflects reality instead of claiming AUTO
@@ -80,6 +113,9 @@ export function loadSettings() {
 }
 
 export function current() { return cache || loadSettings(); }
+// A successful read is best-effort evidence until a write is attempted. Failed
+// writes keep validated options live on this page, but navigation loses them.
+export function storageAvailable() { if (!cache) loadSettings(); return persistenceAvailable; }
 
 export function saveSettings(patch = {}) {
   const prev = current();
@@ -92,8 +128,10 @@ export function saveSettings(patch = {}) {
     else setTier(next.tier);
   }
   cache = next;
-  try { localStorage.setItem(KEY, JSON.stringify(next)); } catch (_) { /* session-only */ }
+  try { localStorage.setItem(KEY, JSON.stringify(next)); persistenceAvailable = true; }
+  catch (_) { persistenceAvailable = false; }
   if (live) applySettings(next, live);
+  notifyChange(next);
   return next;
 }
 
@@ -101,9 +139,11 @@ export function saveSettings(patch = {}) {
 // next boot) + factory defaults, live-applied where bound.
 export function resetSettings() {
   clearBench();
-  try { localStorage.removeItem(KEY); } catch (_) {}
+  try { localStorage.removeItem(KEY); localStorage.removeItem('raptor:mute'); persistenceAvailable = true; }
+  catch (_) { persistenceAvailable = false; }
   cache = { ...DEFAULTS };
   if (live) applySettings(cache, live);
+  notifyChange(cache);
   return cache;
 }
 
@@ -130,19 +170,31 @@ export function effectiveRenderScale(s = current(), baseTier) {
   return s.renderScale !== null ? s.renderScale : tierParams(tierName).renderScale;
 }
 
+export function getAimOptions(s = current()) {
+  const options = validate(s);
+  return {
+    mouseSensitivity: options.pointingDevice === "trackpad" ? options.trackpadSensitivity : options.mouseSensitivity,
+    gamepadSensitivity: options.gamepadSensitivity,
+    invertY: options.invertY,
+  };
+}
+
 export function applySettings(s, ctx = live) {
   s = validate(s);
   if (!ctx) return s;
-  if (ctx.camera) {
+  if (ctx.camera && ctx.camera.fov !== s.fov) {
     ctx.camera.fov = s.fov;
     ctx.camera.updateProjectionMatrix();
   }
   if (ctx.renderer) {
-    ctx.renderer.setPixelRatio(
-      Math.min(window.devicePixelRatio || 1, 2) * effectiveRenderScale(s, ctx.baseTier));
+    const ratio = Math.min(window.devicePixelRatio || 1, 2) * effectiveRenderScale(s, ctx.baseTier);
+    // Resizing the backing buffer rebuilds GPU resources. Audio/accessibility
+    // edits must not interrupt a frame or reset temporal rendering history.
+    if (ctx.renderer.getPixelRatio() !== ratio) ctx.renderer.setPixelRatio(ratio);
   }
   if (ctx.audio && ctx.audio.ctx) {
     const a = ctx.audio, t0 = a.ctx.currentTime;
+    a.setMute?.(s.muted);
     a.master.gain.setTargetAtTime(0.9 * s.masterVol, t0, 0.02); // 0.9 = shipped headroom
     if (a.setEngineVolume) a.setEngineVolume(s.engineVol);
     else if (a.engine && a.engine.dry) a.engine.dry.gain.setTargetAtTime(s.engineVol, t0, 0.02);
@@ -151,8 +203,15 @@ export function applySettings(s, ctx = live) {
     if (a.setWeaponsVolume) a.setWeaponsVolume(s.weaponsVol);
     else if (a.gun && a.gun.dry) a.gun.dry.gain.setTargetAtTime(s.weaponsVol, t0, 0.02);
   }
+  if (!s.voice || s.muted || s.masterVol===0 || s.uiVol===0) ctx.voice?.cancel();
   if (ctx.gunFlash) ctx.gunFlash.visible = !s.motionReduce;
+  ctx.input?.setOptions(getAimOptions(s));
+  ctx.hud?.setScale(s.hudScale);
   return s;
+}
+
+function notifyChange(settings) {
+  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('raptor-settings-change', {detail:settings}));
 }
 
 export function getPalette(name) {
