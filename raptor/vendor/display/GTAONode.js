@@ -343,7 +343,17 @@ class GTAONode extends TempNode {
 
 			const depth = sampleDepth( uvNode ).toVar();
 
-			depth.greaterThanEqual( 1.0 ).discard();
+			// RAPTOR uses reverse depth by default. Empty sky is cleared to 0
+			// in that convention; evaluating its normal adds false sky occlusion.
+			if ( builder.renderer.reversedDepthBuffer === true ) {
+
+				depth.lessThanEqual( 0.0 ).discard();
+
+			} else {
+
+				depth.greaterThanEqual( 1.0 ).discard();
+
+			}
 
 			const viewPosition = getViewPosition( uvNode, depth, this._cameraProjectionMatrixInverse ).toVar();
 			const viewNormal = sampleNormal( uvNode ).toVar();

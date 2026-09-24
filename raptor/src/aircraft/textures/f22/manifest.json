@@ -1,0 +1,229 @@
+{
+  "schema": 1,
+  "sources": [
+    "src/aircraft/authoring/f22-body-paint.js",
+    "src/aircraft/authoring/f22-lifting-paint.js"
+  ],
+  "contactAO": {
+    "status": "current",
+    "applied": true,
+    "geometrySHA256": "8a1e312c09a8fee96e6a6a02f13e25a3f9afa5e2cc43e10d74c2b8746df8894e",
+    "bakedGeometrySHA256": "8a1e312c09a8fee96e6a6a02f13e25a3f9afa5e2cc43e10d74c2b8746df8894e",
+    "provisional": false,
+    "sourceMaps": {
+      "body": {
+        "file": "body-ao.png",
+        "width": 2048,
+        "height": 1024,
+        "sha256": "abebc8ffefd66982422916d1ef9d8399f969823516c658c39591f7717ba58905"
+      },
+      "lifting": {
+        "file": "lifting-ao.png",
+        "width": 2048,
+        "height": 1024,
+        "sha256": "3cd27224fe1848551a6e50e92457e4b97f521179b3f5d58900226a889bc659ae"
+      }
+    },
+    "radiusMetres": 0.35,
+    "strength": 0.65,
+    "filter": {
+      "type": "coverage-weighted binomial",
+      "radiusPixels": 1,
+      "sigmaPixels": 0.7071067811865476
+    },
+    "limitations": [
+      {
+        "components": [
+          "finRootFairingL",
+          "finRootFairingR"
+        ],
+        "treatment": "Opaque occluders; ambiguous shared body-atlas footprints have neutral AO.",
+        "filterFootprintPaddingPixels": 2,
+        "reason": "Steep projected fairing faces reuse boom UVs and cannot represent independent contact visibility.",
+        "retained": "Unique fin-root chart AO, other reliable body contacts and live self-shadowing."
+      }
+    ]
+  },
+  "maps": [
+    {
+      "name": "body-high-color.png",
+      "atlas": "body",
+      "kind": "color",
+      "quality": "high",
+      "width": 4096,
+      "height": 2048,
+      "bytes": 2144760,
+      "sha256": "f2195d90cfb05041ce08e7d8371f6d9c3eff9cdd1df58b6362f780ae775c13b5"
+    },
+    {
+      "name": "body-high-normal.png",
+      "atlas": "body",
+      "kind": "normal",
+      "quality": "high",
+      "width": 2048,
+      "height": 1024,
+      "bytes": 153882,
+      "sha256": "a2f6d870c9812f18ee68f4cccb3d338acdb2719a4ae0ec851a106e9853aed610"
+    },
+    {
+      "name": "body-high-orm.png",
+      "atlas": "body",
+      "kind": "orm",
+      "quality": "high",
+      "width": 2048,
+      "height": 1024,
+      "bytes": 1675337,
+      "sha256": "70f32484e130bf0708ef810015979e5184e25315ad15935b7b6dd49414ab0b28"
+    },
+    {
+      "name": "body-medium-color.png",
+      "atlas": "body",
+      "kind": "color",
+      "quality": "medium",
+      "width": 2048,
+      "height": 1024,
+      "bytes": 718478,
+      "sha256": "044366eabb597ce8ad98f197a0cac3d5a3498ecb1e8fae0de2b4d7e56580ad8a"
+    },
+    {
+      "name": "body-medium-normal.png",
+      "atlas": "body",
+      "kind": "normal",
+      "quality": "medium",
+      "width": 1024,
+      "height": 512,
+      "bytes": 38248,
+      "sha256": "fdf5f225882cfd5bde6bcd154ed761d3b63874390a8396965a051c5eb18adac3"
+    },
+    {
+      "name": "body-medium-orm.png",
+      "atlas": "body",
+      "kind": "orm",
+      "quality": "medium",
+      "width": 1024,
+      "height": 512,
+      "bytes": 398922,
+      "sha256": "889bf529c199743f29394c094bcac644ee314d747326a68d276ad8b7cd0f97f3"
+    },
+    {
+      "name": "body-low-color.png",
+      "atlas": "body",
+      "kind": "color",
+      "quality": "low",
+      "width": 1024,
+      "height": 512,
+      "bytes": 250548,
+      "sha256": "0c835bfe38b03620ada42748175d5e4746ef486eebd100425b6fe05db73ba578"
+    },
+    {
+      "name": "body-low-normal.png",
+      "atlas": "body",
+      "kind": "normal",
+      "quality": "low",
+      "width": 512,
+      "height": 256,
+      "bytes": 9088,
+      "sha256": "a068c9215a260a8d27ae7bbdba324584f172bba485e3a78b6086c31672295fe6"
+    },
+    {
+      "name": "body-low-orm.png",
+      "atlas": "body",
+      "kind": "orm",
+      "quality": "low",
+      "width": 512,
+      "height": 256,
+      "bytes": 104756,
+      "sha256": "41eb621f197c8ce38783277d40ed1797623db0a2cf3ea507361909430af698ba"
+    },
+    {
+      "name": "lifting-high-color.png",
+      "atlas": "lifting",
+      "kind": "color",
+      "quality": "high",
+      "width": 4096,
+      "height": 2048,
+      "bytes": 2506618,
+      "sha256": "5222840590fbd6ca0d711693af0f46056a1f00a72d4ce3b6a4573da5d033a926"
+    },
+    {
+      "name": "lifting-high-normal.png",
+      "atlas": "lifting",
+      "kind": "normal",
+      "quality": "high",
+      "width": 2048,
+      "height": 1024,
+      "bytes": 277535,
+      "sha256": "59d227d4069352f8fcad668bf7062ae80cbfaa75d628561a1cae13494b126e00"
+    },
+    {
+      "name": "lifting-high-orm.png",
+      "atlas": "lifting",
+      "kind": "orm",
+      "quality": "high",
+      "width": 2048,
+      "height": 1024,
+      "bytes": 1760697,
+      "sha256": "f131d5668776097b70542473118e4a9021281d09653ec6ea8daf1f7e5c08cc74"
+    },
+    {
+      "name": "lifting-medium-color.png",
+      "atlas": "lifting",
+      "kind": "color",
+      "quality": "medium",
+      "width": 2048,
+      "height": 1024,
+      "bytes": 856103,
+      "sha256": "a6539a2bebcd18f9173dc7f4343d51c2e6eade2d5e249467b5923a8482ceca7b"
+    },
+    {
+      "name": "lifting-medium-normal.png",
+      "atlas": "lifting",
+      "kind": "normal",
+      "quality": "medium",
+      "width": 1024,
+      "height": 512,
+      "bytes": 75571,
+      "sha256": "ded97d085b4a7de21758b4e5b73b37ce96a196ff614e8b64eceec528dbf231b8"
+    },
+    {
+      "name": "lifting-medium-orm.png",
+      "atlas": "lifting",
+      "kind": "orm",
+      "quality": "medium",
+      "width": 1024,
+      "height": 512,
+      "bytes": 424781,
+      "sha256": "d2dbf7084b207e5311cb3301916150ffbd3b5d75c6816841c9b1d6dca9008883"
+    },
+    {
+      "name": "lifting-low-color.png",
+      "atlas": "lifting",
+      "kind": "color",
+      "quality": "low",
+      "width": 1024,
+      "height": 512,
+      "bytes": 303095,
+      "sha256": "4ff35f83430233d4cea382a57d93e85e9d5d69af8904cf77b9189fb8accd7250"
+    },
+    {
+      "name": "lifting-low-normal.png",
+      "atlas": "lifting",
+      "kind": "normal",
+      "quality": "low",
+      "width": 512,
+      "height": 256,
+      "bytes": 18008,
+      "sha256": "91c60cf052b9a7f2acd0d27a026e2ce5c6a604fdbcafcde36f08a5082cd5a963"
+    },
+    {
+      "name": "lifting-low-orm.png",
+      "atlas": "lifting",
+      "kind": "orm",
+      "quality": "low",
+      "width": 512,
+      "height": 256,
+      "bytes": 110144,
+      "sha256": "9831d4dc400183b4084dde59b9ba2705746399ec490b23e2b45c1070ac4fb988"
+    }
+  ]
+}

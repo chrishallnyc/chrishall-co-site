@@ -7,11 +7,12 @@
 import * as THREE from "three";
 import { Pool } from "../engine/pools.js";
 import { buildF22 } from "../aircraft/f22v3.js";
+import { syncGearBays } from "../aircraft/gear-bays.js";
 
 const TRAIL_N = 240;
 
 export class TestWorld {
-  constructor(scene) {
+  constructor(scene, { aircraftQuality = 'high' } = {}) {
     this.scene = scene;
     // sky, fog, and lights are owned by Atmosphere (world/daycycle.js)
 
@@ -40,13 +41,12 @@ export class TestWorld {
     // the real F-22 (phase 6 v1). Model forward = -Z; testworld's heading
     // math points the jet along +Z, so an inner yaw flip aligns the nose.
     this.jet = new THREE.Group();
-    const f22 = buildF22();
+    const f22 = buildF22({ quality: aircraftQuality });
     f22.group.rotation.y = Math.PI;
-    for (const g of ["gearNose", "gearL", "gearR"]) {
-      if (f22.parts[g]) f22.parts[g].visible = false; // clean in-flight config
-    }
+    syncGearBays(f22.group, 0); // stow the legs, doors and support stays together
     this.jet.add(f22.group);
     this.f22parts = f22.parts;
+    this.f22 = f22.group;
     this.scene.add(this.jet);
 
     // instanced contrail fed by a Pool ring

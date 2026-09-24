@@ -1,5 +1,33 @@
 # RAPTOR release notes
 
+## 1.3.0 — 2026-09-24
+
+Aircraft now hold up to close inspection, with shaped airframes, detailed
+cockpits and mechanical interiors, physical coatings, and volumetric exhaust.
+The F-22 and all three enemy aircraft share quality-aware resources and switch
+to lighter geometry at a distance.
+
+- **Refine the F-22.** Rebuilt airframe surfaces, intake and weapons-bay
+  openings, pilot and instrument details, landing-gear hardware, and vectoring
+  engine nozzles preserve the existing articulated aircraft rig.
+- **Give each aircraft its own finish.** Authored paint, panel wear, glazing,
+  engine metal, and freshly baked contact shading respond to the game's sun,
+  atmosphere, and aircraft shadows.
+- **Improve the enemy fleet.** Fighters gain cockpit and exhaust interiors;
+  transports gain open cockpit windows and contoured engines; drones gain
+  shaped propellers and optical sensor apertures.
+- **Keep motion coherent.** Interpolated control surfaces, gear supports,
+  doors, and nozzles follow the visible aircraft without changing flight
+  simulation numerics. The flight setup and controls improvements from 1.1.0
+  remain intact.
+- **Inspect and reproduce the results.** The aircraft lab covers all four
+  models. Offline coating and contact-bake tools, geometry checks, and browser
+  captures exercise both WebGPU and WebGL rendering.
+
+Five further refinement passes polished coating response, canopy and engines,
+cockpit and gear, the enemy fleet, and exhaust/contact shading. Resource sharing,
+quality caps, and prebuilt distance levels keep the detail bounded.
+
 ## 1.2.0 — 2026-09-24
 
 Flight and combat audio now follows engine spool, aircraft motion and combat

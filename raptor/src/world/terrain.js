@@ -371,7 +371,7 @@ export class Terrain {
   update(camera) {
     camera.updateMatrixWorld();
     this._proj.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
-    this._frustum.setFromProjectionMatrix(this._proj);
+    this._frustum.setFromProjectionMatrix(this._proj, camera.coordinateSystem, camera.reversedDepth);
     const cam = camera.position;
     const out = [];
     const NB = 1 << MAX_LEVEL;

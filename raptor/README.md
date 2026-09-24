@@ -25,6 +25,8 @@ Use a desktop browser with WebGPU for the full graphics path; WebGL2 is the
 fallback. Audio starts after a user gesture. Optional radio speech uses the
 browser's speech synthesis and voices available on the computer.
 
+Deploys via the `raptor` Vercel project (rootDirectory `raptor`) on push to main.
+
 ## Set up a flight
 
 Start with **Practice flight**, choose a region and time, then use **Controls**
@@ -66,7 +68,7 @@ an FPS display. The panel distinguishes the running preset from the next-flight
 choice and offers **Review restart**; restarting asks before discarding an
 unfinished flight. Resolution and field of view changes appear when you resume.
 A **new flight** applies a preset's changes to clouds, shadows, and effects.
-High and Ultra retain volumetric clouds and the full post-processing path;
+On WebGPU, High and Ultra retain volumetric clouds and the full post-processing path;
 Low (fastest) and Medium (balanced) reduce graphics work.
 
 Accessibility includes an illustrative HUD/text-size and target-color preview,
@@ -103,6 +105,7 @@ a connection is still needed to load a complete flight.
 | --- | --- |
 | [index.html](index.html), [src/main.js](src/main.js) | Entry point, renderer initialization, game loop and system wiring. |
 | [src/game/](src/game/) | Preflight, controls/settings, pause menu, pilot log, HUD, player and combat systems. |
+| [src/aircraft/](src/aircraft/) | Aircraft geometry, materials, articulation, visual detail, lighting, and coating textures. |
 | [src/sim/](src/sim/) | Aircraft dynamics, aerodynamic data, instructor and weapon data. |
 | [src/engine/](src/engine/) | Fixed-step simulation, input, controller mapping, audio, graphics quality, post-processing and asynchronous exposure. |
 | [src/world/](src/world/) | Terrain, atmosphere, clouds and water. |
@@ -115,6 +118,39 @@ Standalone development pages: [aircraft](f22lab.html), [clouds](cloudslab.html),
 [units](unitslab.html), [HUD](hudlab.html), and [audio](audiolab.html).
 [Development notes](devlog.html) and [progress.json](progress.json) record earlier
 work; historical phase descriptions are not the current implementation map.
+
+## Aircraft graphics
+
+Aircraft graphics live in `src/aircraft/`. `f22v3.js` retains the player rig's
+15 public controls; reference-derived geometry, cockpit, gear, weapon bays,
+F119 nozzles, and materials are separate modules. `bandit-models.js` builds the
+shared fighter, transport, and drone. Their coating textures are generated once
+at startup for the selected quality and shared across the aircraft pool.
+Distance-dependent visual detail and livery changes preserve each aircraft's
+materials and rig. Flight physics, hit volumes, and deterministic simulation
+remain independent of these meshes.
+
+The F-22 uses authored color, normal, and packed occlusion/roughness/metalness
+maps in `src/aircraft/textures/f22/`. These are static assets, with three texture tiers;
+the browser does no coating baking during flight. Rebuild the paint maps with
+`node raptor/tools/bake-f22.mjs` using an existing Playwright/Chrome installation.
+The authoring source is in `src/aircraft/authoring/`; physical dimensions and
+shared UV/door outlines are in `src/aircraft/geometry/`.
+Contact occlusion is baked offline from the neutral aircraft and packed into
+the same maps. See [`tools/F22-AO.md`](tools/F22-AO.md) to regenerate it after
+geometry changes; the paint baker rejects a stale contact bake.
+
+Serve this directory as the web root, then open `/f22lab.html` to inspect all
+four aircraft under studio lighting. View buttons cover the underside, cockpit,
+and exhausts; toggles expose the landing gear and weapon bays. Reproducible views use
+`?view=rear&gear=0&spin=0`; add `gl=1` for WebGL, `ui=0` for clean screenshots,
+`bays=1` for open bays, `ab=1` for settled afterburners, or `aircraft=fighter`,
+`transport`, or `drone`. The earlier F-22 remains available with `v=2`.
+
+See [`qa/README.md`](qa/README.md) for frozen-source aircraft captures, rig and
+simulation regressions, and real-game WebGPU/WebGL lighting/quality checks.
+`src/aircraft/lighting.js` provides aircraft self-shadow and atmospheric
+integration; compatibility handling is documented alongside those checks.
 
 ## Verify changes
 

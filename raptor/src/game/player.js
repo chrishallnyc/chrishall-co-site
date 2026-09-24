@@ -10,6 +10,7 @@ import * as THREE from "three";
 import { FlightModel, S } from "../sim/flight.js";
 import { Gun } from "./gun.js";
 import { Missiles } from "./missiles.js";
+import { createAircraftPose } from "../aircraft/pose.js";
 
 const MOUSE_SENS = 0.0028;      // rad of aim per px of mouse travel
 const THROTTLE_RATE = 0.45;     // per second held (0 -> 100% in ~2.2s)
@@ -17,7 +18,7 @@ const AB_PUSH_RATE = 0.125;     // slower shove through the AB detent (~0.8s of 
 const AIM_PITCH_LIM = 80 * Math.PI / 180;
 
 export class Player {
-  constructor(scene, { jet, terrain, spawn, battlefield, directory }) {
+  constructor(scene, { jet, parts, terrain, spawn, battlefield, directory }) {
     this.jet = jet;             // the F-22 group (taken over from TestWorld)
     this.terrain = terrain || null;
     this.battlefield = battlefield || null;
@@ -50,6 +51,9 @@ export class Player {
     this._camPos = new THREE.Vector3();
     this._camOffset = new THREE.Vector3();
     this._cameraReady = false;
+    this._renderForward = new THREE.Vector3();
+    this._renderUp = new THREE.Vector3();
+    this._aircraftPose = createAircraftPose(jet,parts);
   }
 
   _doSpawn() {
@@ -194,9 +198,11 @@ export class Player {
   // ---- render side ----
   render(alpha, camera, parked, dt = 1 / 60) {
     const a = this._prev, b = this.fm.state;
-    const lp = (i) => a[i] + (b[i] - a[i]) * alpha;
+    const t = Math.max(0, Math.min(1, alpha));
     // FM ENU -> three (x=east stays, y=up from ENU z, z=north from ENU y)
-    const px = lp(S.PX), py = lp(S.PZ), pz = lp(S.PY);
+    const px = a[S.PX] + (b[S.PX]-a[S.PX])*t;
+    const py = a[S.PZ] + (b[S.PZ]-a[S.PZ])*t;
+    const pz = a[S.PY] + (b[S.PY]-a[S.PY])*t;
     this.jet.position.set(px, py, pz);
 
     // orientation via basis vectors (quat can't cross an improper swap)
@@ -205,15 +211,16 @@ export class Player {
     // displays whose refresh rate does not divide the 120 Hz simulation.
     this._q.set(a[S.QX], a[S.QY], a[S.QZ], a[S.QW]);
     this._nextQ.set(b[S.QX], b[S.QY], b[S.QZ], b[S.QW]);
-    this._q.slerp(this._nextQ, alpha);
+    this._q.slerp(this._nextQ, t);
     this._f.set(1, 0, 0).applyQuaternion(this._q);   // body fwd in ENU
     this._u.set(0, 0, -1).applyQuaternion(this._q);  // body up (FRD +z is down)
-    const f = this._f.set(this._f.x, this._f.z, this._f.y); // ENU->three
-    const u = this._u.set(this._u.x, this._u.z, this._u.y);
+    const f = this._renderForward.set(this._f.x, this._f.z, this._f.y); // ENU->three
+    const u = this._renderUp.set(this._u.x, this._u.z, this._u.y);
     const r = this._r.crossVectors(u, f).normalize();
     u.crossVectors(f, r).normalize();
     this._m.makeBasis(r, u, f);
     this.jet.quaternion.setFromRotationMatrix(this._m);
+    this._aircraftPose?.update(a,b,t);
 
     this.gun.render(dt, camera);
     this.missiles.render(dt, camera);
