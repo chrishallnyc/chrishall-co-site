@@ -879,8 +879,15 @@ async function boot() {
     liveQuality.applyAssetQuality = () => {
       const selected = SETTINGS.current().tier;
       const desiredTier = selected === "AUTO" ? autoAssetTier : selected;
+      const shadowParams = tierParams(desiredTier);
+      // Compare with the next boot's allocation, not Auto's benchmarked live
+      // tier: restarting can change the former but reproduce the latter.
       state.assetReloadRequired = assetsNeedReload(bootAssetRequest,
-        requestedBootAssets(desiredTier, assetContext));
+        requestedBootAssets(desiredTier, assetContext), {
+          allocatedShadowSize: aircraftLighting.stats.allocatedShadowSize,
+          requestedShadowSize: aircraftLighting.shadowRequested && shadowParams.shadows
+            ? shadowParams.shadowSize : 0,
+        });
     };
     liveQuality.applyCloudQuality = (tier) => {
       state.tier = tier; // effective live quality; bootAssetTier stays fixed

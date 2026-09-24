@@ -18,7 +18,7 @@ SELECT hr,ra,dec,vmag,bv_color,pmra,pmdec,alt_name
 FROM bsc5p WHERE vmag <= 6.5 ORDER BY hr
 ```
 
-Endpoint: `https://heasarc.gsfc.nasa.gov/xamin/vo/tap/sync`, query parameters `REQUEST=doQuery`, `LANG=ADQL`, `FORMAT=votable`, and `QUERY` as above. The baker applies the final V≤6.0 selection and writes little-endian binary records. Rebuild with `node bakery/bake_bright_stars.mjs downloaded.vot assets/sky/bright-stars-v6.bin`.
+Endpoint: `https://heasarc.gsfc.nasa.gov/xamin/vo/tap/sync`, query parameters `REQUEST=doQuery`, `LANG=ADQL`, `FORMAT=votable`, and `QUERY` as above. The baker applies the final V≤6.0 selection and writes little-endian binary records. From the repository root, rebuild with `node raptor/bakery/bake_bright_stars.mjs downloaded.vot raptor/assets/sky/bright-stars-v6.bin`.
 
 Source VOTable SHA-256: `70ec7e499322ed8398caccb173e20a2c9556af1bf3d91fa33a7b1a3148e24f3f`.
 

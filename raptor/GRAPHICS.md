@@ -8,10 +8,12 @@ detail, the Moon and stars, and Gerstner water.
 
 ## Coordinate and lighting contracts
 
-Simulation, geographic data, weather, waves, and collision queries use local
-metres: X east, Y up, Z north. `planetcurvature.js` bends render positions around
-a shared moving observer at a 6,360 km radius. Terrain, water, objects, cloud
-sampling, shadows, motion vectors, and HUD projections must use that same frame.
+Flight dynamics and combat state use local ENU metres: X east, Y north, Z up.
+Rendering, geographic sampling, weather and wave fields use X east, Y up,
+Z north; the game adapters convert between them. `planetcurvature.js` bends
+render positions around a shared moving observer at a 6,360 km radius. Terrain,
+water, objects, cloud sampling, shadows, motion vectors, and HUD projections
+must use that same frame.
 Previous-frame transforms retain the previous origin. Do not bend simulation
 positions or feed curved coordinates into a geographic texture.
 
@@ -111,11 +113,12 @@ region; it does not increase the photographic imagery's resolution.
 
 - `bakery/bake_cloud_noise.mjs`: deterministic standard/Ultra noise assets.
 - `bakery/bake_cirrus.mjs`: 2048²/8192² optical-density atlases of broken cirrus
-  veils, fine fibres, and irregular fallstreaks; source notes are in `assets/clouds/ASSET-CREDITS.md`.
+  veils, fine fibres, and irregular fallstreaks;
+  [source notes](assets/clouds/ASSET-CREDITS.md) describe their procedural origin.
 - `bakery/bake_terrain_source.py`: reproducible central Valdez height/normal
-  pair, with source request, hashes and credits in `assets/terrain/source/`.
-- `assets/sky/ASSET-CREDITS.md`: lunar map source and attribution.
-- `assets/sky/BRIGHT-STARS-CREDITS.md`: NASA bright-star catalog, source query,
+  pair, with [source request, hashes and credits](assets/terrain/source/ASSET-CREDITS.md).
+- [Lunar map credits](assets/sky/ASSET-CREDITS.md): source and attribution.
+- [Bright-star credits](assets/sky/BRIGHT-STARS-CREDITS.md): NASA catalog, source query,
   redistribution declaration, hashes, and reproducible baker instructions.
 
 The star catalog supplies measured positions, visual magnitudes, colors, and
@@ -157,7 +160,8 @@ and exposure. For example:
 /?front=MARIANAS&camx=7680&camz=13824&camh=2800&yaw=218&pitch=-8&tod=15.5&hud=0&audio=0&nobattle=1&autoexp=0
 ```
 
-`camh` is height above the local terrain, so record the actual camera position.
+`camh` is added to `max(terrain.heightAt(camx, camz), 0)`: height above ground
+on land and above sea level offshore. Record the actual camera position.
 Check both a stationary view and motion before accepting a detail change.
 Read `__RAPTOR.cloudNoise`, `cloudRendering`, `depthMode`, `fineOcean`, and `meter`
 to confirm the path that actually loaded. `bootAssetTier`, `bootAssetRequest`
@@ -205,8 +209,8 @@ node --import ./raptor/qa/register-three.mjs --test raptor/qa/*.test.mjs
 ```
 
 These check quality selection, asynchronous exposure ownership and failure
-handling, shipped cloud-asset hashes, star-catalog validation, conservation of fine-wave modes across resolutions, and long-clock phase
-continuity. They also exercise source-field
-interpolation/collars/corruption fallback, actual controls, cached asset
+handling, shipped cloud-asset hashes, star-catalog validation, conservation of
+fine-wave modes across resolutions, and long-clock phase continuity. They also
+exercise source-field interpolation/collars/corruption fallback, actual controls, cached asset
 profiles, and near-grid allocation and transitions. Browser rendering and
 visual comparisons are still needed to accept shader or appearance changes.

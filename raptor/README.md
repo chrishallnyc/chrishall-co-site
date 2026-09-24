@@ -67,10 +67,11 @@ Optional **Capture pointer** keeps aiming responsive at window edges. **Esc**
 releases the pointer and pauses; capture is never requested automatically.
 
 Display settings include graphics preset, resolution scale, field of view, and
-an FPS display. The panel distinguishes the running preset from the next-flight
-choice and offers **Review restart**; restarting asks before discarding an
-unfinished flight. Resolution and field of view changes appear when you resume.
-A **new flight** applies a preset's changes to clouds, shadows, and effects.
+an FPS display. Preset changes update render scale, terrain detail and aircraft
+shadow activity when you resume. Field of view changes also appear when you
+resume. Loaded detail assets and shadow-map resolution change on a new flight.
+The panel identifies pending asset changes and offers **Review restart**, which
+asks before discarding an unfinished flight.
 On WebGPU, High and Ultra retain volumetric clouds and the full post-processing path;
 Low (fastest) and Medium (balanced) reduce graphics work.
 

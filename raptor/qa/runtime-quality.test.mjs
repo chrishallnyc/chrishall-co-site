@@ -1,6 +1,9 @@
 import test, { beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { bootAssetTier, deviceTier, detectTier, isCompatibleBench, saveBench, setTier, hasManualTier } from '../src/engine/quality.js';
+import * as THREE from 'three';
+import { float } from 'three/tsl';
+import { AircraftLighting } from '../src/aircraft/lighting.js';
+import { bootAssetTier, deviceTier, detectTier, isCompatibleBench, saveBench, setTier, hasManualTier, tierParams } from '../src/engine/quality.js';
 import { requestedBootAssets, describeBootAssets, assetsNeedReload, oceanFineResolution, terrainSourcePreset } from '../src/engine/bootassets.js';
 import { qualityProfile, qualityWorkload } from '../src/engine/cloudquality.js';
 import { QualityBenchmark } from '../src/engine/qualitybench.js';
@@ -125,15 +128,24 @@ test('Auto excludes settling and upload frames without losing measurements of co
  const result=q.observe(16.7);assert.equal(result.complete,true);assert.equal(result.tier,'MED');
 });
 
-function controlsHarness({bootTier='HIGH',baseTier='MED'}={}) {
- const transition=new TerrainDetailTransition(),bootRequest=requestedBootAssets(bootTier,context);
+function controlsHarness({bootTier='HIGH',baseTier='MED',shadows=true}={}) {
+ const transition=new TerrainDetailTransition(),bootRequest=requestedBootAssets(bootTier,context),autoTier=deviceTier(context);
+ const sun=new THREE.DirectionalLight(),lighting=new AircraftLighting({renderer:{shadowMap:{}},
+  atmosphere:{sun,scene:{}},params:tierParams(bootTier),shadows});
+ lighting.setSunVisibility(float(1));
  const sourceField={id:6412},fineOcean={N:oceanFineResolution(bootTier)};const calls={tiers:[],ratios:[],closed:0};
  const state={ready:true,tier:baseTier,assetReloadRequired:false,sourceField,fineOcean};window.__RAPTOR=state;
  let ratio=1;
  const live={baseTier,renderer:{getPixelRatio:()=>ratio,setPixelRatio:v=>{ratio=v;calls.ratios.push(v);}},
-  applyCloudQuality:tier=>{calls.tiers.push(tier);state.tier=tier;},
+  applyCloudQuality:tier=>{calls.tiers.push(tier);state.tier=tier;lighting.setQuality(tierParams(tier));},
   applyTerrainQuality:tier=>transition.setEnabled(tierHasNearTerrain(tier)),
-  applyAssetQuality:()=>{const s=settings.current();state.assetReloadRequired=assetsNeedReload(bootRequest,requestedBootAssets(s.tier==='AUTO'?deviceTier(context):s.tier,context));}};
+  applyAssetQuality:()=>{
+   const selected=settings.current().tier,desiredTier=selected==='AUTO'?autoTier:selected,shadowParams=tierParams(desiredTier);
+   state.assetReloadRequired=assetsNeedReload(bootRequest,requestedBootAssets(desiredTier,context),{
+    allocatedShadowSize:lighting.stats.allocatedShadowSize,
+    requestedShadowSize:lighting.shadowRequested&&shadowParams.shadows?shadowParams.shadowSize:0,
+   });
+  }};
  settings.bindLive(live);transition.advance(0);
  const button=dataset=>({dataset,addEventListener(type,fn){this[type]=fn;}});
  const buttons=['AUTO','LOW','MED','HIGH','ULTRA'].map(quality=>button({quality}));
@@ -142,7 +154,7 @@ function controlsHarness({bootTier='HIGH',baseTier='MED'}={}) {
   el:{querySelectorAll:q=>q==='[data-quality]'?buttons:q==='[data-action]'?[reset]:q==='[data-confirm]'?[confirm]:[],querySelector:q=>q==='[data-review-restart]'&&menu.html?.includes('data-review-restart')?review:null},
   close(){calls.closed++;},_render(){this.html=this._settingsHtml();this._wire();}});
  menu._render();
- return{transition,sourceField,fineOcean,state,calls,live,menu,click:tier=>buttons.find(b=>b.dataset.quality===tier).click(),
+ return{transition,sourceField,fineOcean,state,calls,live,menu,lighting,sun,click:tier=>buttons.find(b=>b.dataset.quality===tier).click(),
   review:()=>review.click(),reset:()=>{reset.click();assert.equal(menu.confirming,'settings');confirm.click();}};
 }
 
@@ -198,6 +210,67 @@ test('same live tier still offers explicit restart when loaded assets differ',()
  assert.equal(h.state.tier,'HIGH');assert.equal(settings.current().tier,'HIGH');assert.equal(h.state.assetReloadRequired,true);
  assert.match(h.menu.html,/Full graphics detail needs a new flight/);assert.match(h.menu.html,/data-review-restart/);
  h.review();assert.equal(h.calls.closed,1);assert.equal(h.state.fineOcean.N,128);
+});
+
+test('LOW to MED reports the retained shadow resolution even with identical texture assets',()=>{
+ settings.saveSettings({tier:'LOW'});
+ const h=controlsHarness({bootTier:'LOW',baseTier:'LOW'}),map=new THREE.RenderTarget(512,512);
+ h.sun.shadow.map=map;
+ const size=h.sun.shadow.mapSize;
+ try {
+  assert.deepEqual(requestedBootAssets('LOW',context),requestedBootAssets('MED',context));
+  assert.equal(h.lighting.stats.allocatedShadowSize,512);
+  assert.equal(h.state.assetReloadRequired,false);
+  h.click('MED');
+  assert.equal(h.state.tier,'MED');assert.equal(h.lighting.stats.requestedShadowSize,1024);
+  assert.equal(h.state.assetReloadRequired,true);
+  assert.match(h.menu.html,/Full graphics detail needs a new flight/);
+  assert.match(h.menu.html,/data-review-restart/);
+  assert.equal(h.sun.shadow.map,map);assert.equal(h.sun.shadow.mapSize,size);
+  assert.deepEqual(size.toArray(),[512,512]);assert.equal(h.lighting.stats.allocatedShadowSize,512);
+  h.click('LOW');
+  assert.equal(h.state.assetReloadRequired,false);assert.equal(h.lighting.shadows,false);
+  assert.doesNotMatch(h.menu.html,/data-review-restart/);
+  assert.equal(h.sun.shadow.map,map);assert.deepEqual(size.toArray(),[512,512]);
+ } finally { map.dispose();h.lighting.dispose(); }
+});
+
+test('returning to a MED boot tier reuses its matching shadow allocation without a restart notice',()=>{
+ settings.saveSettings({tier:'MED'});
+ const h=controlsHarness({bootTier:'MED',baseTier:'MED'});
+ h.click('LOW');assert.equal(h.state.assetReloadRequired,false);
+ h.click('MED');
+ assert.equal(h.lighting.stats.allocatedShadowSize,1024);assert.equal(h.lighting.stats.requestedShadowSize,1024);
+ assert.equal(h.state.assetReloadRequired,false);assert.doesNotMatch(h.menu.html,/data-review-restart/);
+ assert.deepEqual(h.sun.shadow.mapSize.toArray(),[1024,1024]);h.lighting.dispose();
+});
+
+test('explicitly disabled aircraft shadows do not request a resolution restart',()=>{
+ settings.saveSettings({tier:'LOW'});
+ const h=controlsHarness({bootTier:'LOW',baseTier:'LOW',shadows:false});h.click('MED');
+ assert.equal(h.lighting.stats.allocatedShadowSize,512);assert.equal(h.lighting.stats.requestedShadowSize,0);
+ assert.equal(h.lighting.shadows,false);assert.equal(h.state.assetReloadRequired,false);
+ assert.doesNotMatch(h.menu.html,/data-review-restart/);h.lighting.dispose();
+});
+
+test('LOW to Auto reports the next MED boot allocation even when its live tier remains LOW',()=>{
+ navigator.hardwareConcurrency=8;settings.saveSettings({tier:'LOW'});
+ const h=controlsHarness({bootTier:'LOW',baseTier:'LOW'});h.click('AUTO');
+ assert.equal(deviceTier(context),'MED');assert.equal(h.state.tier,'LOW');
+ assert.equal(h.lighting.stats.requestedShadowSize,0);assert.equal(h.lighting.stats.allocatedShadowSize,512);
+ assert.equal(h.state.assetReloadRequired,true);assert.match(h.menu.html,/data-review-restart/);
+ assert.deepEqual(h.sun.shadow.mapSize.toArray(),[512,512]);h.lighting.dispose();
+});
+
+test('Auto benchmark downgrades do not request a restart of an already matching boot allocation',()=>{
+ navigator.hardwareConcurrency=8;
+ const h=controlsHarness({bootTier:'MED',baseTier:'LOW'});
+ assert.equal(settings.current().tier,'AUTO');assert.equal(h.state.tier,'LOW');
+ assert.equal(h.lighting.stats.allocatedShadowSize,1024);assert.equal(h.lighting.stats.requestedShadowSize,0);
+ assert.equal(h.state.assetReloadRequired,false);assert.doesNotMatch(h.menu.html,/data-review-restart/);
+ h.live.baseTier='MED';settings.applySettings(settings.current(),h.live);
+ assert.equal(h.state.assetReloadRequired,false);assert.equal(h.lighting.stats.requestedShadowSize,1024);
+ h.lighting.dispose();
 });
 
 test('blocked storage never promises that restart will preserve new graphics settings',()=>{

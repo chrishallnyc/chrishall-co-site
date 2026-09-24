@@ -75,9 +75,14 @@ export function describeBootAssets({ bootTier, terrain = null, water = null,
   });
 }
 
-export function assetsNeedReload(bootRequest, nextRequest) {
+export function assetsNeedReload(bootRequest, nextRequest, shadowStats = null) {
   return bootRequest.cirrus !== nextRequest.cirrus
     || bootRequest.noise !== nextRequest.noise
     || bootRequest.fineOcean !== nextRequest.fineOcean
-    || bootRequest.source !== nextRequest.source;
+    || bootRequest.source !== nextRequest.source
+    // Shadow resolution stays fixed for the compiled target's lifetime.
+    // Disabled shadows need no resize; enabling them can reveal a mismatch
+    // even when both tiers use the same texture assets (LOW -> MED).
+    || (shadowStats?.requestedShadowSize > 0
+      && shadowStats.requestedShadowSize !== shadowStats.allocatedShadowSize);
 }
