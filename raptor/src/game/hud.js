@@ -139,8 +139,9 @@ export class HUD {
     this.mode = "arcade";
 
     // WT-arcade layer hooks (phase 8/9): assign draw callbacks fn(ctx, hud).
-    // Both are skipped outside arcade mode (setMode). Coordinates are CSS px
-    // (dpr transform already applied); stroke/fill start as HUD green.
+    // Both are skipped outside arcade mode (setMode). Coordinates are physical
+    // CSS px, independent of instrument scale (native DPR already applied), so
+    // projected world markers and viewport-edge readouts stay aligned.
     //  - arcadeLayer: mid layer — enemy markers + lead indicator. Drawn OVER
     //    the ladder/FPM but UNDER the tapes/blocks (which must stay readable).
     //  - arcadeTopLayer: corner layer — damage silhouette / ammo / kill feed.
@@ -176,10 +177,12 @@ export class HUD {
   // box. Cheap; call on resize only, never per-frame.
   resize() {
     const r = this.parent.getBoundingClientRect ? this.parent.getBoundingClientRect() : null;
-    const W = (r && r.width) || window.innerWidth;
-    const H = (r && r.height) || window.innerHeight;
+    const scale = this.uiScale || 1;
+    const W = ((r && r.width) || window.innerWidth) / scale;
+    const H = ((r && r.height) || window.innerHeight) / scale;
     this.W = W; this.H = H;
-    this.dpr = window.devicePixelRatio || 1;
+    this.nativeDpr = window.devicePixelRatio || 1;
+    this.dpr = this.nativeDpr * scale;
     this.canvas.width = Math.max(1, Math.round(W * this.dpr));
     this.canvas.height = Math.max(1, Math.round(H * this.dpr));
     this.cx = W / 2;
@@ -204,6 +207,13 @@ export class HUD {
   setMode(mode) {
     this.mode = mode === "realistic" ? "realistic" : "arcade";
     if (this._lastState) this._draw(this._lastState);
+  }
+
+  setScale(value) {
+    const scale = Number.isFinite(value) ? Math.max(0.8, Math.min(1.4, value)) : 1;
+    if ((this.uiScale || 1) === scale) return;
+    this.uiScale = scale;
+    this.resize();
   }
 
   dispose() {
@@ -242,7 +252,10 @@ export class HUD {
 
     // WT-arcade mid layer: over the ladder, under the tapes/blocks
     if (this.mode === "arcade" && this.arcadeLayer) {
-      ctx.save(); this.arcadeLayer(ctx, this); ctx.restore();
+      ctx.save();
+      ctx.setTransform(this.nativeDpr, 0, 0, this.nativeDpr, 0, 0);
+      this.arcadeLayer(ctx, this);
+      ctx.restore();
     }
 
     this._drawBoresight(ctx);
@@ -254,7 +267,10 @@ export class HUD {
 
     // WT-arcade corner layer: over everything
     if (this.mode === "arcade" && this.arcadeTopLayer) {
-      ctx.save(); this.arcadeTopLayer(ctx, this); ctx.restore();
+      ctx.save();
+      ctx.setTransform(this.nativeDpr, 0, 0, this.nativeDpr, 0, 0);
+      this.arcadeTopLayer(ctx, this);
+      ctx.restore();
     }
   }
 
