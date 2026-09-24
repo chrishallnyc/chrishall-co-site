@@ -7,7 +7,8 @@
 import * as THREE from "three";
 import {
   Fn, uniform, positionWorld, cameraPosition, normalize, dot, max, pow, exp,
-  acos, cos, smoothstep, mix, clamp, vec3, vec2, float, fract, sin, screenUV,
+  acos, cos, smoothstep, mix, clamp, vec3, vec2, float, fract, screenCoordinate,
+  fwidth, texture, time, sqrt, select, abs,
 } from "three/tsl";
 
 const UP = new THREE.Vector3(0, 1, 0);
@@ -20,6 +21,46 @@ const SUN_E_MAX = 1000.0, EE = 1000.0;
 // π/1.82 carries fading energy to ~−8°, matching real twilight extent.
 const CUTOFF = Math.PI / 1.82;
 const STEEPNESS = 1.5;
+const SUN_RADIUS = THREE.MathUtils.degToRad(0.533 / 2);
+const SUN_COS_RADIUS = Math.cos(SUN_RADIUS);
+import { getCirrusAtlas, horizonVisibility, cirrusOpticalDepthNode, airglowRadiance } from "./celestial-nodes.js";
+// A real solar disc is just over half a degree across. Derivative-based
+// coverage keeps that size stable on both a Retina display and a small
+// viewport, without turning its edge into a large painted glow.
+const solarDisc = Fn(([cosSun]) => {
+  const edge = max(fwidth(cosSun).mul(0.5), 0.00000012);
+  const coverage = smoothstep(float(SUN_COS_RADIUS).sub(edge), float(SUN_COS_RADIUS).add(edge), cosSun);
+  const limb = pow(clamp(cosSun.sub(SUN_COS_RADIUS).div(1 - SUN_COS_RADIUS), 0, 1), 0.5);
+  return coverage.mul(limb.mul(0.16).add(0.84));
+});
+
+// A thin layer of separate ice-cloud fibres, sampled at the view ray's
+// physical intersection. This gives finite parallax, horizon convergence,
+// and a sensible view from above without a second volumetric march.
+function makeCirrusNode(atlas, uMoonDir, uMoonRatio, uExposureGain) {
+  const tau = cirrusOpticalDepthNode(atlas);
+  return Fn(([dir, sunDir, radiance]) => {
+    const transmission = exp(tau(dir).negate());
+    // This matches the 10 km layer's geometric horizon used in the shared
+    // geometry. The path direction is locally sufficient away from the
+    // distant faded horizon (and retains the round-3 daytime energy scale).
+    const cameraRadius = max(cameraPosition.y, 0).mul(0.001).add(6360);
+    const b = cameraRadius.mul(dir.y);
+    const root = sqrt(max(b.mul(b).sub(cameraRadius.pow(2).sub(6370 ** 2)), 0));
+    const distance = select(b.negate().sub(root).greaterThan(0), b.negate().sub(root), b.negate().add(root));
+    const up = normalize(vec3(0, cameraRadius, 0).add(dir.mul(max(distance, 0))));
+    const layerHorizon = -Math.sqrt(1 - (6360 / 6370) ** 2);
+    const sunMu = dot(up, sunDir);
+    const lit = smoothstep(layerHorizon - Math.sin(SUN_RADIUS), layerHorizon + Math.sin(SUN_RADIUS), sunMu);
+    const sunset = float(1).sub(smoothstep(layerHorizon + 0.005, 0.025, sunMu));
+    const sunlight = mix(vec3(1.60, 1.68, 1.77), vec3(1.75, 0.75, 0.31), sunset).mul(lit);
+    const moonMu = dot(up, uMoonDir);
+    const moonLit = smoothstep(layerHorizon - 0.0047, layerHorizon + 0.0047, moonMu);
+    const moonlight = vec3(1.60, 1.65, 1.69).mul(uMoonRatio).mul(moonLit);
+    const source = radiance.mul(0.40).add(sunlight.add(moonlight).mul(uExposureGain));
+    return radiance.mul(transmission).add(source.mul(float(1).sub(transmission)));
+  });
+}
 
 function sunIntensity(zenithCos) {
   const zenithAngle = Math.acos(Math.min(Math.max(zenithCos, -1), 1));
@@ -42,6 +83,13 @@ export class Sky {
 
     // uniforms shared with the shader
     this.uSunDir = uniform(new THREE.Vector3(0, 1, 0));
+    this.uMoonDir = uniform(new THREE.Vector3(0, -1, 0));
+    this.uKeyLightDir = uniform(new THREE.Vector3(0, 1, 0));
+    this.uMoonRatio = uniform(0);
+    this.uMoonColor = uniform(new THREE.Vector3(1.0, 0.98, 0.94));
+    this.uExposureGain = uniform(1);
+    this.uSceneIrradiance = uniform(36);
+    this.uNightSkyRadiance = uniform(new THREE.Vector3());
     this.uBetaR = uniform(new THREE.Vector3());
     this.uBetaM = uniform(new THREE.Vector3());
     this.uSunE = uniform(1000.0);
@@ -55,6 +103,8 @@ export class Sky {
     this.uAmbFade = uniform(1.0); // fades the 0.1·Fex airglow with sun energy
                                   // (it's scattered sunlight — judges caught it
                                   // painting the night sky warm brown)
+    this.cirrusAtlas = getCirrusAtlas();
+    this._withCirrus = makeCirrusNode(this.cirrusAtlas, this.uMoonDir, this.uMoonRatio, this.uExposureGain);
 
     const mat = new THREE.MeshBasicNodeMaterial({ side: THREE.BackSide, fog: false, depthWrite: false });
     mat.colorNode = this._buildColorNode();
@@ -69,22 +119,36 @@ export class Sky {
   // before first compile). skyFn(viewDir)->radiance; uSunI scales unit-sun
   // radiance into the scene's lighting range. Keeps an analytic sun disc —
   // the march integrates the atmosphere only.
-  setHillaire(skyFn, uSunI) {
+  setHillaire(skyFn, uSunI, sharedRadiance = null) {
+    if (sharedRadiance) {
+      this.mesh.material.colorNode = Fn(() => sharedRadiance(cameraPosition, normalize(positionWorld.sub(cameraPosition))))();
+      this.mesh.material.needsUpdate = true;
+      return;
+    }
     const uSunDir = this.uSunDir;
     this.mesh.material.colorNode = Fn(() => {
       const dir = normalize(positionWorld.sub(cameraPosition));
-      const L = skyFn(dir).mul(uSunI).toVar();
-      // sun disc: ~0.53° half-angle; elevation-keyed reddening + enough HDR
-      // overshoot to catch the bloom threshold consistently (PASS-1 item 3:
-      // the disc read as "the moon" — dim, never warm)
+      const L = skyFn(dir).mul(uSunI).add(airglowRadiance(dir).mul(this.uExposureGain)).toVar();
+      // Solar radiance and a restrained circumsolar aureole. The atmosphere
+      // remains entirely in skyFn; this narrow halo represents scattering
+      // around the finite disc, rather than repainting the sky gradient.
       const cosSun = dot(dir, uSunDir);
-      const disc = smoothstep(float(0.99996), float(0.999989), cosSun);
-      const lowSun = smoothstep(float(0.35), float(0.02), uSunDir.y);
+      const disc = solarDisc(cosSun);
+      const lowSun = float(1).sub(smoothstep(0.02, 0.35, uSunDir.y));
       const discCol = mix(vec3(1.0, 0.97, 0.92), vec3(1.0, 0.52, 0.22), lowSun);
-      L.addAssign(discCol.mul(disc).mul(uSunI).mul(0.4).mul(smoothstep(float(-0.06), float(0.0), uSunDir.y)));
-      return L;
+      const visibleSun = horizonVisibility(dir);
+      const aureole = exp(cosSun.sub(1).mul(4200)).mul(0.012);
+      L.addAssign(discCol.mul(disc.mul(0.65).add(aureole)).mul(uSunI).mul(visibleSun));
+      return this._withCirrus(dir, uSunDir, L);
     })();
     this.mesh.material.needsUpdate = true;
+  }
+
+  setMoon(state) {
+    this.uMoonDir.value.fromArray(state.direction);
+    this.uMoonRatio.value = state.irradianceRatio;
+    this.moonState = state;
+    this.uKeyLightDir.value.copy(this.uSunDir.value.y < -0.052335956 ? this.uMoonDir.value : this.uSunDir.value);
   }
 
   _buildColorNode() {
@@ -123,8 +187,7 @@ export class Sky {
       ));
 
       // sun disc + base airglow (airglow fades with the sun — it IS sunlight)
-      const sunAngularCos = 0.999956676946448;
-      const sundisk = smoothstep(sunAngularCos, sunAngularCos + 0.00002, cosTheta);
+      const sundisk = solarDisc(cosTheta).mul(horizonVisibility(dir));
       const L0 = vec3(0.1).mul(Fex).mul(this.uAmbFade).add(uSunE.mul(19000.0).mul(Fex).mul(sundisk));
 
       const texColor = Lin.add(L0).mul(0.04).add(vec3(0.0, 0.0003, 0.00075).mul(this.uAmbFade));
@@ -137,15 +200,23 @@ export class Sky {
       const saturated = vec3(lum).add(graded.sub(vec3(lum)).mul(1.9));
       graded = mix(graded, saturated.mul(0.78), upness);
 
-      // blue-noise-ish dither kills 8-bit gradient banding (judge finding)
-      const dither = fract(sin(dot(screenUV.mul(vec2(12.9898, 78.233)), vec2(1.0, 1.0))).mul(43758.5453))
-        .sub(0.5).mul(2.0 / 255.0);
+      // Pixel-space noise breaks gradient banding in the direct-rendered
+      // fallback. Normalized UV hashing leaves large streaks on big displays.
+      const dither = fract(fract(dot(screenCoordinate.xy, vec2(0.06711056, 0.00583715))).mul(52.9829189))
+        .sub(0.5).mul(1.0 / 255.0).mul(this.uAmbFade);
 
       // horizon handoff: fade into the scene fog color — asymmetric, fully
       // fog just below the horizon (the far-clipped ground edge sits at a
       // small depression angle and must land on pure fog), full sky by +1.4°
       const horizonBlend = smoothstep(-0.002, 0.024, upDot);
-      const withFloor = max(graded, uNight);
+      // Fallback approximates lunar single scatter with the same irradiance,
+      // rather than reusing the nonlinear daylight grade on the Moon.
+      const moonCos = dot(dir, this.uMoonDir);
+      const moonPhase = float(3 / (16 * Math.PI)).mul(moonCos.pow(2).add(1));
+      const lunarLit = smoothstep(-0.06, 0.01, this.uMoonDir.y);
+      const moonL = float(36).mul(this.uMoonRatio).mul(this.uMoonColor).mul(moonPhase)
+        .mul(vec3(1).sub(Fex)).mul(lunarLit);
+      const withFloor = this._withCirrus(dir, uSunDir, graded.add(moonL).add(airglowRadiance(dir)).mul(this.uExposureGain));
       return mix(this.uFog, withFloor, horizonBlend).add(dither);
     })();
   }
@@ -170,6 +241,17 @@ export class Sky {
   // keep the dome centered on the eye
   followCamera(camera) { this.mesh.position.copy(camera.position); }
 
+  sampleLunarDirection(dir) {
+    const zenith = Math.acos(Math.max(0, dir.y));
+    const denominator = Math.cos(zenith) + .15 * (93.885 - zenith * 180 / Math.PI) ** -1.253;
+    const r = this.uBetaR.value.toArray(), m = this.uBetaM.value.toArray();
+    const c = dir.dot(this.uMoonDir.value), phase = 3 / (16 * Math.PI) * (1 + c * c);
+    const t = Math.min(Math.max((this.uMoonDir.value.y + .06) / .07, 0), 1);
+    const visible = t * t * (3 - 2 * t);
+    return r.map((x, i) => 36 * this.uMoonRatio.value * [1, .98, .94][i] * phase
+      * (1 - Math.exp(-(x * 8400 + m[i] * 1250) / denominator)) * visible);
+  }
+
   // CPU evaluation of the same model for one direction — used to derive the
   // fog color so aerial haze always matches the sky at the horizon.
   sampleDirection(dir) {
@@ -190,9 +272,12 @@ export class Sky {
       const frac = (bR[i] * rPh + bM[i] * mPh) / (bR[i] + bM[i]);
       let lin = Math.pow(sunE * frac * (1 - fex), 1.5);
       lin *= (1 - sunsetBlend) + Math.pow(sunE * frac * fex, 0.5) * sunsetBlend;
-      const tex = lin * 0.04 + [0, 0.0003, 0.00075][i] + 0.1 * fex * 0.04;
+      const tex = lin * 0.04 + ([0, 0.0003, 0.00075][i] + 0.1 * fex * 0.04) * this.uAmbFade.value;
       out[i] = Math.pow(tex, 1 / (1.2 + 1.2 * sunfade));
     }
-    return out; // linear RGB
+    const t = Math.min(Math.max((dir.y - .05) / .75, 0), 1);
+    const upness = t * t * (3 - 2 * t) * this.uAmbFade.value;
+    const luma = out[0] * .2126 + out[1] * .7152 + out[2] * .0722;
+    return out.map((x) => x * (1 - upness) + (luma + (x - luma) * 1.9) * .78 * upness); // linear RGB
   }
 }

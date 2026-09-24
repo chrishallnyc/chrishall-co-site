@@ -9,7 +9,7 @@
 
 import * as THREE from "three";
 import {
-  Fn, texture, float, int, vec2, vec3, Loop,
+  Fn, texture, float, int, vec2, vec3, Loop, If,
   exp, sqrt, dot, normalize, clamp, max, min, abs, select, pow, length, and, or,
 } from "three/tsl";
 
@@ -249,7 +249,7 @@ function tslRaySphereNearest(o, d, radius) {
   return select(miss, float(-1.0), nearest);
 }
 
-function tslSampleTransmittance(tTex, r, mu) {
+function tslSampleTransmittance(tTex, r, mu, explicitLevel = false) {
   const rc = clamp(r, R_GROUND, R_TOP);
   const muc = clamp(mu, -1.0, 1.0);
   const rho = sqrt(max(rc.mul(rc).sub(R_GROUND * R_GROUND), 0.0));
@@ -258,7 +258,8 @@ function tslSampleTransmittance(tTex, r, mu) {
   const dMin = float(R_TOP).sub(rc);
   const u = clamp(d.sub(dMin).div(rho.add(H_ATMO).sub(dMin)), 0.0, 1.0);
   const v = rho.div(H_ATMO); // row0=ground + flipY=false: v maps altitude directly
-  return texture(tTex, vec2(u, v)).rgb;
+  const lookup = texture(tTex, vec2(u, v));
+  return (explicitLevel ? lookup.level(0) : lookup).rgb;
 }
 
 function tslSampleMultiscatter(msTex, muS, h) {
@@ -271,7 +272,7 @@ function tslSampleMultiscatter(msTex, muS, h) {
 // pos/dir in planet-frame km (planet center at origin, unit dir). tCap: float
 // node clamp for aerial perspective, or null for the full sky march.
 // Returns { L, trans } accumulator vars.
-function tslMarch({ tTex, msTex, sunDir, pos, dir, tCap, steps }) {
+function tslMarch({ tTex, msTex, sunDir, pos, dir, tCap, steps, moonDir = null, moonRatio = null, moonColor = null }) {
   const tBottom = tslRaySphereNearest(pos, dir, R_GROUND);
   const tTop = tslRaySphereNearest(pos, dir, R_TOP);
   let tMaxNode = select(tBottom.greaterThanEqual(0.0), tBottom, max(tTop, 0.0));
@@ -284,6 +285,14 @@ function tslMarch({ tTex, msTex, sunDir, pos, dir, tCap, steps }) {
   const pMie = cosTheta.mul(cosTheta).add(1.0).mul(3.0 * (1.0 - g2))
     .div(pow(cosTheta.mul(-2.0 * MIE_G).add(1.0 + g2), 1.5).mul(8.0 * Math.PI * (2.0 + g2)))
     .toVar();
+
+  // A second irradiance source through the SAME atmosphere. Rayleigh,
+  // aerosol, ozone, LUTs, and the original solar integrand stay unchanged.
+  const cosMoon = moonDir ? dot(dir, moonDir) : null;
+  const pRayMoon = moonDir ? float(3 / (16 * Math.PI)).mul(cosMoon.pow(2).add(1)).toVar() : null;
+  const pMieMoon = moonDir ? float(3 * (1 - MIE_G * MIE_G))
+    .mul(cosMoon.pow(2).add(1)).div(pow(cosMoon.mul(-2 * MIE_G).add(1 + MIE_G * MIE_G), 1.5)
+    .mul(8 * Math.PI * (2 + MIE_G * MIE_G))).toVar() : null;
 
   const L = vec3(0.0).toVar();
   const trans = vec3(1.0).toVar();
@@ -315,6 +324,22 @@ function tslMarch({ tTex, msTex, sunDir, pos, dir, tCap, steps }) {
     const S = tSun.mul(ssRay.mul(pRay).add(ssMie.mul(pMie))).mul(shadow)
       .add(psi.mul(ssRay.add(ssMie))).toVar();
 
+    if (moonDir && moonRatio) {
+      // Uniform branch: no lunar LUT fetches during daylight. Below the
+      // horizon the planet-shadow test still allows a physically lit high
+      // atmosphere, instead of switching all moonlight off at y=0.
+      If(moonRatio.greaterThan(1e-10).and(sunDir.y.lessThan(0)), () => {
+        const muMoon = dot(up, moonDir);
+        const tMoon = tslSampleTransmittance(tTex, r, muMoon);
+        const moonEarth = tslRaySphereNearest(P.sub(up.mul(PLANET_RADIUS_OFFSET)), moonDir, R_GROUND);
+        const moonShadow = select(moonEarth.lessThan(0), 1, 0);
+        const psiMoon = tslSampleMultiscatter(msTex, muMoon, h);
+        const sourceMoon = tMoon.mul(ssRay.mul(pRayMoon).add(ssMie.mul(pMieMoon))).mul(moonShadow)
+          .add(psiMoon.mul(ssRay.add(ssMie))).mul(moonRatio).mul(moonColor || vec3(1));
+        S.addAssign(sourceMoon);
+      });
+    }
+
     // analytic step integration, sigma_t -> 0 guard (all channels co-vanish)
     const transStep = exp(sigmaT.mul(dt).negate()).toVar();
     const sigSum = sigmaT.x.add(sigmaT.y).add(sigmaT.z);
@@ -334,25 +359,27 @@ function tslCameraPos(uCamPos) {
 }
 
 // (viewDirNode: vec3) => vec3 sky radiance. No sun disc, no ground term.
-export function skySkyNode({ tTex, msTex, uSunDir, uCamPos }) {
+export function skySkyNode({ tTex, msTex, uSunDir, uCamPos, uMoonDir = null, uMoonRatio = null, uMoonColor = null }) {
   return Fn(([viewDir]) => {
     const { L } = tslMarch({
       tTex, msTex, sunDir: normalize(uSunDir),
       pos: tslCameraPos(uCamPos).toVar(), dir: normalize(viewDir).toVar(),
       tCap: null, steps: N_SKY,
+      moonDir: uMoonDir ? normalize(uMoonDir) : null, moonRatio: uMoonRatio, moonColor: uMoonColor,
     });
     return L;
   });
 }
 
 // shared aerial setup: camera->wp ray in planet-frame km
-function tslAerial({ tTex, msTex, uSunDir, uCamPos }, wp) {
+function tslAerial({ tTex, msTex, uSunDir, uCamPos, uMoonDir = null, uMoonRatio = null, uMoonColor = null }, wp) {
   const rel = wp.sub(uCamPos).div(1000.0).toVar();
   const distKm = length(rel).toVar();
   return tslMarch({
     tTex, msTex, sunDir: normalize(uSunDir),
     pos: tslCameraPos(uCamPos).toVar(), dir: rel.div(max(distKm, 1e-6)).toVar(),
     tCap: distKm, steps: N_AERIAL,
+    moonDir: uMoonDir ? normalize(uMoonDir) : null, moonRatio: uMoonRatio, moonColor: uMoonColor,
   });
 }
 
@@ -362,6 +389,61 @@ export function aerialTransNode({ tTex, msTex, uSunDir, uCamPos }) {
 }
 
 // (wp: vec3 world meters) => vec3 inscattered radiance along camera->wp
-export function aerialInscatterNode({ tTex, msTex, uSunDir, uCamPos }) {
-  return Fn(([wp]) => tslAerial({ tTex, msTex, uSunDir, uCamPos }, wp).L);
+export function aerialInscatterNode(args) {
+  return Fn(([wp]) => tslAerial(args, wp).L);
+}
+
+// Observer-independent consumers (environment probes, water, later reflections)
+// share the same planet and march. World positions already include render-only
+// curvature; the planet center remains below the main view's horizontal origin.
+// A one-meter minimum radius keeps a surface observer outside the sphere after
+// float32 rounding. This is a geometric self-intersection offset, not a light floor.
+export function observerSkyNode({ tTex, msTex, uSunDir, uFrameOrigin,
+  uMoonDir = null, uMoonRatio = null, uMoonColor = null }) {
+  return Fn(([observerWorld, viewDir]) => {
+    const p = vec3(observerWorld.x.sub(uFrameOrigin.x),
+      observerWorld.y.add(R_GROUND * 1000), observerWorld.z.sub(uFrameOrigin.z)).div(1000).toVar();
+    const radius = length(p).toVar();
+    const pos = p.mul(max(radius, R_GROUND + 0.001).div(max(radius, 1e-6))).toVar();
+    return tslMarch({ tTex, msTex, sunDir: normalize(uSunDir), pos,
+      dir: normalize(viewDir).toVar(), tCap: null, steps: N_SKY,
+      moonDir: uMoonDir ? normalize(uMoonDir) : null, moonRatio: uMoonRatio, moonColor: uMoonColor,
+    }).L;
+  });
+}
+
+// Apply view-path transport AFTER complete surface lighting. Sharing this one
+// march gives both T and L without two separate eight-step aerial loops.
+// airMassScale preserves the existing front-specific approximation exactly.
+export function aerialCompositeNode(args, uSceneIrradiance, airMassScale = 1) {
+  return Fn(([worldPosition, surfaceRadiance]) => {
+    const { L, trans } = tslAerial(args, worldPosition);
+    return surfaceRadiance.mul(airMassScale === 1 ? trans : pow(trans, vec3(airMassScale)))
+      .add(L.mul(uSceneIrradiance).mul(airMassScale));
+  });
+}
+
+// Rotate an arbitrary observer into the existing CPU oracle's zenith frame.
+// The atmosphere is spherically symmetric; source/view relative angles survive.
+export function cpuSkyAtObserver(luts, observerWorld, frameOrigin, viewDirection, sourceDirection) {
+  const p = new THREE.Vector3(observerWorld[0] - frameOrigin[0],
+    R_GROUND * 1000 + observerWorld[1], observerWorld[2] - frameOrigin[2]);
+  const altitude = Math.max(p.length() - R_GROUND * 1000, 1);
+  const up = p.normalize();
+  const east = new THREE.Vector3(1, 0, 0).addScaledVector(up, -up.x).normalize();
+  const north = east.clone().cross(up).normalize();
+  const rotate = (d) => { const v = new THREE.Vector3(...d).normalize(); return [v.dot(east), v.dot(up), v.dot(north)]; };
+  return cpuSky(luts, altitude, rotate(viewDirection), rotate(sourceDirection));
+}
+
+// Direct illumination reuses the baked atmosphere mapping, without another
+// atmosphere march. The inline node takes its texture at the caller scope;
+// no cached Fn body captures a material-specific texture binding.
+export function atmosphereSourceTransmittanceNode(tTex, radiusKm, elevationSine) {
+  return tslSampleTransmittance(tTex, radiusKm, elevationSine, true);
+}
+export function sampleAtmosphereSourceTransmission(luts, altitudeM, elevationSine) {
+  const rgb = [0, 0, 0];
+  sampleTransmittanceCPU(luts, R_GROUND + altitudeM * .001, elevationSine, rgb);
+  return rgb;
 }

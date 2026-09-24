@@ -7,13 +7,13 @@
 // "doesn't crash" tier).
 
 import * as THREE from "three";
-import { pass, mrt, output, velocity } from "three/tsl";
-import { traa } from "../../vendor/display/TRAANode.js";
+import { pass, mrt, output, velocity, Fn, vec4, fract, screenCoordinate, renderOutput } from "three/tsl";
+import { temporalResolve as makeTemporalResolve } from "./temporalresolve.js";
 import { bloom } from "../../vendor/display/BloomNode.js";
 import { lensflare } from "../../vendor/display/LensflareNode.js";
-import { ao } from "../../vendor/display/GTAONode.js";
+import { depthAwareAO as ao } from "./reverseddepth.js";
 
-export function buildPost(renderer, scene, camera, { flare = true, gtao = false, chain: chainSel = "full", makeClouds = null } = {}) {
+export function buildPost(renderer, scene, camera, { flare = false, gtao = false, chain: chainSel = "full", makeClouds = null, rawDepthSelection = false } = {}) {
   const scenePass = pass(scene, camera);
   scenePass.setMRT(mrt({ output, velocity }));
 
@@ -21,17 +21,36 @@ export function buildPost(renderer, scene, camera, { flare = true, gtao = false,
   const depth = scenePass.getTextureNode("depth");
   const vel = scenePass.getTextureNode("velocity");
 
-  // volumetric clouds composite BEFORE TRAA — the temporal pass integrates
-  // the jittered raymarch (free denoise, per MAXFI research)
+  // Volumetric clouds provide their own depth and motion so TRAA follows the
+  // visible billows instead of the terrain behind them. Plain color nodes
+  // remain supported for callers that do not need a separate cloud pass.
   let base = beauty;
+  let temporalDepth = depth, temporalVelocity = vel;
+  let cloudPass = null;
+  let hasClouds = false;
   if (makeClouds) {
     try {
-      const n = makeClouds({ beauty, depth });
-      if (n) base = n;
+      const n = makeClouds({ beauty, depth, velocity: vel });
+      if (n) {
+        if (typeof n.getTextureNode === "function") {
+          const cloudColor = n.getTextureNode();
+          const cloudDepth = n.getTextureNode("depth");
+          const cloudVelocity = n.getTextureNode("velocity");
+          if (!cloudColor || !cloudDepth?.value?.isDepthTexture || !cloudVelocity) {
+            throw new Error("Cloud composition must provide color, velocity, and a depth texture.");
+          }
+          base = cloudColor;
+          temporalDepth = cloudDepth;
+          temporalVelocity = cloudVelocity;
+          cloudPass = n;
+        } else base = n;
+        hasClouds = true;
+      }
     } catch (err) { console.warn("volumetric clouds node failed, billboards stay:", err && err.message); }
   }
 
-  let taa = traa(base, depth, vel, camera);
+  const temporalResolve = makeTemporalResolve(base, temporalDepth, temporalVelocity, camera, { rawDepthSelection });
+  let taa = temporalResolve;
   // GTAO (?ao=1, eyeball-gated): normals reconstructed from depth (null),
   // occlusion multiplied into the lit scene before bloom picks highlights
   let aoPass = null;
@@ -59,6 +78,25 @@ export function buildPost(renderer, scene, camera, { flare = true, gtao = false,
 
   const Pipeline = THREE.RenderPipeline || THREE.PostProcessing; // r185 rename
   const post = new Pipeline(renderer);
-  post.outputNode = chain;
-  return { post, scenePass, taa, bloomPass, flarePass };
+  // Dither in display space, AFTER exposure, ACES, and temporal AA. One
+  // output-code-value of fixed pixel noise breaks up sky/haze banding without
+  // being accumulated away by TRAA or amplified in dark scenes by exposure.
+  post.outputColorTransform = false;
+  post.outputNode = Fn(() => {
+    const display = renderOutput(chain).toVar();
+    const noise = fract(fract(screenCoordinate.x.mul(0.06711056)
+      .add(screenCoordinate.y.mul(0.00583715))).mul(52.9829189)).sub(0.5).div(255);
+    return vec4(display.rgb.add(noise).clamp(0, 1), display.a);
+  })();
+  return {
+    post, scenePass, taa, bloomPass, flarePass, hasClouds, cloudPass,
+    // Return the existing GPU Texture, NEVER its PassTextureNode. Sampling
+    // it after post.render() cannot schedule scene/TRAA a second time.
+    getExposureTexture: () => chainSel === "beauty"
+      ? beauty.value : temporalResolve.getTextureNode().value,
+    invalidateHistory: () => {
+      temporalResolve.invalidateHistory();
+      cloudPass?.invalidateHistory?.();
+    },
+  };
 }

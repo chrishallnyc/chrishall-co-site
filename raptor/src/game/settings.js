@@ -141,6 +141,12 @@ export function applySettings(s, ctx = live) {
     ctx.renderer.setPixelRatio(
       Math.min(window.devicePixelRatio || 1, 2) * effectiveRenderScale(s, ctx.baseTier));
   }
+  // Cloud graph/asset selection is fixed at boot; this callback only changes
+  // the compiled compositor's integration scale and resets temporal history.
+  const effectiveTier = s.tier !== "AUTO" ? s.tier : (ctx.baseTier || "MED");
+  ctx.applyCloudQuality?.(effectiveTier);
+  ctx.applyTerrainQuality?.(effectiveTier);
+  ctx.applyAssetQuality?.();
   if (ctx.audio && ctx.audio.ctx) {
     const a = ctx.audio, t0 = a.ctx.currentTime;
     a.master.gain.setTargetAtTime(0.9 * s.masterVol, t0, 0.02); // 0.9 = shipped headroom

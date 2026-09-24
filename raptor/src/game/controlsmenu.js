@@ -135,18 +135,21 @@ export class ControlsMenu {
 
   _settingsHtml() {
     const s = current();
-    const boot = (window.__RAPTOR && window.__RAPTOR.tier) || null; // boot-resolved tier
-    // honest reload accounting: render scale / pixelRatio applies live (when
-    // bound); shadows/clouds/post only read tierParams at boot -> reload chip
-    // whenever the picked tier resolves differently from the one running now
+    const state = window.__RAPTOR;
+    const boot = state?.tier || null; // effective tier; AUTO uses the live base
+    const assetsKnown = typeof state?.assetReloadRequired === "boolean";
+    // Output/cloud scales apply live; shadow maps, noise assets and the fine
+    // water cascade are selected at boot. Keep their reload requirement visible.
     let reloadNote = "";
     if (boot) {
       if (s.tier === "AUTO") {
         const b = savedBench();
         if (hasManualTier() || !b || b.tier !== boot) reloadNote = "re-benchmarks after reload";
-      } else if (s.tier !== boot) {
-        reloadNote = "shadows/clouds/post after reload";
+      } else if (assetsKnown ? state.assetReloadRequired : s.tier !== boot) {
+        reloadNote = "full detail after reload";
       }
+      if (!reloadNote && assetsKnown && state.assetReloadRequired)
+        reloadNote = "full detail after reload";
     }
     const liveChip = (on) => `<span class="chip${on ? " live" : ""}">${on ? "live" : "stored"}</span>`;
     const tierChips = ["AUTO", ...Object.keys(TIERS)].map((t) => {

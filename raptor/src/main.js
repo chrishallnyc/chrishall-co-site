@@ -1,19 +1,27 @@
+import { installReversedDepthSort } from "./engine/reverseddepth.js";
 // RAPTOR boot: renderer (WebGPU with WebGL2 fallback), sim, input, debug, hooks.
 
 import * as THREE from "three";
-import { uniform, pow, vec3, Fn } from "three/tsl";
+import { installWebGLIndexStateFix } from "./engine/webglindexstate.js";
+import { uniform, pow, vec3, Fn, If, positionWorld } from "three/tsl";
 import { SimCore, determinismProbe, DT } from "./engine/sim.js";
 import { Input } from "./engine/input.js";
 import { GamepadInput } from "./engine/gamepad.js";
-import { detectTier, tierParams, setTier, TIERS, savedBench, saveBench, benchPick, clearBench, hasManualTier } from "./engine/quality.js";
+import { detectTier, isCompatibleBench, deviceTier, bootAssetTier as chooseBootAssetTier, tierParams, setTier, TIERS, savedBench, saveBench, clearBench, hasManualTier } from "./engine/quality.js";
+import { cloudQuality, cloudOptionsFromFlags, qualityProfile, qualityWorkload } from "./engine/cloudquality.js";
+import { oceanFineResolution, terrainSourcePreset, requestedBootAssets, describeBootAssets, assetsNeedReload } from "./engine/bootassets.js";
+import { QualityBenchmark } from "./engine/qualitybench.js";
 import { DebugOverlay } from "./engine/debug.js";
 import { TestWorld } from "./game/testworld.js";
 import { Player } from "./game/player.js";
 import { ControlsMenu } from "./game/controlsmenu.js";
 import * as SETTINGS from "./game/settings.js";
 import { Atmosphere } from "./world/daycycle.js";
+import { surfaceCelestialTransport } from "./world/celestial-surface.js";
 import { Terrain } from "./world/terrain.js";
 import { Water } from "./world/water.js";
+import { PlanetCurvature } from "./world/planetcurvature.js";
+import { PlanetObjectBender, attachRaptorPlanetObjects } from "./world/planetobjects.js";
 import { Clouds, makeCloudShadowNode } from "./world/clouds.js";
 import { HUD } from "./game/hud.js";
 import { FlightFX } from "./game/flightfx.js";
@@ -62,6 +70,9 @@ function freshCanvas(old) {
 }
 
 async function makeRenderer(canvas) {
+  // Float depth keeps distant terrain/cloud intersections precise on WebGPU.
+  // ?reversedepth=0 retains the forward path; WebGL construction stays below.
+  const reversedDepth = new URLSearchParams(location.search).get("reversedepth") !== "0";
   let adapter = null;
   if (navigator.gpu && new URLSearchParams(location.search).get("gl") !== "1") {
     try { adapter = await navigator.gpu.requestAdapter(); } catch (_) { adapter = null; }
@@ -73,6 +84,7 @@ async function makeRenderer(canvas) {
       // adapter actually offers so SwiftShader/low-end never fails init.
       const r = new THREE.WebGPURenderer({
         canvas, antialias: false,
+        reversedDepthBuffer: reversedDepth,
         requiredLimits: {
           maxTextureDimension2D: Math.min(adapter.limits.maxTextureDimension2D, 16384),
           // the 16k albedo upload stages through a 1GB buffer — the default
@@ -81,13 +93,23 @@ async function makeRenderer(canvas) {
         },
       });
       await r.init();
+      if (reversedDepth && !r.backend.isWebGPUBackend) {
+        r.dispose();
+        throw new Error("Reversed scene depth is only supported on WebGPU.");
+      }
+      installReversedDepthSort(r);
       return { renderer: r, backend: "webgpu", canvas };
     } catch (err) {
       console.warn("WebGPU init failed, falling back to WebGL2:", err && err.message);
       canvas = freshCanvas(canvas);
     }
   }
-  const r = new THREE.WebGPURenderer({ canvas, antialias: true, forceWebGL: true });
+  // Log depth avoids distant coast/sea-floor conflicts in WebGL's depth24
+  // buffer. Keep an ordinary-depth comparison and compatibility opt-out.
+  const r = new THREE.WebGPURenderer({
+    canvas, antialias: true, forceWebGL: true,
+    logarithmicDepthBuffer: new URLSearchParams(location.search).get("logdepth") !== "0",
+  });
   await r.init();
   return { renderer: r, backend: "webgl", canvas };
 }
@@ -95,8 +117,19 @@ async function makeRenderer(canvas) {
 async function boot() {
   const canvas = document.getElementById("game");
   const { renderer, backend } = await makeRenderer(canvas);
+  if (backend === "webgl") installWebGLIndexStateFix(renderer);
   state.backend = backend;
-  state.tier = detectTier({ backend });
+  state.depthMode = renderer.reversedDepthBuffer ? "reversed-float32" : renderer.logarithmicDepthBuffer ? "logarithmic" : "forward";
+  const flags = new URLSearchParams(location.search);
+  const cloudOptions = cloudOptionsFromFlags(flags);
+  const bootRenderScale = SETTINGS.current().renderScale;
+  // Select static assets before consulting cached frame timings. Auto's
+  // measured render tier cannot change the source/FFT workload next boot.
+  const autoAssetTier = deviceTier({ backend });
+  const bootAssetTier = chooseBootAssetTier({ backend });
+  state.bootAssetTier = bootAssetTier;
+  state.tier = bootAssetTier; // provisional render settings behind the veil
+  const bootCloudQuality = cloudQuality(state.tier, cloudOptions);
   const params = tierParams(state.tier);
 
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2) * params.renderScale);
@@ -109,22 +142,38 @@ async function boot() {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.5;
 
-  const flags = new URLSearchParams(location.search);
+  // Terrain, water, clouds and aircraft share the same local planet frame.
+  // The flat-map renderer remains available for controlled QA comparisons.
+  const curvature = flags.get("curvature") !== "0" ? new PlanetCurvature() : null;
+  state.curvature = curvature;
   const atmosphere = new Atmosphere(scene, (flags.get("front") || "NELLIS").toUpperCase());
   atmosphere.initIBL(renderer);
   if (flags.get("tod")) atmosphere.setTime(parseFloat(flags.get("tod")));
 
+  // One scene-linear source bundle: these are shared uniform references,
+  // including pre-exposed irradiance/ambient. Probe captures clone values.
+  const sourceUniforms = {
+    uSunDir: atmosphere.sky.uSunDir,
+    uSunI: atmosphere.sky.uSceneIrradiance || uniform(36.0),
+  };
+  for (const key of ["uMoonDir", "uMoonRatio", "uMoonColor", "uExposureGain", "uNightSkyRadiance", "uKeyLightDir"]) {
+    if (atmosphere.sky[key]) sourceUniforms[key] = atmosphere.sky[key];
+  }
+  const celestial = sourceUniforms.uMoonDir ? sourceUniforms : null;
+  const keyLightDir = atmosphere.sky.uKeyLightDir || atmosphere.sky.uSunDir;
+
   // MAXFI A3: Hillaire physical atmosphere — LUT-driven sky march + in-material
-  // aerial perspective replacing FogExp2. WebGPU only; ?atmo=preetham reverts.
+  // aerial perspective. Both node backends support its ordinary texture/loop
+  // path; ?atmo=preetham retains the lightweight analytic fallback.
   let atmoH = null;
-  if (backend === "webgpu" && flags.get("atmo") !== "preetham") {
+  if (flags.get("atmo") !== "preetham") {
     try {
       const H = await import("./world/hillaire.js");
       const luts = await H.loadAtmo("/assets/atmo");
       if (luts) {
-        const uSunI = uniform(36.0);
+        const uSunI = sourceUniforms.uSunI;
         const uCamPos = uniform(new THREE.Vector3(0, 3400, 0));
-        const nodeArgs = { tTex: luts.tTex, msTex: luts.msTex, uSunDir: atmosphere.sky.uSunDir, uCamPos };
+        const nodeArgs = { tTex: luts.tTex, msTex: luts.msTex, ...sourceUniforms, uCamPos };
         // per-front air mass: the LUTs bake a STANDARD atmosphere; Nevada's
         // dry desert air scatters far less (PASS-1 item 2: foreground desert
         // measured B−R +44 — blue wash with zero depth grading). trans^k with
@@ -132,26 +181,46 @@ async function boot() {
         const airK = { NELLIS: 0.42, VALDEZ: 0.8, MARIANAS: 1.0 }[atmosphere.frontName] ?? 1.0;
         const baseTrans = H.aerialTransNode(nodeArgs), baseIns = H.aerialInscatterNode(nodeArgs);
         atmoH = {
-          uCamPos, uSunI,
+          H, luts, sourceUniforms, airK, uCamPos, uSunI,
           aerial: {
             trans: airK === 1.0 ? baseTrans : (wp) => pow(baseTrans(wp), vec3(airK, airK, airK)),
             ins: airK === 1.0 ? baseIns : (wp) => baseIns(wp).mul(airK),
             uSunI,
+            composite: H.aerialCompositeNode(nodeArgs, uSunI, airK),
+            sourceTransport: flags.get("cloudtransport") === "legacy" ? null
+              : { luts, calibrateDay: flags.get("cloudtransport") !== "toa",
+                  relativeOmission: ["strict", "toa"].includes(flags.get("cloudtransport")) ? 0 : .001 },
+            celestial,
           },
         };
-        atmosphere.sky.setHillaire(H.skySkyNode(nodeArgs), uSunI);
-        scene.fog = null; // per-pixel aerial perspective replaces the single-color fog
+        const { makeSkyRadiance } = await import("./world/sky-radiance.js");
+        const sharedSky = makeSkyRadiance({ luts, sourceUniforms, uFrameOrigin: uCamPos,
+          cirrusAtlas: atmosphere.sky.cirrusAtlas, includeSolarDisc: true });
+        atmosphere.sky.setHillaire(H.skySkyNode(nodeArgs), uSunI, sharedSky);
+        // IBL's cube cameras are at the origin; only their ray direction is
+        // used. Both observer and planet frame stay at the actual main view.
+        const iblSky = makeSkyRadiance({ luts, sourceUniforms, uFrameOrigin: uCamPos,
+          cirrusAtlas: atmosphere.sky.cirrusAtlas, includeSolarDisc: false });
+        atmosphere.setIBLSkyRadiance(iblSky, uCamPos);
+        // Terrain/water use physical transport. The WebGL card/aircraft
+        // fallback still needs its inexpensive distance haze.
+        if (backend === "webgpu") scene.fog = null;
         atmosphere.hillaire = true; // exposure palette gets a twilight floor (tuned for Preetham otherwise)
-        atmosphere.setTime(atmosphere.hours); // re-derive with the floor active
+        if (atmosphere.setHillaireLuts) atmosphere.setHillaireLuts(luts);
+        else atmosphere.setTime(atmosphere.hours); // re-derive with the physical path active
       }
     } catch (err) { console.warn("hillaire atmosphere unavailable, Preetham stays:", err && err.message); }
   }
   state.hillaire = !!atmoH;
 
-  // clouds (phase 5a/5b/5c): coverage + shadows on every tier; billboard
-  // field past LOW. atmosphere.sky.uSunDir is passed BY REFERENCE so sky,
-  // clouds, and ground shadows share one sun uniform — zero-copy, no drift.
-  const clouds = new Clouds(atmosphere.frontName, params, atmosphere.sky.uSunDir);
+  // Cloud illumination also needs the night source when the physical
+  // atmosphere is disabled. Identity air preserves that fallback's fog.
+  const cloudAerial = atmoH?.aerial || (celestial ? {
+    trans: () => vec3(1), ins: () => vec3(0), uSunI: sourceUniforms.uSunI, celestial,
+  } : null);
+  // The fallback's directional billows and shadow projector follow the
+  // same dominant Sun/Moon direction; its optional source bundle sets energy.
+  const clouds = new Clouds(atmosphere.frontName, params, keyLightDir, celestial ? atmosphere.sky : null, curvature);
   scene.add(clouds.group);
 
   const sim = new SimCore(1);
@@ -175,12 +244,48 @@ async function boot() {
   if (backend === "webgpu" && flags.get("post") !== "0" && flags.get("vclouds") !== "0") {
     try {
       const VC = await import("./world/volclouds.js");
-      volPre = { VC, noise: VC.makeCloudNoise(1337) };
+      // Choose once, before cloud-shadow materials capture the coverage
+      // threshold. Neither the live benchmark nor menu swaps compiled noise.
+      const noise = await VC.loadCloudNoise({ seed: 1337, resolution: bootCloudQuality.noise,
+        onFallback: ({ from, to, error }) => console.warn(`Cloud noise ${from} → ${to}:`, error.message),
+      });
+      volPre = { VC, noise };
+      state.cloudNoise = { requested: bootCloudQuality.noise, resolution: noise.resolution,
+        source: noise.source, version: noise.version, seed: noise.seed, normalization: noise.normalization,
+        baseN: noise.baseN, detailN: noise.detailN };
     } catch (err) { console.warn("volumetric clouds unavailable, billboards stay:", err && err.message); }
   }
-  const volShadow = (volPre && volPre.VC.makeVolCloudShadowNode && flags.get("cloudshadow") !== "old")
-    ? volPre.VC.makeVolCloudShadowNode({ noise: volPre.noise, front: atmosphere.frontName, uSunDir: atmosphere.sky.uSunDir })
-    : null;
+  // Each source projects the same cloud density along its own direction.
+  // The receiver's planetary horizon is separate from cloud visibility.
+  const makeSourceCloudShadow = (direction) => {
+    if (volPre?.VC.makeVolCloudShadowNode && flags.get("cloudshadow") !== "old") {
+      return volPre.VC.makeVolCloudShadowNode({ noise: volPre.noise,
+        front: atmosphere.frontName, uSunDir: direction, curvature });
+    }
+    return makeCloudShadowNode({ ...clouds.shared, uSunDir: direction }, curvature);
+  };
+  const groundCloudShadow = makeSourceCloudShadow(atmosphere.sky.uSunDir);
+  const moonCloudShadow = makeSourceCloudShadow(atmosphere.sky.uMoonDir);
+  const uMoonAngularRadius = uniform(atmosphere.moonState.angularRadius);
+  sourceUniforms.uMoonAngularRadius = uMoonAngularRadius;
+  const solarTransport = surfaceCelestialTransport({ direction: atmosphere.sky.uSunDir, curvature });
+  const lunarTransport = surfaceCelestialTransport({ direction: atmosphere.sky.uMoonDir,
+    angularRadius: uMoonAngularRadius, curvature, lunarTransmission: true });
+  // Skip coverage sampling for a source hidden by the local planet limb.
+  const sourceVisibility = (projector, transport) => Fn(() => {
+    const transmission = transport(positionWorld).toVar();
+    const visibility = vec3(0).toVar();
+    If(transmission.x.add(transmission.y).add(transmission.z).greaterThan(1e-8), () => {
+      visibility.assign(projector(positionWorld).mul(transmission));
+    });
+    return visibility;
+  })();
+  renderer.shadowMap.enabled = true;
+  atmosphere.sun.castShadow = true;
+  atmosphere.sun.shadow.shadowNode = sourceVisibility(groundCloudShadow, solarTransport);
+  atmosphere.moonLight.castShadow = true;
+  atmosphere.moonLight.shadow.shadowNode = sourceVisibility(moonCloudShadow, lunarTransport);
+  atmosphere.setReceiverCelestialTransport(true);
   const fg = FRONT_GROUND[atmosphere.frontName];
   if (fg && flags.get("noterrain") !== "1") {
     const vs = document.querySelector("#veil .status");
@@ -189,25 +294,36 @@ async function boot() {
       // drape: 16k imagery on webgpu; 4k on the webgl fallback (SwiftShader
       // tops out at 8192); ?drape=0 keeps the procedural ramps for QA
       const drape = flags.get("drape") === "0" ? null : (backend === "webgpu" ? "16k" : "4k");
+      const sourcePreset = terrainSourcePreset(bootAssetTier, flags.get("terrainsource"), atmosphere.frontName, backend);
+      // The complete field loads before ground placement and stays fixed
+      // through later Auto/menu render-quality changes.
+      const sourceManifest = sourcePreset === "16" ? "/assets/terrain/source/valdez-inland-16km.json" : null;
       terrain = await Terrain.load("/assets/terrain/" + fg.asset, atmosphere.frontName,
-        volShadow || makeCloudShadowNode(clouds.shared), { drape, aerial: atmoH?.aerial });
+        groundCloudShadow, { drape, aerial: atmoH?.aerial, curvature, sourceManifest });
       scene.add(terrain.group);
       if (fg.ocean && flags.get("nowater") !== "1") {
+        let fft = null;
         try {
           // MAXFI A4: FFT ocean on webgpu (?ocean=gerstner reverts)
-          let fft = null;
           if (backend === "webgpu" && flags.get("ocean") !== "gerstner") {
             try {
               const { createFFTOcean } = await import("./world/fftocean.js");
-              fft = createFFTOcean(renderer, { front: atmosphere.frontName });
-            } catch (err) { console.warn("fft ocean unavailable, Gerstner stays:", err && err.message); }
+              const fineN = oceanFineResolution(bootAssetTier, flags.get("waterfine"));
+              fft = createFFTOcean(renderer, { front: atmosphere.frontName, motionHistory: !!curvature, fineN });
+              if (fft) fft.update(0); // Compile macro + fine behind the loading veil.
+            } catch (err) {
+              fft?.dispose?.(); fft = null;
+              console.warn("fft ocean unavailable, Gerstner stays:", err && err.message);
+            }
           }
           state.fftOcean = !!fft;
-          if (fft) fft.update(0); // pre-compile the 19 compute pipelines behind the veil
+          state.fineOcean = fft?.fine ? { N: fft.fine.N, tileM: fft.fine.tileM,
+            resolvedVariance: fft.fine.resolvedVariance, tailVariance: fft.fine.tailVariance } : null;
           water = new Water(atmosphere.frontName, terrain, atmoH?.aerial, fft,
-            { cloudShadow: volShadow || makeCloudShadowNode(clouds.shared) });
+            { cloudShadow: groundCloudShadow, curvature });
           scene.add(water.group);
         } catch (err) {
+          fft?.dispose?.();
           console.warn("water unavailable, placeholder sea stays:", err && err.message);
         }
       }
@@ -308,6 +424,19 @@ async function boot() {
   // scene.add is silently dropped by this renderer build; see flightfx.js)
   const flightfx = player ? new FlightFX(scene, { jetGroup: world.jet, parts: world.f22parts }) : null;
 
+  const planetObjects = curvature ? new PlanetObjectBender(curvature) : null;
+  if (planetObjects) attachRaptorPlanetObjects(planetObjects, { world, player, battlefield, bandits });
+  // Boot creates the ordinary aircraft/prop pools up front. Their direct
+  // light needs the same local planetary visibility as terrain and water;
+  // unlit sky/FX do not participate. No shadow map or frame traversal is added.
+  scene.traverse(object => {
+    if (!object.isMesh || object === water?.mesh || object === water?.far) return;
+    const materials = Array.isArray(object.material) ? object.material : [object.material];
+    if (materials.some(material => material?.isMeshStandardMaterial || material?.isMeshPhysicalMaterial
+      || material?.isMeshLambertMaterial || material?.isMeshPhongMaterial || material?.isMeshToonMaterial
+      || material?.lights === true)) object.receiveShadow = true;
+  });
+
   const input = new Input(window);
   const gamepad = new GamepadInput();
   const controls = new ControlsMenu(input);
@@ -328,6 +457,7 @@ async function boot() {
     const aimV = new THREE.Vector3();
     const pipV = new THREE.Vector3();
     const pipQ = new THREE.Quaternion();
+    const seekerPosition = new Float64Array(3);
     hud.arcadeLayer = (ctx) => {
       const w = ctx.canvas.width / (window.devicePixelRatio || 1);
       const h = ctx.canvas.height / (window.devicePixelRatio || 1);
@@ -344,7 +474,7 @@ async function boot() {
       const drop = 4.9 * tof * tof;
       // ENU -> three (east, up, north)
       pipV.set(st[0] + pipV.x * CONV, st[2] + pipV.z * CONV - drop, st[1] + pipV.y * CONV);
-      const pv = pipV.project(camera);
+      const pv = curvature ? curvature.project(pipV, camera, pipV) : pipV.project(camera);
       if (pv.z < 1 && pv.z > -1) {
         const px = (pv.x * 0.5 + 0.5) * w, py = (1 - (pv.y * 0.5 + 0.5)) * h;
         if (px > 8 && py > 8 && px < w - 8 && py < h - 8) {
@@ -383,10 +513,17 @@ async function boot() {
 
       // seeker box on the IR target: dashed while acquiring, solid when locked
       const MS = player.missiles;
-      if (battlefield && MS.lockTarget >= 0) {
-        const to = MS.lockTarget * 5;
-        pipV.set(battlefield.state[to], battlefield.state[to + 2], battlefield.state[to + 1]);
-        const tv = pipV.project(camera);
+      if (MS.lockTarget >= 0 && (directory ? directory.alive(MS.lockTarget) : battlefield?.alive(MS.lockTarget))) {
+        // Unified seeker IDs include air targets at 4096 + slot. Resolve
+        // ENU through the same directory as the seeker before planet projection.
+        if (directory) {
+          directory.pos(MS.lockTarget, seekerPosition);
+          pipV.set(seekerPosition[0], seekerPosition[2], seekerPosition[1]);
+        } else {
+          const to = MS.lockTarget * 5;
+          pipV.set(battlefield.state[to], battlefield.state[to + 2], battlefield.state[to + 1]);
+        }
+        const tv = curvature ? curvature.project(pipV, camera, pipV) : pipV.project(camera);
         if (tv.z < 1 && tv.z > -1) {
           const tx = (tv.x * 0.5 + 0.5) * w, ty = (1 - (tv.y * 0.5 + 0.5)) * h;
           ctx.save();
@@ -421,7 +558,8 @@ async function boot() {
             if (close || (bs >= 1 && bs <= 3)) seenB[i] = 1;
             else continue;
           }
-          _bv.set(bx, bz, by).project(camera); // ENU -> three -> NDC
+          _bv.set(bx, bz, by); // ENU -> flat map -> rendered planet -> NDC
+          if (curvature) curvature.project(_bv, camera, _bv); else _bv.project(camera);
           if (_bv.z > 1) continue; // behind the camera plane
           const sx = (_bv.x * 0.5 + 0.5) * w, sy = (-_bv.y * 0.5 + 0.5) * h;
           if (sx < -30 || sx > w + 30 || sy < -30 || sy > h + 30) continue;
@@ -635,23 +773,114 @@ async function boot() {
     }
     try {
       const { buildPost } = await import("./engine/post.js");
+      let CloudPass = null;
+      if (vol) {
+        try {
+          if (bootCloudQuality.mode === "adaptive") {
+            ({ AdaptiveCloudPass: CloudPass } = await import("./world/adaptivecloudpass.js"));
+          } else ({ CloudPass } = await import("./world/cloudpass.js"));
+        }
+        catch (err) { console.warn("cloud composition unavailable, billboards stay:", err && err.message); }
+      }
       post = buildPost(renderer, scene, camera, {
-        flare: flags.get("flare") !== "0",
+        // Synthetic lens ghosts duplicate the Moon's disc/terminator.
+        // Keep the natural bloom; the stylized flare remains opt-in.
+        flare: flags.get("flare") === "1",
         gtao: flags.get("ao") === "1", // default off until eyeball-passed
+        rawDepthSelection: renderer.reversedDepthBuffer && flags.get("rawtaa") !== "0",
         chain: flags.get("chain") || "full",
-        makeClouds: vol ? ({ beauty, depth }) => vol.VC.volCloudsNode({
-          beauty, depth, camera,
+        makeClouds: CloudPass ? ({ beauty, depth, velocity }) => new CloudPass({
+          beauty, depth, velocity, camera,
+          ...(bootCloudQuality.mode === "adaptive" ? { cloudScale: bootCloudQuality.scale } : {}),
           uSunDir: atmosphere.sky.uSunDir, uCamPos: vol.uCamPos, uTime: vol.uTime,
-          front: atmosphere.frontName, noise: vol.noise, aerial: atmoH?.aerial ?? null,
+          front: atmosphere.frontName, noise: vol.noise, aerial: cloudAerial, curvature,
         }) : null,
       });
     } catch (err) { console.warn("post chain unavailable, plain render:", err && err.message); }
     // billboards hide when the volumetrics own the sky; their shadow field
     // stays live (clouds.update keeps feeding the shared shadow uniforms)
-    if (vol && post) clouds.group.visible = false;
-    state.volClouds = !!(vol && post);
+    if (post?.hasClouds) clouds.group.visible = false;
+    state.volClouds = !!post?.hasClouds;
   }
   state.post = !!post;
+  // Loaders have settled: profile the actual field/textures/FFT, including
+  // coherent fallbacks, then resolve cached render quality for that workload.
+  const assetContext = { backend, front: atmosphere.frontName, flags,
+    hasTerrain: !!terrain, hasOcean: !!fg?.ocean && flags.get("nowater") !== "1",
+    sourceEnabled: !!terrain && "sourceField" in terrain };
+  const bootAssetRequest = requestedBootAssets(bootAssetTier, assetContext);
+  state.bootAssetRequest = bootAssetRequest;
+  state.bootAssets = describeBootAssets({ bootTier: bootAssetTier, terrain, water,
+    fftOcean: state.fftOcean, fineOcean: state.fineOcean, cloudNoise: state.cloudNoise,
+    cloudMode: post?.cloudPass?.mode || "billboard" });
+  const benchProfile = qualityProfile({ backend, mode: cloudOptions.mode,
+    renderScale: bootRenderScale, pixelRatio: window.devicePixelRatio,
+    scale: cloudOptions.scale, noise: cloudOptions.noise,
+    front: atmosphere.frontName, workload: qualityWorkload(flags), assets: state.bootAssets,
+    width: window.innerWidth, height: window.innerHeight });
+  state.tier = detectTier({ backend, profile: benchProfile });
+  const liveQuality = SETTINGS.getLiveCtx();
+  if (liveQuality) {
+    liveQuality.baseTier = state.tier;
+    liveQuality.applyTerrainQuality = tier => terrain?.setDetailTier(tier);
+    liveQuality.applyAssetQuality = () => {
+      const selected = SETTINGS.current().tier;
+      const desiredTier = selected === "AUTO" ? autoAssetTier : selected;
+      state.assetReloadRequired = assetsNeedReload(bootAssetRequest,
+        requestedBootAssets(desiredTier, assetContext));
+    };
+    liveQuality.applyCloudQuality = (tier) => {
+      state.tier = tier; // effective live quality; bootAssetTier stays fixed
+      const next = cloudQuality(tier, cloudOptions);
+      post?.cloudPass?.setCloudScale?.(next.scale);
+      state.cloudRendering = { mode: post?.cloudPass?.mode || "billboard",
+        scale: post?.cloudPass?.cloudScale ?? null,
+        requestedNoise: next.noise, actualNoise: volPre?.noise?.resolution ?? null,
+        noiseReloadRequired: !!volPre && next.noise !== volPre.noise.resolution };
+    };
+    SETTINGS.applySettings(SETTINGS.current(), liveQuality);
+  }
+
+  // A water-specific sea-level source replaces the old extra emissive mirror.
+  // The existing scene IBL still serves terrain/aircraft; water overrides it.
+  let waterSkyEnvironment = null;
+  if (water && atmoH && flags.get("waterenv") !== "0") {
+    try {
+      const { WaterSkyEnvironment } = await import("./world/sky-environment.js");
+      waterSkyEnvironment = new WaterSkyEnvironment({
+        renderer, water, luts: atmoH.luts, sourceUniforms: atmoH.sourceUniforms,
+        cirrusAtlas: atmosphere.sky.cirrusAtlas,
+        size: flags.get("waterenvsize") === "64" ? 64 : 128,
+        makeCloudNode: vol && post?.hasClouds ? ({ sourceUniforms, ...probe }) => {
+          const { H, luts, airK } = atmoH;
+          const args = { tTex: luts.tTex, msTex: luts.msTex, ...sourceUniforms, uCamPos: probe.uCamPos };
+          const trans = H.aerialTransNode(args), ins = H.aerialInscatterNode(args);
+          // The six-face capture has a frozen planet origin. It must not
+          // inherit the moving main-camera frame while faces are rendered.
+          const probeCurvature = curvature ? new PlanetCurvature({ radius: curvature.radius }) : null;
+          if (probeCurvature) {
+            probeCurvature.origin = probe.uFrameOrigin.xz;
+            probeCurvature.previousOrigin = probeCurvature.origin;
+          }
+          return vol.VC.volCloudsNode({ ...probe, uSunDir: sourceUniforms.uSunDir,
+            front: atmosphere.frontName, noise: vol.noise, curvature: probeCurvature,
+            aerial: {
+              trans: airK === 1 ? trans : wp => pow(trans(wp), vec3(airK)),
+              ins: airK === 1 ? ins : wp => ins(wp).mul(airK),
+              uSunI: sourceUniforms.uSunI,
+              sourceTransport: flags.get("cloudtransport") === "legacy" ? null
+                : { luts, calibrateDay: flags.get("cloudtransport") !== "toa",
+                  relativeOmission: ["strict", "toa"].includes(flags.get("cloudtransport")) ? 0 : .001 },
+              celestial: sourceUniforms.uMoonDir ? sourceUniforms : null,
+            },
+          });
+        } : null,
+      });
+      state.waterReflection = waterSkyEnvironment.stats;
+    } catch (err) {
+      console.warn("Water environment unavailable; existing scene IBL remains:", err && err.message);
+    }
+  }
 
   document.getElementById("controlsLink")?.addEventListener("click", (e) => { e.preventDefault(); controls.show(); });
 
@@ -659,6 +888,8 @@ async function boot() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    post?.invalidateHistory?.();
+    meter?.reset();
   });
 
   // public hooks (QA + future phases)
@@ -675,10 +906,20 @@ async function boot() {
 
   Object.assign(state, {
     sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud, player, battlefield, match, script, bandits, directory,
+    cloudPass: post?.cloudPass ?? null,
     kc: () => killCam,
     cloudImmersion: () => clouds.immersion,
-    setTimeOfDay: (h) => atmosphere.setTime(h),
-    setFront: (f) => atmosphere.setFront(String(f).toUpperCase()),
+    setTimeOfDay: (h) => {
+      atmosphere.setTime(h);
+      waterSkyEnvironment?.invalidate("time-cut");
+      post?.invalidateHistory?.();
+      meter?.reset();
+    },
+    setFront: (f) => {
+      atmosphere.setFront(String(f).toUpperCase());
+      post?.invalidateHistory?.();
+      meter?.reset();
+    },
     hash: () => sim.stateHash(),
     determinismProbe,
     setSeed: (s) => sim.reset(s),
@@ -691,42 +932,31 @@ async function boot() {
   });
 
   // measured auto-bench: first run only — sample the live scene, pick the tier
-  let benchSamples = (!hasManualTier() && !savedBench()) ? [] : null;
+  const priorBench = savedBench();
+  const benchViewport = [window.innerWidth, window.innerHeight, window.devicePixelRatio].join("/");
+  let qualityBenchmark = (!hasManualTier() && !flags.has("cloudscale") && !flags.has("cloudnoise")
+    && !isCompatibleBench(priorBench, { backend, profile: benchProfile }))
+    ? new QualityBenchmark({ tier: state.tier, backend }) : null;
   let frameNo = 0;
 
-  // PHASE 12: auto-exposure metering (closes the golden-triptych
-  // LIVE-WITH-IT). Every 12 frames, blit the finished canvas into a 16x16
-  // 2D canvas, take log-average luminance, and drive an exposure multiplier
-  // toward mid-gray with eye-like adaptation (fast to brighten into shadow,
-  // slower to recover from glare). Multiplies the PALETTE exposure — night
-  // stays night via clamps. WebGPU+post only; ?autoexp=0 reverts.
+  // Read a tiny GPU downsample of the existing temporal image. The readback
+  // promise resolves independently; the frame loop never waits on the GPU.
   let meter = null;
   if (post && flags.get("autoexp") !== "0") {
-    const mc = document.createElement("canvas");
-    mc.width = 16; mc.height = 16;
-    meter = { ctx: mc.getContext("2d", { willReadFrequently: true }), mult: 1, frame: 0 };
+    try {
+      const { AsyncExposureMeter } = await import("./engine/exposure-meter.js");
+      meter = new AsyncExposureMeter(renderer, post.getExposureTexture);
+    } catch (err) { console.warn("Exposure sampler unavailable; palette exposure remains:", err && err.message); }
   }
   state.autoExposure = !!meter;
-  state.meter = meter; // QA: adaptation multiplier visibility
-  function meterStep(dtSec) {
-    meter.frame++;
-    if (meter.frame % 12 !== 0) return;
-    try {
-      meter.ctx.drawImage(renderer.domElement, 0, 0, 16, 16);
-      const px = meter.ctx.getImageData(0, 0, 16, 16).data;
-      let logSum = 0;
-      for (let i = 0; i < px.length; i += 4) {
-        const l = (0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2]) / 255;
-        logSum += Math.log(Math.max(l, 1e-3));
-      }
-      const avg = Math.exp(logSum / 256);
-      const target = 0.42;
-      const desired = Math.min(Math.max(meter.mult * Math.pow(target / Math.max(avg, 1e-3), 0.6), 0.55), 2.3);
-      // adaptation: ~1s brightening, ~3s dimming (12-frame cadence)
-      const k = desired > meter.mult ? Math.min(dtSec * 12 / 1.0, 1) : Math.min(dtSec * 12 / 3.0, 1);
-      meter.mult += (desired - meter.mult) * k;
-    } catch (_) { /* canvas readback denied — palette exposure carries on */ }
-  }
+  state.meter = meter?.state || null;
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      post?.invalidateHistory?.();
+      meter?.reset();
+    }
+  });
+  window.addEventListener("pagehide", event => { if (!event.persisted) meter?.dispose(); });
 
   let last = performance.now();
   let firstFrame = true;
@@ -737,20 +967,28 @@ async function boot() {
     const dtMs = Math.min(now - last, 250);
     last = now;
     frameNo++;
-    if (benchSamples && frameNo > 20) {
-      benchSamples.push(dtMs);
-      if (benchSamples.length >= 80) {
-        const sorted = [...benchSamples].sort((a, b) => a - b);
-        const median = sorted[sorted.length >> 1];
-        const tier = benchPick(median, state.backend);
-        const rec = { ms: +median.toFixed(2), backend: state.backend, tier };
-        saveBench(rec);
-        state.bench = rec;
-        if (tier !== state.tier) {
-          state.tier = tier;
-          renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2) * SETTINGS.effectiveRenderScale(SETTINGS.current(), tier));
+    if (qualityBenchmark) {
+      const settings = SETTINGS.current();
+      const result = qualityBenchmark.observe(dtMs, {
+        hidden: document.hidden, manual: hasManualTier() || settings.tier !== "AUTO",
+        settling: !!terrain?.stats.detailSettling,
+        changed: settings.renderScale !== bootRenderScale
+          || [window.innerWidth, window.innerHeight, window.devicePixelRatio].join("/") !== benchViewport,
+      });
+      if (result?.cancelled) qualityBenchmark = null;
+      else if (result) {
+        state.tier = result.tier;
+        const liveSettings = SETTINGS.getLiveCtx();
+        if (liveSettings) {
+          liveSettings.baseTier = result.tier;
+          SETTINGS.applySettings(settings, liveSettings);
         }
-        benchSamples = null;
+        if (result.complete) {
+          const rec = { ms: +result.median.toFixed(2), backend, tier: result.tier,
+            profile: benchProfile, assets: state.bootAssets, cloudMode: bootCloudQuality.mode,
+            cloudNoise: volPre?.noise?.resolution ?? null, measurements: result.measurements };
+          saveBench(rec); state.bench = rec; qualityBenchmark = null;
+        }
       }
     }
     gamepad.update();
@@ -812,24 +1050,42 @@ async function boot() {
     }
     battlefield?.render(dtMs / 1000, camera);
     bandits?.render(alpha, camera);
-    terrain?.update(camera);
+    const planetFrame = curvature?.beginFrame(camera);
+    if (planetFrame?.resetHistory) post?.invalidateHistory?.();
+    planetObjects?.update();
+    terrain?.update(camera, dtMs / 1000);
     waterClock += dtMs / 1000;
     water?.update(camera, waterClock);
     cloudClock += dtMs / 1000;
     clouds.update(camera, cloudClock);
-    if (vol) { vol.uTime.value = cloudClock; vol.VC.updateCamera?.(camera); }
+    if (vol) {
+      vol.uTime.value = cloudClock;
+      vol.uCamPos.value.copy(camera.position);
+      vol.VC.updateCamera?.(camera);
+    }
     const hudEl = hud.canvas || hud.svg;
     if (hudEl && flags.get("hud") !== "0" && flags.get("chrome") !== "0") {
       if (!hudEl.style.transition) hudEl.style.transition = "opacity 0.3s";
       hudEl.style.opacity = killCam ? "0" : "1"; // death cinematic flies clean
     }
     hud.update(player ? player.hudState() : testworldHudState(world, alpha));
-    atmosphere.update(camera);
     if (atmoH) atmoH.uCamPos.value.copy(camera.position);
+    atmosphere.update(camera); // IBL sees the current observer on its first capture
+    uMoonAngularRadius.value = atmosphere.moonState.angularRadius;
+    if (waterSkyEnvironment) {
+      if (waterSkyEnvironment.front < 0) {
+        try { waterSkyEnvironment.warmUp(camera, cloudClock); }
+        catch (err) {
+          console.warn("Water environment warmup failed; existing scene IBL remains:", err && err.message);
+          waterSkyEnvironment.dispose(); waterSkyEnvironment = null;
+        }
+      } else waterSkyEnvironment.update(camera, cloudClock);
+    }
     renderer.toneMappingExposure = atmosphere.exposure * (meter ? meter.mult : 1);
     if (post) post.post.render();
     else renderer.render(scene, camera);
-    if (meter) meterStep(dtMs / 1000);
+    curvature?.endFrame();
+    meter?.update({ target: atmosphere.meterTarget ?? .42 });
     dbg.frame(dtMs, { backend: state.backend, tier: state.tier, sim });
     input.consumeFrame();
     if (firstFrame) {

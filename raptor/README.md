@@ -14,4 +14,7 @@ served static.
   War Thunder's default binds, quality tiers, pools, debug overlay (`?debug=1`).
 - `src/game/` — game systems (currently the phase-1 proving world).
 
+See [GRAPHICS.md](GRAPHICS.md) for rendering contracts, asset sources, quality
+paths, and reproducible visual comparisons.
+
 Deploys via the `raptor` Vercel project (rootDirectory `raptor`) on push to main.

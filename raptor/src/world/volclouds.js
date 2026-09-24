@@ -1,89 +1,17 @@
-// Volumetric clouds — MAXFI B3 rung 1: a full-res single-pass raymarch that
-// rides the post chain between the scene pass and TRAA (the jittered march is
-// exactly the noise TRAA's history filter integrates away). Supersedes the
-// billboard field visually; clouds.js stays as the fallback tier. Ground
-// cloud shadows on the volumetric path come from makeVolCloudShadowNode
-// below — the SAME coverage stage the march breathes, projected sun-ward
-// onto the terrain (closes the journaled billboard-shadow mismatch).
-//
-// House pattern (hillaire.js, shipped 3x): ONE density recipe, TWO emitters —
-// cpuDensity is the float64 oracle the battery gates, tslDensity emits the
-// SAME steps as nodes. The step comments are numbered 1..8 in BOTH emitters;
-// change one side, change both.
-//
-// March architecture (module contract):
-//   - full-res composite node: beauty/depth in, beauty-with-clouds-over out.
-//     traa() wraps its input in convertToTexture(), so this node renders once
-//     into TRAA's input RT — no private pass needed. Insert in post.js as
-//     `taa = traa(cloudsNode, depth, vel, camera)` instead of beauty.
-//   - slab march: the view ray is clipped to the [base, top] altitude slab,
-//     capped by scene depth (geometry closer than slab entry skips the march
-//     entirely), by 58km of entry distance (the aerial haze owns the sky past
-//     that), and by maxLen of in-slab travel; sky rays 40-64 steps, geometry-
-//     bound rays 48-96 (PASS-2 #1: T(jit) comb variance at fog/terrain
-//     interfaces scales ~linearly with dt — measured Tstd 0.140 -> 0.069 at
-//     dt/2 — and those rays are short/early-Broken so finer steps are cheap
-//     exactly where the stipple lived), trapezoid extinction, early Break
-//     under T < 0.015. Density is staged (coverage field -> base shape ->
-//     detail erosion, each behind an If) so empty air costs 1-2 texture
-//     fetches per step, not 4.
-//   - measured (Dawn/Metal, native 2560x1440, depth at far so EVERY pixel
-//     marches the full slab — the pathological worst case, aerial wired):
-//     NELLIS in-layer 1.5ms, NELLIS below-layer 1.4ms, VALDEZ over-deck
-//     1.9ms, MARIANAS tower slab 2.3ms. In-game frames sit under these
-//     (terrain occlusion + slab misses skip the march per-pixel). PASS-2
-//     step policy re-measured whole-frame: valdez-214 in-slab golden and
-//     marianas-12 near-cumulus both hold 120fps vsync (8.3ms rAF) at
-//     2880x1800 with the full post chain.
-//   - jitter: interleaved-gradient-noise over screenCoordinate + golden-ratio
-//     uTime scroll offsets the march start per pixel per frame. Render-side
-//     only — the sim never reads clouds.
-//   - lighting: 5-tap Beer-Lambert shadow march toward uSunDir, evaluated
-//     ONCE PER RAY at a jitter-stable anchor (PASS-1 #1: a per-step shadow
-//     rides the jittered comb, and with per-step OD >> 1 TRAA's history
-//     clamp turns it into a 2x2 stipple — see the notes in volCloudsNode).
-//     Cumulus fronts anchor at the interpolated cloud-entry gate crossing
-//     and tap the real shape6 column; stratiform fronts anchor mid-slab and
-//     tap a mean-field column with per-tap coverage/relief fields
-//     (FRONTS.shadow3D selects). Over-estimates are compensated by
-//     SUN_SHADOW_K. The anchored shadow BLENDS in (PASS-2 #1/#6,
-//     SUN_BLEND_*: the anchored/unanchored CLIFF printed a ruler-straight
-//     iso-dir.y line across the valdez-214 sky and a per-frame anchor
-//     lottery = stipple wedges on grazing cumulus faces); the blend weight
-//     is assigned per ANCHOR from fixed look-ahead gate probes, and a march
-//     that starts in-gate (camera in cloud) anchors at a jitter-free depth
-//     (PASS-3 #3: the per-step running-max blend and the synthetic step-0
-//     "crossing" were the in-cloud fabric weave + golden lit-face lattice).
-//     The od -> light transfer is multi-scatter Beer-Lambert
-//     (MS_* octaves, deep octaves isotropic) — never binary, warm floor in
-//     shadowed cores and interiors (PASS-1 #5: a single exp() printed
-//     dead-straight stripes + octagonal cell shadows at grazing sun).
-//     Dual-lobe Henyey-Greenstein (g +0.6 forward / -0.25 back), sky-ish
-//     ambient shaded by height in layer, warmed toward gray-white when the
-//     camera itself sits in cloud. Direct sun gates out just below the
-//     horizon and ambient follows the sky down — clouds go dark before the
-//     sky does.
-//   - aerial perspective: accumulated cloud light is pushed through the
-//     Hillaire trans/inscatter pair at the transmittance-weighted mean
-//     scatter distance, so distant clouds sit IN the haze instead of popping
-//     against the horizon (closes the journaled billboard gap).
-//   - compositing: out = beauty*Tvis + cloudLight (cloudLight already
-//     carries the per-step (1-stepT) energy weights). Tvis is T through the
-//     WHITEOUT_T remap — deep-extinction pixels drop the background
-//     entirely (PASS-3 #3), the removed share re-scattered into cloudLight.
-//
-// Camera API: the node never reads the camera inside the node graph — the
-// projection-inverse and world matrices live in mat4 uniforms seeded at
-// construction. updateCamera(camera) (module export) refreshes the matrices
-// of every node built by this module; call it once per frame (main.js:
-// `vol.VC.updateCamera?.(camera)`).
+import { cloudCelestialLight, cloudCelestialSources } from "./night-cloud-lighting.js";
+// Full-resolution volumetric clouds with adaptive extinction and distributed
+// illumination. The CPU oracle and TSL builders share the density recipe;
+// CloudPass reuses one integration for color, motion, and physical depth.
+// Explicit function layouts share density/light helpers in both backends.
 
 import * as THREE from "three";
 import {
-  Fn, If, Loop, Break, uniform, texture3D, uv, vec3, vec4, float, int,
-  exp, pow, dot, normalize, clamp, max, min, abs, mix, smoothstep, select,
+  Fn, If, Loop, Break, Continue, uniform, texture, texture3D, uv, vec3, vec4, float, int,
+  exp, pow, sqrt, dot, normalize, clamp, max, min, abs, mix, smoothstep, select,
   fract, length, and, getViewPosition, screenCoordinate,
 } from "three/tsl";
+import { createCloudGeometry } from "./cloudgeometry.js";
+import { cloudPointAtmosphere } from "./cloud-point-lighting.js";
 
 // ---------------------------------------------------------------------------
 // Per-front layer presets — single source of truth for BOTH emitters.
@@ -94,17 +22,12 @@ import {
 // floor (makeVolCloudShadowNode; values mirror clouds.js CLOUD_CLIMATES).
 // ---------------------------------------------------------------------------
 const FRONTS = {
-  // shadow3D (render-side only, sun-shadow taps at the per-ray anchor):
-  // true = real shape6 taps — cumulus fronts, whose 3D form lives in the
-  // base-shape noise (a coverage-only column is height-independent and
-  // reads ~0 through scattered cells); false = smooth E[shape6] taps —
-  // stratiform fronts, whose form IS coverage x gradient and whose grazing
-  // fog-terrain interfaces would pick base-shape texel noise back up.
+  // Cumulus profiles use taller, more varied crowns than stratocumulus.
   NELLIS: {   // scattered fair-weather cumulus, high desert bases
-    coverage: 0.30, base: 2700, top: 4300,
-    covRepeat: 26000, baseRepeat: 8000, detailRepeat: 1100,
-    covSharp: 2.6, baseRound: 0.10, topSoft: 0.55, erode: 0.28,
-    sigma: 0.035, maxLen: 22000, shadow3D: true, shadowFloor: 0.45,
+    coverage: 0.30, base: 2700, top: 4700,
+    covRepeat: 18000, baseRepeat: 4200, detailRepeat: 850,
+    covSharp: 2.6, baseRound: 0.10, topSoft: 0.55, erode: 0.36,
+    sigma: 0.035, maxLen: 22000, shadow3D: true, shadowFloor: 0.45, coreSupport: 0.74,
   },
   VALDEZ: {   // broken stratocumulus deck: thin, flat, wide cells
     coverage: 0.55, base: 1100, top: 2400,
@@ -114,315 +37,43 @@ const FRONTS = {
   },
   MARIANAS: { // trade cumulus deck + isolated towers to 5200 (tower mask ch.)
     coverage: 0.38, base: 550, top: 1900,
-    towerTop: 5200, towerRepeat: 42000, towerLo: 0.72, towerHi: 0.90, towerCov: 0.45,
-    covRepeat: 24000, baseRepeat: 6500, detailRepeat: 900,
+    towerTop: 5200, towerRepeat: 28000, towerLo: 0.72, towerHi: 0.90, towerCov: 0.45,
+    covRepeat: 18000, baseRepeat: 4200, detailRepeat: 750,
     // PASS-2 #6: baseRound 0.08 -> 0.13 + baseRelief 0.30 — the trade deck's
     // underside printed as a knife-straight 550m plane (base fade was 108m
     // and the shared 0.16 relief too shallow for a deck this thin)
     covSharp: 2.2, baseRound: 0.13, topSoft: 0.60, erode: 0.35, baseRelief: 0.30,
-    sigma: 0.04, maxLen: 22000, shadow3D: true, shadowFloor: 0.50,
+    sigma: 0.04, maxLen: 22000, shadow3D: true, shadowFloor: 0.50, coreSupport: 0.74,
   },
 };
 
-// shared recipe constants — texel-center-aligned slices so the CPU trilinear
-// and the GPU sampler read the identical texel plane
-const BASE_N = 96, DETAIL_N = 32;
-const COV_SLICE = 48.5 / BASE_N;     // base.r on this v-plane = the 2D weather field
-const TOWER_SLICE = 16.5 / DETAIL_N; // detail.a on this v-plane = the 2D tower mask
-// March step sizing: nSteps = clamp(len / STEP_TARGET, MIN, MAX). PASS-2 #1:
-// the residual stipple is the raw comb variance where a ray ends on GEOMETRY
-// through partial cloud (fog/terrain interface: T mid-range against a
-// contrasty bg) — T(jit) spread scales ~linearly with dt (measured 0.140 ->
-// 0.069 Tstd at dt/2). Geometry-bound rays therefore march finer (dt ~90m,
-// up to 96 steps — their early-Break or short len bounds real cost) while
-// sky rays keep the 40-64 economy (opaque collapse hides comb noise there).
-const STEPS_MIN = 40, STEPS_MAX = 64, STEP_TARGET = 110;      // sky rays (m)
-const STEPS_GEO_MIN = 48, STEPS_GEO_MAX = 96, STEP_GEO = 90;  // geometry-bound rays
-const T_MIN = 0.015;                 // early-out transmittance
-const SUN_TAPS = [40, 100, 220, 460, 950]; // shadow-march distances (m)
-// stratiform mean-field taps are 1 fetch each — afford a denser ladder.
-// 5 coarse taps of a compact coverage cell PRINT AS POLYGONS: each tap's
-// boundary crossing contributes one straight edge scaled by its (huge)
-// quadrature weight — the valdez-213 octagons/pentagons at grazing sun.
-const SUN_TAPS_STRAT = [30, 70, 130, 220, 350, 520, 730, 980];
-const ANCHOR_GATE = 0.25;            // coverage*grad level whose crossing anchors the
-                                     // per-ray sun-shadow march (inside the cell mass)
-const SUN_SHADOW_K = 0.8;            // cheap density skips erosion -> overestimates OD
-const ALBEDO = 0.97;                 // single-scatter albedo folded into the sun term
-const ENTRY_MAX = 58000;             // slab entries past this are pure haze
-// Multi-scatter Beer-Lambert octaves (Wrenninge/Hillaire): tSun = sum of
-// a_i*exp(-od*sigmaK*k_i), each octave's phase blended toward isotropic.
-// PASS-1 #5 (grazing sun): a single exp(-od*sigmaK) is BINARY over the deck —
-// 950m of taps saturates at mean density ~0.026, and the stratiform anchor
-// height is a pure function of dir.y, so the light/dark cliff prints as
-// dead-straight horizontal stripes + octagonal cell shadows (measured on
-// valdez-213: both vanish with tSun held flat). The octaves spread the
-// falloff over decades of od — never binary — and give shadowed cores and
-// cloud interiors a warm multiple-scattering floor instead of ambient-blue.
-const MS_A = [0.57, 0.28, 0.15];     // octave weights (sum 1)
-const MS_K = [1.0, 0.22, 0.05];      // per-octave extinction scale
-const MS_PMIX = [0.0, 0.7, 1.0];     // per-octave phase -> isotropic blend
-                                     // (deepest octave FULLY isotropic: its
-                                     // residual back-lobe fought the interior
-                                     // sun-direction gradient, measured)
+// Fixed physical weather planes: densifying the volume does not move them.
+// Quantile sampling below interpolates the identical plane as both samplers.
+import { CLOUD_COV_SLICE as COV_SLICE, CLOUD_TOWER_SLICE as TOWER_SLICE, CLOUD_JITTER_N as JITTER_N } from "./cloudnoiserecipe.js";
+export { makeCloudNoise, loadCloudNoise } from "./cloudnoise.js";
+// Distance-based adaptive view integration; sampling is independent of scene depth.
+const MARCH_MAX = 384;
+const T_MIN = 0.015;
+const ALBEDO = 0.97;
+const ENTRY_MAX = 58000;
+const MS_A = [0.57, 0.28, 0.15];
+const MS_K = [1.0, 0.22, 0.05];
+const MS_PMIX = [0.0, 0.7, 1.0];
 const ISO_PHASE = 1 / (4 * Math.PI);
-// Underside relief: the local cloud base rides the coverage-plane fetch's .b
-// channel (same texel read — zero extra fetches), lifting the base by up to
-// baseRelief of the layer span (P.baseRelief, else this default). Gives deck
-// undersides the soft irregular texture item 5 asks for; never LOWERS the
-// base (slab gates stay exact).
-// SHAPING constant shared with the CPU oracle — change BOTH emitters.
 const BASE_RELIEF = 0.16;
-// PASS-2 #1/#6 anchor continuity: the per-ray sun shadow used to switch from
-// "never anchored" (full msSunPhase(0)) to the anchored column value at the
-// ANCHOR_GATE crossing — a hard cliff in ray space. Rays that barely graze a
-// cell (gate max ~= the threshold) sat one jitter phase away from anchoring
-// at all, so the cliff printed as (a) a dead-straight iso-dir.y line across
-// the valdez-214 sky (the gate-max = 0.25 circle of the deck) and (b) the
-// per-frame anchor lottery = stipple wedges on grazing cumulus faces. The
-// shadow BLENDS in over this window — smoothstep of a smooth field:
-// LAW-compliant.
-// PASS-3 #3: the blend weight is no longer the RUNNING gate max — that made
-// the per-step blend value at the energy-collapse step swing by dt*gate' per
-// frame (a per-step high-contrast factor once golden sun makes the
-// unshadowed/anchored radiance ratio large: the nellis-188 lit-face
-// lattice). The weight
-// is now assigned ONCE per anchor from look-ahead gate probes at FIXED
-// offsets along the ray from the jitter-stable anchor (BLEND_PROBES, ~2-6
-// field fetches per cloud entry): same "how deep does this ray go" semantic,
-// smooth across pixels, jitter-independent — and it gates anchor NOISE too
-// (grazing crossings, whose interpolated anchors are the least stable, get
-// the least anchored shadow).
-const SUN_BLEND_LO = 0.20, SUN_BLEND_HI = 0.55;
-const BLEND_PROBES = [0, 300, 800];  // look-ahead distances from the anchor (m)
-// PASS-3 #3 WHITEOUT: with the camera inside dense cloud the early-Break
-// floor (T_MIN) still lets ~1.5% of the background through, and T's comb
-// variance modulates it per frame — high-contrast terrain detail woven
-// through the whiteout. Below this view-transmittance the background is
-// fully extinguished: Tvis = max((T - WHITEOUT_T)/(1 - WHITEOUT_T), 0), a
-// monotone per-ray remap (slope 1/(1-a) ~= 1.06: no comb-variance
-// amplification), with the removed bg share re-scattered into the cloud
-// radiance (acc *= (1-Tvis)/(1-T) — exact when S is per-ray, which PASS-3 #3
-// makes true). T = 1 (clear pixels) maps to exactly 1: no-cloud frames are
-// bit-identical.
+// Remove the last background leakage in dense cloud while preserving the
+// integrated mean source radiance.
 const WHITEOUT_T = 0.06;
-// PASS-2 #6 bound margins: entry/cap fades are circles around the camera
-// (world-axis edges). One detail fetch at a fixed point along the ray
-// wobbles both fade windows per ray — smooth in dir, jitter-independent.
-const BOUND_NOISE_T = 6000, BOUND_NOISE_REPEAT = 8.0; // fetch dist (m), x detailRepeat
-// PASS-2 #6 near-field skin: cumulus interiors closer than ~5km were
-// airbrushed gradients (T collapses sub-step; tSun/ambient are per-ray
-// smooth). One detail fetch at the jitter-stable entry anchor paints
-// 60-250m surface structure back on (r/g/b channels at SKIN_REPEAT x
-// detailRepeat), fading out by SKIN_FAR (beyond that the march can't
-// resolve it and it would just re-seed stipple).
-const SKIN_NEAR = 1400, SKIN_FAR = 5200, SKIN_AMP = 2.2, SKIN_REPEAT = 0.55;
-const ENTRY_FADE0 = 0.7;             // entry fade start (x ENTRY_MAX): fade, not clip
-const CAP_FADE0 = 0.85;              // in-slab travel fade start (x maxLen)
+const BOUND_NOISE_T = 6000, BOUND_NOISE_REPEAT = 8.0;
+const CAP_FADE0 = 0.85;
+const LIGHT_SUN_ENDS = [24,60,114,195,317,499,772,1182,1797,2720,4104,6180];
+const LIGHT_SKY_ENDS = [100,600,3600];
 
 // ---------------------------------------------------------------------------
 // Seeded noise bake. Local mulberry32 — NOT Math.random, NOT the sim's RNG
 // (render-side asset, but byte-identical across runs so QA can hash it).
 // ---------------------------------------------------------------------------
-function mulberry32(seed) {
-  let s = seed >>> 0;
-  return function () {
-    s = (s + 0x6d2b79f5) >>> 0;
-    let t = s;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-// tileable inverted Worley: F^3 feature points (one per cell), 27-neighbor
-// scan with wrapped cells; value = saturate(1 - dist_in_cells), peak 1 at
-// feature points
-function worleyField(N, F, rnd) {
-  const pts = new Float64Array(F * F * F * 3);
-  for (let i = 0; i < pts.length; i++) pts[i] = rnd();
-  const out = new Float32Array(N * N * N);
-  let k = 0;
-  for (let z = 0; z < N; z++) {
-    const pz = ((z + 0.5) / N) * F, cz = Math.floor(pz);
-    for (let y = 0; y < N; y++) {
-      const py = ((y + 0.5) / N) * F, cy = Math.floor(py);
-      for (let x = 0; x < N; x++) {
-        const px = ((x + 0.5) / N) * F, cx = Math.floor(px);
-        let m = 1e9;
-        for (let dz = -1; dz <= 1; dz++) {
-          const az = cz + dz, wz = az < 0 ? az + F : az >= F ? az - F : az;
-          for (let dy = -1; dy <= 1; dy++) {
-            const ay = cy + dy, wy = ay < 0 ? ay + F : ay >= F ? ay - F : ay;
-            for (let dx = -1; dx <= 1; dx++) {
-              const ax = cx + dx, wx = ax < 0 ? ax + F : ax >= F ? ax - F : ax;
-              const bi = ((wz * F + wy) * F + wx) * 3;
-              const ex = ax + pts[bi] - px, ey = ay + pts[bi + 1] - py, ez = az + pts[bi + 2] - pz;
-              const d2 = ex * ex + ey * ey + ez * ez;
-              if (d2 < m) m = d2;
-            }
-          }
-        }
-        const v = 1 - Math.sqrt(m);
-        out[k++] = v < 0 ? 0 : v;
-      }
-    }
-  }
-  return out;
-}
-
-// tileable gradient (Perlin) noise: wrapped lattice, seeded unit gradients
-function perlinGrads(F, rnd) {
-  const g = new Float64Array(F * F * F * 3);
-  for (let i = 0; i < g.length; i += 3) {
-    let x, y, z, l;
-    do { x = rnd() * 2 - 1; y = rnd() * 2 - 1; z = rnd() * 2 - 1; l = x * x + y * y + z * z; }
-    while (l < 1e-4 || l > 1);
-    l = 1 / Math.sqrt(l);
-    g[i] = x * l; g[i + 1] = y * l; g[i + 2] = z * l;
-  }
-  return g;
-}
-
-function perlinFbmField(N, F0, octaves, rnd) {
-  const tables = [];
-  for (let o = 0; o < octaves; o++) tables.push(perlinGrads(F0 << o, rnd));
-  const fade = (t) => t * t * t * (t * (t * 6 - 15) + 10);
-  const out = new Float32Array(N * N * N);
-  let norm = 0;
-  for (let o = 0; o < octaves; o++) norm += 1 / (1 << o);
-  let k = 0;
-  for (let z = 0; z < N; z++) {
-    for (let y = 0; y < N; y++) {
-      for (let x = 0; x < N; x++) {
-        let sum = 0;
-        for (let o = 0; o < octaves; o++) {
-          const F = F0 << o, g = tables[o];
-          const px = ((x + 0.5) / N) * F, py = ((y + 0.5) / N) * F, pz = ((z + 0.5) / N) * F;
-          const x0 = Math.floor(px), y0 = Math.floor(py), z0 = Math.floor(pz);
-          const fx = px - x0, fy = py - y0, fz = pz - z0;
-          const sx = fade(fx), sy = fade(fy), sz = fade(fz);
-          let acc = 0;
-          for (let c = 0; c < 8; c++) {
-            const ix = c & 1, iy = (c >> 1) & 1, iz = (c >> 2) & 1;
-            const wx = (x0 + ix) % F, wy = (y0 + iy) % F, wz = (z0 + iz) % F;
-            const gi = ((wz * F + wy) * F + wx) * 3;
-            const d = g[gi] * (fx - ix) + g[gi + 1] * (fy - iy) + g[gi + 2] * (fz - iz);
-            const w = (ix ? sx : 1 - sx) * (iy ? sy : 1 - sy) * (iz ? sz : 1 - sz);
-            acc += d * w;
-          }
-          sum += acc / (1 << o);
-        }
-        out[k++] = 0.5 + (sum / norm) * 0.75; // ~[0,1], centered
-      }
-    }
-  }
-  return out;
-}
-
-// 2D tileable inverted Worley for the tower mask (constant across w slices)
-function worley2D(N, F, rnd) {
-  const pts = new Float64Array(F * F * 2);
-  for (let i = 0; i < pts.length; i++) pts[i] = rnd();
-  const out = new Float32Array(N * N);
-  let k = 0;
-  for (let y = 0; y < N; y++) {
-    const py = ((y + 0.5) / N) * F, cy = Math.floor(py);
-    for (let x = 0; x < N; x++) {
-      const px = ((x + 0.5) / N) * F, cx = Math.floor(px);
-      let m = 1e9;
-      for (let dy = -1; dy <= 1; dy++) {
-        const ay = cy + dy, wy = ay < 0 ? ay + F : ay >= F ? ay - F : ay;
-        for (let dx = -1; dx <= 1; dx++) {
-          const ax = cx + dx, wx = ax < 0 ? ax + F : ax >= F ? ax - F : ax;
-          const bi = (wy * F + wx) * 2;
-          const ex = ax + pts[bi] - px, ey = ay + pts[bi + 1] - py;
-          const d2 = ex * ex + ey * ey;
-          if (d2 < m) m = d2;
-        }
-      }
-      const v = 1 - Math.sqrt(m);
-      out[k++] = v < 0 ? 0 : v;
-    }
-  }
-  return out;
-}
-
-function make3DTexture(bytes, N) {
-  const tex = new THREE.Data3DTexture(bytes, N, N, N);
-  tex.format = THREE.RGBAFormat;
-  tex.type = THREE.UnsignedByteType;
-  tex.minFilter = THREE.LinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  tex.wrapS = tex.wrapT = tex.wrapR = THREE.RepeatWrapping;
-  tex.generateMipmaps = false; // far-field aliasing is TRAA's job (v1)
-  tex.needsUpdate = true;
-  return tex;
-}
-
-const B = (v) => {
-  const b = Math.round(v * 255);
-  return b < 0 ? 0 : b > 255 ? 255 : b;
-};
-
-// Base 96^3 RGBA8: R = low-freq Perlin-Worley (Perlin fbm dilated by the G
-// worley, then min/max stretched to full range), G/B/A = inverted Worley at
-// 2/4/8x the base frequency. Detail 32^3 RGBA8: R/G/B = inverted Worley at
-// 2/4/8 cells (erosion fbm), A = the 2D TOWER MASK (constant across w).
-// One PRNG stream, fixed draw order -> byte-identical for a given seed.
-export function makeCloudNoise(seed = 1337) {
-  const rnd = mulberry32(seed);
-  const N = BASE_N;
-
-  const wG = worleyField(N, 8, rnd);
-  const wB = worleyField(N, 16, rnd);
-  const wA = worleyField(N, 32, rnd);
-  const pn = perlinFbmField(N, 4, 3, rnd);
-
-  const baseData = new Uint8Array(N * N * N * 4);
-  // R = remap(perlin, worley-1, 1) — the classic Perlin-Worley dilation
-  const r = new Float32Array(N * N * N);
-  let lo = Infinity, hi = -Infinity;
-  for (let i = 0; i < r.length; i++) {
-    const w = wG[i];
-    let v = (pn[i] - (w - 1)) / (2 - w);
-    v = v < 0 ? 0 : v > 1 ? 1 : v;
-    r[i] = v;
-    if (v < lo) lo = v;
-    if (v > hi) hi = v;
-  }
-  const stretch = hi > lo ? 1 / (hi - lo) : 1; // full-range R (QA gates std dev)
-  for (let i = 0; i < r.length; i++) {
-    baseData[i * 4] = B((r[i] - lo) * stretch);
-    baseData[i * 4 + 1] = B(wG[i]);
-    baseData[i * 4 + 2] = B(wB[i]);
-    baseData[i * 4 + 3] = B(wA[i]);
-  }
-
-  const D = DETAIL_N;
-  const dR = worleyField(D, 2, rnd);
-  const dG = worleyField(D, 4, rnd);
-  const dB = worleyField(D, 8, rnd);
-  const tw = worley2D(D, 2, rnd);
-  const detailData = new Uint8Array(D * D * D * 4);
-  for (let z = 0; z < D; z++) {
-    for (let y = 0; y < D; y++) {
-      for (let x = 0; x < D; x++) {
-        const i = (z * D + y) * D + x;
-        detailData[i * 4] = B(dR[i]);
-        detailData[i * 4 + 1] = B(dG[i]);
-        detailData[i * 4 + 2] = B(dB[i]);
-        detailData[i * 4 + 3] = B(tw[z * D + x]); // tower mask over (u,w) plane
-      }
-    }
-  }
-
-  return {
-    baseTex: make3DTexture(baseData, N),
-    detailTex: make3DTexture(detailData, D),
-    baseData, detailData, baseN: N, detailN: D,
-  };
-}
+// Shared with the offline asset baker in cloudnoiserecipe.js.
 
 // ---------------------------------------------------------------------------
 // CPU sampling — mirrors GPU LinearFilter + RepeatWrapping exactly: texel
@@ -454,10 +105,19 @@ function tri4(data, N, u, v, w, out) {
 // emitters (baked into the TSL graph at build).
 function covThreshold(noise, coverage) {
   if (!noise._covSorted) {
-    const N = noise.baseN, j = Math.round(COV_SLICE * N - 0.5);
+    const N = noise.baseN, fy = COV_SLICE * N - 0.5;
+    const j0 = Math.floor(fy), ty = fy - j0;
+    const y0 = ((j0 % N) + N) % N, y1 = (y0 + 1) % N;
     const row = new Float32Array(N * N);
+    // At 128^3 the physical weather slice lands exactly on a texel plane;
+    // at 256^3 it lies halfway between two. Quantiles must sample that same
+    // interpolated plane as CPU tri4 and the GPU, never round to either side.
     for (let z = 0; z < N; z++) {
-      for (let x = 0; x < N; x++) row[z * N + x] = noise.baseData[((z * N + j) * N + x) * 4] / 255;
+      for (let x = 0; x < N; x++) {
+        const a = noise.baseData[((z * N + y0) * N + x) * 4];
+        const b = noise.baseData[((z * N + y1) * N + x) * 4];
+        row[z * N + x] = (a * (1 - ty) + b * ty) / 255;
+      }
     }
     noise._covSorted = row.sort();
   }
@@ -466,6 +126,7 @@ function covThreshold(noise, coverage) {
 }
 
 const sat = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
+const smoothUnit = (x) => { const t = sat(x); return t * t * (3 - 2 * t); };
 
 // coverage stage (steps 1-3), the CPU twin of tslDensityBuilders' field():
 // ONE implementation shared by cpuDensity and cpuCoverage so the oracle and
@@ -477,16 +138,29 @@ function cpuCoverageStage(noise, P, covQ, x, z, s4) {
   tri4(noise.baseData, noise.baseN, x / P.covRepeat, COV_SLICE, z / P.covRepeat, s4);
   const baseL = P.base + s4[2] * (P.baseRelief ?? BASE_RELIEF) * (P.top - P.base);
   // 2. quantile remap: 0 at the coverage boundary, sharpened toward 1
-  let covAmt = sat(((s4[0] - covQ) / Math.max(1 - covQ, 1e-4)) * P.covSharp);
+  const weatherStrength = sat((s4[0] - covQ) / Math.max(1 - covQ, 1e-4));
+  let covAmt = sat(weatherStrength * P.covSharp);
+  let growth = weatherStrength;
   // 3. towers (MARIANAS): detail.a on the TOWER_SLICE plane raises the local
   //    top toward towerTop and forces coverage in the core
-  let topL = P.top;
+  // A weather cell has a rolling crown, not a shared horizontal ceiling.
+  // Both channels are already in the weather fetch. Stay within the slab.
+  const crown = s4[1] * 0.65 + s4[3] * 0.35;
+  let topL = P.top - (1 - crown) * (P.top - P.base) * (P.shadow3D ? 0.38 : 0.16);
   if (P.towerTop) {
     tri4(noise.detailData, noise.detailN, x / P.towerRepeat, TOWER_SLICE, z / P.towerRepeat, s4);
     const tw = sat((s4[3] - P.towerLo) / (P.towerHi - P.towerLo));
-    topL = P.top + (P.towerTop - P.top) * tw;
+    topL += (P.towerTop - topL) * tw;
     covAmt = sat(covAmt + tw * P.towerCov);
+    growth = Math.max(growth, tw);
   }
+  // Weak edges of a weather cell form shallow cloud; its rising core can
+  // reach the full crown. This tapers the side profile without changing the
+  // coverage footprint or adding another noise sample.
+  // Keep the unsaturated weather strength: covAmt reaches 1 well before
+  // the cell center, so using it for growth would flatten the whole core.
+  const shallow = P.shadow3D ? 0.50 : 0.72;
+  topL = baseL + (topL - baseL) * (shallow + (1 - shallow) * Math.sqrt(growth));
   return { covAmt, topL, baseL };
 }
 
@@ -515,13 +189,24 @@ export function cpuDensity(noise, front, x, y, z) {
   //    zero is preserved), so undersides get 875-1750m lumps instead of a slab
   const hf = (y - baseL) / (topL - baseL);
   if (hf <= 0 || hf >= 1) return 0;
-  const grad = sat(hf / P.baseRound) * (1 - sat((hf - P.topSoft) / (1 - P.topSoft)));
-  // 5. base shape: Perlin-Worley eroded by the Worley fbm
+  const grad = smoothUnit(hf / P.baseRound) * (1 - smoothUnit((hf - P.topSoft) / (1 - P.topSoft)));
+  // 5. base shape: broad weather mass plus positively weighted inverted
+  // Worley lobes. Inverted Worley peaks are billow centers; subtracting them
+  // in a second remap suppressed the lobes and left extruded weather slabs.
   tri4(noise.baseData, noise.baseN, x / P.baseRepeat, y / P.baseRepeat, z / P.baseRepeat, s4);
   const wfbm = s4[1] * 0.625 + s4[2] * 0.25 + s4[3] * 0.125;
-  const shape = sat((s4[0] - (wfbm - 1)) / (2 - wfbm));
+  const rawShape = Math.max(s4[0] * 0.35 + wfbm * 1.8 - 0.40, 0);
+  // A smooth shoulder approaches 1 without clipping the brightest 6.6%
+  // of billow peaks into shared plateaus. Low and middle densities retain
+  // their contrast; that contrast is the actual three-dimensional shape.
+  const shoulder = Math.max(rawShape - 0.80, 0);
+  const shape = rawShape - shoulder * shoulder / (shoulder + 0.20);
   // 6. coverage remap (higher coverage lowers the threshold), softened by covAmt
-  let d = sat((shape * grad - (1 - covAmt)) / Math.max(covAmt, 1e-4)) * covAmt;
+  // Even the wettest weather core retains a three-dimensional boundary.
+  // Letting its support reach 1 fills every low-frequency valley, leaving
+  // only the height envelope to define a broad, almost level roof.
+  const support = covAmt * (P.coreSupport ?? 1);
+  let d = sat((shape * grad - (1 - support)) / Math.max(support, 1e-4)) * covAmt;
   if (d <= 0) return 0;
   // 7. detail erosion: wispy at the base, billowy at the top. Erosion height
   //    uses the BASE layer span (not the tower-raised span) — both emitters.
@@ -553,24 +238,32 @@ function tslDensityBuilders(noise, P, covQ) {
       vec3(p.x.div(P.covRepeat), COV_SLICE, p.z.div(P.covRepeat)));
     const baseL = float(P.base).add(c4.b.mul((P.baseRelief ?? BASE_RELIEF) * (P.top - P.base)));
     // 2. quantile remap
-    const covAmt = clamp(c4.r.sub(covQ).div(invCovQ).mul(P.covSharp), 0.0, 1.0).toVar();
+    const weatherStrength = clamp(c4.r.sub(covQ).div(invCovQ), 0.0, 1.0).toVar();
+    const covAmt = clamp(weatherStrength.mul(P.covSharp), 0.0, 1.0).toVar();
+    const growth = weatherStrength.toVar();
     // 3. towers
-    const topL = float(P.top).toVar();
+    const crown = c4.g.mul(0.65).add(c4.a.mul(0.35));
+    const topL = float(P.top).sub(crown.oneMinus()
+      .mul((P.top - P.base) * (P.shadow3D ? 0.38 : 0.16))).toVar();
     if (P.towerTop) {
       const tw = clamp(texture3D(noise.detailTex,
         vec3(p.x.div(P.towerRepeat), TOWER_SLICE, p.z.div(P.towerRepeat))).a
         .sub(P.towerLo).div(P.towerHi - P.towerLo), 0.0, 1.0);
-      topL.assign(mix(float(P.top), float(P.towerTop), tw));
+      topL.assign(mix(topL, float(P.towerTop), tw));
       covAmt.assign(clamp(covAmt.add(tw.mul(P.towerCov)), 0.0, 1.0));
+      growth.assign(max(growth, tw));
     }
+    const shallow = P.shadow3D ? 0.50 : 0.72;
+    topL.assign(baseL.add(topL.sub(baseL)
+      .mul(sqrt(growth).mul(1 - shallow).add(shallow))));
     return vec3(covAmt, topL, baseL);
-  });
+  }).setLayout({ name: "cloudDensityField", type: "vec3", inputs: [{ name: "p", type: "vec3" }] });
 
   // 4. height gradient — round base, anvil-less soft top (ALU only)
   const gradAt = (y, topL, baseL) => {
     const hf = y.sub(baseL).div(topL.sub(baseL));
-    return clamp(hf.div(P.baseRound), 0.0, 1.0)
-      .mul(clamp(hf.sub(P.topSoft).div(1 - P.topSoft).oneMinus(), 0.0, 1.0));
+    return smoothstep(0.0, P.baseRound, hf)
+      .mul(smoothstep(P.topSoft, 1.0, hf).oneMinus());
   };
 
   // steps 5-6 -> pre-erosion density
@@ -578,11 +271,16 @@ function tslDensityBuilders(noise, P, covQ) {
     // 5. base shape
     const b = texture3D(noise.baseTex, p.div(P.baseRepeat));
     const wfbm = b.g.mul(0.625).add(b.b.mul(0.25)).add(b.a.mul(0.125));
-    const shape = clamp(b.r.sub(wfbm.sub(1.0)).div(float(2.0).sub(wfbm)), 0.0, 1.0);
+    const rawShape = max(b.r.mul(0.35).add(wfbm.mul(1.8)).sub(0.40), 0.0).toVar();
+    const shoulder = max(rawShape.sub(0.80), 0.0).toVar();
+    const shape = rawShape.sub(shoulder.mul(shoulder).div(shoulder.add(0.20)));
     // 6. coverage remap
-    return clamp(shape.mul(grad).sub(covAmt.oneMinus()).div(max(covAmt, 1e-4)), 0.0, 1.0)
+    const support = covAmt.mul(P.coreSupport ?? 1);
+    return clamp(shape.mul(grad).sub(support.oneMinus()).div(max(support, 1e-4)), 0.0, 1.0)
       .mul(covAmt);
-  });
+  }).setLayout({ name: "cloudDensityShape", type: "float", inputs: [
+    { name: "p", type: "vec3" }, { name: "covAmt", type: "float" }, { name: "grad", type: "float" },
+  ] });
 
   // steps 7-8 -> final density
   const erode8 = Fn(([p, d]) => {
@@ -593,15 +291,17 @@ function tslDensityBuilders(noise, P, covQ) {
     const e = mix(dfbm, dfbm.oneMinus(), clamp(hfE.mul(5.0), 0.0, 1.0)).mul(P.erode);
     // 8. final density
     return clamp(d.sub(e).div(e.oneMinus()), 0.0, 1.0);
-  });
+  }).setLayout({ name: "cloudDensityErode", type: "float", inputs: [
+    { name: "p", type: "vec3" }, { name: "d", type: "float" },
+  ] });
 
   return { field, gradAt, shape6, erode8 };
 }
 
 // ---------------------------------------------------------------------------
 // Ground cloud-shadow projector — the volumetric twin of clouds.js
-// makeCloudShadowNode (same call shape: hand the returned fn to a terrain
-// colorNode as `c = c.mul(cloudShadow(wp))`; range [shadowFloor..1]).
+// makeCloudShadowNode (bind the returned visibility to the direct light's
+// shadow node; range [shadowFloor..1]).
 // Projects from the ground point up the sun ray to the slab's mid-altitude
 // and samples the SAME GPU coverage plane the march's field() stage samples
 // (base.r on COV_SLICE at covRepeat) with the same quantile threshold +
@@ -612,34 +312,65 @@ function tslDensityBuilders(noise, P, covQ) {
 // loops, no If-staging: a pure smooth function of wp, jitter/TRAA-
 // independent by construction (VOLUMETRIC LAW).
 // ---------------------------------------------------------------------------
-export function makeVolCloudShadowNode({ noise, front, uSunDir }) {
+export function makeVolCloudShadowNode({ noise, front, uSunDir, curvature = null }) {
   const P = FRONTS[front] || FRONTS.NELLIS;
   const covQ = covThreshold(noise, P.coverage);
   const invCovQ = Math.max(1 - covQ, 1e-4);       // same constant field() bakes
   const midAlt = (P.base + P.top) / 2;            // main-deck casting plane
   const towerMid = P.towerTop ? (P.base + P.towerTop) / 2 : 0;
   const floor = P.shadowFloor ?? 0.55;
-  return function volCloudShadow(wp) {
+  const geometry = curvature ? createCloudGeometry(curvature) : null;
+  return function volCloudShadow(renderWp) {
+    const wp = geometry ? geometry.toMap(renderWp) : renderWp;
     const sun = normalize(uSunDir);
     const sy = max(sun.y, 0.08); // low-sun ray-length clamp (billboard contract)
     // project up the sun ray to the deck's mid-altitude; max(,0) keeps
     // terrain poking above the deck from projecting backwards
-    const t = max(float(midAlt).sub(wp.y), 0.0).div(sy);
-    const hit = wp.xz.add(sun.xz.mul(t));
+    let hit;
+    if (geometry) {
+      // Keep the established low-Sun slope clamp, normalized for sphere roots.
+      const direction = normalize(vec3(sun.x, sy, sun.z));
+      const roots = geometry.roots(renderWp, direction, midAlt);
+      const t = select(wp.y.lessThan(midAlt).and(roots.z.greaterThan(0)), max(roots.y, 0), 0);
+      hit = renderWp.xz.add(direction.xz.mul(t));
+    } else {
+      const t = max(float(midAlt).sub(wp.y), 0.0).div(sy);
+      hit = wp.xz.add(sun.xz.mul(t));
+    }
     // steps 1-2 of the march's coverage stage (field()), verbatim
-    const cov = texture3D(noise.baseTex,
-      vec3(hit.x.div(P.covRepeat), COV_SLICE, hit.y.div(P.covRepeat))).r;
-    let covAmt = clamp(cov.sub(covQ).div(invCovQ).mul(P.covSharp), 0.0, 1.0);
+    const weather = texture3D(noise.baseTex,
+      vec3(hit.x.div(P.covRepeat), COV_SLICE, hit.y.div(P.covRepeat)));
+    const growth = clamp(weather.r.sub(covQ).div(invCovQ), 0.0, 1.0);
+    const deckBase = float(P.base).add(weather.b.mul((P.baseRelief ?? BASE_RELIEF) * (P.top - P.base)));
+    const crown = weather.g.mul(0.65).add(weather.a.mul(0.35));
+    const envelopeTop = float(P.top).sub(crown.oneMinus().mul((P.top - P.base) * (P.shadow3D ? 0.38 : 0.16)));
+    const shallow = P.shadow3D ? 0.50 : 0.72;
+    const deckTop = deckBase.add(envelopeTop.sub(deckBase).mul(sqrt(growth).mul(1 - shallow).add(shallow)));
+    // The inexpensive weather-column approximation only counts cloud above
+    // the receiver. In particular, an exposed mountain cannot be shadowed
+    // by a lower deck merely because its XZ coordinate lies under coverage.
+    const deckRemaining = clamp(deckTop.sub(wp.y).div(max(deckTop.sub(deckBase), 1)), 0, 1);
+    let covAmt = clamp(growth.mul(P.covSharp), 0.0, 1.0).mul(deckRemaining);
     if (P.towerTop) {
       // step 3: MARIANAS towers are a separate additive coverage term in
       // field() — one extra tap, projected at the TOWER column's own
       // mid-altitude so the dominant casters shadow where they stand
-      const tT = max(float(towerMid).sub(wp.y), 0.0).div(sy);
-      const hitT = wp.xz.add(sun.xz.mul(tT));
+      let hitT;
+      if (geometry) {
+        const direction = normalize(vec3(sun.x, sy, sun.z));
+        const roots = geometry.roots(renderWp, direction, towerMid);
+        const tT = select(wp.y.lessThan(towerMid).and(roots.z.greaterThan(0)), max(roots.y, 0), 0);
+        hitT = renderWp.xz.add(direction.xz.mul(tT));
+      } else {
+        const tT = max(float(towerMid).sub(wp.y), 0.0).div(sy);
+        hitT = wp.xz.add(sun.xz.mul(tT));
+      }
       const tw = clamp(texture3D(noise.detailTex,
         vec3(hitT.x.div(P.towerRepeat), TOWER_SLICE, hitT.y.div(P.towerRepeat))).a
         .sub(P.towerLo).div(P.towerHi - P.towerLo), 0.0, 1.0);
-      covAmt = clamp(covAmt.add(tw.mul(P.towerCov)), 0.0, 1.0);
+      const towerTop = mix(float(P.top), float(P.towerTop), tw);
+      const towerRemaining = clamp(towerTop.sub(wp.y).div(max(towerTop.sub(P.base), 1)), 0, 1);
+      covAmt = clamp(covAmt.add(tw.mul(P.towerCov).mul(towerRemaining)), 0.0, 1.0);
     }
     const dayGate = smoothstep(0.03, 0.12, sun.y); // shadows die past sunset
     return mix(float(1.0), float(floor), covAmt.mul(dayGate));
@@ -669,11 +400,147 @@ export function updateCamera(camera) {
 // ins is unit-sun, scaled by uSunI here exactly like terrain/water do).
 // Returns vec4: rgb = beauty with clouds composited over it, a = 1.
 // ---------------------------------------------------------------------------
-export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, front, noise, aerial }) {
+
+// Every light ray samples the same final density as the view ray. Staging
+// avoids shape/detail fetches in empty weather or outside the layer slab.
+function makeSegmentLighting(P, density, topAll, geometry = null, dualSource = false, relativeOmission = .001) {
+  const lightDensity = Fn(([renderP]) => {
+    const p = geometry ? geometry.toMap(renderP).toVar('cloudLightMapPoint') : renderP;
+    // The column clips every interval to the cloud slab before sampling.
+    // Only the weather/shape/detail gates remain inside this shared helper.
+    const value = float(0.0).toVar();
+    const f = density.field(p).toVar();
+    const grad = density.gradAt(p.y, f.y, f.z).toVar();
+    If(f.x.mul(grad).greaterThan(1e-3), () => {
+      const shape = density.shape6(p, f.x, grad).toVar();
+      If(shape.greaterThan(0.002), () => {
+        value.assign(density.erode8(p, shape));
+      });
+    });
+    return value;
+  }).setLayout({ name: 'cloudLightDensity', type: 'float', inputs: [{ name: 'p', type: 'vec3' }] });
+
+  // Growing intervals are gentler than the earlier doubling ladder. Clip
+  // the final interval at the real slab exit, so a midpoint outside the slab
+  // cannot erase the remaining in-cloud part of that interval.
+  const makeColumn = (name, ends) => Fn(([p, direction]) => {
+    const column = float(0.0).toVar();
+    let slabDistance;
+    if (geometry) {
+      const interval = geometry.shell(p, direction, P.base, topAll).toVar();
+      slabDistance = select(interval.x.lessThan(ends[ends.length - 1]),
+        interval.y.clamp(0, ends[ends.length - 1]), 0.0).toVar();
+    } else {
+      const upward = direction.y.greaterThanEqual(0.0);
+      const safeY = select(upward, max(direction.y, 1e-5), min(direction.y, -1e-5));
+      slabDistance = select(upward, float(topAll).sub(p.y), float(P.base).sub(p.y))
+        .div(safeY).clamp(0, ends[ends.length - 1]).toVar();
+    }
+    let start = 0;
+    for (const end of ends) {
+      const intervalStart = start;
+      let active = slabDistance.greaterThan(intervalStart);
+      // All three scattering orders are negligible only at optical depth
+      // 160: the least-attenuated order is then exp(-8). Checking sooner
+      // would add a serial dependency while its conservative bound proves
+      // an early exit impossible. Most fronts need no such branch at all.
+      if (start * P.sigma >= 160) active = active.and(column.mul(P.sigma).lessThan(160));
+      If(active, () => {
+        const finish = min(slabDistance, end).toVar();
+        column.addAssign(lightDensity(p.add(direction.mul(finish.add(intervalStart).mul(0.5))))
+          .mul(finish.sub(intervalStart)));
+      });
+      start = end;
+    }
+    return column.mul(P.sigma);
+  }).setLayout({ name, type: 'float', inputs: [
+    { name: 'p', type: 'vec3' }, { name: 'direction', type: 'vec3' },
+  ] });
+  const sunColumn = makeColumn('cloudSunColumn', LIGHT_SUN_ENDS);
+  const skyColumn = makeColumn('cloudSkyColumn', LIGHT_SKY_ENDS);
+  const skyDirections = [[0.7453559924999299,2/3,0],[-0.7453559924999299,2/3,0]];
+  const diffuseTransfer = (tau) => {
+    let sum = float(0.0);
+    for (let j = 0; j < MS_A.length; j++) {
+      sum = sum.add(exp(tau.mul(-MS_K[j])).mul(MS_A[j]));
+    }
+    return sum;
+  };
+
+  if (dualSource) return Fn(([p, sunDirection, solarPhase, solarColor, moonDirection, lunarPhase, lunarColor, skyColor]) => {
+    const sky = float(0).toVar();
+    for (const direction of skyDirections) {
+      sky.addAssign(diffuseTransfer(skyColumn(p, vec3(...direction))).div(skyDirections.length));
+    }
+    const diffuse = skyColor.mul(sky).toVar();
+    const direct = vec3(0).toVar();
+    // exp(-k*tau) <= 1 for every nonnegative density column. The zero-column
+    // response is therefore an upper bound on each RGB source contribution.
+    // Skip only if ALL channels fit within the allowed fraction of the
+    // actual retained diffuse RGB. Zero tolerance is the strict reference.
+    const sourceColumn = (direction, phase, color) => {
+      let transferBound = float(0);
+      for (let j = 0; j < MS_A.length; j++) {
+        transferBound = transferBound.add(mix(phase, float(ISO_PHASE), MS_PMIX[j]).mul(MS_A[j]));
+      }
+      const upper = color.mul(transferBound).toVar();
+      const limit = diffuse.mul(relativeOmission).toVar();
+      const significant = upper.x.greaterThan(limit.x).or(upper.y.greaterThan(limit.y)).or(upper.z.greaterThan(limit.z));
+      If(max(max(color.x, color.y), color.z).greaterThan(0).and(significant), () => {
+        const tau = sunColumn(p, direction).toVar();
+        const transfer = float(0).toVar();
+        for (let j = 0; j < MS_A.length; j++) {
+          transfer.addAssign(exp(tau.mul(-MS_K[j]))
+            .mul(mix(phase, float(ISO_PHASE), MS_PMIX[j])).mul(MS_A[j]));
+        }
+        direct.addAssign(color.mul(transfer));
+      });
+    };
+    sourceColumn(sunDirection, solarPhase, solarColor);
+    sourceColumn(moonDirection, lunarPhase, lunarColor);
+    return direct.add(diffuse);
+  }).setLayout({ name: 'cloudSegmentRadiance', type: 'vec3', inputs: [
+    { name: 'p', type: 'vec3' }, { name: 'sunDirection', type: 'vec3' },
+    { name: 'solarPhase', type: 'float' }, { name: 'solarColor', type: 'vec3' },
+    { name: 'moonDirection', type: 'vec3' }, { name: 'lunarPhase', type: 'float' },
+    { name: 'lunarColor', type: 'vec3' }, { name: 'skyColor', type: 'vec3' },
+  ] });
+
+  return Fn(([p, sunDirection, phaseV, sunColor, skyColor]) => {
+    const sunlight = float(0.0).toVar();
+    If(sunDirection.y.greaterThan(-0.02), () => {
+      const tau = sunColumn(p, sunDirection).toVar();
+      // Energy-bounded multiple-scattering approximation. The first octave
+      // uses actual Beer extinction; higher orders broaden toward isotropy.
+      for (let j = 0; j < MS_A.length; j++) {
+        sunlight.addAssign(exp(tau.mul(-MS_K[j]))
+          .mul(mix(phaseV, float(ISO_PHASE), MS_PMIX[j])).mul(MS_A[j]));
+      }
+    });
+    const sky = float(0.0).toVar();
+    for (const direction of skyDirections) {
+      sky.addAssign(diffuseTransfer(skyColumn(p, vec3(...direction))).div(skyDirections.length));
+    }
+    return sunColor.mul(sunlight).add(skyColor.mul(sky));
+  }).setLayout({ name: 'cloudSegmentRadiance', type: 'vec3', inputs: [
+    { name: 'p', type: 'vec3' }, { name: 'sunDirection', type: 'vec3' },
+    { name: 'phaseV', type: 'float' }, { name: 'sunColor', type: 'vec3' },
+    { name: 'skyColor', type: 'vec3' },
+  ] });
+}
+
+export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, front, noise, aerial, emit = null, curvature = null, jitterCoordinate = null }) {
   const P = FRONTS[front] || FRONTS.NELLIS;
   const covQ = covThreshold(noise, P.coverage);
   const density = tslDensityBuilders(noise, P, covQ);
   const topAll = P.towerTop || P.top;
+  const geometry = curvature ? createCloudGeometry(curvature) : null;
+  const physicalSources = aerial?.sourceTransport && aerial?.celestial;
+  const pointAtmosphere = physicalSources ? cloudPointAtmosphere({
+    ...aerial.sourceTransport, curvature, referenceAltitude: (P.base + P.top) * .5,
+  }) : null;
+  const segmentRadiance = makeSegmentLighting(P, density, topAll, geometry, !!physicalSources,
+    aerial?.sourceTransport?.relativeOmission ?? .001);
   const uSunE = aerial ? aerial.uSunI : uniform(36.0); // unit-sun -> scene HDR scale
 
   const uProjInv = uniform(new THREE.Matrix4());
@@ -681,12 +548,17 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
   if (camera) {
     uProjInv.value.copy(camera.projectionMatrixInverse);
     uCamWorld.value.copy(camera.matrixWorld);
+    // TRAA applies its view jitter after the main frame update. Sample the
+    // scene camera immediately before this fullscreen draw, when its inverse
+    // matches the depth texture. The draw's own camera is orthographic.
+    uProjInv.onRenderUpdate(() => uProjInv.value.copy(camera.projectionMatrixInverse));
+    uCamWorld.onRenderUpdate(() => uCamWorld.value.copy(camera.matrixWorld));
   }
   _camRegistry.push({ uProjInv, uCamWorld });
 
   return Fn(() => {
     const suv = uv();
-    const bg = beauty.sample(suv).toVar();
+    const bg = beauty.sample(suv); // lazy: layer-only emit does not read scene color
 
     // view ray + scene distance from ONE depth unprojection (getViewPosition
     // owns the per-backend NDC-z convention, same as GTAONode)
@@ -695,233 +567,71 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
     const sceneDist = max(length(rel), 1e-3).toVar();
     const dir = rel.div(sceneDist).toVar();
 
-    // ray/slab clip: [base, topAll] segment, capped by scene depth + maxLen
-    const dy = dir.y;
-    const dySafe = select(abs(dy).lessThan(1e-5),
-      select(dy.greaterThanEqual(0.0), float(1e-5), float(-1e-5)), dy);
-    const tA = float(P.base).sub(uCamPos.y).div(dySafe);
-    const tB = float(topAll).sub(uCamPos.y).div(dySafe);
-    const tIn = max(min(tA, tB), 0.0).toVar();
-    const tOut = min(min(max(tA, tB), sceneDist), tIn.add(P.maxLen)).toVar();
+    // Render rays intersect the same spherical altitude shell as terrain and
+    // water. Density is still evaluated in the original flat map field.
+    let tIn, tOut, naturalEnd;
+    if (geometry) {
+      const interval = geometry.shell(uCamPos, dir, P.base, topAll).toVar();
+      tIn = interval.x.toVar();
+      naturalEnd = min(interval.y, tIn.add(P.maxLen)).toVar();
+      tOut = min(naturalEnd, sceneDist).toVar();
+    } else {
+      const dy = dir.y;
+      const dySafe = select(abs(dy).lessThan(1e-5),
+        select(dy.greaterThanEqual(0.0), float(1e-5), float(-1e-5)), dy);
+      const tA = float(P.base).sub(uCamPos.y).div(dySafe);
+      const tB = float(topAll).sub(uCamPos.y).div(dySafe);
+      tIn = max(min(tA, tB), 0.0).toVar();
+      naturalEnd = min(max(tA, tB), tIn.add(P.maxLen)).toVar();
+      tOut = min(naturalEnd, sceneDist).toVar();
+    }
     const hit = and(tOut.greaterThan(tIn), tIn.lessThan(ENTRY_MAX));
 
     const T = float(1.0).toVar();       // view-path transmittance
     const acc = vec3(0.0).toVar();      // accumulated cloud radiance
     const dsum = float(0.0).toVar();    // transmittance-weighted distance sums
+    const integrationEnd = float(0.0).toVar();
+    const sceneIndependent = float(0.0).toVar();
     const wsum = float(0.0).toVar();    //   (for the aerial representative point)
 
     If(hit, () => {
-      // per-pixel per-frame jittered start: IGN + golden-ratio time scroll —
+      // per-pixel per-frame jittered start: noise + golden-ratio time scroll —
       // TRAA downstream integrates the march noise away
-      const ign = fract(fract(screenCoordinate.x.mul(0.06711056)
-        .add(screenCoordinate.y.mul(0.00583715))).mul(52.9829189));
-      const jit = fract(ign.add(fract(uTime.mul(74.1638))));
+      const rayNoise = texture(noise.jitterTex, (jitterCoordinate || screenCoordinate).div(JITTER_N)).level(0).r
+        .mul(255 / 256).add(0.5 / 256);
+      const jit = fract(rayNoise.add(fract(uTime.mul(74.1638))));
 
-      // step count: geometry-bound rays march finer (see STEPS_* note above).
-      // "Geometry-bound" = the background is terrain (not sky) anywhere the
-      // aerial haze hasn't flattened it — sceneDist beyond the march cap
-      // still prints comb noise against the mountain behind it (measured:
-      // nellis-188 right-edge fog over a 40km ridge kept the full lattice
-      // when this tested against the slab exit / travel cap instead).
-      const geoBound = sceneDist.lessThan(ENTRY_MAX);
-      const nSteps = select(geoBound,
-        clamp(tOut.sub(tIn).div(STEP_GEO), STEPS_GEO_MIN, STEPS_GEO_MAX),
-        clamp(tOut.sub(tIn).div(STEP_TARGET), STEPS_MIN, STEPS_MAX)).floor().toVar();
-      const dt = tOut.sub(tIn).div(nSteps).toVar();
-      const t = tIn.add(dt.mul(jit)).toVar();
+      // World-space sampling is independent of the background's depth. The
+      // old sky/geometry budgets changed dt at the horizon, moving the light
+      // anchor by 76m and drawing a visible stripe through the same cloud.
+      const fineStepAt = (distance) => mix(25.0, 80.0,
+        clamp(distance.sub(1000.0).div(5000.0), 0.0, 1.0));
+      const t = tIn.toVar();
+      const previousT = tIn.toVar();
 
-      // sun geometry — constant per pixel
-      const sunN = normalize(uSunDir).toVar();
-      const cosT = dot(dir, sunN);
-      const phaseV = mix(hg(cosT, 0.6), hg(cosT, -0.25), 0.3).toVar();
-      const sunEl = sunN.y;
-      // shadow-TAP direction: sun clamped to >= ~14 deg elevation. At grazing
-      // sun the near-level taps saturate od within ~50m of anchor height —
-      // tSun becomes a step function of dir.y and prints iso-dy bands
-      // (valdez-213 stripes/octagons). Clamped taps keep the od falloff
-      // spread over the deck thickness exactly as at noon (noon-invariant);
-      // physically, forward Mie diffusion steepens the effective light
-      // direction inside the deck. Phase/sunCol still use the TRUE sun.
-      const sunT = normalize(vec3(sunN.x, max(sunN.y, 0.25), sunN.z)).toVar();
-
-      // multi-scatter sun transfer: od -> (sun visibility x phase), the MS_*
-      // octaves spreading the falloff over decades of od (never binary) with
-      // deep octaves going isotropic — shadowed cores keep a warm floor.
-      // A monotonic per-ray transform of od: the VOLUMETRIC LAW is intact.
-      const msSunPhase = (od) => {
-        let s = null;
-        for (let i = 0; i < MS_A.length; i++) {
-          const term = exp(od.mul(-P.sigma * SUN_SHADOW_K * MS_K[i]))
-            .mul(mix(phaseV, float(ISO_PHASE), MS_PMIX[i])).mul(MS_A[i]);
-          s = s ? s.add(term) : term;
-        }
-        return s;
-      };
-
-      // Beer-Lambert shadow march toward the sun — ONCE PER RAY, anchored
-      // where the ray enters cloud, from the smooth staged fields only
-      // (coverage ~300m+ texels + gradAt ALU) with the mean-field shape6
-      // remap (base-shape noise replaced by its mean 0.5, so thin fog keeps
-      // od ~ 0 and stays luminous).
-      // PASS-1 #1 (stipple root cause): per-step OD here is >> 1, so the
-      // energy weight w = T*(1-stepT) collapses onto the first dense step
-      // and the jitter dithers WHICH step that is — any per-step tSun with
-      // real contrast makes acc flip between S_k and S_{k+1} every frame,
-      // TRAA's history clamp on the moving scene rejects the flicker, and
-      // the residue is the 2x2 stipple in the fog/terrain interface bands.
-      // Measured on valdez-155 (worst smooth-window cb energy): 4.4 stock;
-      // survived jit*0.4 and a de-jittered per-step anchor unchanged;
-      // per-step smooth-field od at bounded exponent still 2.2-2.3 (an
-      // along-ray EMA included — the weight collapse defeats along-march
-      // filtering); tSun held FLAT: 0.44 = clean. Hence ONE tSun per ray.
-      // The anchor: the coverage-gate crossing, linearly interpolated
-      // between consecutive march samples (gatePrev/gateVal below). The
-      // gate samples sit on the jittered comb, but interpolating a SMOOTH
-      // field's threshold crossing cancels the jitter to first order — the
-      // anchor is temporally stable per pixel AND continuous across pixels
-      // (no contour lines), unlike a mid-slab anchor which shades scattered
-      // cumulus with far-away coverage and flattens them (measured: nellis
-      // puffs went paper-flat). Cost: the old 5 base fetches PER CLOUDY
-      // STEP become 1-2 field fetches ONCE per ray.
-      const msSun0 = msSunPhase(float(0.0)).toVar(); // unshadowed sun x phase
-      // tSunB = the ray's sun visibility x phase, ASSIGNED per anchor (PASS-3
-      // #3): mix(msSun0, anchored column, probe-blend weight) — per-ray-
-      // segment constant, so the energy-collapse step can't dither it.
-      const tSunB = msSunPhase(float(0.0)).toVar();
-      const gatePrev = float(0.0).toVar();
-      const armed = float(1.0).toVar(); // anchor hysteresis (see below)
-      const skinMod = float(1.0).toVar(); // near-field skin texture (set at anchor)
-
-      // PASS-1 #5 (grazing sun) — the mid-slab stratiform anchor is GONE.
-      // Every grazing-sun artifact traced to it by elimination on valdez-213:
-      // frozen-coverage taps printed dead-straight iso-dir.y stripes +
-      // octagonal cell shadows (verified: all vanish with tSun held flat);
-      // per-tap coverage still left flat-topped slabs (anchor height = pure
-      // function of dir.y); clamped-elevation taps narrowed but kept the
-      // band; height-free mid-deck taps traded it for full-height shadow
-      // curtains decoupled from the visible cloud. Root: ONE depth-free
-      // anchor shades a 16km integral with a field sampled ~8km away — the
-      // shadow can never align with the material being shaded, so the
-      // anchor's geometry prints as literal shapes. Both front types now use
-      // the coverage-gate CROSSING anchor below (the shadow rides the cloud
-      // the ray actually enters); what differs per front is the TAP STYLE.
-      // The D-056 dotted-fog risk that originally forced the mid-slab
-      // anchor is retired by the preset retune (covSharp 2.6->1.9, razor
-      // flanks gone) + msSunPhase contrast compression — re-gated on
-      // valdez-155 (worst masked 300x200 window mean/p99 below).
-      // twilight energy ordering: direct dies just below the horizon, ambient
-      // follows the sky down — clouds go dark BEFORE the sky does
-      const warm = mix(vec3(1.0, 0.62, 0.38), vec3(1.0), smoothstep(0.0, 0.35, sunEl));
-      const sunCol = warm.mul(uSunE).mul(smoothstep(-0.02, 0.08, sunEl)).mul(ALBEDO).toVar();
-      // in-cloud hue continuity (PASS-1 #5): a camera inside the deck used to
-      // see pure sky-blue ambient (interior B-R +48 vs +21 exterior). The
-      // interior ambient is multiple-scattered sunlight — warm gray-white.
-      // interiorW is a function of the CAMERA point only (frame-constant,
-      // smooth over frames): d6 at uCamPos gates how deep in cloud we sit.
-      const interiorW = float(0.0).toVar();
-      // gate0 = the coverage gate at the march START (PASS-3 #3). Non-zero
-      // only when the camera sits inside the slab (slab-plane entries have
-      // grad = 0 by construction): the in-gate-at-step-0 detector for the
-      // degenerate-anchor fix below, and the real sample gatePrev is seeded
-      // with (the old synthetic 0 made step-0 "crossings" interpolate
-      // against a value the field never had).
-      const gate0 = float(0.0).toVar();
-      If(tIn.lessThan(1.0), () => { // camera inside the slab
-        const f0 = density.field(uCamPos).toVar();
-        const g0 = density.gradAt(uCamPos.y, f0.y, f0.z).toVar();
-        const d0 = density.shape6(uCamPos, f0.x, g0);
-        interiorW.assign(smoothstep(0.04, 0.30, d0));
-        gate0.assign(f0.x.mul(g0));
-      });
-      // 0.35: measured B-R vs the +21 exterior faces — full warm shift gave
-      // -5, 0.62 gave +5; 0.35 lands inside the +-10 continuity window
-      const ambCol = mix(vec3(0.45, 0.62, 0.95), vec3(1.0, 0.94, 0.86), interiorW.mul(0.35))
-        .mul(uSunE).mul(0.05).mul(mix(1.0, 1.25, interiorW))
-        // sun-direction luminance cue for interiors: multiple scattering is
-        // brightest toward the sun; cosT grades the whole-ray ambient
-        .mul(float(1.0).add(cosT.mul(interiorW).mul(0.6)).clamp(0.45, 1.55))
-        .mul(smoothstep(-0.08, 0.25, sunEl)).toVar();
-      // 2-octave ANIMATED interior extinction variation (PASS-1 #5: interior
-      // std 1.2 DN, a featureless void). Per-step powder from 34m detail
-      // texels is exactly the LAW's forbidden high-contrast per-step term,
-      // so the modulation is PER-RAY: two detail fetches at FIXED distances
-      // along dir (a pure function of dir — jitter-independent, smooth
-      // across pixels, ~50-150px features), drifting with uTime. Gated by
-      // interiorW: exterior frames are bit-identical.
-      const intMod = float(1.0).toVar();
-      If(interiorW.greaterThan(0.01), () => {
-        const drift = uTime.mul(8.0);
-        // 900/2100m: far enough that the 34m detail texels stay sub-2.5deg
-        // on screen (at 520m their trilinear tents read as soft squares)
-        const p1 = uCamPos.add(dir.mul(900.0)).add(vec3(drift, 0.0, drift.mul(0.7)));
-        const p2 = uCamPos.add(dir.mul(2100.0)).add(vec3(drift.mul(-0.6), 0.0, drift));
-        const d1 = texture3D(noise.detailTex, p1.div(P.detailRepeat)).r;
-        const d2 = texture3D(noise.detailTex, p2.div(P.detailRepeat * 2.3)).g;
-        const m2 = d1.sub(0.5).mul(0.63).add(d2.sub(0.5).mul(0.42));
-        intMod.assign(clamp(float(1.0).add(m2.mul(interiorW).mul(2.0)), 0.35, 1.75));
-      });
-
-      // THE ANCHOR ROUTINE — emitted twice (degenerate in-gate start below +
-      // the in-loop gate crossings): sun-shadow column, near-field skin, and
-      // (PASS-3 #3) the per-anchor blend weight. tX must be jitter-stable —
-      // everything here is high-contrast (83m base texels in the taps, 19m
-      // detail texels in the skin) and multiplies EVERY subsequent step.
-      const gMid = Math.min(0.5 / P.baseRound, 1) *
-        (1 - Math.min(Math.max((0.5 - P.topSoft) / (1 - P.topSoft), 0), 1));
-      const anchorAt = (tX) => {
-        const pA = uCamPos.add(dir.mul(tX)).toVar();
-        const odA = float(0.0).toVar();
-        let prevA = 0;
-        for (const sd of (P.shadow3D ? SUN_TAPS : SUN_TAPS_STRAT)) {
-          const pT = pA.add(sunT.mul(sd)).toVar();
-          const fT = density.field(pT).toVar();
-          odA.addAssign((P.shadow3D
-            ? density.shape6(pT, fT.x, density.gradAt(pT.y, fT.y, fT.z))
-            : clamp(float(gMid * 0.5).sub(fT.x.oneMinus()).div(max(fT.x, 1e-4)), 0.0, 1.0).mul(fT.x)
-          ).mul(sd - prevA));
-          prevA = sd;
-        }
-        // grazing-sun contrast compression (stratiform): near-horizontal
-        // light diffuses through the broken deck's gaps — the 950m tap
-        // span overestimates od there and cells read as phantom dark
-        // slabs. Full od (the valdez-155 look) above ~27 deg elevation.
-        const odScale = P.shadow3D
-          ? float(1.0) : mix(0.35, 1.0, smoothstep(0.05, 0.45, sunEl));
-        // PASS-3 #3 blend weight (see BLEND_PROBES): "how deep does this ray
-        // go" probed at fixed offsets from the jitter-stable anchor — the
-        // per-step running-gate-max blend put dt*gate' of per-frame swing on
-        // the energy-collapse step (the golden lit-face lattice).
-        const gPk = float(0.0).toVar();
-        for (const bd of BLEND_PROBES) {
-          const pP = bd ? pA.add(dir.mul(bd)).toVar() : pA;
-          const fP = density.field(pP).toVar();
-          gPk.assign(max(gPk, fP.x.mul(density.gradAt(pP.y, fP.y, fP.z))));
-        }
-        tSunB.assign(mix(msSun0, msSunPhase(odA.mul(odScale)),
-          smoothstep(SUN_BLEND_LO, SUN_BLEND_HI, gPk)));
-        // PASS-2 #6 near-field skin: one detail fetch at the (jitter-
-        // stable) anchor paints 60-250m surface structure onto close
-        // cumulus interiors — the sub-step T collapse airbrushes them
-        // otherwise. Fades out by SKIN_FAR; per-ray, LAW-compliant.
-        const sk = texture3D(noise.detailTex, pA.div(P.detailRepeat * SKIN_REPEAT));
-        skinMod.assign(clamp(float(1.0).add(
-          sk.r.mul(0.4).add(sk.g.mul(0.35)).add(sk.b.mul(0.25)).sub(0.487)
-            .mul(smoothstep(SKIN_FAR, SKIN_NEAR, tX)).mul(SKIN_AMP)), 0.45, 1.55));
-        armed.assign(0.0);
-      };
-
-      // PASS-3 #3 (the in-cloud fabric-weave root cause): a march that
-      // STARTS in-gate has no crossing to interpolate — the old anchor fired
-      // off gatePrev's synthetic 0 and tX = tIn + dt*(jit + u) RODE THE
-      // JITTER (up to a full dt ~ 344m on sky-bound rays), so the sun column
-      // and the skin fetch became per-frame lotteries multiplying every step
-      // (measured on nellis-incloud: checker 2.05 -> 0.33 with the skin
-      // held flat, -> 0.05 with the sun blend also flat). Anchor ONCE at a
-      // jitter-FREE depth instead: dt is a pure function of the slab clip.
-      If(gate0.greaterThanEqual(ANCHOR_GATE), () => {
-        anchorAt(tIn.add(dt));
-      });
-      gatePrev.assign(gate0);
+      // Illumination depends on the scattering point, not on which cloud
+      // boundary the ray encountered first. Phase and incident colors are
+      // constant per ray; occlusion is integrated at each scattering point.
+      let sunN, phaseV, sunCol, skyCol, sources;
+      if (physicalSources) {
+        sources = cloudCelestialSources({ viewDir: dir, uSunDir, uSunI: uSunE,
+          ...aerial.celestial, albedo: ALBEDO });
+        skyCol = sources.sky;
+      } else if (aerial?.celestial) {
+        const celestial = cloudCelestialLight({ viewDir: dir, uSunDir, uSunI: uSunE,
+          ...aerial.celestial, albedo: ALBEDO });
+        sunN = celestial.direction; phaseV = celestial.phase;
+        sunCol = celestial.direct; skyCol = celestial.sky;
+      } else {
+        sunN = normalize(uSunDir).toVar();
+        const cosT = dot(dir, sunN);
+        phaseV = mix(hg(cosT, 0.6), hg(cosT, -0.25), 0.3).toVar();
+        const sunEl = sunN.y;
+        const warm = mix(vec3(1.0, 0.62, 0.38), vec3(1.0), smoothstep(0.0, 0.35, sunEl));
+        sunCol = warm.mul(uSunE).mul(smoothstep(-0.02, 0.08, sunEl)).mul(ALBEDO).toVar();
+        skyCol = vec3(0.45, 0.62, 0.95).mul(uSunE).mul(0.05 * ALBEDO)
+          .mul(smoothstep(-0.08, 0.25, sunEl)).toVar();
+      }
 
       // fade-not-clip at the march bounds (PASS-1 #5): rays entering near
       // ENTRY_MAX dissolve into the haze instead of a hard slab silhouette,
@@ -932,24 +642,29 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
       // fetch at a fixed point along the ray wobbles each ray's fade window
       // (+-, features ~1.8km): the circle becomes a noisy shoreline. Smooth
       // in dir, jitter-independent, completes before the hard tOut clip.
+      const fadePoint = uCamPos.add(dir.mul(BOUND_NOISE_T));
       const nB = texture3D(noise.detailTex,
-        uCamPos.add(dir.mul(BOUND_NOISE_T)).div(P.detailRepeat * BOUND_NOISE_REPEAT)).g.toVar();
+        (geometry ? geometry.toMap(fadePoint) : fadePoint)
+          .div(P.detailRepeat * BOUND_NOISE_REPEAT)).g.toVar();
       const entryFade = smoothstep(
         float(ENTRY_MAX).mul(mix(0.62, 0.78, nB)),
         float(ENTRY_MAX).mul(mix(0.90, 1.0, nB)), tIn).oneMinus().toVar();
       const tCap0 = tIn.add(float(P.maxLen).mul(mix(0.60, CAP_FADE0, nB)));
       const tCap1 = tIn.add(float(P.maxLen).mul(mix(CAP_FADE0, 1.0, nB)));
 
-      // trapezoid extinction (PASS-2 #1): each step's sigma averages this and
-      // the previous sample — halves the jitter variance a density ONSET
-      // inside one dt contributes (measured Tstd x0.82 CPU), zero extra
-      // fetches. densPrev resets to 0 through clear air so onsets keep the
-      // correct half-weight first step.
-      const densPrev = float(0.0).toVar();
-      Loop({ start: int(0), end: int(nSteps), type: 'int', condition: '<' }, () => {
-        const p = uCamPos.add(dir.mul(t)).toVar();
-        const densPrev0 = densPrev.toVar();
-        densPrev.assign(0.0);
+      // Integrate actual endpoint intervals, including the density-positive
+      // to density-zero exit segment. The previous loop dropped that tail.
+      // The first sample is exactly at tIn, so a camera inside cloud also
+      // starts with the correct extinction instead of a synthetic zero.
+      const pendingCoarseEnd = float(-1.0).toVar('cloudPendingCoarseEnd');
+      const pendingFineEnd = float(-1.0).toVar('cloudPendingFineEnd');
+      const previousSigma = float(0.0).toVar();
+      const fineMode = float(0.0).toVar();
+      const emptySamples = float(0.0).toVar();
+      Loop({ start: int(0), end: int(MARCH_MAX), type: 'int', condition: '<' }, ({ i }) => {
+        const renderP = uCamPos.add(dir.mul(t)).toVar();
+        const p = geometry ? geometry.toMap(renderP).toVar('cloudViewMapPoint') : renderP;
+        const sampleDensity = float(0.0).toVar();
         // staged density: coverage field first (1-2 fetches), base shape and
         // detail erosion only where the previous stage says cloud can exist —
         // empty air is the common case and must stay near-free
@@ -957,71 +672,108 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
         const covAmt = f.x, topL = f.y;
         const grad = density.gradAt(p.y, topL, f.z).toVar();
         const gateVal = covAmt.mul(grad).toVar();
-        // Per-ray-segment sun shadow, re-evaluated at each interpolated
-        // ANCHOR_GATE up-crossing (a cloud ENTRY — so a thin near puff
-        // cannot hijack the shading of a big cell behind it; each cell is
-        // shaded from its own entry). Hysteresis: the anchor re-arms only
-        // after the gate falls below 0.10, so micro-dips around the
-        // threshold cannot flip WHICH crossing anchors a pixel. The anchor
-        // is jitter-stable: interpolating the SMOOTH gate field's threshold
-        // crossing cancels the jitter to first order. TAP STYLE per front:
-        // cumulus (shadow3D) taps read the REAL shape6 recipe — the 3D
-        // base-shape carries the bulge that actually shades a cumulus face
-        // (a coverage-only column is height-independent and left every noon
-        // face flat-bright, measured); stratiform taps are mean-field
-        // (shape -> its 0.5 mean) at the FIXED mid-deck height fraction —
-        // any anchor-height term is a function of dir.y and prints iso-dy
-        // bands at grazing sun, so od is a pure lateral coverage map, and
-        // the ambient height grade owns vertical shading. ~12-21 fetches
-        // per cloud entry incl. the blend probes (1-3 entries per ray).
-        {
-          If(and(armed.greaterThan(0.5), gateVal.greaterThanEqual(ANCHOR_GATE)), () => {
-            const u = clamp(float(ANCHOR_GATE).sub(gatePrev).div(gateVal.sub(gatePrev).add(1e-9)), 0.0, 1.0);
-            // crossing + 1.0dt: the anchor must sit INSIDE the cell (from
-            // the exact skin the noon up-sun column exits immediately and
-            // od ~ 0 — faces went flat; the old per-step estimator sat 0..1
-            // jittered steps deep on average). dt is smooth per ray, so the
-            // push keeps the anchor's temporal/spatial stability.
-            anchorAt(max(t.sub(dt.mul(u.oneMinus())).add(dt.mul(1.0)), tIn.add(dt.mul(0.1))));
-          });
-          If(gateVal.lessThan(0.10), () => { armed.assign(1.0); });
-          gatePrev.assign(gateVal);
-        }
+        // A coarse empty-weather step may discover a cloud only at its far
+        // endpoint. Revisit the interval at fine spacing BEFORE committing
+        // extinction or lighting; otherwise one 280m interval scatters in air.
+        // Reserve the existing final budget tail for guaranteed ray coverage.
+        const entryFineStep = fineStepAt(previousT).toVar('cloudEntryFineStep');
+        If(i.lessThan(MARCH_MAX - 32).and(gateVal.greaterThan(0.01))
+          .and(t.sub(previousT).greaterThan(entryFineStep.mul(1.05))), () => {
+          pendingCoarseEnd.assign(max(pendingCoarseEnd, t));
+          t.assign(min(previousT.add(entryFineStep), tOut));
+          fineMode.assign(1.0);
+          emptySamples.assign(0.0);
+          Continue();
+        });
         If(gateVal.greaterThan(1e-3), () => {
           const d6 = density.shape6(p, covAmt, grad).toVar();
           If(d6.greaterThan(0.002), () => {
-            const dens = density.erode8(p, d6).toVar();
-            If(dens.greaterThan(0.002), () => {
-              const capFade = smoothstep(tCap0, tCap1, t).oneMinus();
-              const densX = dens.add(densPrev0).mul(0.5); // trapezoid (see densPrev)
-              densPrev.assign(dens);
-              const sigma = densX.mul(entryFade).mul(capFade).mul(P.sigma);
-              const stepT = exp(sigma.mul(dt).negate()).toVar();
-              const hfA = clamp(p.y.sub(P.base).div(P.top - P.base), 0.0, 1.0);
-              // tSunB carries the anchored/unanchored blend, assigned per
-              // anchor (PASS-3 #3): grazing rays that barely reach the
-              // anchor gate stay near-unshadowed — no cliff, and no
-              // per-step blend swing for the jitter to dither.
-              const S = sunCol.mul(tSunB).add(ambCol.mul(mix(0.35, 1.0, hfA)))
-                .mul(intMod).mul(skinMod);
-              const w = T.mul(stepT.oneMinus()); // energy this step scatters to the eye
-              acc.addAssign(S.mul(w));
-              dsum.addAssign(w.mul(t));
-              wsum.addAssign(w);
-              T.mulAssign(stepT);
-            });
+            sampleDensity.assign(density.erode8(p, d6));
           });
         });
-        If(T.lessThan(T_MIN), () => { Break(); });
-        t.addAssign(dt);
+        const capFade = smoothstep(tCap0, tCap1, t).oneMinus();
+        const sigma = sampleDensity.mul(entryFade).mul(capFade).mul(P.sigma).toVar();
+        const interval = t.sub(previousT).toVar();
+        // Bound visible-front quadrature error without shrinking every step.
+        // Refine ordinary fine intervals at most to half their spacing where
+        // endpoint optical-depth change exceeds 0.03 and >=10% light remains.
+        // Rejected endpoints never mutate previousSigma, previousT, T or acc.
+        const frontOpticalChange = abs(sigma.sub(previousSigma)).mul(interval)
+          .toVar('cloudFrontOpticalChange');
+        If(i.lessThan(MARCH_MAX - 32).and(T.greaterThan(0.1))
+          .and(interval.greaterThan(entryFineStep.mul(0.55)))
+          .and(interval.lessThanEqual(entryFineStep.mul(1.05)))
+          .and(frontOpticalChange.greaterThan(0.03)), () => {
+          pendingFineEnd.assign(max(pendingFineEnd, t));
+          t.assign(min(previousT.add(max(entryFineStep.mul(0.5), interval.mul(0.5))), tOut));
+          fineMode.assign(1.0);
+          emptySamples.assign(0.0);
+          Continue();
+        });
+        const tau = sigma.add(previousSigma).mul(0.5).mul(interval).toVar();
+        If(tau.greaterThan(1e-7), () => {
+          const stepT = exp(tau.negate()).toVar();
+          // Exact scatter centroid for the homogeneous segment represented
+          // by this trapezoid. The small-tau expansion avoids cancellation.
+          const centroid = select(tau.greaterThan(0.05),
+            float(1.0).div(max(tau, 1e-5)).sub(stepT.div(max(stepT.oneMinus(), 1e-5))),
+            float(0.5).sub(tau.div(12.0)).add(tau.mul(tau).mul(tau).div(720.0)));
+          const scatterT = previousT.add(interval.mul(centroid)).toVar();
+          const w = T.mul(stepT.oneMinus()).toVar();
+          const scatterPoint = uCamPos.add(dir.mul(scatterT)).toVar();
+          if (physicalSources) {
+            const solarAtPoint = pointAtmosphere(scatterPoint, sources.solarDirection,
+              sources.solarColor).toVar();
+            const lunarAtPoint = pointAtmosphere(scatterPoint, sources.lunarDirection,
+              sources.lunarColor, aerial.celestial.uMoonAngularRadius).toVar();
+            acc.addAssign(segmentRadiance(scatterPoint, sources.solarDirection, sources.solarPhase,
+              solarAtPoint, sources.lunarDirection, sources.lunarPhase, lunarAtPoint, skyCol).mul(w));
+          } else {
+            acc.addAssign(segmentRadiance(scatterPoint, sunN, phaseV, sunCol, skyCol).mul(w));
+          }
+          dsum.addAssign(w.mul(scatterT));
+          wsum.addAssign(w);
+          T.mulAssign(stepT);
+        });
+        // Preserve every discovered far endpoint after a rejected interval. A
+        // midpoint-only rewind followed by a full step could skip its peak.
+        If(t.greaterThanEqual(pendingCoarseEnd), () => { pendingCoarseEnd.assign(-1.0); });
+        If(t.greaterThanEqual(pendingFineEnd), () => { pendingFineEnd.assign(-1.0); });
+        previousSigma.assign(sigma);
+        previousT.assign(t);
+        If(T.lessThan(T_MIN).or(t.greaterThanEqual(tOut)), () => { Break(); });
+
+        // Enter fine mode before the three-dimensional body appears. Two
+        // clear samples release it, avoiding a step-size toggle at its edge.
+        If(gateVal.greaterThan(0.01), () => { fineMode.assign(1.0); });
+        If(gateVal.lessThan(0.003), () => {
+          emptySamples.addAssign(1.0);
+          If(emptySamples.greaterThanEqual(2.0), () => { fineMode.assign(0.0); });
+        }).Else(() => { emptySamples.assign(0.0); });
+        const fineStep = fineStepAt(t).toVar();
+        const step = mix(clamp(fineStep.mul(3.5), 90.0, 280.0), fineStep, fineMode).toVar();
+        If(i.equal(0), () => { step.mulAssign(jit); });
+        // The analytic distance curve fits the budget. Reserve a bounded
+        // coarse tail for future parameter changes instead of ever clipping
+        // a ray merely because its iteration budget ended.
+        If(i.greaterThanEqual(MARCH_MAX - 32), () => {
+          step.assign(max(step, tOut.sub(t).div(max(float(MARCH_MAX - 1).sub(float(i)), 1.0))));
+        });
+        let nextEnd = min(t.add(step), tOut);
+        nextEnd = min(nextEnd, select(pendingCoarseEnd.greaterThan(t), pendingCoarseEnd, tOut));
+        nextEnd = min(nextEnd, select(pendingFineEnd.greaterThan(t), pendingFineEnd, tOut));
+        t.assign(nextEnd);
       });
+      integrationEnd.assign(previousT);
+      // A result can be reused across different opaque backgrounds only when
+      // opacity terminated it or its complete slab/cap interval was integrated.
+      sceneIndependent.assign(select(T.lessThan(T_MIN)
+        .or(sceneDist.greaterThanEqual(naturalEnd)), 1.0, 0.0));
     });
 
-    // PASS-3 #3 WHITEOUT (see WHITEOUT_T): deep-extinction pixels drop the
-    // background entirely — no terrain detail through the in-cloud weave —
-    // with the removed share re-scattered into the cloud (exact recomposite:
-    // out = bg*Tvis + S*(1-Tvis) when S is per-ray). T's residual comb
-    // variance cancels in acc/(1-T): whited-out pixels are jitter-immune.
+    // Preserve the existing dense-cloud opacity remap. With distributed
+    // lighting this rescales the integrated average source, not a single
+    // per-ray light value; no claim of jitter cancellation is made.
     const Tvis = max(T.sub(WHITEOUT_T).div(1 - WHITEOUT_T), 0.0).toVar();
     acc.mulAssign(Tvis.oneMinus().div(max(T.oneMinus(), 1e-4)));
 
@@ -1037,6 +789,19 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
       });
     }
 
-    return vec4(bg.rgb.mul(Tvis).add(acc), 1.0);
+    const color = vec4(bg.rgb.mul(Tvis).add(acc), 1.0);
+    // A compositor can reuse the same integration for motion and real depth.
+    // Standalone callers keep the original RGBA node API.
+    if (emit) return emit({ color, alpha, meanDistance: dsum.div(max(wsum, 1e-4)),
+      sceneDistance: sceneDist, rayDirection: dir,
+      radiance: acc, transmittance: Tvis, viewDepth: vpos.z.negate(),
+      integrationEnd, sceneIndependent });
+    return color;
   })();
+}
+
+// Shared bounds for full-resolution cloud rejection before reconstruction.
+export function cloudLayerBounds(front) {
+  const P = FRONTS[front] || FRONTS.NELLIS;
+  return { base: P.base, top: P.towerTop || P.top, maxLen: P.maxLen, entryMax: ENTRY_MAX };
 }
