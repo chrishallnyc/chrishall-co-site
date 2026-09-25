@@ -22,6 +22,13 @@ import { cloudPointAtmosphere } from "./cloud-point-lighting.js";
 // floor (makeVolCloudShadowNode; values mirror clouds.js CLOUD_CLIMATES).
 // ---------------------------------------------------------------------------
 const FRONTS = {
+  NEWYORK: {
+    coverage: 0.16, base: 2200, top: 3300,
+    covRepeat: 19000, baseRepeat: 2800, detailRepeat: 520,
+    covSharp: 2.8, baseRound: 0.13, topSoft: 0.58, erode: 0.36,
+    sigma: 0.035, maxLen: 18000, shadow3D: true, shadowFloor: 0.55,
+    coreSupport: 0.74, nestedBillows: 0.30,
+  },
   // Cumulus profiles use taller, more varied crowns than stratocumulus.
   NELLIS: {   // scattered fair-weather cumulus, high desert bases
     coverage: 0.30, base: 2700, top: 4700,

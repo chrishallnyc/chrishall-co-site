@@ -8,7 +8,7 @@ import { atmosphereSourceTransmittanceNode } from '../world/hillaire.js';
 export function createAircraftEnvironment({ aircraft, lighting, terrain, front, ...options }) {
   const observer = new THREE.Vector3();
   const groundHeight = uniform(0);
-  const albedo = new THREE.Color({ NELLIS: 0xa99c87, VALDEZ: 0x536353, MARIANAS: 0x234c59 }[front] || 0x777777);
+  const albedo = new THREE.Color({ NELLIS: 0xa99c87, VALDEZ: 0x536353, MARIANAS: 0x234c59, NEWYORK: 0x646f70 }[front] || 0x777777);
   return new SkyEnvironment({ ...options, label: 'Aircraft', minInterval: 6, moveThreshold: 400,
     observer(camera, capture = false) {
       aircraft.getWorldPosition(observer);

@@ -28,6 +28,13 @@ const FAR_SPAN = 480000;
 // Amplitude discipline: the SUM of amplitudes is the worst-case crest.
 // Fjord chop tops out well under a meter; Pacific swell ~2.5m total.
 const SEA_STATES = {
+  NEWYORK: { // Sheltered harbor chop; muted estuary colors, without tropical surf.
+    waves: [
+      [35, 0.035, 220], [58, 0.05, 240], [90, 0.07, 210], [135, 0.08, 235],
+      [200, 0.10, 220], [280, 0.12, 230], [48, 0.035, 180], [160, 0.07, 250],
+    ],
+    deep: 0x122f3b, shallow: 0x3c5855, roughness: 0.22, foamShore: 45, normalK: 1.3, micro: 0.75, mss: 0.009,
+  },
   VALDEZ: { // protected fjord water: short chop, wind-textured not mirror
     waves: [
       [42, 0.06, 335], [67, 0.09, 350], [95, 0.11, 320], [140, 0.14, 345],

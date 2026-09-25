@@ -1,5 +1,37 @@
 # RAPTOR release notes
 
+## 1.12.0 — 2026-09-24
+
+Fly New York Harbor and Manhattan, or launch Harbor Watch from its own briefing.
+
+- **New York City:** a fourth region with a 65.536 km USGS landscape, NAIP aerial
+  imagery, about 56,000 source-derived buildings, thirteen authored landmarks,
+  and six bridges. Regional sky, harbor water, facade shading, and city
+  collision volumes complete the flight environment.
+- **A clear first flight:** New York starts as peaceful practice with the
+  skyline ahead. The optional Harbor Watch briefing opens separately; its
+  mission clock stays paused until you choose **Begin Harbor Watch**.
+- **Harbor Watch:** a standalone alternate history set after the September 11,
+  2001 attacks. Establish harbor overwatch, then intercept two additional
+  hijacked aircraft before either enters protected city airspace. Both
+  interceptions are required, and the eight-minute deadline is a loss condition.
+  Completion and replay stay separate from the thirty-mission campaign.
+- **A defined historical setting:** the attacks are not recreated; aftermath
+  haze and a construction-year filter establish the scene. The F-22 response
+  and additional threats are fictional, and modern imagery is retained.
+  Failed interceptions end before a building impact is depicted.
+- **Correct geographic orientation:** the shared flight camera now preserves
+  east and west, and pointer steering follows the visible direction. Aircraft
+  orientation, surface normals and renderer winding follow the same view.
+- **Documented sources:** reproducible terrain and building bakeries retain
+  source requests and hashes; [Map credits](terrain-credits.html) identifies
+  the geographic data and the authored geometry.
+
+Native checks exercise geometry budgets, collisions, scenario persistence,
+mission outcomes, and a complete interception using production flight and
+missile physics. See [New York City](README.md#new-york-city) for launch and
+mission instructions.
+
 ## 1.11.0 — 2026-09-24
 
 Start flying sooner, then hand the controls to another pilot without rebuilding

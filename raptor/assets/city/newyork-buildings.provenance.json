@@ -1,0 +1,17 @@
+{
+  "dataset": "NYC OTI Building Footprints",
+  "source": "https://data.cityofnewyork.us/resource/5zhs-2jue.json",
+  "datasetPage": "https://data.cityofnewyork.us/City-Government/BUILDING/5zhs-2jue",
+  "metadata": "https://github.com/CityOfNewYork/nyc-geo-metadata/blob/master/Metadata/Metadata_BuildingFootprints.md",
+  "retrieved": "2026-09-24",
+  "sourceRows": 90499,
+  "instances": 55955,
+  "sourceSHA256": "c62d5a60790d4ced602068f97f04960425883e28533be3020a33594dd5de625e",
+  "query": {
+    "$select": "the_geom,height_roof,construction_year,bin,ground_elevation,doitt_id,last_status_type",
+    "$where": "height_roof > 25 AND feature_code = 2100 AND ((bin >= 1000000 AND bin < 2000000 AND within_box(the_geom,40.835,-74.025,40.700,-73.92)) OR within_box(the_geom,40.735,-74.025,40.665,-73.940) OR within_box(the_geom,40.780,-73.975,40.735,-73.925))",
+    "$limit": 100000,
+    "$order": "doitt_id"
+  },
+  "representation": "Minimum-area rectangles, 94% footprint dimensions; simplified roof massing. Heights and ground elevations converted from US feet to metres. Contemporary source filtered by construction year for the fictional 2001 aftermath; not an exact historical reconstruction."
+}

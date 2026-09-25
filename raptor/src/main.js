@@ -1,5 +1,6 @@
 import { loadTerrainImagery } from "./world/terrain-imagery-loader.js";
 import { installReversedDepthSort } from "./engine/reverseddepth.js";
+import { installENUView } from "./engine/renderhandedness.js";
 // RAPTOR boot: renderer (WebGPU with WebGL2 fallback), sim, input, debug, hooks.
 
 import * as THREE from "three";
@@ -40,7 +41,7 @@ import { AircraftLighting } from "./aircraft/lighting.js";
 import { updateF22Visuals } from "./aircraft/f22-lod.js";
 import { Soundscape } from "./game/soundscape.js";
 
-const VERSION = "1.11.0";
+const VERSION = "1.12.0";
 const PHASE = 12;
 
 // WebGPU and reverse-depth WebGL use [0,1]; ordinary WebGL uses [-1,1].
@@ -153,6 +154,9 @@ async function boot() {
   const flags = new URLSearchParams(location.search);
   bootStage('mission','Checking your flight plan…','Preparing the flight you selected. Your aircraft stays on standby until everything is ready.');
   const requested = await loadRequestedFlight(flags);
+  // A region-only New York link opens its peaceful harbor flight. Combat is
+  // an explicit standalone scenario selected from its own briefing.
+  if (!requested && (flags.get('front') || '').toUpperCase() === 'NEWYORK') flags.set('mode', 'practice');
   if (flags.get('mode') === 'practice') {
     // Direct practice links use the same render-workload identity and safe
     // systems configuration as flights launched from preflight.
@@ -182,6 +186,7 @@ async function boot() {
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 120000);
+  installENUView(renderer, camera);
   const _bv = new THREE.Vector3(); // HUD projection scratch
 
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -197,6 +202,10 @@ async function boot() {
     ?? renderer.backend.gl?.getParameter(renderer.backend.gl.MAX_TEXTURE_SIZE) ?? 2048;
   const atmosphere = new Atmosphere(scene, (flags.get("front") || "NELLIS").toUpperCase(),
     { cirrusResolution: cirrusAtlasResolution(bootAssetTier, textureLimit) });
+  if (requested?.authored?.id === 'Y01') {
+    atmosphere.baseUtcMidnight = Date.UTC(2001, 8, 11);
+    atmosphere.setTime(requested.spec.todH);
+  }
   atmosphere.initIBL(renderer);
   if (flags.get("tod")) atmosphere.setTime(parseFloat(flags.get("tod")));
 
@@ -290,14 +299,16 @@ async function boot() {
   aircraftLighting.register(world.jet);
   sim.addSystem(world);
 
-  // real-Earth ground for all three fronts. ?noterrain=1 = QA flag: sky/boot
+  // Real-Earth ground. ?noterrain=1 = QA flag: sky/boot
   // batteries skip the ground so SwiftShader timings measure what they intend.
   const FRONT_GROUND = {
     NELLIS: { asset: "nellis", ocean: false, baseAlt: 3400, label: "NEVADA" },
     VALDEZ: { asset: "valdez", ocean: true, baseAlt: 2800, label: "PRINCE WILLIAM SOUND" },
     MARIANAS: { asset: "marianas", ocean: true, baseAlt: 1400, label: "THE MARIANAS" },
+    NEWYORK: { asset: "newyork", ocean: true, baseAlt: 850, label: "NEW YORK HARBOR",
+      spawn: { x: -3800, y: -5600, alt: 850, headingRad: 65 * Math.PI / 180, speed: 170 } },
   };
-  let terrain = null, water = null;
+  let terrain = null, water = null, city = null, aftermath = null;
   // PHASE 12 item 4: on the volumetric path, ground shadows come from the
   // SAME coverage field the march breathes (volclouds noise hoisted here —
   // terrain materials bake their shadow node at construction, so this must
@@ -406,7 +417,24 @@ async function boot() {
       // the placeholder sea survives only if the real water failed
       world.setGround(terrain, { ...fg, ocean: fg.ocean && !water });
     } catch (err) {
+      if (atmosphere.frontName === 'NEWYORK') throw err;
       console.warn("terrain unavailable, flying over water:", err && err.message);
+    }
+  }
+
+  if (terrain && atmosphere.frontName === 'NEWYORK') {
+    bootStage('landscape', 'Building the New York skyline…', 'Preparing the city, bridges and harbor for your flight.');
+    const { NewYorkCity } = await import('./world/newyork.js');
+    city = await NewYorkCity.load('/assets/city/newyork-buildings.json', {
+      terrain, era: requested?.authored?.id === 'Y01' ? '2001-aftermath' : 'modern', aerial: atmoH?.aerial,
+    });
+    scene.add(city.group);
+    window.addEventListener('pagehide', event => { if (!event.persisted) city.dispose(); });
+    if (requested?.authored?.id === 'Y01') {
+      const { NewYorkAftermath } = await import('./world/newyorksmoke.js');
+      aftermath = new NewYorkAftermath({ aerial: atmoH?.aerial });
+      scene.add(aftermath.group);
+      window.addEventListener('pagehide', event => { if (!event.persisted) aftermath.dispose(); });
     }
   }
 
@@ -433,6 +461,9 @@ async function boot() {
       directory = TG.makeDirectory({ battlefield, bandits });
     } catch (err) { bandits = null; directory = null; console.warn("bandits unavailable:", err && err.message); }
   }
+  if (requested?.spec.bandits?.length && !bandits) {
+    throw new FlightLoadError('The mission aircraft could not be prepared.', { request: requested.request });
+  }
 
   // PHASE 7: you fly. ?demo=1 keeps the old scripted circle for QA baselines.
   if (bandits) aircraftLighting.register(bandits.root);
@@ -445,8 +476,8 @@ async function boot() {
     world.trailMesh.visible = false; // FM-driven trail is a polish item
     world.pylons.visible = false; // phase-1 scale pylons — PASS-1 item 8: they render as needle spikes at distance (and stand ON the ocean)
     player = new Player(scene, {
-      jet: world.jet, terrain, battlefield, directory,
-      spawn: { x: 0, y: -6000, alt: (fg?.baseAlt || 3400) + 200, headingRad: 0, speed: 200 },
+      jet: world.jet, terrain, battlefield, directory, obstacles: city,
+      spawn: fg?.spawn || { x: 0, y: -6000, alt: (fg?.baseAlt || 3400) + 200, headingRad: 0, speed: 200 },
     });
     sim.addSystem(player);
     // the war shoots back (?noaaa=1 for scenery QA — no player ref, guns idle)
@@ -473,7 +504,7 @@ async function boot() {
         script = new Script(spec, { battlefield, player, match, terrain, bandits });
         match.scripted = true;
         if (spec.airfield) match.airfield = spec.airfield;
-        missionData = { spec, lines: requested.lines };
+        missionData = { spec, lines: requested.lines, meta: requested.meta };
         if (spec.playerSpawn) {
           const ps = spec.playerSpawn;
           player.spawn = { x: ps.x, y: ps.y, alt: ps.alt, headingRad: (ps.headingDeg || 0) * Math.PI / 180, speed: ps.speed || 200 };
@@ -492,6 +523,8 @@ async function boot() {
 
   const planetObjects = curvature ? new PlanetObjectBender(curvature) : null;
   if (planetObjects) attachRaptorPlanetObjects(planetObjects, { world, player, battlefield, bandits, aircraftLighting });
+  if (city) planetObjects?.attach(city.group, { staticSurface: true, stableInstances: true });
+  if (aftermath) planetObjects?.attach(aftermath.group);
   // Boot creates the ordinary aircraft/prop pools up front. Their direct
   // light needs the same local planetary visibility as terrain and water;
   // unlit sky/FX do not participate. No shadow map or frame traversal is added.
@@ -1037,7 +1070,7 @@ async function boot() {
 
   Object.assign(state, {
     rendering: { renderer, scene, camera, world, aircraftLighting, projectedDepthVisible },
-    sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud, player, battlefield, match, script, missionData, bandits, directory, audio, soundscape,
+    sim, input, gamepad, controls, dbg, atmosphere, terrain, water, city, aftermath, clouds, hud, player, battlefield, match, script, missionData, bandits, directory, audio, soundscape,
     recoverPractice: () => {
       if (!cockpit.practice || !player) return false;
       cockpit.clearInput();
@@ -1116,6 +1149,8 @@ async function boot() {
   updateF22Visuals(world.f22, aircraftFrame);
   curvature?.beginFrame(camera);
   aircraftLighting.refreshMaterials();
+  city?.update(camera, atmosphere.elevationDeg);
+  aftermath?.update(camera, 0);
   planetObjects?.update();
   terrain?.update(camera, 0);
   water?.update(camera,0);
@@ -1309,6 +1344,8 @@ async function boot() {
     const planetFrame = curvature?.beginFrame(camera);
     if (planetFrame?.resetHistory) post?.invalidateHistory?.();
     aircraftLighting.refreshMaterials();
+    city?.update(camera, atmosphere.elevationDeg);
+    aftermath?.update(camera, sim.time);
     planetObjects?.update();
     terrain?.update(camera, dtMs / 1000);
     waterClock += dtMs / 1000;

@@ -212,7 +212,7 @@ export class Script {
     let all = true;
     for (let i = 0; i < this._win.length; i++) if (this.objState[this._win[i]] !== 1) { all = false; break; }
     if (all) { M.over = 1; return; }
-    if (sim.time > this.spec.timeLimitS) M.over = this._offense ? -1 : 1;
+    if (sim.time > this.spec.timeLimitS) M.over = this.spec.timeoutOutcome ?? (this._offense ? -1 : 1);
   }
 
   // matches the match.js/battlefield.js imul-FNV fold

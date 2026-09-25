@@ -56,8 +56,19 @@ try{
   assert.equal(await page.locator('#destination-name').textContent(),'Nellis');
   assert.equal(await page.locator('[data-front="VALDEZ"]').isDisabled(),true);
   await page.locator('[data-mode="battle"]').click();await page.locator('[data-customize-done]').click();
-  assert.match(await page.locator('#launch-label').textContent(),/Quick battle · Valdez/);
+  assert.match(await page.locator('#launch-label').textContent(),/Quick battle · Nellis/);
   assert.equal(await page.locator('#launch-action').textContent(),'Launch battle');
+ });
+ await check('leaving a New York selection for campaign keeps other flight modes accessible',async()=>{
+  await page.locator('#flight-customize summary').click();await page.locator('[data-front="NEWYORK"]').click();
+  assert.equal(await page.locator('[data-mode="battle"]').isDisabled(),true);
+  await page.locator('[data-mode="campaign"]').click();
+  assert.equal(await page.locator('#destination-name').textContent(),'Nellis');
+  assert.equal(await page.locator('[data-mode="battle"]').isEnabled(),true);
+  assert.equal(await page.locator('[data-mode="operation"]').isEnabled(),true);
+  await page.locator('[data-mode="operation"]').click();
+  assert.match(await page.locator('#launch-label').textContent(),/Operation · Nellis/);
+  await page.locator('[data-customize-done]').click();
  });
  await check('returning late-campaign pilots get a concise opening and the matching briefing',async()=>{
   await page.evaluate(async()=>{

@@ -1,7 +1,7 @@
 // Missing-band render spectrum. The existing macro wave arrays are untouched.
 // Integrate only wavelengths below their maximum represented radial mode;
 // the fixed small-wave variance budget is split into resolved waves + tail.
-export const FINE_VARIANCE = { VALDEZ: .0097 * .36 * .9 ** 2, MARIANAS: .0097 * .36 };
+export const FINE_VARIANCE = { VALDEZ: .0097 * .36 * .9 ** 2, MARIANAS: .0097 * .36, NEWYORK: .0097 * .36 * .75 ** 2 };
 const clamp01 = x => Math.max(0, Math.min(1, x));
 const smooth = (a,b,x) => {const t=clamp01((x-a)/(b-a));return t*t*(3-2*t);};
 function hash(x,z,seed,salt){
@@ -16,7 +16,7 @@ export function buildFineSpectrum(front,{N=128,tileM=32,seed=1337,macroN=256,mac
  if(!Number.isInteger(Math.log2(N))||N<32)throw new RangeError('Fine ocean N must be a power of two >=32');
  if(!(tileM>0))throw new RangeError('Fine ocean tile must be positive');
  const totalVariance=FINE_VARIANCE[front]??FINE_VARIANCE.MARIANAS;
- const direction=(front==='VALDEZ'?335:65)*Math.PI/180,wx=Math.sin(direction),wz=Math.cos(direction);
+ const direction=(front==='VALDEZ'?335:front==='NEWYORK'?225:65)*Math.PI/180,wx=Math.sin(direction),wz=Math.cos(direction);
  const dk=2*Math.PI/tileM,half=N/2;
  const kMin=Math.SQRT2*2*Math.PI*(macroN/2-1)/macroTileM;
  // The existing baseline GGX width remains below this 10cm gravity/capillary

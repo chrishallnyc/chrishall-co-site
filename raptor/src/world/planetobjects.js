@@ -23,8 +23,13 @@ function mappedPlanetNormal(material, mapProperty, scaleProperty, side, flatView
     if (map.channel===0 && builder.geometry.hasAttribute("tangent")) {
       if (builder.object.isInstancedMesh) throw new Error("Instanced authored tangent frames need an explicit planet adapter");
       const t=attribute("tangent","vec4");
+      // Cross products reverse under an improper model/view transform. The
+      // main ENU camera and a mirrored airframe can each introduce one; an
+      // authored tangent's handedness must include both before rebuilding B.
+      const handedness=uniform(1).setName("planetTangentHandedness").onObjectUpdate(({object,camera}) =>
+        object.matrixWorld.determinantAffine()*camera.matrixWorldInverse.determinantAffine()<0?-1:1);
       tangent=modelViewMatrix.mul(vec4(t.xyz,0)).xyz.normalize().mul(side);
-      bitangent=n.cross(tangent).mul(t.w).normalize().mul(side);
+      bitangent=n.cross(tangent).mul(t.w).mul(handedness).normalize().mul(side);
     } else {
       const st=uv(map.channel),q0=flatView.dFdx(),q1=flatView.dFdy();
       const st0=st.dFdx(),st1=st.dFdy(),p1=q1.cross(n),p0=n.cross(q0);

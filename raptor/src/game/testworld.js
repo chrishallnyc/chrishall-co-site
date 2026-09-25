@@ -8,6 +8,7 @@ import * as THREE from "three";
 import { Pool } from "../engine/pools.js";
 import { buildF22 } from "../aircraft/f22v3.js";
 import { syncGearBays } from "../aircraft/gear-bays.js";
+import { useENUF22Frame } from "../engine/renderhandedness.js";
 
 const TRAIL_N = 240;
 
@@ -40,7 +41,7 @@ export class TestWorld {
 
     // the real F-22 (phase 6 v1). Model forward = -Z; testworld's heading
     // math points the jet along +Z, so an inner yaw flip aligns the nose.
-    this.jet = new THREE.Group();
+    this.jet = useENUF22Frame(new THREE.Group());
     const f22 = buildF22({ quality: aircraftQuality });
     f22.group.rotation.y = Math.PI;
     syncGearBays(f22.group, 0); // stow the legs, doors and support stays together

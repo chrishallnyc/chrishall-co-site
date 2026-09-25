@@ -193,7 +193,7 @@ const SPEC_FIELDS = [
   "loseWhen", "timeLimitS", "comms", "scoreKm",
 ];
 const SPEC_KINDS = new Set(["quick", "operation", "authored"]);
-const FRONT_NAMES = new Set(["NELLIS", "VALDEZ", "MARIANAS"]);
+const FRONT_NAMES = new Set(["NELLIS", "VALDEZ", "MARIANAS", "NEWYORK"]);
 const MISSION_TYPES = new Set(["strike", "sead", "anti_ship", "convoy", "intercept", "escort", "fleet_defense", "cap"]);
 const MAX_OBJECTIVES = 16;   // Script.objState capacity
 const MAX_COMMS = 32;        // Script.trigFired capacity (one flag per row)
@@ -210,6 +210,7 @@ function validate(spec) {
   if (!MISSION_TYPES.has(spec.type)) bad(`unknown type "${spec.type}"`);
   if (!num(spec.seed) || !num(spec.todH) || !num(spec.weatherIdx)) bad("seed/todH/weatherIdx must be numbers");
   if (!num(spec.timeLimitS) || spec.timeLimitS <= 0) bad("timeLimitS must be > 0");
+  if (spec.timeoutOutcome !== undefined && spec.timeoutOutcome !== -1 && spec.timeoutOutcome !== 1) bad("timeoutOutcome must be -1 or 1");
   if (!num(spec.scoreKm)) bad("scoreKm must be a number");
   const ps = spec.playerSpawn;
   if (!ps || !num(ps.x) || !num(ps.y) || !num(ps.alt) || !num(ps.headingDeg) || !num(ps.speed)) bad("playerSpawn needs numeric {x,y,alt,headingDeg,speed}");
@@ -309,7 +310,10 @@ function canon(v) {
 }
 
 export function specHash(spec) {
-  const s = SPEC_FIELDS.map((f) => f + "=" + canon(spec[f])).join(";");
+  // Optional rules participate in replay identity when present. Existing
+  // mission hashes stay stable when they use the original timeout rule.
+  const fields = spec.timeoutOutcome === undefined ? SPEC_FIELDS : [...SPEC_FIELDS, "timeoutOutcome"];
+  const s = fields.map((f) => f + "=" + canon(spec[f])).join(";");
   let h = 0x811c9dc5 >>> 0;
   for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 0x01000193) >>> 0;
   return h >>> 0;

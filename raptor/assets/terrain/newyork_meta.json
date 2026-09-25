@@ -1,0 +1,17 @@
+{
+  "sizeM": 65536,
+  "grid": 4096,
+  "minH": -15.0,
+  "maxH": 318.9948,
+  "centerLat": 40.7,
+  "centerLon": -74.0,
+  "mPerPx": 16.0,
+  "source": "USGS 3DEP bare-earth elevation; USDA NAIP imagery (public domain)",
+  "drape": [
+    "albedo_16k",
+    "albedo_4k",
+    "cover",
+    "n_8k",
+    "ao_8k"
+  ]
+}

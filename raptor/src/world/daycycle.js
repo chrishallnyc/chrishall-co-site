@@ -15,6 +15,7 @@ export const FRONTS = {
   VALDEZ:   { lat: 61.13, lon: -146.35, label: "Prince William Sound, AK" },
   NELLIS:   { lat: 36.24, lon: -115.03, label: "Nevada Test & Training Range" },
   MARIANAS: { lat: 13.58, lon: 144.93,  label: "Marianas / Andersen AFB" },
+  NEWYORK:  { lat: 40.70, lon: -74.00, label: "New York Harbor" },
 };
 
 // palette stops by sun elevation (degrees); lerped between neighbors
