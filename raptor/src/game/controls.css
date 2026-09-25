@@ -241,3 +241,93 @@
 
 /* Let the native dialog cover the window without browser default sizing. */
 #controls.flight-setup{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;border:0;box-sizing:border-box}#controls::backdrop{background:transparent}
+
+/* Make the controls recognizable before asking the pilot to edit a list. */
+#controls .aim-presets { margin-top:19px; }
+#controls .aim-preset-heading { display:flex; justify-content:space-between; gap:12px; margin-bottom:9px; font-size:12px; }
+#controls .aim-preset-heading output { color:var(--setup-accent); font-variant-numeric:tabular-nums; }
+#controls .aim-preset-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+#controls .aim-preset-options button { position:relative; min-height:64px; padding:11px 50px 11px 13px; text-align:left; color:var(--setup-text); background:#15212b; border:1px solid #425564; border-radius:7px; }
+#controls .aim-preset-options button[aria-pressed="true"] { background:#30322f; border-color:var(--setup-accent); }
+#controls .aim-preset-options button:hover { border-color:#bba883; }
+#controls .aim-preset-options strong { display:block; font-size:12px; }
+#controls .aim-preset-options small { display:block; margin-top:4px; color:var(--setup-muted); font-size:10px; }
+#controls .aim-preset-options button > span { position:absolute; right:12px; top:13px; color:var(--setup-accent); font-size:11px; }
+#controls .keyboard-layout { margin:0 0 24px; border:1px solid #425564; border-radius:9px; background:#131d26; overflow:hidden; }
+#controls .keyboard-layout > summary { display:flex; align-items:center; justify-content:space-between; gap:16px; cursor:pointer; min-height:60px; padding:13px 17px; list-style:none; }
+#controls .keyboard-layout > summary::-webkit-details-marker { display:none; }
+#controls .keyboard-layout > summary > span:first-child { flex:1; }
+#controls .keyboard-layout > summary::after { content:"+"; font-size:21px; color:var(--setup-accent); }
+#controls .keyboard-layout[open] > summary::after { content:"−"; }
+#controls .keyboard-layout > summary strong { display:block; font-size:13px; font-weight:600; }
+#controls .keyboard-layout > summary small { display:block; color:var(--setup-muted); font-size:11px; margin-top:3px; }
+#controls .layout-legend { display:flex; align-items:center; gap:7px; color:var(--setup-muted); font-size:10px; }
+#controls .layout-legend i { width:6px; height:6px; background:#8ec5d3; border-radius:50%; }
+#controls .layout-legend i:nth-of-type(2) { margin-left:7px; background:#e6bd7d; }
+#controls .keyboard-body { display:grid; grid-template-columns:minmax(0,1fr) 220px; column-gap:20px; padding:2px 17px 17px; }
+#controls .keyboard-rows { min-width:0; overflow-x:auto; scrollbar-width:thin; }
+#controls .keyboard-row { display:flex; gap:4px; padding:3px 0; min-width:440px; }
+#controls .keyboard-row-1 { padding-right:5%; padding-left:5%; }
+#controls .keyboard-row-2 { padding-right:8%; padding-left:8%; }
+#controls .keyboard-row-3 { padding-right:16%; padding-left:16%; }
+#controls .layout-key { display:flex; position:relative; flex:1; min-width:0; min-height:44px; padding:6px 2px; flex-direction:column; align-items:center; justify-content:center; gap:3px; color:#d7e7ee; border:1px solid #526977; border-bottom-width:3px; border-radius:4px; background:#213441; }
+#controls button.layout-key:hover { border-color:#bacdd5; background:#2c4758; }
+#controls .layout-key strong { font-size:11px; line-height:1.3; font-weight:600; }
+#controls .layout-key small { font-size:7px; white-space:nowrap; line-height:1.2; letter-spacing:.15px; color:#aed7df; }
+#controls .layout-key.key-weapons { background:#38362b; border-color:#8e7c58; }
+#controls .layout-key.key-weapons small { color:#e6bd7d; }
+#controls .layout-key.key-unused { color:#657888; background:#111c25; border-color:#293a46; }
+#controls .layout-key.key-space { flex:3; }
+#controls .layout-key[aria-pressed="true"] { border-color:var(--setup-accent); box-shadow:inset 0 0 0 1px var(--setup-accent); }
+#controls .layout-key.key-held { background:#426759; color:#fff; border-color:#afddc1; }
+#controls .layout-key.key-extra { flex:0 1 auto; min-height:36px; min-width:48px; padding:5px 8px; }
+#controls .layout-key.key-extra small { font-size:7px; }
+#controls .pointer-map { display:flex; align-items:center; gap:12px; padding:12px 0 8px; }
+#controls .pointer-map-title { flex:1; }
+#controls .pointer-map-title strong { display:block; color:#c4d3dc; font-size:10px; font-weight:500; }
+#controls .pointer-map-title span { display:block; color:var(--setup-muted); font-size:9px; margin-top:4px; }
+#controls .pointer-buttons { display:flex; flex:1.5; gap:5px; }
+#controls .pointer-buttons .layout-key strong { font-size:9px; white-space:nowrap; }
+#controls .pointer-buttons .key-unused { display:none; }
+#controls .layout-extra { display:flex; align-items:center; flex-wrap:wrap; gap:5px; padding-top:8px; border-top:1px solid var(--setup-line); }
+#controls .layout-extra > span { margin-right:6px; font-size:9px; color:var(--setup-muted); }
+#controls .layout-reference { padding-top:10px; font-size:9px; color:#899ba9; line-height:1.5; }
+#controls .layout-inspector { grid-column:2; grid-row:1 / span 4; align-self:start; padding:15px; margin-top:3px; background:#1c2b35; border:1px solid #3a525f; border-radius:7px; }
+#controls .layout-inspector-title { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:7px; padding-bottom:13px; border-bottom:1px solid #455964; }
+#controls .layout-inspector-title > strong { color:var(--setup-accent); font-size:20px; font-weight:500; }
+#controls .layout-inspector-title > span { font-size:10px; color:var(--setup-muted); }
+#controls .layout-action { display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; padding:15px 0; border-bottom:1px solid #455964; }
+#controls .layout-action > div { flex:1 1 100%; }
+#controls .layout-action strong { display:block; font-size:12px; font-weight:550; }
+#controls .layout-action div > span { display:block; color:#a5bac7; font-size:11px; margin-top:5px; }
+#controls .layout-action .setup-button { font-size:11px; padding:9px 12px; min-height:36px; }
+#controls .layout-fixed { font-size:11px; color:#b8c9b4; }
+#controls .layout-inspector-note, #controls .layout-empty { margin-top:12px; color:var(--setup-muted); font-size:10px; line-height:1.6; }
+#controls .layout-empty { margin-top:0; }
+#controls .aim-test-target { position:absolute; transform:translate(-50%,-50%); width:5.88%; height:5.88%; min-width:20px; min-height:20px; border:1px dashed #b1d9dd; border-radius:50%; background:#91c3d933; pointer-events:none; }
+#controls .aim-test-target[hidden] { display:none; }
+#controls .aim-test-target.on-target { background:#a8d4a966; border-color:#c9efd3; border-style:solid; }
+#controls .aim-exercise { display:flex; align-items:center; justify-content:space-between; gap:20px; text-align:left; padding:0 0 16px; margin-bottom:17px; border-bottom:1px solid #55715e66; }
+#controls .aim-exercise output { font-size:12px; color:#bcd7c9; line-height:1.6; }
+#controls .aim-exercise button { flex-shrink:0; font-size:11px; padding:9px 12px; min-height:36px; }
+@media (max-width:1000px) {
+  #controls .keyboard-body { grid-template-columns:minmax(0,1fr); }
+  #controls .layout-inspector { grid-column:1; grid-row:auto; margin-top:14px; }
+  #controls .layout-action { align-items:center; }
+  #controls .layout-action > div { flex:1; }
+}
+@media (max-width:580px) {
+  #controls .aim-preset-options { gap:5px; }
+  #controls .aim-preset-options button { padding:10px 8px; }
+  #controls .aim-preset-options button > span { position:static; display:block; margin-top:6px; }
+  #controls .aim-preset-options strong { font-size:11px; }
+  #controls .aim-preset-options small { font-size:9px; line-height:1.45; }
+  #controls .aim-preset-heading { font-size:11px; }
+  #controls .keyboard-layout > summary { padding:13px; }
+  #controls .layout-legend { display:none; }
+  #controls .keyboard-body { padding:0 12px 12px; }
+  #controls .keyboard-row { min-width:440px; }
+  #controls .pointer-map { align-items:flex-start; flex-direction:column; gap:9px; }
+  #controls .pointer-buttons { width:100%; }
+  #controls .aim-exercise { flex-direction:column; align-items:flex-start; gap:10px; }
+}

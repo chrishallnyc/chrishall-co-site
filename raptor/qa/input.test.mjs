@@ -276,3 +276,22 @@ test('a browser that denies gamepad access does not break keyboard flight', () =
   assert.equal(pad.connected, false);
   assert.ok(Object.values(pad.axes).every((value) => value === 0));
 });
+
+test('menu exit anchors the free cursor before applying subsequent steering motion',()=>{
+ const {input,dispatch}=fixture();input.suspended=true;input.suspended=false;
+ dispatch('mousemove',{clientX:600,clientY:400,movementX:400,movementY:-200});
+ assert.equal(input.mouse.dx,0);assert.equal(input.mouse.dy,0);
+ dispatch('mousemove',{clientX:610,clientY:404,movementX:10,movementY:4});
+ assert.equal(input.mouse.dx,10);assert.equal(input.mouse.dy,4);
+ input.consumeFrame();dispatch('mousemove',{movementX:300,target:{closest:()=>({})}});
+ dispatch('mousemove',{movementX:-300,movementY:-100});assert.equal(input.mouse.dx,0);
+ dispatch('mousemove',{movementX:8,movementY:3});assert.equal(input.mouse.dx,8);
+});
+
+test('captured relative motion has no free-cursor placement jump to discard',()=>{
+ const prior=globalThis.document;
+ try{globalThis.document={pointerLockElement:{},addEventListener(){}};
+  const {input,dispatch}=fixture();input.clear();
+  dispatch('mousemove',{movementX:8,movementY:3});assert.equal(input.mouse.dx,8);assert.equal(input.mouse.dy,3);
+ }finally{globalThis.document=prior;}
+});

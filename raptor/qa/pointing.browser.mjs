@@ -109,7 +109,7 @@ try {
     await page.keyboard.down('w');await page.waitForTimeout(350);await page.keyboard.up('w');
     assert.ok(await page.evaluate(()=>__RAPTOR.player.throttleCmd)>throttle);
     await page.keyboard.down('a');await page.waitForTimeout(200);await page.keyboard.up('a');
-    assert.equal(await page.evaluate(()=>__RAPTOR.cockpit.practiceSteps.bank),true);
+    assert.ok(Math.abs(await page.evaluate(()=>__RAPTOR.player.hudState().roll))>1,'held bank input changes actual aircraft attitude');
     await page.keyboard.press('h');await page.waitForSelector('.guide-dialog[open]');
     assert.match(await page.locator('.guide-steps').textContent(),/Slide one finger/);
     const t=await page.evaluate(()=>__RAPTOR.sim.time);await page.waitForTimeout(150);assert.equal(await page.evaluate(()=>__RAPTOR.sim.time),t);

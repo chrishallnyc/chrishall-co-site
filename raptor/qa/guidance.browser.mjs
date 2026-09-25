@@ -18,9 +18,12 @@ await check('hiding the checklist leaves key reminders visible',async()=>{
 await page.locator('[data-hide-checklist]').click();assert.equal(await page.locator('.practice-checklist').isVisible(),false);assert.equal(await page.locator('.flight-hints').isVisible(),true);
 await page.locator('[data-flight-action="pause"]').click();await page.locator('[data-checklist]').click();await resume();assert.equal(await page.locator('.practice-checklist').isVisible(),true);
 });
-await check('practice progress reacts to actual controls and collapses when complete',async()=>{
-await page.mouse.move(700,520);await page.mouse.move(722,510,{steps:8});await page.keyboard.down('w');await page.waitForTimeout(450);await page.keyboard.up('w');await page.keyboard.down('a');await page.waitForTimeout(450);await page.keyboard.up('a');
-await page.waitForSelector('.practice-checklist.complete');assert.equal(await page.locator('.practice-checklist li').count(),0);assert.equal(await page.locator('[data-first-mission]').isVisible(),true);await page.screenshot({path:out+'01-practice.png'});
+await check('flight coach reads measured flight and free-flight controls keep keyboard focus',async()=>{
+await page.locator('[data-coach-retry]').click();assert.equal(await page.evaluate(()=>document.activeElement.id),'game');
+await page.waitForFunction(()=>__RAPTOR.cockpit.coach.course.index>=1,null,{timeout:120000});
+assert.match(await page.locator('.practice-checklist h3').textContent(),/pace/);
+await page.locator('[data-coach-free]').click();assert.equal(await page.evaluate(()=>document.activeElement.id),'game');
+assert.match(await page.locator('.practice-checklist h3').textContent(),/Your airspace/);await page.screenshot({path:out+'01-practice.png'});
 });
 await check('hidden key reminders can be restored from pause independently',async()=>{
 await page.locator('.flight-hints button').click();await page.locator('[data-flight-action="pause"]').click();assert.match(await page.locator('[data-reminders]').textContent(),/Show/);await page.locator('[data-reminders]').click();await resume();assert.equal(await page.locator('.flight-hints').isVisible(),true);assert.equal(await page.locator('.practice-checklist').isVisible(),true);
@@ -31,7 +34,7 @@ await page.locator('#setup-hudScale').fill('1.4');await page.locator('#setup-sub
 await page.locator('[data-palette="deuteranopia"]').click();assert.match(await page.locator('.sample-targets').innerHTML(),/#ffa03c/);assert.equal(await page.evaluate(()=>__RAPTOR.sim.time),t);await page.locator('.setup-content').evaluate(el=>el.scrollTop=0);await page.screenshot({path:out+'02-accessibility.png'});
 });
 await check('pending graphics offer a reviewable restart and cancel preserves flight',async()=>{
-await page.locator('[data-tab="display"]').click();await page.locator('[data-quality="MED"]').click();assert.match(await page.locator('.graphics-status').textContent(),/MED is ready/);await page.locator('[data-review-restart]').click();await page.waitForSelector('.pause-dialog[open]');assert.match(await page.locator('[data-restart]').textContent(),/new graphics/);await page.locator('[data-restart]').click();await page.locator('.confirm-dialog [data-cancel]').click();assert.equal(await page.evaluate(()=>__RAPTOR.paused),true);await page.screenshot({path:out+'03-pause.png'});
+await page.locator('[data-tab="display"]').click();await page.locator('[data-quality="MED"]').click();assert.match(await page.locator('.graphics-status').textContent(),/new flight/);assert.equal(await page.locator('[data-quality="MED"]').getAttribute('aria-pressed'),'true');await page.locator('[data-review-restart]').click();await page.waitForSelector('.pause-dialog[open]');assert.match(await page.locator('[data-restart]').textContent(),/new graphics/);await page.locator('[data-restart]').click();await page.locator('.confirm-dialog [data-cancel]').click();assert.equal(await page.evaluate(()=>__RAPTOR.paused),true);await page.screenshot({path:out+'03-pause.png'});
 });
 await check('current mission briefing overrides a previously selected and filtered mission',async()=>{
 // Force only the route context, not any completed progress or gameplay result.
