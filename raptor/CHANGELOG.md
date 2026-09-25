@@ -1,5 +1,11 @@
 # RAPTOR release notes
 
+## 1.13.1 — 2026-09-25
+
+- **Full-window flight on startup:** the world now fills the current window
+  even when its size changes while flight assets are loading. This fixes a
+  half-screen blank area that could persist until a refresh or another resize.
+
 ## 1.13.0 — 2026-09-24
 
 Find your next flight faster, read the fight more clearly, and carry your pilot
