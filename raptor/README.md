@@ -93,6 +93,9 @@ F or H. Unassigned macOS Command shortcuts remain available. **Esc** always
 opens the flight menu; **P** also pauses. Visible **Pause**, **Controls**,
 **Tune feel**, **Settings**, **Pilot log**, and guide buttons remain available in
 flight. Menus and loss of window focus pause the aircraft and world.
+Preflight and setup transitions respect reduced-motion preferences. The chase
+camera gently eases horizon banking while forward aiming stays immediate;
+wingtip condensation keeps consistent spacing across display refresh rates.
 
 The aircraft follows your aim direction. Keyboard bank and rudder turns keep
 the new course when released, unless you also set a pointer target during the

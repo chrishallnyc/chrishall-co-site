@@ -1,11 +1,12 @@
 {
- "updated": "2026-09-24T19:15:32-07:00",
- "version": "v1.9.0",
- "now": "v1.9.0 — ENGINE AND COMBAT SOUND REFINED. Irregular engine pressure, fuller cannon fire and dispersed distant blasts. Selective engine mixing makes room for weapons, warnings and radio while preserving the chosen sound levels.",
+ "updated": "2026-09-24T19:41:44-07:00",
+ "version": "v1.9.1",
+ "now": "v1.9.1 — FLIGHT DECK AND MOTION REFINED. Calmer menus, clearer selections and region previews, smoother horizon response and consistent wingtip trails across refresh rates.",
  "nowPhase": 13,
  "paused": false,
- "pushes": 75,
+ "pushes": 76,
  "ledger": [
+  "2026-09-24 v1.9.1 — Visual refinement across preflight, controls, settings and flight coaching. Consistent wingtip trail spacing, short horizon easing and frame-independent cinematic transitions. Flight physics and particle capacity unchanged.",
   "2026-09-24 v1.9.0 — Further audio refinement: reduced engine loop recurrence, fuller cannon pressure and release, nine distance-aware blast stages, and selective midrange clearance for cannon, warnings and radio. Native PCM checks cover both common sample rates, timing, fuel loss, fader preferences and disposal. Audition the mix in the sound room.",
   "2026-09-24 v1.8.0 — Combined aircraft, sky and terrain graphics release. Aircraft rebuilt and refined through five successive rendered passes: continuous joins, formed bays, independent maintenance coatings, layered nozzle metal, altitude-aware sky/cloud/ground reflections and fresh contact shading. Fighter, transport and drone finishes refined. Retains v1.7.0's finer High cloud assets and cached lighting, corrected Nellis imagery with nearby one-metre tiles, scanned Alaska rock/snow, steep-slope material projection and sky/ocean rendering improvements. Flight school and controls from v1.5.0 and v1.6.0 retained; component timings do not establish combined-release performance.",
   "2026-09-24 v1.4.0 — Clouds, sky and landscapes rebuilt through repeated visual refinement. Full-resolution cloud lighting, 8K cirrus, catalogued stars and mapped Moon, 512² fine water, real 5 m central Valdez elevation data, near terrain and snow detail. Aircraft coating and self-shadows share the world lighting.",

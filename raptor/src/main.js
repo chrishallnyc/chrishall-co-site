@@ -36,7 +36,7 @@ import { AircraftLighting } from "./aircraft/lighting.js";
 import { updateF22Visuals } from "./aircraft/f22-lod.js";
 import { Soundscape } from "./game/soundscape.js";
 
-const VERSION = "1.9.0";
+const VERSION = "1.9.1";
 const PHASE = 12;
 
 // WebGPU and reverse-depth WebGL use [0,1]; ordinary WebGL uses [-1,1].
@@ -1246,12 +1246,12 @@ async function boot() {
         const center = matchOrbit ? world.jet.position : killCam.c;
         const th = now * 0.00045;
         kcPos.set(center.x + Math.cos(th) * 170, center.y + 55, center.z + Math.sin(th) * 170);
-        camera.position.lerp(kcPos, 0.08);
+        camera.position.lerp(kcPos, 1 - Math.pow(0.92, dtMs / 1000 * 60));
         camera.up.set(0, 1, 0);
         camera.lookAt(center);
       }
       if (!cine) lastJetPos.copy(world.jet.position);
-      flightfx?.update(player.fm.out, player.throttleCmd, dtMs / 1000, camera);
+      flightfx?.update(player.fm.out, player.throttleCmd, dtMs / 1000, camera, player.renderPoseVersion);
       const audioPaused = document.hidden || cockpit.paused || controls.open || sim.timescale === 0;
       soundscape?.update({ camera, time: sim.time, dt: dtMs / 1000, paused: audioPaused, cinematic: cine });
       radioSuspended = audioPaused || !!killCam;

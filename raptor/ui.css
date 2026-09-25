@@ -1,4 +1,4 @@
-:root{color-scheme:dark;--bg:#101014;--panel:#17191e;--ink:#eeeae2;--mid:#b2b1aa;--dim:#858b90;--hair:#34383e;--acc:#e8b46f;--ui-font:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+:root{color-scheme:dark;--bg:#0f1419;--panel:#192128;--ink:#f0eee7;--mid:#b6bfc4;--dim:#8f9ba4;--hair:#344048;--acc:#e8b879;--surface:#171f26;--surface-hover:#202b34;--ease-out:cubic-bezier(.2,.7,.2,1);--ui-font:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box}body{margin:0;color:var(--ink);background:var(--bg);font-family:var(--ui-font);font-size:14px}button,input,select{font:inherit}button,a,input,select{touch-action:manipulation}button{cursor:pointer}button:disabled{cursor:not-allowed}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:4px}h1,h2,h3,p{margin:0}button,a{-webkit-tap-highlight-color:transparent}[hidden]{display:none!important}kbd{display:inline-block;padding:2px 6px;border:1px solid #656b72;border-radius:4px;background:#282d33;color:#fff;font:11px var(--mono);white-space:nowrap}a{color:inherit}
 .ui-button{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:42px;padding:10px 17px;border:1px solid var(--hair);border-radius:7px;background:#1d2127;color:var(--ink);font-weight:600;font-size:13px;line-height:1.25;text-decoration:none;transition:background .15s,border-color .15s,transform .15s}
 .ui-button:hover:not(:disabled){background:#2a3037;border-color:#767d83}.ui-button.primary{background:var(--acc);color:#171511;border-color:var(--acc)}.ui-button.primary:hover:not(:disabled){background:#f5c786;border-color:#f5c786}.ui-button:disabled{opacity:.45}.ui-button.selected,.ui-button[aria-pressed=true]{border-color:var(--acc);color:var(--acc);background:#2c2821}.ui-button.icon-button{width:42px;padding:0;flex-shrink:0}.text-button{padding:7px 0;border:0;background:none;color:var(--acc);font-size:13px;text-decoration:none;text-underline-offset:4px}.text-button:hover{text-decoration:underline}.eyebrow{font:10px var(--mono);font-weight:600;letter-spacing:1.8px;text-transform:uppercase;color:var(--acc);line-height:1.6}.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#a5bc9b;margin:0 7px 1px 0}
@@ -27,3 +27,81 @@
 .pause-dialog{max-width:720px}.pause-dialog .dialog-body{padding-top:20px}.pause-dialog .pause-overview{margin:16px 0}.pause-dialog .pause-primary{position:sticky;bottom:-1px;z-index:1;box-shadow:0 8px 18px #171b21}.pause-brief{padding:14px 16px;border:1px solid #778b9f3b;background:#3142541a;border-radius:7px;margin:15px 0}.pause-brief>div{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.pause-brief .eyebrow{font-size:9px;margin:0}.pause-brief strong{display:block;font-size:13px;font-weight:500}.pause-brief small{font-size:10px;color:var(--mid)}.pause-brief p{font-size:11px;line-height:1.6;color:var(--mid);margin:7px 0 0}.pause-brief ul{padding:0;margin:10px 0 0;list-style:none}.pause-brief li{display:flex;align-items:baseline;gap:9px;padding:5px 0;font-size:12px}.pause-brief li b{flex:1;font-weight:400}.pause-brief li.done,.pause-brief li.protected{color:#b8dfb4}.pause-brief li.failed{color:#efb591}
 .quick-tune{border:1px solid #85949e55;background:#131920;border-radius:7px;margin:16px 0}.quick-tune summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;cursor:pointer;font-size:13px;font-weight:550;list-style:none}.quick-tune summary::-webkit-details-marker{display:none}.quick-tune summary:focus-visible{outline:2px solid var(--acc);outline-offset:3px}.quick-tune summary small{font-size:10px;font-weight:400;color:var(--dim);margin-left:10px}.quick-tune[open] summary{border-bottom:1px solid #85949e33}.quick-tune[open] summary>span:last-child{transform:rotate(45deg)}.quick-tune-body{padding:14px 16px 12px}.quick-device{display:flex;gap:7px;margin-bottom:16px}.quick-device .ui-button{flex:1;font-size:11px;min-height:35px;justify-content:center}.quick-device [aria-pressed=true]{color:var(--acc);border-color:#e8b46f88;background:#e8b46f14}.quick-range{display:block}.quick-range>span{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:11px}.quick-range b{font-weight:400}.quick-range output{font:11px var(--mono);color:var(--acc)}.quick-range input{display:block;width:100%;margin:9px 0 0;accent-color:var(--acc);min-height:20px;cursor:pointer}.quick-tune #quick-gain-help{font-size:10px;color:var(--mid);margin:5px 0 16px;line-height:1.5}.quick-columns{display:grid;grid-template-columns:1fr 1fr;gap:24px}.quick-switches{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:11px;color:var(--mid)}.quick-switches label{display:flex;align-items:center;gap:7px;cursor:pointer}.quick-switches input{accent-color:var(--acc);width:15px;height:15px}.quick-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--hair)}.quick-footer>span{font-size:9px;color:var(--dim)}.quick-footer .text-button{font-size:10px;min-height:28px}.pause-guidance{gap:12px 18px}.pause-guidance .text-button{font-size:11px}.flight-tools [data-flight-action=tune]{color:#c7dfdc}
 @media(max-width:760px){.quick-tune summary small{display:block;margin:5px 0 0}.quick-columns{gap:16px}.pause-secondary{flex-wrap:wrap}.pause-brief li{font-size:11px}.pause-dialog .pause-primary{bottom:0}.pause-grid{gap:7px}.pause-grid .ui-button{font-size:11px}.pause-note{font-size:10px}}
+
+/* Flight deck finish: restrained surfaces, readable instruments, quiet motion. */
+::selection{background:#e8b87940;color:var(--ink)}
+body{font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+.flightdeck{background:linear-gradient(145deg,#18232a70,transparent 48%),var(--bg);scrollbar-color:#4f626e var(--bg);scrollbar-width:thin}
+.deck-header{min-height:88px;border-bottom-color:#9eb2be24}
+.game-brand{gap:14px;color:var(--acc)}
+.game-brand small{letter-spacing:2.4px;color:var(--mid)}
+.deck-nav .ui-button{border-color:transparent;color:var(--mid);font-weight:500}
+.deck-nav .ui-button:hover{border-color:var(--hair);color:var(--ink)}
+.deck-intro{position:relative;isolation:isolate;align-items:center;padding:30px 0 28px;min-height:232px}
+.deck-welcome,.deck-readiness{position:relative;z-index:1}
+.deck-intro h1{font-size:clamp(38px,4.2vw,60px);letter-spacing:-2.6px;font-weight:500;line-height:1.08;text-wrap:balance;margin:14px 0 18px}
+.deck-intro>.deck-welcome>p:last-child{font-size:15px;line-height:1.75;color:var(--mid)}
+.deck-aircraft{position:absolute;z-index:0;left:44%;top:50%;transform:translate(-50%,-50%) rotate(-14deg);width:290px;height:236px;color:#93adba;pointer-events:none}
+.aircraft-body{fill:#8aa5b80a;stroke-width:1;stroke-opacity:.42}
+.aircraft-panels{opacity:.27}.aircraft-guides{opacity:.22}
+.deck-aircraft text{font:7px var(--mono);letter-spacing:1.6px;fill:currentColor;opacity:.5;stroke:none}
+.deck-readiness{min-width:300px;padding-left:24px;border-left:1px solid #9eb2be1c}
+.readiness-label{font-size:9px;letter-spacing:1.8px;margin-bottom:8px}
+.readiness-link{padding:10px 0;gap:14px;min-height:48px;transition:color .2s var(--ease-out)}
+.readiness-link>span:nth-child(2){color:var(--ink);font:12px var(--ui-font)}
+.readiness-link>span:first-child{color:var(--dim)}
+.readiness-link small{font-size:10px;color:var(--dim);margin-top:4px}
+.readiness-link>b{color:var(--dim);transition:transform .2s var(--ease-out),color .2s}
+.readiness-link:hover>b{color:var(--acc);transform:translate(2px,-2px)}
+.ui-button{min-height:44px;border-radius:8px;background:var(--surface);border-color:var(--hair);font-weight:500;transition:background .2s var(--ease-out),border-color .2s var(--ease-out),color .2s var(--ease-out),transform .2s var(--ease-out),box-shadow .2s var(--ease-out)}
+.ui-button:hover:not(:disabled){background:var(--surface-hover);border-color:#6b8290}
+.ui-button:active:not(:disabled){transform:translateY(1px)}
+.ui-button.primary{font-weight:600;box-shadow:inset 0 1px 0 #fff3,0 4px 14px #0002}
+.ui-button.primary:hover:not(:disabled){background:#f4c991;border-color:#f4c991;box-shadow:inset 0 1px 0 #fff4,0 6px 20px #0003}
+.ui-button.selected,.ui-button[aria-pressed=true]{background:#e8b87912;border-color:#e8b87980;color:var(--acc)}
+.deck-input{padding:16px 20px;border-color:#9eb2be24;background:#b7d5e205;border-radius:10px;gap:20px}
+.deck-input .eyebrow{color:var(--dim);letter-spacing:1.5px}
+.deck-input b{font-size:14px}.deck-input-choices .ui-button[aria-pressed=true]{background:#e8b87912;border-color:#e8b87980}
+.deck-key-reference{gap:12px 18px;padding-bottom:28px;color:var(--dim)}
+kbd{background:#a0b9ca0d;border-color:#8a9daa45;border-bottom-color:#8a9daa75;border-radius:4px;color:#dce4e7;box-shadow:0 1px 0 #0005}
+.section-heading{margin-bottom:16px}.section-heading h2{font-size:16px;font-weight:500;letter-spacing:-.2px}
+.mode-grid{gap:12px}.mode-card{padding:17px 19px;min-height:108px;border-color:#9eb2be2c;border-radius:10px;background:var(--surface);transition:background .22s var(--ease-out),border-color .22s var(--ease-out),box-shadow .22s var(--ease-out)}
+.mode-card:hover{border-color:#718793;background:var(--surface-hover)}
+.mode-card.selected{border-color:#e8b879b3;background:#e8b8790d;box-shadow:inset 0 1px 0 #e8b87922}
+.mode-card.selected .mode-number{color:var(--acc)}
+.mode-number{margin-bottom:12px;letter-spacing:1px}.mode-card b{font-size:15px;font-weight:500}.mode-card small{font-size:12px;line-height:1.5;color:var(--dim)}
+.mode-check{top:16px;right:17px}.launch-layout{gap:32px;padding-top:28px}
+.region-card{border-color:#9eb2be2c;border-radius:10px;background:var(--surface);transition:background .25s var(--ease-out),border-color .25s var(--ease-out),box-shadow .25s var(--ease-out)}
+.region-card.selected{border-color:#e8b879b3;box-shadow:inset 0 -2px 0 #e8b87966}
+.region-art{height:144px;background-image:linear-gradient(180deg,#101b2620,#101b2600 45%,#121b2680),var(--terrain-image);filter:saturate(.8);transition:filter .3s var(--ease-out)}
+.region-card:hover:not(:disabled) .region-art,.region-card.selected .region-art{filter:saturate(1.1)}
+.region-tag{top:12px;left:12px;max-width:calc(100% - 24px);padding:5px 7px;font-size:8px;background:#111b24de;border-color:#d5e4ea26;letter-spacing:.1px}
+.region-copy{padding:15px 15px 17px}.region-copy>b{font-size:18px;font-weight:500;letter-spacing:-.25px}.region-copy>small{font-size:11px;color:var(--dim)}
+.time-choices .ui-button{min-height:40px;font-size:12px;background:transparent}
+.time-choices .ui-button[aria-pressed=true]{background:#e8b87912}
+.flight-brief{border-left-color:#9eb2be24;padding-left:28px}.flight-brief h2{font-size:29px;font-weight:500;letter-spacing:-.8px;margin:13px 0}
+.flight-brief>p:not(.eyebrow){font-size:13px;line-height:1.8}.flight-brief li{padding-top:6px;padding-bottom:6px}.brief-footer{border-top-color:#9eb2be24;line-height:1.65}
+.launch-bar{background:var(--bg);border-top-color:#9eb2be33;box-shadow:0 -12px 24px #0f14198a;backdrop-filter:none;padding:17px 0}
+.launch-bar>div>b{font-size:16px;font-weight:500}.launch-bar>div>span{font-size:11px;line-height:1.5}
+.launch-button{min-height:54px;min-width:244px;padding:14px 22px;letter-spacing:.1px}
+.launch-button>span:last-child{transition:transform .2s var(--ease-out)}.launch-button:hover>span:last-child{transform:translate(2px,-2px)}
+.deck-footer{border-top-color:#9eb2be14;line-height:1.6}.deck-footer .text-button,.deck-footer a{min-height:32px;display:inline-flex;align-items:center}
+.game-dialog{background:var(--bg);border-color:#5d738166;border-radius:14px;box-shadow:0 24px 80px #0008}
+.game-dialog::backdrop{background:#050b12b8;backdrop-filter:none}
+.dialog-header{background:#bedcec05;border-bottom-color:#9eb2be24}.dialog-header h2{letter-spacing:-.7px}
+.dialog-body{scrollbar-color:#4f626e var(--bg);scrollbar-width:thin}
+.flight-tools{gap:6px}.flight-tools .ui-button{background:#101b24ed;border-color:#b1c8d43b;box-shadow:0 2px 8px #0002;color:#d9e2e6}
+.flight-tools .ui-button:hover{background:#25343eef;border-color:#99b0bd88}
+.flight-hints{background:#101b24e8;border-color:#b1c8d433;border-radius:8px;padding:10px 14px;color:#bdcbd3}
+.flight-toast{border-color:#a5c0cf66;background:#182630f2;box-shadow:0 6px 24px #0003}
+@media(min-width:1251px){.deck-aircraft{left:52%}}
+@media(max-width:1250px){.deck-aircraft{display:none}}
+@media(max-width:1050px){.deck-aircraft{display:none}.deck-intro h1{font-size:46px}.deck-readiness{min-width:275px;padding-left:20px}.region-copy{padding:13px 11px}.region-copy>b{font-size:16px}.region-copy>small{font-size:10px}.launch-layout{gap:22px}.flight-brief{padding-left:20px}}
+@media(max-width:760px){.deck-header{padding:22px 0;gap:20px}.deck-nav .ui-button{background:#b7d5e205;border-color:#9eb2be24;min-height:44px}.deck-intro{min-height:0;padding:30px 0}.deck-intro h1{font-size:42px;letter-spacing:-1.8px;margin:12px 0 16px}.deck-intro>.deck-welcome>p:last-child{font-size:14px}.deck-input{padding:15px;gap:12px}.deck-input b{font-size:13px}.deck-key-reference{padding-bottom:27px;gap:12px 16px}.section-heading{gap:12px}.mode-grid{gap:10px}.mode-card{padding:16px;min-height:108px}.mode-card small{font-size:11px}.launch-layout{gap:24px;padding-top:28px}.region-art{height:124px}.flight-brief{padding:20px;background:#b7d5e205;border-color:#9eb2be24}.flight-brief h2{font-size:27px}.time-choices .ui-button{min-height:44px}.launch-bar{gap:12px;padding:15px 0 calc(15px + env(safe-area-inset-bottom,0px))}.launch-button{min-width:155px;min-height:52px;padding:12px 16px}.launch-bar>div>b{font-size:12px}.launch-bar>div>span{font-size:10px}.deck-footer>div{gap:14px;flex-wrap:wrap}.flight-tools{gap:4px}.flight-hints{padding:8px 10px}}
+@media(max-width:480px){.region-art{height:102px}.region-card{min-height:102px;grid-template-columns:106px 1fr}.region-copy{padding:20px 17px}.region-copy>b{font-size:18px}.region-copy>small{font-size:11px}.region-check{bottom:44px}.deck-intro h1{font-size:39px}}
+@media(prefers-reduced-motion:no-preference){
+  @keyframes deck-arrive{from{transform:translateY(7px);opacity:.7}to{transform:translateY(0);opacity:1}}
+  @keyframes panel-arrive{from{transform:translateY(6px);opacity:.85}to{transform:translateY(0);opacity:1}}
+  .deck-welcome{animation:deck-arrive .55s var(--ease-out) both}
+  .game-dialog[open]{animation:panel-arrive .24s var(--ease-out) both}
+}
