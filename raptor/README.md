@@ -32,11 +32,13 @@ Deploys via the `raptor` Vercel project (rootDirectory `raptor`) on push to main
 
 ## Set up a flight
 
-Start with **Practice flight**, choose a region and time, then use **Controls**
-and **Settings** before launching. Preflight shows your current essential keys,
-names missing bindings, and links directly to **Needs a key** for repair.
-The launch button stays available as you scroll; campaign progress is visible
-before you choose a flight.
+Choose **Mouse** or **Trackpad**, then **Start flying**. A fresh browser starts
+with Practice flight over Nellis at high noon, already airborne with no enemies
+or time limit. Returning pilots see their saved flight choice beside the launch
+button. **Customize flight** opens region, time, battle, campaign and operation
+choices; **Done** returns focus to launch. **Controls**, **Settings**, **Pilot log**
+and **How to fly** remain available above the opening scene. Missing essential
+bindings show a warning with a direct route to **Needs a key** for repair.
 
 The visual keyboard is the main editor in **Controls**; **Edit keys** returns
 there from farther down the page. It follows a complete US MacBook layout,
@@ -74,7 +76,7 @@ aircraft; the last tap stays visible after you release it. **Try aim targets**
 adds five short pointer exercises to check your sensitivity. **Center preview**
 starts the aiming preview from the middle; **Esc** finishes testing.
 
-Choose **Mouse** or **MacBook trackpad** on preflight or in Controls. Both devices
+Choose **Mouse** or **Trackpad** on preflight (**MacBook trackpad** in Controls). Both devices
 remain usable; the choice recalls that device’s sensitivity. Mouse, trackpad,
 and controller gains save separately. Trackpad starts at 0.65×; mouse and
 controller start at 1×. Existing controller gain is retained when migrating an
@@ -90,9 +92,11 @@ a number pad or function key. On the trackpad, steer without clicking or
 dragging; lift and reposition between strokes, and hold **F** to fire with your
 other hand. Existing custom bindings stay intact, including keys already using
 F or H. Unassigned macOS Command shortcuts remain available. **Esc** always
-opens the flight menu; **P** also pauses. Visible **Pause**, **Controls**,
-**Tune feel**, **Settings**, **Pilot log**, and guide buttons remain available in
-flight. Menus and loss of window focus pause the aircraft and world.
+opens the flight menu; **P** also pauses. Practice keeps **Pause**, **Tune feel**,
+**How to fly** and optional pointer capture in its toolbar. Open **Esc → Flight
+options** for **Customize controls**, **Display & sound**, or **Your pilot log**;
+combat flights also keep those shortcuts in the toolbar. Menus and loss of
+window focus pause the aircraft and world.
 Preflight and setup transitions respect reduced-motion preferences. The chase
 camera gently eases horizon banking while forward aiming stays immediate;
 wingtip condensation keeps consistent spacing across display refresh rates.
@@ -115,6 +119,10 @@ saved preferences as the full Controls and Settings screens. Resume when ready;
 the world stays paused while you adjust them. During missions, Pause also shows
 current objectives, remaining time and protected units. Protection losses are
 kept separate from objective completion counts.
+In missions, the HUD highlights the current required objective and shows its
+heading and distance when a live target or mission area is available. Objective
+labels name the actual target type; reaching an area with a height limit also
+shows the required height above terrain.
 
 Practice starts airborne without enemies, mission scoring or ticket pressure.
 The flight coach teaches five maneuvers: steady flight, throttle control, a
@@ -132,6 +140,17 @@ adjust your setup before continuing. Completing all five exercises saves a
 graduation in this browser; replaying or recovering does not erase it. If local
 storage is unavailable, the completion remains valid for the current session
 and the coach reports that it could not be saved.
+
+To present the game and hand it to a new pilot:
+
+1. Launch Practice flight, then choose **Start flying** on the short welcome
+   card. Fly a brief demonstration; **W / S** adjust throttle and **R** centers aim.
+2. Press **Esc**, then **Replay flight school** or **Start flight school**. This
+   restores level flight, restarts the five lessons, and shows the coach and key
+   reminders without clearing earned graduation or campaign progress.
+3. Give the controls to the guest while the welcome card is paused. They choose
+   **Start flying** when ready. **Esc → Reset to level flight** is visible beside
+   the flight-school action whenever they need a fresh aircraft.
 
 Display settings include graphics preset, resolution scale, field of view, and
 an FPS display. Preset changes update render scale, terrain detail and aircraft
@@ -158,8 +177,8 @@ behavior while Auto is selected.
 Accessibility includes an illustrative HUD/text-size and target-color preview,
 reduced combat flashes, and separate switches for key reminders and the practice
 coach. The finished course collapses into a graduation card with campaign and
-replay choices. Restore hidden reminders or the coach from **Pause** without
-changing the other.
+replay choices. Restore hidden reminders or the coach from **Pause → Flight
+options** without changing the other.
 Audio has a visible mute control and separate master, engine, weapon, and
 warnings/radio levels. Master volume and mute also apply to spoken radio.
 
@@ -176,6 +195,11 @@ stay in this browser's local storage, separately for each origin/port.
 **Pilot log** shows briefings,
 unlocks, completed missions, and operation status; during a campaign flight it
 opens the current mission. An unfinished flight restarts when reloaded or left.
+After a saved campaign victory, the result card offers the next available
+mission. Saved operation sorties offer **Continue operation** while the front remains
+active. A won or lost operation returns to preflight, where **Start new operation**
+asks before replacing its save. An unsaved result offers **Retry operation sortie** and explains what
+would be lost.
 Private browsing or blocked storage limits persistence; the UI reports save
 failures and keeps changes usable for the current session.
 
@@ -283,6 +307,7 @@ With the static server running, an **existing Playwright installation** and
 Google Chrome are required for the browser checks:
 
 ```sh
+node raptor/qa/opening.browser.mjs
 node raptor/qa/browser.mjs
 node raptor/qa/controls.browser.mjs
 node raptor/qa/controls-history.browser.mjs
@@ -339,6 +364,8 @@ end-of-mission outcomes to test saving and debrief transitions; it does not
 claim to beat the missions. Checks do not use your normal browser profile or
 progress. Run GPU playthroughs one at a time; recording and other GPU activity
 can affect frame-time measurements.
+`opening` checks the first screen, optional customization, returning campaign
+briefings, keyboard focus and narrow layouts without starting a flight renderer.
 
 ## Audio
 

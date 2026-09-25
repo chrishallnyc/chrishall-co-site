@@ -1,5 +1,30 @@
 # RAPTOR release notes
 
+## 1.11.0 — 2026-09-24
+
+Start flying sooner, then hand the controls to another pilot without rebuilding
+your setup.
+
+- **A simpler opening:** fresh visitors get Practice flight over Nellis with
+  one **Start flying** action. Region, time and mission choices live in
+  **Customize flight**; returning pilots keep their saved selection.
+- **An easier handoff:** the shorter welcome card puts steering and essential
+  keys beside **Start flying**. **Esc → Replay flight school** resets the aircraft
+  and lessons, restores the coach and reminders, and keeps earned progress.
+  **Reset to level flight** stays visible; advanced settings sit in **Flight options**.
+- **Clearer missions:** objective labels name targets, and the active task shows
+  heading and distance. Saved campaign victories offer the next mission;
+  operations distinguish continuing a saved front from retrying an unsaved result.
+  Won or lost operations return to preflight before starting over. Rejected
+  missile launches explain missing lock or empty ammunition.
+- **Prepared first use:** afterburner programs and already-prepared near-terrain
+  geometry join the loading draws, so these resources are ready before flight.
+  Temporary rendering state is restored before the clean starting view.
+- **Campaign loading:** fixes ace-livery material initialization that could block
+  the second campaign mission from loading.
+
+See the [presenter and guest handoff instructions](README.md#set-up-a-flight).
+
 ## 1.10.0 — 2026-09-24
 
 Smoother flight through measured rendering budgets and more consistent feedback.

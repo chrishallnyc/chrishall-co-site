@@ -1,11 +1,12 @@
 {
- "updated": "2026-09-24T19:56:58-07:00",
- "version": "v1.10.0",
- "now": "v1.10.0 — SMOOTHER FLIGHT. Auto balances scene resolution against measured frame times, with sharper-timed instruments and feedback, prepared cloud lighting, and less work competing during flight.",
+ "updated": "2026-09-24T20:31:41-07:00",
+ "version": "v1.11.0",
+ "now": "v1.11.0 — READY TO FLY. A simpler opening, a paused flight-school handoff for the next pilot, clearer mission directions and prepared first-use rendering.",
  "nowPhase": 13,
  "paused": false,
- "pushes": 77,
+ "pushes": 78,
  "ledger": [
+  "2026-09-24 v1.11.0 — Simpler launch and welcome screens, optional flight customization, visible flight-school replay and level-flight reset, clearer objective headings and distances, saved-result continuation, and preflight preparation of exhaust programs and allocated near-terrain geometry. Handoffs keep earned training and campaign progress.",
   "2026-09-24 v1.10.0 — Frame pacing and responsiveness: measured Auto resolution budget, interpolated HUD and air markers, elapsed-time effects, immediate flight-coach feedback, preflight cloud-light warming and terrain preparation, cached aircraft transforms, and scheduled reflection updates. Manual graphics choices and deterministic flight physics retained.",
   "2026-09-24 v1.9.1 — Visual refinement across preflight, controls, settings and flight coaching. Consistent wingtip trail spacing, short horizon easing and frame-independent cinematic transitions. Flight physics and particle capacity unchanged.",
   "2026-09-24 v1.9.0 — Further audio refinement: reduced engine loop recurrence, fuller cannon pressure and release, nine distance-aware blast stages, and selective midrange clearance for cannon, warnings and radio. Native PCM checks cover both common sample rates, timing, fuel loss, fader preferences and disposal. Audition the mix in the sound room.",

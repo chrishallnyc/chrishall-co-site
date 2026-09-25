@@ -46,6 +46,10 @@ export class Missiles {
     // seeker
     this.lockTarget = -1;
     this.lockProgress = 0;
+    // Presentation observes the actual launch decision, never a later seeker
+    // state. These notifications are not part of simulation state or hashes.
+    this.launchSequence = 0;
+    this.launchOutcome = null;
 
     // render: missile bodies + smoke trail
     const bGeo = new THREE.BoxGeometry(0.13, 0.13, 3.0);
@@ -112,6 +116,7 @@ export class Missiles {
     }
 
     // ---- launch on edge, locked only ----
+    let launched = false;
     if (fireEdge && this.ammo > 0 && this.locked()) {
       const slot = this.ammo - 1; // fixed rail order keeps slots deterministic
       this.ammo--;
@@ -128,6 +133,11 @@ export class Missiles {
       r[o + 6] = AIM9X.massKg; r[o + 7] = 0; r[o + 8] = this.lockTarget;
       this.live[slot] = 1;
       this._lastPuff.set([r[o], r[o + 1], r[o + 2]], slot * 3);
+      launched = true;
+    }
+    if (fireEdge) {
+      this.launchSequence++;
+      this.launchOutcome = launched ? 'launched' : this.ammo <= 0 ? 'empty' : 'no-lock';
     }
 
     // ---- flight ----

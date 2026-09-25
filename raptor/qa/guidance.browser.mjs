@@ -16,7 +16,7 @@ await page.waitForFunction(()=>window.__RAPTOR?.ready||window.__RAPTOR?.failure,
 await page.waitForSelector('#veil',{state:'detached'});await page.bringToFront();await resume();
 await check('hiding the checklist leaves key reminders visible',async()=>{
 await page.locator('[data-hide-checklist]').click();assert.equal(await page.locator('.practice-checklist').isVisible(),false);assert.equal(await page.locator('.flight-hints').isVisible(),true);
-await page.locator('[data-flight-action="pause"]').click();await page.locator('[data-checklist]').click();await resume();assert.equal(await page.locator('.practice-checklist').isVisible(),true);
+await page.locator('[data-flight-action="pause"]').click();await page.locator('.pause-options > summary').click();await page.locator('[data-checklist]').click();await resume();assert.equal(await page.locator('.practice-checklist').isVisible(),true);
 });
 await check('flight coach reads measured flight and free-flight controls keep keyboard focus',async()=>{
 await page.locator('[data-coach-retry]').click();assert.equal(await page.evaluate(()=>document.activeElement.id),'game');
@@ -26,10 +26,10 @@ await page.locator('[data-coach-free]').click();assert.equal(await page.evaluate
 assert.match(await page.locator('.practice-checklist h3').textContent(),/Your airspace/);await page.screenshot({path:out+'01-practice.png'});
 });
 await check('hidden key reminders can be restored from pause independently',async()=>{
-await page.locator('.flight-hints button').click();await page.locator('[data-flight-action="pause"]').click();assert.match(await page.locator('[data-reminders]').textContent(),/Show/);await page.locator('[data-reminders]').click();await resume();assert.equal(await page.locator('.flight-hints').isVisible(),true);assert.equal(await page.locator('.practice-checklist').isVisible(),true);
+await page.locator('.flight-hints button').click();await page.locator('[data-flight-action="pause"]').click();await page.locator('.pause-options > summary').click();assert.match(await page.locator('[data-reminders]').textContent(),/Show/);await page.locator('[data-reminders]').click();await resume();assert.equal(await page.locator('.flight-hints').isVisible(),true);assert.equal(await page.locator('.practice-checklist').isVisible(),true);
 });
 await check('accessibility preview scales while the simulation remains frozen',async()=>{
-await page.locator('[data-flight-action="settings"]').click();await page.locator('[data-tab="accessibility"]').click();const t=await page.evaluate(()=>__RAPTOR.sim.time);
+await page.locator('[data-flight-action="pause"]').click();await page.locator('.pause-options > summary').click();await page.locator('[data-pause="settings"]').click();await page.locator('[data-tab="accessibility"]').click();const t=await page.evaluate(()=>__RAPTOR.sim.time);
 await page.locator('#setup-hudScale').fill('1.4');await page.locator('#setup-subtitleScale').fill('1.6');assert.equal(await page.locator('.instrument-sample').evaluate(el=>el.style.getPropertyValue('--instrument-scale')),'1.4');
 await page.locator('[data-palette="deuteranopia"]').click();assert.match(await page.locator('.sample-targets').innerHTML(),/#ffa03c/);assert.equal(await page.evaluate(()=>__RAPTOR.sim.time),t);await page.locator('.setup-content').evaluate(el=>el.scrollTop=0);await page.screenshot({path:out+'02-accessibility.png'});
 });
