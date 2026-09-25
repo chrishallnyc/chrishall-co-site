@@ -465,6 +465,7 @@ node raptor/qa/backup.browser.mjs
 node raptor/qa/pilotlog.browser.mjs
 node raptor/qa/tactical.browser.mjs
 node raptor/qa/loading.browser.mjs
+RAPTOR_BASE_URL=http://localhost:8082/ node raptor/qa/viewport.browser.mjs
 node raptor/qa/accessibility.browser.mjs
 node raptor/qa/missions.browser.mjs
 node raptor/qa/pointing.browser.mjs
@@ -494,9 +495,9 @@ HEADED=1 RECORD=1 node raptor/qa/flight-school.browser.mjs
 | QA environment variable | Meaning |
 | --- | --- |
 | `PLAYWRIGHT_MODULE` | Optional absolute path to an existing Playwright module entry point. |
-| `RAPTOR_BASE_URL` | Server URL; default `http://localhost:8082/`. |
+| `RAPTOR_BASE_URL` | Server URL; default `http://localhost:8082/`, except `viewport` uses port 8097. Its command above overrides this to match the local server. |
 | `RAPTOR_TEST_OUTPUT` | Optional artifact directory; each script has its own default under `.context/`. |
-| `RAPTOR_TEST_BACKEND` | `webgpu` selects WebGPU for the tactical-map browser check; its default is `webgl`. |
+| `RAPTOR_TEST_BACKEND` | `webgpu` selects WebGPU for the tactical-map browser check; its default is `webgl`. For `viewport`, `webgpu` or `webgl` selects one scenario; the default runs both. |
 | `HEADED` | `1` shows Chrome; otherwise the scripts run headless. |
 | `RECORD` | `1` records the flight-school browser check; optional for that script. |
 
@@ -517,6 +518,9 @@ damaged profile at narrow widths, followed by a preflight reload.
 flights; [QA details](qa/README.md) describe both renderer paths and pause checks.
 `accessibility` checks modal isolation, mute migration and illustrative previews.
 `loading` checks loading stages and recovery from missing game/mission files.
+`viewport` checks window growth and shrink during loading, live resize and paused
+resize/resume with AUTO graphics on WebGPU and WebGL; [QA details](qa/README.md)
+describe display coverage and artifact defaults.
 The missions check flies the three campaign regions, checks HIGH/WebGL paths, and injects
 end-of-mission outcomes to test saving and debrief transitions; it does not
 claim to beat the missions. Checks do not use your normal browser profile or
