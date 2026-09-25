@@ -17,7 +17,7 @@ function between(start, end) {
   return main.slice(from, to);
 }
 const boot = between('  const frameBudget = new FrameBudget(', '  // MAXFI A1: TRAA');
-const resize = between('  window.addEventListener("resize", () => {', '  // public hooks');
+const resize = between('  const resizeFlightView = () => {', '  document.addEventListener("visibilitychange", () => {');
 const frame = between('  function frame(now) {', '    if (input.pressed("debug"))');
 const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} != ${expected}`);
 
@@ -55,6 +55,9 @@ function harness({ benchmark = null } = {}) {
   };
   const program = new Function(...Object.keys(env), `${boot}\n${resize}\n${frame}\n  }\nreturn { frame, frameBudget };`);
   const runtime = program(...Object.values(env));
+  assert.deepEqual([calls.sizes, calls.history, calls.exposure], [1, 1, 1],
+    'boot synchronizes the canvas and invalidates history before the first frame');
+  calls.sizes = calls.history = calls.exposure = 0;
   return { ...runtime, state, terrain, cockpit, calls, document, storage,
     ratio: () => ratio,
     tick: (ms = 16.7, count = 1) => { for (let i = 0; i < count; i++) runtime.frame(now += ms); },
