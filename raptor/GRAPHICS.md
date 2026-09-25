@@ -6,6 +6,9 @@ paths. WebGPU supplies volumetric clouds, temporal antialiasing, bloom, and
 spectral water. WebGL2 retains physical atmosphere, lit cloud cards, material
 detail, the Moon and stars, and Gerstner water.
 
+The [1.6 validation report](GRAPHICS-1.6.md) records the six refinement passes,
+seven measured improvements, native comparisons and remaining limits.
+
 ## Coordinate and lighting contracts
 
 Flight dynamics and combat state use local ENU metres: X east, Y north, Z up.

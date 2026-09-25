@@ -27,6 +27,7 @@ export function terrainSourcePreset(tier, override = null, front = 'NELLIS', bac
 export function requestedBootAssets(tier, { backend, front, flags,
   hasTerrain = true, hasOcean = true, sourceEnabled = false, textureLimit = 8192 } = {}) {
   const noise = flags?.get('cloudnoise');
+  const highDetail = tier === 'HIGH' || tier === 'ULTRA';
   return {
     cirrus: cirrusAtlasResolution(tier, textureLimit),
     noise: ['standard', 'high', 'ultra'].includes(noise) ? noise : tierParams(tier).cloudNoise,
@@ -34,6 +35,10 @@ export function requestedBootAssets(tier, { backend, front, flags,
       ? oceanFineResolution(tier, flags?.get('waterfine')) : 0,
     source: sourceEnabled && hasTerrain
       ? terrainSourcePreset(tier, flags?.get('terrainsource'), front, backend) : '0',
+    photo: hasTerrain && highDetail && front === 'VALDEZ'
+      && flags?.get('terrainmaterials') !== '0' && flags?.get('terrainphoto') !== '0',
+    geographic: hasTerrain && highDetail && front === 'NELLIS' && backend === 'webgpu'
+      && flags?.get('drape') !== '0' && flags?.get('geographicdetail') !== '0',
   };
 }
 
@@ -103,6 +108,8 @@ export function assetsNeedReload(bootRequest, nextRequest, shadowStats = null) {
     || bootRequest.noise !== nextRequest.noise
     || bootRequest.fineOcean !== nextRequest.fineOcean
     || bootRequest.source !== nextRequest.source
+    || bootRequest.photo !== nextRequest.photo
+    || bootRequest.geographic !== nextRequest.geographic
     // Shadow resolution stays fixed for the compiled target's lifetime.
     // Disabled shadows need no resize; enabling them can reveal a mismatch
     // even when both tiers use the same texture assets (LOW -> MED).

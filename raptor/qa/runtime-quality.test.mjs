@@ -30,7 +30,7 @@ beforeEach(()=>{storage.clear();settings.bindLive(null);settings.loadSettings();
 
 test('Auto reboots preserve desktop assets after selecting a lower render tier',()=>{
  const boot=bootAssetTier(context),request=requestedBootAssets(boot,context),loaded=assets(boot);
- assert.equal(boot,'HIGH');assert.deepEqual(request,{cirrus:8192,noise:'high',fineOcean:512,source:'16'});
+ assert.equal(boot,'HIGH');assert.deepEqual(request,{cirrus:8192,noise:'high',fineOcean:512,source:'16',photo:true,geographic:false});
  saveBench({ms:16.7,backend:'webgpu',tier:'MED',profile:profile(loaded)});
  assert.equal(detectTier({backend:'webgpu',profile:profile(loaded)}),'MED');
  assert.equal(bootAssetTier(context),'HIGH');
@@ -43,14 +43,14 @@ test('Auto upgrades on a heuristic MED device do not silently replace its asset 
  assert.equal(deviceTier(context),'MED');const boot=bootAssetTier(context);
  const loaded=assets(boot,{source:false,fine:128});saveBench({ms:16.7,backend:'webgpu',tier:'HIGH',profile:profile(loaded)});
  assert.equal(detectTier({backend:'webgpu',profile:profile(loaded)}),'HIGH');
- assert.deepEqual(requestedBootAssets(bootAssetTier(context),context),{cirrus:2048,noise:'standard',fineOcean:128,source:'0'});
+ assert.deepEqual(requestedBootAssets(bootAssetTier(context),context),{cirrus:2048,noise:'standard',fineOcean:128,source:'0',photo:false,geographic:false});
 });
 
 test('manual asset selection and explicit source/ocean overrides win over cached render quality',()=>{
  saveBench({ms:16.7,backend:'webgpu',tier:'LOW',profile:profile(assets())});
  for(const [tier,fine,source,noise] of [['LOW',128,'0','standard'],['MED',128,'0','standard'],['HIGH',512,'16','high'],['ULTRA',512,'16','ultra']]){
   setTier(tier);assert.equal(bootAssetTier(context),tier);
-  assert.deepEqual(requestedBootAssets(tier,context),{cirrus:tier==='HIGH'||tier==='ULTRA'?8192:2048,noise,fineOcean:fine,source});
+  assert.deepEqual(requestedBootAssets(tier,context),{cirrus:tier==='HIGH'||tier==='ULTRA'?8192:2048,noise,fineOcean:fine,source,photo:tier==='HIGH'||tier==='ULTRA',geographic:false});
  }
  for(const value of ['0','128','256','512'])assert.equal(oceanFineResolution('HIGH',value),Number(value));
  for(const value of ['0','16'])assert.equal(terrainSourcePreset('LOW',value,'VALDEZ'),value);
@@ -63,6 +63,49 @@ test('manual asset selection and explicit source/ocean overrides win over cached
  for(const noise of ['standard','high','ultra'])
   assert.equal(requestedBootAssets('LOW',{...context,flags:new URLSearchParams({cloudnoise:noise})}).noise,noise);
  assert.equal(requestedBootAssets('HIGH',{...context,flags:new URLSearchParams('cloudnoise=invalid')}).noise,'high');
+});
+
+test('photo and geographic boot requests follow each pack\'s actual eligibility and opt-outs',()=>{
+ const cases=[
+  ['NELLIS','webgpu','',true,false,true],
+  ['NELLIS','webgl','',true,false,false],
+  ['NELLIS','webgpu','drape=0',true,false,false],
+  ['NELLIS','webgpu','geographicdetail=0',true,false,false],
+  ['NELLIS','webgpu','terrainmaterials=0&terrainphoto=0',true,false,true],
+  ['VALDEZ','webgpu','',true,true,false],
+  ['VALDEZ','webgl','',true,true,false],
+  ['VALDEZ','webgpu','drape=0&geographicdetail=0',true,true,false],
+  ['VALDEZ','webgpu','terrainmaterials=0',true,false,false],
+  ['VALDEZ','webgpu','terrainphoto=0',true,false,false],
+  ['MARIANAS','webgpu','',true,false,false],
+  ['NELLIS','webgpu','',false,false,false],
+  ['VALDEZ','webgpu','',false,false,false],
+ ];
+ for(const [front,backend,query,hasTerrain,photo,geographic] of cases){
+  for(const tier of ['LOW','MED','HIGH','ULTRA']){
+   const request=requestedBootAssets(tier,{...context,front,backend,hasTerrain,flags:new URLSearchParams(query)});
+   const high=tier==='HIGH'||tier==='ULTRA';
+   assert.deepEqual([request.photo,request.geographic],[high&&photo,high&&geographic],`${tier}/${front}/${backend}/${query}/terrain=${hasTerrain}`);
+  }
+ }
+});
+
+test('fixed noise, cirrus and water overrides cannot hide a photo or geographic pack restart',()=>{
+ const flags=new URLSearchParams('cloudnoise=standard&waterfine=128&terrainsource=0');
+ for(const front of ['NELLIS','VALDEZ']){
+  const options={...context,front,flags,textureLimit:4096};
+  const high=requestedBootAssets('HIGH',options),low=requestedBootAssets('LOW',options);
+  const {photo,geographic,...otherHigh}=high,{photo:lowPhoto,geographic:lowGeographic,...otherLow}=low;
+  assert.deepEqual(otherHigh,otherLow);
+  assert.deepEqual([photo,geographic],front==='VALDEZ'?[true,false]:[false,true]);
+  assert.deepEqual([lowPhoto,lowGeographic],[false,false]);
+  assert.equal(assetsNeedReload(high,low),true);
+  assert.equal(assetsNeedReload(low,high),true);
+  assert.equal(assetsNeedReload(high,{...high}),false);
+  const disabledFlags=new URLSearchParams(flags);disabledFlags.set(front==='VALDEZ'?'terrainphoto':'geographicdetail','0');
+  const disabled={...options,flags:disabledFlags};
+  assert.equal(assetsNeedReload(requestedBootAssets('HIGH',disabled),requestedBootAssets('LOW',disabled)),false);
+ }
 });
 
 test('actual source, fine-ocean and drape fallbacks cannot reuse successful asset timings',()=>{
@@ -160,8 +203,8 @@ test('Auto excludes settling and upload frames without losing measurements of co
  const result=q.observe(16.7);assert.equal(result.complete,true);assert.equal(result.tier,'MED');
 });
 
-function controlsHarness({bootTier='HIGH',baseTier='MED',shadows=true}={}) {
- const transition=new TerrainDetailTransition(),bootRequest=requestedBootAssets(bootTier,context),autoTier=deviceTier(context);
+function controlsHarness({bootTier='HIGH',baseTier='MED',shadows=true,assetContext=context}={}) {
+ const transition=new TerrainDetailTransition(),bootRequest=requestedBootAssets(bootTier,assetContext),autoTier=deviceTier(assetContext);
  const sun=new THREE.DirectionalLight(),lighting=new AircraftLighting({renderer:{shadowMap:{}},
   atmosphere:{sun,scene:{}},params:tierParams(bootTier),shadows});
  lighting.setSunVisibility(float(1));
@@ -173,7 +216,7 @@ function controlsHarness({bootTier='HIGH',baseTier='MED',shadows=true}={}) {
   applyTerrainQuality:tier=>transition.setEnabled(tierHasNearTerrain(tier)),
   applyAssetQuality:()=>{
    const selected=settings.current().tier,desiredTier=selected==='AUTO'?autoTier:selected,shadowParams=tierParams(desiredTier);
-   state.assetReloadRequired=assetsNeedReload(bootRequest,requestedBootAssets(desiredTier,context),{
+   state.assetReloadRequired=assetsNeedReload(bootRequest,requestedBootAssets(desiredTier,assetContext),{
     allocatedShadowSize:lighting.stats.allocatedShadowSize,
     requestedShadowSize:lighting.shadowRequested&&shadowParams.shadows?shadowParams.shadowSize:0,
    });
@@ -200,6 +243,24 @@ test('real controls handlers update runtime tiers, fade down, and report only re
  assert.equal(h.calls.ratios.at(-1),.75);
  h.click('ULTRA');assert.equal(h.transition.target,1);assert.equal(h.state.assetReloadRequired,true);assert.equal(h.calls.ratios.at(-1),1.25);
  assert.equal(h.state.sourceField,h.sourceField);assert.equal(h.state.fineOcean,h.fineOcean);assert.equal(h.state.fineOcean.N,512);
+});
+
+test('actual controls show restart for boot-only terrain packs when other allocations match',()=>{
+ for(const front of ['NELLIS','VALDEZ']){
+  settings.saveSettings({tier:'HIGH'});
+  const h=controlsHarness({bootTier:'HIGH',baseTier:'HIGH',shadows:false,assetContext:{...context,front,
+   textureLimit:4096,flags:new URLSearchParams('cloudnoise=standard&waterfine=128&terrainsource=0')}});
+  try{
+   assert.equal(h.state.assetReloadRequired,false);
+   h.click('LOW');
+   assert.equal(h.state.assetReloadRequired,true);
+   assert.match(h.menu.html,/Full graphics detail needs a new flight/);
+   assert.match(h.menu.html,/data-review-restart/);
+   h.click('HIGH');
+   assert.equal(h.state.assetReloadRequired,false);
+   assert.doesNotMatch(h.menu.html,/data-review-restart/);
+  }finally{h.lighting.dispose();}
+ }
 });
 
 test('controls Auto/reset restores live base quality and never swaps boot assets',()=>{

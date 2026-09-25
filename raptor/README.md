@@ -110,6 +110,10 @@ The panel identifies pending asset changes and offers **Review restart**, which
 asks before discarding an unfinished flight.
 On WebGPU, High and Ultra retain volumetric clouds and the full post-processing path;
 Low (fastest) and Medium (balanced) reduce graphics work.
+High now uses finer cloud data, nearby one-metre Nevada aerial imagery, and
+scanned Alaska rock and snow detail. These larger assets load when starting a
+flight; missing optional detail keeps the base terrain usable. Native 4K is
+available but remains demanding on the graphics processor.
 
 Accessibility includes an illustrative HUD/text-size and target-color preview,
 reduced combat flashes, and separate switches for key reminders and the practice
