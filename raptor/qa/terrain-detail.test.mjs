@@ -29,13 +29,25 @@ for(const curved of [false,true])test(`actual ${curved?'curved':'flat'} Terrain 
  }finally{f.dispose();}
 });
 
-test('distant terrain does not allocate the fine grid merely because HIGH is selected',()=>{
+test('HIGH prepares fine buffers before flight while distant terrain still selects coarse geometry',()=>{
  const f=fixture();try{
+  f.terrain.setDetailTier('HIGH');
+  const cache=f.terrain.fineGrid;assert.ok(cache);
+  assert.ok(f.terrain.pool.every(m=>!m.visible&&m.geometry===f.terrain.grid));
   f.camera.position.set(0,50000,0);f.camera.lookAt(0,0,-1000);f.step(0);
-  assert.equal(f.terrain.stats.fineNodes,0);assert.equal(f.terrain.fineGrid,null);
-  f.camera.position.set(100,100,100);f.camera.lookAt(100,0,-1000);f.step(0);assert.ok(f.terrain.fineGrid);
-  const cache=f.terrain.fineGrid;
+  assert.equal(f.terrain.stats.fineNodes,0);assert.equal(f.terrain.fineGrid,cache);
+  assert.ok(f.terrain.pool.filter(m=>m.visible).every(m=>m.geometry===f.terrain.grid));
+  f.camera.position.set(100,100,100);f.camera.lookAt(100,0,-1000);f.step(0);
+  assert.equal(f.terrain.fineGrid,cache);assert.ok(f.terrain.stats.fineNodes>0);
+  assert.equal(f.terrain.stats.detailSettling,false,'First near draw does not allocate geometry');
   f.camera.position.set(0,50000,0);f.camera.lookAt(0,0,-1000);f.step(0);assert.equal(f.terrain.stats.fineNodes,0);assert.equal(f.terrain.fineGrid,cache);
+ }finally{f.dispose();}
+});
+
+for(const tier of ['LOW','MED'])test(`${tier} never allocates fine buffers during preparation or near flight`,()=>{
+ const f=fixture();try{
+  f.terrain.setDetailTier(tier);assert.equal(f.terrain.prepareDetail(tier),null);
+  for(let n=0;n<3;n++){f.step(.3);assert.equal(f.terrain.stats.fineNodes,0);assert.equal(f.terrain.fineGrid,null);}
  }finally{f.dispose();}
 });
 

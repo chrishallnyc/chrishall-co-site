@@ -207,6 +207,7 @@ export class Bandits {
 
     // ---- render-side ----
     this._prev = new Float64Array(this.state);
+    this._renderAlpha = 1;
     this._turn = new Float64Array(MAX_BANDITS); // applied heading rate (banking visual)
     this.root = new THREE.Group();
     this.root.name = "bandits";
@@ -958,8 +959,21 @@ export class Bandits {
 
   // ---- render side ---- alpha = sim interpolation factor (player.js
   // prev-state pattern); banking leans into the applied turn rate
-  render(alpha, camera, viewportHeight = globalThis.innerHeight ?? 720) {
+  // ENU coordinates at the same presentation time as the visible airframe.
+  // Seeker/damage logic keeps using the authoritative directory positions.
+  renderPosition(slot, out) {
+    const offset = slot * SLOTS_B;
+    for (let axis = 0; axis < 3; axis++) {
+      out[axis] = this._prev[offset + axis]
+        + (this.state[offset + axis] - this._prev[offset + axis]) * this._renderAlpha;
+    }
+    return out;
+  }
+
+  render(alpha, camera, viewportHeight = globalThis.innerHeight ?? 720, dt = 1 / 60) {
     const a = this._prev, b = this.state;
+    this._renderAlpha = Math.max(0, Math.min(1, alpha));
+    alpha = this._renderAlpha;
     const frame = this._visualFrame;
     frame.renderTime = performance.now() * .001;
     const projectionScale = Math.abs(camera.projectionMatrix.elements[5]) * viewportHeight * .5;
@@ -1025,7 +1039,7 @@ export class Bandits {
     this.brMesh.count = nr;
     this.brMesh.instanceMatrix.needsUpdate = true;
     let np = 0;
-    const pdt = 1 / 60; // visual aging; cheap approximation (player.js precedent)
+    const pdt = Number.isFinite(dt) ? Math.max(0, dt) : 0;
     for (const pf of this.mslPuffs) {
       pf.age += pdt;
       if (pf.age > 5.0) continue;

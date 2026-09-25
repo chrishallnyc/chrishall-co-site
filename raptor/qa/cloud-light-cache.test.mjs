@@ -52,6 +52,41 @@ function untilReady(f, renderer) {
   return frames;
 }
 
+for (const night of [false, true]) {
+  test(`boot warms active ${night ? 'moon' : 'sun'} and sky lighting before control handoff`, async () => {
+    const { cache } = fixture('NELLIS', night);
+    let dispatches = 0, yielded = 0, completed = 0;
+    const renderer = { compute() { dispatches++; }, backend: { device: { queue: {
+      async onSubmittedWorkDone() { completed = dispatches; },
+    } } } };
+    try {
+      assert.equal(await cache.warmUp(renderer, { yieldFrame: async () => {
+        assert.equal(completed, dispatches, 'GPU submission groups finish before yielding');
+        yielded++;
+      } }), true);
+      assert(dispatches > 4 && yielded > 1);
+      assert(yielded >= Math.ceil(dispatches / 4));
+      for (const kind of [night ? 1 : 0, 2, 3]) assert(cache._sources[kind].valid.value);
+      assert.equal(cache._sources[night ? 0 : 1].hasData, false, 'inactive celestial source stays deferred');
+      assert.deepEqual(cache.stats.initialWarmup, { batches: dispatches, complete: true });
+      await cache.warmUp(renderer, { yieldFrame: async () => assert.fail('ready cache needs no work') });
+      assert.equal(cache.stats.initialWarmup.batches, 0);
+    } finally { cache.dispose(); }
+  });
+}
+
+test('boot warmup remains bounded and disabled lighting does not delay handoff', async () => {
+  const { cache } = fixture();
+  try {
+    assert.equal(await cache.warmUp({ compute() {} }, { maxBatches: 1, yieldFrame: async () => {} }), false);
+    assert.equal(cache.stats.initialWarmup.batches, 1);
+    assert.equal(cache.stats.bakes, 0, 'an incomplete volume never publishes');
+    cache.enabled = false;
+    assert.equal(await cache.warmUp({ compute() { assert.fail('disabled cache'); } }), false);
+    assert.equal(cache.stats.initialWarmup.batches, 0);
+  } finally { cache.dispose(); }
+});
+
 for (const front of ['NELLIS', 'VALDEZ', 'MARIANAS']) {
   test(`${front} publishes complete source volumes with one bounded staging texture`, () => {
     const f = fixture(front), { cache } = f;

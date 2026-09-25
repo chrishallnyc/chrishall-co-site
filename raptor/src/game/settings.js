@@ -154,6 +154,8 @@ export function resetSettings() {
 //   audio     -> AudioBus gains (master / engine.dry / locks.dry)
 //   gunFlash  -> player.gun.flash (InstancedMesh) hidden under motion-reduce
 //   baseTier  -> the boot-resolved tier name, used while tier === "AUTO"
+//   autoPixelRatio -> optional (requestedRatio, settings) callback for AUTO's
+//                session-only frame budget; manual tier/scale choices bypass it
 //   hudLive   -> flag: main.js's render loop consumes subtitleScale/palette/
 //                motionReduce per frame (lights those menu rows LIVE)
 export function bindLive(ctx) {
@@ -187,7 +189,11 @@ export function applySettings(s, ctx = live) {
     ctx.camera.updateProjectionMatrix();
   }
   if (ctx.renderer) {
-    const ratio = Math.min(window.devicePixelRatio || 1, 2) * effectiveRenderScale(s, ctx.baseTier);
+    const requestedRatio = Math.min(window.devicePixelRatio || 1, 2) * effectiveRenderScale(s, ctx.baseTier);
+    const autoRatio = s.tier === "AUTO" && s.renderScale === null
+      ? ctx.autoPixelRatio?.(requestedRatio, s) : undefined;
+    const ratio = Number.isFinite(autoRatio) && autoRatio > 0
+      ? Math.min(requestedRatio, autoRatio) : requestedRatio;
     // Resizing the backing buffer rebuilds GPU resources. Audio/accessibility
     // edits must not interrupt a frame or reset temporal rendering history.
     if (ctx.renderer.getPixelRatio() !== ratio) ctx.renderer.setPixelRatio(ratio);

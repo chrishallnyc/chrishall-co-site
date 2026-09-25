@@ -44,15 +44,21 @@ without enlarging cloud cells or moving the weather planes. Compressed local
 assets are dimension-checked and verified against decoded SHA-256 hashes. Failed
 High/Ultra loads fall back to standard assets, then a standard CPU bake.
 
-The native WebGPU cloud pass caches cumulative optical depth along the Sun,
-Moon and two diffuse-light directions. Four published 3D volumes and one staging
-volume rotate ownership only after a complete update. Each frame produces at
-most 640 columns; stale source directions and large camera cuts immediately use
+The native and optional adaptive WebGPU cloud passes cache cumulative optical
+depth along the Sun, Moon and two diffuse-light directions. Four published 3D
+volumes and one staging volume rotate ownership only after a complete update.
+During flight, each frame produces at most 640 columns; stale source directions
+and large camera cuts immediately use
 the original light integration. Source-specific frozen curvature keeps the
 cache aligned while the observer moves. This changes cloud radiance only; the
 original view march still owns alpha, distance, depth and motion. Typical cache
 storage is about 115–160 MiB, depending on source angles and staging dimensions.
-WebGL and the optional adaptive cloud pass retain their original lighting path.
+The adaptive pass shares one cache between its reduced-resolution integration
+and full-resolution edge repair; unavailable columns use the original light
+integration. WebGL retains its original lighting path.
+Before releasing the loading veil, bounded warmup batches prepare the active
+Sun or Moon and both diffuse sources, yielding between GPU submissions. If
+the warmup limit is reached, unfinished sources retain the integration fallback.
 
 The observer sky uses a 1024×512 RGBA16F scattering cache above a one-megapixel
 render buffer. It retains the direct 32-step atmosphere near the horizon and
@@ -117,14 +123,28 @@ Terrain decodes packed height texels before interpolation, matching its CPU
 collision field. Nearby HIGH/ULTRA terrain uses a stitched grid with about 8 m
 spacing, morphing from the coarse parent triangles. Quality changes fade that
 detail over 0.3 seconds and retain the actual previous surface for motion
-vectors. LOW/MED use coarse geometry; the shared fine grid is allocated only
-when a nearby draw needs it.
+vectors. LOW/MED use coarse geometry. Eligible HIGH/ULTRA settings prepare the
+shared fine grid's CPU buffers before flight; its first GPU upload still waits
+for a nearby draw. Later downgrades retain that allocation. Terrain bounds are
+aggregated once from the loaded height field, and selection reuses node records.
 
 Auto selects a fixed asset class from the device heuristic before loading.
 After loading, its cached render tier is matched against the actual source,
 imagery, water and cloud assets. Live quality changes affect rendering while
 the geographic field and water allocation stay fixed. Manual tiers select
 their asset class on reload; the controls indicate when a reload is needed.
+
+With AUTO and no explicit resolution-scale override, `FrameBudget` caps the
+scene at 1,000,000 render pixels. After warmup, 60-frame windows lower linear
+resolution by 10% if the median exceeds 18.5 ms or at least 20% of frames exceed
+25 ms. Each change gets a 45-frame settling interval. The budget bottoms out
+at 550,000 pixels, never increases a smaller requested buffer, and does not
+rise again during that flight. Pause, hidden tabs, terrain settling, benchmark
+runs and intervals of 250 ms or more discard partial windows. Manual presets
+and explicit scales bypass the budget. The HUD and menus retain display
+resolution; native clouds, shading and post-processing remain active. This is
+a workload limit, not a frame-rate guarantee. Inspect `__RAPTOR.frameBudget`
+for the current ratio, sample window and adjustment count.
 
 Valdez WebGPU HIGH/ULTRA assets include a central 16 km square of real 5 m USGS
 IfSAR elevations and normals derived from those heights. Both decoded payloads
@@ -189,6 +209,9 @@ before applying curvature once, preserving the velocity output. Refresh aircraft
 materials before bending when a livery changes, and update the shadow target
 after the current atmosphere observer. Aerial perspective composites completed
 aircraft lighting through the same Sun/Moon transport as the world.
+Hidden aircraft variants skip curvature updates. Visible ancestors update once
+per frame, while material replacements and in-place material-array edits still
+receive the same curvature adaptation when shown.
 
 `aircraft/environment.js` captures sky radiance at the player's rendered altitude.
 It uses the shared atmosphere/cirrus source and volumetric cloud source when that
@@ -200,9 +223,13 @@ the landscape and sea-level water probe keep their own environments.
 
 `SkyEnvironment` freezes source uniforms, observer and time for a complete cube.
 The first aircraft capture occurs behind the loading veil; later captures render
-one face per frame, then convolve and publish only the complete result. The two
-cube maps and their prefiltered results are reused. Ordinary refreshes are spaced
-at least six seconds apart; explicit time cuts invalidate the probe immediately. Pre-exposure rescales
+one face at a time, then convolve and publish only the complete result. Aircraft
+and water probes share a scheduler that permits one face capture or complete-map
+convolution per frame, with complete captures published first and remaining
+capture work shared in turn. Exposure rescaling still reaches both probes every
+frame. Each probe reuses two cube maps and their prefiltered results. Ordinary
+refreshes are spaced at least six seconds apart for aircraft and four for water;
+explicit time cuts invalidate the probes immediately. Pre-exposure rescales
 the published map without rebaking it, including after a refresh failure. A boot
 failure retains scene lighting. Cube size is 128 on MED/HIGH/ULTRA and 64 on LOW;
 live quality changes retain the boot allocation until restart. Curved recipients
@@ -248,6 +275,8 @@ Check both a stationary view and motion before accepting a detail change.
 Read `__RAPTOR.cloudNoise`, `cloudRendering`, `depthMode`, `fineOcean`, and `meter`
 to confirm the path that actually loaded. `bootAssetTier`, `bootAssetRequest`
 and `bootAssets` distinguish requested assets, loaded assets and live quality.
+Keep AUTO disabled for fixed-resolution comparisons; its session budget can
+change the scene's drawing-buffer size while leaving the HUD unchanged.
 For scenery-only comparisons, hide and restore the player jet explicitly:
 `nobattle=1` still creates it, and its position can change during boot.
 
@@ -300,3 +329,6 @@ fine-wave modes across resolutions, and long-clock phase continuity. They also
 exercise source-field interpolation/collars/corruption fallback, actual controls, cached asset
 profiles, and near-grid allocation and transitions. Browser rendering and
 visual comparisons are still needed to accept shader or appearance changes.
+Frame-budget and environment-scheduling checks cover settling, manual overrides,
+bounded resolution changes and fair probe updates. Cloud checks cover initial
+cache warmup and the adaptive pass's shared lighting cache.

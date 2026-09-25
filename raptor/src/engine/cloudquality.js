@@ -5,7 +5,7 @@ import { tierParams } from './quality.js';
 
 // Cloud light reuse, denser HIGH noise, cached sky and geographic imagery
 // change the default workload even when the viewport and tier are unchanged.
-export const QUALITY_PROFILE_VERSION = 'graphics-atmosphere-v4';
+export const QUALITY_PROFILE_VERSION = 'graphics-smoothness-v1';
 
 export function cloudQuality(tier, { mode = DEFAULT_CLOUD_MODE, scale, noise } = {}) {
   if (mode !== 'native' && mode !== 'adaptive') throw new Error('Unknown cloud mode');

@@ -203,11 +203,33 @@ export class Terrain {
     // Include the new source support before quadtree culling can run.
     this.sourceField?.expandBounds(this.leafMin, this.leafMax, this.size, NB);
 
+    // Heights and source support are fixed for this flight. Aggregate each
+    // ancestor once instead of rescanning up to 1,024 leaves per visited
+    // node on every frame. Level MAX_LEVEL retains the exact leaf bounds.
+    this._nodeMin = new Array(MAX_LEVEL + 1);
+    this._nodeMax = new Array(MAX_LEVEL + 1);
+    this._nodeMin[MAX_LEVEL] = this.leafMin;
+    this._nodeMax[MAX_LEVEL] = this.leafMax;
+    for (let level = MAX_LEVEL - 1; level >= 0; level--) {
+      const width = 1 << level, childWidth = width * 2;
+      const mins = this._nodeMin[level] = new Float32Array(width * width);
+      const maxs = this._nodeMax[level] = new Float32Array(width * width);
+      const childMin = this._nodeMin[level + 1], childMax = this._nodeMax[level + 1];
+      for (let z = 0; z < width; z++) for (let x = 0; x < width; x++) {
+        const i = z * width + x, child = z * 2 * childWidth + x * 2;
+        mins[i] = Math.min(childMin[child], childMin[child + 1],
+          childMin[child + childWidth], childMin[child + childWidth + 1]);
+        maxs[i] = Math.max(childMax[child], childMax[child + 1],
+          childMax[child + childWidth], childMax[child + childWidth + 1]);
+      }
+    }
+
     this.material = this._buildMaterial();
     this.grid = createTerrainGrid();
-    // Cache this one shared grid after its first near draw. LOW/MED sessions
-    // never allocate it; downgrading stops fine draws without upload churn.
+    // Eligible quality settings prepare this shared grid before flight.
+    // LOW/MED sessions never allocate it; downgrades retain the same cache.
     this.fineGrid = null;
+    this._selection = Array.from({ length: POOL }, () => ({ cx: 0, cz: 0, size: 0, level: 0, fine: false }));
     this.pool = [];
     for (let i = 0; i < POOL; i++) {
       const m = new THREE.Mesh(this.grid, this.material);
@@ -499,6 +521,16 @@ export class Terrain {
   setDetailTier(tier) {
     this.detailTransition.setEnabled(tierHasNearTerrain(tier));
     this._geographicEnabled = tier === "HIGH" || tier === "ULTRA";
+    this.prepareDetail(tier);
+  }
+
+  // Settings are applied behind the loading veil. Move the roughly 3 MB
+  // CPU mesh construction there, so descending toward terrain cannot
+  // trigger it mid-frame. Allocation does not affect the selected LOD.
+  prepareDetail(tier) {
+    if (this.nearDetail && tierHasNearTerrain(tier) && !this.fineGrid)
+      this.fineGrid = createTerrainGrid(TERRAIN_FINE_INTERVALS);
+    return this.fineGrid;
   }
 
   // Main-view update only. Other camera passes reuse this frame's geometry.
@@ -519,29 +551,16 @@ export class Terrain {
     this._proj.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
     this._frustum.setFromProjectionMatrix(this._proj, camera.coordinateSystem, camera.reversedDepth);
     const cam = camera.position;
-    const out = [];
-    const NB = 1 << MAX_LEVEL;
-
-    const nodeMinMax = (level, ix, iz) => {
-      // aggregate leaf pyramid over this node's leaf span
-      const span = NB >> level;
-      let mn = Infinity, mx = -Infinity;
-      for (let z = iz * span; z < (iz + 1) * span; z++) {
-        for (let x = ix * span; x < (ix + 1) * span; x++) {
-          const v = z * NB + x;
-          if (this.leafMin[v] < mn) mn = this.leafMin[v];
-          if (this.leafMax[v] > mx) mx = this.leafMax[v];
-        }
-      }
-      return [mn, mx];
-    };
+    const out = this._selection;
+    let selectedCount = 0;
 
     const visit = (level, ix, iz) => {
       const size = this.size / (1 << level);
       const cx = -this.size / 2 + (ix + 0.5) * size;
       // leaf z index 0 = north = +Z half
       const cz = this.size / 2 - (iz + 0.5) * size;
-      const [mn, mx] = nodeMinMax(level, ix, iz);
+      const index = iz * (1 << level) + ix;
+      const mn = this._nodeMin[level][index], mx = this._nodeMax[level][index];
       this._box.min.set(cx - size / 2, mn - 70, cz - size / 2);
       this._box.max.set(cx + size / 2, mx + 10, cz + size / 2);
       if (this.curvature) this.curvature.bounds(this._box, this._box);
@@ -551,7 +570,12 @@ export class Terrain {
       const dy = Math.max(cam.y - this._box.max.y, this._box.min.y - cam.y, 0);
       const dist = Math.hypot(dx, dy, dz);
       if (level >= MAX_LEVEL || dist > size * LOD_K) {
-        out.push({ cx, cz, size, level, fine: this.detailTransition.useFine && level === MAX_LEVEL && dist < TERRAIN_DETAIL_SELECT_M });
+        if (selectedCount < out.length) {
+          const node = out[selectedCount];
+          node.cx = cx; node.cz = cz; node.size = size; node.level = level;
+          node.fine = this.detailTransition.useFine && level === MAX_LEVEL && dist < TERRAIN_DETAIL_SELECT_M;
+        }
+        selectedCount++;
         return;
       }
       visit(level + 1, ix * 2, iz * 2);
@@ -561,7 +585,7 @@ export class Terrain {
     };
     visit(0, 0, 0);
 
-    const n = Math.min(out.length, this.pool.length);
+    const n = Math.min(selectedCount, this.pool.length);
     let minL = 99, maxL = 0, fineNodes = 0;
     let allocatedFine = false;
     for (let i = 0; i < n; i++) {
@@ -582,7 +606,7 @@ export class Terrain {
       if (nd.level > maxL) maxL = nd.level;
     }
     for (let i = n; i < this.pool.length; i++) this.pool[i].visible = false;
-    this.stats = { nodes: n, minLevel: minL, maxLevel: maxL, overflow: out.length - n,
+    this.stats = { nodes: n, minLevel: minL, maxLevel: maxL, overflow: selectedCount - n,
       fineNodes, detailStrength: this.detailTransition.current,
       previousDetailStrength: this.detailTransition.previous,
       detailTarget: this.detailTransition.target, fineCached: !!this.fineGrid,

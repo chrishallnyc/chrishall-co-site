@@ -1,5 +1,27 @@
 # RAPTOR release notes
 
+## 1.10.0 — 2026-09-24
+
+Smoother flight through measured rendering budgets and more consistent feedback.
+
+- **Auto graphics:** adjusts scene resolution when sustained frame times are
+  slow, with a bounded floor and no repeated up/down changes. Instruments stay
+  crisp. Manual presets and explicit resolution scales remain under your control;
+  **Use automatic resolution** restores Auto without resetting other settings.
+- **Flight feedback:** instruments, the gun pipper and air-target markers share
+  the aircraft's interpolated presentation. Damage flashes and smoke use elapsed
+  time. The coach acknowledges target entry and exit immediately.
+- **Frame preparation:** cloud lighting warms before controls become active.
+  HIGH/ULTRA terrain geometry is prepared before flight; hidden aircraft skip
+  transform work, terrain bounds are cached, and reflections share one update
+  slot per frame. The first near-terrain GPU upload remains deferred.
+- **Cloud rendering:** removes redundant filter transforms. The optional adaptive
+  path now shares the native lighting cache; the default cloud path is unchanged.
+
+The deterministic 120 Hz flight simulation is unchanged. Auto can trade scene
+resolution for smoother motion; actual frame rate still depends on hardware,
+region and view.
+
 ## 1.9.1 — 2026-09-24
 
 A calmer flight deck and smoother presentation in the air.

@@ -12,6 +12,7 @@ import { detectTier, isCompatibleBench, deviceTier, bootAssetTier as chooseBootA
 import { cloudQuality, cloudOptionsFromFlags, qualityProfile, qualityWorkload } from "./engine/cloudquality.js";
 import { cirrusAtlasResolution, oceanFineResolution, terrainSourcePreset, requestedBootAssets, describeBootAssets, assetsNeedReload } from "./engine/bootassets.js";
 import { QualityBenchmark } from "./engine/qualitybench.js";
+import { FrameBudget } from "./engine/framebudget.js";
 import { DebugOverlay } from "./engine/debug.js";
 import { TestWorld } from "./game/testworld.js";
 import { Player } from "./game/player.js";
@@ -24,6 +25,7 @@ import { Cockpit } from "./game/cockpit.js";
 import { projectAimCue, drawAimCue } from "./game/aimcue.js";
 import { bindingLabel } from "./game/ui.js";
 import { Atmosphere } from "./world/daycycle.js";
+import { SkyEnvironmentScheduler } from "./world/sky-environment.js";
 import { surfaceCelestialTransport } from "./world/celestial-surface.js";
 import { Terrain } from "./world/terrain.js";
 import { Water } from "./world/water.js";
@@ -36,7 +38,7 @@ import { AircraftLighting } from "./aircraft/lighting.js";
 import { updateF22Visuals } from "./aircraft/f22-lod.js";
 import { Soundscape } from "./game/soundscape.js";
 
-const VERSION = "1.9.1";
+const VERSION = "1.10.0";
 const PHASE = 12;
 
 // WebGPU and reverse-depth WebGL use [0,1]; ordinary WebGL uses [-1,1].
@@ -526,6 +528,7 @@ async function boot() {
     const pipV = new THREE.Vector3();
     const pipQ = new THREE.Quaternion();
     const seekerPosition = new Float64Array(3);
+    const banditPosition = new Float64Array(3);
     hud.arcadeLayer = (ctx) => {
       const w = ctx.canvas.width / (window.devicePixelRatio || 1);
       const h = ctx.canvas.height / (window.devicePixelRatio || 1);
@@ -533,11 +536,11 @@ async function boot() {
       // gun pipper: where rounds actually go — boresight (nose) + ballistic
       // drop at 900m convergence. The stream rides above the aim circle
       // (instructor droop + alpha); this cross is the honest firing solution.
-      const st = player.fm.state;
+      const st = player.renderState;
       pipQ.set(st[4], st[5], st[6], st[3]); // (x,y,z,w)
       pipV.set(1, 0, 0).applyQuaternion(pipQ); // nose in ENU
       const CONV = 900;
-      const v0 = player.fm.out.V + 1050, sK = CONV * 0.00035;
+      const v0 = Math.hypot(st[7], st[8], st[9]) + 1050, sK = CONV * 0.00035;
       const tof = (Math.exp(sK) - 1) / (0.00035 * v0);
       const drop = 4.9 * tof * tof;
       // ENU -> three (east, up, north)
@@ -583,7 +586,9 @@ async function boot() {
         // Unified seeker IDs include air targets at 4096 + slot. Resolve
         // ENU through the same directory as the seeker before planet projection.
         if (directory) {
-          directory.pos(MS.lockTarget, seekerPosition);
+          if (directory.kind(MS.lockTarget) === "air" && bandits) {
+            bandits.renderPosition(MS.lockTarget % 4096, seekerPosition);
+          } else directory.pos(MS.lockTarget, seekerPosition);
           pipV.set(seekerPosition[0], seekerPosition[2], seekerPosition[1]);
         } else {
           const to = MS.lockTarget * 5;
@@ -624,7 +629,10 @@ async function boot() {
             if (close || (bs >= 1 && bs <= 3)) seenB[i] = 1;
             else continue;
           }
-          _bv.set(bx, bz, by); // ENU -> flat map -> rendered planet -> NDC
+          // Detection and range stay authoritative; only the screen marker
+          // follows the interpolated position of its visible aircraft.
+          bandits.renderPosition(i, banditPosition);
+          _bv.set(banditPosition[0], banditPosition[2], banditPosition[1]);
           if (curvature) curvature.project(_bv, camera, _bv); else _bv.project(camera);
           if (!projectedDepthVisible(_bv.z, camera)) continue;
           const sx = (_bv.x * 0.5 + 0.5) * w, sy = (-_bv.y * 0.5 + 0.5) * h;
@@ -644,7 +652,6 @@ async function boot() {
 
       // taking fire: red vignette pulse
       if (player.hitFlash > 0) {
-        player.hitFlash = Math.max(0, player.hitFlash - 1 / 60);
         if (!SETTINGS.current().motionReduce) {
         ctx.save();
         const a = Math.min(player.hitFlash * 0.9, 0.4);
@@ -829,11 +836,20 @@ async function boot() {
     } catch (err) { console.warn("voice unavailable:", err && err.message); }
   }
   // PHASE 15: settings go live (fov/renderScale/volumes/muzzle-flash gate)
-  SETTINGS.bindLive({ renderer, camera, audio, input, hud, gunFlash: player ? player.gun.flash : null, baseTier: state.tier, hudLive: true, voice });
+  const frameBudget = new FrameBudget({ width: window.innerWidth, height: window.innerHeight,
+    pixelRatio: renderer.getPixelRatio(), enabled: SETTINGS.current().tier === "AUTO" && bootRenderScale === null });
+  Object.defineProperty(state, "frameBudget", { get: () => frameBudget.diagnostics });
+  const configureFrameBudget = (ratio, settings) => frameBudget.configure({
+    width: window.innerWidth, height: window.innerHeight, pixelRatio: ratio,
+    enabled: settings.tier === "AUTO" && settings.renderScale === null,
+  });
+  SETTINGS.bindLive({ renderer, camera, audio, input, hud, gunFlash: player ? player.gun.flash : null,
+    baseTier: state.tier, hudLive: true, voice, autoPixelRatio: configureFrameBudget });
   // A hidden tab may stop requesting frames entirely, so silence it here.
   document.addEventListener("visibilitychange", () => {
     audio?.setPaused(document.hidden || !!cockpit?.paused || controls.open || sim.timescale === 0);
     if (document.hidden) { radioSuspended = true; voice?.cancel(); }
+    frameBudget.observe(0, { hidden: document.hidden });
   });
   window.addEventListener("pagehide", () => { audio?.setPaused(true); voice?.cancel(); });
   // MAXFI A1: TRAA + bloom + flare post chain (WebGPU only; ?post=0 keeps
@@ -1083,7 +1099,7 @@ async function boot() {
     player.render(1,camera,parked,0);
   } else world.render(0,camera);
   battlefield?.render(0,camera);
-  bandits?.render(1,camera);
+  bandits?.render(1,camera,window.innerHeight,0);
   aircraftFrame.projectedPixels = Math.max(world.f22.userData.aircraft.length, world.f22.userData.aircraft.span)
     * Math.abs(camera.projectionMatrix.elements[5]) * window.innerHeight
     / (2 * Math.max(1, world.jet.position.distanceTo(camera.position)));
@@ -1099,7 +1115,7 @@ async function boot() {
   if (atmoH) atmoH.uCamPos.value.copy(camera.position);
   atmosphere.update(camera);
   atmoH?.skyViewCache?.update(camera.position);
-  aircraftLighting.update(world.jet, terrain);
+  aircraftLighting.update(world.jet, terrain, { materialsReady: true });
   if (aircraftEnvironment) {
     try { aircraftEnvironment.warmUp(camera, 0); }
     catch (err) {
@@ -1117,6 +1133,8 @@ async function boot() {
       waterSkyEnvironment.dispose(); waterSkyEnvironment = null;
     }
   }
+  const environmentScheduler = new SkyEnvironmentScheduler();
+  const environmentProbes = [aircraftEnvironment, waterSkyEnvironment];
   renderer.toneMappingExposure=atmosphere.exposure;
   if (!post) await renderer.compileAsync(scene,camera);
   // Real draws cover the post graph's own MRT, temporal and shadow variants.
@@ -1138,6 +1156,7 @@ async function boot() {
       curvature?.beginFrame(camera);
       aircraftLighting.refreshMaterials();
       planetObjects?.update();
+      await post?.cloudPass?.lightCache?.warmUp(renderer);
     }
   }
   await renderer.backend.device?.queue.onSubmittedWorkDone();
@@ -1157,6 +1176,7 @@ async function boot() {
     if (pauseRequested && !controls.open && !cockpit.guide.open && !cockpit.log.open) cockpit.toggle();
     if (input.pressed("help")) cockpit.openGuide();
     if (cockpit.paused) {
+      frameBudget.observe(0, { paused: true });
       // Consume presentation snapshots while the world is paused so resume
       // cannot replay an old missile launch, impact or engine transition.
       soundscape?.update({ camera, time: sim.time, dt: 0, paused: true, cinematic: !!killCam || !!match?.over });
@@ -1202,6 +1222,17 @@ async function boot() {
         }
       }
     }
+    const frameSettings = SETTINGS.current();
+    const requestedRatio = Math.min(window.devicePixelRatio || 1, 2)
+      * SETTINGS.effectiveRenderScale(frameSettings, state.tier);
+    configureFrameBudget(requestedRatio, frameSettings);
+    frameBudget.observe(dtMs, { hidden: document.hidden, settling: !!terrain?.stats.detailSettling,
+      benchmarking: !!qualityBenchmark });
+    const budgetRatio = frameBudget.getPixelRatio();
+    if (frameBudget.enabled && renderer.getPixelRatio() !== budgetRatio) {
+      renderer.setPixelRatio(budgetRatio);
+      post?.invalidateHistory?.(); meter?.reset();
+    }
     if (input.pressed("debug")) dbg.toggle();
     player?.feedInput(input);
     const alpha = sim.advance(dtMs / 1000);
@@ -1241,7 +1272,7 @@ async function boot() {
       const cine = !!killCam || matchOrbit;
       const parked = world.fixYaw !== null;
       if (parked) world.renderParkedCamera(camera);
-      player.render(alpha, camera, parked || cine, dtMs / 1000 * sim.timescale);
+      player.render(alpha, camera, parked || cine, dtMs / 1000 * sim.timescale, dtMs / 1000);
       if (!parked && cine) {
         const center = matchOrbit ? world.jet.position : killCam.c;
         const th = now * 0.00045;
@@ -1261,7 +1292,7 @@ async function boot() {
       world.render(alpha, camera);
     }
     battlefield?.render(dtMs / 1000, camera);
-    bandits?.render(alpha, camera);
+    bandits?.render(alpha, camera, window.innerHeight, dtMs / 1000);
     aircraftFrame.projectedPixels = Math.max(world.f22.userData.aircraft.length, world.f22.userData.aircraft.span)
       * Math.abs(camera.projectionMatrix.elements[5]) * window.innerHeight
       / (2 * Math.max(1, world.jet.position.distanceTo(camera.position)));
@@ -1286,22 +1317,13 @@ async function boot() {
       if (!hudEl.style.transition) hudEl.style.transition = "opacity 0.3s";
       hudEl.style.opacity = killCam ? "0" : "1"; // death cinematic flies clean
     }
-    hud.update(player ? player.hudState() : testworldHudState(world, alpha));
+    hud.update(player ? player.hudState({ presentation: true }) : testworldHudState(world, alpha));
     if (atmoH) atmoH.uCamPos.value.copy(camera.position);
     atmosphere.update(camera); // IBL sees the current observer on its first capture
     atmoH?.skyViewCache?.update(camera.position);
-    aircraftLighting.update(world.jet, terrain);
+    aircraftLighting.update(world.jet, terrain, { materialsReady: true });
     uMoonAngularRadius.value = atmosphere.moonState.angularRadius;
-    aircraftEnvironment?.update(camera, cloudClock);
-    if (waterSkyEnvironment) {
-      if (waterSkyEnvironment.front < 0) {
-        try { waterSkyEnvironment.warmUp(camera, cloudClock); }
-        catch (err) {
-          console.warn("Water environment warmup failed; existing scene IBL remains:", err && err.message);
-          waterSkyEnvironment.dispose(); waterSkyEnvironment = null;
-        }
-      } else waterSkyEnvironment.update(camera, cloudClock);
-    }
+    environmentScheduler.update(environmentProbes, camera, cloudClock);
     renderer.toneMappingExposure = atmosphere.exposure * (meter ? meter.mult : 1);
     if (post) post.post.render();
     else renderer.render(scene, camera);

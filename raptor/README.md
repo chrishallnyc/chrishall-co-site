@@ -96,6 +96,9 @@ flight. Menus and loss of window focus pause the aircraft and world.
 Preflight and setup transitions respect reduced-motion preferences. The chase
 camera gently eases horizon banking while forward aiming stays immediate;
 wingtip condensation keeps consistent spacing across display refresh rates.
+Attitude, speed and altitude instruments, the gun pipper and airborne target
+markers follow interpolated aircraft poses. Damage flashes and enemy missile smoke
+age with elapsed time, so their duration stays consistent across refresh rates.
 
 The aircraft follows your aim direction. Keyboard bank and rudder turns keep
 the new course when released, unless you also set a pointer target during the
@@ -118,7 +121,9 @@ The flight coach teaches five maneuvers: steady flight, throttle control, a
 gentle turn to a compass heading, a climb and level-off, and steady cruise.
 Progress comes from the aircraft's measured attitude, heading, altitude and
 throttle. Live readings show the current target, with a short hold and room for
-small corrections. The coach uses your current key bindings.
+small corrections. The coach acknowledges entering or leaving the target on
+the next rendered frame; numeric readings update four times a second.
+The coach uses your current key bindings.
 
 Choose **Just fly** for unguided practice, or start flight school again from
 Pause. **Reset to level flight** restores a safe airborne aircraft and restarts
@@ -141,6 +146,14 @@ scanned Alaska rock and snow detail. Cloud and scanned material assets load at
 flight startup; nearby aerial tiles stream as you move. Missing optional detail
 keeps the base terrain usable. Native 4K is available but remains demanding on
 the graphics processor.
+
+With **Auto** graphics and the default resolution scale, the scene starts with
+at most one million render pixels and can reduce resolution after sustained
+slow frames. Instruments and menus stay at display resolution. The adjustment
+lasts for the current flight and leaves the native graphics path intact;
+choose a manual preset or resolution scale to keep explicit control.
+After choosing a fixed scale, **Use automatic resolution** restores this
+behavior while Auto is selected.
 
 Accessibility includes an illustrative HUD/text-size and target-color preview,
 reduced combat flashes, and separate switches for key reminders and the practice
@@ -259,6 +272,8 @@ node --import ./raptor/qa/register-three.mjs --test raptor/qa/*.test.mjs raptor/
 These cover bindings, Undo/restoration and controller input, settings/storage,
 flight selection and loading failures, camera/interpolation, pause input
 boundaries, flight coaching, aircraft controls, and asynchronous exposure.
+They also cover AUTO's frame budget, shared reflection scheduling, interpolated
+HUD positions, effect timing, cloud-cache warmup and terrain preparation.
 The coach includes a real flight-model integration check driven by pointer
 deltas and held throttle inputs, alongside pure course-state tests. Native
 checks use the vendored modules without an npm installation or GPU. See the

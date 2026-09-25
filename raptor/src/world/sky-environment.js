@@ -197,6 +197,15 @@ export class SkyEnvironment {
 
   update(camera, now) {
     this._rescale();
+    this._advance(camera, now);
+  }
+
+  _stop(error) {
+    this.failed = true; this.stats.error = String(error?.message || error);
+    console.warn(`${this.label} environment refresh stopped; retaining last complete map:`, this.stats.error);
+  }
+
+  _advance(camera, now) {
     if (this.failed) return;
     try {
       if (this.face === 6) { this._publish(now); return; }
@@ -207,8 +216,7 @@ export class SkyEnvironment {
       }
       this._renderFace();
     } catch (error) {
-      this.failed = true; this.stats.error = String(error?.message || error);
-      console.warn(`${this.label} environment refresh stopped; retaining last complete map:`, this.stats.error);
+      this._stop(error);
     }
   }
 
@@ -216,6 +224,35 @@ export class SkyEnvironment {
     this.cubes.forEach(rt => rt.dispose()); this.pmrems.forEach(rt => rt?.dispose());
     this.skyTarget.dispose(); this.sky.geometry.dispose(); this.sky.material.dispose();
     this.cloudQuad?.material.dispose(); this._pmrem.dispose();
+  }
+}
+
+// Each probe already spreads its capture over seven frames, but independent
+// probes can still capture or convolve together. Share that budget across all
+// receivers. Exposure rescaling remains immediate, including for failed probes.
+export class SkyEnvironmentScheduler {
+  constructor() { this.nextIndex = 0; }
+
+  update(probes, camera, now) {
+    const count = probes.length;
+    if (!count) return null;
+    for (const probe of probes) probe?._rescale();
+    // Publish complete captures first so their frozen lighting reaches the
+    // receiver promptly. Round-robin selection keeps capture progress fair.
+    for (let priority = 0; priority < 2; priority++) {
+      for (let offset = 0; offset < count; offset++) {
+        const index = (this.nextIndex + offset) % count, probe = probes[index];
+        if (!probe || probe.failed || (probe.face === 6) !== (priority === 0)) continue;
+        if (probe.face < 0) {
+          try { if (!probe._reason(camera, now)) continue; }
+          catch (error) { probe._stop(error); continue; }
+        }
+        this.nextIndex = (index + 1) % count;
+        probe._advance(camera, now);
+        return probe;
+      }
+    }
+    return null;
   }
 }
 
