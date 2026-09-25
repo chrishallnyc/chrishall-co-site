@@ -1,5 +1,63 @@
 # RAPTOR release notes
 
+## 1.13.0 — 2026-09-24
+
+Find your next flight faster, read the fight more clearly, and carry your pilot
+profile between browsers. Includes the New York and Harbor Watch release.
+
+- **Tactical map and radio log:** M pauses flight to review your heading, current
+  objective, mission areas, battle boundary and airfield return course. A numbered
+  objective list distinguishes required, optional and early-victory tasks. Received
+  radio calls remain readable with timestamps; shortcuts respect existing layouts.
+- **Readable radio:** long calls wrap within the viewport, subtitle age freezes
+  while paused, and urgent combat/navigation cards take priority. Unchanged radio
+  frames reuse history and text layouts instead of rebuilding message objects.
+- **Lighter HUD geometry:** reuse ladder buffers and compute rotation once per
+  draw. A local JavaScript component benchmark measured 24.0% less CPU time
+  (0.00395 to 0.00300 ms), with identical drawing commands. This excludes canvas
+  rasterization and does not establish an FPS improvement.
+- **Lighter preflight:** load the flight engine only after choosing a flight.
+  The initial matched bootstrap comparison reduced resource transfers by 74.5%
+  (2.70 MB to 0.69 MB) and requests from 156 to 53. These are startup download
+  measurements, not in-flight FPS claims.
+- **Faster flight selection:** supported modes are directly accessible, desktop
+  region previews select a destination, and campaign briefings open beside launch.
+- **Find and prepare a mission:** search the pilot log by ID, title or type,
+  combine region and status filters, or jump to the next mission. Sortie plans
+  distinguish required tasks, early-victory goals, navigation and protection
+  conditions using the same timeout rules as the mission.
+- **More useful practice:** live airspeed, terrain clearance and vertical speed
+  continue in free flight and after graduation. Prioritized safety cues and early
+  level-off guidance help recover and finish the climb lesson. High-angle-of-attack
+  recovery and gear status use your current bindings and yield to terrain safety.
+- **Clearer combat:** target range, closing speed, lock progress and the assigned
+  launch key; friendly and empty-ammo cues; incoming missile bearing, distance and
+  count. Air victories now contribute to the HUD kill count.
+- **Understand missile acquisition:** detected, visible hostile aircraft explain
+  range and seeker-angle limits before acquisition. Actual locks, incoming threats,
+  rearming and boundary warnings take priority.
+- **Find your way back:** low supplies and nearby refills show the airfield's
+  heading, distance, rearm conditions and progress. Leaving the battle shows a
+  return course and countdown before hull damage, alongside missile warnings.
+- **A useful sortie report:** flight time, losses, objectives and aircraft stores
+  are captured at mission end and remain unchanged when reopened. Clear retry,
+  next-mission and operation actions explain where the next flight starts.
+- **Portable pilot profiles:** Pilot log → **Backup & restore** downloads progress,
+  controls and preferences to a local file. Preview or cancel before replacing
+  a profile from preflight; failed writes attempt recovery and report the result.
+  Harbor Watch completion stays separate from campaign and operation records.
+- **Less terrain work:** index the four nearby imagery tiles directly and reuse
+  selection storage. Settled frames skip redundant loading-queue and edge updates
+  while retaining fades, nearest-first requests, cancellation and retries.
+- **Less audio update work:** reuse acoustic scratch records and source-selection
+  storage. Isolated Node measurements with four or twelve voices show 49–53% less
+  scene-update CPU time; this excludes audio processing and whole-game frame rate.
+- **Less aircraft transform work:** flight effects update their anchor paths
+  instead of walking every aircraft mesh. Native CPU measurements of neutral
+  effects plus normal transform traversal fall from 0.0722 to 0.0374 ms (48.2%).
+  This measures a component using the real F-22 hierarchy, excluding GPU rendering
+  and whole-game frame rate; trails and plume state match the prior implementation.
+
 ## 1.12.0 — 2026-09-24
 
 Fly New York Harbor and Manhattan, or launch Harbor Watch from its own briefing.
