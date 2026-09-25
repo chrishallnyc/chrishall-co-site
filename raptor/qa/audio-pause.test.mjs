@@ -6,7 +6,16 @@ import {Cockpit} from '../src/game/cockpit.js';
 const data=new Map();
 globalThis.localStorage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)};
 globalThis.window={dispatchEvent(){}};
-function audio(){const a=Object.create(AudioBus.prototype),gains=[];Object.assign(a,{muted:false,paused:false,ctx:{currentTime:5},muteGain:{gain:{setTargetAtTime:v=>gains.push(v)}}});return {a,gains};}
+function audio(){
+  const a=Object.create(AudioBus.prototype),gains=[];
+  // The current bus puts independent mute and pause gates in series. Observe
+  // their combined target, so unmuting a paused bus must remain silent.
+  const gate=()=>({value:1,setTargetAtTime(v){this.value=v;gains.push(a.muteGain.gain.value*a.pauseGain.gain.value);}});
+  Object.assign(a,{muted:false,paused:false,hidden:false,ctx:{currentTime:5},
+    muteGain:{gain:gate()},pauseGain:{gain:gate()},
+    effects:{paused:false,stopAll(){}},scene:{setPaused(){}},gun:{fire(){}},locks:{setMode(){}}});
+  return {a,gains};
+}
 test('editing mute while paused cannot restore engine audio; resuming honors the saved mute',()=>{
 const {a,gains}=audio();a.setPaused(true);a.setMute(true);a.setMute(false);assert.deepEqual(gains,[0,0,0]);a.setPaused(false);assert.equal(gains.at(-1),1);a.setMute(true);a.setPaused(true);a.setPaused(false);assert.equal(gains.at(-1),0);
 });

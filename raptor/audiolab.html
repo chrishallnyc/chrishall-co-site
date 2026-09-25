@@ -2,134 +2,643 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RAPTOR — audio lab</title>
 <style>
-:root { --bg:#101014; --panel:#16161c; --ink:#e8e6df; --mid:#9a988f; --dim:#6e6c64; --hair:#2e2e36; --acc:#e8b46f; }
+:root { color-scheme:dark; --bg:#101014; --panel:#16161c; --ink:#e8e6df; --mid:#aaa89f; --dim:#87857e; --hair:#35353d; --acc:#e8b46f; }
 * { margin:0; padding:0; box-sizing:border-box; }
-body { background:var(--bg); color:var(--ink); font-family:"SF Mono", ui-monospace, Menlo, Consolas, monospace;
-  font-size:13px; padding:20px; }
-h1 { color:var(--acc); letter-spacing:4px; font-size:15px; margin-bottom:4px; }
-.sub { color:var(--dim); font-size:10px; letter-spacing:1.5px; margin-bottom:20px; }
-.panel { background:var(--panel); border:1px solid var(--hair); padding:14px 16px; margin-bottom:14px; max-width:640px; }
-.panel h2 { font-size:10px; letter-spacing:2px; color:var(--dim); margin-bottom:10px; }
-.row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
-.row label { width:90px; color:var(--mid); font-size:11px; }
-.row input[type=range] { flex:1; }
-.row .val { width:60px; text-align:right; color:var(--ink); font-size:11px; }
-button { background:none; border:1px solid var(--hair); color:var(--mid); font:inherit; font-size:11px;
-  letter-spacing:1px; padding:7px 12px; cursor:pointer; margin-right:8px; margin-bottom:8px; }
-button:hover { color:var(--ink); border-color:var(--mid); }
-button.live { color:var(--acc); border-color:var(--acc); }
-#spectrum { display:block; width:100%; height:140px; background:#0a0a0d; border:1px solid var(--hair); }
-#readout { color:var(--dim); font-size:10px; letter-spacing:.5px; line-height:1.7; white-space:pre; }
+body { background:var(--bg); color:var(--ink); font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace; font-size:13px; padding:24px; }
+main { max-width:1040px; margin:0 auto; }
+h1 { color:var(--acc); letter-spacing:4px; font-size:17px; margin-bottom:8px; }
+.sub { color:var(--mid); font-size:11px; line-height:1.7; margin-bottom:22px; }
+.panel { background:var(--panel); border:1px solid var(--hair); padding:18px; min-width:0; }
+.panel h2 { font-size:10px; letter-spacing:2px; color:var(--acc); margin-bottom:14px; font-weight:700; }
+.grid { display:grid; grid-template-columns:1.1fr 1fr; gap:14px; }
+.wide { grid-column:1 / -1; }
+.engine { grid-row:span 2; }
+.row { display:flex; align-items:center; gap:12px; margin-bottom:13px; }
+.row label { flex:0 0 94px; color:var(--mid); font-size:11px; }
+.row input[type=range] { flex:1; min-width:0; accent-color:var(--acc); }
+.row input[type=checkbox] { accent-color:var(--acc); width:18px; height:18px; }
+.row .val { flex:0 0 62px; text-align:right; color:var(--ink); font-size:11px; font-variant-numeric:tabular-nums; }
+.buttons { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+button { background:transparent; border:1px solid var(--hair); color:var(--mid); font:inherit; font-size:11px; letter-spacing:.7px; padding:10px 12px; cursor:pointer; min-height:38px; }
+button:hover:enabled { color:var(--ink); border-color:var(--mid); }
+button.live, button.primary { color:var(--acc); border-color:var(--acc); }
+button:focus-visible, input:focus-visible { outline:2px solid var(--acc); outline-offset:4px; }
+button:disabled { opacity:.4; cursor:default; }
+fieldset { border:0; min-width:0; }
+fieldset:disabled .row { opacity:.5; }
+.note { color:var(--dim); font-size:11px; line-height:1.65; }
+.divider { border-top:1px solid var(--hair); margin:18px 0; }
+.transport { display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; margin-bottom:14px; }
+.transport .note { flex:1; min-width:180px; }
+#demoStatus { min-height:1.65em; color:var(--mid); }
+.chapters { display:flex; flex-wrap:wrap; gap:8px 16px; list-style:none; margin:16px 0 12px; color:var(--dim); font-size:10px; }
+.chapters .live { color:var(--acc); }
+.progress { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+.progress progress { width:100%; height:5px; accent-color:var(--acc); }
+.progress output { white-space:nowrap; font-size:10px; color:var(--mid); font-variant-numeric:tabular-nums; }
+footer { padding:18px 0 4px; font-size:11px; }
+a { color:var(--acc); text-underline-offset:3px; }
+a:focus-visible { outline:2px solid var(--acc); outline-offset:4px; }
+#spectrum { display:block; width:100%; height:150px; background:#0a0a0d; border:1px solid var(--hair); }
+.scale { position:relative; height:12px; color:var(--dim); font-size:9px; margin-top:6px; }
+.scale span { position:absolute; transform:translateX(-50%); }
+.scale span:first-child { left:0; transform:none; }
+.scale span:last-child { right:0; transform:none; }
+#readout { color:var(--dim); font-size:10px; line-height:1.8; white-space:pre-wrap; margin-top:12px; }
+@media (max-width:700px) {
+  body { padding:18px 12px; }
+  h1 { font-size:15px; letter-spacing:3px; }
+  .grid { grid-template-columns:1fr; }
+  .wide { grid-column:auto; }
+  .engine { grid-row:auto; }
+  .panel { padding:16px; }
+  .row { gap:8px; }
+  .row label { flex-basis:88px; }
+  .row .val { flex-basis:56px; }
+}
 </style>
 </head>
 <body>
-<h1>RAPTOR AUDIO LAB</h1>
-<div class="sub">PHASE 13 GROUNDWORK — SYNTH-FIRST WEB AUDIO · engine / gun / lock tones</div>
+<main>
+  <h1>RAPTOR AUDIO LAB</h1>
+  <p class="sub">Twin-engine power, cockpit air, weapons and warning tones. Shape the mix or take a quick listening flight.</p>
 
-<div class="panel">
-  <h2>ENGINE (F119 SYNTH)</h2>
-  <div class="row"><label>THROTTLE</label><input type="range" id="throttle" min="0" max="100" value="0"><span class="val" id="throttleVal">0%</span></div>
-  <div class="row"><label>AFTERBURNER</label><input type="checkbox" id="ab"><span class="val" id="abVal">off</span></div>
-  <div class="row"><label>IAS</label><input type="range" id="ias" min="0" max="800" value="0"><span class="val" id="iasVal">0kt</span></div>
-</div>
+  <section class="panel transport" aria-label="Audio playback">
+    <button id="enableBtn" class="primary">ENABLE SOUND</button>
+    <button id="muteBtn" disabled aria-pressed="false">MUTE</button>
+    <button id="pauseBtn" disabled aria-pressed="false">PAUSE SOUND</button>
+    <button id="stopAllBtn" disabled aria-label="Stop the showcase and all event sounds">STOP EVENTS</button>
+    <p id="audioStatus" class="note" role="status">Sound is off. Enable to begin at idle.</p>
+  </section>
 
-<div class="panel">
-  <h2>M61 GUN</h2>
-  <button id="gunBurst">GUN BURST</button>
-</div>
+  <fieldset id="controls" disabled aria-label="Sound controls">
+    <div class="grid">
+      <section class="panel wide">
+        <h2>LISTENING FLIGHT</h2>
+        <div class="buttons">
+          <button id="demoBtn" class="primary">PLAY 45-SECOND SHOWCASE</button>
+          <button id="stopDemoBtn" disabled>STOP SHOWCASE</button>
+        </div>
+        <ol class="chapters" aria-label="Listening flight chapters">
+          <li data-chapter="quiet">01 QUIET</li><li data-chapter="power">02 POWER</li>
+          <li data-chapter="flyby">03 FLYBY</li><li data-chapter="missile">04 MISSILE</li>
+          <li data-chapter="contact">05 CONTACT</li><li data-chapter="landing">06 LANDING</li>
+        </ol>
+        <div class="progress"><progress id="demoProgress" max="45" value="0" aria-label="Listening flight progress"></progress><output id="demoTime">0 / 45 s</output></div>
+        <p id="demoStatus" class="note" role="status">From a quiet cockpit to full power, passing aircraft and wheels on the runway. Your mix stays in control.</p>
+      </section>
 
-<div class="panel">
-  <h2>RWR / SEEKER TONES</h2>
-  <button id="scanBtn">SCAN</button>
-  <button id="lockBtn">LOCK</button>
-  <button id="launchBtn">LAUNCH WARBLE</button>
-  <button id="offBtn">OFF</button>
-</div>
+      <section class="panel engine">
+        <h2>F119 / FLIGHT</h2>
+        <div class="buttons" aria-label="Engine presets">
+          <button data-preset="idle" aria-pressed="true" class="live">IDLE</button>
+          <button data-preset="cruise" aria-pressed="false">CRUISE</button>
+          <button data-preset="military" aria-pressed="false">MILITARY</button>
+          <button data-preset="afterburner" aria-pressed="false">AFTERBURNER</button>
+          <button data-preset="highg" aria-pressed="false">HIGH-G</button>
+        </div>
+        <div class="row"><label for="throttle">THROTTLE</label><input type="range" id="throttle" min="0" max="100" value="0"><output class="val" id="throttleVal" for="throttle">0%</output></div>
+        <div class="row"><label for="ab">AFTERBURNER</label><input type="checkbox" id="ab"><output class="val" id="abVal" for="ab">off</output></div>
+        <div class="row"><label for="ias">AIRSPEED</label><input type="range" id="ias" min="0" max="850" value="0"><output class="val" id="iasVal" for="ias">0 kt</output></div>
+        <div class="row"><label for="mach">MACH</label><input type="range" id="mach" min="0" max="2.2" step="0.01" value="0"><output class="val" id="machVal" for="mach">0.00</output></div>
+        <div class="row"><label for="g">G LOAD</label><input type="range" id="g" min="0" max="9" step="0.1" value="1"><output class="val" id="gVal" for="g">1.0 G</output></div>
+        <div class="row"><label for="aoa">AOA</label><input type="range" id="aoa" min="0" max="30" step="1" value="0"><output class="val" id="aoaVal" for="aoa">0°</output></div>
+        <div class="divider"></div>
+        <div class="buttons" aria-label="Listening position">
+          <button id="cockpitBtn" aria-pressed="true" class="live">COCKPIT</button>
+          <button id="externalBtn" aria-pressed="false">EXTERNAL</button>
+        </div>
+        <p class="note">Listen for the engines spooling, afterburner lighting and airframe buffeting as flight load builds.</p>
+      </section>
 
-<div class="panel">
-  <h2>MASTER</h2>
-  <button id="muteBtn">MUTE</button>
-</div>
+      <section class="panel">
+        <h2>WEAPONS / EVENTS</h2>
+        <div class="buttons">
+          <button id="gunBurst">M61 BURST</button>
+          <button data-effect="missile">MISSILE</button>
+          <button data-effect="explosion">EXPLOSION</button>
+          <button data-effect="impact">IMPACT</button>
+          <button data-effect="flare">FLARES</button>
+          <button data-effect="sonic">SONIC BOOM</button>
+          <button data-effect="afterburner">AB IGNITION</button>
+        </div>
+        <div class="buttons" aria-label="Event distance">
+          <button id="nearBtn" class="live" aria-pressed="true">NEARBY</button>
+          <button id="farBtn" aria-pressed="false">DISTANT · 1.5 KM</button>
+        </div>
+        <div class="row"><label for="pan">EVENT PAN</label><input type="range" id="pan" min="-100" max="100" value="0"><output class="val" id="panVal" for="pan">center</output></div>
+        <p class="note">Distance and stereo position apply to event sounds. M61 stays on your aircraft.</p>
+        <div class="buttons" style="margin-top:14px;margin-bottom:0"><button id="cutEffectsBtn">STOP EFFECTS</button></div>
+      </section>
 
-<div class="panel" style="max-width:900px;">
-  <h2>SPECTRUM (post-limiter, pre-destination)</h2>
-  <canvas id="spectrum" width="880" height="140"></canvas>
-  <div id="readout"></div>
-</div>
+      <section class="panel">
+        <h2>RWR / SEEKER</h2>
+        <div class="buttons" aria-label="Warning tones">
+          <button id="scanBtn" aria-pressed="false">SCAN</button>
+          <button id="lockBtn" aria-pressed="false">LOCK</button>
+          <button id="launchBtn" aria-pressed="false">MISSILE WARNING</button>
+          <button id="offBtn" aria-pressed="true" class="live">OFF</button>
+        </div>
+        <p class="note">Compare each warning against the engine at idle or full power.</p>
+      </section>
+
+      <section class="panel wide">
+        <h2>MOVEMENT / AIRFRAME</h2>
+        <div class="buttons">
+          <button id="flybyBtn">AIRCRAFT FLYBY</button>
+          <button id="missilePassBtn">MISSILE · BOOST TO COAST</button>
+          <button id="gearBtn">GEAR CYCLE</button>
+          <button id="landingBtn">TOUCHDOWN / ROLL-OUT</button>
+        </div>
+        <p id="motionStatus" class="note" role="status">Aircraft pass from left to right. Gear and landing sounds stay with your aircraft.</p>
+      </section>
+
+      <section class="panel wide">
+        <h2>MIX</h2>
+        <div class="row"><label for="master">MASTER</label><input type="range" id="master" min="0" max="100" value="75"><output class="val" id="masterVal" for="master">75%</output></div>
+        <div class="row"><label for="engineLevel">ENGINE / AIR</label><input type="range" id="engineLevel" min="0" max="100" value="100"><output class="val" id="engineLevelVal" for="engineLevel">100%</output></div>
+        <div class="row"><label for="weaponsLevel">WEAPONS</label><input type="range" id="weaponsLevel" min="0" max="100" value="100"><output class="val" id="weaponsLevelVal" for="weaponsLevel">100%</output></div>
+        <div class="row" style="margin-bottom:0"><label for="alertsLevel">ALERTS</label><input type="range" id="alertsLevel" min="0" max="100" value="100"><output class="val" id="alertsLevelVal" for="alertsLevel">100%</output></div>
+      </section>
+    </div>
+  </fieldset>
+
+  <section class="panel" style="margin-top:14px">
+    <h2>OUTPUT SPECTRUM</h2>
+    <canvas id="spectrum" width="1000" height="150" role="img" aria-label="Live audio frequency spectrum from 20 hertz to 20 kilohertz"></canvas>
+    <div class="scale" aria-hidden="true"><span>20 Hz</span><span style="left:23.3%">100</span><span style="left:56.6%">1k</span><span>20k Hz</span></div>
+    <div id="readout"></div>
+  </section>
+  <footer><a href="/audio-credits.html">Sound sources and credits</a></footer>
+</main>
 
 <script type="module">
 import { AudioBus } from "/src/engine/audio.js";
 
-const bus = new AudioBus();
+const $ = (id) => document.getElementById(id);
+const bus = new AudioBus({ paused: true });
+const baseMaster = bus.master.gain.value;
+// The explicit enable button owns the lab's first audible playback, even in
+// browsers that permit autoplay or resume on another page gesture.
+bus.master.gain.value = 0;
+let enabled = false;
+let view = "cockpit";
+let distance = 0;
+let currentPreset = "idle";
+let demo = null;
+let pendingShowcase = null;
+let paused = false;
+let pausedAt = 0;
+let pausedWarning = "off";
+let engineActive = true;
+let motion = null;
+let gearCycle = null;
+let landing = null;
+let auditionSerial = 0;
+let sampleStatus = bus.engine.textureStatus;
+const SHOWCASE_SECONDS = 45;
+const SHOWCASE_FRAME_GAP = 2;
+const listener = { position:[0, 0, 0], velocity:[0, 0, 0], forward:[0, 0, -1], up:[0, 1, 0], right:[1, 0, 0] };
 
-// QA + dogfooding hooks
+const presets = {
+  idle: { throttle:0, ab:false, ias:0, mach:0, g:1, aoa:0 },
+  cruise: { throttle:58, ab:false, ias:350, mach:0.65, g:1, aoa:2 },
+  military: { throttle:100, ab:false, ias:540, mach:1.05, g:1, aoa:3 },
+  afterburner: { throttle:100, ab:true, ias:700, mach:1.45, g:1, aoa:2 },
+  highg: { throttle:93, ab:false, ias:430, mach:0.85, g:7.5, aoa:19 },
+};
+
+function pressed(id, active) {
+  $(id).classList.toggle("live", active);
+  $(id).setAttribute("aria-pressed", String(active));
+}
+
+function refreshAudioState() {
+  $("controls").disabled = !enabled || paused || bus.ctx.state !== "running" || bus.disposed;
+  $("enableBtn").textContent = enabled ? (bus.ctx.state === "running" ? "SOUND ENABLED" : "RESUME SOUND") : "ENABLE SOUND";
+  $("enableBtn").disabled = enabled && bus.ctx.state === "running";
+  $("muteBtn").disabled = !enabled;
+  $("pauseBtn").disabled = !enabled || bus.disposed;
+  $("stopAllBtn").disabled = !enabled || bus.disposed;
+  $("pauseBtn").textContent = paused ? "RESUME SOUND" : "PAUSE SOUND";
+  pressed("pauseBtn", paused);
+  $("muteBtn").textContent = bus.muted ? "UNMUTE" : "MUTE";
+  pressed("muteBtn", bus.muted);
+  const detail = sampleStatus === "loading" ? " Preparing the full engine sound…" : sampleStatus === "fallback" ? " Some engine detail could not load." : "";
+  $("audioStatus").textContent = !enabled ? "Sound is off. Enable to begin at idle." : paused ? "Sound is paused. Resume to continue from here." : bus.ctx.state !== "running" ? "Audio is paused. Resume sound to continue." : bus.muted ? "Sound is muted." : "Sound is on. Adjust the master level to taste." + detail;
+}
+
+async function enableSound() {
+  try {
+    if (!await bus.resume()) throw new Error("Audio did not resume");
+    enabled = true;
+    bus.setPaused(paused);
+    bus.setMute(false);
+    $("controls").disabled = false;
+    applyMix();
+    refreshAudioState();
+    return true;
+  } catch {
+    $("audioStatus").textContent = "Audio could not start. Press Enable sound to try again.";
+    return false;
+  }
+}
+$("enableBtn").addEventListener("click", enableSound);
+bus.ctx.addEventListener("statechange", refreshAudioState);
+$("muteBtn").addEventListener("click", () => { bus.toggleMute(); refreshAudioState(); });
+bus.ready.then(() => { sampleStatus = bus.engine.textureStatus; refreshAudioState(); });
+
+function canRun() { return enabled && !paused && !bus.paused && !bus.hidden && !document.hidden && !bus.disposed && bus.ctx.state === "running"; }
+
+function setPaused(value) {
+  if (!enabled || bus.disposed || paused === !!value) return;
+  const now = bus.ctx.currentTime;
+  if (value) {
+    // Preserve intentional timelines, but release every audible transient.
+    // On resume, shift their origins by the elapsed audio-clock time.
+    if (pendingShowcase) stopShowcase(true, "Showcase preparation stopped. Play again when ready.");
+    pausedAt = now;
+    pausedWarning = bus.locks.mode;
+    paused = true;
+    bus.setPaused(true);
+    bus.airframe.setState({ active:false });
+  } else {
+    const elapsed = now - pausedAt;
+    for (const task of [demo, motion, gearCycle, landing]) if (task) task.start += elapsed;
+    if (demo) demo.lastTick = now;
+    paused = false;
+    bus.setPaused(false);
+    setLockMode(pausedWarning);
+    tickAuditions();
+    bus.resume();
+  }
+  refreshAudioState();
+}
+$("pauseBtn").addEventListener("click", () => setPaused(!paused));
+
+function updateEngine() {
+  const state = {
+    throttle: +$("throttle").value / 100,
+    ab: $("ab").checked ? 1 : 0,
+    ias: +$("ias").value,
+    mach: +$("mach").value,
+    g: +$("g").value,
+    aoa: +$("aoa").value,
+    view,
+    active:engineActive,
+  };
+  if (!bus.disposed) {
+    bus.engine.setState(state);
+    bus.gun.setPerspective(view);
+  }
+  $("throttleVal").textContent = `${$("throttle").value}%`;
+  $("abVal").textContent = state.ab ? "ON" : "off";
+  $("iasVal").textContent = `${state.ias} kt`;
+  $("machVal").textContent = state.mach.toFixed(2);
+  $("gVal").textContent = `${state.g.toFixed(1)} G`;
+  $("aoaVal").textContent = `${state.aoa}°`;
+  for (const button of document.querySelectorAll("[data-preset]")) {
+    const active = button.dataset.preset === currentPreset;
+    button.classList.toggle("live", active);
+    button.setAttribute("aria-pressed", String(active));
+  }
+  pressed("cockpitBtn", view === "cockpit");
+  pressed("externalBtn", view === "external");
+}
+
+function setPreset(name) {
+  if (!presets[name]) return;
+  currentPreset = name;
+  for (const [id, value] of Object.entries(presets[name])) {
+    if (id === "ab") $(id).checked = value;
+    else $(id).value = value;
+  }
+  updateEngine();
+}
+function setView(next) { view = next; updateEngine(); }
+function setEngineActive(active) { engineActive = active; updateEngine(); }
+
+for (const id of ["throttle", "ias", "mach", "g", "aoa", "ab"]) {
+  $(id).addEventListener(id === "ab" ? "change" : "input", () => {
+    takeControl();
+    currentPreset = null;
+    updateEngine();
+  });
+}
+for (const button of document.querySelectorAll("[data-preset]")) {
+  button.addEventListener("click", () => { takeControl(); setPreset(button.dataset.preset); });
+}
+$("cockpitBtn").addEventListener("click", () => { takeControl(); setView("cockpit"); });
+$("externalBtn").addEventListener("click", () => { takeControl(); setView("external"); });
+
+function playEffect(kind, options = {}) {
+  if (!canRun()) return null;
+  return bus.effects.play(kind, { distance, pan: +$("pan").value / 100, ...options });
+}
+$("gunBurst").addEventListener("click", () => { takeControl(); bus.gun.burst(0.65); });
+for (const button of document.querySelectorAll("[data-effect]")) {
+  button.addEventListener("click", () => { takeControl(); playEffect(button.dataset.effect); });
+}
+function setDistance(value) {
+  distance = value;
+  pressed("nearBtn", value === 0);
+  pressed("farBtn", value > 0);
+}
+$("nearBtn").addEventListener("click", () => { takeControl(); setDistance(0); });
+$("farBtn").addEventListener("click", () => { takeControl(); setDistance(1500); });
+$("pan").addEventListener("input", () => {
+  takeControl();
+  const value = +$("pan").value;
+  $("panVal").textContent = value === 0 ? "center" : `${Math.abs(value)}% ${value < 0 ? "L" : "R"}`;
+});
+
+const lockButtons = [["scanBtn", "scan"], ["lockBtn", "lock"], ["launchBtn", "launch"], ["offBtn", "off"]];
+function setLockMode(mode) {
+  if (paused) pausedWarning = mode;
+  if (!bus.disposed) bus.locks.setMode(mode);
+  for (const [id, value] of lockButtons) pressed(id, value === mode);
+}
+for (const [id, mode] of lockButtons) {
+  $(id).addEventListener("click", () => { takeControl(); setLockMode(mode); });
+}
+
+function applyMix() {
+  const now = bus.ctx.currentTime;
+  bus.master.gain.setTargetAtTime(enabled ? baseMaster * +$("master").value / 100 : 0, now, 0.025);
+  bus.setUiVolume(+$("alertsLevel").value / 100);
+  bus.setWeaponsVolume(+$("weaponsLevel").value / 100);
+  bus.setEngineVolume(+$("engineLevel").value / 100);
+  for (const id of ["master", "engineLevel", "weaponsLevel", "alertsLevel"]) $(id + "Val").textContent = $(id).value + "%";
+}
+for (const id of ["master", "engineLevel", "weaponsLevel", "alertsLevel"]) $(id).addEventListener("input", applyMix);
+
+function stopEffects() {
+  motion = gearCycle = landing = null;
+  if (!bus.disposed) {
+    bus.scene.clear();
+    bus.airframe.setState({ active:false });
+    bus.gun.fire(false);
+    bus.effects.stopAll();
+  }
+  setLockMode("off");
+  $("motionStatus").textContent = "Event sounds stopped.";
+}
+$("cutEffectsBtn").addEventListener("click", () => { takeControl(); stopEffects(); });
+function stopAll() {
+  stopShowcase();
+  stopEffects();
+}
+$("stopAllBtn").addEventListener("click", stopAll);
+
+function startMotion(kind) {
+  if (!canRun() || !["aircraft", "missile"].includes(kind)) return false;
+  bus.scene.clear();
+  motion = { kind, start:bus.ctx.currentTime, id:`lab-${kind}-${++auditionSerial}`, duration:kind === "aircraft" ? 7 : 6, phase:null };
+  $("motionStatus").textContent = kind === "aircraft" ? "Aircraft approaching from the left…" : "Missile approaching under power…";
+  tickAuditions();
+  return true;
+}
+
+function startGearCycle() {
+  if (!canRun()) return false;
+  gearCycle = { start:bus.ctx.currentTime, duration:2.6 };
+  playEffect("gear_start", { distance:0, pan:0 });
+  $("motionStatus").textContent = "Landing gear in motion…";
+  tickAuditions();
+  return true;
+}
+
+function startLanding(duration = 7) {
+  if (!canRun()) return false;
+  landing = { start:bus.ctx.currentTime, duration };
+  playEffect("touchdown", { distance:0, pan:0, strength:0.85 });
+  $("motionStatus").textContent = "Touchdown · wheels rolling, brakes coming in.";
+  tickAuditions();
+  return true;
+}
+
+function tickAuditions() {
+  if (!canRun()) return;
+  const now = bus.ctx.currentTime;
+  const sources = [];
+  if (motion) {
+    const elapsed = now - motion.start;
+    if (elapsed >= motion.duration) {
+      motion = null;
+      $("motionStatus").textContent = "Pass complete.";
+    } else if (motion.kind === "aircraft") {
+      sources.push({ id:motion.id, kind:"aircraft", aircraftClass:"fighter", position:[(elapsed - 3.5) * 280, 65, -100], velocity:[280, 0, 0], power:0.95 });
+      const phase = elapsed < 3.5 ? "approach" : "depart";
+      if (phase !== motion.phase) {
+        motion.phase = phase;
+        $("motionStatus").textContent = phase === "approach" ? "Aircraft approaching from the left…" : "Aircraft passing right and receding.";
+      }
+    } else {
+      const motor = elapsed < 2 ? "boost" : elapsed < 2.85 ? "sustain" : "coast";
+      sources.push({ id:motion.id, kind:"missile", position:[(elapsed - 3.35) * 420, 8, -22], velocity:[420, 0, 0], motor });
+      if (motor !== motion.phase) {
+        motion.phase = motor;
+        $("motionStatus").textContent = motor === "coast" ? "Motor out · coasting close past you." : motor === "sustain" ? "Missile motor settling before the pass…" : "Missile approaching under boost…";
+      }
+    }
+  }
+  if (sources.length || bus.scene.voices.size) bus.scene.update({ listener, sources });
+  if (gearCycle && now - gearCycle.start >= gearCycle.duration) {
+    gearCycle = null;
+    playEffect("gear_lock", { distance:0, pan:0 });
+    $("motionStatus").textContent = "Landing gear locked.";
+  }
+  if (landing && now - landing.start >= landing.duration) {
+    landing = null;
+    $("motionStatus").textContent = "Roll-out complete.";
+  }
+  const progress = landing ? Math.min(1, (now - landing.start) / landing.duration) : 1;
+  const gearProgress = gearCycle ? Math.min(1, (now - gearCycle.start) / gearCycle.duration) : landing ? 1 : 0;
+  const wheelSpeed = landing ? 68 * (1 - progress) : 0;
+  if (gearCycle || landing || bus.airframe.state.active) {
+    bus.airframe.setState({ active:!!(gearCycle || landing), gearMoving:!!gearCycle, weightOnWheels:!!landing,
+      gearPosition:gearProgress, ias:wheelSpeed * 1.94384, groundLoad:landing ? 1 : 0,
+      wheelSpeed, brake:landing && progress > 0.16 ? 0.7 : 0 });
+  }
+}
+for (const [id, action] of [["flybyBtn", () => startMotion("aircraft")], ["missilePassBtn", () => startMotion("missile")], ["gearBtn", startGearCycle], ["landingBtn", () => startLanding()]]) {
+  $(id).addEventListener("click", () => { takeControl(); action(); });
+}
+
+function snapshotFlight() {
+  return { state:Object.fromEntries(Object.keys(presets.idle).map(id => [id, id === "ab" ? $(id).checked : $(id).value])), view, preset:currentPreset, active:engineActive };
+}
+function restoreFlight(snapshot) {
+  for (const [id, value] of Object.entries(snapshot.state)) {
+    if (id === "ab") $(id).checked = value;
+    else $(id).value = value;
+  }
+  view = snapshot.view;
+  currentPreset = snapshot.preset;
+  engineActive = snapshot.active;
+  updateEngine();
+}
+function setChapter(name) {
+  for (const chapter of document.querySelectorAll("[data-chapter]")) {
+    const active = chapter.dataset.chapter === name;
+    chapter.classList.toggle("live", active);
+    if (active) chapter.setAttribute("aria-current", "step");
+    else chapter.removeAttribute("aria-current");
+  }
+}
+function stopShowcase(restore = true, message = "Showcase stopped. Your flight settings are restored.", complete = false) {
+  if (!demo && !pendingShowcase) return;
+  const previous = demo?.previous;
+  // Discard all pending audio-clock cues before stopping voices; no timeout
+  // can restart an effect after the user presses Stop.
+  if (demo) demo.events.length = 0;
+  demo = null;
+  pendingShowcase = null;
+  stopEffects();
+  if (previous) {
+    if (restore) restoreFlight(previous);
+    else setEngineActive(previous.active);
+  }
+  $("demoBtn").disabled = false;
+  $("stopDemoBtn").disabled = true;
+  $("demoStatus").textContent = message;
+  $("demoProgress").value = complete ? SHOWCASE_SECONDS : 0;
+  $("demoTime").textContent = `${complete ? SHOWCASE_SECONDS : 0} / ${SHOWCASE_SECONDS} s`;
+  setChapter(null);
+}
+function takeControl() { stopShowcase(false, "Showcase stopped. You have the controls."); }
+
+async function startShowcase() {
+  if (!canRun() || demo || pendingShowcase) return false;
+  const request = {};
+  pendingShowcase = request;
+  $("demoBtn").disabled = true;
+  $("stopDemoBtn").disabled = false;
+  $("demoStatus").textContent = "Preparing the listening flight…";
+  await bus.ready.catch(() => false);
+  if (pendingShowcase !== request) return false;
+  if (!canRun()) {
+    stopShowcase(true, "Showcase preparation stopped. Resume sound, then play again.");
+    return false;
+  }
+  pendingShowcase = null;
+  stopEffects();
+  const previous = snapshotFlight();
+  // Chapter cues follow the AudioContext clock, so suspending audio pauses
+  // the showcase too. Voices own their sample-accurate envelopes and bursts.
+  const events = [
+    [0, "01 / Quiet · cockpit at idle", () => { setChapter("quiet"); setEngineActive(true); setView("cockpit"); setPreset("idle"); }],
+    [3, "02 / Power · turbine spool and cockpit air", () => { setChapter("power"); setPreset("cruise"); }],
+    [6, "02 / Power · military thrust, outside the canopy", () => { setView("external"); setPreset("military"); }],
+    [9, "02 / Power · afterburner ignition and exhaust", () => { setPreset("afterburner"); playEffect("afterburner", {distance:0, pan:0}); }],
+    [13, "02 / Power · settle back into the cockpit", () => { setView("cockpit"); setPreset("cruise"); }],
+    [16, "03 / Flyby · listen from outside as an aircraft passes", () => { setChapter("flyby"); setPreset("idle"); setView("external"); setEngineActive(false); startMotion("aircraft"); }],
+    [23, "04 / Missile · boost, motor burnout, close coast pass", () => { setChapter("missile"); startMotion("missile"); }],
+    [29, "05 / Contact · high-G cockpit, seeker scanning", () => { setChapter("contact"); setView("cockpit"); setEngineActive(true); setPreset("highg"); setLockMode("scan"); }],
+    [30.8, "05 / Contact · target locked", () => setLockMode("lock")],
+    [31.9, "05 / Contact · M61 burst", () => { setLockMode("off"); bus.gun.burst(0.65); }],
+    [33.1, "05 / Contact · incoming warning and flares", () => { setLockMode("launch"); playEffect("flare", {distance:0, pan:0.45}); }],
+    [34.6, "05 / Contact · quiet recovery", () => { setLockMode("off"); setPreset("idle"); }],
+    [37, "06 / Landing · gear travel and lock", () => { setChapter("landing"); startGearCycle(); }],
+    [40, "06 / Landing · touchdown, wheels and brakes", () => startLanding(5)],
+  ];
+  const start = bus.ctx.currentTime;
+  demo = { start, lastTick:start, previous, events };
+  $("demoBtn").disabled = true;
+  $("stopDemoBtn").disabled = false;
+  tickShowcase();
+  return true;
+}
+function tickShowcase() {
+  if (!demo || !canRun()) return;
+  const now = bus.ctx.currentTime;
+  if (now - demo.lastTick > SHOWCASE_FRAME_GAP) {
+    stopShowcase(true, "Showcase stopped after playback was interrupted. Play again to restart.");
+    return;
+  }
+  demo.lastTick = now;
+  const elapsed = now - demo.start;
+  while (demo && demo.events.length && demo.events[0][0] <= elapsed) {
+    const [, label, action] = demo.events.shift();
+    action();
+    $("demoStatus").textContent = label;
+  }
+  if (demo && elapsed >= SHOWCASE_SECONDS) stopShowcase(true, "Showcase complete. Your flight settings are restored.", true);
+}
+$("demoBtn").addEventListener("click", startShowcase);
+$("stopDemoBtn").addEventListener("click", () => stopShowcase());
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    stopShowcase(true, "Showcase stopped when you left the tab. Play again to restart.");
+    stopEffects();
+  }
+  refreshAudioState();
+});
+window.addEventListener("pagehide", stopAll);
+window.addEventListener("pageshow", refreshAudioState);
+
+// Keep the original QA hooks and expose the new controls for auditioning.
 window.__AUDIOLAB = {
-  bus,
-  engine: bus.engine,
-  gun: bus.gun,
-  locks: bus.locks,
+  bus, engine:bus.engine, gun:bus.gun, locks:bus.locks, effects:bus.effects, scene:bus.scene, airframe:bus.airframe,
   getSpectrum: () => bus.getFrequencyData(),
   getTimeDomain: () => bus.getTimeDomainData(),
   bandEnergyHz: (lo, hi) => bus.bandEnergyHz(lo, hi),
   totalEnergy: () => bus.totalEnergy(),
   rms: () => bus.rms(),
-  ready: true,
+  enableSound, setPreset, setView, playEffect, startShowcase, stopShowcase, setPaused, stopAll,
+  auditionFlyby: () => { takeControl(); return startMotion("aircraft"); },
+  auditionMissile: () => { takeControl(); return startMotion("missile"); },
+  auditionGear: () => { takeControl(); return startGearCycle(); },
+  auditionLanding: () => { takeControl(); return startLanding(); },
+  get auditionState() { return { paused, preparing:!!pendingShowcase, elapsed:demo ? Math.max(0, (paused ? pausedAt : bus.ctx.currentTime) - demo.start) : 0,
+    pendingCues:demo?.events.length || 0, motion:motion?.kind || null, gearMoving:!!gearCycle, rolling:!!landing, sceneVoices:bus.scene.voices.size, airframeActive:!!bus.airframe.state.active }; },
+  assertStopped() {
+    const voicesActive = !bus.disposed && (bus.scene.voices.size || bus.airframe.state.active || bus.gun.firing || bus.locks.mode !== "off" || bus.effects.active.size);
+    if (demo || pendingShowcase || motion || gearCycle || landing || voicesActive) throw new Error("Lab auditions are still active");
+    return true;
+  },
+  get demoPlaying() { return !!demo; },
+  get enabled() { return enabled; },
+  ready:true,
 };
 
-const $ = (id) => document.getElementById(id);
-
-function updateEngine() {
-  const throttle = +$("throttle").value / 100;
-  const ab = $("ab").checked ? 1 : 0;
-  const ias = +$("ias").value;
-  bus.engine.setState({ throttle, ab, ias });
-  $("throttleVal").textContent = $("throttle").value + "%";
-  $("abVal").textContent = ab ? "ON" : "off";
-  $("iasVal").textContent = $("ias").value + "kt";
-}
-$("throttle").addEventListener("input", updateEngine);
-$("ab").addEventListener("change", updateEngine);
-$("ias").addEventListener("input", updateEngine);
-updateEngine();
-
-$("gunBurst").addEventListener("click", () => bus.gun.burst(0.6));
-
-function setLockMode(mode) {
-  bus.locks.setMode(mode);
-  for (const [id, m] of [["scanBtn", "scan"], ["lockBtn", "lock"], ["launchBtn", "launch"], ["offBtn", "off"]]) {
-    $(id).classList.toggle("live", m === mode);
-  }
-}
-$("scanBtn").addEventListener("click", () => setLockMode("scan"));
-$("lockBtn").addEventListener("click", () => setLockMode("lock"));
-$("launchBtn").addEventListener("click", () => setLockMode("launch"));
-$("offBtn").addEventListener("click", () => setLockMode("off"));
+setPreset("idle");
 setLockMode("off");
-
-function refreshMuteBtn() {
-  $("muteBtn").textContent = bus.muted ? "UNMUTE" : "MUTE";
-  $("muteBtn").classList.toggle("live", bus.muted);
-}
-$("muteBtn").addEventListener("click", () => { bus.toggleMute(); refreshMuteBtn(); });
-refreshMuteBtn();
+refreshAudioState();
 
 const cv = $("spectrum"), cx = cv.getContext("2d");
-const readout = $("readout");
+const frequencyData = new Uint8Array(bus.analyser.frequencyBinCount);
+let nextReadout = 0;
 function draw() {
+  if (bus.disposed) return;
   requestAnimationFrame(draw);
-  const data = bus.getFrequencyData();
+  tickShowcase();
+  tickAuditions();
+  bus.analyser.getByteFrequencyData(frequencyData);
   cx.clearRect(0, 0, cv.width, cv.height);
+  const low = 20, high = Math.min(20000, bus.ctx.sampleRate / 2);
+  const bars = 150, binHz = bus.ctx.sampleRate / bus.analyser.fftSize;
   cx.fillStyle = "#e8b46f";
-  const w = cv.width / data.length;
-  for (let i = 0; i < data.length; i++) {
-    const h = (data[i] / 255) * cv.height;
-    cx.fillRect(i * w, cv.height - h, Math.max(1, w), h);
+  for (let i = 0; i < bars; i++) {
+    const from = Math.max(1, Math.floor(low * (high / low) ** (i / bars) / binHz));
+    const to = Math.min(frequencyData.length - 1, Math.max(from, Math.floor(low * (high / low) ** ((i + 1) / bars) / binHz)));
+    let peak = 0;
+    for (let j = from; j <= to; j++) peak = Math.max(peak, frequencyData[j]);
+    const height = peak / 255 * cv.height;
+    cx.fillRect(i * cv.width / bars, cv.height - height, cv.width / bars - 2, height);
   }
-  readout.textContent =
-    `ctx: ${bus.ctx.state}  ·  muted: ${bus.muted}  ·  rms: ${bus.rms().toFixed(3)}\n` +
-    `gun firing: ${bus.gun.firing}  ·  lock mode: ${bus.locks.mode}`;
+  if (performance.now() >= nextReadout) {
+    nextReadout = performance.now() + 150;
+    if (demo) {
+      const elapsed = Math.min(SHOWCASE_SECONDS, Math.max(0, (paused ? pausedAt : bus.ctx.currentTime) - demo.start));
+      $("demoProgress").value = elapsed;
+      $("demoTime").textContent = `${Math.floor(elapsed)} / ${SHOWCASE_SECONDS} s`;
+    }
+    $("readout").textContent = `audio: ${paused ? "paused" : bus.ctx.state} · muted: ${bus.muted} · output RMS: ${bus.rms().toFixed(3)}\nposition: ${view} · cannon: ${bus.gun.firing ? "firing" : "ready"} · warning: ${bus.locks.mode} · moving voices: ${bus.scene.voices.size}`;
+  }
 }
 draw();
 </script>

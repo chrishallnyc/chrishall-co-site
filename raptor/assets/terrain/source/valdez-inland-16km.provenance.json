@@ -1,0 +1,87 @@
+{
+  "provider": "U.S. Geological Survey, 3D Elevation Program",
+  "usageTermsURL": "https://www.usgs.gov/3dep-product-news",
+  "alaskaProgramURL": "https://www.usgs.gov/ngp-user-engagement-office/alaska-mapping-initiative",
+  "sourceItemQuery": "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/6412?f=json",
+  "sourceAttributes": {
+    "OBJECTID": 6412,
+    "Name": "AK_IFSAR-NRCS-C255_2012",
+    "MinPS": 0,
+    "MaxPS": 27,
+    "LowPS": 5,
+    "HighPS": 16,
+    "Category": 1,
+    "Tag": "Dataset",
+    "GroupName": "",
+    "ProductName": "USGS_3DEP",
+    "CenterX": -16307284.012616124,
+    "CenterY": 8743162.249824662,
+    "ZOrder": null,
+    "Dataset_ID": "usgs",
+    "Best": 130696,
+    "DEM_Type": 1,
+    "Source": "USGS",
+    "VerticalDatum": "North American Vertical Datum of 1988 (NAVD 88)",
+    "AcquisitionDate": 1356912000000,
+    "URL": "https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/OPR/Projects/NRCS_USGS_USFS_BLM_Alaska_Mid_Accuracy_DEM/AK_IFSAR-NRCS-C255_2012/TIFF/USGS_AK5M_NRCS_USGS_USFS_BLM_Alaska_Mid_Accuracy_DEM_1369.tif",
+    "Metadata": "D:\\USGS_3DEP\\data\\OPR\\AK_IFSAR-NRCS-C255_2012\\USGS_AK5M_NRCS_USGS_USFS_BLM_Alaska_Mid_Accuracy_DEM_1369.xml",
+    "pubdate": 20150801,
+    "title": "USGS Alaska 5 Meter NRCS_USGS_USFS_BLM_Alaska_Mid_Accuracy_DEM 1369",
+    "Resolution_X": null,
+    "Resolution_Y": null,
+    "Cdate": null,
+    "StartDate": 20120101,
+    "EndDate": "20121231",
+    "Shape_Length": 768735.6388767635,
+    "Shape_Area": 34058066991.96706
+  },
+  "export": {
+    "request": "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/exportImage?f=json&bbox=-146.76988782113392%2C61.24202030018357%2C-146.4701121788661%2C61.385993233272146&bboxSR=4326&imageSR=4326&size=3200%2C3200&format=tiff&pixelType=F32&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B6412%5D%7D&adjustAspectRatio=false",
+    "requestedBBox": [
+      -146.76988782113392,
+      61.24202030018357,
+      -146.4701121788661,
+      61.385993233272146
+    ],
+    "worldCenter": [
+      0,
+      -4000
+    ],
+    "worldSize": 16000,
+    "outputSize": [
+      3200,
+      3200
+    ],
+    "outputSpacingMeters": 5,
+    "sourceId": 6412,
+    "response": {
+      "href": "https://elevation.nationalmap.gov/arcgis/rest/directories/elevation_output/3DEPElevation_ImageServer/_ags_c3daf9bd_d003_45e7_a527_75f2337ff2a2.tif",
+      "width": 3200,
+      "height": 3200,
+      "extent": {
+        "xmin": -146.76988782113392,
+        "ymin": 61.24202030018357,
+        "xmax": -146.4701121788661,
+        "ymax": 61.385993233272146,
+        "spatialReference": {
+          "wkid": 4326,
+          "latestWkid": 4326
+        }
+      },
+      "scale": 0
+    },
+    "bytes": 40965806,
+    "sha256": "3de3040bbc1876050f6575bca18fe86e2d829dd23adc76e1785d412025c05f1e",
+    "fetchSeconds": 6.891352124977857
+  },
+  "canonicalCoordinates": {
+    "worldOriginLatitude": 61.35,
+    "worldOriginLongitude": -146.62,
+    "northMetersPerDegree": 111132.0,
+    "eastMetersPerDegree": 53373.249003687524,
+    "worldX": "east",
+    "worldZ": "north",
+    "projection": "same local linear latitude/longitude map as the canonical Valdez terrain"
+  },
+  "acceptedSource": "One raster locked to object 6412, complete inland 3200 square samples; no mosaic, infill, lidar claim, or source-image sharpening."
+}

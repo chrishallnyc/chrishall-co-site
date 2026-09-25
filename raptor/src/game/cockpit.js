@@ -160,13 +160,17 @@ export class Cockpit {
     const next=campaignProgress().next;
     const options=SETTINGS.current();
     const nextTier=options.tier==='AUTO'?(this.state.recommendedTier||this.state.tier):options.tier;
-    const pendingTier=nextTier!==this.state.tier;
+    const pendingTier=nextTier!==this.state.tier || this.state.assetReloadRequired===true;
+    const graphicsSaved=SETTINGS.storageAvailable();
+    const graphicsNote=!graphicsSaved ? 'Graphics changes are active on this page. Browser storage is unavailable, so restarting may restore your previous settings.'
+      : nextTier!==this.state.tier ? `Graphics: ${escapeHTML(this.state.tier)} running · ${escapeHTML(nextTier)} on restart.`
+        : 'Your selected graphics preset needs a restart to load its full detail.';
     this.pauseDialog.body.innerHTML=`<p class="pause-message">${description}</p>${hs?`<div class="pause-overview"><div><span>AIRSPEED</span><strong>${Math.round(hs.speedKt)} <small>kt</small></strong></div><div><span>ALTITUDE</span><strong>${Math.round(hs.altFt).toLocaleString()} <small>ft</small></strong></div><div><span>THROTTLE</span><strong>${hs.throttle}%</strong></div></div>`:''}
       <div class="pause-grid"><button type="button" class="ui-button" data-pause="controls">Customize controls <span>↗</span></button><button type="button" class="ui-button" data-pause="settings">Display & sound <span>↗</span></button><button type="button" class="ui-button" data-pause="guide">How to fly <span>↗</span></button><button type="button" class="ui-button" data-pause="progress">Your pilot log <span>↗</span></button></div>
       ${complete&&won&&this.flags.has('sortie')&&next?`<button type="button" class="ui-button primary pause-primary" data-next>Fly next campaign mission ↗</button>`:''}
       <button type="button" class="ui-button ${complete?'':'primary'} pause-primary" data-resume>${ready?'Start flying':complete?'Return to flight view':'Resume flight'} <kbd>Esc</kbd></button>
-      ${pendingTier?`<p class="pause-graphics-note">Graphics: ${escapeHTML(this.state.tier)} running · ${escapeHTML(nextTier)} on restart. Your current flight stays paused until you resume.</p>`:''}
-      <div class="pause-secondary"><button type="button" class="text-button" data-restart>${pendingTier?'Restart with new graphics':'Restart this flight'}</button><button type="button" class="text-button" data-hangar>Back to preflight ↗</button><button type="button" class="text-button" data-fullscreen>Fullscreen</button></div>
+      ${pendingTier?`<p class="pause-graphics-note">${graphicsNote} Your current flight stays paused until you resume.</p>`:''}
+      <div class="pause-secondary"><button type="button" class="text-button" data-restart>${pendingTier&&graphicsSaved?'Restart with new graphics':'Restart this flight'}</button><button type="button" class="text-button" data-hangar>Back to preflight ↗</button><button type="button" class="text-button" data-fullscreen>Fullscreen</button></div>
       <div class="pause-guidance"><button type="button" class="text-button" data-reminders>${options.showHints?'Hide':'Show'} key reminders</button>${this.practice?`<button type="button" class="text-button" data-checklist>${options.showChecklist?'Hide':'Show'} practice checklist</button>`:''}</div>
       <p class="pause-note">${ready?'The flight tips stay on screen until you hide them.':complete?'Campaign and operation results save when a sortie finishes.':'Controls and settings save automatically. An unfinished sortie starts over if you leave or reload.'}</p>`;
     for(const b of this.pauseDialog.body.querySelectorAll('[data-pause]'))b.onclick=()=>{

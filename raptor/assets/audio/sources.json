@@ -1,0 +1,60 @@
+{
+  "assets": [
+    {
+      "filename": "f119-afterburner.wav",
+      "bytes": 768044,
+      "sha256": "da1f06002902e0fb6f1535a09cf6b36581e6c3a529deb20e755d0abd12ec68f4",
+      "source": {
+        "official_page": "https://www.dvidshub.net/video/742566/airmen-192nd-wg-and-1st-fw-test-and-certify-f-22-engine-hush-house",
+        "preview_url": "https://d34w7g4gy10iej.cloudfront.net/video/2003/DOD_107722025/DOD_107722025-1024x576-1769k.mp4",
+        "author": "Staff Sgt. Lucretia Cunningham",
+        "unit": "192nd Wing, Virginia Air National Guard",
+        "virin": "200310-Z-PZ006-001",
+        "item_rights_label": "PUBLIC DOMAIN",
+        "rights_notice": "https://www.dvidshub.net/about/copyright",
+        "interpretation": "Visually stationary afterburning test-cell engine; no claim this is idle, a clean-room measurement, or onboard cabin sound",
+        "pcm_sha256": "8ff73ae8c99a7ba3c6cde0e1026f5d4461b3f7e9776e734ac2ac1164d29ea1c7"
+      },
+      "recipe": {
+        "script_sha256": "4eb1d69eafcbeee3d8707d7b3e71274f503cddbfa1ad0dc6e39115a9e67b1d29",
+        "numpy": "2.5.3",
+        "scipy": "1.18.1",
+        "mono": "Arithmetic mean: 0.5L + 0.5R; no equal-power downmix gain",
+        "loop": "Long smoothstep-phase equal-power tail/head overlap with natural consecutive-source wrap; circular EQ/high-pass; quiet-boundary rotation <=10ms",
+        "highpass": "24 Hz, second-order Butterworth, applied with circular frequency-response convolution",
+        "dc": "Mean removed from source and final floating-point loops before PCM quantization",
+        "dither": "Deterministic PCG64-seeded TPDF at +/-1 PCM16 LSB before round-to-nearest quantization",
+        "dynamics": "No compressor, limiter, clipper, master normalization or automatic peak gain; C has one explicitly measured quiet parallel-body gain",
+        "script": "audio-tools/author_textures.py"
+      },
+      "selected_candidate": {
+        "id": "a-grounded",
+        "intent": "Reference texture; DC cleanup and 24 Hz high-pass only.",
+        "source_start_seconds": 0.45,
+        "loop_seconds": 8.0,
+        "overlap_seconds": 2.0,
+        "eq": [],
+        "body": null,
+        "dither_seed": 61721,
+        "bytes": 768044,
+        "sha256": "da1f06002902e0fb6f1535a09cf6b36581e6c3a529deb20e755d0abd12ec68f4",
+        "source_end_seconds": 10.45,
+        "authored_process": {
+          "boundary_rotation_samples": 200,
+          "boundary_rotation_seconds": 0.004166666666666667,
+          "body_static_gain_db": null,
+          "master_gain_db": 0.0
+        }
+      },
+      "format": {
+        "sample_rate": 48000,
+        "channels": 1,
+        "format": "PCM16 WAV",
+        "frames": 384000,
+        "duration_seconds": 8.0
+      },
+      "credits_page": "/audio-credits.html",
+      "scope": "Edited audio texture used only for afterburner. Other sound layers are authored synthesis. No visual material is embedded."
+    }
+  ]
+}

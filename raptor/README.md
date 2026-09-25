@@ -25,6 +25,11 @@ Use a desktop browser with WebGPU for the full graphics path; WebGL2 is the
 fallback. Audio starts after a user gesture. Optional radio speech uses the
 browser's speech synthesis and voices available on the computer.
 
+See [GRAPHICS.md](GRAPHICS.md) for rendering contracts, asset sources, quality
+paths, and reproducible visual comparisons.
+
+Deploys via the `raptor` Vercel project (rootDirectory `raptor`) on push to main.
+
 ## Set up a flight
 
 Start with **Practice flight**, choose a region and time, then use **Controls**
@@ -62,11 +67,12 @@ Optional **Capture pointer** keeps aiming responsive at window edges. **Esc**
 releases the pointer and pauses; capture is never requested automatically.
 
 Display settings include graphics preset, resolution scale, field of view, and
-an FPS display. The panel distinguishes the running preset from the next-flight
-choice and offers **Review restart**; restarting asks before discarding an
-unfinished flight. Resolution and field of view changes appear when you resume.
-A **new flight** applies a preset's changes to clouds, shadows, and effects.
-High and Ultra retain volumetric clouds and the full post-processing path;
+an FPS display. Preset changes update render scale, terrain detail and aircraft
+shadow activity when you resume. Field of view changes also appear when you
+resume. Loaded detail assets and shadow-map resolution change on a new flight.
+The panel identifies pending asset changes and offers **Review restart**, which
+asks before discarding an unfinished flight.
+On WebGPU, High and Ultra retain volumetric clouds and the full post-processing path;
 Low (fastest) and Medium (balanced) reduce graphics work.
 
 Accessibility includes an illustrative HUD/text-size and target-color preview,
@@ -103,6 +109,7 @@ a connection is still needed to load a complete flight.
 | --- | --- |
 | [index.html](index.html), [src/main.js](src/main.js) | Entry point, renderer initialization, game loop and system wiring. |
 | [src/game/](src/game/) | Preflight, controls/settings, pause menu, pilot log, HUD, player and combat systems. |
+| [src/aircraft/](src/aircraft/) | Aircraft geometry, materials, articulation, visual detail, lighting, and coating textures. |
 | [src/sim/](src/sim/) | Aircraft dynamics, aerodynamic data, instructor and weapon data. |
 | [src/engine/](src/engine/) | Fixed-step simulation, input, controller mapping, audio, graphics quality, post-processing and asynchronous exposure. |
 | [src/world/](src/world/) | Terrain, atmosphere, clouds and water. |
@@ -116,12 +123,45 @@ Standalone development pages: [aircraft](f22lab.html), [clouds](cloudslab.html),
 [Development notes](devlog.html) and [progress.json](progress.json) record earlier
 work; historical phase descriptions are not the current implementation map.
 
+## Aircraft graphics
+
+Aircraft graphics live in `src/aircraft/`. `f22v3.js` retains the player rig's
+15 public controls; reference-derived geometry, cockpit, gear, weapon bays,
+F119 nozzles, and materials are separate modules. `bandit-models.js` builds the
+shared fighter, transport, and drone. Their coating textures are generated once
+at startup for the selected quality and shared across the aircraft pool.
+Distance-dependent visual detail and livery changes preserve each aircraft's
+materials and rig. Flight physics, hit volumes, and deterministic simulation
+remain independent of these meshes.
+
+The F-22 uses authored color, normal, and packed occlusion/roughness/metalness
+maps in `src/aircraft/textures/f22/`. These are static assets, with three texture tiers;
+the browser does no coating baking during flight. Rebuild the paint maps with
+`node raptor/tools/bake-f22.mjs` using an existing Playwright/Chrome installation.
+The authoring source is in `src/aircraft/authoring/`; physical dimensions and
+shared UV/door outlines are in `src/aircraft/geometry/`.
+Contact occlusion is baked offline from the neutral aircraft and packed into
+the same maps. See [`tools/F22-AO.md`](tools/F22-AO.md) to regenerate it after
+geometry changes; the paint baker rejects a stale contact bake.
+
+Serve this directory as the web root, then open `/f22lab.html` to inspect all
+four aircraft under studio lighting. View buttons cover the underside, cockpit,
+and exhausts; toggles expose the landing gear and weapon bays. Reproducible views use
+`?view=rear&gear=0&spin=0`; add `gl=1` for WebGL, `ui=0` for clean screenshots,
+`bays=1` for open bays, `ab=1` for settled afterburners, or `aircraft=fighter`,
+`transport`, or `drone`. The earlier F-22 remains available with `v=2`.
+
+See [`qa/README.md`](qa/README.md) for frozen-source aircraft captures, rig and
+simulation regressions, and real-game WebGPU/WebGL lighting/quality checks.
+`src/aircraft/lighting.js` provides aircraft self-shadow and atmospheric
+integration; compatibility handling is documented alongside those checks.
+
 ## Verify changes
 
 From the repository root, with Node.js 26 (used for the current checks):
 
 ```sh
-node --test raptor/qa/*.test.mjs
+node --import ./raptor/qa/register-three.mjs --test raptor/qa/*.test.mjs
 ```
 
 These cover bindings, Undo/restoration and controller input, settings/storage,
@@ -169,3 +209,73 @@ end-of-mission outcomes to test saving and debrief transitions; it does not
 claim to beat the missions. Checks do not use your normal browser profile or
 progress. Run GPU playthroughs one at a time; recording and other GPU activity
 can affect frame-time measurements.
+
+## Audio
+
+The engine combines independently seeded synthesis with a small, edited
+afterburner recording. Real engine spool, airspeed, load, fuel state and
+perspective drive the mix. Aircraft and missile sources move through native
+HRTF panners with bounded Doppler; distant explosions arrive after a bounded
+propagation delay. Gear travel, touchdown and rolling follow flight state.
+`Soundscape` observes these events without changing simulation state or its RNG.
+The solved engine spool receives only a short dezipper; manual lab throttle
+commands retain their authored response. Each cannon trigger starts at a round
+boundary, while successive taps vary. Exposed gear continues to produce airflow
+after the actuator stops, and moving listeners change distant blast filtering. Broad fan/compressor bands
+follow spool; impacts use layered pressure and fragment textures. Moving
+aircraft change intake/exhaust timbre with direction, and coasting missiles
+lose their combustion body while retaining close aerodynamic noise. Mechanical
+cues stay dry while large distant effects retain a diffuse reflection tail.
+
+`AudioBus` owns mixing, warning priority, pause/mute and disposal. Continuous
+world sources are capped at 12, one-shot effects at 20, and warning release
+voices at 4. The 768 KB afterburner asset loads without holding up flight;
+failed loading preserves the procedural engine. Source credits and the precise
+authoring recipe are in `audio-credits.html` and `assets/audio/sources.json`.
+The sounds are artistic game audio, not a reproduction of operational avionics.
+Incoming warnings briefly lower the engine to make room for the first pulse.
+Muting the shared warning/radio fader releases this priority reduction while
+preserving the chosen engine and weapons volumes.
+
+With the local server above running, open `/audiolab.html`, enable sound at a comfortable level, and play the
+45-second showcase or individual flight, flyby, missile and landing auditions.
+The lab also includes a flare effect for audition; the current game does not
+yet simulate a countermeasure dispenser.
+
+## Audio validation
+
+Run the signal and scheduling suites from a served page's browser console.
+Each result must have `failed: 0`:
+
+```js
+await (await import('/tests/audio.test.mjs')).runAudioTests({ log: true })
+await (await import('/tests/audio-assets.test.mjs')).runAudioAssetTests()
+await (await import('/tests/acoustic-scene.test.mjs')).runAcousticSceneTests({ log: true })
+await (await import('/tests/warnings.test.mjs')).runWarningTests({ log: true })
+await (await import('/tests/engine-response.test.mjs')).runEngineResponseTests({ log: true })
+await (await import('/tests/cannon-response.test.mjs')).runCannonResponseTests({ log: true })
+await (await import('/tests/ducking-response.test.mjs')).runDuckingResponseTests({ log: true })
+await (await import('/tests/mix-preferences.test.mjs')).runMixPreferenceTests({ log: true })
+await (await import('/tests/engine-character.test.mjs')).runEngineCharacterTests()
+await (await import('/tests/moving-identity.test.mjs')).runMovingIdentityTests({ log: true })
+```
+
+These render actual Web Audio PCM for dynamics, stereo, timing, loading,
+headroom, priority, pause/mute and resource limits. Spatial tests initialize a
+silent native HRTF node before offline rendering to avoid Chrome's first-node
+initialization stall; production uses native HRTF without a substituted panner.
+Tests preserve the saved mute preference. On `/audiolab.html`, the separate
+`runAudioLabTests()` export from `/tests/audiolab.test.mjs` checks real pause and
+interruption behavior.
+
+Pure geometry, gameplay routing, asset validation and soak-harness checks run
+without a browser:
+
+```sh
+node --test raptor/tests/soundscape.test.mjs raptor/tests/acoustic-scene.test.mjs raptor/tests/audio-assets.test.mjs raptor/tests/audio-soak.test.mjs
+```
+
+See [audio-tools/README.md](audio-tools/README.md) for reproducible captures,
+level-matched blind comparisons, signal analysis and silent endurance tests.
+Passing signal tests does not establish subjective sound quality; record
+listener judgments separately from measurements or automated critiques.

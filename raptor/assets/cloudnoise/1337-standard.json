@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "seed": 1337,
+  "resolution": "standard",
+  "baseN": 128,
+  "detailN": 64,
+  "coverageSlice": 0.50390625,
+  "towerSlice": 0.5078125,
+  "normalization": {
+    "lo": 0.24884316215080254,
+    "hi": 0.8761830935724167
+  },
+  "base": {
+    "file": "1337-standard-base.rgba8.d3.gz",
+    "bytes": 8388608,
+    "sha256": "a8faf3d6a0f3724591449876a673ec90f0d4541861935ef46c3a8865a1e0aa07"
+  },
+  "detail": {
+    "file": "1337-standard-detail.rgba8.d3.gz",
+    "bytes": 1048576,
+    "sha256": "62b6843fc4083d278d9ea4430147272656b23d6021db3bcdb4829b406079fd70"
+  },
+  "encoding": "rgba8-difference3d-v1"
+}
