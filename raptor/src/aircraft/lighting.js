@@ -202,9 +202,9 @@ export class AircraftLighting {
     for (let i = 0; i < this.bindings.length; i++) this._refresh(this.bindings[i]);
   }
 
-  update(aircraftRoot, terrain = null) {
+  update(aircraftRoot, terrain = null, { materialsReady = false } = {}) {
     // Retain the public upstream update contract for callers without a bender.
-    this.refreshMaterials();
+    if (!materialsReady) this.refreshMaterials();
     const sun = this.atmosphere.sun, shadow = sun.shadow;
     this._sun.copy(this.atmosphere.sky.uSunDir.value).normalize();
     // Retain the compiled shadow node but skip an unlit Sun's map draw.

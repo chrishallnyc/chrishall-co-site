@@ -46,6 +46,8 @@ export class PlanetObjectBender {
   constructor(curvature) {
     this.curvature = curvature;
     this._meshes = new Map();
+    this._bindings = [];
+    this._nodes = new WeakMap();
     this._materials = new WeakMap();
     this._box = new THREE.Box3();
     this._sphere = new THREE.Sphere();
@@ -78,8 +80,12 @@ export class PlanetObjectBender {
         throw new Error("Planet object bending needs explicit batched/skinned/morph bounds and history");
       }
       const mode = staticSurface ? "static" : object.isInstancedMesh && !stableInstances ? "reject" : "moving";
-      this._meshes.set(object, { mode, instanceVersion: object.instanceMatrix?.version });
-      this._prepareMaterial(object, mode);
+      const index = this._meshes.get(object)?.index ?? this._bindings.length;
+      const record = { object, mode, index, instanceVersion: object.instanceMatrix?.version, instanceCount: object.count,
+        material: null, materialItems: null };
+      this._meshes.set(object, record);
+      this._bindings[index] = record;
+      this._prepareMaterial(object, mode, record);
       // Existing particle bounds are deliberately disabled by their owners.
       // Other instanced meshes need a whole-instance box when culled.
       if (object.frustumCulled && object.isInstancedMesh) object.computeBoundingBox();
@@ -87,9 +93,18 @@ export class PlanetObjectBender {
     });
   }
 
-  _prepareMaterial(object, mode) {
-    const materials = Array.isArray(object.material) ? object.material : [object.material];
-    for (const material of materials) {
+  _prepareMaterial(object, mode, record) {
+    const source = object.material, array = Array.isArray(source);
+    if (source === record.material) {
+      if (!array) return;
+      let unchanged = source.length === record.materialItems.length;
+      for (let i = 0; unchanged && i < source.length; i++) unchanged = source[i] === record.materialItems[i];
+      if (unchanged) return;
+    }
+    // Single-material meshes are the common path: no temporary array per
+    // object per frame. Multi-material arrays may be edited in place.
+    for (let i = 0, count = array ? source.length : 1; i < count; i++) {
+      const material = array ? source[i] : source;
       const prior = this._materials.get(material);
       if (prior) {
         if (prior !== mode) throw new Error("A planet material cannot share incompatible surface-history modes");
@@ -155,6 +170,27 @@ export class PlanetObjectBender {
       material.needsUpdate = true;
       this._materials.set(material, mode);
     }
+    record.material = source;
+    record.materialItems = array ? source.slice() : null;
+  }
+
+  _updateVisibleWorld(object) {
+    let state = this._nodes.get(object);
+    if (!state) {
+      state = { frame: -1, visible: false };
+      this._nodes.set(object, state);
+    }
+    if (state.frame === this._frame) return state.visible;
+    state.frame = this._frame;
+    // Respect every ancestor, including parents outside an attached root.
+    // The cache is per frame, so visibility changes and reparenting take
+    // effect immediately without rebuilding the registration list.
+    state.visible = object.visible !== false && (!object.parent || this._updateVisibleWorld(object.parent));
+    // The pinned Three implementation accepts a third force argument. A
+    // manually managed local matrix still needs its updated parent applied;
+    // matrixWorldAutoUpdate=false continues to preserve explicit world poses.
+    if (state.visible) object.updateWorldMatrix(false, false, true);
+    return state.visible;
   }
 
   prepareFallbackSea(sea) {
@@ -178,15 +214,17 @@ export class PlanetObjectBender {
       this.fallbackSea.position.x = this.curvature.origin.value.x;
       this.fallbackSea.position.z = this.curvature.origin.value.y;
     }
-    for (const [object, record] of this._meshes) {
-      const { mode } = record;
+    for (let i = 0; i < this._bindings.length; i++) {
+      const record = this._bindings[i], { object, mode } = record;
+      if (!this._updateVisibleWorld(object)) continue;
       // Wreck/team swaps replace material objects after registration.
-      this._prepareMaterial(object, mode);
+      this._prepareMaterial(object, mode, record);
       if (!object.frustumCulled) continue;
-      object.updateWorldMatrix(true, false);
-      if (object.isInstancedMesh && object.instanceMatrix.version !== record.instanceVersion) {
+      if (object.isInstancedMesh && (object.instanceMatrix.version !== record.instanceVersion
+        || object.count !== record.instanceCount)) {
         object.computeBoundingBox();
         record.instanceVersion = object.instanceMatrix.version;
+        record.instanceCount = object.count;
       }
       const source = object.isInstancedMesh ? object.boundingBox : object.geometry.boundingBox;
       if (!source) continue;

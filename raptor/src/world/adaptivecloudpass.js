@@ -9,6 +9,7 @@ import { CloudPass } from './cloudpass.js';
 import { volCloudsNode, cloudLayerBounds } from './volclouds.js';
 import { cloudTemporalResult } from './cloudtemporal.js';
 import { createCloudGeometry } from './cloudgeometry.js';
+import { CloudLightCache } from './cloudlightcache.js';
 
 const LayerResult = struct({ layer: 'vec4', geometry: 'vec4' });
 
@@ -27,6 +28,7 @@ export class AdaptiveCloudPass extends CloudPass {
   constructor({ cloudScale = .67, repairAlphaRange = .05, repairDistanceRange = .2, stopTolerance = .5,
     debugRepair = false, ...options }) {
     super(options);
+    this._disposed = false; this._lastFrameId = undefined;
     this._cloudScale = 1;
     this._nativeOnly = uniform(true);
     this._layerSize = uniform(new THREE.Vector2(1, 1));
@@ -95,9 +97,13 @@ export class AdaptiveCloudPass extends CloudPass {
     this._material.depthTest = !reversed;
     if (builder.renderer.logarithmicDepthBuffer) throw new Error('Adaptive clouds require standard perspective depth.');
     if (reversed) this.renderTarget.depthTexture.type = THREE.FloatType;
+    if (!this.lightCache && builder.renderer.backend.isWebGPUBackend && this.cloudOptions.curvature
+      && this.cloudOptions.aerial?.sourceTransport && this.cloudOptions.aerial?.celestial) {
+      this.lightCache = new CloudLightCache({ ...this.cloudOptions, camera: this.camera });
+    }
     const shared = builder.getSharedContext();
     const lowResult = volCloudsNode({
-      ...this.cloudOptions, beauty: this.beauty, depth: this.sceneDepth, camera: this.camera,
+      ...this.cloudOptions, lightCache: this.lightCache, beauty: this.beauty, depth: this.sceneDepth, camera: this.camera,
       // Preserve the full-resolution spatial noise scale as cloudScale changes.
       jitterCoordinate: screenCoordinate.mul(this._fullSize.div(this._layerSize)), emit: emitLayer,
     });
@@ -186,10 +192,11 @@ export class AdaptiveCloudPass extends CloudPass {
           needsRepair.assign(incompatibleDepth.or(cloudSilhouette).or(cloudDistanceEdge));
         });
         If(needsRepair, () => {
-          // This is the accepted 18-probe integration with original full-res
-          // scene depth, current jittered projection and current pixel noise.
+          // Keep the original full-res scene depth, jittered projection and
+          // pixel noise. Both integrations share the same lighting cache;
+          // unavailable columns retain the original light integration.
           const exact = volCloudsNode({
-            ...this.cloudOptions, beauty: this.beauty, depth: this.sceneDepth,
+            ...this.cloudOptions, lightCache: this.lightCache, beauty: this.beauty, depth: this.sceneDepth,
             camera: this.camera, emit: emitLayer,
           }).toVar('nativeCloudRepairResult');
           layer.assign(exact.get('layer'));
@@ -218,6 +225,8 @@ export class AdaptiveCloudPass extends CloudPass {
   }
 
   updateBefore(frame) {
+    if (this._disposed) throw new Error('adaptive cloud pass is disposed');
+    if (frame.frameId !== undefined && frame.frameId === this._lastFrameId) return;
     const { renderer } = frame;
     const size = renderer.getDrawingBufferSize(this._size);
     this._updateCamera(size.width, size.height);
@@ -231,6 +240,7 @@ export class AdaptiveCloudPass extends CloudPass {
     this._fullSize.value.set(size.width, size.height);
     this._rendererState = THREE.RendererUtils.resetRendererState(renderer, this._rendererState);
     try {
+      this.lightCache?.update(renderer);
       renderer.setMRT(null);
       if (this._cloudScale < 1) {
         renderer.setRenderTarget(this.layerTarget);
@@ -239,10 +249,14 @@ export class AdaptiveCloudPass extends CloudPass {
       renderer.setRenderTarget(this.renderTarget);
       this._quad.render(renderer);
       this._storeCamera();
-    } finally { THREE.RendererUtils.restoreRendererState(renderer, this._rendererState); }
+      this._lastFrameId = frame.frameId;
+    } catch (error) { this.invalidateHistory(); throw error; }
+    finally { THREE.RendererUtils.restoreRendererState(renderer, this._rendererState); }
   }
 
   dispose() {
+    if (this._disposed) return; this._disposed = true;
+    this.lightCache?.dispose();
     this.layerTarget.dispose();
     this._layerMaterial.dispose();
     super.dispose();

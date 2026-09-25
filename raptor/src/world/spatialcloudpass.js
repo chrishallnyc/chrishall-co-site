@@ -49,7 +49,6 @@ export class SpatialCloudPass extends BaseCloudPass {
     this._fullSize = uniform(new THREE.Vector2(1, 1));
     this._filterRadius = uniform(filterRadius, 'int');
     this._nowProjectionInverse = uniform(new THREE.Matrix4());
-    this._nowWorld = uniform(new THREE.Matrix4()); this._nowView = uniform(new THREE.Matrix4());
     this._quad.onBeforeRender = () => {
       if (this._pendingFrame) { this._captureRawCamera(); this._pendingFrame.rawCaptureCount++; }
     };
@@ -64,10 +63,11 @@ export class SpatialCloudPass extends BaseCloudPass {
     return this;
   }
 
-  _rayAt(coord, inverse, world) {
-    // Only the spatial scene-stop guide uses this reconstructed ray.
-    const v = getViewPosition(coord, float(.5), inverse);
-    return normalize(world.mul(vec4(v, 0)).xyz);
+  _viewFactorAt(coord) {
+    // The game's unscaled camera has inverse world/view rotations. The
+    // scene-stop guide needs only -viewRay.z; rotating every filter tap to
+    // world space and back cannot change that normalized view-space value.
+    return normalize(getViewPosition(coord, float(.5), this._nowProjectionInverse)).z.negate();
   }
 
   setup(builder) {
@@ -107,8 +107,7 @@ export class SpatialCloudPass extends BaseCloudPass {
       const radiance = center.toVar();
       If(alpha.greaterThanEqual(p.alphaFloor).and(this._filterRadius.greaterThan(0)), () => {
         const sum = center.div(alpha).toVar(); const weights = float(1).toVar();
-        const centerRay = this._rayAt(coord, this._nowProjectionInverse, this._nowWorld).toVar();
-        const viewFactor = this._nowView.mul(vec4(centerRay, 0)).z.negate().toVar();
+        const viewFactor = this._viewFactorAt(coord).toVar();
         const centerStopView = meta.y.mul(viewFactor).toVar();
         for (let y = -2; y <= 2; y++) for (let x = -2; x <= 2; x++) {
           if (!x && !y) continue;
@@ -116,8 +115,7 @@ export class SpatialCloudPass extends BaseCloudPass {
           If(at.greaterThanEqual(ivec2(0)).all().and(at.lessThan(ivec2(this._fullSize)).all()), () => {
             const neighbor = this._rawMetadata.load(at).toVar();
             const tapUV = vec2(at).add(.5).div(this._fullSize).toVar();
-            const ray = this._rayAt(tapUV, this._nowProjectionInverse, this._nowWorld).toVar();
-            const factor = this._nowView.mul(vec4(ray, 0)).z.negate().toVar();
+            const factor = this._viewFactorAt(tapUV).toVar();
             const sameStop = abs(neighbor.y.mul(factor).sub(centerStopView)).lessThanEqual(viewFactor.mul(p.stopMarginM));
             const complete = neighbor.z.greaterThan(0)
               .and(abs(neighbor.z).mul(factor).add(viewFactor.mul(p.stopMarginM)).lessThanEqual(centerStopView));
@@ -139,8 +137,6 @@ export class SpatialCloudPass extends BaseCloudPass {
 
   _captureRawCamera() {
     this._nowProjectionInverse.value.copy(this.camera.projectionMatrixInverse);
-    this._nowWorld.value.copy(this.camera.matrixWorld);
-    this._nowView.value.copy(this.camera.matrixWorldInverse);
   }
 
   updateBefore(frame) {

@@ -251,6 +251,27 @@ export class CloudLightCache {
     this._statistics();
   }
 
+  // The first interactive frames should sample completed lighting, rather
+  // than compete with its initial construction. Keep the same bounded batch
+  // size and yield between submissions so the loading screen stays responsive.
+  // Only boot calls this; ordinary flight still submits one batch per frame.
+  async warmUp(renderer, { maxBatches = 256, yieldFrame = () => new Promise(requestAnimationFrame) } = {}) {
+    if (!Number.isInteger(maxBatches) || maxBatches < 1) throw new Error('invalid cloud warmup budget');
+    const primary = this._sun.value.y < -.05 ? 1 : 0;
+    const ready = () => [primary, 2, 3].every(kind => this._sources[kind].valid.value);
+    let batches = 0;
+    while (this.enabled && !this._disposed && !ready() && batches < maxBatches) {
+      this.update(renderer);
+      batches++;
+      if (batches % 4 === 0 || ready()) {
+        await renderer.backend?.device?.queue.onSubmittedWorkDone();
+        await yieldFrame();
+      }
+    }
+    this.stats.initialWarmup = { batches, complete: ready() };
+    return ready();
+  }
+
   dispose() {
     if (this._disposed) return;
     this._disposed = true; this._job = null;

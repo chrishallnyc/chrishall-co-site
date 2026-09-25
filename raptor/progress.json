@@ -1,11 +1,12 @@
 {
- "updated": "2026-09-24T19:41:44-07:00",
- "version": "v1.9.1",
- "now": "v1.9.1 — FLIGHT DECK AND MOTION REFINED. Calmer menus, clearer selections and region previews, smoother horizon response and consistent wingtip trails across refresh rates.",
+ "updated": "2026-09-24T19:56:58-07:00",
+ "version": "v1.10.0",
+ "now": "v1.10.0 — SMOOTHER FLIGHT. Auto balances scene resolution against measured frame times, with sharper-timed instruments and feedback, prepared cloud lighting, and less work competing during flight.",
  "nowPhase": 13,
  "paused": false,
- "pushes": 76,
+ "pushes": 77,
  "ledger": [
+  "2026-09-24 v1.10.0 — Frame pacing and responsiveness: measured Auto resolution budget, interpolated HUD and air markers, elapsed-time effects, immediate flight-coach feedback, preflight cloud-light warming and terrain preparation, cached aircraft transforms, and scheduled reflection updates. Manual graphics choices and deterministic flight physics retained.",
   "2026-09-24 v1.9.1 — Visual refinement across preflight, controls, settings and flight coaching. Consistent wingtip trail spacing, short horizon easing and frame-independent cinematic transitions. Flight physics and particle capacity unchanged.",
   "2026-09-24 v1.9.0 — Further audio refinement: reduced engine loop recurrence, fuller cannon pressure and release, nine distance-aware blast stages, and selective midrange clearance for cannon, warnings and radio. Native PCM checks cover both common sample rates, timing, fuel loss, fader preferences and disposal. Audition the mix in the sound room.",
   "2026-09-24 v1.8.0 — Combined aircraft, sky and terrain graphics release. Aircraft rebuilt and refined through five successive rendered passes: continuous joins, formed bays, independent maintenance coatings, layered nozzle metal, altitude-aware sky/cloud/ground reflections and fresh contact shading. Fighter, transport and drone finishes refined. Retains v1.7.0's finer High cloud assets and cached lighting, corrected Nellis imagery with nearby one-metre tiles, scanned Alaska rock/snow, steep-slope material projection and sky/ocean rendering improvements. Flight school and controls from v1.5.0 and v1.6.0 retained; component timings do not establish combined-release performance.",

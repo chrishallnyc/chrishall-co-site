@@ -47,6 +47,9 @@ export class Player {
 
     // render-side scratch
     this._prev = new Float64Array(this.fm.state);
+    // HUD projection shares the aircraft's presentation time. Simulation,
+    // targeting and the coach continue reading fm.state / hudState().
+    this.renderState = new Float64Array(this.fm.state);
     this._q = new THREE.Quaternion();
     this._nextQ = new THREE.Quaternion();
     this._f = new THREE.Vector3(); this._u = new THREE.Vector3(); this._r = new THREE.Vector3();
@@ -133,6 +136,7 @@ export class Player {
       });
       this.aimHeading = (pos.headingDeg || 0) * Math.PI / 180;
       this._prev.set(this.fm.state);
+      this.renderState.set(this.fm.state);
       this._cameraReady = false;
       this.renderPoseVersion++;
     }
@@ -166,6 +170,7 @@ export class Player {
     this.hitFlash = 0;
     // A respawn is a discontinuity, never a flight segment to interpolate.
     this._prev?.set(this.fm.state);
+    this.renderState?.set(this.fm.state);
     this._cameraReady = false;
     this.renderPoseVersion++;
   }
@@ -241,9 +246,12 @@ export class Player {
   }
 
   // ---- render side ----
-  render(alpha, camera, parked, dt = 1 / 60) {
+  render(alpha, camera, parked, dt = 1 / 60, presentationDt = dt) {
     const a = this._prev, b = this.fm.state;
     const t = Math.max(0, Math.min(1, alpha));
+    const elapsed = Number.isFinite(presentationDt) ? Math.max(0, presentationDt) : 0;
+    // Effect lifetime belongs to the frame clock, never to HUD redraw count.
+    this.hitFlash = Math.max(0, this.hitFlash - elapsed);
     // FM ENU -> three (x=east stays, y=up from ENU z, z=north from ENU y)
     const px = a[S.PX] + (b[S.PX]-a[S.PX])*t;
     const py = a[S.PZ] + (b[S.PZ]-a[S.PZ])*t;
@@ -257,6 +265,12 @@ export class Player {
     this._q.set(a[S.QX], a[S.QY], a[S.QZ], a[S.QW]);
     this._nextQ.set(b[S.QX], b[S.QY], b[S.QZ], b[S.QW]);
     this._q.slerp(this._nextQ, t);
+    const shown = this.renderState;
+    shown.set(b);
+    shown[S.PX] = px; shown[S.PY] = pz; shown[S.PZ] = py;
+    shown[S.QX] = this._q.x; shown[S.QY] = this._q.y;
+    shown[S.QZ] = this._q.z; shown[S.QW] = this._q.w;
+    for (let slot = S.VX; slot <= S.VZ; slot++) shown[slot] = a[slot] + (b[slot] - a[slot]) * t;
     this._f.set(1, 0, 0).applyQuaternion(this._q);   // body fwd in ENU
     this._u.set(0, 0, -1).applyQuaternion(this._q);  // body up (FRD +z is down)
     const f = this._renderForward.set(this._f.x, this._f.z, this._f.y); // ENU->three
@@ -293,8 +307,8 @@ export class Player {
     camera.lookAt(px + f.x * 120, py + f.y * 120, pz + f.z * 120);
   }
 
-  hudState() {
-    const st = this.fm.state, out = this.fm.out;
+  hudState({ presentation = false } = {}) {
+    const st = presentation ? this.renderState : this.fm.state, out = this.fm.out;
     // initFlight/reset establish velocity without ticking the physics. Its
     // derived outputs can still be zero or belong to the previous flight when
     // the welcome/pause card opens. Read the current state, including a real

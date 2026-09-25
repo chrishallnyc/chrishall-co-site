@@ -206,10 +206,19 @@ export class FlightCoach {
   }
 
   update(dt, telemetry = this.readTelemetry()) {
+    const wasInTarget = this.course.inTarget;
+    const hadTelemetry = !!this.course.telemetry;
     const changed = this.course.update(dt, telemetry, { paused: this.paused || this.state?.paused });
-    if (changed) this.refresh();
+    if (changed) { this.refresh(); this.paintElapsed = 0; return changed; }
     this.paintElapsed += Math.max(0, Math.min(0.25, Number.isFinite(dt) ? dt : 0));
-    if (this.paintElapsed >= 0.25 && this.visible && !this.paused) { this.paintElapsed = 0; this.paintTelemetry(); }
+    if (this.visible && !this.paused && !this.state?.paused) {
+      const numeric = this.paintElapsed >= 0.25 || !hadTelemetry;
+      // Target entry/exit must acknowledge the maneuver on this frame. Keep
+      // rapidly changing readouts at 4 Hz and preserve their existing nodes.
+      if (numeric || this.course.inTarget !== wasInTarget) this.paintTelemetry({ numeric });
+      if (numeric) this.paintElapsed %= 0.25;
+      if (this.progressEl && this.progressEl.value !== this.course.held) this.progressEl.value = this.course.held;
+    }
     return changed;
   }
 
@@ -246,6 +255,7 @@ export class FlightCoach {
     // never remove a focused button while someone is using keyboard navigation.
     const focusedAction = this.el.contains(document.activeElement) ? Object.keys(document.activeElement.dataset).find(name => name.startsWith('coach') || name === 'hideChecklist' || name === 'firstMission') : null;
     this.el.innerHTML = body + '<p class="coach-visually-hidden" role="status" aria-live="polite" data-coach-announcement></p>';
+    this.progressEl = this.el.querySelector('progress');
     const bind = (selector, fn) => this.el.querySelector(selector)?.addEventListener('click', fn);
     bind('[data-coach-retry]', () => this.retry());
     bind('[data-coach-replay]', () => this.replay());
@@ -262,7 +272,7 @@ export class FlightCoach {
     this.el.hidden = !this.visible || this.paused;
   }
 
-  paintTelemetry() {
+  paintTelemetry({ numeric = true } = {}) {
     if (this.course.status !== 'active') return;
     const telemetry = this.course.telemetry;
     const s = this.course.snapshot();
@@ -292,9 +302,11 @@ export class FlightCoach {
     if (telemetry.speedKt < 150) feedback = 'Low airspeed. Add power and lower the nose';
     else if (Number.isFinite(telemetry.aglFt) && telemetry.aglFt <= 300) feedback = 'Close to terrain. Climb or reset to level flight';
     else if (s.inTarget) feedback = 'On target. Hold steady';
-    readout.innerHTML = `<strong>${escapeHTML(current)}</strong><span>${escapeHTML(target)}</span>`;
+    if (numeric) {
+      readout.innerHTML = `<strong>${escapeHTML(current)}</strong><span>${escapeHTML(target)}</span>`;
+      this.el.querySelector('[data-coach-seconds]').textContent = `${Math.min(s.duration, s.held).toFixed(1)} / ${s.duration}s`;
+    }
     this.el.querySelector('[data-coach-feedback]').textContent = feedback;
-    this.el.querySelector('[data-coach-seconds]').textContent = `${Math.min(s.duration, s.held).toFixed(1)} / ${s.duration}s`;
     this.el.querySelector('progress').value = s.held;
     this.el.classList.toggle('on-target', s.inTarget);
   }
