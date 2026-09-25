@@ -338,6 +338,11 @@ follow spool; impacts use layered pressure and fragment textures. Moving
 aircraft change intake/exhaust timbre with direction, and coasting missiles
 lose their combustion body while retaining close aerodynamic noise. Mechanical
 cues stay dry while large distant effects retain a diffuse reflection tail.
+Long, independently varying pressure motion and slight carrier drift break up
+the engine's repeating noise loops. Cannon rounds combine a sharp attack with
+an overlapping pressure body and short airframe decay after release. Distant
+blast bodies use nine precomputed dispersion stages selected from listener
+distance; the initial pressure front and scheduled arrival stay intact.
 
 `AudioBus` owns mixing, warning priority, pause/mute and disposal. Continuous
 world sources are capped at 12, one-shot effects at 20, and warning release
@@ -348,6 +353,10 @@ The sounds are artistic game audio, not a reproduction of operational avionics.
 Incoming warnings briefly lower the engine to make room for the first pulse.
 Muting the shared warning/radio fader releases this priority reduction while
 preserving the chosen engine and weapons volumes.
+Cannon fire, incoming warnings and radio also briefly reduce the engine's
+midrange while preserving its low rumble. Finite bursts restore the spectrum
+on the audio clock, including when warning and radio priorities overlap.
+Muted cue channels do not trigger this reduction.
 
 With the local server above running, open `/audiolab.html`, enable sound at a comfortable level, and play the
 45-second showcase or individual flight, flyby, missile and landing auditions.
@@ -370,6 +379,9 @@ await (await import('/tests/ducking-response.test.mjs')).runDuckingResponseTests
 await (await import('/tests/mix-preferences.test.mjs')).runMixPreferenceTests({ log: true })
 await (await import('/tests/engine-character.test.mjs')).runEngineCharacterTests()
 await (await import('/tests/moving-identity.test.mjs')).runMovingIdentityTests({ log: true })
+await (await import('/tests/engine-motion.test.mjs')).runEngineMotionTests({ log: true })
+await (await import('/tests/weapon-material.test.mjs')).runWeaponMaterialTests({ log: true })
+await (await import('/tests/mix-focus.test.mjs')).runMixFocusTests({ log: true })
 ```
 
 These render actual Web Audio PCM for dynamics, stereo, timing, loading,
