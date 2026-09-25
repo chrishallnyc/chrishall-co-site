@@ -220,7 +220,7 @@ controller menus still use keyboard and a pointer. Automated checks simulate
 pointer/controller input; they do not certify physical trackpad gestures or
 every controller model.
 
-Preferences, flight school graduation, and completed campaign/operation results
+Preferences, flight school graduation, and completed campaign/scenario/operation results
 stay in this browser's local storage, separately for each origin/port.
 **Pilot log** shows briefings,
 unlocks, completed missions, and operation status; during a campaign flight it
@@ -249,14 +249,17 @@ Private browsing or blocked storage limits persistence; the UI reports save
 failures and keeps changes usable for the current session.
 
 Open **Pilot log → Backup & restore → Download backup** to keep campaign and
-operation progress, flight school graduation, controls and preferences in a local
-JSON file. **Choose backup…** previews the saved profile; **Keep current profile**
+operation progress, standalone scenario completion (including Harbor Watch),
+flight school graduation, controls and preferences in a local JSON file.
+**Choose backup…** previews the saved profile; **Keep current profile**
 cancels without changing it. Restoring replaces the current profile and is available
 only from preflight. **Replace profile & reload** reloads Raptor after a successful
 restore. Invalid files are rejected before writes; failed writes attempt to roll
 back completed changes and report whether recovery succeeded. A valid backup can
 also replace a damaged local profile. Unfinished flights and device benchmark
-results are excluded.
+results are excluded. Older version-1 backups without scenario records show zero
+completed scenarios in the preview; restoring one also clears current scenario
+completion. Download the current profile first if you want to keep both.
 
 The selected target shows missile acquisition progress, range, closing/opening
 speed, and your assigned launch key. Friendly contacts say **Hold fire**; an empty
@@ -325,7 +328,8 @@ and [Harbor Watch](https://raptor.chall.net/?front=NEWYORK&sortie=Y01).
 
 | Location | Responsibility |
 | --- | --- |
-| [index.html](index.html), [src/main.js](src/main.js) | Entry point, renderer initialization, game loop and system wiring. |
+| [index.html](index.html), [src/boot.js](src/boot.js) | Entry point and lightweight preflight/flight routing. |
+| [src/main.js](src/main.js), [src/appstate.js](src/appstate.js) | Flight renderer, game loop and system wiring; shared preflight/flight diagnostics. |
 | [src/game/keyboardlayout.js](src/game/keyboardlayout.js), [controlsmenu.js](src/game/controlsmenu.js), [controls.css](src/game/controls.css) | Physical keyboard geometry, visual binding editor and rehearsal, shared before and during flight. |
 | [src/game/](src/game/) | Preflight, controls/settings, pause menu, pilot log, HUD, player and combat systems. |
 | [src/game/flightcoach.js](src/game/flightcoach.js), [quicktune.js](src/game/quicktune.js), [flightbrief.js](src/game/flightbrief.js) | Telemetry-based practice course, paused setup shortcuts and mission objective overview; wired by [cockpit.js](src/game/cockpit.js). |
@@ -459,6 +463,7 @@ node raptor/qa/guidance.browser.mjs
 node raptor/qa/feedback.browser.mjs
 node raptor/qa/backup.browser.mjs
 node raptor/qa/pilotlog.browser.mjs
+node raptor/qa/tactical.browser.mjs
 node raptor/qa/loading.browser.mjs
 node raptor/qa/accessibility.browser.mjs
 node raptor/qa/missions.browser.mjs
@@ -491,6 +496,7 @@ HEADED=1 RECORD=1 node raptor/qa/flight-school.browser.mjs
 | `PLAYWRIGHT_MODULE` | Optional absolute path to an existing Playwright module entry point. |
 | `RAPTOR_BASE_URL` | Server URL; default `http://localhost:8082/`. |
 | `RAPTOR_TEST_OUTPUT` | Optional artifact directory; each script has its own default under `.context/`. |
+| `RAPTOR_TEST_BACKEND` | `webgpu` selects WebGPU for the tactical-map browser check; its default is `webgl`. |
 | `HEADED` | `1` shows Chrome; otherwise the scripts run headless. |
 | `RECORD` | `1` records the flight-school browser check; optional for that script. |
 
@@ -507,6 +513,8 @@ crash and off-screen aim probes are separate from the flown training course.
 completed-sortie reports using fixed presentation poses and injected outcomes.
 `backup` checks local download, preview/cancel, invalid files and restoring a
 damaged profile at narrow widths, followed by a preflight reload.
+`tactical` checks the map and received radio history in real campaign and practice
+flights; [QA details](qa/README.md) describe both renderer paths and pause checks.
 `accessibility` checks modal isolation, mute migration and illustrative previews.
 `loading` checks loading stages and recovery from missing game/mission files.
 The missions check flies the three campaign regions, checks HIGH/WebGL paths, and injects

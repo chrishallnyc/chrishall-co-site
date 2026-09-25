@@ -20,6 +20,11 @@ needed. `opening` runs headless without booting a flight renderer, covering fres
 and returning pilots, optional customization, focus and narrow layouts. It writes
 screenshots and results to `.context/ceo-pass/opening/` by default. `loading`
 checks recoverable bootstrap/flight-module failures without allocating a GPU.
+Blocking `src/boot.js` exercises the preflight bootstrap recovery screen;
+blocking `src/main.js` fails an explicit flight URL while preflight still works.
+For `loading`, point optional `RAPTOR_STAGE_ROOT` at the staged `raptor/` directory.
+It overlays whitelisted entry files, startup modules (including `src/boot.js` and
+`src/appstate.js`) and preflight images; other requests still use the live server.
 `feedback` runs WebGL practice and combat, checks live instruments and recovery
 at narrow sizes, including high-angle-of-attack guidance, gear
 travel and reassigned recovery/gear controls. It verifies the real HUD's lock,
@@ -30,9 +35,13 @@ outcomes check the completed-sortie report and retry flows without claiming to
 beat a mission. Its artifacts default to `.context/raptor-feedback/`.
 `backup` runs without a flight renderer and checks local download, preview/cancel,
 invalid-file rejection, and replacement of a damaged profile on a narrow screen.
-Successful restore reloads preflight with the restored controls and progress;
-artifacts default to `.context/raptor-backup/`. Native `pilot-backup.test.mjs`
-also checks rollback after failed writes and reports incomplete recovery.
+Successful restore reloads preflight with the restored controls and progress,
+including Harbor Watch completion stored separately from the campaign. Delayed
+file reads verify that the newest choice wins and a closed dialog ignores late
+successes and failures without changing storage. Artifacts default to
+`.context/raptor-backup/`. Native `pilot-backup.test.mjs` also checks migration
+of older backups without scenario records, rollback after failed writes, and
+incomplete-recovery errors.
 `pilotlog` runs without a flight renderer and checks mission-ID/type search,
 combined region/status filters, empty-result recovery, next-mission navigation,
 briefing objectives, typing focus, selected-row visibility and narrow layouts.
