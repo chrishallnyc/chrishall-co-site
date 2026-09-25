@@ -32,7 +32,9 @@ export async function exportF22ForAO() {
       || mesh.userData.aircraftEffect || mesh.userData.excludeAO || mesh.userData.role === 'paint-marking'
       || mat.transparent || mat.transmission > 0 || mat.fog === false;
     if (omitted) { exclusions.push(path); return; }
-    const atlas = /F-22 authored (body|lifting) high RAM coating/.exec(mat.name)?.[1] ?? null;
+    const coating = mat.userData.f22Coating;
+    const atlas = coating?.quality === 'high' && ['body','lifting'].includes(coating.atlas)
+      ? coating.atlas : /F-22 authored (body|lifting) high RAM coating/.exec(mat.name)?.[1] ?? null;
     const geometry = mesh.geometry, pos = geometry.attributes.position, normal = geometry.attributes.normal, uv = geometry.attributes.uv;
     if (!pos || !normal) throw new Error(`Missing geometry attributes: ${path}`);
     const positions = [], normals = [], uvs = [], faces = [], receivers = [], charts = [], neutralAO = [];
@@ -70,16 +72,28 @@ export async function exportF22ForAO() {
       }
       if (atlas === 'lifting') {
         const localY = ids.reduce((sum,id) => sum+normal.getY(id),0)/3;
-        const positive = chart?.endsWith('Upper') || chart?.endsWith('Positive');
+        const positive = /(?:Upper|Positive)(?:Left)?$/.test(chart ?? '');
         receiver &&= positive ? localY > .5 : localY < -.5;
-        // Fin inner/outer faces now have unique charts on each physical side.
-        if (!chart?.startsWith('fin')) receiver &&= x >= -1e-5;
+        // Wings, stabilators and fin faces have independent charts on both
+        // physical sides. Each side must receive its own contact bake.
+        // Presence alone cannot detect a mirrored door borrowing the other
+        // wing's occupied chart. Check ownership in the exported neutral pose.
+        if (receiver && /^(?:wing|tail)/.test(chart)
+          && (chart.endsWith('Left') ? x > 1e-5 : x < -1e-5)) {
+          throw new Error(`AO receiver on wrong physical side: ${path}; chart ${chart}; triangle ${i / 3}; mean X ${x}`);
+        }
       }
       receivers.push(receiver); charts.push(chart); neutralAO.push(neutral);
     }
     if (![...positions,...normals,...uvs].every(Number.isFinite)) throw new Error(`Non-finite export: ${path}`);
     meshes.push({ name:mesh.name,path,atlas,positions,normals,uv:uvs,faces,receivers,charts,neutralAO,components });
   });
+  // Fail before baking if a chart-layout change silently drops a whole skin.
+  const receiverCharts = new Set(meshes.flatMap(mesh => mesh.atlas === 'lifting'
+    ? mesh.charts.filter((chart, i) => mesh.receivers[i]) : []));
+  for (const chart of Object.keys(F22_LIFTING_CHARTS)) {
+    if (!receiverCharts.has(chart)) throw new Error(`No AO receivers for lifting chart ${chart}`);
+  }
   const data = { schema:1, units:'metres', axes:{right:'+X',up:'+Y',forward:'-Z'},
     pose:'neutral FM surfaces; GEAR=0; closed bay controllers; gear/nozzles/effects/transmission excluded', metadata:built.group.userData.aircraft,
     charts:{body:F22_BODY_CHARTS,lifting:F22_LIFTING_CHARTS}, meshes, exclusions };

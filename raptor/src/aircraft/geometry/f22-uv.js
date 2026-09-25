@@ -8,10 +8,16 @@ export const F22_BODY_CHARTS = Object.freeze({
 });
 
 export const F22_LIFTING_CHARTS = Object.freeze({
-  wingUpper: { rect: [.02, .52, .54, .46], bounds: [-1.4, 6.4, 0, 4.96] },
-  wingLower: { rect: [.02, .02, .54, .46], bounds: [-1.4, 6.4, 0, 4.96] },
-  tailUpper: { rect: [.59, .76, .38, .22], bounds: [-1.8, 1.60, 0, 3.28] },
-  tailLower: { rect: [.59, .51, .38, .22], bounds: [-1.8, 1.60, 0, 3.28] },
+  // Independent sides preserve maintenance history while retaining the
+  // established 4K x 2K atlas budget. Fin faces were already independent.
+  wingUpper: { rect: [.02, .52, .263, .46], bounds: [-1.4, 6.4, 0, 4.96] },
+  wingUpperLeft: { rect: [.297, .52, .263, .46], bounds: [-1.4, 6.4, 0, 4.96] },
+  wingLower: { rect: [.02, .02, .263, .46], bounds: [-1.4, 6.4, 0, 4.96] },
+  wingLowerLeft: { rect: [.297, .02, .263, .46], bounds: [-1.4, 6.4, 0, 4.96] },
+  tailUpper: { rect: [.59, .76, .18, .22], bounds: [-1.8, 1.60, 0, 3.28] },
+  tailUpperLeft: { rect: [.79, .76, .18, .22], bounds: [-1.8, 1.60, 0, 3.28] },
+  tailLower: { rect: [.59, .51, .18, .22], bounds: [-1.8, 1.60, 0, 3.28] },
+  tailLowerLeft: { rect: [.79, .51, .18, .22], bounds: [-1.8, 1.60, 0, 3.28] },
   finPositive: { rect: [.59, .265, .18, .22], bounds: [3.4, 7.65, 0, 3.25] },
   finNegative: { rect: [.59, .02, .18, .22], bounds: [3.4, 7.65, 0, 3.25], flipS: true },
   finInnerPositive: { rect: [.79, .265, .18, .22], bounds: [3.4, 7.65, 0, 3.25] },

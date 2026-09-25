@@ -43,7 +43,7 @@ export function qualityProfile({ backend, mode, renderScale, pixelRatio, scale, 
 // for the full game. Pose/time still vary within a front; this key isolates
 // distinct rendering paths, not every possible view of the same workload.
 export function qualityWorkload(flags) {
-  return ['post', 'vclouds', 'atmo', 'skycache', 'curvature', 'noterrain', 'nowater', 'waterenv',
+  return ['post', 'vclouds', 'atmo', 'skycache', 'curvature', 'noterrain', 'nowater', 'waterenv', 'aircraftenv',
     'ocean', 'waterfine', 'watergrid', 'waterslopes', 'watershadow', 'waterenvsize',
     'terrainnear', 'drape', 'geographicdetail', 'terrainphoto', 'snowdetail', 'terrainmaterials', 'terrainsource', 'cloudshadow', 'cloudtransport', 'ao', 'chain', 'aircraftAir', 'aircraftShadows', 'reverseDepth', 'reversedepth', 'logdepth', 'rawtaa', 'nobattle', 'nomatch']
     .filter(key => flags.has(key))

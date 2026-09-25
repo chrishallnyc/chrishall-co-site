@@ -29,7 +29,7 @@ The export drives the actual render pose with neutral surface values and `GEAR=0
 Receiver selection accounts for deliberate UV sharing:
 
 - Upper/lower body charts retain both sides; the shared side strips use starboard faces that point outward.
-- Wing and stabilator charts use the starboard representative.
+- Wings and stabilators have independent left/right upper/lower charts; both sides receive their own bake. Export fails if any lifting-surface chart has no receivers.
 - Each fin inner/outer face uses its unique positive/negative chart.
 - Faces crossing chart boundaries and thin rims poorly aligned with their chart projection remain occluders but cannot write the atlas.
 

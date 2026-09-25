@@ -180,4 +180,3 @@ export function addTerrainPhotoDetail({pack,front,wp,baseNormal,normalWorld,roug
  };
  return{normalWorld:normal,roughness:finalR,land,textures,albedoNode:finalAlbedo};
 }
-

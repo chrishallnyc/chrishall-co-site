@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "provisional": false,
-  "geometrySHA256": "8a1e312c09a8fee96e6a6a02f13e25a3f9afa5e2cc43e10d74c2b8746df8894e",
-  "sourceSHA256": "9003e32aec383e8e169ce210e1838d2664b276594c5a8626d5fae5888a256899",
+  "geometrySHA256": "c16df200c93bd666bc3757dad3483e4ee5a08ff5b5d66394c1d52eb887211b8b",
+  "sourceSHA256": "35df7ed7eb5c3d4a31a55bc3e23d83e51df4307dabed2040267cfcd69d995954",
   "radiusMetres": 0.35,
   "strength": 0.65,
   "blender": "4.5.14 LTS",
@@ -31,13 +31,13 @@
       "file": "body-ao.png",
       "width": 2048,
       "height": 1024,
-      "sha256": "abebc8ffefd66982422916d1ef9d8399f969823516c658c39591f7717ba58905"
+      "sha256": "afb62a06e42a5a5daa6dafcbe105c47f0f7dec0da404461e86253201ee50a636"
     },
     "lifting": {
       "file": "lifting-ao.png",
       "width": 2048,
       "height": 1024,
-      "sha256": "3cd27224fe1848551a6e50e92457e4b97f521179b3f5d58900226a889bc659ae"
+      "sha256": "2ff49f4ab788c29f458877a2913d90754e845d6138fda47e7fef4ac0ab8dd96a"
     }
   }
 }

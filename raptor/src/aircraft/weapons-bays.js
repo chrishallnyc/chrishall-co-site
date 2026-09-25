@@ -3,21 +3,32 @@ import { MAIN_BAYS } from './geometry/f22-bay-layout.js';
 import { airframeBottom, buildAirframeGeometry } from './geometry/f22-airframe.js';
 import { clipProjectedPolygon } from './geometry/clip-polygon.js';
 import { mergeDetails } from './hardware.js';
+import { panelStructure,addFormedRib } from './bay-structure.js';
+import { rodDetail,hoseGeometry } from './detail-geometry.js';
 
 const pairedDoors = new WeakMap();
 const DOOR_OFFSET = .002, DOOR_THICKNESS = .018;
 
 export function joinSurfaces(surfaces) {
   const geometry = new THREE.BufferGeometry(), index = [];
-  for (const name of ['position', 'normal', 'uv']) {
-    const size = surfaces[0].attributes[name].itemSize;
-    const values = new Float32Array(surfaces.reduce((n, surface) => n + surface.attributes[name].array.length, 0));
+  if (!surfaces.length) return geometry;
+  // Clipped skin carries both its authored atlas and metre-scale finish UVs.
+  // Preserve every compatible common attribute; interior-only joins can omit
+  // optional charts that are absent from their simple thickness/rim geometry.
+  for (const [name,first] of Object.entries(surfaces[0].attributes)) {
+    if (!surfaces.every(surface=>{
+      const attribute=surface.attributes[name];
+      return attribute && attribute.itemSize===first.itemSize && attribute.normalized===first.normalized &&
+        attribute.array.constructor===first.array.constructor;
+    })) continue;
+    const size=first.itemSize;
+    const values = new first.array.constructor(surfaces.reduce((n, surface) => n + surface.attributes[name].array.length, 0));
     let offset = 0;
     for (const surface of surfaces) {
       values.set(surface.attributes[name].array, offset);
       offset += surface.attributes[name].array.length;
     }
-    geometry.setAttribute(name, new THREE.BufferAttribute(values, size));
+    geometry.setAttribute(name, new THREE.BufferAttribute(values,size,first.normalized));
   }
   let offset = 0;
   for (const surface of surfaces) {
@@ -78,6 +89,8 @@ export function buildMainWeaponsBays(coating, quality = 'high') {
   liner.name = 'weapon-bay-liner';
   const rail = new THREE.MeshStandardMaterial({ color: 0x6d7678, roughness: .58, metalness: .47 });
   rail.name = 'weapon-bay-hardware';
+  const structure = new THREE.MeshStandardMaterial({color:0x87978e,roughness:.71,metalness:.19});
+  structure.name = 'weapon-bay-formed-structure';
   const add = (parent, name, geometry, material) => {
     const mesh = new THREE.Mesh(geometry, material); mesh.name = name; parent.add(mesh); return mesh;
   };
@@ -91,6 +104,11 @@ export function buildMainWeaponsBays(coating, quality = 'high') {
     const skin = joinSurfaces(patches); patches.forEach(patch => patch.dispose());
     skin.translate(0, -DOOR_OFFSET, 0);
     const boundary = perimeterEdges(skin, outline);
+    const reinforcement=panelStructure(skin,outline,structure,{quality,normalSign:-1,lift:DOOR_THICKNESS+.001,
+      depth:.025,width:.038,fractions:[.18,.40,.63,.84],name:'mainDoorInnerStructure',offset:pivot.position.clone().negate()});
+    for(const z of [-1.04,.42,1.98])rodDetail(reinforcement,'doorHingeKnuckle',
+      [hingeX,airframeBottom(hingeX,z)+.025,z-.064],[hingeX,airframeBottom(hingeX,z)+.025,z+.064],.019,structure,.019,quality==='low'?6:10);
+    pivot.add(mergeDetails(reinforcement));
     const inner = skin.clone(), p = inner.attributes.position;
     for (let i = 0; i < p.count; i++) p.setY(i, p.getY(i) + DOOR_THICKNESS);
     for (let i = 0; i < inner.index.count; i += 3) {
@@ -115,6 +133,26 @@ export function buildMainWeaponsBays(coating, quality = 'high') {
     for (const z of [-.93, .29, 1.55]) {
       const brace = add(cavity, 'bayCrossBrace', new THREE.BoxGeometry(.51, .024, .034), rail);
       brace.position.set(sign * .34, -.289, z);
+    }
+    // These are the broad blank surfaces seen from a low oblique view.
+    // Reinforce their actual inward-facing walls, leaving the coated outside
+    // of the opened doors uninterrupted.
+    for(const [x,inward] of [[sign*.715,-sign],[sign*.035,sign]]){
+      const normal=new THREE.Vector3(inward,0,0);
+      for(const z of [-1.07,.02,1.12,2.09]){
+        const bottom=airframeBottom(x,z)+.075;
+        addFormedRib(cavity,'bayWallFrame',[new THREE.Vector3(x,bottom,z),new THREE.Vector3(x,-.305,z)],
+          [normal,normal],.038,.025,structure,quality);
+      }
+      const points=[],normals=[];
+      const segments=quality==='low'?6:quality==='medium'?12:20;
+      for(let i=0;i<=segments;i++){const z=-1.17+3.34*i/segments;points.push(new THREE.Vector3(x,airframeBottom(x,z)+.08,z));normals.push(normal);}
+      addFormedRib(cavity,'bayWallLowerChannel',points,normals,.034,.022,structure,quality);
+    }
+    if(quality!=='low'){
+      const line=add(cavity,'bayServiceLine',hoseGeometry([[sign*.670,-.36,-1.04],[sign*.670,-.335,-.82],
+        [sign*.670,-.335,1.90],[sign*.635,-.40,2.08]],.008,24,6),rail);
+      line.userData.aircraftInteriorDetail=true;
     }
     pivot.userData.weaponBay = { side: sign, outline, closedAngle: 0, openAngle: sign * 95 };
     return pivot;

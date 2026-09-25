@@ -133,10 +133,11 @@ The panel identifies pending asset changes and offers **Review restart**, which
 asks before discarding an unfinished flight.
 On WebGPU, High and Ultra retain volumetric clouds and the full post-processing path;
 Low (fastest) and Medium (balanced) reduce graphics work.
-High now uses finer cloud data, nearby one-metre Nevada aerial imagery, and
-scanned Alaska rock and snow detail. These larger assets load when starting a
-flight; missing optional detail keeps the base terrain usable. Native 4K is
-available but remains demanding on the graphics processor.
+High uses finer cloud data, streamed one-metre aerial imagery near Nellis, and
+scanned Alaska rock and snow detail. Cloud and scanned material assets load at
+flight startup; nearby aerial tiles stream as you move. Missing optional detail
+keeps the base terrain usable. Native 4K is available but remains demanding on
+the graphics processor.
 
 Accessibility includes an illustrative HUD/text-size and target-color preview,
 reduced combat flashes, and separate switches for key reminders and the practice
@@ -197,22 +198,43 @@ Aircraft graphics live in `src/aircraft/`. `f22v3.js` retains the player rig's
 F119 nozzles, and materials are separate modules. `bandit-models.js` builds the
 shared fighter, transport, and drone. Their coating textures are generated once
 at startup for the selected quality and shared across the aircraft pool.
+The fighter has recessed intake ducts and a modeled cockpit; the transport has
+recessed nacelles, fan assemblies and cockpit crew; the drone has a sensor turret
+and shaped propeller blades. Lower detail levels reduce these small assemblies.
 Distance-dependent visual detail and livery changes preserve each aircraft's
 materials and rig. Flight physics, hit volumes, and deterministic simulation
 remain independent of these meshes.
 
 The F-22 uses authored color, normal, and packed occlusion/roughness/metalness
 maps in `src/aircraft/textures/f22/`. These are static assets, with three texture tiers;
-the browser does no coating baking during flight. Rebuild the paint maps with
+the browser does no coating baking during flight. Independent left/right wing
+and tail charts retain asymmetric repairs and service marks. The authored base
+normal uses the paint atlas, while HIGH/MED add small shared normal and roughness
+maps for the clearcoat layer on a separate physical-scale UV chart. LOW omits
+those detail maps. Paint, protective strips, radome, glazing and nozzle metal
+have separate surface responses; these are visual approximations, not measured
+aircraft coating properties. Rebuild the paint maps with
 `node raptor/tools/bake-f22.mjs` using an existing Playwright/Chrome installation.
 The authoring source is in `src/aircraft/authoring/`; physical dimensions and
 shared UV/door outlines are in `src/aircraft/geometry/`.
-Contact occlusion is baked offline from the neutral aircraft and packed into
-the same maps. See [`tools/F22-AO.md`](tools/F22-AO.md) to regenerate it after
-geometry changes; the paint baker rejects a stale contact bake.
+Contact occlusion is baked offline from frozen neutral, stowed-gear geometry and
+packed into the same maps. It supplements moving shadows; it does not recalculate
+when doors or controls move. Shared side/fairing UVs require explicit receiver
+limits. See [`tools/F22-AO.md`](tools/F22-AO.md) to regenerate it after geometry or
+UV changes; the paint baker rejects a stale contact bake.
+
+In flight, all aircraft share a reflection map captured from the physical sky
+at player altitude, including the active cloud source and an approximate ground
+hemisphere. Individual materials retain their own reflection strength. The
+ground uses a regional average color, not rendered terrain or nearby aircraft.
+See [Aircraft integration](GRAPHICS.md#aircraft-integration) for capture,
+exposure, curvature and quality behavior.
 
 Serve this directory as the web root, then open `/f22lab.html` to inspect all
-four aircraft under studio lighting. View buttons cover the underside, cockpit,
+four aircraft under Studio, Daylight, Overcast or Low sun inspection lighting.
+Select a preset in the toolbar or use `light=studio`, `light=daylight`,
+`light=overcast`, or `light=raking` in the query. These are fixed lab lighting setups, not the in-game
+atmosphere. View buttons cover the underside, cockpit,
 and exhausts; toggles expose the landing gear and weapon bays. Reproducible views use
 `?view=rear&gear=0&spin=0`; add `gl=1` for WebGL, `ui=0` for clean screenshots,
 `bays=1` for open bays, `ab=1` for settled afterburners, or `aircraft=fighter`,

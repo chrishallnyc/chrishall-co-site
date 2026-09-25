@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import {curveSegments} from './quality.js';
+import {curveSegments,buildLevel} from './quality.js';
 import {cutWindowOpenings} from './window-openings.js';
 import {
   Airframe, TAU, airfoilHeight, fin, loft, meshGeometry, ribbon,
-  sampleSection, sectionShell, wing,
+  sampleSection, sectionShell, wing, segmentedWing,
 } from './geometry.js';
 
 // C-17-inspired proportions at the game's intentional, roughly 30 m scale.
@@ -21,7 +21,7 @@ const BODY = [
   [5.9, 1.88, 2.06, .025, .99],
   [8.5, 1.83, 2.00, .01, 1],
   [10.3, 1.73, 1.82, -.02, 1.025],
-  [11.6, 1.58, 1.54, -.075, 1.09],
+  [11.6, 1.58, 1.65, -.025, 1.09],
   [12.7, 1.36, 1.20, -.27, 1.18],
   [13.7, 1.08, 1.01, -.40, 1.12],
   [14.5, .70, .74, -.40, 1.015],
@@ -53,6 +53,29 @@ function sectionPoint(rows, theta, z, offset = 0) {
   const [, w, h, cy, lower = 1] = sampleSection(rows, z);
   const c = Math.cos(theta);
   return [Math.sin(theta) * (w + offset), cy + c * (h * (c < 0 ? lower : 1) + offset), z];
+}
+
+function cargoShell() {
+  const geometry=loft(BODY,64,true,3),p=geometry.attributes.position;
+  const originalNormals=geometry.attributes.normal.clone(),reshaped=new Uint8Array(p.count);
+  // Shape the original upper hull into a shoulder under the wing box.
+  // This stays one watertight shell, including at both tapered ends.
+  for(let i=0;i<p.count;i++) {
+    const x=p.getX(i),y=p.getY(i),z=p.getZ(i),[,width,height,centre]=sampleSection(BODY,z);
+    const envelope=THREE.MathUtils.smoothstep(z,-4.1,-1.1)*(1-THREE.MathUtils.smoothstep(z,3.1,5.5));
+    const elevation=(y-centre)/height;
+    const shoulder=THREE.MathUtils.smoothstep(elevation,.38,.80)*envelope;
+    reshaped[i]=Number(shoulder>0);
+    const u=Math.min(1,Math.abs(x)/Math.max(.001,width));
+    const target=Math.sign(x)*width*1.075*Math.pow(u,.58);
+    p.setX(i,THREE.MathUtils.lerp(x,target,shoulder));
+  }
+  geometry.computeVertexNormals();
+  // Keep the analytic loft normals on the untouched nose, belly and tail.
+  // Re-averaging their unequal rings would reintroduce the highlight bands.
+  const normals=geometry.attributes.normal;
+  for(let i=0;i<p.count;i++)if(!reshaped[i])normals.setXYZ(i,originalNormals.getX(i),originalNormals.getY(i),originalNormals.getZ(i));
+  return geometry;
 }
 
 function wingSection(x) {
@@ -88,22 +111,27 @@ function detailTube(points, radius = .010, radial = 4) {
 }
 
 function fanBlades() {
-  const p = [], ix = [], count = 24;
-  for (let i = 0; i < count; i++) {
-    const a = i / count * TAU, n = p.length / 3;
-    // Radial, slightly swept/twisted vanes. The dark spaces between them
-    // remain open onto a backing disc well behind the inlet rim.
-    const corners = [
-      [.17, a - .046, .88], [.61, a + .092, .765],
-      [.61, a + .185, .785], [.17, a + .035, .90],
-    ];
-    for (const [r, t, z] of corners) p.push(Math.sin(t) * r, Math.cos(t) * r, z);
-    ix.push(n, n + 2, n + 1, n, n + 3, n + 2);
+  const p=[],ix=[],count=buildLevel()===0?28:20,radial=buildLevel()===0?5:4,chord=buildLevel()===0?4:3;
+  for(let blade=0;blade<count;blade++) {
+    const base=blade/count*TAU,first=p.length/3,row=chord+1,layer=(radial+1)*row;
+    for(let face=0;face<2;face++)for(let i=0;i<=radial;i++)for(let j=0;j<=chord;j++) {
+      const u=i/radial,v=j/chord,r=.17+u*.445;
+      const t=base+u*u*.115+(v-.5)*(TAU/count)*(.98+.45*(1-u));
+      const z=.875-u*.075+(v-.5)*(.13-u*.055)+Math.sin(v*Math.PI)*.025+(face?-.006:.006);
+      p.push(Math.sin(t)*r,Math.cos(t)*r,z);
+    }
+    for(let face=0;face<2;face++)for(let i=0;i<radial;i++)for(let j=0;j<chord;j++) {
+      const n=first+face*layer+i*row+j,tris=[n,n+row,n+1,n+1,n+row,n+row+1];
+      for(let q=0;q<6;q+=3)ix.push(...(face?tris.slice(q,q+3):tris.slice(q,q+3).reverse()));
+    }
+    const edge=(a,b)=>ix.push(first+a,first+b,first+a+layer,first+b,first+b+layer,first+a+layer);
+    for(let i=0;i<radial;i++){edge(i*row,(i+1)*row);edge((i+1)*row+chord,i*row+chord);}
+    for(let j=0;j<chord;j++){edge(j+1,j);edge(radial*row+j,radial*row+j+1);}
   }
-  return meshGeometry(p, ix);
+  return meshGeometry(p,ix);
 }
 
-function nacelle(a, x, y, z, name) {
+function nacelle(a, x, y, z, name, rotors) {
   const position = [x, y, z];
   const cowlRows=[
     [-1.77, .50, .50], [-1.26, .67, .66], [-.55, .795, .785],
@@ -118,15 +146,23 @@ function nacelle(a, x, y, z, name) {
     ring(.817, 1.50, .97), ring(.797, 1.64, .97),
     ring(.758, 1.715, .97), ring(.719, 1.713, .98),
     ring(.687, 1.657, .99), ring(.677, 1.565),
-  ]), 'metal', { position, name: `${name}-rounded-inlet-lip`, tint: [1.12, 1.12, 1.1] });
-  a.add(sectionShell([
-    ring(.677, 1.565), ring(.664, 1.28), ring(.639, .99), ring(.622, .73),
-  ]), 'trim', { position, name: `${name}-recessed-inlet-duct`, tint: [.62, .66, .69] });
+  ]), 'machined', { position, name: `${name}-rounded-inlet-lip`, tint: [.90,.93,.95] });
+  const duct=sectionShell([ring(.677,1.565),ring(.667,1.38),ring(.655,1.17),ring(.639,.99),ring(.622,.73)]);
+  const ductColors=[],ductPositions=duct.attributes.position;
+  for(let i=0;i<ductPositions.count;i++) {
+    const depth=THREE.MathUtils.smoothstep(ductPositions.getZ(i),.73,1.565),shade=.36+depth*.84;
+    ductColors.push(shade*.89,shade*.95,shade);
+  }
+  duct.setAttribute('color',new THREE.Float32BufferAttribute(ductColors,3));
+  a.add(duct,'trim',{position,name:`${name}-recessed-inlet-duct`});
   a.add(frontDisc(.624, .70), 'cavity', { position, name: `${name}-fan-shadow` });
-  a.add(fanBlades(), 'metal', { position, name: `${name}-fan-stator`, tint: [.42, .46, .49] });
-  a.add(loft([
+  const fan=buildLevel()<2?new Airframe(`${name}-fan`,{...a.materials,metal:a.materials.fan},TRANSPORT_EXTENT):a;
+  const fanPosition=fan===a?position:[0,0,0];
+  if(fan!==a)fan.add(fanBlades(),'metal',{name:`${name}-fan-stator`,tint:[.79,.83,.85]});
+  fan.add(loft([
     [.71, .185, .185], [.93, .174, .174], [1.15, .105, .105], [1.27, .012, .012],
-  ], 24, true, 2), 'metal', { position, name: `${name}-fan-spinner`, tint: [.67, .70, .72] });
+  ], 28, true, 3), 'metal', { position:fanPosition, name: `${name}-fan-spinner`, tint: [.34,.37,.38] });
+  if(fan!==a){const rotor=fan.finish();rotor.name=`bandit-fan-${name}`;rotor.position.set(...position);rotors.push(rotor);}
 
   a.add(sectionShell([
     ring(.393, -2.20), ring(.438, -2.01), ring(.50, -1.77),
@@ -163,7 +199,7 @@ function nacelle(a, x, y, z, name) {
 
 function cockpitPane(a, side, index, bounds) {
   const [lo, hi, aft, fore, skew] = bounds, p = [], ix = [], axial = 4, angular = 3;
-  const at = (u, v, off = .024) => {
+  const at = (u, v, off = .006) => {
     const theta = THREE.MathUtils.lerp(lo, hi, u);
     const z = THREE.MathUtils.lerp(aft, fore, v) - skew * u;
     const q = sectionPoint(BODY, theta, z, off); q[0] *= side; return q;
@@ -177,12 +213,25 @@ function cockpitPane(a, side, index, bounds) {
     }
   }
   a.add(meshGeometry(p, ix), 'glass', { name: `cockpit-${side > 0 ? 'right' : 'left'}-pane-${index}` });
-  const perimeter = [];
-  for (let i = 0; i <= 4; i++) perimeter.push(at(0, i / 4, .030));
-  for (let i = 1; i <= 3; i++) perimeter.push(at(i / 3, 1, .030));
-  for (let i = 1; i <= 4; i++) perimeter.push(at(1, 1 - i / 4, .030));
-  for (let i = 1; i <= 3; i++) perimeter.push(at(1 - i / 3, 0, .030));
-  a.add(detailTube(perimeter, .014, 4), 'trim', { name: `cockpit-${side > 0 ? 'right' : 'left'}-frame-${index}`, tint: [.88, .91, .92] });
+  const paneBand=(outer,inner,offset)=> {
+    const points=[],indices=[],perimeter=[];
+    for(let j=0;j<6;j++)perimeter.push([0,j/6]);
+    for(let j=0;j<4;j++)perimeter.push([j/4,1]);
+    for(let j=0;j<6;j++)perimeter.push([1,1-j/6]);
+    for(let j=0;j<4;j++)perimeter.push([1-j/4,0]);
+    for(const [u,v]of perimeter)for(const margin of [outer,inner])
+      points.push(...at(THREE.MathUtils.lerp(margin[0],1-margin[0],u),THREE.MathUtils.lerp(margin[1],1-margin[1],v),offset));
+    for(let j=0;j<perimeter.length;j++) {
+      const a=j*2,b=(j+1)%perimeter.length*2,tris=[a,b,a+1,a+1,b,b+1];
+      for(let k=0;k<6;k+=3)indices.push(...(side>0?tris.slice(k,k+3):tris.slice(k,k+3).reverse()));
+    }
+    return meshGeometry(points,indices);
+  };
+  // Surface-following flat retainers seat each pane into the hull. Round
+  // wire outlines caught a metallic glint and obscured the layered seal.
+  const prefix=`cockpit-${side>0?'right':'left'}-frame`;
+  a.add(paneBand([-.014,-.010],[.034,.024],.016),'cavity',{name:`${prefix}-inner-gasket-${index}`,tint:[.8,.84,.81]});
+  a.add(paneBand([-.044,-.029],[-.010,-.008],.028),'skin',{name:`${prefix}-painted-retainer-${index}`,tint:[.86,.90,.91]});
   if(index===1) {
     const arm=[at(.28,.09,.057),at(.36,.51,.063)],blade=[at(.16,.49,.067),at(.52,.57,.067)];
     a.add(detailTube(arm,.012,4),'trim',{name:'cockpit-windshield-wiper-arm',tint:[.48,.5,.5]});
@@ -203,9 +252,9 @@ function surfaceOutline(a, rows, thetaLo, thetaHi, aft, fore, name, options = {}
 }
 
 export function buildTransport(materials) {
-  const a = new Airframe('bandit-transport', materials, TRANSPORT_EXTENT);
-  a.add(cutWindowOpenings(loft(BODY, 64, true, 3),BODY,COCKPIT_PANES), 'skin', { name: 'cargo-fuselage' });
-  materials.glass.color.setHex(0x263e45);materials.glass.transparent=true;materials.glass.opacity=.68;materials.glass.depthWrite=false;
+  const a = new Airframe('bandit-transport', materials, TRANSPORT_EXTENT),rotors=[];
+  a.add(cutWindowOpenings(cargoShell(),BODY,COCKPIT_PANES), 'skin', { name: 'cargo-fuselage' });
+  materials.glass.color.setHex(0x233940);materials.glass.roughness=.13;materials.glass.envMapIntensity=.58;materials.glass.specularIntensity=.62;materials.glass.clearcoat=.42;materials.glass.clearcoatRoughness=.09;materials.glass.iridescence=.025;materials.glass.transparent=true;materials.glass.opacity=.69;materials.glass.depthWrite=false;
   a.add(new THREE.BoxGeometry(2.1,.16,2.65),'cavity',{position:[0,.11,11.84],name:'cockpit-interior-floor'});
   const bulkhead=[0,.15,10.93],bulkheadIndex=[];
   for(let i=0;i<=24;i++) {
@@ -219,8 +268,18 @@ export function buildTransport(materials) {
     const seat=new THREE.BoxGeometry(.40,.56,.16);seat.rotateX(-.14);
     a.add(seat,'trim',{position:[side*.49,.65,11.52],name:'cockpit-crew-seat',tint:[.42,.46,.44]});
     const body=new THREE.SphereGeometry(1,12,8);body.scale(.175,.23,.12);
-    a.add(body,'trim',{position:[side*.49,.65,11.74],name:'cockpit-crew-flight-suit',tint:[.73,.81,.58]});
-    a.add(new THREE.SphereGeometry(.135,12,8),'dielectric',{position:[side*.49,.975,11.78],name:'cockpit-crew-head',tint:[.64,.64,.57]});
+    a.add(body,'crew',{position:[side*.49,.65,11.74],name:'cockpit-crew-flight-suit',tint:[.080,.094,.060]});
+    const head=new THREE.SphereGeometry(.128,16,10);head.scale(1,1.08,.94);
+    a.add(head,'crew',{position:[side*.49,.975,11.78],name:'cockpit-crew-head',tint:[.45,.30,.20]});
+    const hair=new THREE.SphereGeometry(.130,12,6,0,TAU,0,Math.PI*.43);hair.scale(1,1.08,.94);
+    a.add(hair,'trim',{position:[side*.49,.977,11.78],name:'cockpit-crew-hair',tint:[.24,.21,.17]});
+    const headset=[];
+    for(let i=0;i<=10;i++){const t=-Math.PI/2+i/10*Math.PI;headset.push([side*.49+Math.sin(t)*.139,.982+Math.cos(t)*.151,11.775]);}
+    a.add(detailTube(headset,.014,4),'trim',{name:'cockpit-crew-headset',tint:[.39,.42,.4]});
+    for(const ear of [-1,1]) {
+      a.add(new THREE.BoxGeometry(.036,.076,.061),'trim',{position:[side*.49+ear*.137,.982,11.775],name:'cockpit-crew-earphone',tint:[.38,.40,.38]});
+      a.add(detailTube([[side*.49+ear*.10,.83,11.73],[side*.49+ear*.072,.72,11.855],[side*.49+ear*.105,.51,11.80]],.018,4),'crew',{name:'cockpit-crew-shoulder-harness',tint:[.16,.15,.12]});
+    }
     const screen=new THREE.BoxGeometry(.18,.11,.01);screen.rotateX(.13);
     a.add(screen,'glass',{position:[side*.38,.56,12.381],name:'cockpit-instrument-screen',tint:[.37,.67,.57]});
   }
@@ -231,7 +290,7 @@ export function buildTransport(materials) {
 
   for (const side of [-1, 1]) {
     const label = side > 0 ? 'right' : 'left';
-    a.add(wing(WING, side < 0, 24), 'skin', { name: `${label}-main-wing` });
+    a.add(segmentedWing(WING, side < 0, 28,{cut:.765,gap:.003}), 'skin', { name: `${label}-main-wing` });
     a.add(fin([
       [0, 0, -3.60, -5.12, .085], [.48, 0, -3.92, -5.12, .06],
       [1.53, 0, -4.63, -5.20, .024],
@@ -241,10 +300,12 @@ export function buildTransport(materials) {
       const [, wy, le, te] = wingSection(x), y = engineIndex === 1 ? .04 : -.21;
       // Pylon penetrates the cowl and the lower wing surface at both ends.
       a.add(fin([
-        [0, 0, z + 1.01, z - 1.31, .175],
-        [wy - y - .50, 0, le - .08, te + .64, .12],
+        [0,0,z+1.06,z-1.36,.17],
+        [(wy-y-.50)*.35,0,z+.94,z-1.38,.205],
+        [(wy-y-.50)*.74,0,le-.15,te+.73,.18],
+        [wy-y-.50,0,le-.08,te+.64,.12],
       ], side * x, y + .48), 'skin', { name: `${label}-engine-${engineIndex}-pylon` });
-      nacelle(a, side * x, y, z, `${label}-engine-${engineIndex}`);
+      nacelle(a, side * x, y, z, `${label}-engine-${engineIndex}`,rotors);
     }
 
     const hinge = [2.22, 4.5, 6.1, 8.4, 10.65, 12.8, 14.1].map(x => {
@@ -312,5 +373,7 @@ export function buildTransport(materials) {
     a.add(fin([[0, 0, z + .25, z - .20, .037], [.30, 0, z + .09, z - .18, .017]], 0, cy + h - .045), 'dielectric', { name: `dorsal-blade-antenna-${z > 0 ? 'forward' : 'aft'}` });
   }
   a.add(new THREE.SphereGeometry(.078, 12, 8), 'light', { position: [0, 2.16, -2.22], name: 'upper-anti-collision-beacon', tint: [1, .16, .11] });
-  return a.finish();
+  const group=a.finish();if(rotors.length)group.add(...rotors);
+  group.userData.aircraft.fanRotors=rotors.map(rotor=>rotor.name);
+  return group;
 }

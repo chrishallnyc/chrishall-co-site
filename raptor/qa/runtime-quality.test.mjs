@@ -116,6 +116,13 @@ test('actual source, fine-ocean and drape fallbacks cannot reuse successful asse
  assert.equal(detectTier({backend:'webgpu',profile:full}),'LOW');
 });
 
+test('Auto does not reuse an aircraft-reflection-disabled benchmark for normal flight',()=>{
+ const loaded=assets(),disabled=profile(loaded,'aircraftenv=0');
+ saveBench({ms:16.7,backend:'webgpu',tier:'LOW',profile:disabled});
+ assert.equal(detectTier({backend:'webgpu',profile:disabled}),'LOW');
+ assert.equal(detectTier({backend:'webgpu',profile:profile(loaded)}),'HIGH');
+});
+
 test('terrain cost overrides and policy version isolate saved workload identity',()=>{
  const full=profile(assets());
  for(const flag of ['terrainnear=0','drape=0','geographicdetail=0','terrainphoto=0','skycache=0','snowdetail=0','terrainmaterials=0','cloudshadow=old','terrainsource=0','terrainsource=8','terrainsource=16','terrainsource=slice'])assert.notEqual(profile(assets(),flag),full);
