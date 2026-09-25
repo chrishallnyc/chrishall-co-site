@@ -16,6 +16,7 @@ const MOUSE_SENS = 0.0028;      // rad of aim per px of mouse travel
 const THROTTLE_RATE = 0.45;     // per second held (0 -> 100% in ~2.2s)
 const AB_PUSH_RATE = 0.125;     // slower shove through the AB detent (~0.8s of deliberate holding)
 const AIM_PITCH_LIM = 80 * Math.PI / 180;
+const CAMERA_UP_TAU = 0.07;   // short horizon easing; aiming direction stays immediate
 
 export class Player {
   constructor(scene, { jet, parts, terrain, spawn, battlefield, directory }) {
@@ -52,7 +53,10 @@ export class Player {
     this._m = new THREE.Matrix4();
     this._camPos = new THREE.Vector3();
     this._camOffset = new THREE.Vector3();
+    this._camUp = new THREE.Vector3();
+    this._camUpTarget = new THREE.Vector3();
     this._cameraReady = false;
+    this.renderPoseVersion = 0; // render effects must not bridge respawns or teleports
     this._renderForward = new THREE.Vector3();
     this._renderUp = new THREE.Vector3();
     this._aircraftPose = createAircraftPose(jet,parts);
@@ -130,6 +134,7 @@ export class Player {
       this.aimHeading = (pos.headingDeg || 0) * Math.PI / 180;
       this._prev.set(this.fm.state);
       this._cameraReady = false;
+      this.renderPoseVersion++;
     }
     if (aimPitchDeg !== undefined) this.aimPitch = aimPitchDeg * Math.PI / 180;
     if (aimHeadingDeg !== undefined) this.aimHeading = aimHeadingDeg * Math.PI / 180;
@@ -162,6 +167,7 @@ export class Player {
     // A respawn is a discontinuity, never a flight segment to interpolate.
     this._prev?.set(this.fm.state);
     this._cameraReady = false;
+    this.renderPoseVersion++;
   }
 
   tick(sim, dt) {
@@ -271,14 +277,19 @@ export class Player {
     // Time-based damping retains the old 60 fps banking feel at any cadence.
     const back = 55, up = 16;
     this._camPos.set(-f.x * back + u.x * up, -f.y * back + u.y * up, -f.z * back + u.z * up);
+    this._camUpTarget.set(u.x * 0.35, 1, u.z * 0.35);
     if (!this._cameraReady) {
       this._camOffset.copy(this._camPos);
+      this._camUp.copy(this._camUpTarget);
       this._cameraReady = true;
     } else {
       this._camOffset.lerp(this._camPos, 1 - Math.pow(0.65, Math.max(0, dt) * 60));
+      this._camUp.lerp(this._camUpTarget, 1 - Math.exp(-Math.max(0, dt) / CAMERA_UP_TAU));
     }
     camera.position.copy(this.jet.position).add(this._camOffset);
-    camera.up.set(u.x * 0.35, 1, u.z * 0.35).normalize();
+    // Normalize only the displayed vector, keeping the damped state linear
+    // so the horizon has the same response at every display refresh rate.
+    camera.up.copy(this._camUp).normalize();
     camera.lookAt(px + f.x * 120, py + f.y * 120, pz + f.z * 120);
   }
 

@@ -46,6 +46,9 @@ const VORT_SIZE = 1.0;         // m, peak puff radius
 const VORT_ALPHA = 0.32;       // subtle white, not a ribbon of paper
 const VORT_NZ_GATE = 4;        // |nz| >
 const VORT_AOA_GATE = 15;      // alphaDeg >
+const VORT_MAX_FRAME = 0.1;   // longer gaps restart at the current tip, never bridge a stall
+const VORT_MAX_EMISSIONS = 12; // bounded catch-up for the 9 ms cadence
+const VORT_CUT_DISTANCE = 250; // fallback for callers without a render-pose revision
 
 // ---- afterburner plume (throttle > 1.0) ----
 const AB_SPOOL_TAU = 0.4;      // s, EST light-off feel (f22data ENGINE.spoolTauAbS ~0.5)
@@ -98,6 +101,8 @@ export class FlightFX {
 
     // scratch — allocated once, mutated per frame, never replaced
     this._pTipL = new THREE.Vector3(); this._pTipR = new THREE.Vector3();
+    this._prevTipL = new THREE.Vector3(); this._prevTipR = new THREE.Vector3();
+    this._vortSpawn = new THREE.Vector3();
     this._pNozL = new THREE.Vector3(); this._pNozR = new THREE.Vector3();
     this._aftL = new THREE.Vector3(); this._aftR = new THREE.Vector3();
     this._mid = new THREE.Vector3();
@@ -116,7 +121,10 @@ export class FlightFX {
     this._vortMesh.count = 0;
     this._worldFixed.add(this._vortMesh);
     this._vortPool = new Pool(VORT_CAP, () => ({ x: 0, y: 0, z: 0, age: 1e9 }));
-    this._vortCooldown = 0;
+    this._vortCooldown = VORT_INTERVAL;
+    this._vortHistoryReady = false;
+    this._vortWasOn = false;
+    this._renderPoseVersion = null;
 
     // ---- 3. mil-power haze: same shape, darker/fainter/slower ----
     this._smokeMesh = new THREE.InstancedMesh(
@@ -146,7 +154,12 @@ export class FlightFX {
 
   // fmOut: FlightModel.out ({V, mach, alphaDeg, nz, ...}). throttleCmd: 0..1.1.
   // camera: only `.position` is read.
-  update(fmOut, throttleCmd, dt, camera) {
+  // renderPoseVersion changes on a respawn/teleport, including nearby cuts.
+  update(fmOut, throttleCmd, dt, camera, renderPoseVersion = 0) {
+    if (renderPoseVersion !== this._renderPoseVersion) {
+      this.resetTrails();
+      this._renderPoseVersion = renderPoseVersion;
+    }
     this._t += dt;
     // force the f22 rig's matrixWorld fresh THIS frame (player.render() just
     // moved jetGroup; the renderer's own cascade hasn't run yet) so anchors
@@ -173,17 +186,48 @@ export class FlightFX {
 
   // ---- 1. wingtip condensation vortices ----
   _updateVortices(fmOut, dt) {
+    const elapsed = Math.max(0, dt);
     const on = Math.abs(fmOut.nz) > VORT_NZ_GATE || fmOut.alphaDeg > VORT_AOA_GATE;
-    this._vortCooldown -= dt;
-    if (on && this._vortCooldown <= 0) {
-      this._vortCooldown = VORT_INTERVAL;
-      this._spawn(this._vortPool, this._pTipL);
-      this._spawn(this._vortPool, this._pTipR);
-    }
-    let n = 0;
+    if (this._vortHistoryReady && (
+      this._pTipL.distanceToSquared(this._prevTipL) > VORT_CUT_DISTANCE ** 2
+      || this._pTipR.distanceToSquared(this._prevTipR) > VORT_CUT_DISTANCE ** 2
+    )) this.resetTrails();
+
+    // Age old samples first; new samples carry only the elapsed time since
+    // their own sub-frame emission. This keeps size and spacing consistent
+    // when a render frame contains several 9 ms trail intervals.
     this._vortPool.forEachLive((p, i) => {
-      p.age += dt;
-      if (p.age > VORT_LIFE) { this._vortPool.release(i); return; }
+      p.age += elapsed;
+      if (p.age > VORT_LIFE) this._vortPool.release(i);
+    });
+    if (on && elapsed > 0) {
+      if (this._vortHistoryReady && this._vortWasOn && elapsed <= VORT_MAX_FRAME) {
+        this._vortCooldown -= elapsed;
+        let emitted = 0;
+        while (this._vortCooldown <= 1e-9 && emitted++ < VORT_MAX_EMISSIONS) {
+          const age = Math.max(0, -this._vortCooldown);
+          const fraction = Math.max(0, Math.min(1, 1 - age / elapsed));
+          this._vortSpawn.lerpVectors(this._prevTipL, this._pTipL, fraction);
+          this._spawn(this._vortPool, this._vortSpawn, age);
+          this._vortSpawn.lerpVectors(this._prevTipR, this._pTipR, fraction);
+          this._spawn(this._vortPool, this._vortSpawn, age);
+          this._vortCooldown += VORT_INTERVAL;
+        }
+      } else {
+        // A new trail, pose cut, or long frame has no reliable old segment.
+        this._spawn(this._vortPool, this._pTipL);
+        this._spawn(this._vortPool, this._pTipR);
+        this._vortCooldown = VORT_INTERVAL;
+      }
+    } else if (!on) {
+      this._vortCooldown = VORT_INTERVAL;
+    }
+    this._prevTipL.copy(this._pTipL);
+    this._prevTipR.copy(this._pTipR);
+    this._vortHistoryReady = true;
+    this._vortWasOn = on;
+    let n = 0;
+    this._vortPool.forEachLive((p) => {
       const t = p.age / VORT_LIFE;
       const grow = Math.min(1, p.age / 0.15);          // quick pop-in
       const fade = Math.max(0, 1 - Math.pow(t, 1.6));  // lingers, then dissipates
@@ -196,9 +240,20 @@ export class FlightFX {
     if (n > 0) this._vortMesh.instanceMatrix.needsUpdate = true;
   }
 
-  _spawn(pool, worldPos) {
+  resetTrails() {
+    for (const pool of [this._vortPool, this._smokePool]) {
+      pool.forEachLive((_p, i) => pool.release(i));
+    }
+    this._vortMesh.count = this._smokeMesh.count = 0;
+    this._vortCooldown = VORT_INTERVAL;
+    this._smokeCooldown = 0;
+    this._vortHistoryReady = false;
+    this._vortWasOn = false;
+  }
+
+  _spawn(pool, worldPos, age = 0) {
     const { item } = pool.acquire();
-    item.x = worldPos.x; item.y = worldPos.y; item.z = worldPos.z; item.age = 0;
+    item.x = worldPos.x; item.y = worldPos.y; item.z = worldPos.z; item.age = age;
   }
 
   // ---- 2. afterburner plume ----
