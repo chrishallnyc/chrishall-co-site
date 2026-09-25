@@ -17,9 +17,9 @@ export function buildCockpit({ canopyStations = F22_CANOPY, pilot = true } = {})
   const material = {
     structure: new THREE.MeshStandardMaterial({color:0x242d2e,roughness:.73,metalness:.25}),
     rubber: new THREE.MeshStandardMaterial({color:0x131918,roughness:.92}),
-    cloth: new THREE.MeshStandardMaterial({color:0xffffff,vertexColors:true,roughness:1,...fabric,normalScale:new THREE.Vector2(.17,.17),side:THREE.DoubleSide}),
+    cloth: new THREE.MeshStandardMaterial({color:0xc1c4be,vertexColors:true,roughness:1,...fabric,normalScale:new THREE.Vector2(.14,.14),side:THREE.DoubleSide}),
     metal: new THREE.MeshStandardMaterial({color:0x909d9b,roughness:.43,metalness:.72}),
-    helmet: new THREE.MeshStandardMaterial({color:0x878f88,roughness:.52,metalness:.02}),
+    helmet: new THREE.MeshStandardMaterial({color:0x656e67,roughness:.62,metalness:.02}),
     visor: new THREE.MeshPhysicalMaterial({color:0x101b1c,roughness:.14,metalness:.36,clearcoat:.65,clearcoatRoughness:.12}),
     mask: new THREE.MeshStandardMaterial({color:0x4a5550,roughness:.68}),
     safety: new THREE.MeshStandardMaterial({color:0xbca248,roughness:.67,metalness:.15}),

@@ -7,21 +7,21 @@
   "contactAO": {
     "status": "current",
     "applied": true,
-    "geometrySHA256": "8a1e312c09a8fee96e6a6a02f13e25a3f9afa5e2cc43e10d74c2b8746df8894e",
-    "bakedGeometrySHA256": "8a1e312c09a8fee96e6a6a02f13e25a3f9afa5e2cc43e10d74c2b8746df8894e",
+    "geometrySHA256": "c16df200c93bd666bc3757dad3483e4ee5a08ff5b5d66394c1d52eb887211b8b",
+    "bakedGeometrySHA256": "c16df200c93bd666bc3757dad3483e4ee5a08ff5b5d66394c1d52eb887211b8b",
     "provisional": false,
     "sourceMaps": {
       "body": {
         "file": "body-ao.png",
         "width": 2048,
         "height": 1024,
-        "sha256": "abebc8ffefd66982422916d1ef9d8399f969823516c658c39591f7717ba58905"
+        "sha256": "afb62a06e42a5a5daa6dafcbe105c47f0f7dec0da404461e86253201ee50a636"
       },
       "lifting": {
         "file": "lifting-ao.png",
         "width": 2048,
         "height": 1024,
-        "sha256": "3cd27224fe1848551a6e50e92457e4b97f521179b3f5d58900226a889bc659ae"
+        "sha256": "2ff49f4ab788c29f458877a2913d90754e845d6138fda47e7fef4ac0ab8dd96a"
       }
     },
     "radiusMetres": 0.35,
@@ -52,8 +52,8 @@
       "quality": "high",
       "width": 4096,
       "height": 2048,
-      "bytes": 2144760,
-      "sha256": "f2195d90cfb05041ce08e7d8371f6d9c3eff9cdd1df58b6362f780ae775c13b5"
+      "bytes": 2610620,
+      "sha256": "8fe4aced72ccdc5a97cc7b28f995e2ec8daaaf35f6d632ac743c90db8e13ce1a"
     },
     {
       "name": "body-high-normal.png",
@@ -62,8 +62,8 @@
       "quality": "high",
       "width": 2048,
       "height": 1024,
-      "bytes": 153882,
-      "sha256": "a2f6d870c9812f18ee68f4cccb3d338acdb2719a4ae0ec851a106e9853aed610"
+      "bytes": 214939,
+      "sha256": "eee4be85506cd114c588e36f85ecfc3b59e9b27166c055bda5fbcd0c28c0b246"
     },
     {
       "name": "body-high-orm.png",
@@ -72,8 +72,8 @@
       "quality": "high",
       "width": 2048,
       "height": 1024,
-      "bytes": 1675337,
-      "sha256": "70f32484e130bf0708ef810015979e5184e25315ad15935b7b6dd49414ab0b28"
+      "bytes": 1707118,
+      "sha256": "a2470699a2ce9883cf214a81d9f35631b1ac8941c563623f49aa1f6522859433"
     },
     {
       "name": "body-medium-color.png",
@@ -82,8 +82,8 @@
       "quality": "medium",
       "width": 2048,
       "height": 1024,
-      "bytes": 718478,
-      "sha256": "044366eabb597ce8ad98f197a0cac3d5a3498ecb1e8fae0de2b4d7e56580ad8a"
+      "bytes": 925662,
+      "sha256": "2128c7bd71dd2401dc13ae447b441c14bc4f2bbc57ed67e52a4511815d1d7da1"
     },
     {
       "name": "body-medium-normal.png",
@@ -92,8 +92,8 @@
       "quality": "medium",
       "width": 1024,
       "height": 512,
-      "bytes": 38248,
-      "sha256": "fdf5f225882cfd5bde6bcd154ed761d3b63874390a8396965a051c5eb18adac3"
+      "bytes": 41005,
+      "sha256": "0fe18434df3c9accad5ad2a9c0fd5bae9280eae5056a3932fd258133df4ee70e"
     },
     {
       "name": "body-medium-orm.png",
@@ -102,8 +102,8 @@
       "quality": "medium",
       "width": 1024,
       "height": 512,
-      "bytes": 398922,
-      "sha256": "889bf529c199743f29394c094bcac644ee314d747326a68d276ad8b7cd0f97f3"
+      "bytes": 425976,
+      "sha256": "822e1f7d98e50e7438dee87766b73b4b728e36c98beb0d9502c0078d6fff95e2"
     },
     {
       "name": "body-low-color.png",
@@ -112,8 +112,8 @@
       "quality": "low",
       "width": 1024,
       "height": 512,
-      "bytes": 250548,
-      "sha256": "0c835bfe38b03620ada42748175d5e4746ef486eebd100425b6fe05db73ba578"
+      "bytes": 333244,
+      "sha256": "f2141bb1824d0a563f412671fcbb4f7e9a4938353f3766097c59a9c18eb5b808"
     },
     {
       "name": "body-low-normal.png",
@@ -122,8 +122,8 @@
       "quality": "low",
       "width": 512,
       "height": 256,
-      "bytes": 9088,
-      "sha256": "a068c9215a260a8d27ae7bbdba324584f172bba485e3a78b6086c31672295fe6"
+      "bytes": 5667,
+      "sha256": "cc5902ef2ee8f8cfcf44d65090ad2fb0ad908f35e4cb3548dd27049058109cfa"
     },
     {
       "name": "body-low-orm.png",
@@ -132,8 +132,8 @@
       "quality": "low",
       "width": 512,
       "height": 256,
-      "bytes": 104756,
-      "sha256": "41eb621f197c8ce38783277d40ed1797623db0a2cf3ea507361909430af698ba"
+      "bytes": 125887,
+      "sha256": "2897078fe2f27e0e273fc7e914e01abdff99804bffe911f3e41bf77434ba1061"
     },
     {
       "name": "lifting-high-color.png",
@@ -142,8 +142,8 @@
       "quality": "high",
       "width": 4096,
       "height": 2048,
-      "bytes": 2506618,
-      "sha256": "5222840590fbd6ca0d711693af0f46056a1f00a72d4ce3b6a4573da5d033a926"
+      "bytes": 3003792,
+      "sha256": "f330cc6d286efc9578c4fd53d357dbf14f0ab04e100179ec0fe61e701bf0ba8d"
     },
     {
       "name": "lifting-high-normal.png",
@@ -152,8 +152,8 @@
       "quality": "high",
       "width": 2048,
       "height": 1024,
-      "bytes": 277535,
-      "sha256": "59d227d4069352f8fcad668bf7062ae80cbfaa75d628561a1cae13494b126e00"
+      "bytes": 293990,
+      "sha256": "b53c27ba28334a32d8903187365068fb52d0390a46d79853d2ab67aeda621791"
     },
     {
       "name": "lifting-high-orm.png",
@@ -162,8 +162,8 @@
       "quality": "high",
       "width": 2048,
       "height": 1024,
-      "bytes": 1760697,
-      "sha256": "f131d5668776097b70542473118e4a9021281d09653ec6ea8daf1f7e5c08cc74"
+      "bytes": 1775386,
+      "sha256": "68146e2e79ad1b47753fcaa4ac13360913cbe2b649e2adf221a29c32baecc922"
     },
     {
       "name": "lifting-medium-color.png",
@@ -172,8 +172,8 @@
       "quality": "medium",
       "width": 2048,
       "height": 1024,
-      "bytes": 856103,
-      "sha256": "a6539a2bebcd18f9173dc7f4343d51c2e6eade2d5e249467b5923a8482ceca7b"
+      "bytes": 1024649,
+      "sha256": "8f395720baf60ba4f141966a0368a21beef9647e1922e1a139e8a9f0d292f57b"
     },
     {
       "name": "lifting-medium-normal.png",
@@ -182,8 +182,8 @@
       "quality": "medium",
       "width": 1024,
       "height": 512,
-      "bytes": 75571,
-      "sha256": "ded97d085b4a7de21758b4e5b73b37ce96a196ff614e8b64eceec528dbf231b8"
+      "bytes": 67551,
+      "sha256": "e8a584509481afbfd19961258944e68ce953dbe97b4de0101bfa09ecc3eff3e3"
     },
     {
       "name": "lifting-medium-orm.png",
@@ -192,8 +192,8 @@
       "quality": "medium",
       "width": 1024,
       "height": 512,
-      "bytes": 424781,
-      "sha256": "d2dbf7084b207e5311cb3301916150ffbd3b5d75c6816841c9b1d6dca9008883"
+      "bytes": 463955,
+      "sha256": "66ee3da8023d7c0e1f8d1f4bbde67aa14d25196ecb919c3d04bb0a5b2767f51a"
     },
     {
       "name": "lifting-low-color.png",
@@ -202,8 +202,8 @@
       "quality": "low",
       "width": 1024,
       "height": 512,
-      "bytes": 303095,
-      "sha256": "4ff35f83430233d4cea382a57d93e85e9d5d69af8904cf77b9189fb8accd7250"
+      "bytes": 366539,
+      "sha256": "93aff8e3c348f773bfa69bda5ef14eac629d03bf8c3eb2a73ce18dd8ad79ab9c"
     },
     {
       "name": "lifting-low-normal.png",
@@ -212,8 +212,8 @@
       "quality": "low",
       "width": 512,
       "height": 256,
-      "bytes": 18008,
-      "sha256": "91c60cf052b9a7f2acd0d27a026e2ce5c6a604fdbcafcde36f08a5082cd5a963"
+      "bytes": 5458,
+      "sha256": "1ebd9c0c352126505734957ea148aa842505c5c4d4c0372140545272fb5495d0"
     },
     {
       "name": "lifting-low-orm.png",
@@ -222,8 +222,8 @@
       "quality": "low",
       "width": 512,
       "height": 256,
-      "bytes": 110144,
-      "sha256": "9831d4dc400183b4084dde59b9ba2705746399ec490b23e2b45c1070ac4fb988"
+      "bytes": 137811,
+      "sha256": "cf80fc042a62790ca5e4a7306d45411957a3b5f7e9bd16870bd08b9d114a0231"
     }
   ]
 }

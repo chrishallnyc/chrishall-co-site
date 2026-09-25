@@ -11,6 +11,8 @@ import { createHash } from 'node:crypto';
 
 const options = {};
 for (let i = 2; i < process.argv.length; i += 2) options[process.argv[i].replace(/^--/, '')] = process.argv[i + 1];
+const scenarios = (options.scenarios ?? 'clear,hazy,sunset').split(',');
+if (scenarios.some(s => !['clear','hazy','sunset','landing','night'].includes(s))) throw new Error('Unknown lighting scenario');
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const out = resolve(options.out ?? join(root, '../.context/aircraft-rebuild/validation/game-lighting'));
 await mkdir(out, { recursive: true });
@@ -53,7 +55,9 @@ const server = createServer(async (request, response) => {
     if (url.endsWith('/')) url += 'index.html';
     const file = resolve(root, `.${url}`);
     if (!file.startsWith(root + sep)) throw new Error('Path outside root');
-    const bytes = snapshot.get(url) ?? await readFile(file);
+    const textureFile = options.textures && url.startsWith('/src/aircraft/textures/f22/') && url.endsWith('.png')
+      ? join(resolve(options.textures), url.split('/').pop()) : null;
+    const bytes = snapshot.get(url) ?? await readFile(textureFile || file);
     response.writeHead(200, { 'Content-Type': mime[extname(file)] ?? 'application/octet-stream', 'Cache-Control': 'no-store' }); response.end(bytes);
   } catch { response.writeHead(404); response.end('Not found'); }
 });
@@ -64,7 +68,6 @@ const browser = await playwright.chromium.connect(launch.wsEndpoint());
 const results = { started: new Date().toISOString(), browser: browser.version(), executablePath, packagePath,
   sourceSHA256: createHash('sha256').update([...snapshot].sort().map(([url, b]) => url + createHash('sha256').update(b).digest('hex')).join('\n')).digest('hex'), cases: [] };
 const backends = (options.backend ?? 'both') === 'both' ? ['webgpu', 'webgl'] : [options.backend];
-const scenarios = (options.scenarios ?? 'clear,hazy,sunset').split(',');
 const tier = options.tier ?? 'HIGH';
 try {
   for (const backend of backends) for (const scenario of scenarios) {
@@ -98,12 +101,13 @@ try {
     page.on('console', m => { if (m.type() === 'error') record.errors.push(m.text()); else if (m.type() === 'warning') record.warnings.push(m.text()); });
     page.on('requestfailed', r => record.failedRequests.push({ url: r.url(), error: r.failure()?.errorText }));
     page.on('response', r => { if (r.status() >= 400) record.failedRequests.push({ url: r.url(), status: r.status() }); });
-    const params = new URLSearchParams({ front: scenario === 'hazy' ? 'VALDEZ' : 'NELLIS', tod: scenario === 'sunset' ? '18.8' : '12', hud: '0', chrome: '0', noaaa: '1', autoexp: '0' });
+    const params = new URLSearchParams({ front: scenario === 'hazy' ? 'VALDEZ' : 'NELLIS', tod: scenario === 'night' ? '0' : scenario === 'sunset' ? '18.8' : '12', hud: '0', chrome: '0', noaaa: '1', autoexp: '0' });
     if (scenario === 'clear') params.set('mission', 'nellis-cap-01'); else params.set('nomatch', '1');
     if (backend === 'webgl') params.set('gl', '1');
     if (options.terrain === '0') params.set('noterrain', '1');
     if (options.shadows === '0') params.set('aircraftShadows', '0');
     if (options.air === '0') params.set('aircraftAir', '0');
+    if (options.environment === '0') params.set('aircraftenv', '0');
     if (options.post === '0') params.set('post', '0');
     if (options['reverse-depth']) params.set('reverseDepth', options['reverse-depth']);
     if (options.ao) params.set('ao', options.ao);
@@ -141,13 +145,15 @@ try {
           const point = part.position.clone().fromArray(gear.wheelCenter); part.localToWorld(point);
           wheelClearances[name] = point.y - gear.wheelRadius - (s.terrain?.heightAt(point.x, point.z) ?? 0);
         }
-        const materialProperties = ['map','normalMap','roughnessMap','metalnessMap','aoMap','emissiveMap','opacity','roughness','metalness','transmission','ior','clearcoat'];
+        const materialProperties = ['map','normalMap','roughnessMap','metalnessMap','aoMap','emissiveMap','opacity','roughness','metalness','transmission','ior','clearcoat','clearcoatRoughness','clearcoatNormalMap','clearcoatRoughnessMap','specularIntensity'];
         const materialFailures = [];
         for (const binding of r.aircraftLighting.bindings) {
           const originals = Array.isArray(binding.source) ? binding.source : [binding.source];
           const copies = Array.isArray(binding.assigned) ? binding.assigned : [binding.assigned];
           for (let i = 0; i < originals.length; i++) for (const key of materialProperties)
             if (originals[i][key] !== copies[i][key]) materialFailures.push(`${originals[i].name}:${key}`);
+          for (let i = 0; i < originals.length; i++) for (const key of ['normalScale','clearcoatNormalScale'])
+            if (originals[i][key]?.equals && !originals[i][key].equals(copies[i][key])) materialFailures.push(`${originals[i].name}:${key}`);
         }
         const direction = r.camera.getWorldDirection(r.camera.position.clone());
         const hudDepth = [[r.camera.near * .5, false], [r.camera.near * 2, true], [r.camera.far * .9, true], [r.camera.far * 1.1, false], [-100, false]].map(([distance, visible]) => {
@@ -158,7 +164,7 @@ try {
         });
         return { ready: s.ready, failure: s.failure, backend: s.backend, tier: s.tier, hash: s.hash(), simulationTime: s.sim.time,
           mission: !!s.script, hillaire: s.hillaire, info: { render: { ...r.renderer.info.render }, memory: { ...r.renderer.info.memory } },
-          lighting: { ...r.aircraftLighting.stats }, meshCount: meshes, materialCount: materials.size, opaque, casting,
+          lighting: { ...r.aircraftLighting.stats }, reflection: s.aircraftReflection, meshCount: meshes, materialCount: materials.size, opaque, casting,
           lod: r.world.f22.userData.aircraft.lod?.level, environment: !!r.scene.environment, pmremReady: s.atmosphere.envReady,
           wheelClearances, materialFailures, sunDirectionError: sunDirection.distanceTo(s.atmosphere.sky.uSunDir.value),
           reverseDepth: r.renderer.reversedDepthBuffer,
@@ -214,6 +220,23 @@ try {
           { id: 'quality-cycle-material-cache-stable', pass: record.qualityCycle.every(s => s.materials === record.qualityCycle[0].materials) },
           { id: 'quality-cycle-sim-unchanged', pass: record.qualityCycle.every(s => s.hash === record.before.hash) });
       }
+      if (options['time-cuts'] === '1') {
+        record.timeCuts = await page.evaluate(async () => {
+          const s = window.__RAPTOR, samples = [];
+          for (const hour of [0, 12, 18.8]) {
+            const before = s.aircraftReflection?.publications ?? 0;
+            s.setTimeOfDay(hour);
+            // An in-flight old capture may finish first; allow two complete
+            // six-face captures and publication frames, never a timed sleep.
+            await new Promise(done => { let n = 0; function frame() { if (++n === 20) done(); else requestAnimationFrame(frame); } requestAnimationFrame(frame); });
+            samples.push({ hour, before, after: s.aircraftReflection?.publications,
+              reason: s.aircraftReflection?.lastReason, error: s.aircraftReflection?.error, hash: s.hash() });
+          }
+          return samples;
+        });
+        record.checks.push({ id: 'time-cuts-refresh-complete-reflection', pass: record.timeCuts.every(s => s.after > s.before && s.reason === 'time-cut' && !s.error) },
+          { id: 'time-cuts-sim-unchanged', pass: record.timeCuts.every(s => s.hash === record.before.hash) });
+      }
       record.checks.push({ id: 'requested-backend', pass: record.before.backend === backend },
         { id: 'requested-tier', pass: record.before.tier === tier }, { id: 'ready', pass: record.before.ready && !record.before.failure },
         { id: 'frozen-sim-unchanged', pass: record.before.hash === record.timing.hash },
@@ -225,6 +248,9 @@ try {
         { id: 'opaque-shadow-casters', pass: options.shadows === '0' || tier === 'LOW' || record.before.casting === record.before.opaque },
         { id: 'aerial-materials', pass: options.air === '0' || !record.before.hillaire || record.before.adapted > 0 });
       if (scenario === 'clear') record.checks.push({ id: 'actual-mission-loaded', pass: record.before.mission });
+      if (options['require-reflection'] === '1') record.checks.push({ id: 'complete-aircraft-reflection',
+        pass: record.before.reflection?.publications > 0 && !record.before.reflection.error
+          && record.before.lighting.environment === 'aircraft-height-sky-cloud-ground-pmrem' });
     } catch (error) { record.failure = error.stack; }
     record.warnings = [...new Set(record.warnings)];
     record.checks.push({ id: 'no-backend-validation-warnings',

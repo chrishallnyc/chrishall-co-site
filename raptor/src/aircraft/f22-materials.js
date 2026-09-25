@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createCoatingDetail } from './coating-detail.js';
 
 const textureSets = new Map();
 
@@ -30,15 +31,23 @@ export function createF22Coating(kind = 'body', quality = 'high') {
     textures.ready.catch(error => console.error('[F-22] Coating load failed:', error));
     textureSets.set(key, textures);
   }
+  const detail = createCoatingDetail(quality);
   const material = new THREE.MeshPhysicalMaterial({
     color: 0xffffff, map: textures.color, normalMap: textures.normal,
-    normalScale: new THREE.Vector2(.16, .16),
+    // The authoring tool now differentiates millimetre relief in metres.
+    // Preserve those slopes instead of attenuating an arbitrary height field.
+    normalScale: new THREE.Vector2(.82, .82),
     aoMap: textures.orm, aoMapIntensity: .6,
     roughnessMap: textures.orm, roughness: 1,
-    metalnessMap: textures.orm, metalness: 1, envMapIntensity: .82,
-    specularIntensity: .72, specularColor: new THREE.Color(0xe4ebee),
-    clearcoat: .045, clearcoatRoughness: .62,
+    metalnessMap: textures.orm, metalness: 1, envMapIntensity: .95,
+    specularIntensity: .90, specularColor: new THREE.Color(0xf0efeb),
+    clearcoat: detail ? .10 : .045, clearcoatRoughness: .71,
+    clearcoatNormalMap: detail?.normal ?? null,
+    clearcoatNormalScale: new THREE.Vector2(.55, .55),
+    clearcoatRoughnessMap: detail?.roughness ?? null,
   });
-  material.name = `F-22 authored ${kind} ${quality} RAM coating`;
+  material.name = `F-22 layered ${kind} ${quality} service coating`;
+  material.userData.f22Coating = { revision: 2, atlas: kind, quality,
+    normalUnits: 'metres', microTileMetres: detail?.tileMetres ?? null };
   return { material, ready: textures.ready };
 }

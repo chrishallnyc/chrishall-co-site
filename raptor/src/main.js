@@ -907,9 +907,33 @@ async function boot() {
     SETTINGS.applySettings(SETTINGS.current(), liveQuality);
   }
 
-  // A water-specific sea-level source replaces the old extra emissive mirror.
-  // The existing scene IBL still serves terrain/aircraft; water overrides it.
-  let waterSkyEnvironment = null;
+  // Both receivers use frozen sky/cloud captures. Water stays at sea level;
+  // aircraft capture the sky at flight altitude with diffuse ground bounce.
+  const makeProbeCloudNode = vol && post?.hasClouds ? ({ sourceUniforms, ...probe }) => {
+    const { H, luts, airK } = atmoH;
+    const args = { tTex: luts.tTex, msTex: luts.msTex, ...sourceUniforms, uCamPos: probe.uCamPos };
+    const trans = H.aerialTransNode(args), ins = H.aerialInscatterNode(args);
+    // The six-face capture has a frozen planet origin. It must not
+    // inherit the moving main-camera frame while faces are rendered.
+    const probeCurvature = curvature ? new PlanetCurvature({ radius: curvature.radius }) : null;
+    if (probeCurvature) {
+      probeCurvature.origin = probe.uFrameOrigin.xz;
+      probeCurvature.previousOrigin = probeCurvature.origin;
+    }
+    return vol.VC.volCloudsNode({ ...probe, uSunDir: sourceUniforms.uSunDir,
+      front: atmosphere.frontName, noise: vol.noise, curvature: probeCurvature,
+      aerial: {
+        trans: airK === 1 ? trans : wp => pow(trans(wp), vec3(airK)),
+        ins: airK === 1 ? ins : wp => ins(wp).mul(airK),
+        uSunI: sourceUniforms.uSunI,
+        sourceTransport: flags.get("cloudtransport") === "legacy" ? null
+          : { luts, calibrateDay: flags.get("cloudtransport") !== "toa",
+            relativeOmission: ["strict", "toa"].includes(flags.get("cloudtransport")) ? 0 : .001 },
+        celestial: sourceUniforms.uMoonDir ? sourceUniforms : null,
+      },
+    });
+  } : null;
+  let waterSkyEnvironment = null, aircraftEnvironment = null;
   if (water && atmoH && flags.get("waterenv") !== "0") {
     try {
       const { WaterSkyEnvironment } = await import("./world/sky-environment.js");
@@ -917,34 +941,25 @@ async function boot() {
         renderer, water, luts: atmoH.luts, sourceUniforms: atmoH.sourceUniforms,
         cirrusAtlas: atmosphere.sky.cirrusAtlas,
         size: flags.get("waterenvsize") === "64" ? 64 : 128,
-        makeCloudNode: vol && post?.hasClouds ? ({ sourceUniforms, ...probe }) => {
-          const { H, luts, airK } = atmoH;
-          const args = { tTex: luts.tTex, msTex: luts.msTex, ...sourceUniforms, uCamPos: probe.uCamPos };
-          const trans = H.aerialTransNode(args), ins = H.aerialInscatterNode(args);
-          // The six-face capture has a frozen planet origin. It must not
-          // inherit the moving main-camera frame while faces are rendered.
-          const probeCurvature = curvature ? new PlanetCurvature({ radius: curvature.radius }) : null;
-          if (probeCurvature) {
-            probeCurvature.origin = probe.uFrameOrigin.xz;
-            probeCurvature.previousOrigin = probeCurvature.origin;
-          }
-          return vol.VC.volCloudsNode({ ...probe, uSunDir: sourceUniforms.uSunDir,
-            front: atmosphere.frontName, noise: vol.noise, curvature: probeCurvature,
-            aerial: {
-              trans: airK === 1 ? trans : wp => pow(trans(wp), vec3(airK)),
-              ins: airK === 1 ? ins : wp => ins(wp).mul(airK),
-              uSunI: sourceUniforms.uSunI,
-              sourceTransport: flags.get("cloudtransport") === "legacy" ? null
-                : { luts, calibrateDay: flags.get("cloudtransport") !== "toa",
-                  relativeOmission: ["strict", "toa"].includes(flags.get("cloudtransport")) ? 0 : .001 },
-              celestial: sourceUniforms.uMoonDir ? sourceUniforms : null,
-            },
-          });
-        } : null,
+        makeCloudNode: makeProbeCloudNode,
       });
       state.waterReflection = waterSkyEnvironment.stats;
     } catch (err) {
       console.warn("Water environment unavailable; existing scene IBL remains:", err && err.message);
+    }
+  }
+  if (atmoH && flags.get("aircraftenv") !== "0") {
+    try {
+      const { createAircraftEnvironment } = await import("./aircraft/environment.js");
+      aircraftEnvironment = createAircraftEnvironment({
+        renderer, aircraft: world.jet, lighting: aircraftLighting, terrain,
+        front: atmosphere.frontName, luts: atmoH.luts, sourceUniforms: atmoH.sourceUniforms,
+        cirrusAtlas: atmosphere.sky.cirrusAtlas, makeCloudNode: makeProbeCloudNode,
+        size: state.tier === "LOW" ? 64 : 128,
+      });
+      state.aircraftReflection = aircraftEnvironment.stats;
+    } catch (err) {
+      console.warn("Aircraft environment unavailable; existing scene IBL remains:", err && err.message);
     }
   }
 
@@ -988,6 +1003,7 @@ async function boot() {
     setTimeOfDay: (h) => {
       atmosphere.setTime(h);
       waterSkyEnvironment?.invalidate("time-cut");
+      aircraftEnvironment?.invalidate("time-cut");
       post?.invalidateHistory?.();
       meter?.reset();
     },
@@ -1060,6 +1076,14 @@ async function boot() {
   if (atmoH) atmoH.uCamPos.value.copy(camera.position);
   atmosphere.update(camera);
   aircraftLighting.update(world.jet, terrain);
+  if (aircraftEnvironment) {
+    try { aircraftEnvironment.warmUp(camera, 0); }
+    catch (err) {
+      console.warn("Aircraft environment warmup failed; existing scene IBL remains:", err && err.message);
+      state.aircraftReflection.error = String(err?.message || err);
+      aircraftEnvironment.dispose(); aircraftEnvironment = null;
+    }
+  }
   renderer.toneMappingExposure=atmosphere.exposure;
   if (!post) await renderer.compileAsync(scene,camera);
   // Real draws cover the post graph's own MRT, temporal and shadow variants.
@@ -1225,6 +1249,7 @@ async function boot() {
     atmosphere.update(camera); // IBL sees the current observer on its first capture
     aircraftLighting.update(world.jet, terrain);
     uMoonAngularRadius.value = atmosphere.moonState.angularRadius;
+    aircraftEnvironment?.update(camera, cloudClock);
     if (waterSkyEnvironment) {
       if (waterSkyEnvironment.front < 0) {
         try { waterSkyEnvironment.warmUp(camera, cloudClock); }

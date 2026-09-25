@@ -128,12 +128,47 @@ it does not reconstruct geographic features absent from those source assets.
 
 ## Aircraft integration
 
-The aircraft's authored normal, roughness, metalness, and ambient-occlusion maps
-remain intact. `PlanetObjectBender` resolves mapped normals in the original
-surface frame before applying curvature once. Refresh aircraft materials before
-bending when a livery changes, and update the shadow target after the current
-atmosphere observer. Aerial perspective composites completed aircraft lighting
-through the same Sun/Moon transport as the world.
+`aircraft/lighting.js` adapts physical materials without replacing their authored
+normal, roughness, metalness or ambient-occlusion maps. The F-22's base normal
+uses its UV0 paint atlas; `coating-detail.js` supplies cached micro-normal and
+roughness maps for the clearcoat layer on metre-scale UV1. HIGH/MED share these
+small maps across both coating atlases; LOW omits them. In the pinned Three
+renderer, clearcoat roughness samples red; the scalar detail map carries that
+value in all RGB channels. Independent left/right wing and stabilator charts
+retain distinct repair histories within the existing atlas dimensions.
+
+`PlanetObjectBender` resolves each normal layer in its original surface frame
+before applying curvature once, preserving the velocity output. Refresh aircraft
+materials before bending when a livery changes, and update the shadow target
+after the current atmosphere observer. Aerial perspective composites completed
+aircraft lighting through the same Sun/Moon transport as the world.
+
+`aircraft/environment.js` captures sky radiance at the player's rendered altitude.
+It uses the shared atmosphere/cirrus source and volumetric cloud source when that
+path is active. Below the horizon, a regional average ground color receives
+direct and ambient light. This is a diffuse ground approximation, not a terrain
+render, nearby-object reflection, or separate probe for each enemy. All aircraft
+share this map while retaining their authored material reflection strengths;
+the landscape and sea-level water probe keep their own environments.
+
+`SkyEnvironment` freezes source uniforms, observer and time for a complete cube.
+The first aircraft capture occurs behind the loading veil; later captures render
+one face per frame, then convolve and publish only the complete result. The two
+cube maps and their prefiltered results are reused. Ordinary refreshes are spaced
+at least six seconds apart; explicit time cuts invalidate the probe immediately. Pre-exposure rescales
+the published map without rebaking it, including after a refresh failure. A boot
+failure retains scene lighting. Cube size is 128 on MED/HIGH/ULTRA and 64 on LOW;
+live quality changes retain the boot allocation until restart. Curved recipients
+rotate their reflection lookup toward the probe's +Y frame; one shared probe
+still approximates weather, terrain and solar-angle variation across the map.
+
+F-22 contact occlusion is an offline neutral-pose bake, packed only into ORM red.
+It must be regenerated after geometry or UV changes and checked against a
+matching flat-AO capture. Overlapping projected body charts use explicit receiver
+filters; ambiguous fin-fairing footprints are kept neutral while live shadows
+handle those contacts. The result is bounded ambient contact shading, not a
+directional shadow or dynamic articulation bake. The exact export policy,
+fingerprint checks and acceptance workflow are in [F22-AO.md](tools/F22-AO.md).
 
 Solar visibility multiplies native aircraft self-shadow with cloud and planetary
 visibility. LOW disables native shadow updates while retaining celestial
@@ -182,6 +217,7 @@ Useful comparison flags:
 | `logdepth=0` | Restore ordinary forward depth on WebGL2. WebGPU is unchanged. |
 | `rawtaa=0` | Compare native temporal depth selection with the raw-depth default. |
 | `curvature=0` | Compare the legacy flat render frame. |
+| `aircraftenv=0` | Disable the dedicated aircraft reflection probe; retain scene lighting. |
 | `terrainnear=0` | Disable the near terrain grid at every quality tier. |
 | `terrainsource=0\|16` | Compare original and central 5 m Valdez elevation data. |
 | `snowdetail=0` | Disable added wind-packed snow material relief. |

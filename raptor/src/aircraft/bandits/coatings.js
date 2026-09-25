@@ -25,7 +25,8 @@ function atlas(kind,extent,quality) {
   const color=canvas(resolution),rough=canvas(resolution),height=canvas(resolution);
   const c=color.getContext('2d'),r=rough.getContext('2d'),h=height.getContext('2d');
   for(const ctx of [c,r,h])ctx.scale(resolution/size,resolution/size);
-  c.fillStyle={fighter:'#929d9f',transport:'#9ea7aa',drone:'#bec6c6'}[kind];c.fillRect(0,0,size,size);
+  c.fillStyle={fighter:'#70858c',transport:'#8b9391',drone:'#a4af9f'}[kind];c.fillRect(0,0,size,size);
+  c.fillStyle={fighter:'#99a8ab',transport:'#898f8c',drone:'#acb3a5'}[kind];c.fillRect(size*.501,0,size*.499,size*.5);
   r.fillStyle={fighter:'#b8b8b8',transport:'#c6c6c6',drone:'#cccccc'}[kind];r.fillRect(0,0,size,size);
   h.fillStyle='#808080';h.fillRect(0,0,size,size);
   const point=(p,chart='top')=> {
@@ -136,14 +137,23 @@ export function createCoatings(kind,extent,quality='high') {
   const maps=atlas(kind,extent,quality);
   const setId=++materialSetSerial;
   const m={
-    skin:new THREE.MeshStandardMaterial({color:0xffffff,roughness:.86,metalness:{fighter:.07,transport:.035,drone:.02}[kind],normalScale:new THREE.Vector2(.18,.18),...maps,vertexColors:true}),
-    dielectric:new THREE.MeshStandardMaterial({color:kind==='fighter'?0x65716b:0xa0a7a4,roughness:.78,metalness:.035,vertexColors:true}),
+    skin:new THREE.MeshPhysicalMaterial({color:0xffffff,roughness:{fighter:.83,transport:.79,drone:.94}[kind],metalness:{fighter:.035,transport:.025,drone:.012}[kind],clearcoat:kind==='drone'?.025:.075,clearcoatRoughness:kind==='drone'?.68:.48,specularIntensity:kind==='drone'?.60:.76,normalScale:new THREE.Vector2(.22,.22),...maps,vertexColors:true}),
+    dielectric:new THREE.MeshPhysicalMaterial({color:kind==='fighter'?0x5b6461:kind==='drone'?0xbfc2ad:0xa0a7a4,roughness:kind==='drone'?.97:.78,roughnessMap:kind==='drone'?maps.roughnessMap:null,metalness:.015,clearcoat:.025,clearcoatRoughness:.68,specularIntensity:.62,vertexColors:true}),
     trim:new THREE.MeshStandardMaterial({color:0x424b4d,roughness:.72,metalness:.22,vertexColors:true,side:THREE.DoubleSide}),
-    glass:new THREE.MeshPhysicalMaterial({color:0x556c70,roughness:.12,metalness:.08,clearcoat:1,clearcoatRoughness:.075,reflectivity:.72,vertexColors:true,side:THREE.DoubleSide}),
-    metal:new THREE.MeshStandardMaterial({color:0x858d91,roughness:.46,metalness:.78,vertexColors:true,side:THREE.DoubleSide}),
+    glass:new THREE.MeshPhysicalMaterial({color:0x637f88,roughness:.065,metalness:0,clearcoat:1,clearcoatRoughness:.038,ior:1.48,specularIntensity:1,iridescence:.09,iridescenceIOR:1.32,iridescenceThicknessRange:[180,260],reflectivity:.72,vertexColors:true,side:THREE.DoubleSide}),
+    metal:new THREE.MeshStandardMaterial({color:0x9ba2a6,roughness:kind==='fighter'?.50:.42,envMapIntensity:kind==='fighter'?.72:1,metalness:.86,vertexColors:true,side:THREE.DoubleSide}),
     cavity:new THREE.MeshStandardMaterial({color:0x11191d,roughness:.94,metalness:.05,vertexColors:true,side:THREE.DoubleSide}),
     light:new THREE.MeshStandardMaterial({color:0xebcda5,roughness:.18,metalness:.22,emissive:0xb39464,emissiveIntensity:.32,vertexColors:true}),
   };
+  if(kind!=='drone')m.crew=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.94,metalness:0,envMapIntensity:.65,vertexColors:true});
+  if(kind==='transport') {
+    m.machined=new THREE.MeshStandardMaterial({color:0xadb6bc,roughness:.23,metalness:.92,envMapIntensity:.83,vertexColors:true,side:THREE.DoubleSide});
+    m.fan=new THREE.MeshStandardMaterial({color:0x78868e,roughness:.47,metalness:.74,envMapIntensity:.78,vertexColors:true,side:THREE.DoubleSide});
+  }
+  if(kind==='drone') {
+    m.glass.color.setHex(0x0c2833);m.glass.roughness=.038;m.glass.iridescence=.19;
+    m.glass.iridescenceThicknessRange=[180,350];m.metal.roughness=.50;m.metal.metalness=.73;
+  }
   for(const [role,mat]of Object.entries(m)) {
     // A second preview/model build must not replace the original pool's
     // tint when an older clone is recoloured later.

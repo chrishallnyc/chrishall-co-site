@@ -33,6 +33,12 @@
     <option value="transport">Transport</option>
     <option value="drone">Drone</option>
   </select>
+  <select id="light" aria-label="Inspection lighting">
+    <option value="studio">Studio</option>
+    <option value="daylight">Daylight</option>
+    <option value="overcast">Overcast</option>
+    <option value="raking">Low sun</option>
+  </select>
   <button data-view="three-quarter">Perspective</button>
   <button data-view="top">Top</button>
   <button data-view="side">Side</button>
@@ -62,6 +68,7 @@ import { syncGearBays } from '/src/aircraft/gear-bays.js';
 const q = new URLSearchParams(location.search);
 const aircraft = ["fighter", "transport", "drone"].includes(q.get("aircraft")) ? q.get("aircraft") : "f22";
 const VIEW = q.get("view");
+const lightPreset = ['daylight','overcast','raking'].includes(q.get('light')) ? q.get('light') : 'studio';
 let spin = q.get("spin") !== "0" && !VIEW;
 let gearDown = q.get("gear") === "1";
 let baysOpen = q.get("bays") === "1";
@@ -123,9 +130,33 @@ reflector(9, 30, [20, 12, 8], 0xc7dfff, 3);
 reflector(28, 12, [0, 26, 5], 0xffffff, 4);
 const pmrem = new THREE.PMREMGenerator(renderer);
 try {
-  const environment = pmrem.fromScene(studio, 0.025, 0.1, 150);
+  let environment;
+  if (lightPreset === 'studio') environment = pmrem.fromScene(studio, 0.025, 0.1, 150);
+  else {
+    // Deterministic broad outdoor reflectors, without a second solar disc.
+    // These inspection presets are deliberately separate from the game's
+    // physical weather/altitude probe and leave the studio comparison intact.
+    const w=512,h=256,data=new Float32Array(w*h*4),color=new THREE.Color();
+    const overcast=lightPreset==='overcast',low=lightPreset==='raking';
+    const zenith=new THREE.Color().setRGB(...(overcast?[.74,.80,.89]:low?[.12,.22,.43]:[.14,.31,.61]));
+    const horizon=new THREE.Color().setRGB(...(overcast?[1.2,1.23,1.26]:low?[1.3,.72,.38]:[1.1,1.22,1.37]));
+    const earth=new THREE.Color().setRGB(...(overcast?[.26,.28,.29]:low?[.20,.15,.12]:[.30,.27,.23]));
+    for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+      // DataTexture row 0 is v=0 (nadir in Three’s equirectangular mapping).
+      const elevation=Math.sin(((y+.5)/h-.5)*Math.PI),azimuth=(x+.5)/w*Math.PI*2;
+      if(elevation>=0){
+        color.copy(horizon).lerp(zenith,Math.sqrt(elevation));
+        const veil=Math.max(0,Math.sin(azimuth*3+.6)*Math.sin(elevation*9+azimuth)*.35+.2)*elevation;
+        color.lerp(horizon,veil*(overcast?.22:.35));
+      }else color.copy(horizon).lerp(earth,Math.min(1,-elevation*14));
+      const i=(y*w+x)*4;data[i]=color.r;data[i+1]=color.g;data[i+2]=color.b;data[i+3]=1;
+    }
+    const panorama=new THREE.DataTexture(data,w,h,THREE.RGBAFormat,THREE.FloatType);
+    panorama.mapping=THREE.EquirectangularReflectionMapping;panorama.colorSpace=THREE.LinearSRGBColorSpace;
+    panorama.needsUpdate=true;environment=pmrem.fromEquirectangular(panorama);panorama.dispose();
+  }
   scene.environment = environment.texture;
-  scene.environmentIntensity = numberParam("ibl", 0.48, 0, 2);
+  scene.environmentIntensity = numberParam("ibl", lightPreset==='studio'?.48:.9, 0, 2);
   lab.environment = environment;
 } catch (error) {
   console.warn("[f22lab] Studio reflections unavailable:", error.message);
@@ -146,7 +177,15 @@ const fill = new THREE.DirectionalLight(0xc2d5ee, 0.85);
 fill.position.set(12, 5, -2);
 const rim = new THREE.DirectionalLight(0xe7efff, 1.7);
 rim.position.set(0, 10, 16);
-scene.add(key, fill, rim, new THREE.HemisphereLight(0xc0cad8, 0x444047, 0.55));
+const hemi=new THREE.HemisphereLight(0xc0cad8, 0x444047, 0.55);
+if(lightPreset!=='studio'){
+  fill.intensity=0;rim.intensity=0;hemi.intensity=.08;
+  key.intensity=lightPreset==='overcast'?.35:lightPreset==='raking'?3.5:4.2;
+  key.color.set(lightPreset==='raking'?0xffcd98:0xfff3e1);
+  key.position.set(...(lightPreset==='raking'?[-18,3,8]:[-12,20,-14]));
+  scene.background.set(lightPreset==='overcast'?0x6e7984:lightPreset==='raking'?0x333c4c:0x7c99b5);
+}
+scene.add(key,fill,rim,hemi);
 
 let group, parts;
 if (aircraft === "f22") {
@@ -188,6 +227,14 @@ setBays(baysOpen);
 let tris = 0;
 group.traverse((o) => {
   if (o.isMesh) {
+    if(scene.environment&&(o.material.isMeshStandardMaterial||o.material.isMeshPhysicalMaterial)){
+      o.material.envMap=scene.environment;
+      // Shared material instances are visited repeatedly by prebuilt LODs.
+      if(!o.material.userData.inspectionEnvironment){
+        o.material.envMapIntensity*=scene.environmentIntensity;
+        o.material.userData.inspectionEnvironment=true;
+      }
+    }
     o.castShadow = !o.material.transparent && !(o.material.transmission > 0);
     o.receiveShadow = !o.material.transparent && !(o.material.transmission > 0);
     const p = o.geometry.getAttribute("position");
@@ -262,6 +309,10 @@ document.getElementById("aircraft").addEventListener("change", (event) => {
   const url = new URL(location.href);
   url.searchParams.set("aircraft", event.target.value);
   location.href = url.href;
+});
+document.getElementById('light').value=lightPreset;
+document.getElementById('light').addEventListener('change',event=>{
+  const url=new URL(location.href);url.searchParams.set('light',event.target.value);location.href=url.href;
 });
 document.getElementById("gear").addEventListener("click", () => setGear(!gearDown));
 document.getElementById("bays").addEventListener("click", () => setBays(!baysOpen));
