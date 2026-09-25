@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#10182e">
+  <meta name="description" content="A little jet. A big adventure. RAPTOR Pixel Wing is a gorgeous 16-bit arcade flight game with three skies, giant bosses, and an original chiptune score. Play in your browser.">
+  <title>RAPTOR · Pixel Wing</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23ffbd6c' d='M7 0h2v5h2v2h2v2h3v2h-5v2h2v2H9v-2H7v2H3v-2h2v-2H0V9h3V7h2V5h2Z'/%3E%3C/svg%3E">
+  <link rel="preload" as="font" href="./assets/silkscreen.ttf" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="Raptor Pixel Wing home"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 0h2v5h2v2h2v2h3v2h-5v2h2v2H9v-2H7v2H3v-2h2v-2H0V9h3V7h2V5h2Z"/></svg><span>RAPTOR <b>PIXEL WING</b></span></a>
+      <nav aria-label="Game options"><a href="/" class="sim-link">3D flight simulator <span aria-hidden="true">↗</span></a><button id="sound" class="quiet-button" aria-pressed="true" aria-label="Sound on">♪ <span>Sound on</span></button><button id="help" class="quiet-button" aria-label="How to play">?</button></nav>
+    </header>
+
+    <main id="screen" class="screen" data-view="title">
+      <canvas id="game" width="640" height="400" aria-label="Pixel art flight arena. Use arrow keys or WASD to fly; Space launches missiles; Shift performs a dodge roll." tabindex="0"></canvas>
+      <div class="screen-edge" aria-hidden="true"></div>
+
+      <section id="title-screen" class="title-screen" aria-labelledby="game-title">
+        <div class="title-copy"><p class="eyebrow"><span class="live-pixel" aria-hidden="true"></span>16-BIT AIR SUPERIORITY</p>
+          <h1 id="game-title">RAPTOR</h1><p class="subtitle">PIXEL WING</p>
+          <p class="intro">A little jet.<br>A big adventure.</p>
+          <button id="launch" class="primary launch" disabled>Preparing flight… <span aria-hidden="true">↗</span></button>
+          <fieldset class="difficulty"><legend>Flight style</legend><button type="button" data-difficulty="arcade" aria-pressed="true">Arcade</button><button type="button" data-difficulty="relaxed" aria-pressed="false">Relaxed</button></fieldset>
+          <p id="difficulty-note" class="small-note">Chase the score. Make every dodge count.</p>
+        </div>
+        <div class="title-record"><span class="eyebrow">YOUR BEST</span><b id="title-best">000000</b><span class="record-star" aria-hidden="true">✦</span></div>
+        <div class="route"><span class="route-label">THREE SKIES.<br>ONE GOOD JET.</span><div role="group" aria-label="Preview a region"><button data-preview="0" aria-pressed="true"><small>01</small>Pacific coast</button><button data-preview="1" aria-pressed="false"><small>02</small>Red canyon</button><button data-preview="2" aria-pressed="false"><small>03</small>Neon harbor</button></div></div>
+      </section>
+
+      <section id="flight-hud" class="flight-hud" aria-label="Flight instruments" hidden>
+        <div class="hud-top"><div class="score-block"><span>SCORE</span><b id="score">000000</b><small id="streak">Find your rhythm</small></div><div class="stage-block"><span id="stage-number">SECTOR 01 / 03</span><b id="stage-name">PACIFIC COAST</b><div class="progress-track"><i id="stage-progress"></i></div></div><div class="health-block"><span>AIRFRAME <button id="pause" aria-label="Pause flight">Ⅱ</button></span><div id="hearts" aria-label="Airframe health"></div></div></div>
+        <div id="boss-hud" class="boss-hud" hidden><span id="boss-name">HOSTILE ACE</span><div><i id="boss-health"></i></div></div>
+        <p id="stage-banner" class="stage-banner" aria-live="polite"></p>
+        <div class="hud-bottom"><span class="weapon-label">AUTO CANNON <b id="weapon-level">I</b></span><div class="ability-buttons"><button id="missile" class="ability" aria-label="Launch missiles, Space"><span class="ability-meter"></span><kbd>SPACE</kbd><b>MISSILES</b><small>READY</small></button><button id="roll" class="ability" aria-label="Dodge roll, Shift"><span class="ability-meter"></span><kbd>SHIFT</kbd><b>DODGE</b><small>READY</small></button></div></div>
+        <p id="first-tip" class="first-tip">Move with WASD or arrows. Cannons fire automatically.</p>
+      </section>
+
+      <section id="pause-screen" class="overlay" aria-labelledby="pause-title" hidden><div class="menu-panel"><p class="eyebrow">ON STANDBY</p><h2 id="pause-title">Take a breath.</h2><p>Your flight is paused.</p><button id="resume" class="primary">Back to the sky <span aria-hidden="true">↗</span></button><button id="motion" class="text-button" aria-pressed="false">Reduced effects: off</button><button id="quit" class="text-button">End run & return to title</button><small>WASD / arrows to fly · Space missiles · Shift dodge</small></div></section>
+
+      <section id="upgrade-screen" class="overlay" aria-labelledby="upgrade-title" hidden><div class="upgrade-panel"><p class="eyebrow">SKY CLEAR · WELL FLOWN</p><h2 id="upgrade-title">Make it yours.</h2><p>Choose an upgrade. Every choice restores armor.</p><div id="upgrade-options" class="upgrade-options"></div><p id="next-region" class="next-region"></p></div></section>
+
+      <section id="result-screen" class="overlay" aria-labelledby="result-title" hidden><div class="menu-panel result-panel"><p class="eyebrow" id="result-kicker">FLIGHT COMPLETE</p><h2 id="result-title">What a flight.</h2><p id="result-copy"></p><div class="result-score"><span>FINAL SCORE</span><b id="final-score">000000</b><small id="new-best"></small></div><div class="result-stats"><span><b id="final-kills">0</b> aircraft down</span><span><b id="final-time">0:00</b> in the sky</span></div><button id="retry" class="primary">Fly again <span aria-hidden="true">↗</span></button><button id="back-title" class="text-button">Back to title</button></div></section>
+
+      <section id="load-error" class="overlay" hidden><div class="menu-panel"><p class="eyebrow">STILL ON THE GROUND</p><h2>One more try.</h2><p>A game file couldn’t load. Check your connection, then reload.</p><button onclick="location.reload()" class="primary">Reload game ↗</button></div></section>
+    </main>
+
+    <footer class="site-footer"><p id="control-hint"><kbd>WASD</kbd> / <kbd>↑↓←→</kbd> fly <span>·</span> <kbd>SPACE</kbd> missiles <span>·</span> <kbd>SHIFT</kbd> dodge</p><p><span class="footer-spark" aria-hidden="true">✦</span> Small pixels. All heart. <span class="version">v1.0</span></p></footer>
+  </div>
+
+  <dialog id="help-dialog" aria-labelledby="help-title"><button class="dialog-close" aria-label="Close instructions">×</button><p class="eyebrow">YOUR VERY SHORT FLIGHT MANUAL</p><h2 id="help-title">You fly.<br>We handle the trigger.</h2><p>Clear three skies and their bosses. Collect glowing supplies, keep a streak going, and choose an upgrade between sectors.</p><dl><div><dt>FLY</dt><dd>WASD or arrows. You can also drag anywhere in the flight arena.</dd></div><div><dt>MISSILES</dt><dd>Space, controller A, or tap Missiles. Powerful wing rockets recharge automatically.</dd></div><div><dt>DODGE</dt><dd>Shift, controller B, or tap Dodge. Roll through danger without taking a hit.</dd></div><div><dt>TAKE A BREAK</dt><dd>Escape or P pauses. Leaving the tab pauses your flight, too.</dd></div></dl><p class="help-note">Cannons fire automatically. The little light at your jet’s center is the part to keep clear of enemy fire.</p><button class="primary dialog-close-button">Got it. Let’s fly. ↗</button></dialog>
+  <p id="announcement" class="sr-only" role="status" aria-live="polite"></p>
+  <noscript><div class="no-script">Pixel Wing needs JavaScript to fly. Enable it and reload.</div></noscript>
+  <script type="module">import('./src/main.js').catch(error=>{console.error(error);document.getElementById('load-error').hidden=false;});</script>
+</body>
+</html>
