@@ -10,14 +10,19 @@ function rotorBlur() {
     const size=128,data=new Uint8Array(size*size*4);
     for(let y=0;y<size;y++)for(let x=0;x<size;x++) {
       const r=Math.hypot((x+.5-size/2)/(size/2),(y+.5-size/2)/(size/2));
-      const inner=THREE.MathUtils.smoothstep(r,.1,.32),outer=1-THREE.MathUtils.smoothstep(r,.84,1);
-      const i=(y*size+x)*4;data[i]=data[i+1]=data[i+2]=255;data[i+3]=Math.round(inner*outer*255);
+      const inner=THREE.MathUtils.smoothstep(r,.11,.30),outer=1-THREE.MathUtils.smoothstep(r,.92,1);
+      // Two finite shutter arcs follow the actual two blades. A uniform
+      // filled circle looked like smoke even when the blade was visible.
+      const angle=Math.atan2(-(y+.5-size/2),x+.5-size/2);
+      let phase=(angle-.56+r*.12)%(Math.PI);if(phase<0)phase+=Math.PI;
+      const exposure=Math.exp(-((Math.min(phase,Math.PI-phase)/.65)**2));
+      const i=(y*size+x)*4;data[i]=data[i+1]=data[i+2]=255;data[i+3]=Math.round(inner*outer*exposure*255);
     }
     const texture=new THREE.DataTexture(data,size,size,THREE.RGBAFormat);
     texture.colorSpace=THREE.SRGBColorSpace;texture.needsUpdate=true;
     texture.magFilter=THREE.LinearFilter;texture.minFilter=THREE.LinearMipmapLinearFilter;texture.generateMipmaps=true;
     blurResources={geometry:new THREE.PlaneGeometry(2.36,2.36),material:new THREE.MeshBasicMaterial({
-      color:0x69757c,map:texture,transparent:true,opacity:.15,depthWrite:false,side:THREE.DoubleSide,
+      color:0x3e484d,map:texture,transparent:true,opacity:.21,depthWrite:false,side:THREE.DoubleSide,
     })};
     blurResources.material.name='bandit-propeller-motion-blur';
   }
@@ -63,6 +68,9 @@ export function updateBanditVisuals(group,{projectedPixels=Infinity,renderTime=0
     const levels=names.map((_,index)=>group.children.find(child=>child.userData.banditLODLevel===index));
     if(levels.some(level=>!level))return;
     state={levels,rotors:levels.map(level=>level.getObjectByName('bandit-propeller')),
+      blurs:levels.map(level=>level.getObjectByName('bandit-propeller-blur')),
+      sensors:levels.map(level=>level.getObjectByName('bandit-sensor-gimbal')),
+      fans:levels.map(level=>{const fans=[];level.traverse(object=>{if(object.name.startsWith('bandit-fan-'))fans.push(object);});return fans;}),
       level:0,initialized:false,phase:(group.id*.61803398875%1)*Math.PI*2};instances.set(group,state);
   }
   const px=Number.isFinite(projectedPixels)?Math.max(0,projectedPixels):Infinity;
@@ -75,12 +83,15 @@ export function updateBanditVisuals(group,{projectedPixels=Infinity,renderTime=0
   else if(level===2&&px>88)level=px>264?0:1;
   if(level!==state.level||!state.initialized)state.levels.forEach((object,index)=>{object.visible=index===level;});
   state.level=level;state.initialized=true;
-  const rotor=state.rotors[level];
+  const rotor=state.rotors[level],time=Number.isFinite(renderTime)?renderTime:0;
   if(rotor&&level<2) {
-    const time=Number.isFinite(renderTime)?renderTime:0;
     // Visual speed ~2,230 rpm. A non-integral frame ratio avoids a frozen-looking
     // shutter alias at 30/60 fps; phase differs between pooled clones.
     rotor.rotation.z=(time*37.2*Math.PI*2+state.phase)%(Math.PI*2);
   }
+  const blur=state.blurs[level];if(blur)blur.rotation.z=(time*37.2*Math.PI*2+state.phase)%(Math.PI*2);
+  for(const [index,fan]of state.fans[level].entries())fan.rotation.z=(time*(41.7+index*.13)*Math.PI*2+state.phase)%(Math.PI*2);
+  const sensor=state.sensors[level];
+  if(sensor){sensor.rotation.y=Math.sin(time*.24+state.phase)*.13;sensor.rotation.x=.04+Math.sin(time*.17+state.phase)*.035;}
   group.userData.activeLOD=names[level];
 }

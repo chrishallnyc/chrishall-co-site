@@ -1,5 +1,5 @@
-// A coherent sea-level environment for water. One face is rendered per update,
-// then a complete cube is convolved/published. No per-water-pixel sky march.
+// Bounded, coherent environment capture. One face is rendered per update,
+// then a complete cube is convolved/published for its owning receiver.
 import * as THREE from "three";
 import { uniform, normalize, positionWorld, cameraPosition, texture, vec4 } from "three/tsl";
 import { makeSkyRadiance } from "./sky-radiance.js";
@@ -11,13 +11,14 @@ const assignValue = (node, value) => {
   else node.value = value;
 };
 
-export class WaterSkyEnvironment {
-  constructor({ renderer, water, luts, sourceUniforms, cirrusAtlas = null,
+export class SkyEnvironment {
+  constructor({ renderer, luts, sourceUniforms, cirrusAtlas = null,
+    publish, rescale, observer = null, radiance = null, label = "Sky",
     makeCloudNode = null, size = 128, minInterval = 4, moveThreshold = 500,
-    sunThresholdDegrees = .25, intensity = .45 }) {
+    sunThresholdDegrees = .25 }) {
     if (![32, 64, 128, 256].includes(size)) throw new Error("Environment size must be a power of two from 32 to 256.");
-    this.renderer = renderer; this.water = water; this.liveSources = sourceUniforms;
-    this.intensity = intensity; this.minInterval = minInterval; this.moveThreshold = moveThreshold;
+    this.renderer = renderer; this.liveSources = sourceUniforms;
+    this.publish = publish; this.rescale = rescale; this.observer = observer; this.label = label; this.minInterval = minInterval; this.moveThreshold = moveThreshold;
     this.angleCos = Math.cos(sunThresholdDegrees * Math.PI / 180);
     this.sources = Object.fromEntries(Object.entries(sourceUniforms).filter(([, v]) => v)
       .map(([key, node]) => [key, uniform(copyValue(node.value))]));
@@ -53,7 +54,9 @@ export class WaterSkyEnvironment {
       includeSolarDisc: false });
     const material = new THREE.MeshBasicNodeMaterial({ side: THREE.BackSide,
       fog: false, depthTest: false, depthWrite: false, toneMapped: false });
-    material.colorNode = source(this.uObserver, normalize(positionWorld.sub(cameraPosition)));
+    const direction = normalize(positionWorld.sub(cameraPosition));
+    material.colorNode = radiance ? radiance({ sky: source, direction, sources: this.sources,
+      observer: this.uObserver, origin: this.uFrameOrigin }) : source(this.uObserver, direction);
     this.sky = new THREE.Mesh(new THREE.SphereGeometry(1000, 16, 8), material);
     this.sky.frustumCulled = false;
     this.scene = new THREE.Scene(); this.scene.add(this.sky);
@@ -78,15 +81,17 @@ export class WaterSkyEnvironment {
   // scales with the live gain while celestial/weather content stays cached.
   _rescale() {
     if (this.front < 0) return;
-    this.water.mesh.material.envMapIntensity = this.intensity * this.liveSources.uSunI.value / Math.max(this.publishedIrradiance, 1e-12);
+    this.rescale(this.liveSources.uSunI.value / Math.max(this.publishedIrradiance, 1e-12));
     this.stats.rescaleOnlyFrames++;
   }
 
   _reason(camera, now) {
     if (this.forceDirty) return this.stats.lastReason || "explicit";
     if (now - this.startedTime < this.minInterval) return null;
-    const dx = camera.position.x - this.completedOrigin.x, dz = camera.position.z - this.completedOrigin.z;
-    if (dx * dx + dz * dz >= this.moveThreshold ** 2) return "translation";
+    const point = this.observer ? this.observer(camera) : camera.position;
+    const dx = point.x - this.completedOrigin.x, dz = point.z - this.completedOrigin.z;
+    const dy = this.observer ? point.y - this.completedOrigin.y : 0;
+    if (dx * dx + dy * dy + dz * dz >= this.moveThreshold ** 2) return "translation";
     if (this.liveSources.uSunDir.value.dot(this.completedSun) < this.angleCos) return "sun-direction";
     if (this.liveSources.uMoonDir && this.liveSources.uMoonDir.value.dot(this.completedMoon) < this.angleCos) return "moon-direction";
     if (this.liveSources.uMoonRatio && Math.abs(this.liveSources.uMoonRatio.value - this.completedMoonRatio)
@@ -98,7 +103,8 @@ export class WaterSkyEnvironment {
   _begin(camera, now, reason) {
     for (const [key, node] of Object.entries(this.sources)) assignValue(node, this.liveSources[key].value);
     this.uFrameOrigin.value.copy(camera.position);
-    this.uObserver.value.set(camera.position.x, 1, camera.position.z);
+    if (this.observer) this.uObserver.value.copy(this.observer(camera, true));
+    else this.uObserver.value.set(camera.position.x, 1, camera.position.z);
     this.uTime.value = now;
     this.captureIrradiance = this.sources.uSunI.value;
     this.captureMoonRatio = this.sources.uMoonRatio?.value || 0;
@@ -170,15 +176,7 @@ export class WaterSkyEnvironment {
     this.pmrems[this.back] = target;
     this.stats.convolutionCalls++;
     this.stats.lastConvolutionCpuMs = performance.now() - start;
-    const material = this.water.mesh.material;
-    const first = this.front < 0;
-    material.envMap = target.texture;
-    if (first) {
-      const radialUp = this.water.curvature ? wp => this.water.curvature.radialUpNode(wp) : null;
-      this.surfaceEnvironment = makeSurfaceEnvironment(target.texture, radialUp);
-      material.envNode = this.surfaceEnvironment.node;
-      material.needsUpdate = true;
-    } else this.surfaceEnvironment.setTexture(target.texture);
+    this.publish(target.texture, this.front < 0);
     this.front = this.back; this.back = 1 - this.back;
     this.publishedIrradiance = this.captureIrradiance;
     this.completedOrigin.copy(this.uObserver.value);
@@ -198,8 +196,8 @@ export class WaterSkyEnvironment {
   }
 
   update(camera, now) {
-    if (this.failed) return;
     this._rescale();
+    if (this.failed) return;
     try {
       if (this.face === 6) { this._publish(now); return; }
       if (this.face < 0) {
@@ -210,7 +208,7 @@ export class WaterSkyEnvironment {
       this._renderFace();
     } catch (error) {
       this.failed = true; this.stats.error = String(error?.message || error);
-      console.warn("Water sky environment refresh stopped; retaining last complete map:", this.stats.error);
+      console.warn(`${this.label} environment refresh stopped; retaining last complete map:`, this.stats.error);
     }
   }
 
@@ -218,5 +216,26 @@ export class WaterSkyEnvironment {
     this.cubes.forEach(rt => rt.dispose()); this.pmrems.forEach(rt => rt?.dispose());
     this.skyTarget.dispose(); this.sky.geometry.dispose(); this.sky.material.dispose();
     this.cloudQuad?.material.dispose(); this._pmrem.dispose();
+  }
+}
+
+// Keep water's public contract and its existing sea-level reflection frame.
+export class WaterSkyEnvironment extends SkyEnvironment {
+  constructor({ water, intensity = .45, ...options }) {
+    let environment;
+    super({ ...options, label: 'Water sky',
+      publish(texture, first) {
+        const material = water.mesh.material;
+        material.envMap = texture;
+        if (first) {
+          const radialUp = water.curvature ? wp => water.curvature.radialUpNode(wp) : null;
+          environment = makeSurfaceEnvironment(texture, radialUp);
+          material.envNode = environment.node;
+          material.needsUpdate = true;
+        } else environment.setTexture(texture);
+      },
+      rescale(gain) { water.mesh.material.envMapIntensity = intensity * gain; },
+    });
+    this.water = water;
   }
 }

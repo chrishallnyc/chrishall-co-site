@@ -4,6 +4,8 @@ import { clipProjectedPolygon } from './geometry/clip-polygon.js';
 import { SIDE_BAY_AXES, SIDE_BAY_OUTLINE, SIDE_BAY_OPEN_DEGREES } from './geometry/f22-side-bay-layout.js';
 import { joinSurfaces, perimeterEdges } from './weapons-bays.js';
 import { mergeDetails } from './hardware.js';
+import { panelStructure,surfaceSampler,addFormedRib } from './bay-structure.js';
+import { rodDetail } from './detail-geometry.js';
 
 const THICKNESS = .018;
 const toBoundaryProjection = new THREE.Matrix4().set(0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1);
@@ -45,6 +47,8 @@ export function buildSideWeaponsBays(coating, quality = 'high') {
   liner.name = 'side-weapon-bay-liner';
   const hardware = new THREE.MeshStandardMaterial({ color: 0x64706f, roughness: .63, metalness: .43 });
   hardware.name = 'side-weapon-bay-hardware';
+  const structure=new THREE.MeshStandardMaterial({color:0x84958c,roughness:.72,metalness:.18});
+  structure.name='side-bay-formed-structure';
   const add = (parent, name, geometry, material) => {
     const mesh = new THREE.Mesh(geometry, material); mesh.name = name; parent.add(mesh); return mesh;
   };
@@ -62,6 +66,11 @@ export function buildSideWeaponsBays(coating, quality = 'high') {
     if (!hit) throw new Error(`Side weapon bay ${pivot.name} has no upper hinge support`);
     pivot.position.set(hit.point.x, hingeY, hingeZ);
     pivot.userData.weaponBay = { side: sign, closedAngle: 0, openAngle: sign * SIDE_BAY_OPEN_DEGREES };
+    const doorStructure=panelStructure(skin,SIDE_BAY_OUTLINE,structure,{quality,axes:SIDE_BAY_AXES,normalSign:-1,
+      lift:THICKNESS+.001,depth:.018,width:.035,fractions:[.18,.42,.67,.86],name:'sideDoorInnerStructure',offset:pivot.position.clone().negate()});
+    for(const z of [-1.82,-.56,.73])rodDetail(doorStructure,'sideDoorHingeKnuckle',
+      [pivot.position.x-sign*.020,hingeY,z-.055],[pivot.position.x-sign*.020,hingeY,z+.055],.017,structure,.017,quality==='low'?6:10);
+    pivot.add(mergeDetails(doorStructure));
 
     const inner = reverseFaces(skin.clone().translate(-sign * THICKNESS, 0, 0));
     const rim = connectEdges(boundary, ([x, y, z]) => [x - sign * THICKNESS, y, z]);
@@ -70,6 +79,18 @@ export function buildSideWeaponsBays(coating, quality = 'high') {
     for (let i = 0; i < p.count; i++) p.setX(i, interiorX(p.getX(i), p.getZ(i), sign));
     back.computeVertexNormals();
     add(cavity, 'sideBayBack', back, liner);
+    cavity.add(panelStructure(back,SIDE_BAY_OUTLINE,structure,{quality,axes:SIDE_BAY_AXES,
+      depth:.016,width:.034,fractions:[.18,.43,.67,.86],name:`sideBayBackStructure${sign}`}));
+    const sampleBack=surfaceSampler(back,SIDE_BAY_AXES);
+    for(const y of [-.22,-.54]){
+      const points=[],normals=[];
+      const segments=quality==='low'?6:quality==='medium'?11:18;
+      for(let i=0;i<=segments;i++){
+        const sample=sampleBack(-2.17+3.05*i/segments,y);if(!sample)continue;
+        points.push(sample.point.addScaledVector(sample.normal,.021));normals.push(sample.normal);
+      }
+      addFormedRib(cavity,'sideBayEquipmentRail',points,normals,.037,.014,hardware,quality);
+    }
     add(cavity, 'sideBayWalls', connectEdges(boundary,
       ([x, y, z]) => [interiorX(x, z, sign), y, z], true), liner);
 

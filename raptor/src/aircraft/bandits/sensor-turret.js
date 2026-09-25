@@ -19,9 +19,9 @@ export function addSensorTurret(a) {
     const boundary=Array.from({length:segments},(_,j)=>[x+Math.cos(j/segments*TAU)*r,y+Math.sin(j/segments*TAU)*r]);
     const clipped=clipProjectedPolygon(front,boundary,{axes:[0,1]});front.dispose();front=clipped;
   }
-  a.add(front,'dielectric',{position:centre,name:'sensor-turret-aperture-shell',tint:[.88,.91,.88]});
+  a.add(front,'metal',{position:centre,name:'sensor-turret-aperture-shell',tint:[.43,.48,.47]});
   const rear=new THREE.BufferGeometry();rear.setAttribute('position',new THREE.Float32BufferAttribute(data.rear.p,3));rear.setAttribute('normal',new THREE.Float32BufferAttribute(data.rear.n,3));
-  a.add(rear,'dielectric',{position:centre,name:'sensor-turret-gimbal-shell',tint:[.88,.91,.88]});
+  a.add(rear,'dielectric',{position:centre,name:'sensor-turret-gimbal-shell',tint:[.67,.70,.64]});
   for(const [x,y,r,depth]of apertures) {
     const points=[],indices=[];
     for(let j=0;j<segments;j++) {
@@ -30,10 +30,21 @@ export function addSensorTurret(a) {
       points.push(px,py,skinZ,x+Math.cos(t)*r*.9,y+Math.sin(t)*r*.9,depth);
       const k=j*2,next=(j+1)%segments*2;indices.push(k,next,k+1,k+1,next,next+1);
     }
+    const rimPoints=[],rimIndices=[];
+    for(let j=0;j<segments;j++) {
+      const angle=j/segments*TAU;
+      for(const scale of [1.045,.985]) {
+        const px=x+Math.cos(angle)*r*scale,py=y+Math.sin(angle)*r*scale;
+        const z=Math.sqrt(Math.max(0,radius*radius-px*px-(py/.94)**2))*1.05+.006;
+        rimPoints.push(px,py,z);
+      }
+      const k=j*2,next=(j+1)%segments*2;rimIndices.push(k,next,k+1,k+1,next,next+1);
+    }
+    a.add(meshGeometry(rimPoints,rimIndices),'metal',{position:centre,name:'sensor-aperture-machined-rim',tint:[.70,.77,.79]});
     a.add(meshGeometry(points,indices),'cavity',{position:centre,name:'sensor-optical-recess'});
     const lens=new THREE.SphereGeometry(1,segments,6,0,TAU,0,Math.PI/2);
     lens.scale(r*.9,.009,r*.9);lens.rotateX(Math.PI/2);
-    a.add(lens,'glass',{position:[centre[0]+x,centre[1]+y,centre[2]+depth],name:'sensor-optical-window',tint:[.18,.31,.36]});
+    a.add(lens,'glass',{position:[centre[0]+x,centre[1]+y,centre[2]+depth],name:'sensor-optical-window',tint:[.45,.64,.73]});
   }
   for(const side of [-1,1]) {
     const bearing=new THREE.CylinderGeometry(.063,.063,.026,curveSegments(20));bearing.rotateZ(Math.PI/2);

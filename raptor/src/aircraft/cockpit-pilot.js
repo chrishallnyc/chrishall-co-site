@@ -9,7 +9,7 @@ export function addPilot(group, material) {
   const block=(name,w,h,d,p,mat=material.structure,r=.008)=>add(name,roundedBlock(w,h,d,r),mat,p);
   const rod=(name,a,b,r,mat=material.structure)=>rodDetail(group,name,a,b,r,mat);
   const cloth=(name,g,color)=>add(name,tintGeometry(g,color),material.cloth);
-  const suit=0x4c5945,harness=0x596350,glove=0x30392e;
+  const suit=0x4c5945,harness=0x737e69,glove=0x30392e;
   function drapedLoft(stations,segments=28,folds=false) {
     const source=stations.map(s=>({x:0,z:0,...s})),sample=stationSet(source,['x','z','w','d'],'y');
     const low=source[0].y,high=source.at(-1).y;
@@ -138,9 +138,9 @@ export function addPilot(group, material) {
   },48,20),material.helmet);
   add('helmetLeatherEdgeRoll',hoseGeometry(Array.from({length:49},(_,i)=>edgePoint(i/48*Math.PI*2)),.0045,64,7),material.rubber);
   const visorPoint=(u,v)=>{
-    const theta=(u*2-1)*1.27,top=1.316-.037*(Math.abs(theta)/1.27)**1.6;
-    const bottom=1.214+.023*Math.exp(-((theta/.25)**2))-.013*(Math.abs(theta)/1.27);
-    return [.119*Math.sin(theta),top+(bottom-top)*v,head[2]-.148*Math.cos(theta)-.009*Math.sin(v*Math.PI)];
+    const theta=(u*2-1)*1.43,top=1.316-.037*(Math.abs(theta)/1.43)**1.6;
+    const bottom=1.202+.023*Math.exp(-((theta/.25)**2))-.010*(Math.abs(theta)/1.43);
+    return [.123*Math.sin(theta),top+(bottom-top)*v,head[2]-.152*Math.cos(theta)-.010*Math.sin(v*Math.PI)];
   };
   add('HGU55DarkVisor',patchGeometry(visorPoint,40,10),material.visor);
   for(const v of [0,1])add('visorRubberRim',hoseGeometry(Array.from({length:25},(_,i)=>visorPoint(i/24,v)),.003,32,6),material.rubber);
