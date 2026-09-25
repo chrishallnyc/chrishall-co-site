@@ -91,7 +91,7 @@ html,body{height:100%;overflow:hidden}
 <script type="module">
 // Module/network failures occur before main.js can display its graphics error.
 // Keep a usable recovery route instead of leaving the loading screen spinning.
-import('/src/main.js').catch(error => {
+import('/src/boot.js').catch(error => {
   console.error('RAPTOR could not load its game files:', error);
   const veil=document.getElementById('veil');
   if(!veil)return;

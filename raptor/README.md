@@ -36,7 +36,10 @@ Deploys via the `raptor` Vercel project (rootDirectory `raptor`) on push to main
 Choose **Mouse** or **Trackpad**, then **Start flying**. A fresh browser starts
 with Practice flight over Nellis at high noon, already airborne with no enemies
 or time limit. Returning pilots see their saved flight choice beside the launch
-button. **Customize flight** opens region, time, battle, campaign and operation
+button. **Practice**, **Battle**, **Campaign**, and **Operation** are available
+directly above the launch area. On desktop, select a region on the destination
+preview; campaign destinations follow the next mission. **Read mission briefing**
+opens that mission directly. **Customize flight** opens detailed region and time
 choices; **Done** returns focus to launch. **Controls**, **Settings**, **Pilot log**
 and **How to fly** remain available above the opening scene. Missing essential
 bindings show a warning with a direct route to **Needs a key** for repair.
@@ -88,13 +91,13 @@ custom key assignments and other device preferences are kept.
 
 Defaults: mouse or one finger on the trackpad to aim, **W / S** for throttle,
 **A / D** to roll, **F** or **left click** for cannon, **Space** for missile,
-**R** to recenter aim, and **H** for the flight guide. No essential action needs
+**R** to recenter aim, **M** for the tactical map, and **H** for the flight guide. No essential action needs
 a number pad or function key. On the trackpad, steer without clicking or
 dragging; lift and reposition between strokes, and hold **F** to fire with your
 other hand. Existing custom bindings stay intact, including keys already using
-F or H. Unassigned macOS Command shortcuts remain available. **Esc** always
+F, H or M. Unassigned macOS Command shortcuts remain available. **Esc** always
 opens the flight menu; **P** also pauses. Practice keeps **Pause**, **Tune feel**,
-**How to fly** and optional pointer capture in its toolbar. Open **Esc → Flight
+**Tactical map**, **How to fly** and optional pointer capture in its toolbar. Open **Esc → Flight
 options** for **Customize controls**, **Display & sound**, or **Your pilot log**;
 combat flights also keep those shortcuts in the toolbar. Menus and loss of
 window focus pause the aircraft and world.
@@ -125,6 +128,21 @@ heading and distance when a live target or mission area is available. Objective
 labels name the actual target type; reaching an area with a height limit also
 shows the required height above terrain.
 
+**M** or **Tactical map** pauses the world to show your aircraft, heading, battle
+boundary, airfield, authored mission areas and current navigation objective.
+Numbered locations match the objective list, which distinguishes required,
+optional and early-victory tasks. The airfield includes a return course and the
+actual rearm conditions. The map plots only the current mission navigation
+target, not every enemy aircraft. Close a map opened from flight to resume;
+opening it from Pause returns there on close. **Resume flight** always returns
+directly to flying. The shortcut can be changed in Controls.
+
+The map's **Radio log** retains received calls with simulation timestamps, newest
+first, even after their live subtitles expire. It uses the mission's existing
+32-call ring and does not survive a flight reload. Live subtitles wrap within
+the viewport and pause with the simulation. Missile, boundary and rearm warnings
+take precedence; their radio messages remain available in the log.
+
 Practice starts airborne without enemies, mission scoring or ticket pressure.
 The flight coach teaches five maneuvers: steady flight, throttle control, a
 gentle turn to a compass heading, a climb and level-off, and steady cruise.
@@ -132,7 +150,18 @@ Progress comes from the aircraft's measured attitude, heading, altitude and
 throttle. Live readings show the current target, with a short hold and room for
 small corrections. The coach acknowledges entering or leaving the target on
 the next rendered frame; numeric readings update four times a second.
-The coach uses your current key bindings.
+The coach uses your current key bindings. Live airspeed, height above terrain,
+and climb/sink rate remain visible in **Just fly** and after graduation.
+Terrain, descent, low-speed, and steep-bank cues explain the next correction;
+terrain clearance takes priority over low-speed advice. Descent warnings project
+current vertical speed over the ground below, rather than scanning terrain ahead.
+The climb exercise prompts an early level-off and waits for vertical speed to settle.
+At a high angle of attack, the coach asks you to ease the pull, add power and
+center aim on the flight path using your assigned key. Near terrain, making room
+to recover takes priority. Gear status distinguishes extending, down and retracting;
+when there is enough height and speed, it shows your assigned gear key to reduce
+drag. Unassigned controls prompt a visit to Controls, and recovery advice takes priority
+over gear instructions.
 
 Choose **Just fly** for unguided practice, or start flight school again from
 Pause. **Reset to level flight** restores a safe airborne aircraft and restarts
@@ -191,11 +220,26 @@ controller menus still use keyboard and a pointer. Automated checks simulate
 pointer/controller input; they do not certify physical trackpad gestures or
 every controller model.
 
-Preferences, flight school graduation, and completed campaign/operation results
+Preferences, flight school graduation, and completed campaign/scenario/operation results
 stay in this browser's local storage, separately for each origin/port.
 **Pilot log** shows briefings,
 unlocks, completed missions, and operation status; during a campaign flight it
-opens the current mission. An unfinished flight restarts when reloaded or left.
+opens the current mission. Search by mission ID, title or type, and combine region
+and status filters to find ready, completed or locked missions. **Jump to next
+mission** clears those filters and opens the next available briefing.
+**Plan your sortie** separates required objectives, navigation, optional tasks
+and **Must hold** conditions. Defense briefings mark combat goals **For early
+victory** and explain how holding until the time limit can also win; protection
+loss thresholds are kept separate from attack target counts.
+An unfinished flight restarts when reloaded or left.
+
+Completed sorties show a **Sortie report** with flight time, enemy and friendly
+losses, objective results, and remaining aircraft stores when an aircraft survives.
+The report captures mission end once: returning to flight view and reopening it
+keeps those results unchanged. Enemy losses are battle totals, not personal kill
+attribution. **Retry mission**, **Fly mission again**, or **Fly battle again**
+start a fresh attempt of the completed flight.
+
 After a saved campaign victory, the result card offers the next available
 mission. Saved operation sorties offer **Continue operation** while the front remains
 active. A won or lost operation returns to preflight, where **Start new operation**
@@ -204,7 +248,42 @@ would be lost.
 Private browsing or blocked storage limits persistence; the UI reports save
 failures and keeps changes usable for the current session.
 
-Flight preparation shows its current stage. If a selected mission cannot load,
+Open **Pilot log → Backup & restore → Download backup** to keep campaign and
+operation progress, standalone scenario completion (including Harbor Watch),
+flight school graduation, controls and preferences in a local JSON file.
+**Choose backup…** previews the saved profile; **Keep current profile**
+cancels without changing it. Restoring replaces the current profile and is available
+only from preflight. **Replace profile & reload** reloads Raptor after a successful
+restore. Invalid files are rejected before writes; failed writes attempt to roll
+back completed changes and report whether recovery succeeded. A valid backup can
+also replace a damaged local profile. Unfinished flights and device benchmark
+results are excluded. Older version-1 backups without scenario records show zero
+completed scenarios in the preview; restoring one also clears current scenario
+completion. Download the current profile first if you want to keep both.
+
+The selected target shows missile acquisition progress, range, closing/opening
+speed, and your assigned launch key. Friendly contacts say **Hold fire**; an empty
+loadout says **No missiles**. Incoming missile warnings show the nearest threat's
+clock bearing and distance, plus the total count of missiles targeting you.
+Reduced combat flashes also steadies the warning. Kills include air and ground targets.
+Before acquisition, advice beside a detected, visible hostile aircraft explains
+whether it is too close, out of range or outside the seeker angle, with the next
+correction. Actual seeker feedback, incoming missiles, rearming and boundary
+warnings take priority over this advice.
+
+When supplies are low or a needed refill is nearby, the airfield card gives its
+heading, distance and rearm instructions. Stay inside the displayed radius, below
+400 m above terrain (about 1,312 ft), and under 120 m/s total speed (about 233 kt)
+for four seconds to refill cannon, missiles and hull together. The card identifies
+being too high, too fast or outside the zone; leaving those conditions resets
+progress. Speed includes vertical motion, as the match rules require.
+Outside the battle boundary, a warning gives the nearest return course, distance
+and grace countdown, then reports active hull drain. It stays clear of incoming
+missile warnings and respects reduced combat flashes.
+
+Preflight loads independently of the renderer, world, and aircraft modules;
+these load only when you launch a flight. Flight preparation shows its current
+stage. If a selected mission cannot load,
 retry that mission or return to preflight; it never silently starts a different
 battle. Small preflight images keep setup lighter than loading full terrain
 textures. The installable PWA caches its small shell, not every flight asset:
@@ -249,7 +328,8 @@ and [Harbor Watch](https://raptor.chall.net/?front=NEWYORK&sortie=Y01).
 
 | Location | Responsibility |
 | --- | --- |
-| [index.html](index.html), [src/main.js](src/main.js) | Entry point, renderer initialization, game loop and system wiring. |
+| [index.html](index.html), [src/boot.js](src/boot.js) | Entry point and lightweight preflight/flight routing. |
+| [src/main.js](src/main.js), [src/appstate.js](src/appstate.js) | Flight renderer, game loop and system wiring; shared preflight/flight diagnostics. |
 | [src/game/keyboardlayout.js](src/game/keyboardlayout.js), [controlsmenu.js](src/game/controlsmenu.js), [controls.css](src/game/controls.css) | Physical keyboard geometry, visual binding editor and rehearsal, shared before and during flight. |
 | [src/game/](src/game/) | Preflight, controls/settings, pause menu, pilot log, HUD, player and combat systems. |
 | [src/game/flightcoach.js](src/game/flightcoach.js), [quicktune.js](src/game/quicktune.js), [flightbrief.js](src/game/flightbrief.js) | Telemetry-based practice course, paused setup shortcuts and mission objective overview; wired by [cockpit.js](src/game/cockpit.js). |
@@ -281,6 +361,10 @@ and shaped propeller blades. Lower detail levels reduce these small assemblies.
 Distance-dependent visual detail and livery changes preserve each aircraft's
 materials and rig. Flight physics, hit volumes, and deterministic simulation
 remain independent of these meshes.
+Flight effects refresh their wingtip and nozzle transform paths before rendering,
+leaving the full aircraft traversal to the normal rendering path. Trails and exhaust
+retain their articulated poses. See the [native CPU checks](qa/README.md#flight-feedback-and-cpu-checks)
+for component measurements and their limits.
 
 The F-22 uses authored color, normal, and packed occlusion/roughness/metalness
 maps in `src/aircraft/textures/f22/`. These are static assets, with three texture tiers;
@@ -340,6 +424,15 @@ building and bridge collisions, era filtering, scenario loading, save isolation,
 and mission success, boundary failure, and timeout. Its flight-model integration
 check completes both interceptions using ordinary aim, throttle, and missile
 inputs with production aircraft, target, and missile physics.
+
+Match guidance is checked against real rearm and boundary ticks; sortie reports
+are checked for immutable results. Profile tests cover validation, replacement,
+failed-write recovery and preservation of unrelated browser records.
+Campaign discovery checks combine search and unlock filters with the real timeout
+victory rules. Flight feedback checks cover high-angle-of-attack recovery, actual
+gear travel and customized bindings; missile advice is compared with the real
+seeker at its range and angle boundaries. Effect transform checks cover moving
+parents, manual matrices, reparenting and deferred aircraft detail updates.
 The coach includes a real flight-model integration check driven by pointer
 deltas and held throttle inputs, alongside pure course-state tests. Native
 checks use the vendored modules without an npm installation or GPU. See the
@@ -367,6 +460,10 @@ node raptor/qa/control-layout.browser.mjs
 node raptor/qa/keyboard-workshop.browser.mjs
 node raptor/qa/flight-school.browser.mjs
 node raptor/qa/guidance.browser.mjs
+node raptor/qa/feedback.browser.mjs
+node raptor/qa/backup.browser.mjs
+node raptor/qa/pilotlog.browser.mjs
+node raptor/qa/tactical.browser.mjs
 node raptor/qa/loading.browser.mjs
 node raptor/qa/accessibility.browser.mjs
 node raptor/qa/missions.browser.mjs
@@ -399,6 +496,7 @@ HEADED=1 RECORD=1 node raptor/qa/flight-school.browser.mjs
 | `PLAYWRIGHT_MODULE` | Optional absolute path to an existing Playwright module entry point. |
 | `RAPTOR_BASE_URL` | Server URL; default `http://localhost:8082/`. |
 | `RAPTOR_TEST_OUTPUT` | Optional artifact directory; each script has its own default under `.context/`. |
+| `RAPTOR_TEST_BACKEND` | `webgpu` selects WebGPU for the tactical-map browser check; its default is `webgl`. |
 | `HEADED` | `1` shows Chrome; otherwise the scripts run headless. |
 | `RECORD` | `1` records the flight-school browser check; optional for that script. |
 
@@ -411,6 +509,12 @@ five lessons using browser keyboard and pointer events, then checks Quick tune,
 live recovery focus, off-screen aim and crash handling. Its deliberately injected
 crash and off-screen aim probes are separate from the flown training course.
 `guidance` checks independent overlays, accessibility preview and graphics restart.
+`feedback` checks practice and combat HUDs, rearm and boundary guidance, and
+completed-sortie reports using fixed presentation poses and injected outcomes.
+`backup` checks local download, preview/cancel, invalid files and restoring a
+damaged profile at narrow widths, followed by a preflight reload.
+`tactical` checks the map and received radio history in real campaign and practice
+flights; [QA details](qa/README.md) describe both renderer paths and pause checks.
 `accessibility` checks modal isolation, mute migration and illustrative previews.
 `loading` checks loading stages and recovery from missing game/mission files.
 The missions check flies the three campaign regions, checks HIGH/WebGL paths, and injects
@@ -448,6 +552,10 @@ world sources are capped at 12, one-shot effects at 20, and warning release
 voices at 4. The 768 KB afterburner asset loads without holding up flight;
 failed loading preserves the procedural engine. Source credits and the precise
 authoring recipe are in `audio-credits.html` and `assets/audio/sources.json`.
+Acoustic updates reuse scratch records and selection storage while preserving
+source ranking and voice limits. An isolated Node 26 benchmark with a mock Web
+Audio context measured 49–53% less scene-update CPU time with four and twelve
+voices. It excludes audio processing, browser rendering and whole-game FPS.
 The sounds are artistic game audio, not a reproduction of operational avionics.
 Incoming warnings briefly lower the engine to make room for the first pulse.
 Muting the shared warning/radio fader releases this priority reduction while

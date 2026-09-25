@@ -25,7 +25,12 @@ import { hasFlightRequest } from "./game/flightplan.js";
 import { loadRequestedFlight, FlightLoadError, bootFailureMessage } from "./game/flightload.js";
 import { Cockpit } from "./game/cockpit.js";
 import { projectAimCue, drawAimCue } from "./game/aimcue.js";
+import { targetKinematics, nearestMissileThreat, drawSeekerCue, drawMissileWarning, drawMissileEnvelopeCue, ticketBarTop, combatLabelTop } from "./game/combathud.js";
+import { LOCK_TIME, SEEK_MIN, SEEK_MAX, SEEK_COS } from "./game/missiles.js";
+import { selectMissileAdvisory } from "./game/weaponenvelope.js";
+import { airfieldGuidance, boundaryGuidance, drawAirfieldGuidance, drawBoundaryGuidance } from "./game/matchguidance.js";
 import { missionObjectiveRows, missionNavigation } from "./game/missionguidance.js";
+import { radioHistory, drawRadioFeed } from "./game/radiolog.js";
 import { bindingLabel } from "./game/ui.js";
 import { Atmosphere } from "./world/daycycle.js";
 import { SkyEnvironmentScheduler } from "./world/sky-environment.js";
@@ -41,8 +46,7 @@ import { AircraftLighting } from "./aircraft/lighting.js";
 import { updateF22Visuals } from "./aircraft/f22-lod.js";
 import { Soundscape } from "./game/soundscape.js";
 
-const VERSION = "1.12.0";
-const PHASE = 12;
+import { createAppState } from "./appstate.js";
 
 // WebGPU and reverse-depth WebGL use [0,1]; ordinary WebGL uses [-1,1].
 // Behind-camera markers must be rejected under either projection convention.
@@ -76,10 +80,7 @@ function testworldHudState(world, alpha) {
   };
 }
 
-const state = {
-  version: VERSION, phase: PHASE, ready: false, paused: false, backend: null, tier: null,
-  failure: null,
-};
+const state = createAppState();
 window.__RAPTOR = state;
 function bootStage(name,label,detail) {
   state.bootStage=name;
@@ -563,10 +564,19 @@ async function boot() {
     const pipV = new THREE.Vector3();
     const pipQ = new THREE.Quaternion();
     const seekerPosition = new Float64Array(3);
+    const seekerVelocity = new Float64Array(3);
+    const seekerTelemetry = {};
+    const missileThreat = {};
+    const airfieldReadout = {};
+    const boundaryReadout = {};
+    const missileEnvelopeLimits = { min: SEEK_MIN, max: SEEK_MAX, cos: SEEK_COS };
+    const missileAdvisory = {}, missileAdvisoryScratch = {};
+    const contactScreen = new Float64Array(16);
     const banditPosition = new Float64Array(3);
     hud.arcadeLayer = (ctx) => {
       const w = ctx.canvas.width / (window.devicePixelRatio || 1);
       const h = ctx.canvas.height / (window.devicePixelRatio || 1);
+      const labelTop = combatLabelTop(cockpit?.toolbarBottom, hud.uiScale, !!match);
 
       // gun pipper: where rounds actually go — boresight (nose) + ballistic
       // drop at 900m convergence. The stream rides above the aim circle
@@ -610,42 +620,52 @@ async function boot() {
       ctx.font = "12px ui-monospace, Menlo, monospace";
       ctx.fillStyle = player.gun.ammo > 0 ? "#9be89b" : "#d08770";
       ctx.textAlign = "center";
-      const score = battlefield && battlefield.kills > 0 ? "   KILLS " + battlefield.kills : "";
+      const kills = (battlefield?.kills || 0) + (bandits?.kills || 0);
+      const score = kills > 0 ? "   KILLS " + kills : "";
       const dmg = player.hp < 100 ? "   HULL " + Math.max(player.hp, 0) + "%" : "";
       ctx.fillText("GUN " + player.gun.ammo + "   AAM " + player.missiles.ammo + score + dmg, w / 2, h - (SETTINGS.current().showHints ? 68 : 34));
       ctx.restore();
 
       // seeker box on the IR target: dashed while acquiring, solid when locked
       const MS = player.missiles;
-      if (MS.lockTarget >= 0 && (directory ? directory.alive(MS.lockTarget) : battlefield?.alive(MS.lockTarget))) {
+      let seekerDrawn = false;
+      const hasSeekerTarget = MS.lockTarget >= 0 && (directory ? directory.alive(MS.lockTarget) : battlefield?.alive(MS.lockTarget));
+      if (hasSeekerTarget) {
         // Unified seeker IDs include air targets at 4096 + slot. Resolve
         // ENU through the same directory as the seeker before planet projection.
         if (directory) {
-          if (directory.kind(MS.lockTarget) === "air" && bandits) {
-            bandits.renderPosition(MS.lockTarget % 4096, seekerPosition);
-          } else directory.pos(MS.lockTarget, seekerPosition);
-          pipV.set(seekerPosition[0], seekerPosition[2], seekerPosition[1]);
+          directory.pos(MS.lockTarget, seekerPosition);
+          directory.vel(MS.lockTarget, seekerVelocity);
         } else {
           const to = MS.lockTarget * 5;
-          pipV.set(battlefield.state[to], battlefield.state[to + 2], battlefield.state[to + 1]);
+          seekerPosition[0] = battlefield.state[to];
+          seekerPosition[1] = battlefield.state[to + 1];
+          seekerPosition[2] = battlefield.state[to + 2];
+          seekerVelocity.fill(0);
         }
+        const telemetry = targetKinematics(player.fm.state, seekerPosition, seekerVelocity, seekerTelemetry);
+        if (directory?.kind(MS.lockTarget) === "air" && bandits) {
+          bandits.renderPosition(MS.lockTarget % 4096, seekerPosition);
+        }
+        pipV.set(seekerPosition[0], seekerPosition[2], seekerPosition[1]);
         const tv = curvature ? curvature.project(pipV, camera, pipV) : pipV.project(camera);
-        if (projectedDepthVisible(tv.z, camera)) {
+        if (telemetry && projectedDepthVisible(tv.z, camera)) {
           const tx = (tv.x * 0.5 + 0.5) * w, ty = (1 - (tv.y * 0.5 + 0.5)) * h;
-          ctx.save();
-          const locked = MS.locked();
-          ctx.strokeStyle = locked ? "#ffd27a" : "#9be89b";
-          ctx.lineWidth = locked ? 2 : 1.2;
-          if (!locked) ctx.setLineDash([4, 4]);
-          ctx.strokeRect(tx - 14, ty - 14, 28, 28);
-          if (locked) { ctx.font = "10px ui-monospace, Menlo, monospace"; ctx.textAlign = "center"; ctx.fillStyle = "#ffd27a"; ctx.fillText("LOCK", tx, ty - 20); }
-          ctx.restore();
+          const friendly = MS.lockTarget >= 4096 ? bandits?.side[MS.lockTarget % 4096] === 1 : battlefield?.side[MS.lockTarget] === 1;
+          seekerDrawn = drawSeekerCue(ctx, { x: tx, y: ty, width: w, height: h,
+            rangeM: telemetry.rangeM, closingMs: telemetry.closingMs,
+            locked: MS.locked(), progress: MS.lockProgress / LOCK_TIME, ammo: MS.ammo,
+            friendly, ace: MS.lockTarget >= 4096 && bandits?.aceId[MS.lockTarget % 4096] >= 0,
+            launchKey: bindingLabel(input, 'fire_aam'), showHints: SETTINGS.current().showHints,
+            palette: SETTINGS.getPalette(), top: labelTop,
+          });
         }
       }
       // PHASE 11 INC-4: bandit diamonds — project live bandits, dashed
       // diamond + range; blue for friendlies. Render-side only.
       if (bandits && bandits.aliveCount() > 0) {
         const st = player.fm.state;
+        let advisoryVisible = 0;
         ctx.save();
         ctx.setLineDash([5, 4]);
         ctx.lineWidth = 1.6;
@@ -664,6 +684,7 @@ async function boot() {
             if (close || (bs >= 1 && bs <= 3)) seenB[i] = 1;
             else continue;
           }
+          if (seekerDrawn && MS.lockTarget === 4096 + i) continue; // A visible seeker owns this contact's marker and range.
           // Detection and range stay authoritative; only the screen marker
           // follows the interpolated position of its visible aircraft.
           bandits.renderPosition(i, banditPosition);
@@ -672,6 +693,10 @@ async function boot() {
           if (!projectedDepthVisible(_bv.z, camera)) continue;
           const sx = (_bv.x * 0.5 + 0.5) * w, sy = (-_bv.y * 0.5 + 0.5) * h;
           if (sx < -30 || sx > w + 30 || sy < -30 || sy > h + 30) continue;
+          if (sx >= 16 && sx <= w - 16 && sy >= 16 && sy <= h - 16) {
+            advisoryVisible |= 1 << i;
+            contactScreen[i * 2] = sx; contactScreen[i * 2 + 1] = sy;
+          }
           const col = bandits.side[i] === 1 ? SETTINGS.getPalette().friendly : SETTINGS.getPalette().enemy;
           ctx.strokeStyle = col;
           ctx.beginPath();
@@ -683,6 +708,19 @@ async function boot() {
           if (bandits.aceId[i] >= 0) ctx.fillText("★", sx, sy - 18); // the named one
         }
         ctx.restore();
+        // An actual seeker, a refill, a boundary escape or an incoming shot
+        // takes priority over optional acquisition advice. The visible mask
+        // came through the normal detection gate: no hidden targets leak.
+        if (!hasSeekerTarget && MS.ammo > 0 && !match?.over && !match?.rearming && !match?.outside
+            && !battlefield?.samInbound() && !bandits.mslInboundPlayer()) {
+          const advisory = selectMissileAdvisory(st, bandits, advisoryVisible, missileEnvelopeLimits,
+            missileAdvisory, missileAdvisoryScratch);
+          if (advisory) drawMissileEnvelopeCue(ctx, advisory, {
+            x: contactScreen[advisory.slot * 2], y: contactScreen[advisory.slot * 2 + 1], width: w, height: h,
+            limits: missileEnvelopeLimits, gunAmmo: player.gun.ammo, showHints: SETTINGS.current().showHints,
+            palette: SETTINGS.getPalette(), top: labelTop,
+          });
+        }
       }
 
       // taking fire: red vignette pulse
@@ -709,11 +747,17 @@ async function boot() {
       ctx.save();
       ctx.globalCompositeOperation = "source-over";
       ctx.lineJoin = "round"; ctx.miterLimit = 2; ctx.textAlign = "center";
+      let boundaryBottom = null;
+      let airfieldShown = false;
+      // Threat priority is known before placing optional navigation cards.
+      // Reuse this same reading for the warning below; no second pool scan.
+      const threat = !match || match.over === 0
+        ? nearestMissileThreat(player.fm.state, battlefield, bandits, missileThreat) : null;
 
       // ticket bars: blue (you) left, red (them) right — WT-style
       if (match) {
         const bw = Math.min(170,(w-90)/2), bh = 7, gap = 14;
-        const y0 = Math.max(86,70*(hud.uiScale||1)+12,(cockpit?.toolbarBottom||0)+9);
+        const y0 = ticketBarTop(cockpit?.toolbarBottom, hud.uiScale);
         const blueF = match.blue / match.blueMax, redF = match.red / match.redMax;
         ctx.fillStyle = "rgba(0,10,0,0.5)";
         ctx.fillRect(w / 2 - bw - gap / 2 - 2, y0 - 2, bw + 4, bh + 4);
@@ -727,23 +771,22 @@ async function boot() {
         ctx.fillText(String(Math.round(match.blue)), w / 2 - bw - gap / 2 - 16, y0 + bh);
         ctx.fillText(String(Math.round(match.red)), w / 2 + bw + gap / 2 + 16, y0 + bh);
 
-        if (match.rearming) {
-          ctx.font = "bold 14px ui-monospace, Menlo, monospace";
-          ctx.lineWidth = 3; ctx.strokeStyle = "rgba(0,0,0,0.85)";
-          const msg = "REARMING " + Math.round(match.rearmT / 4 * 100) + "%";
-          ctx.strokeText(msg, w / 2, h * 0.62);
-          ctx.fillStyle = "#9be89b";
-          ctx.fillText(msg, w / 2, h * 0.62);
-        }
-        if (match.outside && match.over === 0) {
-          const pulse2 = Math.floor(performance.now() / 300) % 2 === 0 ? 1.0 : 0.55;
-          ctx.font = "bold 26px ui-monospace, Menlo, monospace";
-          ctx.lineWidth = 4; ctx.strokeStyle = "rgba(0,0,0,0.9)";
-          ctx.strokeText("RETURN TO THE BATTLE", w / 2, h * 0.24);
-          ctx.globalAlpha = pulse2;
-          ctx.fillStyle = SETTINGS.getPalette().warn;
-          ctx.fillText("RETURN TO THE BATTLE", w / 2, h * 0.24);
-          ctx.globalAlpha = 1;
+        if (match.over === 0) {
+          const boundary = boundaryGuidance(match, player, boundaryReadout);
+          boundaryBottom = drawBoundaryGuidance(ctx, boundary, {
+            width: w, height: h, top: y0 + 24, palette: SETTINGS.getPalette(),
+            // Leave the key-reminder strip clear when stacking both warnings.
+            bottom: SETTINGS.current().showHints ? (w <= 760 ? 48 : 60) : 12,
+            reserveMissile: !!threat,
+            time: performance.now(), motionReduce: SETTINGS.current().motionReduce,
+          });
+          if (!boundary) {
+            airfieldShown = drawAirfieldGuidance(ctx, airfieldGuidance(match, player, airfieldReadout), {
+              width: w, height: h, top: y0 + 24, bottom: SETTINGS.current().showHints ? 100 : 68,
+              incomingMissile: !!threat,
+              palette: SETTINGS.getPalette(),
+            });
+          }
         }
         if (match.over !== 0) {
           ctx.fillStyle = "rgba(10,10,14,0.55)";
@@ -810,40 +853,20 @@ async function boot() {
             oy += 18;
           }
         }
-        const nowS = performance.now() / 1000;
-        if (script._commsShown === undefined) script._commsShown = new Map(); // render-side age memory
-        let cy = h - 64;
-        const cx = 96; // clear of the G/M/AOA block in the corner
-        for (const c of script.readComms().slice(0, 3)) {
-          const key = c.lineId + ":" + c.t;
-          if (!script._commsShown.has(key)) script._commsShown.set(key, nowS);
-          const age = nowS - script._commsShown.get(key);
-          if (age > 9) continue;
-          const text = missionData.lines[c.lineId];
-          if (!text) continue;
-          ctx.globalAlpha = Math.min(1, Math.max(0, (9 - age) / 2));
-          const subS = SETTINGS.subtitleScale();
-          ctx.font = Math.round(11 * subS) + "px ui-monospace, Menlo, monospace";
-          ctx.strokeText("» " + text, cx, cy);
-          ctx.fillStyle = "#cfe8cf";
-          ctx.fillText("» " + text, cx, cy);
-          ctx.globalAlpha = 1;
-          cy -= Math.round(16 * subS);
-        }
+        drawRadioFeed(ctx, radioHistory(state), { timeS: sim.time, width: w, height: h,
+          hudScale: hud.uiScale, subtitleScale: SETTINGS.subtitleScale(), showHints: SETTINGS.current().showHints,
+          toolbarBottom: cockpit?.toolbarBottom || 0, top: oy + 12,
+          priorityCue: !!threat || !!match?.outside || boundaryBottom !== null || airfieldShown });
         ctx.textAlign = "center";
       }
 
-      // MISSILE warning (over everything but the end card)
-      const airInbound = bandits && bandits.mslInboundPlayer ? bandits.mslInboundPlayer() : false;
-      if (battlefield && (battlefield.samInbound() || airInbound) && (!match || match.over === 0)) {
-        const pulse = Math.floor(performance.now() / 250) % 2 === 0 ? 1.0 : 0.6;
-        ctx.font = "bold 30px ui-monospace, Menlo, monospace";
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = "rgba(0,0,0,0.9)";
-        ctx.strokeText("MISSILE", w / 2, h * 0.3);
-        ctx.globalAlpha = pulse;
-        ctx.fillStyle = SETTINGS.getPalette().warn;
-        ctx.fillText("MISSILE", w / 2, h * 0.3);
+      // Real player threats only; surface-attack missiles never generate a
+      // false warning. The bearing dial remains steady with reduced motion.
+      if (!match || match.over === 0) {
+        drawMissileWarning(ctx, threat, { width: w, height: h, color: SETTINGS.getPalette().warn,
+          time: performance.now(), motionReduce: SETTINGS.current().motionReduce,
+          top: Math.max(100, (cockpit?.toolbarBottom || 70) + 35, (boundaryBottom ?? 0) + 8),
+        });
       }
       ctx.restore();
     };
@@ -1216,8 +1239,9 @@ async function boot() {
     last = now;
     gamepad.update();
     const pauseRequested=input.pressed("menu") || gamepad.pressed("menu") || input.pressed("game_pause");
-    if (pauseRequested && !controls.open && !cockpit.guide.open && !cockpit.log.open) cockpit.toggle();
+    if (pauseRequested && !controls.open && !cockpit.guide.open && !cockpit.log.open && !cockpit.tactical.open) cockpit.toggle();
     if (input.pressed("help")) cockpit.openGuide();
+    if (input.pressed("map")) cockpit.openTactical();
     if (cockpit.paused) {
       frameBudget.observe(0, { paused: true });
       // Consume presentation snapshots while the world is paused so resume

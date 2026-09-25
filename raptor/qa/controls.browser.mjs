@@ -11,7 +11,7 @@ const browser = await chromium.launch({channel:'chrome',headless:process.env.HEA
 const context = await browser.newContext({viewport:{width:1280,height:840},recordVideo:{dir:out,size:{width:1280,height:840}}});
 const page = await context.newPage(), errors = [], results = [];
 page.on('pageerror', error => errors.push(error.message));
-await page.route('**/src/main.js', route => route.fulfill({contentType:'text/javascript',body:`
+await page.route('**/src/boot.js', route => route.fulfill({contentType:'text/javascript',body:`
   import { Input } from './engine/input.js'; import { ControlsMenu } from './game/controlsmenu.js';
   document.getElementById('veil')?.remove(); document.getElementById('hangar')?.remove();
   window.testInput = new Input(window); window.testControls = new ControlsMenu(testInput); testControls.show();
@@ -27,7 +27,7 @@ try {
     await page.locator('[data-action="all-keys"]').click();
     assert.equal(await page.locator('#controlSearch').evaluate(el=>el===document.activeElement),true);
     await page.locator('[data-category="all"]').click();
-    assert.equal(await page.locator('[data-action-id]').count(),18);
+    assert.equal(await page.locator('[data-action-id]').count(),19);
   });
   await check('editing a control lower in the list preserves its scroll position', async()=>{
     await page.locator('[data-bind="debug"][data-slot="0"]').scrollIntoViewIfNeeded();

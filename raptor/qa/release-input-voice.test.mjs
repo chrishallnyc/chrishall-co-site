@@ -11,7 +11,7 @@ function fixture(saved = {}, key = STORE_KEY) {
   return {input:new Input(new EventTarget()), store};
 }
 
-for (const [code, owner] of [['KeyF', 'fire_mguns'], ['KeyH', 'help']]) {
+for (const [code, owner] of [['KeyF', 'fire_mguns'], ['KeyH', 'help'], ['KeyM', 'map']]) {
   test(`explicit sharing of default ${code} survives a real save/reload`, () => {
     const {input, store} = fixture();
     assert.equal(input.setBinding('gear', 0, [code], {resolve:'share'}), true);

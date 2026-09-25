@@ -12,7 +12,7 @@ const context=await browser.newContext({viewport:{width:1440,height:900}});
 const staged=process.env.RAPTOR_STAGE_ROOT;
 if(staged)await context.route('**/*',async route=>{
   const path=new URL(route.request().url()).pathname;
-  if(!['/index.html','/','/src/main.js','/src/game/flightdeck.js','/src/game/flightload.js','/assets/preflight/nellis.webp','/assets/preflight/valdez.webp','/assets/preflight/marianas.webp'].includes(path))return route.continue();
+  if(!['/index.html','/','/src/boot.js','/src/appstate.js','/src/main.js','/src/game/flightdeck.js','/src/game/flightload.js','/assets/preflight/nellis.webp','/assets/preflight/valdez.webp','/assets/preflight/marianas.webp','/assets/preflight/newyork.webp'].includes(path))return route.continue();
   const file=staged+(path==='/'?'/index.html':path);
   const body=await readFile(file);
   await route.fulfill({status:200,contentType:path.endsWith('.js')?'text/javascript':path.endsWith('.webp')?'image/webp':'text/html',body});
@@ -24,13 +24,21 @@ const shot=name=>page.screenshot({path:out+name+'.png'});
 try {
   const requests=[];page.on('request',request=>requests.push(new URL(request.url()).pathname));
   await page.goto(origin,{waitUntil:'networkidle'});
-  await check('preflight loads three small region previews without downloading flight terrain imagery',async()=>{
-    await page.waitForSelector('.region-card');
-    for(const front of ['nellis','valdez','marianas'])assert.ok(requests.includes(`/assets/preflight/${front}.webp`));
+  await check('preflight loads four small region previews without downloading flight terrain imagery',async()=>{
+    await page.waitForSelector('#flyBtn');
+    assert.equal(requests.some(path=>path==='/src/main.js'||path.startsWith('/vendor/')),false);
+    // Other region previews load on demand when their setup cards are shown.
+    await page.locator('#flight-customize summary').click();
+    await page.waitForFunction(()=>performance.getEntriesByType('resource').filter(r=>r.name.includes('/assets/preflight/')).length===4);
+    for(const front of ['nellis','valdez','marianas','newyork'])assert.ok(requests.includes(`/assets/preflight/${front}.webp`));
     assert.equal(requests.some(path=>path.includes('_albedo_4k.jpg')),false);
     const previews=await page.evaluate(()=>performance.getEntriesByType('resource').filter(r=>r.name.includes('/assets/preflight/')).map(r=>({name:r.name.split('/').pop(),encodedBodySize:r.encodedBodySize,transferSize:r.transferSize})));
-    assert.equal(previews.length,3);assert.ok(previews.every(r=>r.encodedBodySize>0));
-    const totalBytes=previews.reduce((total,r)=>total+r.encodedBodySize,0);assert.ok(totalBytes<200000);
+    assert.equal(previews.length,4);assert.ok(previews.every(r=>r.encodedBodySize>0));
+    const totalBytes=previews.reduce((total,r)=>total+r.encodedBodySize,0);
+    // Four regions include the detailed NYC preview (about 189 KB). Retain
+    // the original three-region budget and bound the new image separately.
+    assert.ok(previews.filter(r=>r.name!=='newyork.webp').reduce((sum,r)=>sum+r.encodedBodySize,0)<200000);
+    assert.ok(previews.find(r=>r.name==='newyork.webp').encodedBodySize<200000);
     metrics.previews=previews;metrics.totalPreviewBytes=totalBytes;
     await shot('01-lightweight-preflight');
   });
@@ -70,15 +78,25 @@ try {
     await back.focus();assert.equal(await back.evaluate(el=>el===document.activeElement),true);await shot('04-narrow-loader');
   });
   await check('a missing game module has public recovery copy and a working return to preflight',async()=>{
-    await page.route('**/src/main.js',route=>route.abort('failed'));
+    await page.route('**/src/boot.js',route=>route.abort('failed'));
     await page.goto(origin,{waitUntil:'networkidle'});
     await page.getByRole('button',{name:'Reload game'}).waitFor();
     assert.match(await page.locator('.boot-status-detail').textContent(),/connection/);
     assert.doesNotMatch(await page.locator('.boot-status-detail').textContent(),/local server/i);
     assert.equal(await page.getByRole('button',{name:'Reload game'}).evaluate(el=>el===document.activeElement),true);
     await shot('05-game-file-recovery');
-    await page.unroute('**/src/main.js');await page.getByRole('link',{name:'Back to preflight'}).click();
+    await page.unroute('**/src/boot.js');await page.getByRole('link',{name:'Back to preflight'}).click();
     await page.waitForSelector('#flyBtn');assert.equal(new URL(page.url()).search,'');
+  });
+  await check('a missing flight engine is recoverable while preflight still works',async()=>{
+    await page.route('**/src/main.js',route=>route.abort('failed'));
+    await page.goto(origin+'?mode=practice&front=NELLIS',{waitUntil:'networkidle'});
+    await page.getByRole('button',{name:'Reload game'}).waitFor();
+    assert.match(await page.locator('#veil .status').textContent(),/GAME FILES/);
+    await page.getByRole('link',{name:'Back to preflight'}).click();
+    await page.waitForSelector('#flyBtn');
+    assert.equal(await page.evaluate(()=>__RAPTOR.hangar),true);
+    await page.unroute('**/src/main.js');
   });
   assert.deepEqual(errors,[]);
 } catch(error) {await shot('failure').catch(()=>{});throw error;}

@@ -214,9 +214,11 @@ test('scenario saving reports a denied write accurately without changing campaig
 
 test('the pilot log renders a separate scenario card without attempting an unsupported NYC operation',async()=>{
   storage();
-  const body={innerHTML:'',querySelector:()=>null,querySelectorAll:()=>[]};
+  const control={scrollTop:0,clientHeight:480,getBoundingClientRect:()=>({top:0,bottom:40}),addEventListener(){}};
+  control.querySelector=()=>control;
+  const body={innerHTML:'',querySelector:()=>control,querySelectorAll:()=>[]};
   const catalog=await campaignCatalog();
-  PilotLog.prototype.render.call({body,catalog,selected:'N01',filter:'ALL'});
+  PilotLog.prototype.render.call({body,catalog,selected:'N01',filter:'ALL',query:'',status:'all'});
   assert.match(body.innerHTML,/Standalone scenarios/);assert.match(body.innerHTML,/Harbor Watch/);
   assert.match(body.innerHTML,/data-scenario="Y01"/);assert.doesNotMatch(body.innerHTML,/data-filter="NEWYORK"/);
   assert.equal(catalog.length,30);

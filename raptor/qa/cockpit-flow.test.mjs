@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Cockpit, flightContinuation } from '../src/game/cockpit.js';
 import * as settings from '../src/game/settings.js';
-import { markDone } from '../src/campaign/authored.js';
+import { CAMPAIGN, markDone } from '../src/campaign/authored.js';
 import { campaignProgress, operationSummary } from '../src/game/pilotlog.js';
 import { PREFLIGHT_KEY } from '../src/game/flightplan.js';
 import { freshSave, genMission, reduceCampaign, saveSave, loadSave } from '../src/campaign/engine.js';
@@ -267,4 +267,36 @@ test('debrief buttons retain truthful continuation after visiting another menu',
   assert.equal(operation.calls.navigate, 0);
   assert.equal(operation.calls.confirmation.options.label, 'Continue operation');
   assert.match(operation.calls.confirmation.options.detail, /next sortie/);
+});
+
+test('failed campaign and completed quick battles expose one immediate retry with the existing leave confirmation', () => {
+  for(const [flags,over,label] of [['sortie=N01',-1,'Retry mission'],['front=NELLIS',1,'Fly battle again'],['front=NELLIS',-1,'Fly battle again']]) {
+    storage();
+    const h=harness({reason:'result',flags,over});
+    h.cockpit.showPause();
+    assert.match(h.body.innerHTML,new RegExp(`class="ui-button primary pause-primary" data-restart>${label}`));
+    assert.equal((h.body.innerHTML.match(/data-restart/g)||[]).length,1);
+    assert.ok(h.body.innerHTML.indexOf('data-restart')<h.body.innerHTML.indexOf('data-resume'));
+    h.body.querySelector('[data-restart]').onclick();
+    assert.equal(h.calls.navigate,0);
+    assert.equal(h.calls.confirmation.options.label,label);
+    h.calls.confirmation.action();
+    assert.equal(h.calls.reload,1);
+  }
+});
+
+test('the completed campaign offers the pilot log while ordinary pause and practice retain their compact flow', () => {
+  storage();
+  for(const mission of CAMPAIGN)markDone(mission.id);
+  const complete=harness({reason:'result',flags:'sortie=M10',over:1,saved:true});
+  let opened=0;complete.cockpit.openLog=()=>opened++;
+  complete.cockpit.showPause();
+  assert.match(complete.body.innerHTML,/data-debrief-log>Explore your completed campaign/);
+  assert.doesNotMatch(complete.body.innerHTML,/data-next/);
+  complete.body.querySelector('[data-debrief-log]').dispatchEvent(new Event('click'));
+  assert.equal(opened,1);
+  for(const practice of [false,true]) {
+    const paused=harness({practice});paused.cockpit.showPause();
+    assert.doesNotMatch(paused.body.innerHTML,/sortie-debrief|data-debrief-log|Fly battle again|Retry mission/);
+  }
 });
