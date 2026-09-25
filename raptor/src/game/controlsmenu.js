@@ -5,20 +5,14 @@ import { validChord, chordIdentity } from "../engine/input.js";
 import { current, saveSettings, resetSettings, hasLive, storageAvailable, getAimOptions, getPalette } from "./settings.js";
 import { TIERS, tierParams } from "../engine/quality.js";
 import { BindingHistory, planActionRestore, missingEssentialActions } from "./controlhistory.js";
+import { KEYBOARD_KEYS, KEYBOARD_CODES, KEYBOARD_BOUNDS, ACTION_TOKENS, bindingMap, keyDescriptor, moveKeyboardFocus } from "./keyboardlayout.js";
 
 const MODS = new Set(["ShiftLeft", "ShiftRight", "ControlLeft", "ControlRight", "AltLeft", "AltRight", "MetaLeft", "MetaRight"]);
 const CATEGORIES = { essentials: "Start here", missing: "Needs a key", all: "All controls", flight: "Flying", weapons: "Weapons", systems: "Aircraft", interface: "Interface" };
 const TABS = { controls: "Controls", display: "Display", audio: "Audio", accessibility: "Accessibility" };
-const KEYBOARD_ROWS = [
-  ["Escape", "Backquote", ..."1234567890".split("").map(n => "Digit" + n), "Minus", "Equal"],
-  [..."QWERTYUIOP"].map(key => "Key" + key),
-  [..."ASDFGHJKL"].map(key => "Key" + key),
-  [..."ZXCVBNM"].map(key => "Key" + key),
-  ["ControlLeft", "AltLeft", "MetaLeft", "Space", "MetaRight", "AltRight", "ArrowLeft", "ArrowUp", "ArrowDown", "ArrowRight"],
-];
 const POINTER_CODES = ["Mouse0", "Mouse1", "Mouse2", "WheelUp", "WheelDown"];
-const SHORT_ACTIONS = { throttle_up: "THR +", throttle_down: "THR −", roll_left: "BANK L", roll_right: "BANK R", pitch_up: "NOSE ↑", pitch_down: "NOSE ↓", yaw_left: "YAW L", yaw_right: "YAW R", fire_mguns: "CANNON", fire_aam: "MISSILE", gear: "GEAR", wheel_brakes: "BRAKE", menu: "PAUSE", game_pause: "PAUSE", help: "GUIDE", recenter_aim: "CENTER", hide_hud: "HUD", debug: "DETAILS" };
-const compactKey = code => ({ ControlLeft: "ctrl", AltLeft: "⌥", AltRight: "⌥", MetaLeft: "⌘", MetaRight: "⌘", Mouse0: "Left click", Mouse1: "Middle", Mouse2: "Right click" }[code] || keyName(code));
+const MAP_CATEGORIES = { all: "All keys", flight: "Flying", weapons: "Weapons", systems: "Aircraft", interface: "Interface", available: "Unused keys" };
+const mapCategory = cat => ["view", "raptor"].includes(cat) ? "interface" : cat;
 
 // A preset is a starting point for one device, never a separate saved state.
 // Derive its name from the actual gain so slider edits cannot leave a stale badge.
@@ -36,17 +30,7 @@ export function aimPresetState(settings) {
 
 // Index by trigger, not every member of a chord. Option + Z belongs on Z;
 // clicking that key still exposes the complete chord and all shared actions.
-export function mappedControls(actions) {
-  const inputs = new Map();
-  for (const [id, action] of Object.entries(actions)) {
-    action.binds.forEach((chord, slot) => {
-      const code = chord.at(-1);
-      if (!inputs.has(code)) inputs.set(code, []);
-      inputs.get(code).push({ id, slot, chord, label: action.label, locked: action.lockedPrimary && slot === 0 });
-    });
-  }
-  return inputs;
-}
+export const mappedControls = bindingMap;
 const esc = (text) => String(text).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const nice = (chord) => esc(chordName(chord));
 const FOCUSABLE = 'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), summary, [tabindex="0"]';
@@ -64,7 +48,10 @@ export class ControlsMenu {
     this.category = "essentials";
     this.query = "";
     this.selectedCode = "KeyW";
+    this.mapFocusCode = "KeyW";
     this.layoutOpen = true;
+    this.mapFilter = "all";
+    this.mapTesting = false;
     this.capturing = null;
     this.pending = null;
     this.confirming = null;
@@ -96,7 +83,7 @@ export class ControlsMenu {
     this._mouseUp = (event) => {
       if (!this.open) return;
       event.stopPropagation();
-      if (this.testing) { this.testDown.delete("Mouse" + event.button); this._updateTest(); }
+      if (this.testing || this.mapTesting) { this.testDown.delete("Mouse" + event.button); this._updateTest(); }
     };
     this._wheel = (event) => this._onWheel(event);
     this._blur = () => {
@@ -105,6 +92,8 @@ export class ControlsMenu {
       if (this.capturing) this._cancelCapture("Binding canceled because the window lost focus.");
       this._updateTest();
     };
+    this._visibility = () => { if (document.hidden) this._blur(); };
+    document.addEventListener("visibilitychange", this._visibility);
     window.addEventListener("keydown", this._keyDown, true);
     window.addEventListener("keyup", this._keyUp, true);
     window.addEventListener("mousedown", this._mouseDown, true);
@@ -136,7 +125,7 @@ export class ControlsMenu {
     if (!this.open) return;
     this.open = false; this.capturing = this.pending = this.confirming = this.restoring = null;
     this.lastTest = null;
-    this.testing = false; this.testDown.clear(); this._heldMods = [];
+    this.testing = this.mapTesting = false; this.testDown.clear(); this._heldMods = [];
     this._cancelAimHold?.();
     clearInterval(this._statusInterval);
     this.input.clear();
@@ -150,11 +139,13 @@ export class ControlsMenu {
   _onKey(event) {
     if (!this.open) return;
     event.stopPropagation();
+    if ((this.testing || this.mapTesting) && !event.metaKey && (this.testDown.has("MetaLeft") || this.testDown.has("MetaRight"))) this.testDown.clear();
     if (event.code === "Escape") {
       event.preventDefault();
       if (this.capturing || this.pending) this._cancelCapture("Binding unchanged.");
       else if (this.restoring) this._cancelRestore();
       else if (this.confirming) { this.confirming = null; this._render(); }
+      else if (this.mapTesting) { this.mapTesting = false; this.testDown.clear(); this._render("map-test"); }
       else if (this.testing) { this.testing = false; this.testDown.clear(); this._render("test-controls"); }
       else this.close();
       return;
@@ -168,11 +159,29 @@ export class ControlsMenu {
       } else this._offer([...this._heldMods, event.code]);
       return;
     }
-    if (this.testing && this.el.querySelector(".input-test") === document.activeElement) {
+    if ((this.testing && this.el.querySelector(".input-test") === document.activeElement) || (this.mapTesting && this.el.querySelector(".keyboard-stage")?.contains(document.activeElement))) {
+      if (event.metaKey && !event.code.startsWith("Meta") && !this.testDown.has("MetaLeft") && !this.testDown.has("MetaRight")) {
+        event.preventDefault(); this.testDown.clear();
+        this.lastTest="Command shortcut · release Command, then try the full shortcut again.";
+        this._updateTest(); return;
+      }
       if (event.code === "Tab") { this.testDown.clear(); this._updateTest(); }
       else {
-        event.preventDefault(); this.testDown.add(event.code); this._updateTest(event.code); return;
+        event.preventDefault(); if (!event.repeat) { this.testDown.add(event.code); this._updateTest(event.code); } return;
       }
+    }
+    const mapKey=event.target.closest?.(".keyboard-board [data-map-key]");
+    if (mapKey && !this.mapTesting && !this.capturing && !this.pending) {
+      const direction={ArrowLeft:"left",ArrowRight:"right",ArrowUp:"up",ArrowDown:"down",Home:"home",End:"end"}[event.code];
+      if (direction) {
+        event.preventDefault();
+        const code=moveKeyboardFocus(mapKey.dataset.mapKey,direction);
+        this._selectMapKey(code);
+        const next=this.el.querySelector(`[data-map-key="${code}"]`);
+        next?.focus({preventScroll:true}); next?.scrollIntoView({block:"nearest",inline:"nearest"});
+        return;
+      }
+      if (event.code==="Enter" || event.code==="Space") { event.preventDefault(); this._selectMapKey(mapKey.dataset.mapKey,true); return; }
     }
     if (event.key === "Tab") this._trapFocus(event);
   }
@@ -187,12 +196,21 @@ export class ControlsMenu {
       this._heldMods = this._heldMods.filter((code) => code !== event.code);
       if (chord.length) this._offer(chord);
     }
-    if (this.testing) { this.testDown.delete(event.code); this._updateTest(); }
+    if (this.testing || this.mapTesting) {
+      // macOS may omit letter keyup events while Command is held.
+      if (event.code.startsWith("Meta") || (!event.metaKey && (this.testDown.has("MetaLeft") || this.testDown.has("MetaRight")))) this.testDown.clear();
+      else this.testDown.delete(event.code);
+      this._updateTest();
+    }
   }
   _onMouse(event) {
     if (!this.open) return;
     if (this.capturing && !this.pending && !event.target.closest?.("[data-capture-control]")) {
       event.stopPropagation(); event.preventDefault(); this._offer([...this._heldMods, "Mouse" + event.button]);
+    } else if (this.mapTesting && event.target.closest?.(".keyboard-stage,.pointer-buttons")) {
+      event.stopPropagation(); event.preventDefault();
+      this.el.querySelector(".keyboard-stage").focus({preventScroll:true});
+      const code="Mouse"+event.button; this.testDown.add(code); this._updateTest(code);
     } else if (this.testing && event.target.closest?.(".input-test") && !event.target.closest?.("button")) {
       event.stopPropagation(); event.preventDefault();
       this.el.querySelector(".input-test").focus();
@@ -204,12 +222,13 @@ export class ControlsMenu {
     if (this.capturing && !this.pending) {
       event.stopPropagation(); event.preventDefault();
       this._offer([...this._heldMods, event.deltaY < 0 ? "WheelUp" : "WheelDown"]);
-    } else if (this.testing && event.target.closest?.(".input-test")) {
+    } else if ((this.testing && event.target.closest?.(".input-test")) || (this.mapTesting && event.target.closest?.(".keyboard-stage,.pointer-buttons"))) {
       event.stopPropagation(); event.preventDefault();
       const code = event.deltaY < 0 ? "WheelUp" : "WheelDown";
+      this.testDown.delete("WheelUp"); this.testDown.delete("WheelDown");
       this.testDown.add(code); this._updateTest(code);
       clearTimeout(this._testWheelTimeout);
-      this._testWheelTimeout = setTimeout(() => { this.testDown.delete(code); this._updateTest(); }, 500);
+      this._testWheelTimeout = setTimeout(() => { this.testDown.delete("WheelUp"); this.testDown.delete("WheelDown"); this._updateTest(); }, 500);
     }
   }
   _trapFocus(event) {
@@ -222,7 +241,7 @@ export class ControlsMenu {
   }
 
   _beginCapture(id, slot, returnFocus = "") {
-    this.capturing = { id, slot }; this.pending = null; this.testing = false;
+    this.capturing = { id, slot }; this.pending = null; this.testing = this.mapTesting = false;
     this.captureReturnFocus = returnFocus; this.testDown.clear();
     this._heldMods = []; this.captureError = "";
     this._render();
@@ -260,7 +279,7 @@ export class ControlsMenu {
     this._showMissing();
   }
   _showMissing() {
-    this.tab = "controls"; this.category = "missing"; this.query = ""; this.testing = false;
+    this.tab = "controls"; this.category = "missing"; this.query = ""; this.testing = this.mapTesting = false;
     this._render("category-missing");
     const first = this.el.querySelector("[data-bind]");
     first?.scrollIntoView({block:"center"}); first?.focus({preventScroll:true});
@@ -314,37 +333,79 @@ export class ControlsMenu {
   }
   _layoutInspectorHtml() {
     const entries = mappedControls(this.input.actions).get(this.selectedCode) || [];
-    if (!entries.length) return `<div class="layout-empty">Choose a lit key to see its action and change its binding. Every tile reflects your saved setup.</div>`;
-    return `<div class="layout-inspector-title"><strong>${esc(keyName(this.selectedCode))}</strong><span>${entries.length > 1 ? "All bindings using this trigger" : "Your current binding"}</span></div>${entries.map((entry, index) => `<div class="layout-action"><div><strong>${esc(entry.label)}</strong><span>${nice(entry.chord)}${entry.chord.length > 1 ? " · hold the full shortcut" : ""}</span></div>${entry.locked ? '<span class="layout-fixed">Always available</span>' : `<button type="button" class="setup-button" data-layout-edit="${entry.id}" data-slot="${entry.slot}" data-focus="map-edit-${entry.id}-${entry.slot}">Change key</button>`}${this.input.actions[entry.id].binds.length < 4 && entries.findIndex(item => item.id === entry.id) === index ? `<button type="button" class="setup-text-button" data-layout-add="${entry.id}" data-focus="map-add-${entry.id}" aria-label="Add an alternate key for ${esc(entry.label)}">+ Add key</button>` : ""}</div>`).join("")}<p class="layout-inspector-note">Add a key to keep the current binding. Your last key change can always be undone below.</p><button type="button" class="setup-text-button" data-action="all-keys">Search all actions ↓</button>`;
+    const descriptor = keyDescriptor(this.selectedCode);
+    const title = `<div class="layout-inspector-title"><span class="inspector-keycap">${esc(descriptor.label)}</span><div><strong>${esc(descriptor.name)}</strong><span>${entries.length ? `${entries.length} ${entries.length === 1 ? "binding" : "bindings"} on this key` : MODS.has(this.selectedCode) ? "Shortcut modifier" : "No action assigned"}</span></div></div>`;
+    const modifiers = Object.entries(this.input.actions).flatMap(([id,action]) => action.binds.filter(chord=>chord.slice(0,-1).includes(this.selectedCode)).map(chord=>({id,chord,label:action.label})));
+    const modifierHelp = modifiers.length ? `<div class="map-modifier-help"><strong>Combine with another key</strong>${modifiers.map(entry=>`<button type="button" data-map-related-code="${entry.chord.at(-1)}" aria-label="Explore ${esc(chordName(entry.chord))}: ${esc(entry.label)}">${nice(entry.chord)}<small>${esc(entry.label)}</small></button>`).join("")}</div>` : "";
+    const content = entries.map((entry,index) => {
+      const action = this.input.actions[entry.id];
+      return `<div class="layout-action" data-map-action="${entry.id}"><div class="layout-action-heading"><span class="map-action-category cat-${mapCategory(action.cat)}">${esc(MAP_CATEGORIES[mapCategory(action.cat)] || "Control")}</span><span class="map-action-mode">${action.hold ? "Hold" : "Press"}</span></div><div><strong>${esc(entry.label)}</strong><p>${esc(action.description || "")}</p><span class="layout-chord">${nice(entry.chord)}${entry.chord.length > 1 ? " · hold the full shortcut" : ""}</span></div><div class="map-alternates"><span>All keys for this action</span>${action.binds.map(chord=>`<button type="button" data-map-related-code="${chord.at(-1)}" class="${chordIdentity(chord)===chordIdentity(entry.chord)?"current":""}" aria-label="Explore ${esc(chordName(chord))} for ${esc(entry.label)}">${nice(chord)}</button>`).join("")}</div>${entry.locked ? '<span class="layout-fixed">Escape always stays available</span>' : `<button type="button" class="setup-button" data-layout-edit="${entry.id}" data-slot="${entry.slot}" data-focus="map-edit-${entry.id}-${entry.slot}">Change key</button>`}${action.binds.length < 4 && entries.findIndex(item => item.id === entry.id) === index ? `<button type="button" class="setup-text-button" data-layout-add="${entry.id}" data-focus="map-add-${entry.id}" aria-label="Add an alternate key for ${esc(entry.label)}">+ Add key</button>` : ""}</div>`;
+    }).join("");
+    const available = this.selectedCode !== "Escape";
+    const options = Object.entries(this.input.actions).map(([id,action])=> {
+      const full = action.binds.length >= 4, duplicate = action.binds.some(chord=>chord.length===1 && chord[0]===this.selectedCode), wheelHold = this.selectedCode.startsWith("Wheel") && action.hold;
+      const reason = full ? " · 4 keys already" : duplicate ? " · already here" : wheelHold ? " · needs a held key" : "";
+      return `<option value="${id}" ${full || duplicate || wheelHold ? "disabled" : ""}>${esc(action.label + reason)}</option>`;
+    }).join("");
+    return `${title}${content}${!entries.length ? `<div class="layout-empty"><strong>${MODS.has(this.selectedCode) ? "Build a shortcut around this key." : "Give this key a job."}</strong><p>Adding an action keeps its existing keys. Undo can reverse your change.</p></div>` : ""}${modifierHelp}${available ? `<details class="map-assign" ${entries.length ? "" : "open"}><summary>${entries.length ? "Assign another action here" : "Choose an action"}</summary><label for="mapAssignAction">Action for ${esc(descriptor.label)}</label><select id="mapAssignAction"><option value="">Choose an action…</option>${options}</select><p data-map-assign-preview>Existing keys stay assigned. Up to four bindings per action.</p><button type="button" class="setup-button" data-map-assign disabled>Assign ${esc(descriptor.label)}</button></details>` : ""}<p class="layout-inspector-note">${entries.length > 1 ? "Several bindings use this key. The full shortcut decides which actions run. " : ""}Changes save automatically. Undo is below.</p><button type="button" class="setup-text-button" data-action="all-keys">Search all actions ↓</button>`;
+  }
+  _selectMapKey(code, edit = false) {
+    this.selectedCode = code;
+    const inspector = this.el.querySelector(".layout-inspector");
+    if (!inspector) return;
+    inspector.innerHTML = this._layoutInspectorHtml();
+    this._wireLayoutInspector(); this._refreshMapHighlights();
+    const announcement=this.el.querySelector("[data-map-selection-status]");
+    if (announcement) {
+      const entries=mappedControls(this.input.actions).get(code) || [];
+      announcement.textContent=`${keyDescriptor(code).name}: ${entries.length ? [...new Set(entries.map(entry=>entry.label))].join(", ") : "No action assigned"}`;
+    }
+    if (edit) { inspector.scrollIntoView({block:"nearest"}); (inspector.querySelector("[data-layout-edit]") || inspector.querySelector("#mapAssignAction") || inspector.querySelector("button"))?.focus({preventScroll:true}); }
+  }
+  _refreshMapHighlights() {
+    if (!this.el.querySelector(".keyboard-layout")) return;
+    const mapped = mappedControls(this.input.actions), selected = mapped.get(this.selectedCode) || [];
+    if (KEYBOARD_CODES.has(this.selectedCode)) this.mapFocusCode=this.selectedCode;
+    const related = new Set(selected.flatMap(entry=>this.input.actions[entry.id].binds.map(chord=>chord.at(-1))));
+    const modifiers = new Set(selected.flatMap(entry=>entry.chord.slice(0,-1)));
+    for (const button of this.el.querySelectorAll("[data-map-key]")) {
+      const code = button.dataset.mapKey, entries = mapped.get(code) || [];
+      button.setAttribute("aria-pressed", String(code===this.selectedCode));
+      if (KEYBOARD_CODES.has(code)) button.tabIndex=this.mapTesting ? -1 : code===this.mapFocusCode ? 0 : -1;
+      else button.tabIndex=this.mapTesting ? -1 : 0;
+      button.classList.toggle("key-related", code!==this.selectedCode && related.has(code));
+      button.classList.toggle("key-modifier", modifiers.has(code));
+      const match = this.mapFilter === "all" || (this.mapFilter === "available" ? !entries.length : entries.some(entry=>mapCategory(this.input.actions[entry.id].cat)===this.mapFilter));
+      button.classList.toggle("key-dimmed", !match && code!==this.selectedCode);
+    }
+    this.el.querySelectorAll("[data-map-filter]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.mapFilter===this.mapFilter)));
   }
   _keyboardHtml() {
     const mapped = mappedControls(this.input.actions);
-    const key = (code, extra = false) => {
-      const entries = mapped.get(code) || [];
-      const labels = [...new Set(entries.map(entry => entry.label))];
-      const action = entries[0]?.id;
-      const category = action ? this.input.actions[action].cat : "";
-      const caption = labels.length > 1 ? `${labels.length} ACTIONS` : SHORT_ACTIONS[action] || "";
-      const label = extra ? keyName(code) : compactKey(code);
-      const modifier = part => /^Control/.test(part) ? "⌃" : /^Alt/.test(part) ? "⌥" : /^Meta/.test(part) ? "⌘" : /^Shift/.test(part) ? "⇧" : compactKey(part);
-      const displayLabel = entries.length === 1 && entries[0].chord.length > 1 ? `${entries[0].chord.slice(0, -1).map(modifier).join("")} + ${label}` : label;
-      const attrs = `class="layout-key ${category ? `key-${category}` : "key-unused"}${code === "Space" ? " key-space" : ""}${extra ? " key-extra" : ""}"`;
-      return entries.length ? `<button type="button" ${attrs} data-map-key="${code}" data-focus="map-${code}" aria-pressed="${code === this.selectedCode}" aria-label="${esc(keyName(code))}: ${esc(entries.map(entry => `${entry.label}${entry.chord.length > 1 ? ` (${chordName(entry.chord)})` : ""}`).join("; "))}. ${entries.every(entry => entry.locked) ? "Always available." : "Configure this key."}"><strong>${esc(displayLabel)}</strong><small>${esc(caption)}</small></button>` : `<span ${attrs} aria-hidden="true"><strong>${esc(label)}</strong></span>`;
+    const key = (descriptor, positioned = false) => {
+      const { code, label, name } = descriptor;
+      const entries = mapped.get(code) || [], labels = [...new Set(entries.map(entry => entry.label))];
+      const category = entries.length ? mapCategory(this.input.actions[entries[0].id].cat) : "unused";
+      const caption = labels.length > 1 ? `${labels.length} ACTIONS` : ACTION_TOKENS[entries[0]?.id] || "";
+      const position = positioned ? `style="left:${descriptor.x / KEYBOARD_BOUNDS.width * 100}%;top:${descriptor.y / KEYBOARD_BOUNDS.height * 100}%;width:${descriptor.width / KEYBOARD_BOUNDS.width * 100}%;height:${descriptor.height / KEYBOARD_BOUNDS.height * 100}%"` : "";
+      const classes = `layout-key key-${category}${code.startsWith("Arrow") ? " key-arrow" : ""}${positioned ? " physical-key" : " key-extra"}${descriptor.bindable === false ? " key-system" : ""}`;
+      if (descriptor.bindable === false) return `<span class="${classes}" ${position} title="${esc(name)}"><strong>${esc(label)}</strong><small>macOS</small></span>`;
+      const description = entries.length ? entries.map(entry => `${entry.label}${entry.chord.length > 1 ? ` (${chordName(entry.chord)})` : ""}`).join("; ") : "Unused key";
+      return `<button type="button" class="${classes}" ${position} data-map-key="${code}" data-focus="map-${code}" ${positioned ? 'aria-describedby="keyboardNavHelp"' : ""} aria-pressed="${code === this.selectedCode}" aria-label="${esc(name)}: ${esc(description)}. Select to configure."><strong>${esc(label)}</strong><small>${esc(caption)}</small>${entries.some(entry => entry.chord.length > 1) ? '<i class="key-shortcut" title="Uses a shortcut" aria-hidden="true">＋</i>' : ""}</button>`;
     };
-    const shown = new Set([...KEYBOARD_ROWS.flat(), ...POINTER_CODES]);
-    const extras = [...mapped.keys()].filter(code => !shown.has(code));
-    return `<details class="keyboard-layout" ${this.layoutOpen ? "open" : ""}><summary><span><strong>Your keyboard & pointer map</strong><small>Choose a lit key to change its action</small></span><span class="layout-legend" aria-hidden="true"><i></i> Controls <i></i> Weapons</span></summary><div class="keyboard-body"><div class="keyboard-rows" aria-label="Current keyboard bindings, QWERTY positions">${KEYBOARD_ROWS.map((row, index) => `<div class="keyboard-row keyboard-row-${index}">${row.map(code => key(code)).join("")}</div>`).join("")}</div><div class="pointer-map"><div class="pointer-map-title"><strong>${current().pointingDevice === "trackpad" ? "Trackpad or mouse movement" : "Mouse or trackpad movement"}</strong><span>Aim the nose · no click needed</span></div><div class="pointer-buttons" aria-label="Current mouse and wheel bindings">${POINTER_CODES.map(code => key(code)).join("")}</div></div>${extras.length ? `<div class="layout-extra"><span>Additional inputs</span>${extras.map(code => key(code, true)).join("")}</div>` : ""}<p class="layout-reference">QWERTY key positions · ⌥ Option · ⌃ Control · ⇧ Shift · ⌘ Command. Select a key for its complete shortcut.</p><section class="layout-inspector" aria-label="Selected control">${this._layoutInspectorHtml()}</section></div></details>`;
+    const extras = [...mapped.keys()].filter(code => !KEYBOARD_CODES.has(code) && !POINTER_CODES.includes(code));
+    return `<details class="keyboard-layout" ${this.layoutOpen ? "open" : ""}><summary><span><strong>Your keyboard. Your cockpit.</strong><small>Choose any key to explore your controls</small></span><span class="keyboard-layout-tag">MacBook · US QWERTY</span></summary><div class="keyboard-body${this.mapTesting ? ' rehearsing' : ''}"><div class="keyboard-main"><div class="map-toolbar"><div class="map-filters" role="group" aria-label="Highlight keyboard actions">${Object.entries(MAP_CATEGORIES).map(([cat,label])=>`<button type="button" class="cat-${cat}" data-map-filter="${cat}" aria-pressed="${this.mapFilter===cat}">${cat!=="all"&&cat!=="available"?'<i aria-hidden="true"></i>':""}${label}</button>`).join("")}</div><button type="button" class="map-test-button" data-map-test data-focus="map-test" aria-pressed="${this.mapTesting}">${this.mapTesting ? "Finish rehearsal" : "Rehearse keys"}<span aria-hidden="true">${this.mapTesting ? "■" : "▷"}</span></button></div>${this.mapTesting ? '<div class="map-test-readout"><div><span>SAFE REHEARSAL · FLIGHT STAYS PAUSED</span><strong id="mapTestKeys">Press keys on your keyboard</strong><p id="mapTestActions">Nothing fires or moves.</p></div><output id="mapTestLast" aria-live="polite">Your last input will stay here.</output><small>Press your real keys, or use mouse buttons over the keyboard. Tab leaves this area. Esc finishes.</small></div>' : ''}<span class="map-sr-only" data-map-selection-status role="status" aria-live="polite"></span><p class="map-navigation-help" id="keyboardNavHelp">Arrow keys explore · Enter edits · Home / End jump to the first / last key</p><div class="keyboard-viewport"><div class="keyboard-stage" tabindex="${this.mapTesting ? '0' : '-1'}" role="group" aria-label="${this.mapTesting ? 'Safe keyboard rehearsal. Press real keys. Tab leaves. Escape finishes.' : 'Visual keyboard'}"><div class="keyboard-board" style="aspect-ratio:${KEYBOARD_BOUNDS.width}/${KEYBOARD_BOUNDS.height}">${KEYBOARD_KEYS.map(d=>key(d,true)).join("")}</div></div></div><p class="map-scroll-hint">Swipe sideways to explore the full keyboard.</p><div class="pointer-map"><div class="pointer-map-title"><strong>${current().pointingDevice === "trackpad" ? "Trackpad + keyboard" : "Mouse + keyboard"}</strong><span>Move to aim · no click or drag needed</span></div><div class="pointer-buttons" aria-label="Mouse and wheel bindings">${POINTER_CODES.map(code=>key(keyDescriptor(code))).join("")}</div></div>${extras.length ? `<div class="layout-extra"><span>Other keys & devices</span>${extras.map(code=>key(keyDescriptor(code))).join("")}</div>` : ""}<p class="layout-reference">⌥ Option · ⌃ Control · ⇧ Shift · ⌘ Command. Physical US key positions; your saved bindings stay the same. F1–F12 may need Fn. Fn and Touch ID are managed by macOS. <span class="map-state-legend">Solid outline: selected · Dotted: alternate · Dashed: required modifier · ＋: shortcut</span></p></div><section class="layout-inspector" aria-label="Selected control">${this._layoutInspectorHtml()}</section></div></details>`;
   }
   _controlsHtml() {
     const settings = current();
     const trackpad = settings.pointingDevice === "trackpad";
     const gain = trackpad ? "trackpadSensitivity" : "mouseSensitivity";
-    return `<div class="setup-controls-top"><div class="setup-intro"><span class="setup-kicker">YOUR AIRCRAFT. YOUR CONTROLS.</span><h2>A few keys. The whole sky.</h2><p>Aim with a mouse or one finger on your trackpad. Your keyboard handles the rest.</p></div><div class="setup-controls-actions"><button class="setup-button" data-action="keys">Edit keys <span aria-hidden="true">↓</span></button><button class="setup-button" data-focus="test-controls" data-action="test">${this.testing ? "Finish testing" : "Test your controls"}<span aria-hidden="true">↗</span></button></div></div>
+    return `<div class="setup-controls-top"><div class="setup-intro"><span class="setup-kicker">YOUR AIRCRAFT. YOUR CONTROLS.</span><h2>Make the cockpit yours.</h2><p>Explore the keys, make them your own, then find your aiming feel.</p></div><div class="setup-controls-actions"><button class="setup-button" data-action="keys">Edit keys <span aria-hidden="true">↓</span></button><button class="setup-button" data-focus="test-controls" data-action="test">${this.testing ? "Finish testing" : "Test your controls"}<span aria-hidden="true">↗</span></button></div></div>
+      ${this._keyboardHtml()}
       <section class="setup-device" aria-label="Aiming setup"><div class="device-heading"><strong>Choose your aiming feel</strong><span>Each sensitivity saves separately. Your keys stay the same.</span></div><div class="device-options" role="group" aria-label="Pointing device">${[["mouse", "Mouse + keyboard", "Full-range aiming · click or use a key to fire"], ["trackpad", "MacBook trackpad + keyboard", "Gentler aiming · steer without clicking or dragging"]].map(([id,title,note]) => `<button type="button" data-device="${id}" data-focus="device-${id}" aria-pressed="${settings.pointingDevice === id}"><span class="device-check" aria-hidden="true">${settings.pointingDevice === id ? "✓" : "○"}</span><span><strong>${title}</strong><small>${note}</small></span></button>`).join("")}</div><p class="device-note">${trackpad ? "Slide one finger to steer; lift and reposition between strokes. Use a keyboard binding for cannon fire. Two fingers scroll menus." : "Move the mouse to steer. Use your cannon binding to fire; add a mouse button or keyboard alternate below."} Both devices work in either profile; switch here to use their saved sensitivity.</p></section>
       ${this._aimPresetsHtml()}<div class="setup-mouse-card">${this._slider(gain, trackpad ? "Trackpad sensitivity" : "Mouse sensitivity", "Fine-tune your feel. Your other device keeps its own setting.", 0.35, 2, 0.05, settings[gain])}${this._toggle("invertY", "Invert vertical aim", "Move up to aim the nose down.", settings.invertY)}</div>
       ${this.testing ? `<div class="input-test" tabindex="0" role="group" aria-label="Controls test area. Move your pointer, press keys or click here. Escape ends the test."><div class="test-heading"><span class="setup-kicker">SAFE INPUT TEST</span><span>Flight stays paused · Esc to finish</span><button type="button" class="setup-text-button" data-test-recenter>Center preview</button></div><div class="aim-test-surface" aria-label="Aim preview"><span class="aim-test-center" aria-hidden="true"></span><span class="aim-test-target" hidden aria-hidden="true"></span><span class="aim-test-dot" aria-hidden="true"></span><output class="aim-test-reading">Move here to try your sensitivity</output></div><div class="aim-exercise"><output data-aim-exercise-status aria-live="polite">Want to check your feel? Gently follow five targets.</output><button type="button" class="setup-button" data-test-targets>Try aim targets</button></div><strong id="testKeys">Press a key or mouse button</strong><p id="testActions">See which action your input triggers. Nothing fires or moves.</p><div class="test-last-input"><span>LAST INPUT</span><output id="testLastInput" aria-live="polite">Tap a key to keep its result here.</output></div></div>` : ""}
       <details class="setup-controller-options"><summary>Controller aiming</summary>${this._slider("gamepadSensitivity", "Right-stick sensitivity", "Independent of mouse and trackpad aiming. Vertical inversion applies to all devices.", 0.35, 2, 0.05, settings.gamepadSensitivity)}</details>
-      ${this._keyboardHtml()}
       <div class="setup-binding-layout"><aside class="setup-categories" aria-label="Control categories">${Object.entries(CATEGORIES).map(([id, label]) => `<button data-category="${id}" data-focus="category-${id}" class="${this.category === id ? "selected" : ""}" aria-pressed="${this.category === id}">${label}<span>${this._categoryCount(id)}</span></button>`).join("")}<div class="controller-card"><span class="controller-light"></span><strong id="controllerTitle">Keyboard & mouse ready</strong><small id="controllerDetail">Connect a standard controller and press a button to detect it.</small></div><button class="setup-text-button" data-action="reset-binds">Restore default keys</button></aside>
       <section class="setup-bindings"><div class="bindings-toolbar"><label class="setup-search"><span aria-hidden="true">⌕</span><input id="controlSearch" type="search" value="${esc(this.query)}" placeholder="Find an action or key…" aria-label="Search control actions or keys"></label><span id="bindingCount"></span></div><div id="bindingRows">${this._rowsHtml()}</div><p class="bindings-help">Click a key to change it. <strong>+ Add key</strong> keeps your current binding. Escape always opens the flight menu.</p></section></div>`;
   }
@@ -435,6 +496,7 @@ export class ControlsMenu {
     const modal = this.el.querySelector(".setup-modal");
     this.el.querySelector('.setup-shell').inert=!!modal;
     if (modal) modal.querySelector(FOCUSABLE)?.focus();
+    else if (this.mapTesting) this.el.querySelector(".keyboard-stage")?.focus({preventScroll:true});
     else if (this.testing) this.el.querySelector(".input-test")?.focus();
     else if (oldFocus) this.el.querySelector(`[data-focus="${oldFocus}"]`)?.focus({ preventScroll: true });
   }
@@ -449,6 +511,26 @@ export class ControlsMenu {
     this.el.querySelectorAll("[data-restore-action]").forEach(button => button.addEventListener("click", () => this._beginRestore(button.dataset.restoreAction)));
   }
   _wireLayoutInspector() {
+    this.el.querySelectorAll("[data-map-related-code]").forEach(button=>button.onclick=()=> {
+      this._selectMapKey(button.dataset.mapRelatedCode);
+      const key=this.el.querySelector(`[data-map-key="${this.selectedCode}"]`);
+      key?.scrollIntoView({block:"nearest",inline:"nearest"}); key?.focus({preventScroll:true});
+    });
+    const picker=this.el.querySelector("#mapAssignAction"), assign=this.el.querySelector("[data-map-assign]");
+    if (picker && assign) {
+      picker.onchange=()=> {
+        const action=this.input.actions[picker.value];
+        assign.disabled=!action;
+        this.el.querySelector("[data-map-assign-preview]").textContent=action ? `${action.label} will also use ${keyName(this.selectedCode)}. ${action.binds.length ? "Your existing keys stay assigned." : "This gives the action its first key."}` : "Existing keys stay assigned. Up to four bindings per action.";
+      };
+      assign.onclick=()=> {
+        const id=picker.value, action=this.input.actions[id];
+        if (!action || action.binds.length>=4 || picker.selectedOptions[0]?.disabled || this.selectedCode==="Escape") return;
+        const chord=[this.selectedCode];
+        this._beginCapture(id,action.binds.length,`map-${this.selectedCode}`);
+        this._offer(chord);
+      };
+    }
     this.el.querySelectorAll("[data-layout-edit]").forEach(button => button.addEventListener("click", () => this._beginCapture(button.dataset.layoutEdit, Number(button.dataset.slot), button.dataset.focus)));
     this.el.querySelectorAll("[data-layout-add]").forEach(button => button.addEventListener("click", () => this._beginCapture(button.dataset.layoutAdd, this.input.actions[button.dataset.layoutAdd].binds.length, button.dataset.focus)));
     this.el.querySelectorAll('[data-action="all-keys"]').forEach(button => button.addEventListener("click", () => { const search = this.el.querySelector("#controlSearch"); search?.scrollIntoView({block:"center"}); search?.focus({preventScroll:true}); }));
@@ -456,15 +538,23 @@ export class ControlsMenu {
   _wire() {
     this._wireRows();
     this._wireLayoutInspector();
-    this.el.querySelector(".keyboard-layout")?.addEventListener("toggle", event => { this.layoutOpen = event.target.open; });
-    this.el.querySelectorAll("[data-map-key]").forEach(button => button.addEventListener("click", () => {
-      this.selectedCode = button.dataset.mapKey;
-      this.el.querySelectorAll("[data-map-key]").forEach(key => key.setAttribute("aria-pressed", String(key.dataset.mapKey === this.selectedCode)));
-      const inspector = this.el.querySelector(".layout-inspector");
-      inspector.innerHTML = this._layoutInspectorHtml(); this._wireLayoutInspector();
-      inspector.scrollIntoView({ block: "nearest" });
-      inspector.querySelector("button")?.focus({ preventScroll: true });
-    }));
+    this.el.querySelector(".keyboard-layout")?.addEventListener("toggle", event => {
+      this.layoutOpen = event.target.open;
+      if (!this.layoutOpen && this.mapTesting) { this.mapTesting=false; this.testDown.clear(); this._render(); this.el.querySelector(".keyboard-layout > summary")?.focus(); }
+    });
+    this.el.querySelectorAll("[data-map-key]").forEach(button => button.addEventListener("click", () => { if (!this.mapTesting) this._selectMapKey(button.dataset.mapKey); }));
+    this.el.querySelectorAll("[data-map-filter]").forEach(button=>button.onclick=()=>{ this.mapFilter=button.dataset.mapFilter; this._refreshMapHighlights(); });
+    this._refreshMapHighlights();
+    this.el.querySelector("[data-map-test]")?.addEventListener("click",()=> {
+      this.mapTesting=!this.mapTesting; this.testing=false; this.testDown.clear(); this.lastTest=null;
+      this.mapFilter="all"; this._render("map-test");
+      this.el.querySelector(".keyboard-layout")?.scrollIntoView({block:"start"});
+    });
+    const stage=this.el.querySelector(".keyboard-stage");
+    stage?.addEventListener("focusout",event=> {
+      if (!stage.contains(event.relatedTarget)) { this.testDown.clear(); queueMicrotask(()=>this._updateTest()); }
+    });
+    stage?.addEventListener("focusin",()=>this._updateTest());
     this.el.querySelectorAll("[data-aim-preset]").forEach(button => button.addEventListener("click", () => {
       const state = aimPresetState(current()), preset = state.presets.find(item => item.id === button.dataset.aimPreset);
       const settings = saveSettings({ [state.key]: preset.value });
@@ -476,6 +566,7 @@ export class ControlsMenu {
       this._updateStorageStatus();
     }));
     this.el.querySelectorAll("[data-device]").forEach((button) => button.addEventListener("click", () => {
+      this.mapTesting=false; this.testDown.clear();
       const settings = saveSettings({ pointingDevice: button.dataset.device });
       this.input.setOptions(getAimOptions(settings));
       this.notice = storageAvailable() ? `${settings.pointingDevice === "trackpad" ? "Trackpad" : "Mouse"} aiming selected. Your control keys are unchanged.` : "Aiming updated for this session. Browser storage is unavailable.";
@@ -534,9 +625,9 @@ export class ControlsMenu {
     this.el.querySelectorAll("[data-action]").forEach((button) => button.addEventListener("click", () => {
       const action = button.dataset.action;
       if (action === "close") this.close();
-      else if (action === "keys") { const layout = this.el.querySelector(".keyboard-layout"); layout.open = true; this.layoutOpen = true; layout.scrollIntoView({block:"start"}); layout.querySelector("summary").focus({preventScroll:true}); }
+      else if (action === "keys") { this.mapTesting=false; this.testDown.clear(); this._render(); const layout = this.el.querySelector(".keyboard-layout"); layout.open = true; this.layoutOpen = true; layout.scrollIntoView({block:"start"}); layout.querySelector("summary").focus({preventScroll:true}); }
       else if (action === "all-keys") { /* wired with the replaceable map inspector */ }
-      else if (action === "test") { this.testing = !this.testing; this.testDown.clear(); this.lastTest = null; this._render("test-controls"); }
+      else if (action === "test") { this.mapTesting=false; this.testing = !this.testing; this.testDown.clear(); this.lastTest = null; this._render("test-controls"); }
       else if (action === "missing") this._showMissing();
       else if (action === "undo-keys") {
         const label = this.history.undo();
@@ -545,8 +636,8 @@ export class ControlsMenu {
       }
       else { this.confirming = action === "reset-binds" ? "binds" : "settings"; this._render(); }
     }));
-    this.el.querySelectorAll("[data-tab]").forEach((button) => button.addEventListener("click", () => { this.tab = button.dataset.tab; this.testing = false; this.notice = ""; this._render(`tab-${this.tab}`); }));
-    this.el.querySelectorAll("[data-category]").forEach((button) => button.addEventListener("click", () => { this.category = button.dataset.category; this.query = ""; this.testing = false; this._render(`category-${this.category}`); }));
+    this.el.querySelectorAll("[data-tab]").forEach((button) => button.addEventListener("click", () => { this.tab = button.dataset.tab; this.testing = this.mapTesting = false; this.testDown.clear(); this.notice = ""; this._render(`tab-${this.tab}`); }));
+    this.el.querySelectorAll("[data-category]").forEach((button) => button.addEventListener("click", () => { this.category = button.dataset.category; this.query = ""; this.testing = this.mapTesting = false; this.testDown.clear(); this._render(`category-${this.category}`); }));
     this.el.querySelector("#controlSearch")?.addEventListener("input", (event) => {
       this.query = event.target.value; this.el.querySelector("#bindingRows").innerHTML = this._rowsHtml(); this._wireRows(); this._updateCount();
     });
@@ -606,21 +697,30 @@ export class ControlsMenu {
   }
   _updateCount() { const node = this.el.querySelector("#bindingCount"); if (node) node.textContent = `${this._visibleActions().length} actions`; }
   _updateTest(trigger) {
-    if (!this.testing) return;
-    const keyNode = this.el.querySelector("#testKeys"), actionNode = this.el.querySelector("#testActions");
-    if (!keyNode || !actionNode) return;
-    keyNode.textContent = this.testDown.size ? [...this.testDown].map(keyName).join(" + ") : "Press a key or mouse button";
+    this.el.querySelectorAll?.("[data-map-key]").forEach(key => key.classList.toggle("key-held", this.testDown.has(key.dataset.mapKey)));
+    if (!this.testing && !this.mapTesting) return;
     const ids = new Set(trigger ? this.input.matchingActions(trigger, this.testDown) : []);
     for (const [id, action] of Object.entries(this.input.actions)) if (action.hold && this.input.keyboardHeld(id, this.testDown)) ids.add(id);
-    actionNode.textContent = ids.size ? [...ids].map((id) => this.input.actions[id].label).join(" · ") : this.testDown.size ? "No action uses this input. Assign it in the list below." : "No keys held. Nothing fires or moves.";
+    const keys = this.testDown.size ? [...this.testDown].map(keyName).join(" + ") : "Press a key or mouse button";
+    const actions = ids.size ? [...ids].map(id=>this.input.actions[id].label).join(" · ") : this.testDown.size ? "No action uses this input." : "No keys held. Nothing fires or moves.";
     if (trigger) {
       const chord = [...this.testDown].filter(code => MODS.has(code) && code !== trigger).concat(trigger);
       const triggered = this.input.matchingActions(trigger, this.testDown);
       this.lastTest = `${chordName(chord)} → ${triggered.length ? triggered.map(id => this.input.actions[id].label).join(" · ") : "No action assigned"}`;
     }
-    const lastNode = this.el.querySelector("#testLastInput");
-    if (lastNode) lastNode.textContent = this.lastTest || "Tap a key to keep its result here.";
-    this.el.querySelectorAll?.("[data-map-key]").forEach(key => key.classList.toggle("key-held", this.testDown.has(key.dataset.mapKey)));
+    if (this.testing) {
+      const keyNode=this.el.querySelector("#testKeys"), actionNode=this.el.querySelector("#testActions"), lastNode=this.el.querySelector("#testLastInput");
+      if (keyNode) keyNode.textContent=keys;
+      if (actionNode) actionNode.textContent=actions;
+      if (lastNode) lastNode.textContent=this.lastTest || "Tap a key to keep its result here.";
+    }
+    if (this.mapTesting) {
+      const focused=this.el.querySelector(".keyboard-stage")?.contains(document.activeElement);
+      const keyNode=this.el.querySelector("#mapTestKeys"), actionNode=this.el.querySelector("#mapTestActions"), lastNode=this.el.querySelector("#mapTestLast");
+      if (keyNode) keyNode.textContent=focused ? keys : "Rehearsal paused · click the keyboard to continue";
+      if (actionNode) actionNode.textContent=actions;
+      if (lastNode) lastNode.textContent=this.lastTest || "Your last input will stay here.";
+    }
   }
   _updateController() {
     const title = this.el.querySelector("#controllerTitle"), detail = this.el.querySelector("#controllerDetail");
@@ -639,6 +739,7 @@ export class ControlsMenu {
     window.removeEventListener("keydown", this._keyDown, true); window.removeEventListener("keyup", this._keyUp, true);
     window.removeEventListener("mousedown", this._mouseDown, true); window.removeEventListener("mouseup", this._mouseUp, true);
     window.removeEventListener("wheel", this._wheel, true); window.removeEventListener("blur", this._blur);
+    document.removeEventListener("visibilitychange", this._visibility);
     clearTimeout(this._testWheelTimeout); clearTimeout(this._aimHoldTimeout); this.el.remove();
   }
 }

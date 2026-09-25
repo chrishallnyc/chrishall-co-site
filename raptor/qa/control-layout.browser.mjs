@@ -43,13 +43,14 @@ try {
     await map('KeyW').click();
     assert.match(await page.locator('.layout-inspector').textContent(), /Increase throttle/);
     await page.locator('[data-layout-edit="throttle_up"]').click(); await page.keyboard.press('u');
-    assert.equal(await map('KeyW').count(), 0);
+    assert.equal(await map('KeyW').count(), 1);
+    assert.match(await map('KeyW').getAttribute('aria-label'), /Unused/);
     assert.match(await map('KeyU').getAttribute('aria-label'), /Increase throttle/);
     assert.equal(await page.locator('[data-layout-edit="throttle_up"]').evaluate(el => el === document.activeElement), true);
     await page.screenshot({path:out+'02-keyboard-map.png'});
     await page.locator('[data-action="undo-keys"]').click();
     assert.equal(await map('KeyW').count(), 1);
-    assert.equal(await map('KeyU').count(), 0);
+    assert.match(await map('KeyU').getAttribute('aria-label'), /Unused/);
   });
   await check('map edits preserve conflict choices, exact alternate slots and Escape recovery', async () => {
     await map('KeyF').click();
@@ -65,12 +66,13 @@ try {
     await page.locator('[data-layout-edit="fire_mguns"]').click(); await page.keyboard.press('j');
     assert.deepEqual(await page.evaluate(() => testInput.actions.fire_mguns.binds), [['KeyG'], ['KeyJ'], ['Digit1']]);
     await map('Escape').click();
-    assert.match(await page.locator('.layout-inspector').textContent(), /Always available/);
+    assert.match(await page.locator('.layout-inspector').textContent(), /always (?:stays )?available/i);
     assert.equal(await page.locator('[data-layout-edit="menu"]').count(), 0);
   });
   await check('shortcut keys expose the complete chord without making modifiers a false action', async () => {
     await map('KeyZ').click();
-    assert.match(await map('KeyZ').textContent(), /⌥ \+ Z/);
+    assert.equal(await map('KeyZ').locator('strong').textContent(), 'Z');
+    assert.equal(await map('KeyZ').locator('.key-shortcut').count(), 1);
     assert.match(await page.locator('.layout-inspector').textContent(), /Left Alt \/ Option \+ Z.*hold the full shortcut/);
     await page.reload({waitUntil:'networkidle'});
     assert.match(await map('KeyJ').getAttribute('aria-label'), /Fire cannon/);
@@ -84,20 +86,21 @@ try {
     await page.locator('[data-action="all-keys"]').click();
     assert.equal(await page.locator('#controlSearch').evaluate(el => el === document.activeElement), true);
     await page.locator('[data-action="undo-keys"]').click();
-    assert.equal(await map('KeyK').count(), 0);
+    assert.match(await map('KeyK').getAttribute('aria-label'), /Unused/);
   });
   await check('custom shortcuts outside the laptop map remain visible, searchable and focusable', async () => {
     await map('Backquote').click();
-    await page.locator('[data-layout-edit="debug"]').click(); await page.keyboard.press('Shift+F6');
-    assert.match(await page.locator('.layout-extra [data-map-key="F6"]').textContent(), /⇧ \+ F6/);
-    assert.match(await page.locator('.layout-inspector').textContent(), /Left Shift \+ F6/);
+    await page.locator('[data-layout-edit="debug"]').click(); await page.keyboard.press('Shift+PageUp');
+    assert.equal(await page.locator('.layout-extra [data-map-key="PageUp"] strong').textContent(), 'PageUp');
+    assert.equal(await map('PageUp').locator('.key-shortcut').count(), 1);
+    assert.match(await page.locator('.layout-inspector').textContent(), /Left Shift \+ PageUp/);
     assert.equal(await page.locator('[data-layout-edit="debug"]').evaluate(el => el === document.activeElement), true);
     await page.locator('[data-layout-edit="debug"]').click(); await page.keyboard.press('Escape');
     assert.equal(await page.locator('[data-layout-edit="debug"]').evaluate(el => el === document.activeElement), true);
-    await page.locator('[data-action="all-keys"]').click(); await page.locator('#controlSearch').fill('F6');
+    await page.locator('[data-action="all-keys"]').click(); await page.locator('#controlSearch').fill('PageUp');
     assert.equal(await page.locator('[data-action-id]').getAttribute('data-action-id'), 'debug');
     await page.locator('[data-action="undo-keys"]').click();
-    assert.equal(await map('F6').count(), 0);
+    assert.equal(await map('PageUp').count(), 0);
     await page.locator('#controlSearch').fill('');
   });
   await check('guided pointer exercise reacts to actual motion while keyboard input remains isolated', async () => {
