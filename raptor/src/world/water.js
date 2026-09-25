@@ -10,7 +10,7 @@
 import * as THREE from "three";
 import { surfaceVelocityMRT } from "./surfacevelocitymrt.js";
 import {
-  Fn, uniform, texture, vec2, vec3, float, positionLocal, positionWorld,
+  Fn, If, uniform, texture, vec2, vec3, float, positionLocal, positionWorld,
   modelWorldMatrix, vec4, normalize, clamp, smoothstep, mix, sin, cos, dot,
   fract, floor, cameraPosition, dFdx, dFdy, max, pow, sqrt, luminance,
   log2, exp2, abs, cameraViewMatrix, attribute, output, varyingProperty,
@@ -130,6 +130,11 @@ export class Water {
       const inMap = smoothstep(float(HALF), float(HALF - 2000), max(abs(wp.x), abs(wp.z)));
       return mix(float(shore.maxDist), raw, inMap);
     };
+
+    // Reuse the same physical receiver distance across fragment consumers.
+    // Vertex displacement keeps its own pre-displacement shoreline lookup.
+    const fragmentShoreDistance = Fn(() => shoreDist(mapPosition))()
+      .toVar("waterShoreDistance");
 
     // value noise (same idiom as terrain.js): foam ribbons + micro-gust fields
     const hash2 = (p) => fract(sin(dot(p, vec2(127.1, 311.7))).mul(43758.5453));
@@ -287,7 +292,7 @@ export class Water {
 
     const flatNormal = Fn(() => {
       const wp = mapPosition;
-      const shoreDamp = smoothstep(0.0, 120.0, shoreDist(wp)).mul(S.normalK);
+      const shoreDamp = smoothstep(0.0, 120.0, fragmentShoreDistance).mul(S.normalK);
       if (slopeMoments) {
         // Means follow the same physical FFT coordinates as displacement.
         // The filter carries subpixel variance separately into roughness;
@@ -368,7 +373,7 @@ export class Water {
       // anchored, and continues seamlessly onto the shared-material skirt.
       mat.roughnessNode = Fn(() => {
         const wp = mapPosition;
-        const microDamp = smoothstep(0.0, 120.0, shoreDist(wp));
+        const microDamp = smoothstep(0.0, 120.0, fragmentShoreDistance);
         if (slopeMoments) {
           // E[|s|²] - |E[s]|² is exactly the trace of the filtered slope
           // covariance. Scale variance by damp², consistently with normals.
@@ -406,34 +411,36 @@ export class Water {
       // noise so no straight texel edge survives, then cut the foam as a
       // noise-broken advected ribbon instead of a uniform speckled stripe.
       const t = this.uTime;
-      const sdRaw = shoreDist(wp);
-      const wob = vnoise(wp.xz.div(90.0).add(vec2(t.mul(0.015), t.mul(-0.011)))).sub(0.5).mul(70.0)
-        .add(vnoise(wp.xz.div(28.0)).sub(0.5).mul(22.0));
-      const sd = sdRaw.add(wob);
-      let c = mix(vec3(shallowC.r, shallowC.g, shallowC.b), vec3(deepC.r, deepC.g, deepC.b),
-                  smoothstep(20.0, 520.0, sd));
-      // foam terms wear the same radial edge fade as the displacement, or the
-      // speckle pattern hard-stops at the sheet rim (measured energy cliff)
+      const sdRaw = fragmentShoreDistance;
+      const c = vec3(deepC.r, deepC.g, deepC.b).toVar("waterBaseColor");
+      const shoreFoam = float(0).toVar("waterShoreFoam");
+      // Both value noises lie in [0,1], so wobble lies in [-46,46] m.
+      // Beyond 520+46 m, shallow color is exactly deep and the foam band
+      // is exactly zero. Keep the original expression order inside shore
+      // support; offshore pixels need none of the five noise evaluations.
+      If(sdRaw.lessThan(566.0), () => {
+        const wob = vnoise(wp.xz.div(90.0).add(vec2(t.mul(0.015), t.mul(-0.011)))).sub(0.5).mul(70.0)
+          .add(vnoise(wp.xz.div(28.0)).sub(0.5).mul(22.0));
+        const sd = sdRaw.add(wob);
+        c.assign(mix(vec3(shallowC.r, shallowC.g, shallowC.b), vec3(deepC.r, deepC.g, deepC.b),
+                    smoothstep(20.0, 520.0, sd)));
+        const band = smoothstep(this.state.foamShore, 6.0, sd);
+        const camDist = wp.sub(cameraPosition).length();
+        const fn1 = vnoise(wp.xz.div(60.0).add(vec2(t.mul(0.030), t.mul(0.021))));
+        const fn2 = vnoise(wp.xz.div(21.0).add(vec2(t.mul(-0.050), t.mul(0.033))));
+        const fn3 = vnoise(wp.xz.div(7.5).add(vec2(t.mul(0.080), t.mul(-0.060))));
+        const fnoise = fn1.mul(0.5).add(fn2.mul(0.32)).add(fn3.mul(smoothstep(4000.0, 1200.0, camDist).mul(0.18)));
+        shoreFoam.assign(smoothstep(float(0.62).sub(band.mul(0.34)), float(0.88).sub(band.mul(0.26)), fnoise)
+          .mul(band).mul(fn2.mul(0.35).add(0.65)));
+      });
       const edgeFadeC = smoothstep(15800.0, 9000.0, positionLocal.xz.length());
-      // advected foam ribbon: band strength biases the noise threshold, so
-      // the waterline is near-solid froth that breaks into tapered fingers
-      // and dissolves seaward — never a stripe with a hard seaward chop
-      const band = smoothstep(this.state.foamShore, 6.0, sd);
-      const camDist = wp.sub(cameraPosition).length();
-      const fn1 = vnoise(wp.xz.div(60.0).add(vec2(t.mul(0.030), t.mul(0.021))));
-      const fn2 = vnoise(wp.xz.div(21.0).add(vec2(t.mul(-0.050), t.mul(0.033))));
-      const fn3 = vnoise(wp.xz.div(7.5).add(vec2(t.mul(0.080), t.mul(-0.060))));
-      // the 7.5m octave goes sub-pixel past ~2km — retire it before it dithers
-      const fnoise = fn1.mul(0.5).add(fn2.mul(0.32)).add(fn3.mul(smoothstep(4000.0, 1200.0, camDist).mul(0.18)));
-      const shoreFoam = smoothstep(float(0.62).sub(band.mul(0.34)), float(0.88).sub(band.mul(0.26)), fnoise)
-        .mul(band).mul(fn2.mul(0.35).add(0.65));
       // crest foam: FFT mode uses the compute-side Jacobian accumulation via
       // the same phase-jittered 4-tap field as the normals (mip-less — fade
       // by footprint before its texels dither into confetti)
       const crest = slopeMoments ? slopeMoments.w.mul(.75) : fft
         ? slopeFoam(wp).foam.mul(smoothstep(10.0, 2.5, footprint(wp))).mul(0.75)
         : smoothstep(0.55, 0.95, gerstner(wp).nyAcc).mul(0.6);
-      c = mix(c, vec3(0.92, 0.95, 0.96), clamp(shoreFoam.add(crest), 0.0, 0.85).mul(edgeFadeC));
+      c.assign(mix(c, vec3(0.92, 0.95, 0.96), clamp(shoreFoam.add(crest), 0.0, 0.85).mul(edgeFadeC)));
       return c;
     })();
     // `output` contains complete direct diffuse/specular + environment

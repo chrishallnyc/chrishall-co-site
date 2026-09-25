@@ -1048,13 +1048,31 @@ async function boot() {
   if (atmoH) atmoH.uCamPos.value.copy(camera.position);
   atmosphere.update(camera);
   aircraftLighting.update(world.jet, terrain);
+  // Publish the final water environment before compiling the main graph.
+  // Publishing it later replaces envNode and recompiles the water material.
+  if (waterSkyEnvironment && waterSkyEnvironment.front < 0) {
+    try { waterSkyEnvironment.warmUp(camera, 0); }
+    catch (err) {
+      console.warn("Water environment warmup failed; existing scene IBL remains:", err && err.message);
+      waterSkyEnvironment.dispose(); waterSkyEnvironment = null;
+    }
+  }
   renderer.toneMappingExposure=atmosphere.exposure;
   if (!post) await renderer.compileAsync(scene,camera);
   // Real draws cover the post graph's own MRT, temporal and shadow variants.
   // No physics, input, audio or weapon effects advance during this warmup.
   for(let pass=0;pass<2;pass++) {
     await new Promise(requestAnimationFrame);
-    if(post)post.post.render();else renderer.render(scene,camera);
+    // Compile the real celestial MRT variants under the loading veil.
+    // Dusk should change uniforms, not stall the first visible night frame.
+    const celestial = pass === 0 ? [atmosphere.stars.points, atmosphere.stars.moon] : [];
+    const visibility = celestial.map(object => object.visible);
+    for (const object of celestial) object.visible = true;
+    try {
+      if(post)post.post.render();else renderer.render(scene,camera);
+    } finally {
+      celestial.forEach((object, i) => { object.visible = visibility[i]; });
+    }
     curvature?.endFrame();
     if (pass === 0) {
       curvature?.beginFrame(camera);
