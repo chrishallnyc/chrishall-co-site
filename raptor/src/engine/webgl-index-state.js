@@ -12,6 +12,7 @@ const installed = new WeakSet();
 export function installWebGLIndexStateGuard(renderer) {
   const backend = renderer.backend;
   if (REVISION !== '185' || !backend?.isWebGLBackend || installed.has(backend)) return false;
+  if (!backend.state?.resetVertexState || !backend.createIndexAttribute || !backend.updateAttribute) return false;
   const create = backend.createIndexAttribute;
   const update = backend.updateAttribute;
   backend.createIndexAttribute = function (attribute) {
@@ -19,7 +20,8 @@ export function installWebGLIndexStateGuard(renderer) {
     return create.call(this, attribute);
   };
   backend.updateAttribute = function (attribute) {
-    if (this.get(attribute).bufferType === this.gl.ELEMENT_ARRAY_BUFFER)
+    const storage = attribute.isInterleavedBufferAttribute ? attribute.data : attribute;
+    if (this.get(storage).bufferType === this.gl.ELEMENT_ARRAY_BUFFER)
       this.state.resetVertexState();
     return update.call(this, attribute);
   };

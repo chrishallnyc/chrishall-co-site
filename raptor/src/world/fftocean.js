@@ -1,6 +1,8 @@
 // FFT ocean — Tessendorf spectral water in TSL compute (MAXFI A4, v1: one
 // 256² cascade). createFFTOcean() returns GPU-resident displacement and
 // normal/foam maps regenerated per frame by a 19-dispatch compute chain.
+// Displacement and slope-moment mips are generated after compute. The latter
+// preserve unresolved wave variance for filtered fragment normals/roughness.
 // water.js (Gerstner) stays untouched as the WebGL2/LOW fallback. House
 // pattern per hillaire.js: the CPU reference (cpuIFFT2D — the same Stockham
 // radix the GPU butterflies run, pure JS) and spectrum stats are exported for
@@ -14,6 +16,8 @@
 //            uv = worldXZ / tileM (+u = +x world, +v = +z world).
 //   normTex  RGBA16F N×N storage: xyz = world-space normal (y-up),
 //            a = foam 0..1 (Jacobian whitecaps, accumulated with decay).
+//   slopeMomentTex RGBA16F: (normal.x/normal.y, normal.z/normal.y,
+//            squared slope length, foam); linear mip chain preserves moments.
 //   update(timeSec) submits the compute chain (call once per render frame;
 //            zero per-frame JS allocations). First call compiles 19 pipelines
 //            through Dawn — warm it once behind the loading veil.
@@ -70,6 +74,8 @@
 //   batches all dispatches into one submit.
 
 import * as THREE from "three";
+import { createFineOcean } from "./oceanfine.js";
+import { OceanClock, oceanPrincipalPhase } from "./oceanclock.js";
 import {
   Fn, uniform, textureStore, textureLoad, instanceIndex,
   float, int, uint, vec3, vec4, ivec2,
@@ -245,7 +251,7 @@ function buildH0(front, N, tileM, seed) {
 // cpuSpectrumStats — QA oracle: Hs realized from the h0 field, peak
 // wavelength from the discretized analytic spectrum.
 // ---------------------------------------------------------------------------
-export function cpuSpectrumStats(front, { N = 256, tileM = 320, seed = 1337 } = {}) {
+export function cpuSpectrumStats(front, { N = 256, tileM = 320, seed = 1337, motionHistory = false } = {}) {
   const b = buildH0(front, N, tileM, seed);
   return { significantWaveHeight: b.significantWaveHeight, peakWavelengthM: b.peakWavelengthM };
 }
@@ -292,10 +298,22 @@ export function cpuIFFT2D(complexArray, N) {
 // ---------------------------------------------------------------------------
 // createFFTOcean — the GPU pipeline.
 // ---------------------------------------------------------------------------
-export function createFFTOcean(renderer, { front, N = 256, tileM = 320, seed = 1337 } = {}) {
+export function createFFTOcean(renderer, { front, N = 256, tileM = 320, seed = 1337, motionHistory = false, fineN = 128 } = {}) {
+  const resources = [], computeNodes = [];
+  let fine = null, clock = null, clockTexture = null, disposed = false;
+  const dispose = () => {
+    if (disposed) return;
+    disposed = true;
+    fine?.dispose();
+    clock?.dispose(clockTexture);
+    for (const node of computeNodes) node.dispose?.();
+    for (const texture of resources) texture.dispose();
+  };
   try {
     if (!renderer || !renderer.backend || renderer.backend.isWebGPUBackend !== true) return null;
     if (typeof renderer.compute !== "function") return null;
+    if (motionHistory && typeof renderer.copyTextureToTexture !== "function") return null;
+    if (typeof renderer.backend.generateMipmaps !== "function") return null;
     const log2N = Math.log2(N);
     if (!Number.isInteger(log2N) || N < 8) return null;
 
@@ -307,11 +325,16 @@ export function createFFTOcean(renderer, { front, N = 256, tileM = 320, seed = 1
     const dxm = tileM / N; // texel pitch in meters
 
     // -- textures ----------------------------------------------------------
-    const h0Tex = new THREE.DataTexture(built.data, N, N, THREE.RGBAFormat, THREE.FloatType);
+    clock = new OceanClock(built.data, N, tileM);
+    built.data = null; // Clock owns the immutable spectrum.
+    const h0Tex = new THREE.DataTexture(clock.data, N, N, THREE.RGBAFormat, THREE.FloatType);
+    clockTexture = h0Tex;
+    resources.push(h0Tex);
     h0Tex.needsUpdate = true; // Nearest + flipY:false DataTexture defaults are right
 
     const makeStorage = (type, repeat) => {
       const t = new THREE.StorageTexture(N, N);
+      resources.push(t);
       t.type = type;
       t.generateMipmaps = false;
       t.flipY = false;
@@ -325,7 +348,30 @@ export function createFFTOcean(renderer, { front, N = 256, tileM = 320, seed = 1
     const pingTex = makeStorage(THREE.FloatType, false);  // FFT scratch: fp32
     const pongTex = makeStorage(THREE.FloatType, false);
     const dispTex = makeStorage(THREE.HalfFloatType, true);
+    // The mesh samples a continuous LOD from actual vertex spacing. Keep
+    // normal/foam generation at level zero and update mips only AFTER the
+    // whole compute chain is submitted. Auto-updating during intermediate
+    // compute bindings could sample the preceding frame's unfinished data.
+    dispTex.generateMipmaps = true;
+    dispTex.minFilter = THREE.LinearMipmapLinearFilter;
+    dispTex.mipmapsAutoUpdate = false;
+    // Preserve the preceding surface, not just its camera/model transform.
+    // Public copyTextureToTexture copies base level and pinned WebGPU then
+    // generates destination mips when generateMipmaps=true (see audit).
+    const previousDispTex = motionHistory ? makeStorage(THREE.HalfFloatType, true) : null;
+    if (previousDispTex) {
+      previousDispTex.generateMipmaps = true;
+      previousDispTex.minFilter = THREE.LinearMipmapLinearFilter;
+      previousDispTex.mipmapsAutoUpdate = false;
+    }
     const normTex = makeStorage(THREE.HalfFloatType, true);
+    // First/second slope moments are linear-filterable. Normalized vectors
+    // alone lose the variance needed to widen distant specular highlights.
+    const slopeMomentTex = makeStorage(THREE.HalfFloatType, true);
+    slopeMomentTex.generateMipmaps = true;
+    slopeMomentTex.minFilter = THREE.LinearMipmapLinearFilter;
+    slopeMomentTex.mipmapsAutoUpdate = false;
+    slopeMomentTex.anisotropy = 8;
     const foamA = makeStorage(THREE.HalfFloatType, false); // foam history pair
     const foamB = makeStorage(THREE.HalfFloatType, false);
 
@@ -349,7 +395,7 @@ export function createFFTOcean(renderer, { front, N = 256, tileM = 320, seed = 1
       const kLen = sqrt(kx.mul(kx).add(kz.mul(kz))).toVar();
       const kInv = select(kLen.greaterThan(1e-6), float(1.0).div(kLen), float(0.0)).toVar();
       const h0 = textureLoad(h0Tex, coord).toVar(); // rg = ĥ0(k), ba = ĥ0*(−k)
-      const wt = sqrt(kLen.mul(G)).mul(uTime).toVar();
+      const wt = oceanPrincipalPhase(sqrt(kLen.mul(G)).mul(uTime)).toVar();
       const c = cos(wt).toVar(), s = sin(wt).toVar();
       // Ĥ(k,t) = ĥ0(k)·e^{iωt} + ĥ0*(−k)·e^{−iωt}
       const hr = h0.x.mul(c).sub(h0.y.mul(s)).add(h0.z.mul(c)).add(h0.w.mul(s)).toVar();
@@ -427,26 +473,50 @@ export function createFFTOcean(renderer, { front, N = 256, tileM = 320, seed = 1
       const prev = textureLoad(foamSrc, coord).x;
       const foam = max(prev.mul(uFoamDecay), fresh).toVar();
       textureStore(normTex, coord, vec4(nrm, foam));
+      // Strongly overturning crests are outside a height-field model; bound
+      // only their nearly-horizontal denominator, not ordinary wave slopes.
+      const slope = nrm.xz.div(max(nrm.y, .1));
+      textureStore(slopeMomentTex, coord, vec4(slope, slope.dot(slope), foam));
       textureStore(foamDst, coord, vec4(foam, 0.0, 0.0, 0.0));
     })().compute(TEXELS);
 
     const base = [evolve, ...fftPasses, dispPass];
     const passesEven = [...base, makeNormalPass(foamA, foamB)];
     const passesOdd = [...base, makeNormalPass(foamB, foamA)];
+    computeNodes.push(...base, passesEven.at(-1), passesOdd.at(-1));
+    if (fineN) {
+      try {
+        if (fineN !== 128 && fineN !== 256 && fineN !== 512) throw new RangeError("Fine ocean size must be 0, 128, 256, or 512");
+        fine = createFineOcean(renderer, { front, N: fineN, tileM: 32, seed, macroN: N, macroTileM: tileM });
+      } catch (error) {
+        console.warn("Fine ocean unavailable; filtered macro waves remain:", error?.message);
+      }
+    }
 
     // -- per-frame driver (no allocations) -----------------------------------
     let lastT = null, frame = 0;
     const update = (timeSec) => {
-      uTime.value = timeSec;
+      if (disposed || !clock.prepare(timeSec)) return;
+      if (fine && !fine.prepareTime(timeSec)) return;
+      // Publish BOTH prepared epochs before either cascade submits compute.
+      clock.commit(h0Tex, uTime);
+      fine?.commitTime();
       const dt = lastT === null ? 1 / 60 : Math.min(Math.max(timeSec - lastT, 0), 0.25);
       lastT = timeSec;
       uFoamDecay.value = Math.exp(-dt / S.foamTauSec);
+      if (previousDispTex && frame > 0) renderer.copyTextureToTexture(dispTex, previousDispTex);
       renderer.compute(frame & 1 ? passesOdd : passesEven);
+      // Pinned Three r185 backend API; queues mip work after the FFT writes.
+      renderer.backend.generateMipmaps(dispTex);
+      renderer.backend.generateMipmaps(slopeMomentTex);
+      if (previousDispTex && frame === 0) renderer.copyTextureToTexture(dispTex, previousDispTex);
+      fine?.updatePrepared();
       frame++;
     };
 
-    return { dispTex, normTex, tileM, N, update };
+    return { dispTex, previousDispTex, normTex, slopeMomentTex, fine, tileM, N, update, dispose, displacementMipLevels: log2N + 1 };
   } catch (err) {
+    dispose();
     return null; // contract: feature-detect defensively, never throw
   }
 }

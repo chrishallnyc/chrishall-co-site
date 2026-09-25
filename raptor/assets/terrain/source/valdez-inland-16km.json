@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "front": "VALDEZ",
+  "worldBounds": {
+    "xmin": -8000,
+    "xmax": 8000,
+    "zmax": 4000,
+    "zmin": -12000
+  },
+  "width": 3200,
+  "height": 3200,
+  "sampleConvention": "pixel-area; row0 north; centers 2.5m inside bounds",
+  "spacingM": 5,
+  "blendWidthM": 512,
+  "minH": 474.4343566894531,
+  "maxH": 2599.90771484375,
+  "heightEncoding": "R=high byte,G=low byte,UNORM16 scaled minH..maxH; RG8 nearest raw texel loads; scalar decode-before-bilinear; no height mips",
+  "normalEncoding": "RGB=east,north,up from central differences of decoded quantized height; linear NoColorSpace; normal mips",
+  "heightFile": "valdez-inland-16km-height.png",
+  "normalFile": "valdez-inland-16km-normal.png",
+  "heightSHA256": "72cd288b046b32033889b31ce1549864f2f1da64e704845a99bc67619dbb1cc9",
+  "normalSHA256": "cfef6cdf5e2df6672ad75ba49bce1997b19e137a5a9784e0f9df905a06c998fe",
+  "provenance": {
+    "sourceId": 6412,
+    "name": "AK_IFSAR-NRCS-C255_2012",
+    "nativeSpacingM": 5,
+    "acquisitionYear": 2012,
+    "published": 20150801,
+    "verticalDatum": "North American Vertical Datum of 1988 (NAVD 88)",
+    "originalSourceURL": "https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/OPR/Projects/NRCS_USGS_USFS_BLM_Alaska_Mid_Accuracy_DEM/AK_IFSAR-NRCS-C255_2012/TIFF/USGS_AK5M_NRCS_USGS_USFS_BLM_Alaska_Mid_Accuracy_DEM_1369.tif",
+    "exportRequest": "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/exportImage?f=json&bbox=-146.76988782113392%2C61.24202030018357%2C-146.4701121788661%2C61.385993233272146&bboxSR=4326&imageSR=4326&size=3200%2C3200&format=tiff&pixelType=F32&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B6412%5D%7D&adjustAspectRatio=false",
+    "exportSHA256": "3de3040bbc1876050f6575bca18fe86e2d829dd23adc76e1785d412025c05f1e",
+    "subregionOfOriginalExport": false
+  },
+  "canonicalBaseHeightSHA256": "1e8f2011525f5929276787aae7cfb5ab8a24470ac8c3a773b414c002952f8105",
+  "sourceCrop": {
+    "row": 0,
+    "col": 0,
+    "size": 3200
+  },
+  "heightPackedSHA256": "7caa3f52a8fa3d21f18f0f95b10bd9b4b406e383dfc6c2cd77b7283077755413",
+  "normalPixelsSHA256": "ec952a6209606e0f99e20ac57707afc61f8910b6191590f6725a4512b51c085b",
+  "mapTransform": {
+    "worldOriginLatitude": 61.35,
+    "worldOriginLongitude": -146.62,
+    "northMetersPerDegree": 111132.0,
+    "eastMetersPerDegree": 53373.249003687524,
+    "worldX": "east",
+    "worldZ": "north",
+    "projection": "same local linear latitude/longitude map as the canonical Valdez terrain"
+  },
+  "bakeVersion": 1
+}
