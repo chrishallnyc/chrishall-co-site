@@ -108,6 +108,8 @@ export class FlightFX {
     this._mid = new THREE.Vector3();
     this._m4 = new THREE.Matrix4();
     this._invWorld = new THREE.Matrix4();
+    this._transformFrame = 0;
+    this._transformFrames = new WeakMap();
 
     // ---- 1. wingtip vortex: instanced puffs, Pool-backed (testworld's
     // retired-contrail pattern — sphere geometry so no billboard bookkeeping
@@ -161,10 +163,11 @@ export class FlightFX {
       this._renderPoseVersion = renderPoseVersion;
     }
     this._t += dt;
-    // force the f22 rig's matrixWorld fresh THIS frame (player.render() just
-    // moved jetGroup; the renderer's own cascade hasn't run yet) so anchors
-    // read the current position, not last frame's.
-    this.jetGroup.updateMatrixWorld(true);
+    // Only effect anchors need world transforms before rendering. Refresh
+    // their parent paths once, without walking every aircraft mesh/LOD here
+    // and then again in the planet adapter and renderer.
+    this._transformFrame++;
+    this._updateWorld(this.jetGroup);
 
     // re-cancel jetGroup's (now-fresh) world transform on the vortex/smoke
     // anchor, then push that fix down into its own subtree.
@@ -172,16 +175,30 @@ export class FlightFX {
     this._worldFixed.matrix.copy(this._invWorld);
     this._worldFixed.updateMatrixWorld(true);
 
-    this._tipL.getWorldPosition(this._pTipL);
-    this._tipR.getWorldPosition(this._pTipR);
-    this._nozL.getWorldPosition(this._pNozL);
-    this._nozR.getWorldPosition(this._pNozR);
+    this._updateWorld(this._tipL);
+    this._updateWorld(this._tipR);
+    this._updateWorld(this._nozL);
+    this._updateWorld(this._nozR);
+    this._pTipL.setFromMatrixPosition(this._tipL.matrixWorld);
+    this._pTipR.setFromMatrixPosition(this._tipR.matrixWorld);
+    this._pNozL.setFromMatrixPosition(this._nozL.matrixWorld);
+    this._pNozR.setFromMatrixPosition(this._nozR.matrixWorld);
     this._aftL.set(0, 0, 1).transformDirection(this._nozL.matrixWorld);
     this._aftR.set(0, 0, 1).transformDirection(this._nozR.matrixWorld);
 
     this._updateVortices(fmOut, dt);
     this._updateAB(fmOut, throttleCmd, dt, camera);
     this._updateSmoke(throttleCmd, dt);
+  }
+
+  _updateWorld(object) {
+    if (this._transformFrames.get(object) === this._transformFrame) return;
+    if (object.parent) this._updateWorld(object.parent);
+    // The pinned Three accepts a force argument. A manual local matrix must
+    // still inherit its moving parent; explicit manual world matrices retain
+    // Three's matrixWorldAutoUpdate=false behavior.
+    object.updateWorldMatrix(false, false, true);
+    this._transformFrames.set(object, this._transformFrame);
   }
 
   // ---- 1. wingtip condensation vortices ----

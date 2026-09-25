@@ -5,24 +5,131 @@ the [local setup instructions](../README.md#run-locally), then run:
 
 ```sh
 node raptor/qa/opening.browser.mjs
+node raptor/qa/loading.browser.mjs
+RAPTOR_BASE_URL=http://localhost:8082/ node raptor/qa/viewport.browser.mjs
 node raptor/qa/browser.mjs
+node raptor/qa/feedback.browser.mjs
+node raptor/qa/backup.browser.mjs
+node raptor/qa/pilotlog.browser.mjs
+node raptor/qa/tactical.browser.mjs
 node raptor/qa/missions.browser.mjs
 ```
 
-These use `RAPTOR_BASE_URL` (default `http://localhost:8082/`) and an existing
-Playwright installation; set `PLAYWRIGHT_MODULE` to its module entry point if
-needed. `opening` runs headless without booting a flight renderer, covering fresh
+These use `RAPTOR_BASE_URL` and an existing Playwright installation; set
+`PLAYWRIGHT_MODULE` to its module entry point if needed. The default server is
+`http://localhost:8082/`, except `viewport`, which defaults to port 8097; the
+command above overrides it to match the local setup. `opening` runs headless
+without booting a flight renderer, covering fresh
 and returning pilots, optional customization, focus and narrow layouts. It writes
-screenshots and results to `.context/ceo-pass/opening/` by default. Run the two
-flight scripts one at a time to avoid competing graphics work.
+screenshots and results to `.context/ceo-pass/opening/` by default. `loading`
+checks recoverable bootstrap/flight-module failures without allocating a GPU.
+Blocking `src/boot.js` exercises the preflight bootstrap recovery screen;
+blocking `src/main.js` fails an explicit flight URL while preflight still works.
+For `loading`, point optional `RAPTOR_STAGE_ROOT` at the staged `raptor/` directory.
+It overlays whitelisted entry files, startup modules (including `src/boot.js` and
+`src/appstate.js`) and preflight images; other requests still use the live server.
+`feedback` runs WebGL practice and combat, checks live instruments and recovery
+at narrow sizes, including high-angle-of-attack guidance, gear
+travel and reassigned recovery/gear controls. It verifies the real HUD's lock,
+binding, friendly, ammunition, incoming-threat, rearm and boundary cues using fixed
+presentation poses. Acquisition cases cover range and seeker-angle advice, detected
+on-screen hostiles, and priority for actual locks and urgent warnings. Injected
+outcomes check the completed-sortie report and retry flows without claiming to
+beat a mission. Its artifacts default to `.context/raptor-feedback/`.
+`backup` runs without a flight renderer and checks local download, preview/cancel,
+invalid-file rejection, and replacement of a damaged profile on a narrow screen.
+Successful restore reloads preflight with the restored controls and progress,
+including Harbor Watch completion stored separately from the campaign. Delayed
+file reads verify that the newest choice wins and a closed dialog ignores late
+successes and failures without changing storage. Artifacts default to
+`.context/raptor-backup/`. Native `pilot-backup.test.mjs` also checks migration
+of older backups without scenario records, rollback after failed writes, and
+incomplete-recovery errors.
+`pilotlog` runs without a flight renderer and checks mission-ID/type search,
+combined region/status filters, empty-result recovery, next-mission navigation,
+briefing objectives, typing focus, selected-row visibility and narrow layouts.
+It verifies that discovery leaves campaign progress and unlocks unchanged; artifacts
+default to `.context/raptor-pilotlog/`.
+Run flight scripts one at a time to avoid
+competing graphics work.
 
-Current routes: **Customize flight** opens region/time/mode choices; **Done**
+`tactical` flies a real campaign sortie and practice flight on WebGL (or set
+`RAPTOR_TEST_BACKEND=webgpu` to assert the WebGPU path). It checks
+map/flight/Pause transitions, frozen simulation and weapons, current objectives,
+full radio history, remapped shortcuts, narrow layouts and maximum-size live
+subtitles. The subtitle layout check freezes presentation and reuses the first
+received call's time; no future messages or victory are injected. Artifacts
+default to `.context/raptor-tactical/`. `tactical-map.test.mjs` separately checks
+all 30 authored missions, real flight headings, map bounds and hidden-target
+exclusion without changing simulation hashes. `radio-log.test.mjs` covers ring
+wrap/reset, subtitle expiry during simulated pauses, layout and warning priority.
+
+`viewport` holds a startup asset while the window grows on WebGPU at device pixel
+ratio 2 or shrinks on WebGL at ratio 1, with AUTO graphics. It also checks live
+resize and paused resize/resume, including renderer, camera and HUD dimensions,
+backing-pixel scale, frozen paused simulation, and visible scenery on both sides
+of each displayed frame. Both scenarios run by default; set
+`RAPTOR_TEST_BACKEND=webgpu` or `webgl` to run one. Screenshots and `results.json`
+default to `.context/raptor-viewport/`; override with `RAPTOR_TEST_OUTPUT`.
+
+`hud-ladder.test.mjs` compares canvas drawing commands to the exported geometry
+functions across 630 poses, including scale changes and shrinking visible rung
+sets. A saved prior implementation also matched 278,397 commands across 1,134
+poses exactly. Nine warmed, alternating 100,000-frame samples measured median
+JavaScript ladder work of 0.003951 ms before and 0.003001 ms after (24.0% less).
+This excludes canvas rasterization, other game work and GPU time.
+
+Current routes: the opening mode selector switches practice/battle/campaign/
+operation without opening setup. The desktop destination preview switches region;
+campaign regions follow their mission. **Customize flight** opens region/time choices; **Done**
 returns focus to launch. In Practice, **Esc → Flight options** opens Controls,
 Display & sound, and Pilot log. **Replay/Start flight school** and **Reset to
 level flight** are outside those optional settings. The welcome card's **Start
 flying** resumes with the flight canvas focused. Handoff behavior and render
 warmup also have portable coverage in `cockpit-flow.test.mjs` and
 `render-warmup.test.mjs`.
+
+## Flight feedback and CPU checks
+
+The following native checks use the pinned Three distribution without a browser
+or GPU:
+
+```sh
+node --import ./raptor/qa/register-three.mjs --test \
+  raptor/qa/mission-catalog.test.mjs raptor/qa/practice-guidance.test.mjs \
+  raptor/qa/practice-recovery.test.mjs raptor/qa/flightcoach.test.mjs \
+  raptor/qa/weapon-envelope.test.mjs raptor/qa/flightfx-transform.test.mjs \
+  raptor/qa/flight-presentation.test.mjs raptor/qa/render-warmup.test.mjs
+```
+
+Mission preparation shares the simulation's timeout-victory predicate. Tests
+distinguish required goals, early-victory goals, protection loss thresholds and
+navigation. Practice checks cover recovery priority and actual gear actuator
+travel, including customized or unassigned controls. Missile advice is compared
+with the production seeker at strict angle and inclusive range boundaries, and
+excludes friendly, dead, undetected and off-screen aircraft.
+
+`flightfx-transform` checks current wingtip/nozzle poses, world-fixed trails and
+plume camera coordinates under moving parents, manual local/world matrices,
+reparenting and pose cuts. It also checks that effect preparation leaves unrelated
+aircraft detail to normal rendering. Existing trail tests retain timing and density
+coverage across 30, 60 and 144 fps.
+
+A local before/after comparison used the real HIGH F-22 hierarchy (363 objects),
+with raster/image loading stubbed and no GPU submission. Nine alternating samples
+of 4,000 frames produced these median CPU times per update:
+
+| Measured component | Before | After | Reduction |
+| --- | ---: | ---: | ---: |
+| Neutral flight effects | 0.0380 ms | 0.00282 ms | 92.6% |
+| Condensation and afterburner effects | 0.1965 ms | 0.1724 ms | 12.3% |
+| Neutral effects plus normal transform traversal | 0.0722 ms | 0.0374 ms | 48.2% |
+
+Neutral effect preparation made 11 local matrix updates instead of 382. An exact
+comparison with the saved prior implementation matched effect state and final
+rendered world transforms across 600 frames, including LOD changes and pose cuts.
+These small component CPU savings exclude drawing, GPU execution and the rest
+of the game loop; they do not establish an FPS improvement.
 
 ## Aircraft driver
 

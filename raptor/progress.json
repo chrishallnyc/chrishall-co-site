@@ -1,11 +1,13 @@
 {
- "updated": "2026-09-24T20:53:32-07:00",
- "version": "v1.12.0",
- "now": "v1.12.0 — NEW YORK. Fly the harbor and Manhattan, or launch Harbor Watch: a standalone alternate-history interception mission with its own briefing, objectives, and replay.",
+ "updated": "2026-09-25T00:15:36-07:00",
+ "version": "1.13.1",
+ "now": "v1.13.1 — Full-window flight from the first frame. Fixed a startup sizing race that could leave half the world blank until refresh.",
  "nowPhase": 13,
  "paused": false,
- "pushes": 79,
+ "pushes": 81,
  "ledger": [
+  "2026-09-25 v1.13.1 — Flight now synchronizes the canvas with the current window before graphics warmup. Fixes half-screen startup rendering after a viewport change during loading; browser regression checks cover Retina growth, WebGL shrink, live resize and paused resize/resume.",
+  "2026-09-24 v1.13.0 — Faster preflight and mission search, tactical map with received radio history, clearer missile and airfield guidance, practice recovery cues, immutable sortie reports, and downloadable pilot backups including Harbor Watch. Terrain, audio, aircraft transforms and HUD geometry do less CPU work; isolated component measurements are not whole-game FPS claims.",
   "2026-09-24 v1.12.0 — New York City: a fourth geographic region with USGS terrain, NAIP aerial imagery, about 56,000 source-derived buildings, thirteen landmarks, and six bridges. Free flight opens toward the skyline; Harbor Watch adds a separately launched alternate-history harbor patrol and two-aircraft interception. The historical attacks are not recreated. Scenario progress stays separate from the thirty-mission campaign; source provenance and rebuild scripts accompany the map.",
   "2026-09-24 v1.11.0 — Simpler launch and welcome screens, optional flight customization, visible flight-school replay and level-flight reset, clearer objective headings and distances, saved-result continuation, and preflight preparation of exhaust programs and allocated near-terrain geometry. Handoffs keep earned training and campaign progress.",
   "2026-09-24 v1.10.0 — Frame pacing and responsiveness: measured Auto resolution budget, interpolated HUD and air markers, elapsed-time effects, immediate flight-coach feedback, preflight cloud-light warming and terrain preparation, cached aircraft transforms, and scheduled reflection updates. Manual graphics choices and deterministic flight physics retained.",

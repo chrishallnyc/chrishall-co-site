@@ -23,8 +23,8 @@ const deckAircraft = `<svg class="deck-aircraft" viewBox="0 0 340 260" aria-hidd
 </svg>`;
 
 const MODES=[
-  {id:'practice',name:'Practice flight',note:'Learn at your own pace',number:'01'},
-  {id:'battle',name:'Quick battle',note:'Straight into combat',number:'02'},
+  {id:'practice',name:'Practice flight',short:'Practice',note:'Learn at your own pace',number:'01'},
+  {id:'battle',name:'Quick battle',short:'Battle',note:'Straight into combat',number:'02'},
   {id:'campaign',name:'Campaign',note:'30 authored missions',number:'03'},
   {id:'operation',name:'Operation',note:'A persistent front line',number:'04'},
 ];
@@ -54,21 +54,22 @@ export function showFlightdeck(state) {
   Object.assign(state,{hangar:true,input,controls,pilotLog:log});
 
   root.innerHTML=`<div class="deck-wrap"><header class="deck-header"><a class="game-brand" href="/" aria-label="RAPTOR home">${jetMark}<span>RAPTOR<small>F-22 AIR COMBAT</small></span></a><nav class="deck-nav" aria-label="Game setup"><button class="ui-button" type="button" data-open="controls">Controls</button><button class="ui-button" type="button" data-open="settings">Settings</button><button class="ui-button" type="button" data-open="progress">Pilot log</button><button class="ui-button" type="button" data-open="guide">How to fly</button></nav></header>
-    <main><section class="deck-intro" aria-labelledby="welcome-title"><div class="deck-welcome"><p class="eyebrow"><span class="status-dot"></span><span id="readiness-status">Ready when you are</span></p><h1 id="welcome-title">The sky is yours.</h1><p class="deck-lead" id="welcome-copy">An F-22, a clear horizon, and room to learn.<br>Start airborne. We’ll guide you from there.</p>
-      <div class="deck-flight-selection"><b id="launch-label">Practice flight · Nellis</b><span id="launch-conditions">High noon · No enemies or time limit</span></div>
+    <main><div class="deck-mode-rail" role="group" aria-label="Flight type">${MODES.map(m=>`<button type="button" class="deck-mode" data-mode="${m.id}" aria-label="${m.name}" aria-pressed="false"><span class="deck-mode-number" aria-hidden="true">${m.number}</span><span><b>${m.short||m.name}</b><small>${m.note}</small></span><span class="deck-mode-check" aria-hidden="true">✓</span></button>`).join('')}</div>
+    <section class="deck-intro" aria-labelledby="welcome-title"><div class="deck-welcome"><p class="eyebrow"><span class="status-dot"></span><span id="readiness-status">Ready when you are</span></p><h1 id="welcome-title">The sky is yours.</h1><p class="deck-lead" id="welcome-copy">An F-22, a clear horizon, and room to learn.<br>Start airborne. We’ll guide you from there.</p>
+      <div class="deck-flight-selection" aria-live="polite" aria-atomic="true"><b id="launch-label">Practice flight · Nellis</b><span id="launch-conditions">High noon · No enemies or time limit</span></div><button class="text-button deck-brief-link" type="button" data-deck-brief hidden>Read mission briefing ↗</button>
       <div class="deck-input" aria-label="Choose your aiming setup"><span>Aim with</span><div class="deck-input-choices" role="group" aria-label="Pointing device"><button type="button" class="ui-button" data-deck-device="mouse" aria-pressed="false">Mouse</button><button type="button" class="ui-button" data-deck-device="trackpad" aria-pressed="false">Trackpad</button></div></div>
       <div class="deck-control-warning" id="deck-control-warning" role="status" hidden><span></span><button type="button" class="ui-button" data-review-keys>Review missing keys ↗</button></div>
       <div class="launch-bar"><button id="flyBtn" class="ui-button primary launch-button" type="button"><span id="launch-action">Start flying</span><span aria-hidden="true">↗</span></button><span id="setup-summary"></span></div>
       <aside class="deck-scenario" id="newyork-scenario" hidden><div><span class="eyebrow">NEW YORK · STANDALONE MISSION</span><h2>Harbor Watch</h2><p>An alternate-history defense of the city.</p></div><button class="text-button" type="button" data-scenario-brief>Read briefing <span aria-hidden="true">↗</span></button></aside>
       <p id="deck-status" class="deck-status" role="status" aria-live="polite"></p></div>
-      <div class="deck-destination" id="deck-destination"><span class="destination-label" id="destination-mode">PRACTICE FLIGHT</span>${deckAircraft}<div class="destination-caption"><span class="eyebrow">YOUR FLIGHT TAKES YOU TO</span><strong id="destination-name">Nellis</strong><span id="destination-place">Nevada test range</span></div><span class="destination-compass" aria-hidden="true">N<br>↑</span></div>
+      <div class="deck-destination" id="deck-destination"><span class="destination-label" id="destination-mode">PRACTICE FLIGHT</span>${deckAircraft}<div class="destination-caption"><span class="eyebrow">YOUR FLIGHT TAKES YOU TO</span><strong id="destination-name">Nellis</strong><span id="destination-place">Nevada test range</span><span id="destination-description"></span></div><span class="destination-compass" aria-hidden="true">N<br>↑</span><div class="destination-route" role="group" aria-label="Flight region">${Object.entries(FRONTS).map(([id,f])=>`<button type="button" data-deck-front="${id}" aria-pressed="false">${f.name}</button>`).join('')}</div></div>
     </section>
     <details class="deck-customize" id="flight-customize"><summary><span>Customize flight<small>Choose a different region, time, or mission</small></span><span class="customize-symbol" aria-hidden="true">+</span></summary><div class="deck-customize-body">
-    <section class="flight-selector" aria-labelledby="flight-style-title"><div class="section-heading"><h2 id="flight-style-title">Your flight</h2><div class="deck-campaign-progress"><span id="campaign-count"></span><progress id="deck-campaign-meter" max="30" value="0" aria-label="Campaign missions completed"></progress></div></div><div class="mode-grid" role="group" aria-label="Flight type">${MODES.map(m=>`<button type="button" class="mode-card" data-mode="${m.id}" aria-pressed="false"><span class="mode-number">${m.number}</span><b>${m.name}</b><small>${m.note}</small><span class="mode-check" aria-hidden="true">✓</span></button>`).join('')}</div></section>
+    <section class="flight-selector" aria-labelledby="flight-style-title"><div class="section-heading"><h2 id="flight-style-title">Your flight plan</h2><div class="deck-campaign-progress"><span id="campaign-count"></span><progress id="deck-campaign-meter" max="30" value="0" aria-label="Campaign missions completed"></progress></div></div></section>
     <section class="launch-layout"><div class="region-picker"><div class="section-heading"><h2 id="region-label">Select a region</h2><span id="region-note">Real terrain. Different challenges.</span></div><div class="region-grid" role="group" aria-labelledby="region-label">${Object.entries(FRONTS).map(([id,f])=>`<button type="button" class="region-card" data-front="${id}" aria-pressed="false"><span class="region-art" style="--terrain-image:url('/assets/preflight/${f.asset}.webp')"><span class="region-tag">${f.tag}</span><span class="region-compass" aria-hidden="true">N<br>↑</span></span><span class="region-copy"><b>${f.name}</b><small>${f.place}</small></span><span class="region-check" aria-hidden="true">✓</span></button>`).join('')}</div><div class="time-picker"><span id="conditions-label">Time of day</span><div class="time-choices" role="group" aria-label="Time of day">${[['noon','High noon'],['afternoon','Afternoon'],['golden','Golden hour']].map(([id,label])=>`<button type="button" class="ui-button" data-time="${id}" aria-pressed="false">${label}</button>`).join('')}</div><span id="mission-conditions" hidden>Conditions are part of the mission.</span></div></div>
     <article class="flight-brief" aria-labelledby="brief-title"><p class="eyebrow" id="brief-eyebrow"></p><h2 id="brief-title"></h2><p id="brief-copy"></p><ul id="brief-features"></ul><button class="text-button" type="button" id="brief-more" hidden>Read the full briefing <span aria-hidden="true">↗</span></button><div class="brief-footer" id="brief-footer"></div></article></section>
     <div class="customize-actions"><button class="ui-button" type="button" data-customize-done>Done</button></div></div></details></main>
-    <footer class="deck-footer"><span id="deck-storage-note">Progress & preferences save in this browser.</span><div><button type="button" class="text-button" data-fullscreen>Fullscreen</button><a href="/terrain-credits.html" target="_blank" rel="noopener">Map credits ↗</a><a href="/audio-credits.html" target="_blank" rel="noopener">Sound credits ↗</a><a href="/devlog.html" target="_blank" rel="noopener">Development notes ↗</a><span>RAPTOR 1.12.0</span></div></footer></div>`;
+    <footer class="deck-footer"><span id="deck-storage-note">Progress & preferences save in this browser.</span><div><button type="button" class="text-button" data-fullscreen>Fullscreen</button><a href="/terrain-credits.html" target="_blank" rel="noopener">Map credits ↗</a><a href="/audio-credits.html" target="_blank" rel="noopener">Sound credits ↗</a><a href="/devlog.html" target="_blank" rel="noopener">Development notes ↗</a><span>RAPTOR ${escapeHTML(state.version)}</span></div></footer></div>`;
 
   function refreshSetup() {
     const s=SETTINGS.current();
@@ -97,8 +98,9 @@ export function showFlightdeck(state) {
       b.disabled=unavailable;
       b.title=unavailable?'Choose Nellis, Valdez or Marianas for this flight type.':'';
     }
-    for(const b of root.querySelectorAll('[data-front]')){
-      b.classList.toggle('selected',b.dataset.front===shownFront);b.setAttribute('aria-pressed',String(b.dataset.front===shownFront));
+    for(const b of root.querySelectorAll('[data-front], [data-deck-front]')){
+      const front=b.dataset.front||b.dataset.deckFront;
+      b.classList.toggle('selected',front===shownFront);b.setAttribute('aria-pressed',String(front===shownFront));
       b.disabled=plan.mode==='campaign';
     }
     for(const b of root.querySelectorAll('[data-time]')){b.classList.toggle('selected',b.dataset.time===plan.time);b.setAttribute('aria-pressed',String(b.dataset.time===plan.time));}
@@ -124,6 +126,7 @@ export function showFlightdeck(state) {
     setText('brief-eyebrow',info.eyebrow);setText('brief-title',info.title);setText('brief-copy',info.copy);briefFooter=info.foot;
     root.querySelector('#brief-features').innerHTML=info.features.map(f=>`<li>${escapeHTML(f)}</li>`).join('');
     root.querySelector('#brief-more').hidden=plan.mode!=='campaign';
+    root.querySelector('[data-deck-brief]').hidden=plan.mode!=='campaign';
     const destination=FRONTS[shownFront];
     root.querySelector('#newyork-scenario').hidden=plan.front!=='NEWYORK'||plan.mode==='campaign';
     if(plan.front==='NEWYORK'&&plan.mode==='practice'){
@@ -133,9 +136,11 @@ export function showFlightdeck(state) {
     const mode=MODES.find(m=>m.id===plan.mode);
     const conditions=scripted?'Mission conditions':({noon:'High noon',afternoon:'Afternoon',golden:'Golden hour'}[plan.time]);
     setText('launch-action',info.action);setText('launch-label',`${mode.name} · ${destination.name}`);
+    setText('welcome-title',({practice:'The sky is yours.',battle:'Make your mark.',campaign:progress.next?'Your next chapter.':'Mission accomplished.',operation:'Change the course.'})[plan.mode]);
     setText('launch-conditions',plan.mode==='practice'?`${conditions} · No enemies or time limit`:plan.mode==='campaign'?(next?.title||info.title):`${conditions} · ${info.title}`);
     setText('welcome-copy',({practice:'An F-22, a clear horizon, and room to learn. Start airborne. We’ll guide you from there.',battle:'Take on enemy aircraft and ground forces. Your next fight starts in the air.',campaign:progress.next?'Your next mission awaits. Explore the briefing, then take the controls.':'Thirty missions complete. Revisit a favorite from your pilot log.',operation:'Every sortie shapes the front line. Pick up where your last flight left off.'})[plan.mode]);
     setText('destination-mode',mode.name);setText('destination-name',destination.name);setText('destination-place',destination.place);
+    setText('destination-description',plan.mode==='campaign'?(next?`Mission ${String(next.index+1).padStart(2,'0')} / ${progress.total} · ${missionTypeLabel(next.type)}${next.minutes?` · ${next.minutes} min limit`:''}`:'Choose a mission from your pilot log.'):destination.description);
     root.querySelector('#deck-destination').style.setProperty('--destination-image',`url('/assets/preflight/${destination.asset}.webp')`);
     root.querySelector('#flyBtn').disabled=launching||(plan.mode==='campaign'&&!!progress.next&&(!next||next.unavailable));
     missionStatus=plan.mode==='campaign'&&next?.unavailable?'This mission’s briefing could not load. Reload the page to try again, or choose Practice flight.':'';
@@ -163,9 +168,10 @@ export function showFlightdeck(state) {
     else if(b.dataset.open==='guide')guide.show();else log.show();
   };
   for(const b of root.querySelectorAll('[data-mode]'))b.onclick=()=>{Object.assign(plan,selectFlightMode(plan,b.dataset.mode,campaignProgress().next));refresh();};
-  for(const b of root.querySelectorAll('[data-front]'))b.onclick=()=>{Object.assign(plan,validateFlightPlan({...plan,front:b.dataset.front}));refresh();};
+  for(const b of root.querySelectorAll('[data-front], [data-deck-front]'))b.onclick=()=>{Object.assign(plan,validateFlightPlan({...plan,front:b.dataset.front||b.dataset.deckFront}));refresh();};
   for(const b of root.querySelectorAll('[data-time]'))b.onclick=()=>{plan.time=b.dataset.time;refresh();};
   root.querySelector('#brief-more').onclick=()=>log.show(campaignProgress().next?.id);
+  root.querySelector('[data-deck-brief]').onclick=()=>log.show(campaignProgress().next?.id);
   for(const button of root.querySelectorAll('[data-deck-device]'))button.onclick=()=>{const settings=SETTINGS.saveSettings({pointingDevice:button.dataset.deckDevice});input.setOptions(SETTINGS.getAimOptions(settings));};
   root.querySelector('[data-review-keys]').onclick=()=>controls.showMissingControls();
   root.querySelector('#flyBtn').onclick=launch;

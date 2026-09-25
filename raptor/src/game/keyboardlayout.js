@@ -82,7 +82,7 @@ export const ACTION_TOKENS = Object.freeze({
   pitch_up: "NOSE ↑", pitch_down: "NOSE ↓", yaw_left: "YAW L", yaw_right: "YAW R",
   fire_mguns: "CANNON", fire_aam: "MISSILE", gear: "GEAR", wheel_brakes: "BRAKE",
   menu: "PAUSE", game_pause: "PAUSE", help: "GUIDE", recenter_aim: "CENTER",
-  hide_hud: "HUD", debug: "DETAILS",
+  hide_hud: "HUD", debug: "DETAILS", map: "MAP",
 });
 
 /** Labels for physical keys, mouse inputs, or external-keyboard extras. */

@@ -18,7 +18,7 @@ if (process.env.RAPTOR_SOURCE_OVERRIDE) {
       route.fulfill({contentType:file.endsWith('.css')?'text/css':'text/javascript',body})));
   }
 }
-await page.route('**/src/main.js', route => route.fulfill({contentType:'text/javascript',body:`
+await page.route('**/src/boot.js', route => route.fulfill({contentType:'text/javascript',body:`
   import { Input } from './engine/input.js'; import { ControlsMenu } from './game/controlsmenu.js';
   document.getElementById('veil')?.remove(); document.getElementById('hangar')?.remove();
   window.testInput = new Input(window); window.testControls = new ControlsMenu(testInput); testControls.show();

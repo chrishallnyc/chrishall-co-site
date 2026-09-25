@@ -10,7 +10,7 @@ const browser = await chromium.launch({channel:'chrome',headless:process.env.HEA
 const context = await browser.newContext({viewport:{width:1280,height:800}});
 const page = await context.newPage(), results = [], errors = [];
 page.on('pageerror', error => errors.push(error.message));
-await page.route('**/src/main.js', route => route.fulfill({contentType:'text/javascript',body:`
+await page.route('**/src/boot.js', route => route.fulfill({contentType:'text/javascript',body:`
   import { Input } from './engine/input.js'; import { ControlsMenu } from './game/controlsmenu.js';
   document.getElementById('veil')?.remove(); document.getElementById('hangar')?.remove();
   window.testInput = new Input(window); window.testControls = new ControlsMenu(testInput); testControls.show();

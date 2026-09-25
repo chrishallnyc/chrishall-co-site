@@ -17,14 +17,13 @@
 // (trigFired[i] mirrors spec.comms[i]). Zone-enter/groupDead land with
 // INC-2 tags; playerHpBelow/aceState with later increments.
 
-import { TRIG, OBJ_KIND } from "./missions.js";
+import { TRIG, OBJ_KIND, winsAtTimeLimit } from "./missions.js";
 
 const MAX_OBJ = 16, MAX_TRIG = 32, MAX_TIMERS = 8, RING = 32;
 const KIND_NAME = ["destroy_tag", "protect_tag", "reach_zone", "survive_until", "kill_ace"];
 // timeout rule (§2 priority table): offense types lose at timeLimitS;
 // defense types (protect objectives intact — they'd have failed loseWhen
 // otherwise) win. Only offense types exist in INC-1.
-const DEFENSE_TYPES = new Set(["escort", "fleet_defense", "intercept"]); // timeout with the protect intact = the raid is beaten
 
 export class Script {
   constructor(spec, { battlefield, player, match, terrain, bandits } = {}) {
@@ -79,7 +78,7 @@ export class Script {
     }
     this._win = spec.winWhen.map((id) => this._slotOf.get(id));
     this._lose = spec.loseWhen.map((id) => this._slotOf.get(id));
-    this._offense = !DEFENSE_TYPES.has(spec.type);
+    this._offense = !winsAtTimeLimit(spec);
 
     // --- sim state (fixed capacity, all folded by hash()) ---
     this.objState = new Uint8Array(MAX_OBJ);     // 0 pending, 1 done, 2 failed

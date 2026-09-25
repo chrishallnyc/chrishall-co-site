@@ -122,6 +122,9 @@ function computeSum(save) {
   return (h >>> 0).toString(16).padStart(8, "0");
 }
 
+// Backup validation uses the same integrity contract as operation loading.
+export { computeSum as operationChecksum };
+
 // ---- the save (schema per design §4, key "raptor.op.v1:"+front) ----
 
 export function freshSave(front, seed = DEFAULT_SEED) {

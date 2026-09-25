@@ -4,8 +4,10 @@ import { PilotLog, FRONTS, campaignProgress, operationSummary, sortieURL } from 
 import { FlightCoach } from './flightcoach.js';
 import { mountQuickTune } from './quicktune.js';
 import { flightBrief } from './flightbrief.js';
+import { captureFlightDebrief } from './flightdebrief.js';
 import { PREFLIGHT_KEY, validateFlightPlan } from './flightplan.js';
 import { SCENARIOS, isStandaloneSortie } from '../campaign/authored.js';
+import { TacticalView } from './tacticalview.js';
 
 // Reloading an operation generates a sortie from its last persisted front.
 // A campaign continuation must never send a failed save back to the same mission.
@@ -48,6 +50,7 @@ export class Cockpit {
     }});
     this.guide=createGuide(input,{onClose:()=>this.showPause(),onControls:()=>this.openControls('controls')});
     this.log=new PilotLog({onClose:()=>this.showPause(),onLaunch:s=>this.confirmLeave(()=>location.assign(sortieURL(s)),'Fly this mission?')});
+    this.tactical=new TacticalView({state,input,onClose:()=>this.tacticalFromPause?this.showPause():this.resume(),onResume:()=>this.resume()});
     this.toolbar=document.createElement('div');this.toolbar.className='flight-toolbar';this.toolbar.dataset.gameUi='';
     const front=FRONTS[flags.get('front')?.toUpperCase()] || FRONTS.NELLIS;
     const scenario=SCENARIOS.find(s=>s.id===flags.get('sortie'));
@@ -65,6 +68,9 @@ export class Cockpit {
     const tune=document.createElement('button');tune.type='button';tune.className='ui-button';tune.dataset.flightAction='tune';tune.textContent='Tune feel';
     tune.onclick=()=>{this.pause('tune');this.pauseDialog.body.querySelector('.quick-tune summary')?.focus();};
     this.toolbar.querySelector('[data-flight-action="pause"]').after(tune);
+    const map=document.createElement('button');map.type='button';map.className='ui-button';map.dataset.flightAction='map';map.onclick=()=>this.openTactical();
+    tune.after(map);
+    this.renderMapButton();
     this.setupMouseCapture();
     this.flightCanvas?.addEventListener('pointermove',event=>{
       if(this.edgeTipShown||this.paused||this.mouseCaptured||this.captureButton.hidden||!event.isTrusted)return;
@@ -81,7 +87,7 @@ export class Cockpit {
       onHide:()=>SETTINGS.saveSettings({showChecklist:false})}):null;
     this.renderHints();this.renderPractice();this.applyOptions();
     window.addEventListener('raptor-settings-change',()=>{this.applyOptions();this.renderHints();this.renderPractice();this.refreshSaveNote();});
-    window.addEventListener('raptor-bindings-change',()=>{this.renderHints();this.renderPractice();this.refreshSaveNote();});
+    window.addEventListener('raptor-bindings-change',()=>{this.renderHints();this.renderMapButton();this.renderPractice();this.refreshSaveNote();});
     window.addEventListener('blur',()=>{if(state.ready&&!this.paused)this.pause('focus');});
     document.addEventListener('visibilitychange',()=>{if(document.hidden&&state.ready&&!this.paused)this.pause('focus');});
     // Programmatic/gamepad pause shortcuts still work when input is suspended.
@@ -164,7 +170,7 @@ export class Cockpit {
   }
   toggle(){if(!this.confirmDialog?.open)this.paused?this.resume():this.pause();}
   resume(closeDialog=true) {
-    if(this.controls.open||this.guide.open||this.log.open||this.confirmDialog?.open)return;
+    if(this.controls.open||this.guide.open||this.log.open||this.tactical?.open||this.confirmDialog?.open)return;
     if(closeDialog&&this.pauseDialog.open){this.afterPauseClose=()=>this.resume(false);this.pauseDialog.close();return;}
     this.clearInput();this.input.suspended=false;this.paused=false;this.state.paused=false;
     // A visibility/focus gap must never become catch-up time in the next frame.
@@ -182,8 +188,19 @@ export class Cockpit {
   onControlsClose(){this.input.suspended=true;this.showPause();}
   openGuide(){this.switchView(()=>this.guide.show());}
   openLog(){this.switchView(()=>this.log.show(this.flags.get('sortie')));}
+  openTactical(){
+    if(this.tactical.open||this.controls.open||this.guide.open||this.log.open||this.confirmDialog?.open)return;
+    this.tacticalFromPause=this.paused;
+    const heldCodes=[...this.input.down];
+    this.switchView(()=>this.tactical.show(heldCodes));
+  }
+  renderMapButton(){
+    const button=this.toolbar.querySelector('[data-flight-action="map"]');
+    const label=bindingLabel(this.input,'map');
+    button.innerHTML=`Tactical map${label==='Unassigned'?'':` <kbd>${escapeHTML(label)}</kbd>`}`;
+  }
   showPause() {
-    if(!this.paused||this.controls.open||this.guide.open||this.log.open)return;
+    if(!this.paused||this.controls.open||this.guide.open||this.log.open||this.tactical?.open)return;
     this.input.suspended=true;
     const p=this.state.player;
     const ready=this.reason==='welcome';
@@ -193,8 +210,12 @@ export class Cockpit {
     const won=this.state.match?.over===1;
     const requestedFront=this.flags.get('front')?.toUpperCase();
     const operationFront=FRONTS[requestedFront]?requestedFront:'NELLIS';
-    const continuation=flightContinuation({flags:this.flags,match:this.state.match,progressSaved:this.state.progressSaved},campaignProgress().next);
+    const progress=campaignProgress();
+    const continuation=flightContinuation({flags:this.flags,match:this.state.match,progressSaved:this.state.progressSaved},progress.next);
     const next=continuation.nextMission;
+    const campaignFinished=complete&&won&&!scenario&&this.flags.has('sortie')&&this.state.progressSaved===true&&!progress.next;
+    const resultRestart=complete&&!this.practice&&!scenario&&!continuation.operation&&!next&&!campaignFinished;
+    const restartLabel=resultRestart?(this.flags.has('sortie')||this.flags.has('mission')?(won?'Fly mission again':'Retry mission'):'Fly battle again'):continuation.restartLabel;
     const title=ready?'Ready to fly':scenarioReady?scenario.title:this.reason==='recovery'?'A fresh start in the air':this.reason==='tune'?'Find your flight feel':complete?(continuation.resultTitle||(won?'Mission complete':'Let’s fly again')):scenario?`${scenario.title} paused`:'Flight paused';
     this.pauseDialog.el.querySelector('h2').textContent=title;
     this.pauseDialog.el.setAttribute('aria-label',title);
@@ -217,11 +238,14 @@ export class Cockpit {
       : nextTier!==this.state.tier ? `Graphics: ${escapeHTML(this.state.tier)} running · ${escapeHTML(nextTier)} on restart.`
         : 'Your selected graphics preset needs a restart to load its full detail.';
     this.pauseDialog.body.innerHTML=`<p class="pause-message">${description}</p>
-      ${ready?`<div class="welcome-guidance"><p>${steering}</p><div class="welcome-keys"><span>${key('throttle_up')} / ${key('throttle_down')} Throttle</span><span>${key('recenter_aim')} Center aim</span><span><kbd>Esc</kbd> Pause</span></div></div>`:this.renderFlightBrief()}
+      ${ready?`<div class="welcome-guidance"><p>${steering}</p><div class="welcome-keys"><span>${key('throttle_up')} / ${key('throttle_down')} Throttle</span><span>${key('recenter_aim')} Center aim</span><span><kbd>Esc</kbd> Pause</span></div></div>`:complete&&!this.practice?this.renderDebrief():this.renderFlightBrief()}
       ${complete&&next?`<button type="button" class="ui-button primary pause-primary" data-next>Fly next campaign mission ↗</button>`:''}
       ${scenario&&complete?`<button type="button" class="ui-button primary pause-primary" data-replay-scenario>${continuation.restartLabel} ↗</button>`:''}
       ${continuation.operation?`<p class="pause-continuation">${continuation.consequence}</p><button type="button" class="ui-button primary pause-primary" data-restart>${continuation.restartLabel} ↗</button>`:''}
+      ${resultRestart?`<button type="button" class="ui-button primary pause-primary" data-restart>${restartLabel} ↗</button>`:''}
+      ${campaignFinished?'<button type="button" class="ui-button primary pause-primary" data-debrief-log>Explore your completed campaign ↗</button>':''}
       <button type="button" class="ui-button ${complete?'':'primary'} pause-primary" data-resume>${ready?'Start flying':scenarioReady?'Begin Harbor Watch':complete?'Return to flight view':'Resume flight'} <kbd>Esc</kbd></button>
+      ${!ready?'<button type="button" class="text-button pause-tactical" data-tactical>Tactical map & radio log ↗</button>':''}
       ${this.practice&&!ready?`<div class="pause-handoff"><span>New pilot?<small>Begin with level flight and five guided exercises.</small></span><div class="pause-practice-actions"><button type="button" class="ui-button" data-school-start>${this.coach.course.record||this.coach.course.elapsed>0?'Replay':'Start'} flight school</button><button type="button" class="text-button" data-recover>Reset to level flight</button></div></div>`:''}
       ${pendingTier?`<p class="pause-graphics-note">${graphicsNote} Your current flight stays paused until you resume.</p>`:''}
       <div data-quick-tune></div>
@@ -229,7 +253,7 @@ export class Cockpit {
         <div class="pause-grid"><button type="button" class="ui-button" data-pause="controls">Customize controls <span>↗</span></button><button type="button" class="ui-button" data-pause="settings">Display & sound <span>↗</span></button><button type="button" class="ui-button" data-pause="guide">How to fly <span>↗</span></button><button type="button" class="ui-button" data-pause="progress">Your pilot log <span>↗</span></button></div>
         ${!ready&&hs?`<div class="pause-overview"><div><span>AIRSPEED</span><strong>${Math.round(hs.speedKt)} <small>kt</small></strong></div><div><span>ALTITUDE</span><strong>${Math.round(hs.altFt).toLocaleString()} <small>ft</small></strong></div><div><span>THROTTLE</span><strong>${hs.throttle}%</strong></div></div>`:''}
         <div class="pause-guidance"><button type="button" class="text-button" data-reminders>${options.showHints?'Hide':'Show'} key reminders</button>${this.practice?`<button type="button" class="text-button" data-checklist>${options.showChecklist?'Hide':'Show'} flight coach</button><button type="button" class="text-button" data-school>${this.coach.course.status==='active'?'Switch to free flight':'Start flight school'}</button>`:''}</div>
-        <div class="pause-secondary">${continuation.operation?'':`<button type="button" class="text-button" data-restart>${pendingTier&&graphicsSaved?'Restart with new graphics':continuation.restartLabel}</button>`}<button type="button" class="text-button" data-fullscreen>Fullscreen</button></div>
+        <div class="pause-secondary">${continuation.operation||resultRestart?'':`<button type="button" class="text-button" data-restart>${pendingTier&&graphicsSaved?'Restart with new graphics':continuation.restartLabel}</button>`}<button type="button" class="text-button" data-fullscreen>Fullscreen</button></div>
       </details>
       <div class="pause-exit"><button type="button" class="text-button" data-hangar>Back to preflight ↗</button><p class="pause-note" ${!ready&&!complete?'data-settings-save':''}>${ready?'Five short exercises. Learn at your own pace.':complete?this.state.progressSaved===false?'This result is not saved.':this.state.progressSaved===true?'This result is saved in this browser.':'Choose another flight from your pilot log.':settingsSaved?'Controls and settings save in this browser.':'Some settings are available for this session only.'}</p></div>`;
     for(const b of this.pauseDialog.body.querySelectorAll('[data-pause]'))b.onclick=()=>{
@@ -238,6 +262,7 @@ export class Cockpit {
     };
     mountQuickTune(this.pauseDialog.body.querySelector('[data-quick-tune]'),{expanded:!!tuneOpen,onControls:()=>this.openControls('controls')});
     this.pauseDialog.body.querySelector('[data-resume]').onclick=()=>this.resume();
+    this.pauseDialog.body.querySelector('[data-tactical]')?.addEventListener('click',()=>this.openTactical());
     this.pauseDialog.body.querySelector('[data-reminders]').onclick=()=>{SETTINGS.saveSettings({showHints:!SETTINGS.current().showHints});this.showPause();this.pauseDialog.body.querySelector('[data-reminders]').focus();};
     this.pauseDialog.body.querySelector('[data-checklist]')?.addEventListener('click',()=>{SETTINGS.saveSettings({showChecklist:!SETTINGS.current().showChecklist});this.showPause();this.pauseDialog.body.querySelector('[data-checklist]').focus();});
     this.pauseDialog.body.querySelector('[data-recover]')?.addEventListener('click',()=>{this.recoverPractice();this.coach.reset();this.showPause();this.pauseDialog.body.querySelector('[data-resume]').focus();});
@@ -253,12 +278,13 @@ export class Cockpit {
       }
       location.assign('/');
     };
-    const restart=()=>this.confirmLeave(continuation.operationComplete?returnToPreflight:()=>location.reload(),continuation.restartTitle,{label:continuation.operation||scenario?continuation.restartLabel:undefined,detail:continuation.consequence});
+    const restart=()=>this.confirmLeave(continuation.operationComplete?returnToPreflight:()=>location.reload(),resultRestart?`${restartLabel}?`:continuation.restartTitle,{label:continuation.operation||scenario||resultRestart?restartLabel:undefined,detail:continuation.consequence});
     this.pauseDialog.body.querySelector('[data-restart]').onclick=restart;
     this.pauseDialog.body.querySelector('[data-replay-scenario]')?.addEventListener('click',restart);
     this.pauseDialog.body.querySelector('[data-hangar]').onclick=()=>this.confirmLeave(returnToPreflight,'Return to preflight?');
     this.pauseDialog.body.querySelector('[data-fullscreen]').onclick=e=>fullscreen(e.currentTarget);
     this.pauseDialog.body.querySelector('[data-next]')?.addEventListener('click',()=>{if(next)location.assign(sortieURL(next));});
+    this.pauseDialog.body.querySelector('[data-debrief-log]')?.addEventListener('click',()=>this.openLog());
     this.pauseDialog.show();
   }
   startFlightSchool() {
@@ -313,8 +339,27 @@ export class Cockpit {
     if(!brief)return '';
     return `${brief.briefing.length?`<section class="pause-brief" aria-label="Scenario briefing"><strong>${escapeHTML(brief.title)}</strong>${brief.briefing.map(line=>`<p>${escapeHTML(line)}</p>`).join('')}${brief.contentNote?`<p class="save-note">${escapeHTML(brief.contentNote)}</p>`:''}</section>`:''}<section class="pause-brief" aria-label="Mission objectives"><div><span class="eyebrow">YOUR OBJECTIVES</span><small>${brief.remaining===null?'':brief.remaining+' remaining · '}${brief.completed} / ${brief.total} complete</small></div><ul>${brief.objectives.map(o=>`<li class="${o.status}"><span aria-label="${o.status}">${['done','protected'].includes(o.status)?'✓':o.status==='failed'?'×':'○'}</span><b>${escapeHTML(o.label)}</b><small>${escapeHTML(o.detail)}</small></li>`).join('')}</ul></section>`;
   }
+  captureDebrief() {
+    if(this.practice)return null;
+    this.debrief ??=captureFlightDebrief(this.state);
+    return this.debrief;
+  }
+  renderDebrief() {
+    const report=this.captureDebrief();
+    if(!report)return '';
+    const statuses={complete:'Complete',protected:'Protected',held:'Held at finish',failed:'Failed',incomplete:'Incomplete'};
+    const aircraft=report.aircraft;
+    const stores=aircraft?[`${aircraft.hull}% hull`,aircraft.cannon===null?'':`${aircraft.cannon} cannon rounds`,aircraft.missiles===null?'':`${aircraft.missiles} missiles`].filter(Boolean).join(' · '):'';
+    return `<section class="sortie-debrief" aria-label="Sortie report"><div class="sortie-report-heading"><span class="eyebrow">SORTIE REPORT</span><span>At mission end</span></div>
+      ${report.metrics.length?`<dl class="sortie-metrics">${report.metrics.map(metric=>`<div><dt>${escapeHTML(metric.label)}</dt><dd>${escapeHTML(metric.value)}</dd></div>`).join('')}</dl>`:''}
+      ${report.noAircraft?'<p class="sortie-aircraft lost">No aircraft remaining.</p>':aircraft?`<p class="sortie-aircraft"><b>Aircraft at finish</b><span>${escapeHTML(stores)}</span></p>`:''}
+      ${report.friendlyLosses===null?'':`<p class="sortie-friendly">Friendly units lost: <b>${report.friendlyLosses}</b></p>`}
+      ${report.objectives.length?`<details class="sortie-objectives" ${report.won?'':'open'}><summary>Objective results <span>${report.objectives.filter(o=>o.status==='complete'||o.status==='protected'||o.status==='held').length} / ${report.objectives.length} fulfilled or held</span></summary><ul>${report.objectives.map(objective=>`<li class="${objective.status}"><span aria-hidden="true">${['complete','protected','held'].includes(objective.status)?'✓':objective.status==='failed'?'×':'○'}</span><b>${escapeHTML(objective.label)}</b><small>${escapeHTML(objective.detail)}${objective.detail?' · ':''}${statuses[objective.status]}</small></li>`).join('')}</ul></details>`:''}
+    </section>`;
+  }
   update(now,dtMs) {
     if(this.paused)return;
+    this.captureDebrief();
     this.updateMissileFeedback(now);
     if(this.state.ready)this.coach?.update(Math.min(dtMs/1000,10/120));
     if(this.state.ready){this.samples.push(dtMs);if(this.samples.length>180)this.samples.shift();}

@@ -28,8 +28,8 @@ const NO_DASH = [];
 
 // ---------------------------------------------------------------------------
 // Pure geometry. No DOM references anywhere in this section — importable
-// straight into Node for the qa battery. This is the ONLY place ladder/FPM
-// screen math is computed; the class below calls these, never reimplements.
+// straight into Node for the qa battery. The ladder's scalar batch below
+// preserves this geometry while sharing one rotation across all its points.
 // ---------------------------------------------------------------------------
 
 export const VFOV_DEG = 40;        // pitch degrees spanning the full screen height
@@ -37,6 +37,7 @@ export const LADDER_RUNG_STEP = 5; // degrees between rungs
 export const LADDER_GAP = 34;      // px either side of boresight left un-drawn
 export const LADDER_HALF_W = 130;  // px length of each rung segment beyond the gap
 export const FPM_CAGE_PX = 150;    // px — FPM pins near the reticle at extreme AoA
+const MAX_LADDER_RUNGS = Math.floor((VFOV_DEG + LADDER_RUNG_STEP * 4) / LADDER_RUNG_STEP) + 1;
 
 // pixels per degree of pitch, from viewport height.
 export function pxPerDegree(heightPx, vfovDeg = VFOV_DEG) {
@@ -91,10 +92,10 @@ const font = (size, weight = 400) => `${weight} ${size}px ${FONT}`;
 
 // stroke a batch of disjoint segments [x1,y1,x2,y2, ...] as ONE path — the
 // per-stroke() fixed cost, not path length, dominates canvas 2D line drawing.
-function strokeSegs(ctx, segs, width) {
-  if (!segs.length) return;
+function strokeSegs(ctx, segs, width, length = segs.length) {
+  if (!length) return;
   ctx.beginPath();
-  for (let i = 0; i < segs.length; i += 4) {
+  for (let i = 0; i < length; i += 4) {
     ctx.moveTo(segs[i], segs[i + 1]);
     ctx.lineTo(segs[i + 2], segs[i + 3]);
   }
@@ -283,45 +284,64 @@ export class HUD {
 
     // batch into 3 stroke passes (solid rungs+ticks 1.4 / dashed sub-horizon
     // rungs 1.4 / horizon 2) + one text pass
-    const solid = [], dashed = [], horizon = [], labels = [];
+    // At most 13 rungs fit this pitch window. Keep fixed scratch buffers per
+    // HUD, and pass used counts so changing pitch never draws stale segments.
+    const scratch = this._ladderScratch ||= {
+      solid: new Float64Array(MAX_LADDER_RUNGS * 16), dashed: new Float64Array(MAX_LADDER_RUNGS * 8),
+      horizon: new Float64Array(8), labels: new Float64Array(MAX_LADDER_RUNGS * 8),
+    };
+    const { solid, dashed, horizon, labels } = scratch;
+    let solidN = 0, dashedN = 0, horizonN = 0, labelsN = 0;
+    const th = -rollDeg * Math.PI / 180, c = Math.cos(th), s = Math.sin(th);
 
     for (let r = lo; r <= hi; r += LADDER_RUNG_STEP) {
       if (r < -90 || r > 90) continue;
       const isHorizon = r === 0;
       const tickLen = isHorizon ? 0 : 9;
       const tickDir = r > 0 ? 1 : -1; // end-caps bend TOWARD the horizon
+      const localY = (pitchDeg - r) * pxPerDeg;
 
-      for (const side of [-1, 1]) {
+      for (let side = -1; side <= 1; side += 2) {
         const innerX = side * LADDER_GAP;
         const outerX = side * (LADDER_GAP + LADDER_HALF_W);
-        const p1 = rungPoint(r, pitchDeg, rollDeg, cx, cy, pxPerDeg, innerX);
-        const p2 = rungPoint(r, pitchDeg, rollDeg, cx, cy, pxPerDeg, outerX);
-        (isHorizon ? horizon : r < 0 ? dashed : solid).push(p1.x, p1.y, p2.x, p2.y);
+        const p1x = cx + innerX * c - localY * s, p1y = cy + innerX * s + localY * c;
+        const p2x = cx + outerX * c - localY * s, p2y = cy + outerX * s + localY * c;
+        const segments = isHorizon ? horizon : r < 0 ? dashed : solid;
+        let offset = isHorizon ? horizonN : r < 0 ? dashedN : solidN;
+        segments[offset++] = p1x; segments[offset++] = p1y;
+        segments[offset++] = p2x; segments[offset++] = p2y;
+        if (isHorizon) horizonN = offset;
+        else if (r < 0) dashedN = offset;
+        else solidN = offset;
 
         if (tickLen) {
-          const p3 = rungPoint(r, pitchDeg, rollDeg, cx, cy, pxPerDeg, outerX, tickDir * tickLen);
-          solid.push(p2.x, p2.y, p3.x, p3.y); // end-cap ticks are always solid
+          const tickY = localY + tickDir * tickLen;
+          solid[solidN++] = p2x; solid[solidN++] = p2y;
+          solid[solidN++] = cx + outerX * c - tickY * s;
+          solid[solidN++] = cy + outerX * s + tickY * c; // end-cap ticks are always solid
           // label stands off PAST the tick tip along the tick's own direction
           // (not along the rung line) — a fixed clear gap at every roll angle,
           // since "further along the line" collapses to near-zero separation
           // once the roll rotates the tick to be nearly parallel with the line.
-          const lp = rungPoint(r, pitchDeg, rollDeg, cx, cy, pxPerDeg, outerX, tickDir * (tickLen + 11));
-          labels.push(lp.x, lp.y, Math.abs(r), side); // text upright at the rotated anchor
+          const labelY = localY + tickDir * (tickLen + 11);
+          labels[labelsN++] = cx + outerX * c - labelY * s;
+          labels[labelsN++] = cy + outerX * s + labelY * c;
+          labels[labelsN++] = Math.abs(r); labels[labelsN++] = side; // text upright at the rotated anchor
         }
       }
     }
 
-    strokeSegs(ctx, solid, 1.4);
-    if (dashed.length) {
+    strokeSegs(ctx, solid, 1.4, solidN);
+    if (dashedN) {
       ctx.setLineDash(DASH);
-      strokeSegs(ctx, dashed, 1.4);
+      strokeSegs(ctx, dashed, 1.4, dashedN);
       ctx.setLineDash(NO_DASH);
     }
-    strokeSegs(ctx, horizon, 2);
+    strokeSegs(ctx, horizon, 2, horizonN);
 
     ctx.font = font(11);
     ctx.textBaseline = "middle";
-    for (let i = 0; i < labels.length; i += 4) {
+    for (let i = 0; i < labelsN; i += 4) {
       ctx.textAlign = labels[i + 3] < 0 ? "right" : "left";
       fillTextH(ctx, String(labels[i + 2]), labels[i], labels[i + 1]);
     }
