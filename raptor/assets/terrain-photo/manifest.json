@@ -1,0 +1,416 @@
+{
+  "version": 1,
+  "materials": [
+    {
+      "kind": "rock",
+      "sourceAsset": "rock_face_03",
+      "authors": {
+        "Dario Barresi": "Photography",
+        "Rico Cilliers": "Processing"
+      },
+      "sourcePage": "https://polyhaven.com/a/rock_face_03",
+      "license": "CC0",
+      "licenseURL": "https://polyhaven.com/license",
+      "periodM": 2.7,
+      "sourceSize": 2048,
+      "sourceBitDepth": {
+        "diffuse": 16,
+        "normal": 16,
+        "roughness": 16
+      },
+      "size": 512,
+      "channels": [
+        "slopeU",
+        "slopeV",
+        "roughness^4 + 2*(slopeU^2+slopeV^2)",
+        "zero-mean linear luminance residual"
+      ],
+      "file": "rock-photo-moments-512.rgba16f.gz",
+      "encoding": "rgba16f-le",
+      "bytes": 2097152,
+      "gzipBytes": 1953190,
+      "sha256": "f7c4572227776dfab456ee27b4b62f93625336b6ed60e9df112fc69238e7cd62",
+      "tiltRemoved": [
+        -0.027300101763975425,
+        -0.0016244533828732087
+      ],
+      "sourceSlopeMagnitudeP50P95P99Max": [
+        0.26024304839849294,
+        0.8781107104580962,
+        1.6326442603524076,
+        20.44757400616511
+      ],
+      "sourceMeanRoughnessFourth": 0.45715335436399546,
+      "sourceMeanSlopeSquared": 0.22672658566488044,
+      "normalSlopeClamp": null,
+      "overlappingMipIdentity": {
+        "referenceSize": 1024,
+        "baseIsReferenceMip1ByteExact": true,
+        "referenceBaseSha256": "ea1a620ce14d2f8235db2409b6a7374b765b11a6de4d1c24e3b55aa161a21223",
+        "reason": "512 begins at the exact half-quantized mip1 of the 1024 reference; all coarser CPU mips are byte-identical."
+      },
+      "luma": {
+        "colorSpace": "source sRGB decoded to linear before luminance",
+        "highpassSigmaM": 0.3,
+        "gain": 0.55,
+        "clampBeforeRecentering": 0.3,
+        "mean": 1.0749945431598462e-06,
+        "rms": 0.13062796902155543
+      },
+      "mipProof": [
+        {
+          "size": 512,
+          "mean": [
+            -1.3735734682995826e-07,
+            9.105269782594405e-08,
+            0.9106059614568949,
+            1.0749945431598462e-06
+          ],
+          "meanSlopeSquared": 0.14958849209941433,
+          "minimumRoughnessFourthMoment": 0.1743714016629383,
+          "residualRMS": 0.13062796902155543
+        },
+        {
+          "size": 256,
+          "mean": [
+            1.5276236808858812e-07,
+            -6.858681445010006e-08,
+            0.9106035344302654,
+            1.1485044524306431e-06
+          ],
+          "meanSlopeSquared": 0.11227375162369757,
+          "minimumRoughnessFourthMoment": 0.24964203825220466,
+          "residualRMS": 0.11790421758016972
+        },
+        {
+          "size": 128,
+          "mean": [
+            6.609479896724224e-07,
+            5.8120349422097206e-08,
+            0.9106030166149139,
+            1.2355594662949443e-06
+          ],
+          "meanSlopeSquared": 0.08020272564228022,
+          "minimumRoughnessFourthMoment": 0.28523682057857513,
+          "residualRMS": 0.10556116296703152
+        },
+        {
+          "size": 64,
+          "mean": [
+            -2.789311110973358e-07,
+            -2.4191103875637054e-07,
+            0.9106094837188721,
+            7.675262168049812e-07
+          ],
+          "meanSlopeSquared": 0.05225091085212219,
+          "minimumRoughnessFourthMoment": 0.3313750403394806,
+          "residualRMS": 0.0924304970020912
+        },
+        {
+          "size": 32,
+          "mean": [
+            -4.5495107769966125e-07,
+            -3.073364496231079e-07,
+            0.9106197357177734,
+            -2.468004822731018e-08
+          ],
+          "meanSlopeSquared": 0.030399779364691293,
+          "minimumRoughnessFourthMoment": 0.39846922270953655,
+          "residualRMS": 0.07815689335121359
+        },
+        {
+          "size": 16,
+          "mean": [
+            -1.944601535797119e-06,
+            1.5273690223693848e-07,
+            0.9106111526489258,
+            -1.218169927597046e-06
+          ],
+          "meanSlopeSquared": 0.01644151005961092,
+          "minimumRoughnessFourthMoment": 0.47406663734000176,
+          "residualRMS": 0.06029305701469077
+        },
+        {
+          "size": 8,
+          "mean": [
+            -2.980232238769531e-07,
+            7.152557373046875e-07,
+            0.9105987548828125,
+            -1.1175870895385742e-06
+          ],
+          "meanSlopeSquared": 0.009315140712033099,
+          "minimumRoughnessFourthMoment": 0.5808351544837933,
+          "residualRMS": 0.0416511543720372
+        },
+        {
+          "size": 4,
+          "mean": [
+            2.86102294921875e-06,
+            4.5299530029296875e-06,
+            0.910614013671875,
+            -7.152557373046875e-07
+          ],
+          "meanSlopeSquared": 0.004503318938986922,
+          "minimumRoughnessFourthMoment": 0.6848287251486909,
+          "residualRMS": 0.0219436659773801
+        },
+        {
+          "size": 2,
+          "mean": [
+            0.0,
+            1.9073486328125e-06,
+            0.91064453125,
+            1.9073486328125e-06
+          ],
+          "meanSlopeSquared": 0.0014480670943157747,
+          "minimumRoughnessFourthMoment": 0.8536245728610083,
+          "residualRMS": 0.00808116492832972
+        },
+        {
+          "size": 1,
+          "mean": [
+            0.0,
+            1.9073486328125e-06,
+            0.91064453125,
+            1.9073486328125e-06
+          ],
+          "meanSlopeSquared": 3.637978807091713e-12,
+          "minimumRoughnessFourthMoment": 0.910644531242724,
+          "residualRMS": 1.9073486328125e-06
+        }
+      ],
+      "gpuLogicalBytesIncludingMipChain": 2796200,
+      "scope": "Material appearance residual only. Macro aerial-image color, DEM/collision and source transport are unchanged. Source diffuse is reflectance; no AO or normal-derived lighting was put into color."
+    },
+    {
+      "kind": "snow",
+      "sourceAsset": "snow_02",
+      "authors": {
+        "Rob Tuytel": "All"
+      },
+      "sourcePage": "https://polyhaven.com/a/snow_02",
+      "license": "CC0",
+      "licenseURL": "https://polyhaven.com/license",
+      "periodM": 2.0,
+      "sourceSize": 2048,
+      "sourceBitDepth": {
+        "diffuse": 8,
+        "normal": 8,
+        "roughness": 8
+      },
+      "size": 512,
+      "channels": [
+        "slopeU",
+        "slopeV",
+        "roughness^4 + 2*(slopeU^2+slopeV^2)",
+        "zero-mean linear luminance residual"
+      ],
+      "file": "snow-photo-moments-512.rgba16f.gz",
+      "encoding": "rgba16f-le",
+      "bytes": 2097152,
+      "gzipBytes": 1953090,
+      "sha256": "049371457e310f742098d3c5489b0f4d7d8de37b8c6d907915fb38273db03729",
+      "tiltRemoved": [
+        -0.15749171933909206,
+        -0.16008640607245825
+      ],
+      "sourceSlopeMagnitudeP50P95P99Max": [
+        0.20672575033396234,
+        0.5487105617121237,
+        0.8407600313803577,
+        3.6082573453648794
+      ],
+      "sourceMeanRoughnessFourth": 0.4131694413749665,
+      "sourceMeanSlopeSquared": 0.08740749097750569,
+      "normalSlopeClamp": null,
+      "overlappingMipIdentity": {
+        "referenceSize": 1024,
+        "baseIsReferenceMip1ByteExact": true,
+        "referenceBaseSha256": "3bcd64415bfc0d5827ad28907387707397af91ef33b74acafd7e5dd3d290b437",
+        "reason": "512 begins at the exact half-quantized mip1 of the 1024 reference; all coarser CPU mips are byte-identical."
+      },
+      "luma": {
+        "colorSpace": "source sRGB decoded to linear before luminance",
+        "highpassSigmaM": 0.3,
+        "gain": 0.25,
+        "clampBeforeRecentering": 0.14,
+        "mean": 4.968273970007431e-08,
+        "rms": 0.023439615541960498
+      },
+      "mipProof": [
+        {
+          "size": 512,
+          "mean": [
+            -1.734515535645187e-07,
+            2.847036739694886e-08,
+            0.5879848692566156,
+            4.968273970007431e-08
+          ],
+          "meanSlopeSquared": 0.03924214747360697,
+          "minimumRoughnessFourthMoment": 0.3784899818710983,
+          "residualRMS": 0.023439615541960498
+        },
+        {
+          "size": 256,
+          "mean": [
+            -3.3823380363173783e-07,
+            -6.461050361394882e-09,
+            0.5879846476018429,
+            4.641879058908671e-08
+          ],
+          "meanSlopeSquared": 0.026225082438050478,
+          "minimumRoughnessFourthMoment": 0.39377480090479366,
+          "residualRMS": 0.022022354446133777
+        },
+        {
+          "size": 128,
+          "mean": [
+            -4.490866558626294e-07,
+            -1.7697311704978347e-07,
+            0.5879856497049332,
+            6.867048796266317e-08
+          ],
+          "meanSlopeSquared": 0.017668895914237245,
+          "minimumRoughnessFourthMoment": 0.42116869799792767,
+          "residualRMS": 0.020867304765928154
+        },
+        {
+          "size": 64,
+          "mean": [
+            3.0393130145967007e-07,
+            -1.9936123862862587e-07,
+            0.5879862308502197,
+            -3.272725734859705e-08
+          ],
+          "meanSlopeSquared": 0.01290365556034211,
+          "minimumRoughnessFourthMoment": 0.4308432303369045,
+          "residualRMS": 0.01943255417660134
+        },
+        {
+          "size": 32,
+          "mean": [
+            9.157229214906693e-07,
+            -8.759088814258575e-07,
+            0.5879912376403809,
+            -9.615905582904816e-08
+          ],
+          "meanSlopeSquared": 0.008649920942298495,
+          "minimumRoughnessFourthMoment": 0.44254664072650485,
+          "residualRMS": 0.017272326766610557
+        },
+        {
+          "size": 16,
+          "mean": [
+            8.048955351114273e-07,
+            -1.150183379650116e-06,
+            0.5880041122436523,
+            -2.2631138563156128e-07
+          ],
+          "meanSlopeSquared": 0.004783367778226091,
+          "minimumRoughnessFourthMoment": 0.4613984109601006,
+          "residualRMS": 0.013531822496114128
+        },
+        {
+          "size": 8,
+          "mean": [
+            9.08970832824707e-07,
+            -2.0116567611694336e-06,
+            0.5879974365234375,
+            -6.221234798431396e-07
+          ],
+          "meanSlopeSquared": 0.0016414242178086624,
+          "minimumRoughnessFourthMoment": 0.4827189022616949,
+          "residualRMS": 0.009351929460918009
+        },
+        {
+          "size": 4,
+          "mean": [
+            2.1457672119140625e-06,
+            -2.6226043701171875e-06,
+            0.588043212890625,
+            -1.2814998626708984e-06
+          ],
+          "meanSlopeSquared": 0.0002884134628402535,
+          "minimumRoughnessFourthMoment": 0.510592435770377,
+          "residualRMS": 0.006309580099129341
+        },
+        {
+          "size": 2,
+          "mean": [
+            1.9073486328125e-06,
+            -1.9073486328125e-06,
+            0.5880126953125,
+            -1.430511474609375e-06
+          ],
+          "meanSlopeSquared": 5.153909842192661e-05,
+          "minimumRoughnessFourthMoment": 0.5629570884266286,
+          "residualRMS": 0.002023388459792115
+        },
+        {
+          "size": 1,
+          "mean": [
+            1.9073486328125e-06,
+            -1.9073486328125e-06,
+            0.587890625,
+            -1.430511474609375e-06
+          ],
+          "meanSlopeSquared": 7.275957614183426e-12,
+          "minimumRoughnessFourthMoment": 0.5878906249854481,
+          "residualRMS": 1.430511474609375e-06
+        }
+      ],
+      "gpuLogicalBytesIncludingMipChain": 2796200,
+      "scope": "Material appearance residual only. Macro aerial-image color, DEM/collision and source transport are unchanged. Source diffuse is reflectance; no AO or normal-derived lighting was put into color."
+    }
+  ],
+  "sources": [
+    {
+      "name": "rock_face_03",
+      "map": "Diffuse",
+      "file": ".context/graphics-six/review/terrain-pbr/references/rock_face_03_diff_2k.png",
+      "bytes": 22809381,
+      "sha256": "09c30549220c8297c06eabcb25d272fcc1b514548be712221bd9d47f010def8b",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/rock_face_03/rock_face_03_diff_2k.png"
+    },
+    {
+      "name": "rock_face_03",
+      "map": "nor_gl",
+      "file": ".context/graphics-six/review/terrain-pbr/references/rock_face_03_nor_gl_2k.png",
+      "bytes": 23159678,
+      "sha256": "53044f276b4f1c3041b91c7d4767bda0d75cb4b2d237f08b64eb4e95ee456a93",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/rock_face_03/rock_face_03_nor_gl_2k.png"
+    },
+    {
+      "name": "rock_face_03",
+      "map": "Rough",
+      "file": ".context/graphics-six/review/terrain-pbr/references/rock_face_03_rough_2k.png",
+      "bytes": 7453585,
+      "sha256": "9ba99f1441a94235f729d24ddaabd4dd4b978a460bd71b593dc6275b745044f6",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/rock_face_03/rock_face_03_rough_2k.png"
+    },
+    {
+      "name": "snow_02",
+      "map": "Diffuse",
+      "file": ".context/graphics-six/review/terrain-pbr/references/snow_02_diff_2k.png",
+      "bytes": 5321286,
+      "sha256": "9abe413e1740fa91564ce8111eb9cf11ae52b8de2914b884dda39c162e598289",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/snow_02/snow_02_diff_2k.png"
+    },
+    {
+      "name": "snow_02",
+      "map": "nor_gl",
+      "file": ".context/graphics-six/review/terrain-pbr/references/snow_02_nor_gl_2k.png",
+      "bytes": 8901048,
+      "sha256": "719e5acd81ee61cf19506a8e0069ea297ed00d2eb71a40101c4002cf35ac2e19",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/snow_02/snow_02_nor_gl_2k.png"
+    },
+    {
+      "name": "snow_02",
+      "map": "Rough",
+      "file": ".context/graphics-six/review/terrain-pbr/references/snow_02_rough_2k.png",
+      "bytes": 1656423,
+      "sha256": "0dcb2775b1220cee03dae5b92b57cc3e55bcece6a7e9fa0ac7a22b56dbbb6863",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/snow_02/snow_02_rough_2k.png"
+    }
+  ]
+}

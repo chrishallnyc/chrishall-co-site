@@ -3,16 +3,16 @@
 export const DEFAULT_CLOUD_MODE = 'native';
 import { tierParams } from './quality.js';
 
-// No-flag WebGPU now uses reversed depth + raw nearest-depth selection.
-// Old timing records measured a different default even with the same assets.
-export const QUALITY_PROFILE_VERSION = 'graphics-atmosphere-v3';
+// Cloud light reuse, denser HIGH noise, cached sky and geographic imagery
+// change the default workload even when the viewport and tier are unchanged.
+export const QUALITY_PROFILE_VERSION = 'graphics-atmosphere-v4';
 
 export function cloudQuality(tier, { mode = DEFAULT_CLOUD_MODE, scale, noise } = {}) {
   if (mode !== 'native' && mode !== 'adaptive') throw new Error('Unknown cloud mode');
   if (scale !== undefined && (!Number.isFinite(scale) || scale < .5 || scale > 1)) {
     throw new Error('Cloud scale must be between 0.5 and 1');
   }
-  if (noise !== undefined && noise !== 'standard' && noise !== 'ultra') throw new Error('Unknown cloud noise resolution');
+  if (noise !== undefined && !['standard', 'high', 'ultra'].includes(noise)) throw new Error('Unknown cloud noise resolution');
   const params = tierParams(tier);
   return Object.freeze({ mode,
     scale: mode === 'native' ? 1 : (scale ?? params.cloudScale),
@@ -28,7 +28,7 @@ export function cloudOptionsFromFlags(flags) {
   return {
     mode: mode === 'native' || mode === 'adaptive' ? mode : DEFAULT_CLOUD_MODE,
     ...(Number.isFinite(scale) && scale >= .5 && scale <= 1 ? { scale } : {}),
-    ...(noise === 'standard' || noise === 'ultra' ? { noise } : {}),
+    ...(['standard', 'high', 'ultra'].includes(noise) ? { noise } : {}),
   };
 }
 
@@ -43,9 +43,9 @@ export function qualityProfile({ backend, mode, renderScale, pixelRatio, scale, 
 // for the full game. Pose/time still vary within a front; this key isolates
 // distinct rendering paths, not every possible view of the same workload.
 export function qualityWorkload(flags) {
-  return ['post', 'vclouds', 'atmo', 'curvature', 'noterrain', 'nowater', 'waterenv',
+  return ['post', 'vclouds', 'atmo', 'skycache', 'curvature', 'noterrain', 'nowater', 'waterenv',
     'ocean', 'waterfine', 'watergrid', 'waterslopes', 'watershadow', 'waterenvsize',
-    'terrainnear', 'drape', 'snowdetail', 'terrainmaterials', 'terrainsource', 'cloudshadow', 'cloudtransport', 'ao', 'chain', 'aircraftAir', 'aircraftShadows', 'reverseDepth', 'reversedepth', 'logdepth', 'rawtaa', 'nobattle', 'nomatch']
+    'terrainnear', 'drape', 'geographicdetail', 'terrainphoto', 'snowdetail', 'terrainmaterials', 'terrainsource', 'cloudshadow', 'cloudtransport', 'ao', 'chain', 'aircraftAir', 'aircraftShadows', 'reverseDepth', 'reversedepth', 'logdepth', 'rawtaa', 'nobattle', 'nomatch']
     .filter(key => flags.has(key))
     .map(key => `${key}=${encodeURIComponent(flags.get(key))}`).join('&');
 }

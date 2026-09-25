@@ -3,7 +3,7 @@
 // this module never loads or swaps a geographic field.
 import { tierParams } from './quality.js';
 
-export const ASSET_PROFILE_VERSION = 'boot-assets-v2/near-grid-v1/cirrus-v4/fine-ocean-v2';
+export const ASSET_PROFILE_VERSION = 'boot-assets-v3/near-grid-v1/cirrus-v4/fine-ocean-v2/cloud-noise-v2/geographic-imagery-v1';
 
 export function cirrusAtlasResolution(tier, textureLimit = 8192) {
   return (tier === 'HIGH' || tier === 'ULTRA') && textureLimit >= 8192 ? 8192 : 2048;
@@ -29,7 +29,7 @@ export function requestedBootAssets(tier, { backend, front, flags,
   const noise = flags?.get('cloudnoise');
   return {
     cirrus: cirrusAtlasResolution(tier, textureLimit),
-    noise: noise === 'standard' || noise === 'ultra' ? noise : tierParams(tier).cloudNoise,
+    noise: ['standard', 'high', 'ultra'].includes(noise) ? noise : tierParams(tier).cloudNoise,
     fineOcean: hasOcean && backend === 'webgpu' && flags?.get('ocean') !== 'gerstner'
       ? oceanFineResolution(tier, flags?.get('waterfine')) : 0,
     source: sourceEnabled && hasTerrain
@@ -40,6 +40,27 @@ export function requestedBootAssets(tier, { backend, front, flags,
 function imageSize(texture) {
   const image = texture?.image;
   return image ? [image.width || image.naturalWidth || 0, image.height || image.naturalHeight || 0] : null;
+}
+
+function imageryIdentity(stream) {
+  if (!stream) return null;
+  const meta = stream.manifest;
+  // Resident tiles and fade/upload counters change during flight. The
+  // validated source geometry and content hashes identify the fixed pack.
+  return {
+    supported: stream.supported,
+    schema: meta.schema, front: meta.front,
+    imagePixels: meta.imagePixels, metresPerPixel: meta.metresPerPixel,
+    grid: [meta.rows, meta.columns], tileSizeM: meta.tileSizeM, gutterPixels: meta.gutterPixels,
+    worldBounds: { ...meta.worldBounds },
+    tiles: meta.tiles.map(tile => [tile.id, tile.sha256]),
+  };
+}
+
+function photoIdentity(detail) {
+  if (!detail) return null;
+  const { version, status, requested, eligible, hashes } = detail.diagnostics();
+  return { version, status, requested, eligible, hashes: hashes ? { ...hashes } : null };
 }
 
 // Called only after the loaders settle. Missing/fallback data receives a
@@ -63,6 +84,8 @@ export function describeBootAssets({ bootTier, terrain = null, water = null,
         normalSHA256: source.normalPixelsSHA256 || null } : null,
       drape: { albedo: imageSize(drape?.albedo), cover: imageSize(drape?.cover),
         normal: imageSize(drape?.nrm), ao: imageSize(drape?.ao) },
+      imagery: imageryIdentity(terrain.geographicImagery),
+      photo: photoIdentity(terrain.photoDetail),
     } : null,
     ocean: !water ? null : { mode: fftOcean ? 'fft' : 'gerstner',
       macroN: fftOcean ? 256 : 0, fineN: fftOcean ? fineOcean?.N || 0 : 0,

@@ -32,11 +32,29 @@ surface lighting supplies those glints separately.
 
 ## Resolution and temporal rendering
 
-Standard cloud noise is 128³ base plus 64³ detail; Ultra is 256³ plus 128³. Both
-sample the same seeded physical fields. Ultra increases spatial sampling density
+Standard cloud noise is 128³ base plus 64³ detail; High is 192³ plus 96³,
+and Ultra is 256³ plus 128³. All three
+sample the same seeded physical fields. High and Ultra increase spatial sampling density
 without enlarging cloud cells or moving the weather planes. Compressed local
 assets are dimension-checked and verified against decoded SHA-256 hashes. Failed
-Ultra loads fall back to standard assets, then a standard CPU bake.
+High/Ultra loads fall back to standard assets, then a standard CPU bake.
+
+The native WebGPU cloud pass caches cumulative optical depth along the Sun,
+Moon and two diffuse-light directions. Four published 3D volumes and one staging
+volume rotate ownership only after a complete update. Each frame produces at
+most 640 columns; stale source directions and large camera cuts immediately use
+the original light integration. Source-specific frozen curvature keeps the
+cache aligned while the observer moves. This changes cloud radiance only; the
+original view march still owns alpha, distance, depth and motion. Typical cache
+storage is about 115–160 MiB, depending on source angles and staging dimensions.
+WebGL and the optional adaptive cloud pass retain their original lighting path.
+
+The observer sky uses a 1024×512 RGBA16F scattering cache above a one-megapixel
+render buffer. It retains the direct 32-step atmosphere near the horizon and
+rebuilds when altitude, source direction or irradiance changes. Discs, cirrus,
+airglow, stars, probes and surface aerial perspective keep their existing paths.
+Failure or a smaller render buffer selects direct scattering. Day/night source
+changes retain compiled light programs; stars and Moon warm up during loading.
 
 The billboard fallback joins tropical tower puffs into overlapping columns,
 uses a shared height gradient, and omits interior cap planes. Dense tower cores
@@ -109,14 +127,38 @@ are hash-checked before use. A 512 m collar joins the original field, and load
 failure retains the original terrain. This adds geographic relief in that
 region; it does not increase the photographic imagery's resolution.
 
+Nellis High/Ultra WebGPU streams real one-metre NAIP imagery over a 12.288 km
+square around the normal flight area. Thirty tiles provide valid source imagery
+across 67.45% of that square; transparent holes and positions outside coverage
+retain the base image. Four resident 2064² tiles use about 86.7 MiB including
+mips, with at most two requests in flight. Detail fades from actual upload,
+across missing neighbors, and with pixel footprint. It is disabled above 2500 m
+AGL. A failed tile keeps the base image without repeated automatic requests.
+The older Nellis base image also has its NAIP block aspect distortion repaired;
+Sentinel fill, coverage masks, terrain heights and normals retain their mapping.
+A small 0.241% of the area retains legacy feather pixels where no original
+radiance was recoverable. Source details are in the imagery credits below.
+
+Terrain material relief now follows three physical projection planes on steep
+slopes. Valdez High/Ultra adds optional scanned rock and snow microrelief with
+rotated, differently scaled samples and filtered slope/roughness moments. The
+photographs describe material appearance, not new geographic terrain. Their
+bounded four-second load completes before material compilation; any failure
+keeps the procedural material. Other fronts and lower asset tiers do not fetch
+them. The packed array adds about 9.3 MiB over the procedural material textures.
+
 ## Assets
 
-- `bakery/bake_cloud_noise.mjs`: deterministic standard/Ultra noise assets.
+- `bakery/bake_cloud_noise.mjs`: deterministic Standard/High/Ultra noise assets.
 - `bakery/bake_cirrus.mjs`: 2048²/8192² optical-density atlases of broken cirrus
   veils, fine fibres, and irregular fallstreaks;
   [source notes](assets/clouds/ASSET-CREDITS.md) describe their procedural origin.
 - `bakery/bake_terrain_source.py`: reproducible central Valdez height/normal
   pair, with [source request, hashes and credits](assets/terrain/source/ASSET-CREDITS.md).
+- [Nellis imagery credits](assets/terrain/nellis-imagery/ASSET-CREDITS.md):
+  USGS/USDA sources, geographic grid and base-image correction.
+- [Scanned material credits](assets/terrain-photo/ASSET-CREDITS.md): CC0 rock
+  and snow, physical scales, hashes and filtered moment encoding.
 - [Lunar map credits](assets/sky/ASSET-CREDITS.md): source and attribution.
 - [Bright-star credits](assets/sky/BRIGHT-STARS-CREDITS.md): NASA catalog, source query,
   redistribution declaration, hashes, and reproducible baker instructions.
@@ -176,12 +218,15 @@ Useful comparison flags:
 | `gl=1` | Force WebGL2. |
 | `cloudmode=native\|adaptive` | Select the cloud compositor at boot. |
 | `cloudscale=.5` through `1` | Override the adaptive integration scale. |
-| `cloudnoise=standard\|ultra` | Select noise assets independently of output size. |
+| `cloudnoise=standard\|high\|ultra` | Select noise assets independently of output size. |
 | `cloudtransport=legacy\|strict\|toa` | Compare fitted lighting, unomitted calibrated sources, or uncalibrated sources. |
 | `reversedepth=0` | Compare forward depth with the WebGPU reversed-depth default. |
 | `logdepth=0` | Restore ordinary forward depth on WebGL2. WebGPU is unchanged. |
 | `rawtaa=0` | Compare native temporal depth selection with the raw-depth default. |
 | `curvature=0` | Compare the legacy flat render frame. |
+| `skycache=0` | Compare direct observer-sky scattering. |
+| `geographicdetail=0` | Disable streamed Nellis one-metre imagery. |
+| `terrainphoto=0` | Disable optional scanned Valdez material detail. |
 | `terrainnear=0` | Disable the near terrain grid at every quality tier. |
 | `terrainsource=0\|16` | Compare original and central 5 m Valdez elevation data. |
 | `snowdetail=0` | Disable added wind-packed snow material relief. |

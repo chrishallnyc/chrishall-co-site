@@ -1,4 +1,4 @@
-// Run from any directory: node raptor/bakery/bake_cloud_noise.mjs [standard|ultra] [seed]
+// Run from any directory: node raptor/bakery/bake_cloud_noise.mjs [standard|high|ultra] [seed]
 // Reproducible local source assets; no network or external texture input.
 import { writeFile, mkdir } from "node:fs/promises";
 import { createHash } from "node:crypto";

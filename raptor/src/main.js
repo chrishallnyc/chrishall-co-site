@@ -1,3 +1,4 @@
+import { loadTerrainImagery } from "./world/terrain-imagery-loader.js";
 import { installReversedDepthSort } from "./engine/reverseddepth.js";
 // RAPTOR boot: renderer (WebGPU with WebGL2 fallback), sim, input, debug, hooks.
 
@@ -348,8 +349,22 @@ async function boot() {
       // The complete field loads before ground placement and stays fixed
       // through later Auto/menu render-quality changes.
       const sourceManifest = sourcePreset === "16" ? "/assets/terrain/source/valdez-inland-16km.json" : null;
+      const geographicImagery = atmosphere.frontName === "NELLIS" && drape && backend === "webgpu"
+        && ["HIGH", "ULTRA"].includes(bootAssetTier) && flags.get("geographicdetail") !== "0"
+        ? loadTerrainImagery({
+          manifestURL: new URL("/assets/terrain/nellis-imagery/manifest.json", location.href),
+          maxTextureSize: textureLimit,
+          maxTextureArrayLayers: renderer.backend.device.limits.maxTextureArrayLayers,
+          onFailure: error => { state.terrainImageryFailure = String(error.message || error); },
+        }).then(stream => {
+          if (stream) window.addEventListener("pagehide", event => { if (!event.persisted) stream.dispose(); });
+          return stream;
+        }) : null;
       terrain = await Terrain.load("/assets/terrain/" + fg.asset, atmosphere.frontName,
-        groundCloudShadow, { drape, aerial: atmoH?.aerial, curvature, sourceManifest });
+        groundCloudShadow, { drape, aerial: atmoH?.aerial, curvature, sourceManifest, geographicImagery,
+          photoDetail: { tier: bootAssetTier,
+            requested: flags.get("terrainphoto") !== "0" && flags.get("terrainmaterials") !== "0" } });
+      window.addEventListener("pagehide", event => { if (!event.persisted) terrain?.photoDetail?.dispose(); });
       scene.add(terrain.group);
       if (fg.ocean && flags.get("nowater") !== "1") {
         let fft = null;

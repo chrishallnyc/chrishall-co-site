@@ -13,7 +13,7 @@ function manualTier() {
 export const TIERS = {
   LOW:   { renderScale: 0.75, shadows: false, shadowSize: 0,    scatter: 0.25, clouds: "volumetric", cloudScale: .5,  cloudNoise: "standard", post: true },
   MED:   { renderScale: 1.0,  shadows: true,  shadowSize: 1024, scatter: 0.5,  clouds: "volumetric", cloudScale: .67, cloudNoise: "standard", post: true },
-  HIGH:  { renderScale: 1.0,  shadows: true,  shadowSize: 2048, scatter: 1.0,  clouds: "volumetric", cloudScale: .75, cloudNoise: "standard", post: true },
+  HIGH:  { renderScale: 1.0,  shadows: true,  shadowSize: 2048, scatter: 1.0,  clouds: "volumetric", cloudScale: .75, cloudNoise: "high", post: true },
   ULTRA: { renderScale: 1.25, shadows: true,  shadowSize: 4096, scatter: 1.0,  clouds: "volumetric", cloudScale: 1,   cloudNoise: "ultra", post: true },
 };
 

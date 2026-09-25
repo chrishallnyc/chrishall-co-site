@@ -96,8 +96,8 @@ for(const api of ['wgsl','glsl'])for(const front of ['VALDEZ','NELLIS','MARIANAS
   const arrays=layout.filter(t=>t.name==='terrain-surface-slope-moments');assert.equal(arrays.length,1);
   assert.equal(arrays[0].type,api==='wgsl'?'texture_2d_array<f32>':'sampler2DArray');
   const samples=code.split('\n').filter(line=>line.includes(arrays[0].binding+',')&&/textureSample\(|texture\(/.test(line));
-  assert.equal(samples.length,4,'Two original orientations for each material field');
-  for(const layer of [0,1])assert.equal(samples.filter(line=>new RegExp(api==='wgsl'?', '+layer+' \\);':', '+layer+' \\) \\);').test(line)).length,2,'Constant field layer '+layer);
+  assert.equal(samples.length,9,'Two rock and one aggregate orientation on each of three projections');
+  for(const layer of [0,1])assert.equal(samples.filter(line=>new RegExp(api==='wgsl'?', '+layer+' \\);':', '+layer+' \\) \\);').test(line)).length,layer===0?6:3,'Constant field layer '+layer);
   assert.match(vertex,/terrainPreviousDetailHeight/,'Retain previous terrain displacement');
   assert.match(code,/m1|location\( 1 \)/,'Retain velocity attachment');
   assert(warnings.every(w=>w.includes("Return statement used in an inline 'Fn()'")),'No unexpected builder warning');
@@ -108,7 +108,7 @@ test('packed layers retain the original half-float fields, snow and filter setti
  const {surface,snow}=terrainMaterialNodes({front:'VALDEZ',baseNormal:T.vec3(0,1,0),worldPosition:T.vec3(0,1400,0)}).textures;
  assert(surface?.isDataArrayTexture);assert.deepEqual([surface.image.width,surface.image.height,surface.image.depth],[256,256,2]);
  const words=256*256*4,sha=data=>createHash('sha256').update(new Uint8Array(data.buffer,data.byteOffset,data.byteLength)).digest('hex');
- assert.equal(sha(surface.image.data.subarray(0,words)),'35173741fd3b5e97c43c24fc68e65344a3328500beb883d4879f8a111429b0a0','Original rock half-floats');
+ assert.equal(sha(surface.image.data.subarray(0,words)),'33cb0d86b151d0a5326ee99db554fae440db779ba7575f70223a4fbfada23d26','Reviewed mineral-bedding rock half-floats');
  assert.equal(sha(surface.image.data.subarray(words)),'2ade12c29cc752f18d9ff13d3af928d51a36a8d5150705b568f706ab7aaec5ee','Original aggregate half-floats');
  assert.equal(sha(snow.image.data),'434c94ae2457fca9188cb006ed788b0b3c8ce64674650bb67d16a9fb013f379b','Original snow half-floats');
  assert.deepEqual([snow.image.width,snow.image.height],[512,512]);
