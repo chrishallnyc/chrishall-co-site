@@ -37,6 +37,8 @@ export class Player {
     this.throttleCmd = 0.8;
     this.gearDown = false;
     this._mouseDx = 0; this._mouseDy = 0;
+    this._manualSteering = false;
+    this._manualPointerAim = false;
     this._live = { rollL: 0, rollR: 0, yawL: 0, yawR: 0, thrUp: 0, thrDn: 0, pitchUp: 0, pitchDn: 0, brake: 0, wheel: 0, gearEdge: 0, fire: 0, aamEdge: 0 };
     this.crashes = 0;
     this.hp = 100;
@@ -91,18 +93,26 @@ export class Player {
   clearInput() {
     this._mouseDx = 0;
     this._mouseDy = 0;
+    this._manualSteering = false;
+    this._manualPointerAim = false;
     for (const key of Object.keys(this._live)) this._live[key] = 0;
   }
 
-  // Recover a lost aim marker without changing the aircraft's attitude or
-  // throttle. Discard queued mouse movement so it cannot undo the recenter.
+  // Hold the flight path already being flown. The instructor aims velocity,
+  // not the nose (which is several degrees above it at positive angle of
+  // attack). Recentring to the nose would add a climb on every press.
+  // At walking speed there is no meaningful flight path; fall back to nose.
   recenterAim() {
     const st = this.fm.state;
     this._q.set(st[S.QX], st[S.QY], st[S.QZ], st[S.QW]);
     this._f.set(1, 0, 0).applyQuaternion(this._q);
-    this.aimHeading = Math.atan2(this._f.y, this._f.x);
+    const horizontal = Math.hypot(st[S.VX], st[S.VY]);
+    const moving = Math.hypot(horizontal, st[S.VZ]) >= 5;
+    this.aimHeading = moving && horizontal >= 1
+      ? Math.atan2(st[S.VY], st[S.VX]) : Math.atan2(this._f.y, this._f.x);
     this.aimPitch = Math.max(-AIM_PITCH_LIM, Math.min(AIM_PITCH_LIM,
-      Math.asin(Math.max(-1, Math.min(1, this._f.z)))));
+      moving ? Math.atan2(st[S.VZ], horizontal)
+        : Math.asin(Math.max(-1, Math.min(1, this._f.z)))));
     this._mouseDx = 0;
     this._mouseDy = 0;
   }
@@ -134,10 +144,21 @@ export class Player {
 
   // ---- sim side ----
   reset() {
+    this.recoverFlight();
+  }
+
+  // Practice UI may offer this explicitly; combat only calls it through the
+  // crash/damage respawn path above. Restore a usable aircraft without
+  // replenishing ammunition, clearing active weapons, or rewriting progress.
+  recoverFlight() {
+    this.clearInput();
+    this.throttleCmd = 0.8;
+    this.gearDown = false;
     this._doSpawn();
     this.aimPitch = 0;
     this.aimHeading = this.spawn.headingRad;
     this.hp = 100;
+    this.hitFlash = 0;
     // A respawn is a discontinuity, never a flight segment to interpolate.
     this._prev?.set(this.fm.state);
     this._cameraReady = false;
@@ -147,12 +168,27 @@ export class Player {
     this._prev.set(this.fm.state);
     const L = this._live;
 
+    // A keyboard-only bank/rudder maneuver establishes a new course. Without
+    // this handoff the instructor fights the turn and flies back to the old
+    // pointer heading on release. If the pilot also aims with the pointer,
+    // retain that deliberate target for the entire manual maneuver instead.
+    const manual = L.rollL !== L.rollR || L.yawL !== L.yawR;
+    if (manual && !this._manualSteering) this._manualPointerAim = false;
+    if ((manual || this._manualSteering) && (this._mouseDx || this._mouseDy)) this._manualPointerAim = true;
+    if ((manual || this._manualSteering) && !this._manualPointerAim) {
+      const st = this.fm.state;
+      const qw = st[S.QW], qx = st[S.QX], qy = st[S.QY], qz = st[S.QZ];
+      this.aimHeading = Math.atan2(2 * (qx * qy + qw * qz), 1 - 2 * (qy * qy + qz * qz));
+    }
+    this._manualSteering = manual;
+
     // aim from accumulated mouse travel
     this.aimHeading -= this._mouseDx * MOUSE_SENS; // FM heading is CCW-from-east: mouse-right must decrease it
-    this.aimPitch = Math.max(-AIM_PITCH_LIM, Math.min(AIM_PITCH_LIM, this.aimPitch - this._mouseDy * MOUSE_SENS));
+    // Clamp after combining pointer and keyboard input: held arrow keys must
+    // obey the same limit as the pointer, including when both are active.
+    this.aimPitch = Math.max(-AIM_PITCH_LIM, Math.min(AIM_PITCH_LIM,
+      this.aimPitch - this._mouseDy * MOUSE_SENS + (L.pitchUp - L.pitchDn) * 0.9 * dt));
     this._mouseDx = 0; this._mouseDy = 0;
-    // arrow-key manual pitch nudges the aim
-    this.aimPitch += (L.pitchUp - L.pitchDn) * 0.9 * dt;
 
     // throttle: W/S ONLY (Chris's spec — the mouse never accelerates).
     // WT behavior: hold W → 100% in ~a second, KEEP holding → pushes into
@@ -175,7 +211,10 @@ export class Player {
       throttle: this.throttleCmd,
       rudder: L.yawR - L.yawL,
       rollOverride: L.rollR - L.rollL,
-      mode: "arcade",
+      // The instructor's aim-vector mode is named "mouse". Unknown modes
+      // fall through to realistic stick control, which ignores aimYaw and
+      // interprets aimPitch as a sustained G command instead of a direction.
+      mode: "mouse",
       brake: L.brake,
       gearDown: this.gearDown,
     }, { groundH: Math.max(groundH, 0) });
@@ -258,10 +297,14 @@ export class Player {
     this._q.set(st[S.QX], st[S.QY], st[S.QZ], st[S.QW]);
     this._f.set(1, 0, 0).applyQuaternion(this._q);
     this._r.set(0, 1, 0).applyQuaternion(this._q); // body right wing in ENU
+    this._u.set(0, 0, -1).applyQuaternion(this._q); // body up in ENU
     const heading = Math.atan2(this._f.x, this._f.y) * 180 / Math.PI; // from north, eastward
     const pitch = Math.asin(Math.max(-1, Math.min(1, this._f.z))) * 180 / Math.PI;
     // +roll = right bank: right wing dips → its ENU z goes negative
-    const roll = Math.atan2(-this._r.z, Math.hypot(this._r.x, this._r.y)) * 180 / Math.PI;
+    // Both components contain cos(pitch), so atan2 cancels it and retains
+    // the inverted half of the circle. A horizontal magnitude folded every
+    // bank past 90 degrees back toward zero, hiding inverted flight.
+    const roll = Math.atan2(-this._r.z, this._u.z) * 180 / Math.PI;
     return {
       speedKt: speed * 1.94384,
       altFt: st[S.PZ] * 3.28084,

@@ -48,6 +48,7 @@ export class Input {
     this._boundCodes = new Set();
     this._rebuildIndex();
     this._suspended = false;
+    this._pointerReady = true;
     this._kd = (e) => {
       if (this.suspended || (fromUI(e) && e.code !== "Escape") || !CODE.test(e.code)) return;
       // Command shortcuts belong to the browser unless the pilot explicitly
@@ -90,10 +91,15 @@ export class Input {
     };
     this._aux = (e) => { if (!this.suspended && !fromUI(e) && this._byTrigger.has("Mouse" + e.button)) e.preventDefault(); };
     this._mm = (e) => {
-      if (this.suspended || fromUI(e)) return;
+      if (this.suspended || fromUI(e)) { this._pointerReady = false; return; }
       this.mouse.x = e.clientX; this.mouse.y = e.clientY;
       this.mouse.nx = (e.clientX / (globalThis.innerWidth || 1)) * 2 - 1;
       this.mouse.ny = -((e.clientY / (globalThis.innerHeight || 1)) * 2 - 1);
+      // Moving back from a menu is cursor placement, not a steering command.
+      // Pointer lock supplies relative travel and needs no entry baseline.
+      const relative = !!globalThis.document?.pointerLockElement;
+      if (!this._pointerReady && !relative) { this._pointerReady = true; return; }
+      this._pointerReady = true;
       this.mouse.dx += (e.movementX || 0) * this.options.mouseSensitivity;
       this.mouse.dy += (e.movementY || 0) * this.options.mouseSensitivity * (this.options.invertY ? -1 : 1);
     };
@@ -322,6 +328,7 @@ export class Input {
 
   clear() {
     this.down?.clear(); this.edge?.clear();
+    this._pointerReady = false;
     if (this.mouse) this.mouse.dx = this.mouse.dy = this.mouse.wheel = 0;
   }
   consumeFrame() {
