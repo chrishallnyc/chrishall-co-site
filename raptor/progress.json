@@ -1,12 +1,12 @@
 {
  "updated": "2026-09-24T18:37:40-07:00",
- "version": "v1.7.0",
- "now": "v1.7.0 — AIRCRAFT, SKY AND TERRAIN. Smoother airframes, layered coatings and altitude-aware reflections meet finer cloud structure and lighting, streamed Nellis aerial detail, and scanned Alaska rock and snow. Flight school, controls and audio remain integrated.",
+ "version": "v1.8.0",
+ "now": "v1.8.0 — AIRCRAFT, SKY AND TERRAIN. Smoother airframes, layered coatings and altitude-aware reflections join v1.7.0's finer cloud lighting, streamed Nellis aerial detail, and scanned Alaska rock and snow. Flight school, controls and audio remain integrated.",
  "nowPhase": 13,
  "paused": false,
  "pushes": 74,
  "ledger": [
-  "2026-09-24 v1.7.0 — Combined aircraft, sky and terrain graphics release. Aircraft rebuilt and refined through five successive rendered passes: continuous joins, formed bays, independent maintenance coatings, layered nozzle metal, altitude-aware sky/cloud/ground reflections and fresh contact shading. Fighter, transport and drone finishes refined. Finer High cloud assets and cached lighting, corrected Nellis imagery with nearby one-metre tiles, scanned Alaska rock/snow and steep-slope material projection join sky/ocean rendering improvements. Flight school and controls from v1.5.0 and v1.6.0 retained; component timings do not establish combined-release performance.",
+  "2026-09-24 v1.8.0 — Combined aircraft, sky and terrain graphics release. Aircraft rebuilt and refined through five successive rendered passes: continuous joins, formed bays, independent maintenance coatings, layered nozzle metal, altitude-aware sky/cloud/ground reflections and fresh contact shading. Fighter, transport and drone finishes refined. Retains v1.7.0's finer High cloud assets and cached lighting, corrected Nellis imagery with nearby one-metre tiles, scanned Alaska rock/snow, steep-slope material projection and sky/ocean rendering improvements. Flight school and controls from v1.5.0 and v1.6.0 retained; component timings do not establish combined-release performance.",
   "2026-09-24 v1.4.0 — Clouds, sky and landscapes rebuilt through repeated visual refinement. Full-resolution cloud lighting, 8K cirrus, catalogued stars and mapped Moon, 512² fine water, real 5 m central Valdez elevation data, near terrain and snow detail. Aircraft coating and self-shadows share the world lighting.",
   "2026-09-24 v1.3.0 — Aircraft graphics rebuilt and refined through five further passes. New cockpit and mechanical detail, paint and engine materials, articulated bays, volumetric exhaust, and shared distance/quality levels. Browser checks pass on WebGPU and WebGL; combat simulation remains unchanged.",
   "2026-09-24 v1.2.0: Flight and combat audio rebuilt. Recorded afterburner texture, spool-driven turbine detail, round-aligned cannon attacks, moving aircraft and missiles, delayed blasts, gear and ground-contact sounds, and distinct threat tones. Audition the mix in the audio lab.",

@@ -36,7 +36,7 @@ export function showFlightdeck(state) {
     <article class="flight-brief" aria-labelledby="brief-title"><p class="eyebrow" id="brief-eyebrow"></p><h2 id="brief-title"></h2><p id="brief-copy"></p><ul id="brief-features"></ul><button class="text-button" type="button" id="brief-more" hidden>Read the full briefing <span aria-hidden="true">↗</span></button><div class="brief-footer" id="brief-footer"></div></article></section>
     <section class="launch-bar" aria-label="Launch your flight"><div><b id="launch-label">Ready for a practice flight</b><span id="setup-summary"></span></div><button id="flyBtn" class="ui-button primary launch-button" type="button"><span id="launch-action">Start practice</span><span aria-hidden="true">↗</span></button></section>
     <p id="deck-status" class="deck-status" role="status" aria-live="polite"></p></main>
-    <footer class="deck-footer"><span id="deck-storage-note">Progress & preferences use this browser’s storage.</span><div><button type="button" class="text-button" data-fullscreen>Fullscreen</button><a href="/audio-credits.html" target="_blank" rel="noopener">Sound credits ↗</a><a href="/devlog.html" target="_blank" rel="noopener">Development notes ↗</a><span>RAPTOR 1.7.0</span></div></footer></div>`;
+    <footer class="deck-footer"><span id="deck-storage-note">Progress & preferences use this browser’s storage.</span><div><button type="button" class="text-button" data-fullscreen>Fullscreen</button><a href="/audio-credits.html" target="_blank" rel="noopener">Sound credits ↗</a><a href="/devlog.html" target="_blank" rel="noopener">Development notes ↗</a><span>RAPTOR 1.8.0</span></div></footer></div>`;
 
   function refreshSetup() {
     const s=SETTINGS.current();
