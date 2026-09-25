@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23101014'/%3E%3Cpath d='M16 4 L19 12 L27 17 L19 19 L18 24 L21 27 L16 25 L11 27 L14 24 L13 19 L5 17 L13 12 Z' fill='%23e8b46f'/%3E%3C/svg%3E">
+  <title>Map credits — RAPTOR</title>
+  <style>
+    :root { color-scheme: dark; background: #101014; color: #e8e6df; font: 16px/1.65 system-ui, sans-serif; }
+    body { max-width: 680px; margin: 0 auto; padding: 48px 24px 80px; }
+    a { color: #e8b46f; text-underline-offset: 3px; overflow-wrap: anywhere; }
+    a:focus-visible { outline: 2px solid #e8b46f; outline-offset: 5px; }
+    h1 { font-size: 2rem; line-height: 1.2; margin: 36px 0 24px; }
+    h2 { font-size: 1.1rem; margin-top: 32px; }
+    .credit { border-left: 2px solid #e8b46f; padding-left: 20px; }
+    .note { color: #aaa89f; font-size: .9rem; }
+    nav { display: flex; flex-wrap: wrap; gap: 12px 24px; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <nav aria-label="Back to Raptor"><a href="/">Return to Raptor</a><a href="/audio-credits.html">Sound credits</a></nav>
+  <main>
+    <h1>Map credits</h1>
+    <p>Raptor combines real geographic data with original terrain materials, city geometry, and atmosphere. The source records below identify where the landscape comes from and how it was prepared for flight.</p>
+
+    <h2>New York terrain and aerial imagery</h2>
+    <div class="credit">
+      <p>Elevation: USGS National Map <a href="https://www.usgs.gov/3d-elevation-program/about-3dep-products-services">3D Elevation Program</a>. Aerial imagery: USGS, USDA, The National Map: Orthoimagery, distributed through the <a href="https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer">USGS NAIP imagery service</a>.</p>
+      <p>These federal sources are public domain. They provide the 65.536 km region's elevation field and aerial drape. The imagery is modern. The sea floor is a rendering convention, not surveyed bathymetry.</p>
+      <p><a href="/assets/terrain/newyork-ASSET-CREDITS.md">Terrain source notes</a> · <a href="/assets/terrain/newyork-provenance.json">Requests, source metadata, and hashes</a></p>
+    </div>
+
+    <h2>New York buildings</h2>
+    <div class="credit">
+      <p>Building locations, footprint alignment, roof heights, ground elevations, and construction years are derived from <a href="https://data.cityofnewyork.us/City-Government/BUILDING/5zhs-2jue">NYC Office of Technology and Innovation Building Footprints</a>, downloaded September 24, 2026.</p>
+      <p>The game simplifies footprints into oriented building masses and converts heights from US feet to metres. Facades, roof setbacks, thirteen landmark silhouettes, and six bridges are original procedural game art.</p>
+      <p><a href="/assets/city/ASSET-CREDITS.md">Building and architectural references</a> · <a href="/assets/city/newyork-buildings.provenance.json">Source query and transformations</a> · <a href="https://www.nyc.gov/opendata/get-started/what-is-open-data-">About NYC Open Data</a></p>
+    </div>
+    <p class="note">Harbor Watch filters the contemporary building snapshot by construction year. Missing construction dates, demolished buildings, and modern aerial imagery prevent a complete reconstruction of the city in 2001. Its setting and aircraft response are fictional.</p>
+
+    <h2>Other terrain sources</h2>
+    <p><a href="/assets/terrain/nellis-imagery/ASSET-CREDITS.md">Nellis aerial imagery</a> records the USGS/USDA data, geographic alignment, and nearby imagery tiles. <a href="/assets/terrain/source/ASSET-CREDITS.md">Central Valdez elevations</a> records the USGS height and normal data. <a href="/assets/terrain-photo/ASSET-CREDITS.md">Scanned rock and snow materials</a> credits the CC0 photographs used for close surface detail.</p>
+    <p class="note">These environments are visual flight settings. Geographic simplification and authored geometry make them unsuitable for real-world navigation.</p>
+  </main>
+</body>
+</html>
