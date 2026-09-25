@@ -6,6 +6,7 @@ the [local setup instructions](../README.md#run-locally), then run:
 ```sh
 node raptor/qa/opening.browser.mjs
 node raptor/qa/loading.browser.mjs
+RAPTOR_BASE_URL=http://localhost:8082/ node raptor/qa/viewport.browser.mjs
 node raptor/qa/browser.mjs
 node raptor/qa/feedback.browser.mjs
 node raptor/qa/backup.browser.mjs
@@ -14,9 +15,11 @@ node raptor/qa/tactical.browser.mjs
 node raptor/qa/missions.browser.mjs
 ```
 
-These use `RAPTOR_BASE_URL` (default `http://localhost:8082/`) and an existing
-Playwright installation; set `PLAYWRIGHT_MODULE` to its module entry point if
-needed. `opening` runs headless without booting a flight renderer, covering fresh
+These use `RAPTOR_BASE_URL` and an existing Playwright installation; set
+`PLAYWRIGHT_MODULE` to its module entry point if needed. The default server is
+`http://localhost:8082/`, except `viewport`, which defaults to port 8097; the
+command above overrides it to match the local setup. `opening` runs headless
+without booting a flight renderer, covering fresh
 and returning pilots, optional customization, focus and narrow layouts. It writes
 screenshots and results to `.context/ceo-pass/opening/` by default. `loading`
 checks recoverable bootstrap/flight-module failures without allocating a GPU.
@@ -60,6 +63,14 @@ default to `.context/raptor-tactical/`. `tactical-map.test.mjs` separately check
 all 30 authored missions, real flight headings, map bounds and hidden-target
 exclusion without changing simulation hashes. `radio-log.test.mjs` covers ring
 wrap/reset, subtitle expiry during simulated pauses, layout and warning priority.
+
+`viewport` holds a startup asset while the window grows on WebGPU at device pixel
+ratio 2 or shrinks on WebGL at ratio 1, with AUTO graphics. It also checks live
+resize and paused resize/resume, including renderer, camera and HUD dimensions,
+backing-pixel scale, frozen paused simulation, and visible scenery on both sides
+of each displayed frame. Both scenarios run by default; set
+`RAPTOR_TEST_BACKEND=webgpu` or `webgl` to run one. Screenshots and `results.json`
+default to `.context/raptor-viewport/`; override with `RAPTOR_TEST_OUTPUT`.
 
 `hud-ladder.test.mjs` compares canvas drawing commands to the exported geometry
 functions across 630 poses, including scale changes and shrinking visible rung

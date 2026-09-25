@@ -1071,14 +1071,6 @@ async function boot() {
   state.cockpit = cockpit;
   renderer.domElement.tabIndex = -1;
 
-  window.addEventListener("resize", () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    post?.invalidateHistory?.();
-    meter?.reset();
-  });
-
   // public hooks (QA + future phases)
 
   // PHASE 12: kill cam — render-side only. On death: 4s orbit of the crash
@@ -1146,6 +1138,18 @@ async function boot() {
   }
   state.autoExposure = !!meter;
   state.meter = meter?.state || null;
+  const resizeFlightView = () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    post?.invalidateHistory?.();
+    meter?.reset();
+  };
+  window.addEventListener("resize", resizeFlightView);
+  // Loading assets can outlast a window resize. Reconcile the renderer's
+  // logical and CSS size before warmup; changing DPR alone preserves the old
+  // size and can leave half the window blank while the HUD fills it.
+  resizeFlightView();
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
       post?.invalidateHistory?.();
