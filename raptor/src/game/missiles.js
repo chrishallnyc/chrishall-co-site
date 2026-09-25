@@ -23,9 +23,9 @@ import { softDiscTexture } from "../engine/sprites.js";
 
 const LOADOUT = 4;
 const SLOTS = 9; // x,y,z, vx,vy,vz, massKg, age, targetIdx
-const SEEK_COS = Math.cos(25 * Math.PI / 180); // v1 acquisition cone (HOBS later)
-const SEEK_MIN = 400, SEEK_MAX = 8000;
-const LOCK_TIME = 0.7;
+export const SEEK_COS = Math.cos(25 * Math.PI / 180); // Shared with render-only envelope advice.
+export const SEEK_MIN = 400, SEEK_MAX = 8000;
+export const LOCK_TIME = 0.7; // Shared with the presentation-only acquisition meter.
 const PROX_M = 7;
 const DMG = 90;
 const LIFE_S = 10;

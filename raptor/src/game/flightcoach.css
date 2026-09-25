@@ -11,6 +11,19 @@
 .flight-coach .coach-readout{padding:10px 11px;border:1px solid #8ca0b344;border-radius:8px;background:#31425440;box-shadow:inset 0 1px 0 #ffffff05;display:flex;flex-direction:column;gap:5px;transition:background-color .2s ease,border-color .2s ease}
 .flight-coach .coach-readout strong{font:13px var(--mono,monospace);font-weight:500;font-variant-numeric:tabular-nums;color:#f0f3f4}
 .flight-coach .coach-readout span{font-size:10px;color:#b7c3ce}
+.flight-coach .coach-instruments{display:grid;grid-template-columns:.85fr 1.1fr 1.15fr;gap:7px;margin:11px 0 0;padding:0}
+.flight-coach .coach-instruments>div{min-width:0}
+.flight-coach .coach-instruments dt{font-size:8px;line-height:1.4;color:#aebdca;white-space:nowrap}
+.flight-coach .coach-instruments dd{margin:3px 0 0;font:9px var(--mono,monospace);font-variant-numeric:tabular-nums;color:#e2e8ee;white-space:nowrap}
+.flight-coach .coach-configuration{margin:8px 0 0;font-size:9px;line-height:1.5;color:#d3c6ab}
+.flight-coach .coach-configuration[hidden]{display:none}
+.flight-coach .coach-condition{margin-top:12px;padding-top:11px;border-top:1px solid #8da0b326}
+.flight-coach .coach-condition strong{font-size:11px;font-weight:550;color:#b8dfb4}
+.flight-coach .coach-condition p{margin:4px 0 0;font-size:10px;line-height:1.5;color:#c5ced7}
+.flight-coach.coach-caution .coach-readout{border-color:#edc38680;background:#81633928}
+.flight-coach.coach-danger .coach-readout{border-color:#efa2939c;background:#8d40332e}
+.flight-coach.coach-caution [data-coach-feedback],.flight-coach.coach-caution .coach-condition strong{color:#edc386}
+.flight-coach.coach-danger [data-coach-feedback],.flight-coach.coach-danger .coach-condition strong{color:#ffb7a9}
 .flight-coach .coach-hold{display:flex;gap:9px;align-items:baseline;justify-content:space-between;margin-top:12px;font-size:10px;color:#c5ced7;line-height:1.4}
 .flight-coach .coach-hold [data-coach-seconds]{white-space:nowrap;font:9px var(--mono,monospace);color:var(--acc,#e8b46f)}
 .flight-coach progress{display:block;width:100%;height:4px;margin:8px 0 0;accent-color:var(--acc,#e8b46f);border:0;border-radius:4px;overflow:hidden;background:#6b788533}

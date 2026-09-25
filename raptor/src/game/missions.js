@@ -27,6 +27,13 @@ export const TRIG = { ON_START: 0, ON_OBJECTIVE_DONE: 1, ON_TIME: 2, ON_OBJECTIV
 // / survive_until; protect_tag (ESCORT, INC-4) and kill_ace (INC-6) are
 // validate-rejected until their increments land.
 export const OBJ_KIND = { destroy_tag: 0, protect_tag: 1, reach_zone: 2, survive_until: 3, kill_ace: 4 };
+const DEFENSE_TYPES = new Set(['escort', 'fleet_defense', 'intercept']);
+// Shared by the match script and preflight preparation: these mission types
+// also win at the time limit if no loss condition has ended the sortie.
+// Mission-specific deadlines override the usual defensive timeout victory.
+// Passing a type remains useful for the default rule; briefings pass the spec.
+export const winsAtTimeLimit = mission => mission?.timeoutOutcome !== undefined
+  ? mission.timeoutOutcome === 1 : DEFENSE_TYPES.has(typeof mission === 'string' ? mission : mission?.type);
 const INC1_KINDS = new Set(["destroy_tag", "reach_zone", "survive_until", "protect_tag", "kill_ace"]); // kill_ace unlocked INC-6
 
 // numeric lineId -> subtitle text. RENDER-SIDE ONLY — the Script's comms ring

@@ -131,6 +131,7 @@ export const PLAYABLE_ACTIONS = {
   wheel_brakes: { label: "Wheel brakes", description: "Hold to brake when the aircraft is on the ground." },
   menu: { label: "Pause / flight menu", description: "Open the flight menu. Escape always stays available.", essential: true, lockedPrimary: true },
   game_pause: { label: "Pause / resume", description: "Quickly pause or resume your flight." },
+  map: { label: "Tactical map / radio log", description: "Pause to review your course, objectives and received radio messages." },
   hide_hud: { label: "Show / hide flight HUD", description: "Toggle flight instruments and target markers." },
   help: { label: "Flight guide", description: "Open the flight guide and quick reference.", binds: [["KeyH"], ["F1"]] },
   recenter_aim: { label: "Recenter flight aim", description: "Bring the aim point back to the aircraft's current direction.", essential: true },

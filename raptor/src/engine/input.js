@@ -10,7 +10,7 @@ const fromUI = (e) => !!e.target?.closest?.("input, select, textarea, button, a,
 const defaults = () => Object.fromEntries(Object.entries(ACTIVE_ACTIONS).map(([id, a]) => [id, { ...a, binds: a.binds.map((c) => [...c]) }]));
 // These keyboard alternatives were added after v3 shipped. A saved action
 // already using either key takes precedence over the newly added default.
-const ADDED_DEFAULT_KEYS = { fire_mguns: "KeyF", help: "KeyH" };
+const ADDED_DEFAULT_KEYS = { fire_mguns: "KeyF", help: "KeyH", map: "KeyM" };
 const isMeta = (code) => code === "MetaLeft" || code === "MetaRight";
 const hasMeta = (codes) => codes.has("MetaLeft") || codes.has("MetaRight");
 
@@ -209,7 +209,7 @@ export class Input {
     for (const [id, action] of Object.entries(this.actions)) {
       // An explicitly shared new default belongs to both actions. Persist
       // its owner even when that action otherwise equals factory defaults,
-      // so the older-layout F/H migration cannot remove it after reload.
+      // so the older-layout F/H/M migration cannot remove it after reload.
       const added = ADDED_DEFAULT_KEYS[id];
       const sharedDefault = added && action.binds.some(chord => chord.length === 1 && chord[0] === added)
         && this.findConflicts(id, [added]).length > 0;

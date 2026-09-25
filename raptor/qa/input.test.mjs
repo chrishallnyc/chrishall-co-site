@@ -41,6 +41,24 @@ test('unbound actions persist instead of silently regaining defaults', () => {
   assert.deepEqual(new Input(target).actions.gear.binds, []);
 });
 
+test('new tactical-map shortcut respects existing M assignments and explicit unbinding', () => {
+  for (const key of [STORE_KEY, LEGACY_STORE_KEY]) {
+    const {input, dispatch} = fixture({[key]: JSON.stringify({gear: key === LEGACY_STORE_KEY ? 'KeyM' : [['KeyM']]})});
+    assert.deepEqual(input.actions.map.binds, []);
+    dispatch('keydown', {code: 'KeyM'});
+    assert.equal(input.pressed('gear'), true);
+    assert.equal(input.pressed('map'), false);
+  }
+  assert.deepEqual(fixture({[STORE_KEY]: JSON.stringify({map: []})}).input.actions.map.binds, []);
+  const {input, dispatch, target} = fixture();
+  dispatch('keydown', {code: 'KeyM'});
+  assert.equal(input.pressed('map'), true);
+  assert.equal(input.setBinding('gear', 0, ['KeyM'], {resolve: 'share'}), true);
+  const restored = new Input(target);
+  assert.deepEqual(restored.actions.map.binds, [['KeyM']], 'a deliberate shared default survives reload');
+  assert.deepEqual(restored.actions.gear.binds, [['KeyM']]);
+});
+
 test('valid v2 records migrate independently from malformed entries', () => {
   const { input } = fixture({ [LEGACY_STORE_KEY]: JSON.stringify({ gear: 'KeyU', throttle_up: null, yaw_right: 'AltLeft+KeyL' }) });
   assert.deepEqual(input.actions.gear.binds, [['KeyU']]);

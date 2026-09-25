@@ -2,6 +2,7 @@
 // deterministic; the DOM adapter only redraws telemetry four times a second.
 // No scene objects, simulator commands, or input bindings belong to the coach.
 import { bindingLabel, escapeHTML } from './ui.js';
+import { practiceGuidance, practiceTerrainRisk, practiceHighAlpha, practiceGearGuidance } from './practiceguidance.js';
 
 export const FLIGHT_SCHOOL_KEY = 'raptor.flight-school.v1';
 export const LESSONS = Object.freeze([
@@ -74,9 +75,12 @@ export class TrainingCourse {
   // A pause or a long frame cannot earn several seconds of unseen progress.
   // Small slips are forgiven; sustained misses gradually drain the hold meter.
   update(dt, telemetry, { paused = this.paused } = {}) {
-    if (paused || this.status !== 'active' || !finiteTelemetry(telemetry) || !Number.isFinite(dt) || dt <= 0) return false;
-    const step = Math.min(dt, 0.25);
+    if (paused || !finiteTelemetry(telemetry) || !Number.isFinite(dt) || dt <= 0) return false;
     this.telemetry = telemetry;
+    // The instruments stay alive in free flight and after graduation without
+    // advancing lessons, elapsed training time, or the persisted achievement.
+    if (this.status !== 'active') return false;
+    const step = Math.min(dt, 0.25);
     if (!this.initialized) this.anchor(telemetry);
     if (Number.isFinite(telemetry.crashes) && this.lastCrashes !== null && telemetry.crashes !== this.lastCrashes) {
       this.recoveries++;
@@ -86,13 +90,13 @@ export class TrainingCourse {
     }
     if (Number.isFinite(telemetry.crashes)) this.lastCrashes = telemetry.crashes;
     this.elapsed += step;
-    const safe = telemetry.speedKt >= 150 && (!Number.isFinite(telemetry.aglFt) || telemetry.aglFt > 300);
+    const safe = telemetry.speedKt >= 150 && !practiceTerrainRisk(telemetry) && !practiceHighAlpha(telemetry);
     const flat = Math.abs(telemetry.pitch) <= 7 && Math.abs(telemetry.roll) <= 12;
     switch (LESSONS[this.index].id) {
       case 'steady': this.inTarget = safe && flat; break;
       case 'throttle': this.inTarget = safe && telemetry.throttle >= 60 && telemetry.throttle <= 70 && Math.abs(telemetry.pitch) <= 12 && Math.abs(telemetry.roll) <= 20; break;
       case 'turn': this.inTarget = safe && Math.abs(headingDifference(this.targetHeading, telemetry.heading)) <= 7 && Math.abs(telemetry.roll) <= 15 && Math.abs(telemetry.pitch) <= 10; break;
-      case 'climb': this.inTarget = safe && Math.abs(telemetry.altFt - this.targetAltitude) <= 140 && flat; break;
+      case 'climb': this.inTarget = safe && Math.abs(telemetry.altFt - this.targetAltitude) <= 140 && flat && (!Number.isFinite(telemetry.verticalSpeedFpm) || Math.abs(telemetry.verticalSpeedFpm) <= 900); break;
       case 'cruise': this.inTarget = safe && flat && telemetry.throttle >= 80 && telemetry.throttle <= 95; break;
     }
     if (this.inTarget) { this.held += step; this.slip = 0; }
@@ -141,6 +145,8 @@ export class TrainingCourse {
 
 const headingText = value => `${String(Math.round(normalizeHeading(value)) % 360).padStart(3, '0')}°`;
 const altitudeText = value => `${Math.round(value).toLocaleString()} ft`;
+const instruments = `<dl class="coach-instruments" aria-label="Live flight instruments"><div><dt>Airspeed</dt><dd data-coach-speed>—</dd></div><div><dt>Above ground</dt><dd data-coach-clearance>—</dd></div><div><dt>Climb / sink</dt><dd data-coach-vertical>—</dd></div></dl><p class="coach-configuration" data-coach-configuration hidden></p>`;
+const flightCondition = `<div class="coach-condition"><strong data-coach-condition>Waiting for flight data</strong><p data-coach-advice></p></div>`;
 
 // Telemetry is useful while a player is adjusting the aircraft; status changes
 // are announced once, while frequent numeric updates remain quiet for AT.
@@ -208,14 +214,18 @@ export class FlightCoach {
   update(dt, telemetry = this.readTelemetry()) {
     const wasInTarget = this.course.inTarget;
     const hadTelemetry = !!this.course.telemetry;
+    const previousGuidance = this.guidance?.id;
+    const previousGear = this.gearGuidance?.id;
     const changed = this.course.update(dt, telemetry, { paused: this.paused || this.state?.paused });
+    this.guidance = practiceGuidance(this.course.telemetry, this.course.snapshot());
+    this.gearGuidance = practiceGearGuidance(this.course.telemetry);
     if (changed) { this.refresh(); this.paintElapsed = 0; return changed; }
     this.paintElapsed += Math.max(0, Math.min(0.25, Number.isFinite(dt) ? dt : 0));
     if (this.visible && !this.paused && !this.state?.paused) {
       const numeric = this.paintElapsed >= 0.25 || !hadTelemetry;
       // Target entry/exit must acknowledge the maneuver on this frame. Keep
       // rapidly changing readouts at 4 Hz and preserve their existing nodes.
-      if (numeric || this.course.inTarget !== wasInTarget) this.paintTelemetry({ numeric });
+      if (numeric || this.course.inTarget !== wasInTarget || this.guidance?.id !== previousGuidance || this.gearGuidance?.id !== previousGear) this.paintTelemetry({ numeric });
       if (numeric) this.paintElapsed %= 0.25;
       if (this.progressEl && this.progressEl.value !== this.course.held) this.progressEl.value = this.course.held;
     }
@@ -240,16 +250,16 @@ export class FlightCoach {
       };
       body = `<div class="coach-eyebrow"><span>FLIGHT SCHOOL</span><span>${s.step} / ${s.total}</span></div><h3 tabindex="-1">${escapeHTML(s.title)}</h3>
         <ol class="coach-course" aria-label="Flight school exercises">${LESSONS.map((lesson, index) => `<li class="${index < this.course.index ? 'done' : index === this.course.index ? 'current' : ''}" ${index === this.course.index ? 'aria-current="step"' : ''} title="${escapeHTML(lesson.title)}"><span class="coach-visually-hidden">${index < this.course.index ? 'Complete: ' : ''}${escapeHTML(lesson.title)}</span></li>`).join('')}</ol>
-        <p class="coach-instruction">${instructions[s.id]}</p><div class="coach-readout" data-coach-readout></div>
+        <p class="coach-instruction">${instructions[s.id]}</p><div class="coach-readout" data-coach-readout></div>${instruments}
         <div class="coach-hold"><span data-coach-feedback>Find the target, then hold steady</span><span data-coach-seconds>0 / ${s.duration}s</span></div>
         <progress max="${s.duration}" value="${s.held}" aria-label="Seconds held on target"></progress>
         <p class="coach-reassurance">Small corrections. A brief wobble is okay.</p>
         <div class="coach-actions"><button type="button" class="ui-button" data-coach-retry>Reset to level flight</button><button type="button" class="text-button" data-coach-controls>Adjust controls</button></div>
         <div class="coach-footer"><button type="button" class="text-button" data-coach-free>Just fly</button><button type="button" class="text-button" data-hide-checklist>Hide coach</button></div>`;
     } else if (s.status === 'complete') {
-      body = `<div class="coach-eyebrow"><span>FLIGHT SCHOOL</span><span>5 / 5 ✓</span></div><h3 tabindex="-1">Ready for your first mission</h3><p>You can hold a steady course, manage throttle, turn and climb.</p><p class="coach-save ${s.saved === false ? 'unsaved' : ''}">${s.saved === false ? 'Completed this session. Your browser could not save this achievement.' : 'Flight school complete · saved in this browser'}</p><div class="coach-actions"><button type="button" class="ui-button" data-first-mission>Explore the campaign ↗</button></div><div class="coach-footer"><button type="button" class="text-button" data-coach-replay>Fly the course again</button><button type="button" class="text-button" data-hide-checklist>Hide coach</button></div>`;
+      body = `<div class="coach-eyebrow"><span>FLIGHT SCHOOL</span><span>5 / 5 ✓</span></div><h3 tabindex="-1">Ready for your first mission</h3><p class="coach-instruction">You can hold a steady course, manage throttle, turn and climb.</p>${instruments}${flightCondition}<p class="coach-save ${s.saved === false ? 'unsaved' : ''}">${s.saved === false ? 'Completed this session. Your browser could not save this achievement.' : 'Flight school complete · saved in this browser'}</p><div class="coach-actions"><button type="button" class="ui-button" data-first-mission>Explore the campaign ↗</button><button type="button" class="text-button" data-coach-retry>Reset to level flight</button></div><div class="coach-footer"><button type="button" class="text-button" data-coach-replay>Fly the course again</button><button type="button" class="text-button" data-hide-checklist>Hide coach</button></div>`;
     } else {
-      body = `<div class="coach-eyebrow"><span>PRACTICE</span><span>${s.earned ? 'QUALIFIED ✓' : 'NO PRESSURE'}</span></div><h3 tabindex="-1">Your airspace. Your pace.</h3><p>No enemies or clock. Try your setup, explore the landscape, and recover whenever you need.</p><div class="coach-actions"><button type="button" class="ui-button" data-coach-retry>Reset to level flight</button></div><div class="coach-footer"><button type="button" class="text-button" data-coach-replay>${s.earned ? 'Replay' : 'Start'} flight school</button><button type="button" class="text-button" data-hide-checklist>Hide coach</button></div>`;
+      body = `<div class="coach-eyebrow"><span>PRACTICE</span><span>${s.earned ? 'QUALIFIED ✓' : 'NO PRESSURE'}</span></div><h3 tabindex="-1">Your airspace. Your pace.</h3><p class="coach-instruction">No enemies or clock. Explore and recover whenever you need.</p>${instruments}${flightCondition}<div class="coach-actions"><button type="button" class="ui-button" data-coach-retry>Reset to level flight</button></div><div class="coach-footer"><button type="button" class="text-button" data-coach-replay>${s.earned ? 'Replay' : 'Start'} flight school</button><button type="button" class="text-button" data-hide-checklist>Hide coach</button></div>`;
     }
     // Rebuilding is limited to exercise/binding changes, so the live readings
     // never remove a focused button while someone is using keyboard navigation.
@@ -273,42 +283,72 @@ export class FlightCoach {
   }
 
   paintTelemetry({ numeric = true } = {}) {
-    if (this.course.status !== 'active') return;
     const telemetry = this.course.telemetry;
     const s = this.course.snapshot();
     const readout = this.el.querySelector('[data-coach-readout]');
-    if (!telemetry || !readout) return;
-    let current, target, feedback;
+    if (!telemetry) return;
+    const guidance = practiceGuidance(telemetry, s);
+    this.guidance = guidance;
+    if (!guidance) return;
+    let feedback = guidance.feedback;
+    if (guidance.action === 'recenter_aim') {
+      const centerKey = bindingLabel(this.input, 'recenter_aim');
+      feedback += centerKey === 'Unassigned' ? ' Assign Center aim in controls if needed.' : ` ${centerKey} centers aim.`;
+    }
+    let current, target;
     if (s.id === 'throttle' || s.id === 'cruise') {
       current = `${Math.round(telemetry.throttle)}% throttle`;
       target = s.id === 'throttle' ? 'Target 60–70%' : 'Target 80–95%';
-      const low = s.id === 'throttle' ? 60 : 80, high = s.id === 'throttle' ? 70 : 95;
-      feedback = telemetry.throttle > high ? 'Ease off the throttle' : telemetry.throttle < low ? 'Add a little power' : 'Settle the aircraft';
     } else if (s.id === 'turn') {
       current = `Heading ${headingText(telemetry.heading)}`;
       target = `Target ${headingText(s.targetHeading)}`;
-      const difference = headingDifference(s.targetHeading, telemetry.heading);
-      feedback = Math.abs(difference) > 7 ? `${Math.abs(Math.round(difference))}° ${difference > 0 ? 'right' : 'left'} to target` : 'Ease the bank and settle';
     } else if (s.id === 'climb') {
       current = altitudeText(telemetry.altFt);
       target = `Target ${altitudeText(s.targetAltitude)}`;
-      const difference = s.targetAltitude - telemetry.altFt;
-      feedback = difference > 140 ? 'Raise the nose gently' : difference < -140 ? 'Lower the nose gently' : 'At your altitude. Level off';
     } else {
       current = `${Math.round(Math.abs(telemetry.roll))}° bank · ${Math.round(telemetry.pitch)}° pitch`;
       target = 'Wings level · nose near horizon';
-      feedback = Math.abs(telemetry.roll) > 12 ? 'Ease the bank; aim near the horizon' : 'Bring the nose near the horizon';
     }
-    if (telemetry.speedKt < 150) feedback = 'Low airspeed. Add power and lower the nose';
-    else if (Number.isFinite(telemetry.aglFt) && telemetry.aglFt <= 300) feedback = 'Close to terrain. Climb or reset to level flight';
-    else if (s.inTarget) feedback = 'On target. Hold steady';
+    const setText = (selector, value) => {
+      const node = this.el.querySelector(selector);
+      if (node && node.textContent !== value) node.textContent = value;
+    };
     if (numeric) {
-      readout.innerHTML = `<strong>${escapeHTML(current)}</strong><span>${escapeHTML(target)}</span>`;
-      this.el.querySelector('[data-coach-seconds]').textContent = `${Math.min(s.duration, s.held).toFixed(1)} / ${s.duration}s`;
+      if (s.status === 'active' && readout) readout.innerHTML = `<strong>${escapeHTML(current)}</strong><span>${escapeHTML(target)}</span>`;
+      setText('[data-coach-seconds]', `${Math.min(s.duration, s.held).toFixed(1)} / ${s.duration}s`);
+      setText('[data-coach-speed]', `${Math.round(telemetry.speedKt)} kt`);
+      setText('[data-coach-clearance]', Number.isFinite(telemetry.aglFt) ? altitudeText(Math.max(0, telemetry.aglFt)) : '—');
+      const vertical = telemetry.verticalSpeedFpm;
+      const rounded = Math.round(Math.abs(vertical) / 50) * 50;
+      setText('[data-coach-vertical]', Number.isFinite(vertical) ? `${rounded === 0 ? '' : vertical > 0 ? '+' : '−'}${rounded.toLocaleString()} fpm` : '—');
     }
-    this.el.querySelector('[data-coach-feedback]').textContent = feedback;
-    this.el.querySelector('progress').value = s.held;
-    this.el.classList.toggle('on-target', s.inTarget);
+    const gear = practiceGearGuidance(telemetry);
+    this.gearGuidance = gear;
+    const configuration = this.el.querySelector('[data-coach-configuration]');
+    if (configuration) {
+      configuration.hidden = !gear;
+      let status = gear?.title || '';
+      if (gear?.retract && guidance.tone !== 'danger') {
+        const gearKey = bindingLabel(this.input, 'gear');
+        status += gearKey === 'Unassigned' ? ' · Adds drag. Assign a gear key in controls.' : ` · Adds drag. ${gearKey} retracts it.`;
+      }
+      setText('[data-coach-configuration]', status);
+    }
+    setText('[data-coach-feedback]', feedback);
+    setText('[data-coach-condition]', guidance.title);
+    setText('[data-coach-advice]', feedback);
+    const progress = this.el.querySelector('progress');
+    if (progress) progress.value = s.held;
+    this.el.classList.toggle('on-target', s.status === 'active' && s.inTarget && guidance.tone === 'normal');
+    this.el.classList.toggle('coach-caution', guidance.tone === 'caution');
+    this.el.classList.toggle('coach-danger', guidance.tone === 'danger');
+    // Announce a condition change once, never every numeric refresh.
+    const alert = guidance.tone === 'normal' ? null : guidance.id;
+    if (alert !== this.announcedAlert) {
+      if (alert) setText('[data-coach-announcement]', `${guidance.title}. ${feedback}`);
+      else if (this.announcedAlert) setText('[data-coach-announcement]', 'Flight condition recovered.');
+      this.announcedAlert = alert;
+    }
   }
 
   destroy() {

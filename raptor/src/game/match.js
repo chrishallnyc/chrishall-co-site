@@ -16,9 +16,9 @@ const TICKET_WEIGHTS = {
 const BLUE_TICKETS = 30;
 const DEATH_COST = 10;       // 3 deaths = out
 const AIRFIELD = { x: -3000, y: -8700, r: 900 };   // probed flat pad (D-061)
-const REARM_AGL_MAX = 400, REARM_SPEED_MAX = 120;  // low + slow
-const REARM_TIME = 4.0;
-const BOUNDARY = 30000, BOUNDARY_GRACE = 8.0, BOUNDARY_DPS = 4;
+export const REARM_AGL_MAX = 400, REARM_SPEED_MAX = 120;  // meters, total world speed in m/s
+export const REARM_TIME = 4.0;
+export const BOUNDARY = 30000, BOUNDARY_GRACE = 8.0, BOUNDARY_DPS = 4;
 
 export class Match {
   constructor(battlefield, player, { airfield } = {}) {
