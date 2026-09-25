@@ -1,12 +1,11 @@
 // Render-side mission overview, using the same authoritative script state as
 // the flight HUD. Never infers victory from a local display counter.
-const LABELS = {destroy_tag:'Destroy the marked targets',protect_tag:'Keep the protected units alive',reach_zone:'Reach the marked area',survive_until:'Hold your position',kill_ace:'Defeat the enemy ace'};
+import { missionObjectiveRows } from './missionguidance.js';
 export function flightBrief(state) {
   const script=state.script;
   if (!script) return null;
-  const lines=state.missionData?.lines||{};
-  const objectives=script.objectiveSummary().map(o=>({
-    label: lines[o.labelId] || LABELS[o.kind] || 'Complete the objective',
+  const objectives=missionObjectiveRows(state).map(o=>({
+    label: o.label,
     status:o.failed?'failed':o.kind==='protect_tag'&&state.match?.over===1?'protected':o.done?'done':'pending',
     protection:o.kind==='protect_tag',
     // Protection counters measure losses, never progress toward a reward.

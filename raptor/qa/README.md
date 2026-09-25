@@ -1,5 +1,31 @@
 # Aircraft validation
 
+For the opening screen and cockpit flows, serve `raptor/` as the web root using
+the [local setup instructions](../README.md#run-locally), then run:
+
+```sh
+node raptor/qa/opening.browser.mjs
+node raptor/qa/browser.mjs
+node raptor/qa/missions.browser.mjs
+```
+
+These use `RAPTOR_BASE_URL` (default `http://localhost:8082/`) and an existing
+Playwright installation; set `PLAYWRIGHT_MODULE` to its module entry point if
+needed. `opening` runs headless without booting a flight renderer, covering fresh
+and returning pilots, optional customization, focus and narrow layouts. It writes
+screenshots and results to `.context/ceo-pass/opening/` by default. Run the two
+flight scripts one at a time to avoid competing graphics work.
+
+Current routes: **Customize flight** opens region/time/mode choices; **Done**
+returns focus to launch. In Practice, **Esc → Flight options** opens Controls,
+Display & sound, and Pilot log. **Replay/Start flight school** and **Reset to
+level flight** are outside those optional settings. The welcome card's **Start
+flying** resumes with the flight canvas focused. Handoff behavior and render
+warmup also have portable coverage in `cockpit-flow.test.mjs` and
+`render-warmup.test.mjs`.
+
+## Aircraft driver
+
 Run from the repository root with Node and an installed Playwright package/browser:
 
 ```sh
@@ -169,3 +195,22 @@ GL/GPU validation warnings fail the gate alongside browser errors and network fa
 Reverse depth also needs `engine/reversed-depth-order.js`: r185 reverses explicit group/render priorities along with distance order, so the guard preserves the intended star/cloud draw order when reverse depth is active. The application imports this guard through `engine/reverseddepth.js`, which also wraps the pinned GTAO implementation to reject the reverse-depth sky clear value of zero when `--ao 1` is enabled. Revalidate these compatibility fixes when upgrading Three.js, including the optional AO path and WebGL startup draws.
 
 Timing is warmed **rAF interval evidence**, with raw renderer counters and memory inventory. It is not GPU timestamp data, CPU-only render time, a long mission endurance test, or a universal fps claim. The full HIGH native terrain/post/cloud path can dominate the result. Run comparison cases without competing graphics jobs before attributing a small difference to the aircraft.
+
+### Presenter and guest rehearsal
+
+`demo.browser.mjs` checks a returning pilot with completed training and hidden
+coaching on WebGPU and WebGL2. It verifies paused handoff, retained training,
+visible recovery, real afterburner input, and prepared terrain GPU buffers.
+Stored progress and near-terrain poses are fixtures; `flight-school.browser.mjs`
+completes the course through real flight input.
+
+```sh
+PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs \
+RAPTOR_BASE_URL=http://localhost:8082/ \
+node raptor/qa/demo.browser.mjs
+```
+
+The recorded Marianas HIGH feature smoke in `missions.browser.mjs` uses an
+explicit 0.65 scene scale while retaining HIGH clouds, exposure and FFT ocean.
+Full-resolution manual HIGH is a heavier hardware benchmark; the default Auto
+mode has its own frame-budget tests and resolution policy.

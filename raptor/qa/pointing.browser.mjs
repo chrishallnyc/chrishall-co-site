@@ -16,7 +16,7 @@ const check = async (name,fn) => { await fn(); results.push(name); console.log('
 const snap = name => page.screenshot({path:out+name+'.png',fullPage:true});
 const saved = () => page.evaluate(()=>JSON.parse(localStorage.getItem('raptor.settings.v1')));
 const slider = async (key,value) => page.locator(`[data-setting="${key}"]`).evaluate((el,v)=>{el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));},String(value));
-const pause = async () => { await page.locator('[data-flight-action="controls"]').click(); await page.waitForFunction(()=>__RAPTOR.cockpit.paused); };
+const pause = async () => { await page.locator('[data-flight-action="pause"]').click();await page.locator('.pause-options > summary').click();await page.locator('[data-pause="controls"]').click(); await page.waitForFunction(()=>__RAPTOR.cockpit.paused); };
 const resume = async () => {
   if (await page.locator('#controls').isVisible()) await page.locator('[data-action="close"]').click();
   // Native dialog close events open the pause sheet on the next task.

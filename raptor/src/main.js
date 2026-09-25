@@ -13,6 +13,7 @@ import { cloudQuality, cloudOptionsFromFlags, qualityProfile, qualityWorkload } 
 import { cirrusAtlasResolution, oceanFineResolution, terrainSourcePreset, requestedBootAssets, describeBootAssets, assetsNeedReload } from "./engine/bootassets.js";
 import { QualityBenchmark } from "./engine/qualitybench.js";
 import { FrameBudget } from "./engine/framebudget.js";
+import { withWarmupResources } from "./engine/renderwarmup.js";
 import { DebugOverlay } from "./engine/debug.js";
 import { TestWorld } from "./game/testworld.js";
 import { Player } from "./game/player.js";
@@ -23,6 +24,7 @@ import { hasFlightRequest } from "./game/flightplan.js";
 import { loadRequestedFlight, FlightLoadError, bootFailureMessage } from "./game/flightload.js";
 import { Cockpit } from "./game/cockpit.js";
 import { projectAimCue, drawAimCue } from "./game/aimcue.js";
+import { missionObjectiveRows, missionNavigation } from "./game/missionguidance.js";
 import { bindingLabel } from "./game/ui.js";
 import { Atmosphere } from "./world/daycycle.js";
 import { SkyEnvironmentScheduler } from "./world/sky-environment.js";
@@ -38,7 +40,7 @@ import { AircraftLighting } from "./aircraft/lighting.js";
 import { updateF22Visuals } from "./aircraft/f22-lod.js";
 import { Soundscape } from "./game/soundscape.js";
 
-const VERSION = "1.10.0";
+const VERSION = "1.11.0";
 const PHASE = 12;
 
 // WebGPU and reverse-depth WebGL use [0,1]; ordinary WebGL uses [-1,1].
@@ -489,7 +491,7 @@ async function boot() {
   const flightfx = player ? new FlightFX(scene, { jetGroup: world.jet, parts: world.f22parts }) : null;
 
   const planetObjects = curvature ? new PlanetObjectBender(curvature) : null;
-  if (planetObjects) attachRaptorPlanetObjects(planetObjects, { world, player, battlefield, bandits });
+  if (planetObjects) attachRaptorPlanetObjects(planetObjects, { world, player, battlefield, bandits, aircraftLighting });
   // Boot creates the ordinary aircraft/prop pools up front. Their direct
   // light needs the same local planetary visibility as terrain and water;
   // unlit sky/FX do not participate. No shadow map or frame traversal is added.
@@ -751,22 +753,29 @@ async function boot() {
       // PHASE 11 INC-1: mission objectives (top-left) + comms feed (bottom-left)
       if (script && missionData && (!match || match.over === 0)) {
         ctx.textAlign = "left";
-        const VERB = { destroy_tag: "DESTROY", reach_zone: "REACH", survive_until: "HOLD", protect_tag: "PROTECT", kill_ace: "KILL" };
+        const objectives = missionObjectiveRows(state);
+        const navigation = missionNavigation(state, objectives);
         let oy = Math.max(100,(cockpit?.toolbarBottom||0)+20);
         ctx.font = "10px ui-monospace, Menlo, monospace";
         ctx.lineWidth = 3; ctx.strokeStyle = "rgba(0,10,0,0.8)";
-        for (const o of script.objectiveSummary()) {
-          const mark = o.done ? "✓" : o.failed ? "✗" : "◦";
-          const count = o.need > 1 ? ` ${o.count}/${o.need}` : "";
+        for (const o of objectives) {
+          const active = navigation?.objectiveId === o.id;
+          const mark = o.done ? "✓" : o.failed ? "✗" : active ? "›" : "◦";
+          const count = o.kind !== "protect_tag" && o.need > 1 ? ` ${Math.min(o.count, o.need)}/${o.need}` : "";
           // D-078 enabler: authored labels beat bare verbs; PROTECT rows are
           // lose-conditions, not tasks — amber while pending
-          const label = (o.labelId !== undefined && missionData.lines[o.labelId]) || VERB[o.kind] || o.kind.toUpperCase();
-          const line = `${mark} ${label}${count}`;
+          const line = `${mark} ${o.label}${count}`;
           ctx.strokeText(line, 18, oy);
           const pending = o.kind === "protect_tag" ? "#e8b46f" : "#9be89b";
-          ctx.fillStyle = o.done ? "rgba(155,232,155,0.55)" : o.failed ? SETTINGS.getPalette().warn : pending;
+          ctx.fillStyle = o.done ? "rgba(155,232,155,0.55)" : o.failed ? SETTINGS.getPalette().warn : active ? "#ffd27a" : pending;
           ctx.fillText(line, 18, oy);
           oy += 15;
+          if (active) {
+            ctx.strokeText(navigation.text, 30, oy);
+            ctx.fillStyle = "#e8e6df";
+            ctx.fillText(navigation.text, 30, oy);
+            oy += 18;
+          }
         }
         const nowS = performance.now() / 1000;
         if (script._commsShown === undefined) script._commsShown = new Map(); // render-side age memory
@@ -1139,24 +1148,23 @@ async function boot() {
   if (!post) await renderer.compileAsync(scene,camera);
   // Real draws cover the post graph's own MRT, temporal and shadow variants.
   // No physics, input, audio or weapon effects advance during this warmup.
+  const drawWarmup = () => { if (post) post.post.render(); else renderer.render(scene, camera); };
   for(let pass=0;pass<2;pass++) {
     await new Promise(requestAnimationFrame);
-    // Compile the real celestial MRT variants under the loading veil.
-    // Dusk should change uniforms, not stall the first visible night frame.
-    const celestial = pass === 0 ? [atmosphere.stars.points, atmosphere.stars.moon] : [];
-    const visibility = celestial.map(object => object.visible);
-    for (const object of celestial) object.visible = true;
-    try {
-      if(post)post.post.render();else renderer.render(scene,camera);
-    } finally {
-      celestial.forEach((object, i) => { object.visible = visibility[i]; });
-    }
+    // Prepare first-use exhaust, nearby terrain and celestial variants in
+    // the real scene/MRT. The second draw uses only the actual spawn view.
+    if (pass === 0) withWarmupResources({
+      exhaustRoots: flightfx?.jetGroup.getObjectsByProperty("name", "F119-exhaust"), terrain,
+      visible: [atmosphere.stars.points, atmosphere.stars.moon],
+    }, drawWarmup);
+    else drawWarmup();
     curvature?.endFrame();
     if (pass === 0) {
       curvature?.beginFrame(camera);
       aircraftLighting.refreshMaterials();
       planetObjects?.update();
       await post?.cloudPass?.lightCache?.warmUp(renderer);
+      post?.invalidateHistory?.(); // Discard temporary warmup geometry/celestial color.
     }
   }
   await renderer.backend.device?.queue.onSubmittedWorkDone();

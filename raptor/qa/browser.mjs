@@ -15,6 +15,11 @@ page.on('pageerror',error=>errors.push(error.message));
 const check=async(name,fn)=>{await fn();results.push(name);console.log('PASS '+name);};
 const snap=name=>page.screenshot({path:out+name+'.png',fullPage:true});
 const paused=()=>page.waitForFunction(()=>window.__RAPTOR?.cockpit?.paused);
+const flightMenu=async view=>{
+  await page.locator('[data-flight-action="pause"]').click();await paused();
+  await page.locator('.pause-options > summary').click();
+  await page.locator(`[data-pause="${view}"]`).click();
+};
 const running=()=>page.waitForFunction(()=>window.__RAPTOR?.ready&&!__RAPTOR.cockpit.paused);
 const resume=async()=>{if(await page.locator('.pause-dialog[open]').count())await page.locator('[data-resume]').click();await running();};
 const boot=async()=>{
@@ -30,8 +35,8 @@ const assertFrozen=async()=>{
 try{
   await page.goto(origin+'?utm_source=qa',{waitUntil:'networkidle'});
   await check('analytics links open preflight with visible setup actions',async()=>{
-    assert.equal(await page.locator('#flyBtn').textContent(),'Start practice↗');
-    assert.equal(await page.locator('[data-open="controls"]').count(),2);
+    assert.equal(await page.locator('#flyBtn').textContent(),'Start flying↗');
+    assert.equal(await page.locator('[data-open="controls"]').count(),1);
     assert.equal(await page.locator('#veil').count(),0);
     await snap('01-preflight');
   });
@@ -45,10 +50,12 @@ try{
     await page.keyboard.press('Escape');
   });
   await check('preflight region and conditions persist across reload',async()=>{
+    await page.locator('#flight-customize summary').click();
     await page.locator('[data-front="VALDEZ"]').click();await page.locator('[data-time="golden"]').click();
     await page.reload({waitUntil:'networkidle'});
     assert.equal(await page.locator('[data-front="VALDEZ"]').getAttribute('aria-pressed'),'true');
     assert.equal(await page.locator('[data-time="golden"]').getAttribute('aria-pressed'),'true');
+    await page.locator('#flight-customize summary').click();
     await page.locator('[data-front="NELLIS"]').click();await page.locator('[data-time="noon"]').click();
   });
   await check('pilot log shows readable missions, locks and matching filtered briefings',async()=>{
@@ -71,11 +78,14 @@ try{
   await page.locator('#flyBtn').click();await boot();
   await check('first practice flight starts safely paused without combat',async()=>{
     await paused();await assertFrozen();
-    assert.match(await page.locator('.pause-dialog h2').textContent(),/first flight/);
+    assert.match(await page.locator('.pause-dialog h2').textContent(),/Ready to fly/);
     assert.equal(await page.evaluate(()=>__RAPTOR.tier),'LOW');
     assert.equal(await page.evaluate(()=>__RAPTOR.cockpit.coach.course.held),0);
     assert.equal(await page.evaluate(()=>__RAPTOR.match),null);
     assert.equal(await page.evaluate(()=>__RAPTOR.post),true);
+    assert.equal(await page.locator('.quick-tune').getAttribute('open'),null);
+    const start=await page.locator('[data-resume]').boundingBox();
+    assert.ok(start.y+start.height<page.viewportSize().height,'Start flying is visible without modal scrolling');
     await snap('03-ready');
   });
   await check('resume focuses the aircraft and real keyboard input changes throttle',async()=>{
@@ -101,7 +111,7 @@ try{
     assert.equal(await page.evaluate(()=>document.activeElement.id),'game');
   });
   await check('in-flight rebind stays paused and becomes the actual flight key',async()=>{
-    await page.locator('[data-flight-action="controls"]').click();await paused();await assertFrozen();
+    await flightMenu('controls');await paused();await assertFrozen();
     await page.locator('[data-bind="throttle_up"][data-slot="0"]').click();await page.keyboard.press('u');
     await page.locator('[data-action="close"]').click();
     await page.waitForSelector('.pause-dialog[open]');await resume();
@@ -115,7 +125,7 @@ try{
     assert.match(await page.locator('.flight-hints').textContent(),/U/);
   });
   await check('audio edits do not rebuild GPU buffers and accessibility settings apply',async()=>{
-    await page.locator('[data-flight-action="settings"]').click();await paused();
+    await flightMenu('settings');await paused();
     await page.evaluate(async()=>{window.qaSettings=await import('/src/game/settings.js');const r=qaSettings.getLiveCtx().renderer;window.qaResizes=0;const f=r.setPixelRatio;r.setPixelRatio=function(...args){qaResizes++;return f.apply(this,args);};});
     await page.locator('[data-tab="audio"]').click();await page.locator('#setup-masterVol').fill('0.35');
     assert.equal(await page.evaluate(()=>qaResizes),0);
@@ -135,7 +145,7 @@ try{
     assert.equal(await page.evaluate(()=>document.activeElement.id),'game');
   });
   await check('a remapped pause shortcut can both pause and resume',async()=>{
-    await page.locator('[data-flight-action="controls"]').click();
+    await flightMenu('controls');
     await page.locator('#controlSearch').fill('pause');
     await page.locator('[data-bind="game_pause"][data-slot="0"]').click();await page.keyboard.press('o');
     await page.keyboard.press('Escape');await page.waitForSelector('.pause-dialog[open]');await resume();
@@ -146,7 +156,7 @@ try{
     await page.keyboard.down('u');
     await page.evaluate(()=>window.dispatchEvent(new Event('blur')));await page.keyboard.up('u');
     await paused();await assertFrozen();
-    assert.match(await page.locator('.pause-message').textContent(),/left the game window/);
+    assert.match(await page.locator('.pause-message').textContent(),/left the window/);
     const before=await page.evaluate(()=>({time:__RAPTOR.sim.time,throttle:__RAPTOR.player.throttleCmd}));
     await resume();await page.waitForTimeout(150);
     const after=await page.evaluate(()=>({time:__RAPTOR.sim.time,throttle:__RAPTOR.player.throttleCmd}));
@@ -202,6 +212,7 @@ try{
   await check('narrow preflight fits the viewport with usable region choices',async()=>{
     await page.setViewportSize({width:390,height:844});await snap('08-mobile-preflight');
     assert.equal(await page.evaluate(()=>document.getElementById('hangar').scrollWidth<=innerWidth),true);
+    await page.locator('#flight-customize summary').click();
     const r=await page.locator('[data-front="NELLIS"]').boundingBox();assert.ok(r.height>70&&r.width>300);
   });
   assert.deepEqual(errors,[]);

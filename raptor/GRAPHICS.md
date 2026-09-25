@@ -65,7 +65,9 @@ render buffer. It retains the direct 32-step atmosphere near the horizon and
 rebuilds when altitude, source direction or irradiance changes. Discs, cirrus,
 airglow, stars, probes and surface aerial perspective keep their existing paths.
 Failure or a smaller render buffer selects direct scattering. Day/night source
-changes retain compiled light programs; stars and Moon warm up during loading.
+changes retain compiled light programs. Loading draws prepare stars, Moon,
+afterburner programs and any allocated near-terrain grid, then restore temporary
+visibility/geometry and reset temporal history before the clean starting view.
 
 The billboard fallback joins tropical tower puffs into overlapping columns,
 uses a shared height gradient, and omits interior cap planes. Dense tower cores
@@ -124,9 +126,11 @@ collision field. Nearby HIGH/ULTRA terrain uses a stitched grid with about 8 m
 spacing, morphing from the coarse parent triangles. Quality changes fade that
 detail over 0.3 seconds and retain the actual previous surface for motion
 vectors. LOW/MED use coarse geometry. Eligible HIGH/ULTRA settings prepare the
-shared fine grid's CPU buffers before flight; its first GPU upload still waits
-for a nearby draw. Later downgrades retain that allocation. Terrain bounds are
-aggregated once from the loaded height field, and selection reuses node records.
+shared fine grid's CPU buffers before flight; loading draws perform the first
+GPU upload when that grid is already prepared at startup. A grid first
+allocated by a later quality change uploads on its first draw. Downgrades retain
+that allocation. Terrain bounds are aggregated once from the loaded height
+field, and selection reuses node records.
 
 Auto selects a fixed asset class from the device heuristic before loading.
 After loading, its cached render tier is matched against the actual source,

@@ -1,9 +1,35 @@
 import * as SETTINGS from './settings.js';
 import { GameDialog, createGuide, confirmAction, fullscreen, jetMark, bindingLabel, escapeHTML, readLocal, writeLocal } from './ui.js';
-import { PilotLog, FRONTS, campaignProgress, campaignCatalog, sortieURL } from './pilotlog.js';
+import { PilotLog, FRONTS, campaignProgress, operationSummary, sortieURL } from './pilotlog.js';
 import { FlightCoach } from './flightcoach.js';
 import { mountQuickTune } from './quicktune.js';
 import { flightBrief } from './flightbrief.js';
+import { PREFLIGHT_KEY, validateFlightPlan } from './flightplan.js';
+
+// Reloading an operation generates a sortie from its last persisted front.
+// A campaign continuation must never send a failed save back to the same mission.
+export function flightContinuation({flags, match, progressSaved, operationStatus}, next = null) {
+  const finished = !!match?.over;
+  const current = flags.get('sortie');
+  const operation = finished && !current && flags.has('op');
+  const saved = progressSaved === true;
+  if (operation && saved && operationStatus === undefined) {
+    const front = flags.get('front')?.toUpperCase();
+    operationStatus = operationSummary(FRONTS[front] ? front : 'NELLIS').status;
+  }
+  const operationComplete = operation && saved && ['won', 'lost'].includes(operationStatus);
+  return {
+    nextMission: finished && match.over === 1 && current && saved && next?.id && next.id !== current ? next : null,
+    operation,
+    operationComplete,
+    resultTitle: operationComplete ? (operationStatus === 'won' ? 'Operation won' : 'Operation lost') : null,
+    restartLabel: operationComplete ? 'Back to preflight' : operation ? (saved ? 'Continue operation' : 'Retry operation sortie') : 'Restart this flight',
+    restartTitle: operationComplete ? 'Return to preflight?' : operation ? (saved ? 'Continue operation?' : 'Retry this operation sortie?') : 'Restart this flight?',
+    consequence: operationComplete ? 'Start a new operation from preflight. This completed operation stays saved until you confirm its replacement.' : operation ? (saved
+      ? 'Continue operation loads the next sortie from your saved front line.'
+      : 'Retry loads the last saved front line. This unsaved result will be lost.') : '',
+  };
+}
 
 // One owner for the flight/menu boundary. Pausing never changes sim.timescale
 // or persisted audio preferences; the frame loop simply stops advancing.
@@ -13,6 +39,7 @@ export class Cockpit {
     this.paused=false;this.reason='manual';this.hudHidden=false;this.afterPauseClose=null;
     this.practice=flags.get('mode')==='practice';
     this.samples=[];this.lastStatus=0;this.resultAt=null;this.resultShown=false;
+    this.missileLaunchSequence=0;this.lastMissileFeedback=-Infinity;
     this.pauseDialog=new GameDialog({title:'Flight paused',label:'Take your time',className:'pause-dialog',onClose:()=>{
       const next=this.afterPauseClose;this.afterPauseClose=null;
       if(next)next();else this.resume(false);
@@ -21,7 +48,7 @@ export class Cockpit {
     this.log=new PilotLog({onClose:()=>this.showPause(),onLaunch:s=>this.confirmLeave(()=>location.assign(sortieURL(s)),'Fly this mission?')});
     this.toolbar=document.createElement('div');this.toolbar.className='flight-toolbar';this.toolbar.dataset.gameUi='';
     const front=FRONTS[flags.get('front')?.toUpperCase()] || FRONTS.NELLIS;
-    this.toolbar.innerHTML=`<div class="flight-brand">${jetMark} RAPTOR <small>${escapeHTML(front.name)} · ${this.practice?'Practice':flags.has('sortie')?'Campaign':flags.has('op')?'Operation':'Quick battle'}</small></div><nav class="flight-tools" aria-label="Flight menu"><button type="button" class="ui-button" data-flight-action="pause">Ⅱ Pause <kbd>Esc</kbd></button><button type="button" class="ui-button" data-flight-action="controls">Controls</button><button type="button" class="ui-button" data-flight-action="settings">Settings</button><button type="button" class="ui-button" data-flight-action="progress">Pilot log</button><button type="button" class="ui-button" data-flight-action="guide" aria-label="How to fly">?</button><button type="button" class="ui-button" data-flight-action="capture" aria-pressed="false" title="Keep steering at the window edges. Escape releases the pointer and pauses flight.">Capture pointer</button></nav><p class="mouse-capture-note" role="status" hidden>Pointer captured · Esc frees the cursor and pauses</p>`;
+    this.toolbar.innerHTML=`<div class="flight-brand">${jetMark} RAPTOR <small>${escapeHTML(front.name)} · ${this.practice?'Practice':flags.has('sortie')?'Campaign':flags.has('op')?'Operation':'Quick battle'}</small></div><nav class="flight-tools" aria-label="Flight menu"><button type="button" class="ui-button" data-flight-action="pause">Ⅱ Pause <kbd>Esc</kbd></button>${this.practice?'':'<button type="button" class="ui-button" data-flight-action="controls">Controls</button><button type="button" class="ui-button" data-flight-action="settings">Settings</button><button type="button" class="ui-button" data-flight-action="progress">Pilot log</button>'}<button type="button" class="ui-button" data-flight-action="guide">How to fly</button><button type="button" class="ui-button" data-flight-action="capture" aria-pressed="false" title="Keep steering at the window edges. Escape releases the pointer and pauses flight.">Capture pointer</button></nav><p class="mouse-capture-note" role="status" hidden>Pointer captured · Esc frees the cursor and pauses</p>`;
     document.getElementById('chrome')?.replaceWith(this.toolbar);
     this.toolbarBottom=80;
     this.toolbarObserver=new ResizeObserver(()=>{this.toolbarBottom=this.toolbar.hidden?0:this.toolbar.getBoundingClientRect().bottom;this.coach?.el.style.setProperty('--flight-toolbar-bottom',`${this.toolbarBottom+16}px`);});
@@ -34,7 +61,7 @@ export class Cockpit {
     };
     const tune=document.createElement('button');tune.type='button';tune.className='ui-button';tune.dataset.flightAction='tune';tune.textContent='Tune feel';
     tune.onclick=()=>{this.pause('tune');this.pauseDialog.body.querySelector('.quick-tune summary')?.focus();};
-    this.toolbar.querySelector('[data-flight-action="controls"]').after(tune);
+    this.toolbar.querySelector('[data-flight-action="pause"]').after(tune);
     this.setupMouseCapture();
     this.flightCanvas?.addEventListener('pointermove',event=>{
       if(this.edgeTipShown||this.paused||this.mouseCaptured||this.captureButton.hidden||!event.isTrusted)return;
@@ -50,8 +77,8 @@ export class Cockpit {
       onRecover:()=>this.recoverPractice(),onControls:()=>this.openControls('controls'),onCampaign:()=>this.openLog(),
       onHide:()=>SETTINGS.saveSettings({showChecklist:false})}):null;
     this.renderHints();this.renderPractice();this.applyOptions();
-    window.addEventListener('raptor-settings-change',()=>{this.applyOptions();this.renderHints();this.renderPractice();});
-    window.addEventListener('raptor-bindings-change',()=>{this.renderHints();this.renderPractice();});
+    window.addEventListener('raptor-settings-change',()=>{this.applyOptions();this.renderHints();this.renderPractice();this.refreshSaveNote();});
+    window.addEventListener('raptor-bindings-change',()=>{this.renderHints();this.renderPractice();this.refreshSaveNote();});
     window.addEventListener('blur',()=>{if(state.ready&&!this.paused)this.pause('focus');});
     document.addEventListener('visibilitychange',()=>{if(document.hidden&&state.ready&&!this.paused)this.pause('focus');});
     // Programmatic/gamepad pause shortcuts still work when input is suspended.
@@ -124,6 +151,8 @@ export class Cockpit {
   }
   pause(reason='manual',show=true) {
     this.reason=reason;this.paused=true;this.state.paused=true;
+    this.missileLaunchSequence=this.state.player?.missiles?.launchSequence||0;
+    this.lastMissileFeedback=-Infinity;this.clearMissileFeedback();
     this.clearInput();this.input.suspended=true;
     this.quiet(true);
     this.applyOptions();
@@ -155,37 +184,53 @@ export class Cockpit {
     this.input.suspended=true;
     const p=this.state.player;
     const ready=this.reason==='welcome';
-    const complete=this.reason==='result';
+    const complete=this.reason==='result'||!!this.state.match?.over;
     const won=this.state.match?.over===1;
-    const title=ready?'Ready for your first flight?':this.reason==='recovery'?'A fresh start in the air':this.reason==='tune'?'Find your flight feel':complete?(won?'Mission complete':'Let’s fly again'):'Flight paused';
+    const requestedFront=this.flags.get('front')?.toUpperCase();
+    const operationFront=FRONTS[requestedFront]?requestedFront:'NELLIS';
+    const continuation=flightContinuation({flags:this.flags,match:this.state.match,progressSaved:this.state.progressSaved},campaignProgress().next);
+    const next=continuation.nextMission;
+    const title=ready?'Ready to fly':this.reason==='recovery'?'A fresh start in the air':this.reason==='tune'?'Find your flight feel':complete?(continuation.resultTitle||(won?'Mission complete':'Let’s fly again')):'Flight paused';
     this.pauseDialog.el.querySelector('h2').textContent=title;
     this.pauseDialog.el.setAttribute('aria-label',title);
+    this.pauseDialog.el.setAttribute('data-pause-kind',ready?'welcome':complete?'result':'paused');
+    this.pauseDialog.el.querySelector('.icon-button').setAttribute?.('aria-label',ready?'Start flying':complete?'Return to flight view':'Resume flight');
     this.pauseDialog.el.querySelector('.eyebrow').textContent=ready?'A little space to learn':complete?'Debrief':'Take your time';
-    const saveMessage=this.state.progressSaved===true?'Your progress has been saved in this browser.':this.state.progressSaved===false?'Your browser could not save this result. Check that local storage is available before starting another mission.':this.flags.has('sortie')?'This mission is still available in your pilot log. Complete its objectives to advance.':'Quick battles do not change your campaign progress.';
-    const description=ready?'You’re already airborne. Five short exercises will teach you to steer, turn, climb and manage power. There are no enemies or time pressure. You can switch to free flight at any point.':this.reason==='recovery'?'Your aircraft touched down too hard. You’re safely airborne again, with the world paused. Take a breath, adjust your setup, and try the exercise again.':complete?`${saveMessage} ${won?'Ready for the next sortie?':'Take a moment, adjust your setup, and try again.'}`:this.reason==='focus'?'You left the game window, so your flight was paused. Resume when you’re ready.':this.reason==='pointer'?'The cursor is free and your flight is paused. Resume when you’re ready; pointer capture is always your choice.':'The aircraft and the world are paused. Adjust anything you need before returning to flight.';
+    const saveMessage=this.state.progressSaved===true?'Your progress has been saved in this browser.':this.state.progressSaved===false?'Your browser could not save this result. Leaving this page will lose it.':this.flags.has('sortie')?'This mission is still available in your pilot log. Complete its objectives to advance.':this.flags.has('op')?'Your operation continues from its last saved front line.':'Quick battles do not change your campaign progress.';
+    const description=ready?'You’re already airborne. No enemies, no time pressure.':this.reason==='recovery'?'You’re safely airborne again. Take a breath and try the exercise when you’re ready.':complete?saveMessage:this.reason==='focus'?'Your flight paused when you left the window. Resume when you’re ready.':this.reason==='pointer'?'The cursor is free and your flight is paused. Resume when you’re ready.':'Your aircraft and the world are paused.';
     const hs=p?.hudState();
-    const next=campaignProgress().next;
     const options=SETTINGS.current();
+    const key=id=>`<kbd>${escapeHTML(bindingLabel(this.input,id))}</kbd>`;
+    const steering=options.pointingDevice==='trackpad'?'Slide one finger to steer, without clicking. Lift and reposition between strokes.':'Move the mouse gently to steer. The aircraft follows your aim.';
+    const settingsSaved=this.input.storageAvailable&&SETTINGS.storageAvailable();
+    const optionsOpen=this.pauseDialog.open&&this.pauseDialog.body.querySelector('.pause-options')?.open;
+    const tuneOpen=!ready&&(this.reason==='tune'||this.pauseDialog.open&&this.pauseDialog.body.querySelector('.quick-tune')?.open);
     const nextTier=options.tier==='AUTO'?(this.state.recommendedTier||this.state.tier):options.tier;
     const pendingTier=nextTier!==this.state.tier || this.state.assetReloadRequired===true;
     const graphicsSaved=SETTINGS.storageAvailable();
     const graphicsNote=!graphicsSaved ? 'Graphics changes are active on this page. Browser storage is unavailable, so restarting may restore your previous settings.'
       : nextTier!==this.state.tier ? `Graphics: ${escapeHTML(this.state.tier)} running · ${escapeHTML(nextTier)} on restart.`
         : 'Your selected graphics preset needs a restart to load its full detail.';
-    this.pauseDialog.body.innerHTML=`<p class="pause-message">${description}</p>${hs?`<div class="pause-overview"><div><span>AIRSPEED</span><strong>${Math.round(hs.speedKt)} <small>kt</small></strong></div><div><span>ALTITUDE</span><strong>${Math.round(hs.altFt).toLocaleString()} <small>ft</small></strong></div><div><span>THROTTLE</span><strong>${hs.throttle}%</strong></div></div>`:''}
-      ${this.renderFlightBrief()}<div data-quick-tune></div>
-      <div class="pause-grid"><button type="button" class="ui-button" data-pause="controls">Customize controls <span>↗</span></button><button type="button" class="ui-button" data-pause="settings">Display & sound <span>↗</span></button><button type="button" class="ui-button" data-pause="guide">How to fly <span>↗</span></button><button type="button" class="ui-button" data-pause="progress">Your pilot log <span>↗</span></button></div>
-      ${complete&&won&&this.flags.has('sortie')&&next?`<button type="button" class="ui-button primary pause-primary" data-next>Fly next campaign mission ↗</button>`:''}
+    this.pauseDialog.body.innerHTML=`<p class="pause-message">${description}</p>
+      ${ready?`<div class="welcome-guidance"><p>${steering}</p><div class="welcome-keys"><span>${key('throttle_up')} / ${key('throttle_down')} Throttle</span><span>${key('recenter_aim')} Center aim</span><span><kbd>Esc</kbd> Pause</span></div></div>`:this.renderFlightBrief()}
+      ${complete&&next?`<button type="button" class="ui-button primary pause-primary" data-next>Fly next campaign mission ↗</button>`:''}
+      ${continuation.operation?`<p class="pause-continuation">${continuation.consequence}</p><button type="button" class="ui-button primary pause-primary" data-restart>${continuation.restartLabel} ↗</button>`:''}
       <button type="button" class="ui-button ${complete?'':'primary'} pause-primary" data-resume>${ready?'Start flying':complete?'Return to flight view':'Resume flight'} <kbd>Esc</kbd></button>
+      ${this.practice&&!ready?`<div class="pause-handoff"><span>New pilot?<small>Begin with level flight and five guided exercises.</small></span><div class="pause-practice-actions"><button type="button" class="ui-button" data-school-start>${this.coach.course.record||this.coach.course.elapsed>0?'Replay':'Start'} flight school</button><button type="button" class="text-button" data-recover>Reset to level flight</button></div></div>`:''}
       ${pendingTier?`<p class="pause-graphics-note">${graphicsNote} Your current flight stays paused until you resume.</p>`:''}
-      <div class="pause-secondary"><button type="button" class="text-button" data-restart>${pendingTier&&graphicsSaved?'Restart with new graphics':'Restart this flight'}</button><button type="button" class="text-button" data-hangar>Back to preflight ↗</button><button type="button" class="text-button" data-fullscreen>Fullscreen</button></div>
-      <div class="pause-guidance"><button type="button" class="text-button" data-reminders>${options.showHints?'Hide':'Show'} key reminders</button>${this.practice?`<button type="button" class="text-button" data-checklist>${options.showChecklist?'Hide':'Show'} flight coach</button><button type="button" class="text-button" data-recover>Reset to level flight</button><button type="button" class="text-button" data-school>${this.coach.course.status==='active'?'Switch to free flight':'Start flight school'}</button>`:''}</div>
-      <p class="pause-note">${ready?'The flight tips stay on screen until you hide them.':complete?'Campaign and operation results save when a sortie finishes.':'Controls and settings save automatically. An unfinished sortie starts over if you leave or reload.'}</p>`;
+      <div data-quick-tune></div>
+      <details class="pause-options" ${optionsOpen||pendingTier?'open':''}><summary>Flight options <span>Controls, display & more</span></summary>
+        <div class="pause-grid"><button type="button" class="ui-button" data-pause="controls">Customize controls <span>↗</span></button><button type="button" class="ui-button" data-pause="settings">Display & sound <span>↗</span></button><button type="button" class="ui-button" data-pause="guide">How to fly <span>↗</span></button><button type="button" class="ui-button" data-pause="progress">Your pilot log <span>↗</span></button></div>
+        ${!ready&&hs?`<div class="pause-overview"><div><span>AIRSPEED</span><strong>${Math.round(hs.speedKt)} <small>kt</small></strong></div><div><span>ALTITUDE</span><strong>${Math.round(hs.altFt).toLocaleString()} <small>ft</small></strong></div><div><span>THROTTLE</span><strong>${hs.throttle}%</strong></div></div>`:''}
+        <div class="pause-guidance"><button type="button" class="text-button" data-reminders>${options.showHints?'Hide':'Show'} key reminders</button>${this.practice?`<button type="button" class="text-button" data-checklist>${options.showChecklist?'Hide':'Show'} flight coach</button><button type="button" class="text-button" data-school>${this.coach.course.status==='active'?'Switch to free flight':'Start flight school'}</button>`:''}</div>
+        <div class="pause-secondary">${continuation.operation?'':`<button type="button" class="text-button" data-restart>${pendingTier&&graphicsSaved?'Restart with new graphics':'Restart this flight'}</button>`}<button type="button" class="text-button" data-fullscreen>Fullscreen</button></div>
+      </details>
+      <div class="pause-exit"><button type="button" class="text-button" data-hangar>Back to preflight ↗</button><p class="pause-note" ${!ready&&!complete?'data-settings-save':''}>${ready?'Five short exercises. Learn at your own pace.':complete?this.state.progressSaved===false?'This result is not saved.':this.state.progressSaved===true?'This result is saved in this browser.':'Choose another flight from your pilot log.':settingsSaved?'Controls and settings save in this browser.':'Some settings are available for this session only.'}</p></div>`;
     for(const b of this.pauseDialog.body.querySelectorAll('[data-pause]'))b.onclick=()=>{
       const a=b.dataset.pause;
       if(a==='controls'||a==='settings')this.openControls(a);else if(a==='guide')this.openGuide();else this.openLog();
     };
-    mountQuickTune(this.pauseDialog.body.querySelector('[data-quick-tune]'),{expanded:ready||this.reason==='tune',onControls:()=>this.openControls('controls')});
+    mountQuickTune(this.pauseDialog.body.querySelector('[data-quick-tune]'),{expanded:!!tuneOpen,onControls:()=>this.openControls('controls')});
     this.pauseDialog.body.querySelector('[data-resume]').onclick=()=>this.resume();
     this.pauseDialog.body.querySelector('[data-reminders]').onclick=()=>{SETTINGS.saveSettings({showHints:!SETTINGS.current().showHints});this.showPause();this.pauseDialog.body.querySelector('[data-reminders]').focus();};
     this.pauseDialog.body.querySelector('[data-checklist]')?.addEventListener('click',()=>{SETTINGS.saveSettings({showChecklist:!SETTINGS.current().showChecklist});this.showPause();this.pauseDialog.body.querySelector('[data-checklist]').focus();});
@@ -194,17 +239,38 @@ export class Cockpit {
       if(this.coach.course.status==='active')this.coach.freeFlight();else{this.coach.replay();SETTINGS.saveSettings({showChecklist:true});}
       this.showPause();this.pauseDialog.body.querySelector('[data-resume]').focus();
     });
-    this.pauseDialog.body.querySelector('[data-restart]').onclick=()=>this.confirmLeave(()=>location.reload(),'Restart this flight?');
-    this.pauseDialog.body.querySelector('[data-hangar]').onclick=()=>this.confirmLeave(()=>location.assign('/'),'Return to preflight?');
+    this.pauseDialog.body.querySelector('[data-school-start]')?.addEventListener('click',()=>this.startFlightSchool());
+    const returnToPreflight=()=>{
+      if(continuation.operationComplete){
+        const plan=validateFlightPlan(readLocal(PREFLIGHT_KEY,null));
+        writeLocal(PREFLIGHT_KEY,{...plan,mode:'operation',front:operationFront});
+      }
+      location.assign('/');
+    };
+    this.pauseDialog.body.querySelector('[data-restart]').onclick=()=>this.confirmLeave(continuation.operationComplete?returnToPreflight:()=>location.reload(),continuation.restartTitle,{label:continuation.operation?continuation.restartLabel:undefined,detail:continuation.consequence});
+    this.pauseDialog.body.querySelector('[data-hangar]').onclick=()=>this.confirmLeave(returnToPreflight,'Return to preflight?');
     this.pauseDialog.body.querySelector('[data-fullscreen]').onclick=e=>fullscreen(e.currentTarget);
-    this.pauseDialog.body.querySelector('[data-next]')?.addEventListener('click',()=>location.assign(sortieURL(next)));
+    this.pauseDialog.body.querySelector('[data-next]')?.addEventListener('click',()=>{if(next)location.assign(sortieURL(next));});
     this.pauseDialog.show();
   }
-  confirmLeave(action,title) {
+  startFlightSchool() {
+    if(!this.practice||!this.coach)return;
+    this.recoverPractice();
+    this.coach.replay();
+    SETTINGS.saveSettings({showChecklist:true,showHints:true});
+    this.reason='welcome';this.showPause();
+    this.pauseDialog.body.querySelector('[data-resume]').focus();
+  }
+  refreshSaveNote() {
+    const note=this.pauseDialog.body.querySelector('[data-settings-save]');
+    if(note)note.textContent=this.input.storageAvailable&&SETTINGS.storageAvailable()?'Controls and settings save in this browser.':'Some settings are available for this session only.';
+  }
+  confirmLeave(action,title,{label,detail=''}={}) {
     this.pause('menu',false);
     const resultMessage=this.state.progressSaved===false?'This result could not be saved in this browser. Leaving will lose this result.':this.state.progressSaved===true?'Your completed result is saved.':'Your earlier campaign progress is kept.';
     const leaveMessage=this.input.storageAvailable&&SETTINGS.storageAvailable()?'Your control settings and completed missions are saved. This unfinished flight will start over.':'This browser cannot save all of your current settings. Unsaved changes will reset and this unfinished flight will start over.';
-    const dialog=confirmAction({title,message:this.state.match?.over?resultMessage:leaveMessage,action:title.startsWith('Restart')?'Restart flight':title.startsWith('Return')?'Back to preflight':'Fly mission',onConfirm:action});
+    const message=`${this.state.match?.over?resultMessage:leaveMessage}${detail?' '+detail:''}`;
+    const dialog=confirmAction({title,message,action:label||(title.startsWith('Restart')?'Restart flight':title.startsWith('Return')?'Back to preflight':'Fly mission'),onConfirm:action});
     this.confirmDialog=dialog;
     dialog.el.addEventListener('close',()=>{if(this.paused&&!this.log.open&&!this.pauseDialog.open)this.showPause();});
   }
@@ -214,7 +280,7 @@ export class Cockpit {
   }
   renderHints() {
     const key=id=>`<kbd>${escapeHTML(bindingLabel(this.input,id))}</kbd>`;
-    this.hints.innerHTML=`<span>${key('throttle_up')} / ${key('throttle_down')} Throttle</span><span>${key('roll_left')} / ${key('roll_right')} Roll</span><span>${key('recenter_aim')} Recenter</span><span>${key('fire_mguns')} Cannon</span><span>${key('fire_aam')} Missile</span><button type="button" aria-label="Hide key reminders">✕</button>`;
+    this.hints.innerHTML=`<span>${key('throttle_up')} / ${key('throttle_down')} Throttle</span><span>${key('roll_left')} / ${key('roll_right')} Roll</span><span>${key('recenter_aim')} Center aim</span>${this.practice?'':`<span>${key('fire_mguns')} Cannon</span><span>${key('fire_aam')} Missile</span>`}<button type="button" aria-label="Hide key reminders">✕</button>`;
     this.hints.querySelector('button').onclick=()=>SETTINGS.saveSettings({showHints:false});
   }
   renderPractice(){this.coach?.refresh();}
@@ -240,6 +306,7 @@ export class Cockpit {
   }
   update(now,dtMs) {
     if(this.paused)return;
+    this.updateMissileFeedback(now);
     if(this.state.ready)this.coach?.update(Math.min(dtMs/1000,10/120));
     if(this.state.ready){this.samples.push(dtMs);if(this.samples.length>180)this.samples.shift();}
     if(now-this.lastStatus>750){
@@ -253,14 +320,33 @@ export class Cockpit {
       if(now-this.resultAt>3500){this.resultShown=true;this.pause('result');}
     }
   }
+  updateMissileFeedback(now) {
+    const weapon=this.state.player?.missiles;
+    if(!weapon?.launchSequence||weapon.launchSequence===this.missileLaunchSequence)return;
+    this.missileLaunchSequence=weapon.launchSequence;
+    if(weapon.launchOutcome==='launched'){
+      this.clearMissileFeedback();return;
+    }
+    const message=weapon.launchOutcome==='empty'?'No missiles remaining.'
+      :weapon.launchOutcome==='no-lock'?'No missile lock. Keep a target ahead until LOCK appears.':null;
+    if(!message||now-this.lastMissileFeedback<2000)return;
+    this.lastMissileFeedback=now;
+    this.toast(message,1800);this.missileFeedbackToast=this.toastEl;
+  }
+  clearMissileFeedback() {
+    if(this.missileFeedbackToast&&this.missileFeedbackToast===this.toastEl){
+      clearTimeout(this.toastTimer);this.toastEl.remove();
+    }
+    this.missileFeedbackToast=null;
+  }
   toggleHUD(){
     this.hudHidden=!this.hudHidden;
     if(this.hud.canvas)this.hud.canvas.style.display=this.hudHidden?'none':'';
     this.toast(this.hudHidden?'HUD hidden. Use your HUD shortcut to show it again.':'HUD visible.');
   }
-  toast(message){
+  toast(message,duration=3500){
     this.toastEl?.remove();clearTimeout(this.toastTimer);
     const el=document.createElement('div');el.className='flight-toast';el.setAttribute('role','status');el.textContent=message;document.body.append(el);this.toastEl=el;
-    this.toastTimer=setTimeout(()=>el.remove(),3500);
+    this.toastTimer=setTimeout(()=>el.remove(),duration);
   }
 }

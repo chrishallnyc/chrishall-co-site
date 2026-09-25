@@ -241,7 +241,12 @@ export class PlanetObjectBender {
   }
 }
 
-export function attachRaptorPlanetObjects(bender, { world, player, battlefield, bandits }) {
+export function attachRaptorPlanetObjects(bender, { world, player, battlefield, bandits, aircraftLighting }) {
+  // Mission setup can assign ace/team liveries after the pool was registered
+  // for aircraft lighting. Resolve those renderer-owned materials first:
+  // bending a livery source would make the later lighting clone inherit
+  // deformation/MRT nodes whose ownership belongs to a different material.
+  aircraftLighting?.refreshMaterials();
   bender.attach(world.jet); // Includes all FlightFX children and worldFixed particles.
   bender.attach(world.pylons, { stableInstances: true });
   bender.attach(world.trailMesh);

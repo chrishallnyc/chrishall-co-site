@@ -21,7 +21,7 @@ try{
   assert.equal(await page.evaluate(()=>__RAPTOR.hud.canvas.width),2560);
   assert.equal(await page.evaluate(()=>__RAPTOR.cloudPass.lightCache.stats.initialWarmup.complete),true);
  });
- await page.locator('[data-flight-action="settings"]').click();await page.locator('[data-tab="display"]').click();
+ await page.locator('[data-flight-action="pause"]').click();await page.locator('.pause-options > summary').click();await page.locator('[data-pause="settings"]').click();await page.locator('[data-tab="display"]').click();
  await check('manual quality bypasses Auto without advancing the paused flight',async()=>{
   const time=(await graphics()).time;await page.locator('[data-quality="HIGH"]').click();
   assert.equal((await graphics()).ratio,2);assert.equal((await graphics()).time,time);

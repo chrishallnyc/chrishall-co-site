@@ -40,6 +40,7 @@ const fly=async()=>{
 try{
   await page.goto(origin,{waitUntil:'networkidle'});
   await check('campaign starts from its named preflight briefing',async()=>{
+    await page.locator('#flight-customize summary').click();
     await page.locator('[data-mode="campaign"]').click();
     await page.waitForFunction(()=>!document.getElementById('flyBtn').disabled);
     assert.ok((await page.locator('#brief-title').textContent()).length>3);
@@ -51,6 +52,16 @@ try{
     const before=await page.evaluate(()=>__RAPTOR.player.gun.ammo);
     await page.keyboard.down('1');await page.waitForTimeout(450);await page.keyboard.up('1');
     assert.ok(await page.evaluate(()=>__RAPTOR.player.gun.ammo)<before);
+  });
+  await check('rejected missile commands explain missing lock and empty ammunition',async()=>{
+    assert.equal(await page.evaluate(()=>__RAPTOR.player.missiles.locked()),false);
+    await page.keyboard.press('Space');await page.waitForFunction(()=>document.querySelector('.flight-toast')?.textContent.includes('No missile lock'));
+    assert.match(await page.locator('.flight-toast').textContent(),/No missile lock/);
+    await page.waitForTimeout(2100);
+    const ammo=await page.evaluate(()=>{const m=__RAPTOR.player.missiles,a=m.ammo;m.ammo=0;return a;});
+    await page.keyboard.press('Space');await page.waitForFunction(()=>document.querySelector('.flight-toast')?.textContent.includes('No missiles remaining'));
+    assert.match(await page.locator('.flight-toast').textContent(),/No missiles remaining/);
+    await page.evaluate(ammo=>{__RAPTOR.player.missiles.ammo=ammo;},ammo);
   });
   await check('completed campaign result saves and offers the next mission',async()=>{
     await page.evaluate(()=>{__RAPTOR.match.over=1;});
@@ -69,16 +80,32 @@ try{
     await page.locator('[data-mission="N02"]').click();assert.equal(await page.locator('[data-launch-mission]').isDisabled(),false);
     await snap('04-unlocked-progress');
   });
+  await check('a failed campaign save cannot offer a misleading next mission',async()=>{
+    await page.keyboard.press('Escape');await page.locator('[data-resume]').click();
+    await page.evaluate(()=>{const set=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k==='raptor.auth.v1')throw Error('QA quota failure');return set.call(this,k,v);};__RAPTOR.match.over=1;});
+    await page.waitForSelector('.pause-dialog[open]');
+    assert.equal(await page.evaluate(()=>__RAPTOR.progressSaved),false);
+    assert.equal(await page.locator('[data-next]').count(),0);
+    assert.match(await page.locator('.pause-message').textContent(),/could not save/);
+    await page.locator('[data-hangar]').click();assert.match(await page.locator('.confirm-dialog .dialog-body').textContent(),/lose this result/);
+    await page.locator('[data-cancel]').click();
+  });
   await check('Valdez operation flies and saves a completed result in its own region',async()=>{
     await page.goto(origin+'?front=VALDEZ&op=1');await boot();await fly();await snap('05-valdez-operation');
     await page.evaluate(()=>{__RAPTOR.match.over=-1;});await page.waitForSelector('.pause-dialog[open]');
     assert.equal(await page.evaluate(()=>__RAPTOR.progressSaved),true);
     assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('raptor.op.v1:VALDEZ')).sortieIndex),1);
     assert.equal(await page.evaluate(()=>localStorage.getItem('raptor.op.v1:MARIANAS')),null);
-    await snap('06-operation-debrief');
+    assert.match(await page.locator('[data-restart]').textContent(),/Continue operation/);
+    assert.match(await page.locator('.pause-continuation').textContent(),/next sortie/);
+    await page.locator('[data-restart]').click();assert.match(await page.locator('.confirm-dialog .dialog-body').textContent(),/next sortie/);
+    await page.locator('[data-cancel]').click();await snap('06-operation-debrief');
   });
   await check('Marianas preserves high-quality graphics and adapts exposure asynchronously',async()=>{
-    await page.evaluate(async()=>{const s=await import('/src/game/settings.js');s.saveSettings({tier:'HIGH',hudScale:1,showHints:false});});
+    // Keep this a feature smoke test: full-resolution HIGH ocean exceeds
+    // this laptop's frame budget on the baseline too. Rendering quality/FFT
+    // remain HIGH; explicit scene scale avoids an implicit hardware benchmark.
+    await page.evaluate(async()=>{const s=await import('/src/game/settings.js');s.saveSettings({tier:'HIGH',renderScale:.65,hudScale:1,showHints:false});});
     await page.goto(origin+'?front=MARIANAS&mode=practice&nobattle=1&nomatch=1&tod=12');await boot();
     assert.equal(await page.evaluate(()=>__RAPTOR.tier),'HIGH');
     assert.equal(await page.evaluate(()=>__RAPTOR.post),true);
@@ -90,7 +117,7 @@ try{
       const frames=[];let last=performance.now();
       await new Promise(resolve=>{const start=last;function frame(now){if(!__RAPTOR.paused)frames.push(now-last);last=now;if(now-start>8000)resolve();else requestAnimationFrame(frame);}requestAnimationFrame(frame);});
       const f=frames.filter(n=>n>0).sort((a,b)=>a-b);
-      return {front:'MARIANAS',backend:__RAPTOR.backend,tier:__RAPTOR.tier,post:__RAPTOR.post,volClouds:__RAPTOR.volClouds,fftOcean:__RAPTOR.fftOcean,paused:__RAPTOR.paused,samples:f.length,medianMs:f[Math.floor(f.length*.5)],p95Ms:f[Math.floor(f.length*.95)],over50ms:f.filter(n=>n>50).length,meterSamples:__RAPTOR.meter.samples,exposureMultiplier:__RAPTOR.meter.mult,recording:true};
+      return {front:'MARIANAS',backend:__RAPTOR.backend,tier:__RAPTOR.tier,renderScale:__RAPTOR.rendering.renderer.getPixelRatio(),post:__RAPTOR.post,volClouds:__RAPTOR.volClouds,fftOcean:__RAPTOR.fftOcean,paused:__RAPTOR.paused,samples:f.length,medianMs:f[Math.floor(f.length*.5)],p95Ms:f[Math.floor(f.length*.95)],over50ms:f.filter(n=>n>50).length,meterSamples:__RAPTOR.meter.samples,exposureMultiplier:__RAPTOR.meter.mult,recording:true};
     });metrics.push(sample);console.log('METRICS '+JSON.stringify(sample));assert.ok(sample.samples>100);assert.equal(sample.paused,false);
     await page.keyboard.press('Escape');const t=await page.evaluate(()=>__RAPTOR.sim.time);await page.waitForTimeout(500);assert.equal(await page.evaluate(()=>__RAPTOR.sim.time),t);
     await snap('08-high-paused');
