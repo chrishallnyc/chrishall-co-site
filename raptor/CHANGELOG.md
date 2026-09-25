@@ -1,5 +1,31 @@
 # RAPTOR release notes
 
+## 1.6.0 — 2026-09-24
+
+The F-22 and opposing fleet have smoother airframes, deeper mechanical
+construction and more natural material response under the sky at flight altitude.
+The rebuild was followed by five rendered refinement passes.
+
+- **Shape and assembly:** continuous cockpit and wing-root joins, rolled
+  intake lips, formed bay/wheel-well structure and gear doors that clear the
+  wheels through deployment. Nozzle panels show their convergent/divergent
+  construction, with restrained brushed metal and heat-affected interiors.
+- **Coating and light:** independent left/right maintenance patterns, quieter
+  resealed joints, layered coating normals, differentiated radome/glass/metal,
+  and freshly baked contact shading. Sky, cloud and average ground reflections
+  now follow aircraft altitude while preserving each material's response.
+- **The opposing fleet:** smoother transport noses, shaped inlet fans, fitted
+  cockpit panes, deeper fighter ducts, continuous drone shoulders and detailed
+  sensor/propeller assemblies. Geometry and textures remain shared by pool clones.
+- **Motion and inspection:** more structured afterburner compression cells,
+  stable prebuilt distance levels, and daylight, overcast and low-sun lighting
+  in the aircraft lab. Native and browser checks cover both render backends,
+  articulation, quality changes, reflection refresh and simulation invariance.
+
+This release retains the flight school, controls, audio and world improvements
+from earlier releases. Native volumetric clouds and post-processing remain
+more demanding than the WebGL fallback; quality presets are still available.
+
 ## 1.5.0 — 2026-09-24
 
 Mouse and trackpad aiming now steer the aircraft as intended. The player had

@@ -1,11 +1,12 @@
 {
- "updated": "2026-09-24T12:01:35-07:00",
- "version": "v1.4.0",
- "now": "v1.4.0 — SKY AND WORLD REFINED. Detailed clouds and cirrus, physical night lighting, finer ocean waves and terrain relief, with the rebuilt aircraft integrated into the curved world.",
+ "updated": "2026-09-24T18:37:40-07:00",
+ "version": "v1.6.0",
+ "now": "v1.6.0 — AIRCRAFT, UP CLOSE. Smoother airframes, layered coatings, formed bay interiors, rebuilt nozzles and altitude-aware reflections, refined through five visual passes. Flight school, controls, world and audio improvements remain integrated.",
  "nowPhase": 13,
  "paused": false,
- "pushes": 73,
+ "pushes": 74,
  "ledger": [
+  "2026-09-24 v1.6.0 — Aircraft graphics rebuilt and refined through five successive rendered passes. Continuous joins, detailed bay structure, independent maintenance coatings, layered nozzle metal, altitude-aware sky/cloud/ground reflections and refreshed contact shading. Fighter, transport and drone finishes refined. Flight-school and control improvements from v1.5.0 retained.",
   "2026-09-24 v1.4.0 — Clouds, sky and landscapes rebuilt through repeated visual refinement. Full-resolution cloud lighting, 8K cirrus, catalogued stars and mapped Moon, 512² fine water, real 5 m central Valdez elevation data, near terrain and snow detail. Aircraft coating and self-shadows share the world lighting.",
   "2026-09-24 v1.3.0 — Aircraft graphics rebuilt and refined through five further passes. New cockpit and mechanical detail, paint and engine materials, articulated bays, volumetric exhaust, and shared distance/quality levels. Browser checks pass on WebGPU and WebGL; combat simulation remains unchanged.",
   "2026-09-24 v1.2.0: Flight and combat audio rebuilt. Recorded afterburner texture, spool-driven turbine detail, round-aligned cannon attacks, moving aircraft and missiles, delayed blasts, gear and ground-contact sounds, and distinct threat tones. Audition the mix in the audio lab.",
