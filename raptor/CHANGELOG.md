@@ -1,5 +1,41 @@
 # RAPTOR release notes
 
+## 1.5.0 — 2026-09-24
+
+Mouse and trackpad aiming now steer the aircraft as intended. The player had
+selected an unsupported instructor mode, which ignored horizontal aim and
+treated vertical aim as a sustained load command. Selecting the actual mouse
+instructor fixes that mismatch. Keyboard turns keep their new course when
+released, and recentering holds the current flight path without adding a climb.
+
+- **See and edit your controls.** An interactive keyboard and pointer map shows
+  current bindings, complete shortcuts and shared actions. Change a key or add
+  an alternate directly from the map, with the existing conflict choices and
+  Undo. Custom inputs outside the laptop layout remain visible and editable.
+- **Find a comfortable aiming feel.** Precise, Balanced and Responsive presets
+  work with separately saved mouse and MacBook trackpad sensitivities. A guided
+  five-target comfort check lets you try the feel in the safe Controls preview;
+  it does not move or fire the aircraft.
+- **Learn through real flight.** Five practice lessons measure steady flight,
+  throttle control, a heading change, a climb and level-off, and steady cruise.
+  The coach shows live targets and current keys, forgives brief wobbles, and
+  saves graduation in the browser. Free flight, replay and reset to level flight
+  are available throughout practice. Crashes pause on a safe aircraft before
+  you continue; recovery preserves earned training and returns keyboard focus
+  to the flight canvas.
+- **Adjust without losing your place.** Tune feel opens a paused panel for
+  sensitivity, device choice, inversion, instrument size and sound. Pause also
+  shows mission objectives and remaining time, with protection kept separate
+  from completion counts. An off-screen aim cue keeps recentering discoverable
+  while weapon and ammunition information remains visible.
+
+Native checks cover input behavior, course timing, persistence and a real
+flight-model course. Isolated browser checks exercise the controls map, aim
+targets, all five flown lessons, Quick tune, recovery and focus. Automated
+pointer input exercises the trackpad profile; physical MacBook trackpad testing
+has not been performed. See [README.md](README.md#verify-changes) for commands
+and optional playthrough recording.
+
 ## 1.4.0 — 2026-09-24
 
 The sky and landscape now carry substantially more detail, with shaped volumetric

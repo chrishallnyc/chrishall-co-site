@@ -20,6 +20,8 @@ import { showFlightdeck } from "./game/flightdeck.js";
 import { hasFlightRequest } from "./game/flightplan.js";
 import { loadRequestedFlight, FlightLoadError, bootFailureMessage } from "./game/flightload.js";
 import { Cockpit } from "./game/cockpit.js";
+import { projectAimCue, drawAimCue } from "./game/aimcue.js";
+import { bindingLabel } from "./game/ui.js";
 import { Atmosphere } from "./world/daycycle.js";
 import { surfaceCelestialTransport } from "./world/celestial-surface.js";
 import { Terrain } from "./world/terrain.js";
@@ -33,7 +35,7 @@ import { AircraftLighting } from "./aircraft/lighting.js";
 import { updateF22Visuals } from "./aircraft/f22-lod.js";
 import { Soundscape } from "./game/soundscape.js";
 
-const VERSION = "1.4.0";
+const VERSION = "1.5.0";
 const PHASE = 12;
 
 // WebGPU and reverse-depth WebGL use [0,1]; ordinary WebGL uses [-1,1].
@@ -146,6 +148,11 @@ async function boot() {
   const flags = new URLSearchParams(location.search);
   bootStage('mission','Checking your flight plan…','Preparing the flight you selected. Your aircraft stays on standby until everything is ready.');
   const requested = await loadRequestedFlight(flags);
+  if (flags.get('mode') === 'practice') {
+    // Direct practice links use the same render-workload identity and safe
+    // systems configuration as flights launched from preflight.
+    flags.set('nobattle','1'); flags.set('nomatch','1');
+  }
   // A shared mission link may omit its region; the validated mission owns it.
   if (requested?.spec.front) flags.set("front", requested.spec.front);
   bootStage('graphics-device','Connecting to your graphics system…','Choosing the graphics renderer for this browser and your display settings.');
@@ -380,7 +387,7 @@ async function boot() {
 
   // PHASE 9: targets on the ground. ?nobattle=1 for clean scenery QA shots.
   let battlefield = null;
-  if (flags.get("nobattle") !== "1") {
+  if (flags.get("nobattle") !== "1" && flags.get('mode') !== 'practice') {
     const { Battlefield } = await import("./game/battlefield.js");
     battlefield = new Battlefield(scene, terrain, (flags.get("front") || "NELLIS").toUpperCase());
     sim.addSystem(battlefield);
@@ -532,21 +539,19 @@ async function boot() {
       const cp = Math.cos(player.aimPitch), sp = Math.sin(player.aimPitch);
       aimV.set(Math.cos(player.aimHeading) * cp, sp, Math.sin(player.aimHeading) * cp)
         .multiplyScalar(6000).add(camera.position);
-      const v = aimV.project(camera);
-      if (!projectedDepthVisible(v.z, camera)) return;
-      const sx = (v.x * 0.5 + 0.5) * w, sy = (1 - (v.y * 0.5 + 0.5)) * h;
-      if (sx < 8 || sy < 8 || sx > w - 8 || sy > h - 8) return;
+      aimV.applyMatrix4(camera.matrixWorldInverse);
+      const cue = projectAimCue({x:aimV.x,y:aimV.y,z:aimV.z,width:w,height:h,
+        fov:camera.fov,top:(cockpit?.toolbarBottom||70)+32,bottom:110});
+      drawAimCue(ctx,cue,bindingLabel(input,'recenter_aim'));
+      state.aimCue = cue;
       ctx.save();
-      ctx.strokeStyle = "#9be89b"; ctx.lineWidth = 1.6; ctx.globalAlpha = 0.95;
-      ctx.beginPath(); ctx.arc(sx, sy, 9, 0, Math.PI * 2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(sx, sy, 1.4, 0, Math.PI * 2); ctx.fillStyle = "#9be89b"; ctx.fill();
       // ammo + score + airframe readout, WT-style bottom-center
       ctx.font = "12px ui-monospace, Menlo, monospace";
       ctx.fillStyle = player.gun.ammo > 0 ? "#9be89b" : "#d08770";
       ctx.textAlign = "center";
       const score = battlefield && battlefield.kills > 0 ? "   KILLS " + battlefield.kills : "";
       const dmg = player.hp < 100 ? "   HULL " + Math.max(player.hp, 0) + "%" : "";
-      ctx.fillText("GUN " + player.gun.ammo + "   AAM " + player.missiles.ammo + score + dmg, w / 2, h - 34);
+      ctx.fillText("GUN " + player.gun.ammo + "   AAM " + player.missiles.ammo + score + dmg, w / 2, h - (SETTINGS.current().showHints ? 68 : 34));
       ctx.restore();
 
       // seeker box on the IR target: dashed while acquiring, solid when locked
@@ -969,7 +974,14 @@ async function boot() {
 
   Object.assign(state, {
     rendering: { renderer, scene, camera, world, aircraftLighting, projectedDepthVisible },
-    sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud, player, battlefield, match, script, bandits, directory, audio, soundscape,
+    sim, input, gamepad, controls, dbg, atmosphere, terrain, water, clouds, hud, player, battlefield, match, script, missionData, bandits, directory, audio, soundscape,
+    recoverPractice: () => {
+      if (!cockpit.practice || !player) return false;
+      cockpit.clearInput();
+      player.recoverFlight(); killCam = null; kcCrashes = player.crashes;
+      post?.invalidateHistory?.(); meter?.reset();
+      return true;
+    },
     cloudPass: post?.cloudPass ?? null,
     kc: () => killCam,
     cloudImmersion: () => clouds.immersion,
@@ -1092,7 +1104,13 @@ async function boot() {
     if (state.resetFrameClock) { dtMs=0; state.resetFrameClock=false; }
     input.sampleGamepad(dtMs / 1000);
     if (input.pressed("hide_hud")) cockpit.toggleHUD();
-    if (input.pressed("recenter_aim")) { player?.recenterAim(); cockpit.toast("Aim aligned with your aircraft."); }
+    if (input.pressed("recenter_aim")) {
+      player?.recenterAim();
+      // These render-frame deltas have not reached Player yet. Drop them too,
+      // so a pointer stroke immediately before R cannot undo the recenter.
+      input.mouse.dx = input.mouse.dy = 0;
+      cockpit.toast("Aim aligned with your flight path.");
+    }
     frameNo++;
     if (qualityBenchmark) {
       const settings = SETTINGS.current();
@@ -1126,7 +1144,13 @@ async function boot() {
       // jet WAS (lastJetPos still holds the pre-reset position)
       if (player.crashes !== kcCrashes) {
         kcCrashes = player.crashes;
-        killCam = { c: lastJetPos.clone(), until: now + 4000 };
+        if (cockpit.practice) {
+          // A learner should see a safe aircraft and a choice, never keep
+          // controlling an invisible respawn during a death-camera orbit.
+          killCam = null;
+          post?.invalidateHistory?.(); meter?.reset();
+          cockpit.onPracticeCrash();
+        } else killCam = { c: lastJetPos.clone(), until: now + 4000 };
       }
       if (killCam && killCam.until && now > killCam.until) killCam = null;
       if (authored && match && match.over === 1 && !authored.saved) {

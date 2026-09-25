@@ -73,9 +73,9 @@ try{
     await paused();await assertFrozen();
     assert.match(await page.locator('.pause-dialog h2').textContent(),/first flight/);
     assert.equal(await page.evaluate(()=>__RAPTOR.tier),'LOW');
-    assert.equal(await page.evaluate(()=>__RAPTOR.cockpit.practiceSteps.pause),false);
+    assert.equal(await page.evaluate(()=>__RAPTOR.cockpit.coach.course.held),0);
     assert.equal(await page.evaluate(()=>__RAPTOR.match),null);
-    assert.equal(await page.evaluate(()=>__RAPTOR.post),false);
+    assert.equal(await page.evaluate(()=>__RAPTOR.post),true);
     await snap('03-ready');
   });
   await check('resume focuses the aircraft and real keyboard input changes throttle',async()=>{

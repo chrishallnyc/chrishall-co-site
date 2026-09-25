@@ -287,9 +287,12 @@ test('blocked storage never promises that restart will preserve new graphics set
 const {Cockpit}=await import('../src/game/cockpit.js');
 function pauseHarness({tier='HIGH',next='HIGH',assetReloadRequired=false}={}){
  settings.bindLive(null);settings.saveSettings({tier:next});
- const buttons=new Map(),body={innerHTML:'',querySelectorAll:()=>[],querySelector(key){if(!buttons.has(key))buttons.set(key,{addEventListener(){},focus(){}});return buttons.get(key);}};
- const h={paused:true,reason:'manual',state:{tier,assetReloadRequired},controls:{open:false},guide:{open:false},log:{open:false},input:{},flags:new URLSearchParams(),pauseDialog:{body,el:{querySelector:()=>({}),setAttribute(){}},show(){}},confirmLeave(action,title){this.confirmation={action,title};}};
- Cockpit.prototype.showPause.call(h);return{h,body,buttons};
+ const buttons=new Map(),body={innerHTML:'',querySelectorAll:()=>[],querySelector(key){if(!buttons.has(key))buttons.set(key,{addEventListener(){},focus(){},append(){}});return buttons.get(key);}};
+ const h=Object.assign(Object.create(Cockpit.prototype),{paused:true,reason:'manual',state:{tier,assetReloadRequired},controls:{open:false},guide:{open:false},log:{open:false},input:{},flags:new URLSearchParams(),pauseDialog:{body,el:{querySelector:()=>({}),setAttribute(){}},show(){}},confirmLeave(action,title){this.confirmation={action,title};}});
+ const priorDocument=globalThis.document;
+ globalThis.document={...priorDocument,createElement:()=>({querySelector:()=>({}),querySelectorAll:()=>[]})};
+ try{h.showPause();}finally{globalThis.document=priorDocument;}
+ return{h,body,buttons};
 }
 
 test('actual pause panel explains same-tier asset reloads and keeps restart behind confirmation',()=>{

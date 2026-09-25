@@ -38,19 +38,27 @@ names missing bindings, and links directly to **Needs a key** for repair.
 The launch button stays available as you scroll; campaign progress is visible
 before you choose a flight.
 
-In **Controls**, search by action or key, click a binding to replace it, or use
-**+ Add key** for an alternate. Conflicts let you move a key, explicitly share it,
-or keep your current setup. **Restore action** resets only that action and
+In **Controls**, **Edit keys** opens your current keyboard and pointer map.
+Choose a lit key or mouse button to inspect its action and complete shortcut,
+then **Change key** or **+ Add key** for an alternate. The map uses QWERTY key
+positions and shows custom inputs outside that layout separately. You can also
+search the full action list by action or key. Conflicts let you move a key,
+explicitly share it, or keep your current setup. **Restore action** resets only that action and
 explains any occupied defaults; **Undo** reverses the most recent layout edit,
 including any keys moved from other actions. Only implemented actions are offered.
 **Test your controls** previews aiming and held keys without moving or firing the
-aircraft; the last tap stays visible after you release it.
+aircraft; the last tap stays visible after you release it. **Try aim targets**
+adds five short pointer exercises to check your sensitivity. **Center preview**
+starts the aiming preview from the middle; **Esc** finishes testing.
 
 Choose **Mouse** or **MacBook trackpad** on preflight or in Controls. Both devices
 remain usable; the choice recalls that device’s sensitivity. Mouse, trackpad,
 and controller gains save separately. Trackpad starts at 0.65×; mouse and
 controller start at 1×. Existing controller gain is retained when migrating an
 older shared sensitivity. Vertical inversion applies to all three.
+Choose **Precise**, **Balanced**, or **Responsive** for a starting sensitivity,
+then adjust the slider. Each preset changes only the selected device's gain;
+custom key assignments and other device preferences are kept.
 
 Defaults: mouse or one finger on the trackpad to aim, **W / S** for throttle,
 **A / D** to roll, **F** or **left click** for cannon, **Space** for missile,
@@ -59,12 +67,40 @@ a number pad or function key. On the trackpad, steer without clicking or
 dragging; lift and reposition between strokes, and hold **F** to fire with your
 other hand. Existing custom bindings stay intact, including keys already using
 F or H. Unassigned macOS Command shortcuts remain available. **Esc** always
-opens the flight menu; **P** also pauses. Visible **Pause**, **Controls**, **Settings**,
-**Pilot log**, and guide buttons remain available in flight. Menus and loss of
-window focus pause the aircraft and world.
+opens the flight menu; **P** also pauses. Visible **Pause**, **Controls**,
+**Tune feel**, **Settings**, **Pilot log**, and guide buttons remain available in
+flight. Menus and loss of window focus pause the aircraft and world.
+
+The aircraft follows your aim direction. Keyboard bank and rudder turns keep
+the new course when released, unless you also set a pointer target during the
+turn. **R** aligns aim with your current flight path, so repeated recentering
+does not add an unwanted climb. An off-screen aim arrow helps you find a lost
+aim marker without hiding ammunition and weapon status.
 
 Optional **Capture pointer** keeps aiming responsive at window edges. **Esc**
 releases the pointer and pauses; capture is never requested automatically.
+
+**Tune feel** opens a paused **Quick tune** panel for device choice, sensitivity,
+vertical inversion, instrument size, volume and mute. Changes use the same
+saved preferences as the full Controls and Settings screens. Resume when ready;
+the world stays paused while you adjust them. During missions, Pause also shows
+current objectives, remaining time and protected units. Protection losses are
+kept separate from objective completion counts.
+
+Practice starts airborne without enemies, mission scoring or ticket pressure.
+The flight coach teaches five maneuvers: steady flight, throttle control, a
+gentle turn to a compass heading, a climb and level-off, and steady cruise.
+Progress comes from the aircraft's measured attitude, heading, altitude and
+throttle. Live readings show the current target, with a short hold and room for
+small corrections. The coach uses your current key bindings.
+
+Choose **Just fly** for unguided practice, or start flight school again from
+Pause. **Reset to level flight** restores a safe airborne aircraft and restarts
+the current exercise. A practice crash pauses on a fresh aircraft so you can
+adjust your setup before continuing. Completing all five exercises saves a
+graduation in this browser; replaying or recovering does not erase it. If local
+storage is unavailable, the completion remains valid for the current session
+and the coach reports that it could not be saved.
 
 Display settings include graphics preset, resolution scale, field of view, and
 an FPS display. Preset changes update render scale, terrain detail and aircraft
@@ -77,8 +113,9 @@ Low (fastest) and Medium (balanced) reduce graphics work.
 
 Accessibility includes an illustrative HUD/text-size and target-color preview,
 reduced combat flashes, and separate switches for key reminders and the practice
-checklist. Completed practice steps collapse into a compact summary. Restore
-hidden reminders or the checklist from **Pause** without changing the other.
+coach. The finished course collapses into a graduation card with campaign and
+replay choices. Restore hidden reminders or the coach from **Pause** without
+changing the other.
 Audio has a visible mute control and separate master, engine, weapon, and
 warnings/radio levels. Master volume and mute also apply to spoken radio.
 
@@ -90,8 +127,9 @@ controller menus still use keyboard and a pointer. Automated checks simulate
 pointer/controller input; they do not certify physical trackpad gestures or
 every controller model.
 
-Preferences and completed campaign/operation results stay in this browser's
-local storage, separately for each origin/port. **Pilot log** shows briefings,
+Preferences, flight school graduation, and completed campaign/operation results
+stay in this browser's local storage, separately for each origin/port.
+**Pilot log** shows briefings,
 unlocks, completed missions, and operation status; during a campaign flight it
 opens the current mission. An unfinished flight restarts when reloaded or left.
 Private browsing or blocked storage limits persistence; the UI reports save
@@ -109,6 +147,7 @@ a connection is still needed to load a complete flight.
 | --- | --- |
 | [index.html](index.html), [src/main.js](src/main.js) | Entry point, renderer initialization, game loop and system wiring. |
 | [src/game/](src/game/) | Preflight, controls/settings, pause menu, pilot log, HUD, player and combat systems. |
+| [src/game/flightcoach.js](src/game/flightcoach.js), [quicktune.js](src/game/quicktune.js), [flightbrief.js](src/game/flightbrief.js) | Telemetry-based practice course, paused setup shortcuts and mission objective overview; wired by [cockpit.js](src/game/cockpit.js). |
 | [src/aircraft/](src/aircraft/) | Aircraft geometry, materials, articulation, visual detail, lighting, and coating textures. |
 | [src/sim/](src/sim/) | Aircraft dynamics, aerodynamic data, instructor and weapon data. |
 | [src/engine/](src/engine/) | Fixed-step simulation, input, controller mapping, audio, graphics quality, post-processing and asynchronous exposure. |
@@ -161,13 +200,16 @@ integration; compatibility handling is documented alongside those checks.
 From the repository root, with Node.js 26 (used for the current checks):
 
 ```sh
-node --import ./raptor/qa/register-three.mjs --test raptor/qa/*.test.mjs
+node --import ./raptor/qa/register-three.mjs --test raptor/qa/*.test.mjs raptor/tests/*.test.mjs
 ```
 
 These cover bindings, Undo/restoration and controller input, settings/storage,
 flight selection and loading failures, camera/interpolation, pause input
-boundaries, and asynchronous exposure. They use the vendored modules without
-an npm installation or GPU.
+boundaries, flight coaching, aircraft controls, and asynchronous exposure.
+The coach includes a real flight-model integration check driven by pointer
+deltas and held throttle inputs, alongside pure course-state tests. Native
+checks use the vendored modules without an npm installation or GPU. See the
+audio validation commands below for browser-dependent audio checks.
 
 With the static server running, an **existing Playwright installation** and
 Google Chrome are required for the browser checks:
@@ -176,6 +218,8 @@ Google Chrome are required for the browser checks:
 node raptor/qa/browser.mjs
 node raptor/qa/controls.browser.mjs
 node raptor/qa/controls-history.browser.mjs
+node raptor/qa/control-layout.browser.mjs
+node raptor/qa/flight-school.browser.mjs
 node raptor/qa/guidance.browser.mjs
 node raptor/qa/loading.browser.mjs
 node raptor/qa/accessibility.browser.mjs
@@ -191,17 +235,30 @@ PLAYWRIGHT_MODULE=/absolute/path/to/playwright/index.mjs \
 HEADED=1 node raptor/qa/browser.mjs
 ```
 
+To watch and record the flight school playthrough:
+
+```sh
+PLAYWRIGHT_MODULE=/absolute/path/to/playwright/index.mjs \
+HEADED=1 RECORD=1 node raptor/qa/flight-school.browser.mjs
+```
+
 | QA environment variable | Meaning |
 | --- | --- |
 | `PLAYWRIGHT_MODULE` | Optional absolute path to an existing Playwright module entry point. |
 | `RAPTOR_BASE_URL` | Server URL; default `http://localhost:8082/`. |
 | `RAPTOR_TEST_OUTPUT` | Optional artifact directory; each script has its own default under `.context/`. |
 | `HEADED` | `1` shows Chrome; otherwise the scripts run headless. |
+| `RECORD` | `1` records the flight-school browser check; optional for that script. |
 
 Browser checks use fresh contexts and save screenshots and results; the main
 playthrough scripts also record video. `controls-history` covers Undo, action
-restoration, missing keys, and retained test feedback; `guidance` flies practice
-and checks independent overlays, accessibility preview, and graphics restart.
+restoration, missing keys, and retained test feedback. `control-layout` checks
+the visual key map, preset persistence, shortcut editing, aim comfort targets
+and narrow layouts before starting a renderer. `flight-school` completes the
+five lessons using browser keyboard and pointer events, then checks Quick tune,
+live recovery focus, off-screen aim and crash handling. Its deliberately injected
+crash and off-screen aim probes are separate from the flown training course.
+`guidance` checks independent overlays, accessibility preview and graphics restart.
 `accessibility` checks modal isolation, mute migration and illustrative previews.
 `loading` checks loading stages and recovery from missing game/mission files.
 The missions check flies all three regions, checks HIGH/WebGL paths, and injects

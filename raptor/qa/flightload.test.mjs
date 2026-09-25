@@ -62,7 +62,7 @@ test('an unavailable operation fails instead of starting an unrelated battle',as
 
 test('mission links that disable required systems fail before importing or starting a simulation',async()=>{
   let imports=0;
-  for(const conflict of ['nomatch=1','nobattle=1','demo=1']) {
+  for(const conflict of ['nomatch=1','nobattle=1','demo=1','mode=practice']) {
     await assert.rejects(loadRequestedFlight(flags(`sortie=N01&${conflict}`),{missions:()=>{imports++;}}),FlightLoadError);
   }
   assert.equal(imports,0);

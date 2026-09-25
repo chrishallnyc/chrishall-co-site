@@ -23,6 +23,8 @@ try {
   await check('only implemented controls visible, essentials first', async()=> {
     assert.equal(await page.locator('[data-action-id]').count(),8);
     await page.locator('[data-action="keys"]').click();
+    assert.equal(await page.locator('.keyboard-layout > summary').evaluate(el=>el===document.activeElement),true);
+    await page.locator('[data-action="all-keys"]').click();
     assert.equal(await page.locator('#controlSearch').evaluate(el=>el===document.activeElement),true);
     await page.locator('[data-category="all"]').click();
     assert.equal(await page.locator('[data-action-id]').count(),18);
