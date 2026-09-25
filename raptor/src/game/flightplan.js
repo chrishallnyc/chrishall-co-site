@@ -22,5 +22,5 @@ export function flightURL(value, sortie) {
 }
 export function hasFlightRequest(query) {
   // Sharing/analytics parameters should not throw a new pilot into combat.
-  return ['front','sortie','mission','op','demo','gl','noterrain','nobattle','nomatch','frame','fixyaw'].some(k=>query.has(k));
+  return query.get('mode') === 'practice' || ['front','sortie','mission','op','demo','gl','noterrain','nobattle','nomatch','frame','fixyaw'].some(k=>query.has(k));
 }
