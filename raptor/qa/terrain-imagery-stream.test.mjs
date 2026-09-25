@@ -170,3 +170,55 @@ test('slot opacity starts at actual upload, ramps over600ms, and opens missing/f
   assert.deepEqual(retained.edgeOpen.value.toArray(),[1,1,.5,.5]);
   stream.dispose();assert(stream.slots.every(s=>s.opacity.value===0));
 });
+
+test('indexed streaming preserves nearest-first selection at boundaries and does not rescan the manifest', () => {
+  const meta = fixture();
+  meta.tiles.reverse(); // Manifests are not required to be in grid order.
+  meta.tiles.find(t => t.id === 'r1c1').blank = true;
+  const tiles = meta.tiles;
+  let scans = 0;
+  Object.defineProperty(meta, 'tiles', { get() { scans++; return tiles; } });
+  const stream = make({ manifest: meta });
+  stream._pump = () => {}; // Isolate request selection from network completion.
+  const wanted = stream._desired, selected = stream._tiles;
+  scans = 0;
+  try {
+    for (let j = -1; j <= 33; j++) for (let i = -1; i <= 33; i++) {
+      const x = -8 + i * .5, z = -8 + j * .5;
+      // The public selector retains the full-scan path as an independent
+      // reference for the stream's indexed lookup, including distance ties.
+      const expected = imageryQuartet({ ...meta, tiles }, x, z);
+      const before = scans;
+      stream.update({ x, z, heightAboveGroundM: 100 });
+      assert.equal(scans, before, 'render updates never read the complete tile list');
+      assert.equal(stream.enabled.value, expected.length > 0);
+      assert.deepEqual(stream.profile.wanted, expected.filter(t => !t.blank).map(t => t.id));
+      assert.equal(stream._desired, wanted);
+      assert.equal(stream._tiles, selected);
+    }
+    stream.update({ ...near, x: NaN }); assert(!stream.enabled.value);
+    assert.deepEqual(stream.profile.wanted, []);
+    stream.update(near); assert(stream.enabled.value);
+    stream.update({ ...near, enabled: false }); assert(!stream.enabled.value);
+    assert.deepEqual(stream.profile.wanted, []);
+  } finally { stream.dispose(); }
+});
+
+test('settled imagery keeps request and edge work idle while fades and nearby priorities remain live', async () => {
+  let now = 100;
+  const stream = make({ clock: () => now, loadPixels: async args => pixels(args) });
+  try {
+    stream.update(near); await stream.whenSettled();
+    stream.texture.onUpdate(); now += 600; stream.update(near);
+    let pumps = 0, edges = 0;
+    const pump = stream._pump, refresh = stream._refreshEdges;
+    stream._pump = function() { pumps++; return pump.call(this); };
+    stream._refreshEdges = function() { edges++; return refresh.call(this); };
+    for (let i = 0; i < 240; i++) { now += 16; stream.update(near); }
+    assert.equal(pumps, 0); assert.equal(edges, 0);
+    assert(stream.slots.every(slot => slot.opacity.value === 1));
+    stream.update({ ...near, x: 1, z: -1 });
+    assert.equal(pumps, 1, 'new nearest-first order still reaches the pending queue');
+    assert.equal(stream.profile.wanted[0], 'r2c2');
+  } finally { stream.dispose(); }
+});

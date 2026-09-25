@@ -41,17 +41,29 @@ export function validateImageryManifest(meta) {
   }
 }
 
-export function imageryQuartet(meta, x, z) {
+function selectImageryQuartet(meta, x, z, result, cells = null) {
   const b = meta.worldBounds;
-  if (![x, z].every(Number.isFinite) || x < b.xmin || x > b.xmax || z < b.zmin || z > b.zmax) return [];
+  if (!Number.isFinite(x) || !Number.isFinite(z) || x < b.xmin || x > b.xmax || z < b.zmin || z > b.zmax) {
+    result.length = 0; return result;
+  }
   const col = clamp(Math.floor((x - b.xmin) / meta.tileSizeM - .5), 0, meta.columns - 2);
   const row = clamp(Math.floor((b.zmax - z) / meta.tileSizeM - .5), 0, meta.rows - 2);
-  return meta.tiles.filter(tile => tile.column >= col && tile.column <= col + 1 && tile.row >= row && tile.row <= row + 1)
-    .sort((a, b) => {
-      const distance = t => (x - (t.worldBounds.xmin + t.worldBounds.xmax) / 2) ** 2
-        + (z - (t.worldBounds.zmin + t.worldBounds.zmax) / 2) ** 2;
-      return distance(a) - distance(b) || a.row - b.row || a.column - b.column;
-    });
+  if (cells) {
+    const first = row * meta.columns + col;
+    result.length = 4;
+    result[0] = cells[first]; result[1] = cells[first + 1];
+    result[2] = cells[first + meta.columns]; result[3] = cells[first + meta.columns + 1];
+  } else {
+    result.length = 0;
+    for (const tile of meta.tiles) if (tile.column >= col && tile.column <= col + 1 && tile.row >= row && tile.row <= row + 1) result.push(tile);
+  }
+  const distance = t => (x - (t.worldBounds.xmin + t.worldBounds.xmax) / 2) ** 2
+    + (z - (t.worldBounds.zmin + t.worldBounds.zmax) / 2) ** 2;
+  return result.sort((a, b) => distance(a) - distance(b) || a.row - b.row || a.column - b.column);
+}
+
+export function imageryQuartet(meta, x, z) {
+  return selectImageryQuartet(meta, x, z, []);
 }
 
 export function imageryMipBytes(imagePixels, layers = 4) {
@@ -124,6 +136,12 @@ export class TerrainImageryStream {
     this.fadeDurationMs = fadeDurationMs; this._clock = clock;
     this._loadPixels = loadPixels; this._disposed = false; this._allocated = false; this._data = null;
     this._desired = new Map(); this._requests = new Map(); this._promises = new Set(); this._failed = new Set();
+    // Validated manifests contain one tile per cell, in arbitrary file order.
+    // Resolve the four nearby cells directly instead of scanning all tiles on
+    // every render frame. The manifest remains immutable after construction.
+    this._cells = new Array(manifest.rows * manifest.columns);
+    for (const tile of manifest.tiles) this._cells[tile.row * manifest.columns + tile.column] = tile;
+    this._tiles = []; this._lastTiles = [];
     this._serial = 0; this._fullUploadPending = false;
     this.enabled = uniform(false);
     this.texture = new THREE.DataArrayTexture(new Uint8Array(16), 1, 1, 4);
@@ -150,9 +168,20 @@ export class TerrainImageryStream {
     if (this._disposed) return;
     this._advanceFades();
     const active = this.supported && !!enabled && Number.isFinite(heightAboveGroundM) && heightAboveGroundM <= this.maxHeightAboveGroundM;
-    const tiles = active ? imageryQuartet(this.manifest, x, z) : [];
+    const tiles = this._tiles;
+    if (active) selectImageryQuartet(this.manifest, x, z, tiles, this._cells);
+    else tiles.length = 0;
     this.enabled.value = active && tiles.length > 0;
-    this._desired = new Map(tiles.filter(t => !t.blank).map(t => [t.id, t]));
+    let changed = tiles.length !== this._lastTiles.length;
+    for (let i = 0; !changed && i < tiles.length; i++) changed = tiles[i] !== this._lastTiles[i];
+    // Completion/retry already pumps the queue. Keep checking sorted order so
+    // moving within a quartet still updates nearest-first pending requests.
+    if (!changed) return;
+    this._desired.clear(); this._lastTiles.length = tiles.length;
+    for (let i = 0; i < tiles.length; i++) {
+      const tile = this._lastTiles[i] = tiles[i];
+      if (!tile.blank) this._desired.set(tile.id, tile);
+    }
     for (const request of this._requests.values()) {
       if (!this._desired.has(request.tile.id) && !request.controller.signal.aborted) {
         clearTimeout(request.timer);
@@ -163,30 +192,31 @@ export class TerrainImageryStream {
   }
 
   _advanceFades() {
-    const now = this._clock();
+    const now = this._clock(); let changed = false;
     for (const slot of this.slots) {
       const t = slot._fadeStart === null ? 0 : clamp((now - slot._fadeStart) / this.fadeDurationMs, 0, 1);
-      slot.opacity.value = t * t * (3 - 2 * t);
+      const opacity = t * t * (3 - 2 * t);
+      if (slot.opacity.value !== opacity) { slot.opacity.value = opacity; changed = true; }
     }
-    this._refreshEdges();
+    if (changed) this._refreshEdges();
   }
 
   _refreshEdges() {
     for (const slot of this.slots) {
-      const b = slot.bounds.value, openness = [1, 1, 1, 1];
+      const b = slot.bounds.value, openness = slot.edgeOpen.value;
+      openness.set(1, 1, 1, 1);
       if (slot.ready.value) for (const neighbor of this.slots) {
         if (neighbor === slot || !neighbor.ready.value) continue;
         const n = neighbor.bounds.value, open = 1 - neighbor.opacity.value;
         if (n.y === b.y && n.w === b.w) {
-          if (n.z === b.x) openness[0] = open; // west
-          if (n.x === b.z) openness[2] = open; // east
+          if (n.z === b.x) openness.x = open; // west
+          if (n.x === b.z) openness.z = open; // east
         }
         if (n.x === b.x && n.z === b.z) {
-          if (n.w === b.y) openness[1] = open; // south
-          if (n.y === b.w) openness[3] = open; // north
+          if (n.w === b.y) openness.y = open; // south
+          if (n.y === b.w) openness.w = open; // north
         }
       }
-      slot.edgeOpen.value.fromArray(openness);
     }
   }
 

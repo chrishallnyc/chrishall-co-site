@@ -5,11 +5,17 @@ import { SfcRng } from './rng.js';
 
 const C = 343;
 const TAU = Math.PI * 2;
+const ZERO = [0, 0, 0], FORWARD = [0, 0, -1], UP = [0, 1, 0], RIGHT = [1, 0, 0];
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, Number.isFinite(v) ? v : lo));
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const length = v => Math.hypot(...v);
-const subtract = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
-const unit = (v, fallback = [0, 0, -1]) => { const n = length(v); return n > 0.0001 ? v.map(x => x / n) : fallback; };
+const unit = (v, out) => {
+  const n = length(v);
+  out[0] = n > 0.0001 ? v[0] / n : 0;
+  out[1] = n > 0.0001 ? v[1] / n : 0;
+  out[2] = n > 0.0001 ? v[2] / n : -1;
+  return out;
+};
 const validVector = v => Array.isArray(v) && v.length === 3 && v.every(Number.isFinite);
 const smooth = (p, value, now, tau = 0.06) => p.setTargetAtTime(value, now, tau);
 function biquad(ctx, type, hz, Q = 0.707) {
@@ -32,18 +38,23 @@ function noise(ctx, rng, seconds, pink) {
 }
 
 // Exposed independently of Web Audio for geometry/physics regression tests.
-export function relativeAcoustics(listener, source) {
-  const delta = subtract(source.position, listener.position);
-  const distance = length(delta), direction = unit(delta);
-  const listenerRadial = clamp(dot(listener.velocity || [0, 0, 0], direction), -0.75 * C, 0.75 * C);
-  const sourceRadial = clamp(dot(source.velocity || [0, 0, 0], direction), -0.75 * C, 0.75 * C);
+export function relativeAcoustics(listener, source, out = {}) {
+  const dx = source.position[0] - listener.position[0], dy = source.position[1] - listener.position[1],
+    dz = source.position[2] - listener.position[2];
+  const distance = Math.hypot(dx, dy, dz), direction = out.direction || (out.direction = [0, 0, -1]);
+  direction[0] = distance > 0.0001 ? dx / distance : 0;
+  direction[1] = distance > 0.0001 ? dy / distance : 0;
+  direction[2] = distance > 0.0001 ? dz / distance : -1;
+  const listenerRadial = clamp(dot(listener.velocity || ZERO, direction), -0.75 * C, 0.75 * C);
+  const sourceRadial = clamp(dot(source.velocity || ZERO, direction), -0.75 * C, 0.75 * C);
   // Sonic booms are separate pressure transients, not infinite pitch changes.
   const doppler = clamp((C + listenerRadial) / (C + sourceRadial), 0.45, 2.4);
   const reference = source.kind === 'missile' ? 28 : 110;
   const attenuation = reference / (reference + Math.max(0, distance - 8));
-  return { distance, direction, doppler, attenuation,
-    pan: clamp(dot(direction, listener.right || [1, 0, 0]), -1, 1),
-    cutoff: clamp(14000 / (1 + distance / 850), 450, 14000) };
+  out.distance = distance; out.doppler = doppler; out.attenuation = attenuation;
+  out.pan = clamp(dot(direction, listener.right || RIGHT), -1, 1);
+  out.cutoff = clamp(14000 / (1 + distance / 850), 450, 14000);
+  return out;
 }
 
 class MovingVoice {
@@ -87,13 +98,18 @@ class MovingVoice {
     detail.start(ctx.currentTime, scene.rng.f() * scene.white.duration);
   }
 
-  update(source, acoustics) {
+  update(source, acoustics, score) {
     const now = this.ctx.currentTime, p = this.panner;
-    for (const [param, v] of [[p.positionX, source.position[0]], [p.positionY, source.position[1]], [p.positionZ, source.position[2]]]) smooth(param, v, now, 0.025);
-    const velocity = source.velocity || [0, 0, 0], rear = unit(velocity).map(v => -v);
-    for (const [param, v] of [[p.orientationX, rear[0]], [p.orientationY, rear[1]], [p.orientationZ, rear[2]]]) smooth(param, v, now, 0.1);
+    smooth(p.positionX, source.position[0], now, 0.025);
+    smooth(p.positionY, source.position[1], now, 0.025);
+    smooth(p.positionZ, source.position[2], now, 0.025);
+    const velocity = source.velocity || ZERO, speed = length(velocity);
+    const vx = speed > .0001 ? velocity[0] / speed : 0,
+      vy = speed > .0001 ? velocity[1] / speed : 0, vz = speed > .0001 ? velocity[2] / speed : -1;
+    smooth(p.orientationX, -vx, now, 0.1);
+    smooth(p.orientationY, -vy, now, 0.1);
+    smooth(p.orientationZ, -vz, now, 0.1);
     const power = clamp(source.power ?? 0.6, 0, 1.5);
-    const speed = length(velocity);
     let emitted;
     if (this.kind === 'missile') {
       const motor = source.motor === 'boost' ? 1 : source.motor === 'sustain' ? 0.44 : 0;
@@ -110,7 +126,8 @@ class MovingVoice {
     } else {
       const cls = source.aircraftClass;
       const weight = cls === 'transport' ? 1.25 : cls === 'drone' ? 0.5 : 1;
-      const intake = speed > 0.1 ? clamp((1 - dot(unit(velocity), acoustics.direction)) * 0.5, 0, 1) : 0.5;
+      const d = acoustics.direction;
+      const intake = speed > 0.1 ? clamp((1 - (vx * d[0] + vy * d[1] + vz * d[2])) * 0.5, 0, 1) : 0.5;
       emitted = (0.22 + 0.85 * power) * weight;
       // The existing exhaust cone controls level; intake direction also
       // changes the balance between fan detail and the heavier exhaust bed.
@@ -126,7 +143,7 @@ class MovingVoice {
     smooth(this.air.frequency, acoustics.cutoff, now, 0.1);
     smooth(this.mix.gain, emitted * acoustics.attenuation * 0.65, now, 0.055);
     this.retiring = false; this.end = Infinity;
-    this.distance = acoustics.distance; this.score = source.score;
+    this.distance = acoustics.distance; this.score = score;
   }
 
   retire(now) {
@@ -161,36 +178,50 @@ export class AcousticScene {
     this.voices = new Map(); this.paused = false; this.disposed = false;
     this.onListener = onListener;
     this.stats = { candidates: 0, voices: 0, dropped: 0 };
+    this._forward = [0, 0, -1]; this._up = [0, 1, 0];
+    this._candidatePool = []; this._candidates = []; this._wanted = new Set();
   }
 
   update({ listener, sources = [] } = {}) {
     if (this.paused || this.disposed || !listener || !validVector(listener.position)) return;
     const now = this.ctx.currentTime, target = this.ctx.listener;
-    const forward = unit(listener.forward || [0, 0, -1]), up = unit(listener.up || [0, 1, 0]);
-    for (const [param, value] of [
-      [target.positionX, listener.position[0]], [target.positionY, listener.position[1]], [target.positionZ, listener.position[2]],
-      [target.forwardX, forward[0]], [target.forwardY, forward[1]], [target.forwardZ, forward[2]],
-      [target.upX, up[0]], [target.upY, up[1]], [target.upZ, up[2]],
-    ]) smooth(param, value, now, 0.025);
+    const forward = unit(listener.forward || FORWARD, this._forward), up = unit(listener.up || UP, this._up);
+    smooth(target.positionX, listener.position[0], now, 0.025);
+    smooth(target.positionY, listener.position[1], now, 0.025);
+    smooth(target.positionZ, listener.position[2], now, 0.025);
+    smooth(target.forwardX, forward[0], now, 0.025);
+    smooth(target.forwardY, forward[1], now, 0.025);
+    smooth(target.forwardZ, forward[2], now, 0.025);
+    smooth(target.upX, up[0], now, 0.025);
+    smooth(target.upY, up[1], now, 0.025);
+    smooth(target.upZ, up[2], now, 0.025);
     this.onListener?.(listener);
     for (const voice of this.voices.values()) if (voice.end <= now) voice.dispose();
-    const candidates = [];
+    const candidates = this._candidates;
+    let count = 0;
     for (const source of sources) {
-      if (source.id == null || !['aircraft', 'missile'].includes(source.kind) || !validVector(source.position)) continue;
-      const acoustic = relativeAcoustics(listener, source);
+      if (source.id == null || (source.kind !== 'aircraft' && source.kind !== 'missile') || !validVector(source.position)) continue;
+      // Retain only geometry/score scratch. Each update reads the caller's
+      // current source directly; no cloned source or cached acoustic values.
+      const candidate = this._candidatePool[count] || (this._candidatePool[count] = { acoustic: {}, source: null, score: 0 });
+      const acoustic = relativeAcoustics(listener, source, candidate.acoustic);
       if (acoustic.distance > (source.kind === 'missile' ? 3500 : 14000)) continue;
-      const coast = source.kind === 'missile' && !['boost', 'sustain'].includes(source.motor);
+      const coast = source.kind === 'missile' && source.motor !== 'boost' && source.motor !== 'sustain';
       if (coast && acoustic.distance > 250) continue;
       const priority = clamp(source.priority ?? 1, 0.1, 5);
       const audibility = coast ? clamp((250 - acoustic.distance) / 180, 0, 1) : 1;
       const score = acoustic.attenuation * priority * audibility * (source.kind === 'missile' ? 1.5 : 1);
-      candidates.push({ source: { ...source, score }, acoustic, score });
+      candidate.source = source; candidate.score = score;
+      candidates[count++] = candidate;
     }
+    candidates.length = count;
     candidates.sort((a, b) => b.score - a.score);
-    const selected = candidates.slice(0, this.maxVoices);
-    const wanted = new Set(selected.map(c => c.source.id));
+    const selected = Math.min(candidates.length, this.maxVoices), wanted = this._wanted;
+    wanted.clear();
+    for (let i = 0; i < selected; i++) wanted.add(candidates[i].source.id);
     for (const voice of this.voices.values()) if (!wanted.has(voice.id)) voice.retire(now);
-    for (const candidate of selected) {
+    for (let i = 0; i < selected; i++) {
+      const candidate = candidates[i];
       let voice = this.voices.get(candidate.source.id);
       if (voice?.retiring) { voice.dispose(); voice = null; }
       if (!voice) {
@@ -212,14 +243,18 @@ export class AcousticScene {
         voice = new MovingVoice(this, candidate.source);
         this.voices.set(candidate.source.id, voice);
       }
-      voice.update(candidate.source, candidate.acoustic);
+      voice.update(candidate.source, candidate.acoustic, candidate.score);
     }
-    const admitted = selected.filter(({ source }) => {
-      const voice = this.voices.get(source.id);
-      return voice && !voice.retiring;
-    }).length;
+    let admitted = 0;
+    for (let i = 0; i < selected; i++) {
+      const voice = this.voices.get(candidates[i].source.id);
+      if (voice && !voice.retiring) admitted++;
+    }
     this.stats = { candidates: candidates.length, voices: this.voices.size,
       dropped: candidates.length - admitted };
+    // Caller source arrays may be recycled or large. Scratch outlives a frame,
+    // source references must not, including candidates rejected by the cap.
+    for (let i = 0; i < candidates.length; i++) candidates[i].source = null;
   }
 
   setPaused(paused) { this.paused = !!paused; if (paused) this.clear(); }
