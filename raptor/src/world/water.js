@@ -1,41 +1,27 @@
-// Water v1 — Gerstner-sum ocean in TSL (one material, both backends).
-// A camera-following snapped grid carries 8 summed Gerstner waves displaced
-// in the vertex shader with ANALYTIC normals; a flat far skirt reaches the
-// horizon. Standard-material shading means the sun light gives GGX glitter
-// and the sky IBL gives reflections for free. Depth is proxied by the
-// terrain's shore-distance field (bathymetry was clamped in the bake):
-// turquoise shallows + a foam band hug the coast; crest foam breaks on the
-// steepest wave sums. Render-side clock only — the sim never reads water.
-//
-// PASS-2 items 4+5 (FFT/webgpu path only; the Gerstner fallback above is
-// untouched): all detail layers are filtered against the PROJECTED PIXEL
-// FOOTPRINT with the removed slope variance traded into roughness
-// (Toksvig/LEAN), the FFT normal/foam tile is phase-jittered per 320m cell,
-// glitter is stochastic and luminance-floored — all of it because six fixed
-// sinusoids + a raw tile once aliased into denim moire / comb rows /
-// fingerprint rings. Grazing Fresnel picks up the hillaire horizon (skyRefl
-// march) so golden-hour water finally mirrors the warm sky.
-// PASS-3 item 6: the pass-2 micro chop (three warped cos gratings) itself
-// combed at grazing and its fades left noon water dead glass — the gratings
-// are gone entirely and the glitter is now a footprint-adaptive stochastic
-// glint NDF (world-anchored hash cells sized to the pixel footprint,
-// amplitude fed by the Toksvig-retired variance; see the micro-layer note).
-// PASS-3 polish: D-066 cloud shadows on water (optional cloudShadow
-// projector — constructor note below) + the valdez radial-aperture fix
-// (normal/roughness rim fades were CAMERA-anchored — they printed a
-// camera-centered luminance trough + a hard step at the 15.8km skirt
-// handoff; every optical term is now world/footprint-anchored and the far
-// skirt SHARES the sheet material outright — see the skirt note).
+// Spectral water with a camera-centered adaptive mesh and curved far ocean.
+// The macro FFT displaces geometry; a separate missing-band FFT provides
+// centimeter-height fine ripples as smooth shading slopes. Both slope fields
+// filter first/second moments so unresolved waves broaden GGX roughness.
+// Geometry, phase, prior-frame motion, and shoreline queries stay in map
+// coordinates; final complete surface radiance receives atmosphere once.
+// Gerstner waves remain the WebGL/LOW fallback. ?waterslopes=legacy keeps
+// the prior hashed normal field solely for QA comparison.
 
 import * as THREE from "three";
+import { surfaceVelocityMRT } from "./surfacevelocitymrt.js";
 import {
   Fn, uniform, texture, vec2, vec3, float, positionLocal, positionWorld,
   modelWorldMatrix, vec4, normalize, clamp, smoothstep, mix, sin, cos, dot,
   fract, floor, cameraPosition, dFdx, dFdy, max, pow, sqrt, luminance,
-  log2, exp2, abs,
+  log2, exp2, abs, cameraViewMatrix, attribute, output, varyingProperty,
 } from "three/tsl";
 
-const NEAR_SPAN = 32000, NEAR_VERTS = 384;
+import { makeOceanGrid, OCEAN_GRID_SPAN, OCEAN_GRID_VERTS, OCEAN_GRID_WARP } from "./oceangrid.js";
+
+import { makeFarOcean } from "./farocean.js";
+import { filteredSlopeMoments } from "./waterslopes.js";
+
+const NEAR_SPAN = OCEAN_GRID_SPAN, NEAR_VERTS = OCEAN_GRID_VERTS;
 const FAR_SPAN = 480000;
 
 // per-front sea states: [wavelengthM, amplitudeM, dirDeg] ×8
@@ -59,34 +45,43 @@ const SEA_STATES = {
 };
 
 export class Water {
-  constructor(front, terrain, aerial = null, fft = null, { cloudShadow = null } = {}) {
-    // D-066 CLOUD SHADOWS ON WATER: cloudShadow is an optional TSL projector
-    // fn (wp)=>node in [shadowFloor..1] — volclouds.makeVolCloudShadowNode
-    // ({noise,front,uSunDir}) or clouds.makeCloudShadowNode, exactly what
-    // terrain.js already consumes. It attenuates the DIFFUSE terms only:
-    // water-body/foam color (sheet + skirt) and the stochastic glint
-    // amplitude. The Fresnel/IBL sky reflection and the emissive sky terms
-    // (aerial inscatter + warm-horizon mirror) are intentionally untouched —
-    // a cloud shadow dims sun glint + sub-surface light, not the mirrored
-    // sky. Null-safe: absent = pre-D-066 behavior. ?watershadow=0 QA-disables
-    // a provided node (default on).
+  constructor(front, terrain, aerial = null, fft = null, { cloudShadow = null, curvature = null } = {}) {
+    // The shared Sun shadow node is installed during boot (round 4).
+    // Receiver flags attenuate direct diffuse/specular only, preserving
+    // ambient/IBL and wave normals. The QA flag opts both water meshes out.
     if (cloudShadow && typeof location !== "undefined" &&
         new URLSearchParams(location.search).get("watershadow") === "0") cloudShadow = null;
+    this.curvature = curvature;
+    this.terrain = terrain;
+    this.temporalSurfaceHistory = !fft || !!fft.previousDispTex;
     this.cloudShadow = cloudShadow;
     this.aerial = aerial; // exposed for QA rebuilds (t6b battery)
     this.fft = fft; // MAXFI A4: createFFTOcean result, or null = Gerstner
+    // QA A/B only; the actual FFT provider supplies the moment map. Custom
+    // old providers keep their existing normal contract without assuming mips.
+    this.filteredSlopes = !!fft?.slopeMomentTex && !(typeof location !== "undefined" &&
+      new URLSearchParams(location.search).get("waterslopes") === "legacy");
+    const legacyGrid = typeof location !== "undefined" &&
+      new URLSearchParams(location.search).get("watergrid") === "legacy";
+    // An old/custom FFT provider without mip support keeps the legacy grid;
+    // a warped mesh must never sample its full-frequency displacement raw.
+    this.adaptiveGrid = !legacyGrid && (!fft || fft.displacementMipLevels > 1);
     if (fft) {
       // world-tiled sampling needs repeat wrapping (set defensively here)
-      for (const t of [fft.dispTex, fft.normTex]) {
+      for (const t of [fft.dispTex, fft.normTex, fft.previousDispTex].filter(Boolean)) {
         t.wrapS = t.wrapT = THREE.RepeatWrapping;
-        t.minFilter = THREE.LinearFilter;
         t.magFilter = THREE.LinearFilter;
-        t.generateMipmaps = false;
       }
+      // The FFT provider owns displacement mip allocation/update ordering.
+      // Keep the fragment normal/foam map exactly as before.
+      fft.normTex.minFilter = THREE.LinearFilter;
+      fft.normTex.generateMipmaps = false;
     }
     const S = SEA_STATES[front] || SEA_STATES.MARIANAS;
     this.state = S;
     this.uTime = uniform(0);
+    this.uPreviousTime = uniform(0);
+    this.uPreviousGridCenter = uniform(new THREE.Vector2());
     this.terrainSize = terrain.size;
     const shore = terrain.getShoreField();
 
@@ -101,6 +96,22 @@ export class Water {
     const mat = new THREE.MeshStandardNodeMaterial({
       roughness: S.roughness, metalness: 0.0, transparent: false,
     });
+    const surface = curvature?.surfaceNodes("water");
+    const mapPosition = surface ? surface.flat : positionWorld;
+    // Sampling coordinates of the wave simulation precede displacement.
+    // Sampling the already-choppy world XZ slides normals across the crests.
+    const waveParameter = this.filteredSlopes ? varyingProperty("vec3", "waterWaveParameter") : null;
+    if (surface) mat.mrtNode = this.temporalSurfaceHistory ? surface.mrt : surfaceVelocityMRT(vec2(4));
+    // Same conservative adjacent gap as the sinh grid, evaluated at the old
+    // camera-relative location of a current geographic sample. This avoids
+    // pretending that the previous mip footprint equals the current grid's.
+    const gridK = NEAR_SPAN / 2 / Math.sinh(OCEAN_GRID_WARP);
+    const gridDelta = OCEAN_GRID_WARP * 2 / (NEAR_VERTS - 1);
+    const priorGridSpacing = (offset) => {
+      const gap = (v) => abs(v).mul(Math.cosh(gridDelta) - 1)
+        .add(sqrt(v.mul(v).add(gridK * gridK)).mul(Math.sinh(gridDelta)));
+      return max(gap(offset.x), gap(offset.y));
+    };
 
     const shoreUV = (wp) => vec2(
       wp.x.div(this.terrainSize).add(0.5),
@@ -210,15 +221,20 @@ export class Water {
       return { sx: sx.div(wrms), sz: sz.div(wrms), foam };
     } : null;
 
-    const gerstner = (wp) => {
+    const gerstner = (wp, gridSpacing = null, time = this.uTime) => {
       let dispX = float(0), dispY = float(0), dispZ = float(0);
       let nx = float(0), nz = float(0), nyAcc = float(0);
       for (const { w, A, phi, dx, dz, Q } of waves) {
-        const theta = wp.x.mul(dx * w).add(wp.z.mul(dz * w)).add(this.uTime.mul(phi));
+        const theta = wp.x.mul(dx * w).add(wp.z.mul(dz * w)).add(time.mul(phi));
         const s = sin(theta), c = cos(theta);
-        dispX = dispX.add(c.mul(Q * A * dx));
-        dispZ = dispZ.add(c.mul(Q * A * dz));
-        dispY = dispY.add(s.mul(A));
+        // Geometry only: fade a wave before fewer than four vertices can
+        // describe it; gone at Nyquist. Fragment normals retain their field.
+        const amplitude = gridSpacing
+          ? smoothstep(gridSpacing.mul(2.0), gridSpacing.mul(4.0), float(2 * Math.PI / w)).mul(A)
+          : float(A);
+        dispX = dispX.add(c.mul(amplitude).mul(Q * dx));
+        dispZ = dispZ.add(c.mul(amplitude).mul(Q * dz));
+        dispY = dispY.add(s.mul(amplitude));
         nx = nx.add(c.mul(dx * w * A));
         nz = nz.add(c.mul(dz * w * A));
         nyAcc = nyAcc.add(s.mul(Q * w * A));
@@ -231,58 +247,55 @@ export class Water {
     // the rim energy cliff and beach flattening were forensics findings)
     const fftUV = fft ? (wp) => fract(wp.xz.div(fft.tileM)) : null;
 
-    // PASS-2 item 5 (golden-hour sea doesn't mirror the sky): the IBL path
-    // CAN'T carry the warm horizon — the PMREM lobe at roughness 0.2-0.3
-    // averages the whole (blue) upper sky, so the few-degree orange band
-    // vanishes and grazing water measured B−R −5 under a −45 sky. Cheap
-    // analytic fix: march the SAME hillaire aerial inscatter along the
-    // flat-mirror reflected ray to ~80km and add it as a grazing Fresnel
-    // term. Sun-azimuth weighting, warm grading and the cool noon case all
-    // fall out of the physics for free; grazeW keeps it a horizon-band
-    // effect so steep-angle water (reef turquoise) is untouched.
-    // These node objects are built ONCE and referenced by emissive, normal
-    // and roughness slots — one march per material, and it doubles as the
-    // glitter luminance floor (item 4: dark water carries no sparkle).
-    let skyRefl = null, mirror = null, glintGate = float(1.0);
-    if (aerial) {
-      const V = normalize(positionWorld.sub(cameraPosition));
-      const cosV = clamp(V.y.negate(), 0.0, 1.0);
-      // reflected elevation is skewed toward the horizon (0.22x): the GGX
-      // grazing lobe on rough water hugs the surface, so the mirror reads
-      // the low warm band, not the mauve sky a flat mirror would return
-      const R = normalize(vec3(V.x, max(cosV.mul(0.22), 0.012), V.z));
-      skyRefl = aerial.ins(cameraPosition.add(R.mul(80000.0))).mul(aerial.uSunI);
-      const fres = pow(float(1.0).sub(cosV), 5.0).mul(0.98).add(0.02);
-      const grazeW = smoothstep(0.30, 0.10, cosV);
-      // 1.15: the single-bounce march undersells the warm band a touch (no
-      // multiple scattering) — measured against the valdez-214 B−R gate
-      mirror = skyRefl.mul(fres).mul(grazeW).mul(1.15);
-      glintGate = smoothstep(0.015, 0.10, luminance(skyRefl));
-    }
+    // Surface statistics are independent of the incoming illumination.
+    const glintGate = float(1.0);
+    const slopeMoments = this.filteredSlopes
+      ? filteredSlopeMoments(fft.slopeMomentTex, waveParameter.xz, fft.tileM, fft.N).toVar("waterSlopeMoments") : null;
+    const fineMoments = slopeMoments && fft.fine
+      ? filteredSlopeMoments(fft.fine.slopeMomentTex, waveParameter.xz, fft.fine.tileM, fft.fine.N, "waterFine")
+        .toVar("waterFineSlopeMoments") : null;
 
     mat.positionNode = Fn(() => {
+      // Evaluate wave/shore fields in the original map coordinates, then
+      // bend both current and previous physical surface positions.
       const wp = modelWorldMatrix.mul(vec4(positionLocal, 1.0)).xyz;
-      const edgeFade = smoothstep(15800.0, 9000.0, positionLocal.xz.length());
-      const damp = smoothstep(0.0, 120.0, shoreDist(wp)).mul(edgeFade);
-      if (fft) {
-        const d = texture(fft.dispTex, fftUV(wp)).xyz;
-        return vec3(
-          positionLocal.x.add(d.x.mul(damp)),
-          d.y.mul(damp),
-          positionLocal.z.add(d.z.mul(damp))
-        );
-      }
-      const g = gerstner(wp);
-      return vec3(
-        positionLocal.x.add(g.dispX.mul(damp)),
-        g.dispY.mul(damp),
-        positionLocal.z.add(g.dispZ.mul(damp))
-      );
+      if (waveParameter) waveParameter.assign(wp);
+      const shoreDamp = smoothstep(0.0, 120.0, shoreDist(wp));
+      const damp = shoreDamp.mul(smoothstep(15800.0, 9000.0, positionLocal.xz.length()));
+      const oldOffset = wp.xz.sub(this.uPreviousGridCenter);
+      const oldDamp = shoreDamp.mul(smoothstep(15800.0, 9000.0, oldOffset.length()));
+      const spacing = this.adaptiveGrid ? attribute("waterGridSpacing", "float") : null;
+      const oldSpacing = this.adaptiveGrid ? priorGridSpacing(oldOffset) : null;
+      const displaced = (previous) => {
+        const fade = previous ? oldDamp : damp, sampleSpacing = previous ? oldSpacing : spacing;
+        if (fft) {
+          const tex = previous && fft.previousDispTex ? fft.previousDispTex : fft.dispTex;
+          const lod = sampleSpacing
+            ? clamp(log2(max(sampleSpacing.mul(2.0 / (fft.tileM / fft.N)), 1.0)), 0.0, fft.displacementMipLevels - 1)
+            : float(0);
+          const d = texture(tex, fftUV(wp)).level(lod).xyz;
+          return vec3(wp.x.add(d.x.mul(fade)), wp.y.add(d.y.mul(fade)), wp.z.add(d.z.mul(fade)));
+        }
+        const g = gerstner(wp, sampleSpacing, previous ? this.uPreviousTime : this.uTime);
+        return vec3(wp.x.add(g.dispX.mul(fade)), wp.y.add(g.dispY.mul(fade)), wp.z.add(g.dispZ.mul(fade)));
+      };
+      const current = displaced(false);
+      if (surface) return surface.vertex(current, displaced(true));
+      // Without curvature keep the established local/model contract.
+      return vec3(positionLocal.x.add(current.x.sub(wp.x)), current.y.sub(wp.y), positionLocal.z.add(current.z.sub(wp.z)));
     })();
 
-    mat.normalNode = Fn(() => {
-      const wp = positionWorld;
+    const flatNormal = Fn(() => {
+      const wp = mapPosition;
       const shoreDamp = smoothstep(0.0, 120.0, shoreDist(wp)).mul(S.normalK);
+      if (slopeMoments) {
+        // Means follow the same physical FFT coordinates as displacement.
+        // The filter carries subpixel variance separately into roughness;
+        // no discontinuous hash-cell normal is added at any footprint.
+        const damp = clamp(shoreDamp, 0, 1);
+        const mean = fineMoments ? slopeMoments.xy.add(fineMoments.xy) : slopeMoments.xy;
+        return normalize(vec3(mean.x.mul(damp), 1, mean.y.mul(damp)));
+      }
       if (fft) {
         // filtered-NDF LOD, footprint edition: normTex has no mips (per-frame
         // storage) — flatten the phase-jittered slope as its 1.25m texels go
@@ -317,11 +330,8 @@ export class Water {
         const spark = mix(dotAt(exp2(l0), l0), dotAt(exp2(l0.add(1.0)), l0.add(1.0)), lw);
         // fade only where a cell would exceed ~50m / the horizon band: the
         // far-field glitter average IS the roughness lobe (horizon intact)
-        let sparkA = sqrt(varRet.add(1e-5)).mul(3.1).mul(gustK).mul(glintGate)
+        const sparkA = sqrt(varRet.add(1e-5)).mul(3.1).mul(gustK).mul(glintGate)
           .mul(smoothstep(45.0, 18.0, fp));
-        // D-066: a cloud between sun and water kills the glint (a diffuse-
-        // side sun term); the mirror/IBL sky reflection stays untouched
-        if (cloudShadow) sparkA = sparkA.mul(cloudShadow(wp));
         const nx = sf.sx.mul(fftFade).add(spark.x.mul(sparkA));
         const nz = sf.sz.mul(fftFade).add(spark.y.mul(sparkA));
         // PASS-3 RADIAL FIX: NO sheet-rim fade here (shore damp only). The
@@ -341,6 +351,8 @@ export class Water {
       const g = gerstner(wp);
       return normalize(vec3(g.nx.negate().mul(damp), float(1.0).sub(g.nyAcc.mul(damp).mul(0.8)), g.nz.negate().mul(damp)));
     })();
+    mat.normalNode = (curvature ? curvature.normalNode(flatNormal, mapPosition) : flatNormal)
+      .transformDirection(cameraViewMatrix);
     if (fft) {
       // GGX companion: as micro-normal energy rises the surface must sparkle,
       // not mirror-flash — nudge roughness up with the same gust/damp fields.
@@ -355,9 +367,24 @@ export class Water {
       // every range; the restore is world/footprint-anchored, never camera-
       // anchored, and continues seamlessly onto the shared-material skirt.
       mat.roughnessNode = Fn(() => {
-        const wp = positionWorld;
-        const fp = footprint(wp);
+        const wp = mapPosition;
         const microDamp = smoothstep(0.0, 120.0, shoreDist(wp));
+        if (slopeMoments) {
+          // E[|s|²] - |E[s]|² is exactly the trace of the filtered slope
+          // covariance. Scale variance by damp², consistently with normals.
+          // Three uses perceptual roughness r and GGX alpha=r², so width
+          // variance accumulates in alpha²=r⁴, not r². This isotropic GGX
+          // width match is an approximation, not a full anisotropic LEAN BRDF.
+          const macroVariance = max(slopeMoments.z.sub(dot(slopeMoments.xy, slopeMoments.xy)), 0);
+          const fineVariance = fineMoments
+            ? max(fineMoments.z.sub(dot(fineMoments.xy, fineMoments.xy)), 0) : float(0);
+          const unresolved = macroVariance.add(fineVariance);
+          const tail = fineMoments ? fft.fine.tailVariance : MICRO_VAR;
+          const damp = clamp(microDamp.mul(S.normalK), 0, 1);
+          return clamp(pow(float(S.roughness ** 4)
+            .add(unresolved.add(tail).mul(damp.mul(damp))), .25), .04, 1);
+        }
+        const fp = footprint(wp);
         const gustK = gustField(wp);
         const texel = fft.tileM / fft.N;
         const fftFade = smoothstep(texel * 5.0, texel * 1.2, fp);
@@ -372,7 +399,7 @@ export class Water {
 
     const deepC = new THREE.Color(S.deep), shallowC = new THREE.Color(S.shallow);
     mat.colorNode = Fn(() => {
-      const wp = positionWorld;
+      const wp = mapPosition;
       // PASS-1 item 7: the shore field is coarse (32m texels) — consumed raw,
       // its bilinear iso-contours draw as staircase chunks along every coast.
       // Wobble the sampled distance with two octaves of slow world-space
@@ -403,66 +430,66 @@ export class Water {
       // crest foam: FFT mode uses the compute-side Jacobian accumulation via
       // the same phase-jittered 4-tap field as the normals (mip-less — fade
       // by footprint before its texels dither into confetti)
-      const crest = fft
+      const crest = slopeMoments ? slopeMoments.w.mul(.75) : fft
         ? slopeFoam(wp).foam.mul(smoothstep(10.0, 2.5, footprint(wp))).mul(0.75)
         : smoothstep(0.55, 0.95, gerstner(wp).nyAcc).mul(0.6);
       c = mix(c, vec3(0.92, 0.95, 0.96), clamp(shoreFoam.add(crest), 0.0, 0.85).mul(edgeFadeC));
-      // D-066: cloud shadow attenuates the water-body/foam diffuse (same
-      // consume shape as terrain.js); the emissive sky terms stay lit
-      if (cloudShadow) c = c.mul(cloudShadow(wp));
-      if (aerial) c = c.mul(aerial.trans(wp)); // MAXFI A3 (see terrain.js note)
       return c;
     })();
-    // emissive carries the aerial inscatter + the item-5 warm-horizon mirror
-    if (aerial) mat.emissiveNode = Fn(() => aerial.ins(positionWorld).mul(aerial.uSunI).add(mirror))();
+    // `output` contains complete direct diffuse/specular + environment
+    // light. Apply the view atmosphere ONCE to all of it after lighting.
+    // The shared composite uses one march for both transmittance/inscatter.
+    if (aerial) {
+      mat.fog = false;
+      mat.outputNode = Fn(() => vec4(
+        aerial.composite
+          ? aerial.composite(positionWorld, output.rgb)
+          : output.rgb.mul(aerial.trans(positionWorld)).add(aerial.ins(positionWorld).mul(aerial.uSunI)),
+        output.a
+      ))();
+    }
 
     // near animated sheet + flat far skirt to the horizon
     this.mesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(NEAR_SPAN, NEAR_SPAN, NEAR_VERTS - 1, NEAR_VERTS - 1).rotateX(-Math.PI / 2),
+      this.adaptiveGrid ? makeOceanGrid() :
+        new THREE.PlaneGeometry(NEAR_SPAN, NEAR_SPAN, NEAR_VERTS - 1, NEAR_VERTS - 1).rotateX(-Math.PI / 2),
       mat
     );
     this.mesh.frustumCulled = false;
-    // PASS-3 RADIAL FIX, skirt half (the valdez "camera aperture"): the
-    // skirt used to wear its own flat material (pure deep color, roughness
-    // +0.04). Its inner rim is a CAMERA-CENTERED 15.8km circle, and wherever
-    // shore-graded fjord water crossed it the color popped from the sheet's
-    // shallow/deep shore mix to the skirt's pure deep — a hard luminance
-    // step that tracked the camera (measured -0.019..-0.025 at exactly
-    // 15.81km from three displaced camera positions; A/B'd the skirt's
-    // roughness and normals — both irrelevant, the COLOR handoff was the
-    // whole step). The skirt now SHARES the sheet material: on ring geometry
-    // every positionLocal-radius fade sits at 0 (flat, no foam — exactly the
-    // sheet's rim state) and every other term (shore color mix, glint NDF,
-    // Toksvig roughness, aerial air + item-5 mirror, D-066 cloud shadow) is
-    // world/footprint-anchored, so the seam is invisible by construction and
-    // the two surfaces can never drift apart again. Measured: seam step
-    // -0.004 (probe noise floor), 121fps unchanged. Beyond-DEM water reads
-    // open-deep via the shoreDist map-border fade above.
-    // PASS-1 item 6a (still true): the full-span skirt plane z-fought the
-    // sheet at range (metres of Y separation vanish in far-field depth
-    // precision) — the skirt won in patches and stamped a hard-edged flat
-    // rectangle into the textured water (the measured x≈483 seam). A ring
-    // whose hole matches the sheet's flat rim never overlaps live waves;
-    // past 15.8km both surfaces are flat and now share ONE material, so the
-    // residual overlap is invisible outright.
+    this.mesh.receiveShadow = !!cloudShadow;
+    // Match every near-grid boundary vertex at the same physical height.
+    // Overlapping a radial skirt with the square grid loses depth precision
+    // at range and changes the world position used for wave/shore shading.
     this.far = new THREE.Mesh(
-      new THREE.RingGeometry(15800, FAR_SPAN / 2, 48, 1).rotateX(-Math.PI / 2),
+      makeFarOcean({ nearGeometry: this.mesh.geometry,
+        ...(curvature ? {} : { outerRadius: FAR_SPAN / 2, radialSegments: 1, angularSegments: 48 }) }),
       mat
     );
-    this.far.position.y = -0.4; // tucked under the flattened sheet rim
+    if (this.adaptiveGrid) {
+      // The far ring shares this material but has zero geometric wave fade.
+      // Provide the same vertex input so both render pipelines are valid.
+      const count = this.far.geometry.getAttribute("position").count;
+      this.far.geometry.setAttribute("waterGridSpacing", new THREE.BufferAttribute(new Float32Array(count).fill(NEAR_SPAN), 1));
+    }
+    this.far.position.y = 0; // shared seam vertices occupy one surface
     this.far.frustumCulled = false;
+    this.far.receiveShadow = !!cloudShadow;
     this.group = new THREE.Group();
     this.group.add(this.mesh, this.far);
   }
 
-  // follow the camera in whole-quad snaps so the grid never swims
+  // The adaptive grid follows continuously: no snap or topology change.
+  // Displacement is world-anchored and filtered for the local sample spacing.
   update(camera, timeSec) {
+    this.uPreviousTime.value = this.uTime.value;
+    this.uPreviousGridCenter.value.set(this.mesh.position.x, this.mesh.position.z);
     this.uTime.value = timeSec;
     if (this.fft) this.fft.update(timeSec); // per-frame compute dispatch
     const quad = NEAR_SPAN / (NEAR_VERTS - 1);
-    this.mesh.position.x = Math.round(camera.position.x / quad) * quad;
-    this.mesh.position.z = Math.round(camera.position.z / quad) * quad;
-    this.far.position.x = camera.position.x;
-    this.far.position.z = camera.position.z;
+    this.mesh.position.x = this.adaptiveGrid ? camera.position.x : Math.round(camera.position.x / quad) * quad;
+    this.mesh.position.z = this.adaptiveGrid ? camera.position.z : Math.round(camera.position.z / quad) * quad;
+    this.far.position.x = this.mesh.position.x;
+    this.far.position.z = this.mesh.position.z;
+    this.terrain.oceanOcclusion?.update(this, camera);
   }
 }

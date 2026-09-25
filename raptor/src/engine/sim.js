@@ -13,7 +13,8 @@ export const DT = 1 / TICK_HZ;
 //   1 = phases 7-11 INC-3 (player missile PN assumed static targets)
 //   2 = phase 11 INC-4 W2: moving-target prop-nav in missiles.js
 //       (dR/dt = v_tgt − v_m through the TargetDirectory)
-export const SIM_VERSION = 2;
+//   3 = player mouse-aim instructor, bounded aim input and consistent respawn
+export const SIM_VERSION = 3;
 const MAX_CATCHUP_TICKS = 10; // beyond this we drop time rather than spiral
 
 export class SimCore {

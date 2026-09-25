@@ -241,3 +241,223 @@
 
 /* Let the native dialog cover the window without browser default sizing. */
 #controls.flight-setup{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;border:0;box-sizing:border-box}#controls::backdrop{background:transparent}
+
+/* Make the controls recognizable before asking the pilot to edit a list. */
+#controls .aim-presets { margin-top:19px; }
+#controls .aim-preset-heading { display:flex; justify-content:space-between; gap:12px; margin-bottom:9px; font-size:12px; }
+#controls .aim-preset-heading output { color:var(--setup-accent); font-variant-numeric:tabular-nums; }
+#controls .aim-preset-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+#controls .aim-preset-options button { position:relative; min-height:64px; padding:11px 50px 11px 13px; text-align:left; color:var(--setup-text); background:#15212b; border:1px solid #425564; border-radius:7px; }
+#controls .aim-preset-options button[aria-pressed="true"] { background:#30322f; border-color:var(--setup-accent); }
+#controls .aim-preset-options button:hover { border-color:#bba883; }
+#controls .aim-preset-options strong { display:block; font-size:12px; }
+#controls .aim-preset-options small { display:block; margin-top:4px; color:var(--setup-muted); font-size:10px; }
+#controls .aim-preset-options button > span { position:absolute; right:12px; top:13px; color:var(--setup-accent); font-size:11px; }
+/* A physical keyboard is the primary control editor, not a miniature legend. */
+#controls:has(.keyboard-layout) .setup-shell { width:min(1240px,100%); }
+#controls .keyboard-layout { margin:24px 0 28px; border:1px solid #405362; border-radius:12px; background:#121c25; overflow:hidden; }
+#controls .keyboard-layout > summary { display:flex; align-items:center; gap:16px; cursor:pointer; min-height:68px; padding:15px 20px; list-style:none; border-bottom:1px solid var(--setup-line); }
+#controls .keyboard-layout > summary::-webkit-details-marker { display:none; }
+#controls .keyboard-layout > summary > span:first-child { flex:1; }
+#controls .keyboard-layout > summary::after { content:"+"; font-size:21px; color:var(--setup-accent); }
+#controls .keyboard-layout[open] > summary::after { content:"−"; }
+#controls .keyboard-layout > summary strong { display:block; font-size:16px; font-weight:600; }
+#controls .keyboard-layout > summary small { display:block; color:var(--setup-muted); font-size:12px; margin-top:4px; }
+#controls .keyboard-layout-tag { color:var(--setup-muted); font:10px ui-monospace,monospace; }
+#controls .keyboard-body { display:grid; grid-template-columns:minmax(0,1fr) 246px; gap:20px; padding:18px; }
+#controls .keyboard-main { min-width:0; }
+#controls .map-toolbar { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:15px; }
+#controls .map-color-legend { display:flex; flex-wrap:wrap; gap:14px; font-size:10px; color:#bcc8d2; }
+#controls .map-color-legend span { display:flex; align-items:center; gap:5px; }
+#controls .cat-flight { --key-color:#8bcbdc; }
+#controls .cat-weapons { --key-color:#eac084; }
+#controls .cat-systems { --key-color:#a5d2ac; }
+#controls .cat-interface { --key-color:#c3b3df; }
+#controls .map-color-legend i { height:6px; width:6px; background:var(--key-color); border-radius:50%; }
+#controls .map-hint { font-size:10px; color:#99acba; }
+#controls .keyboard-viewport { overflow-x:auto; scrollbar-width:thin; scrollbar-color:#60788b #121c25; padding:5px; margin:-5px; }
+#controls .keyboard-stage { min-width:660px; border-radius:10px; }
+#controls .keyboard-board { position:relative; width:100%; }
+#controls .layout-key { display:flex; position:relative; min-width:0; padding:7px 4px; flex-direction:column; align-items:center; justify-content:center; gap:5px; color:#d8e5ed; border:1px solid #50636f; border-bottom-width:3px; border-radius:6px; background:#253640; }
+#controls .physical-key { position:absolute; transform:scale(.92,.90); transform-origin:center; }
+#controls button.layout-key:hover { border-color:#d6e3ea; background:#304654; }
+#controls .layout-key strong { font-size:12px; line-height:1.2; font-weight:600; }
+#controls .layout-key small { font-size:7px; white-space:nowrap; line-height:1.2; letter-spacing:.25px; color:#acd1dc; }
+#controls .layout-key.key-weapons { background:#383225; border-color:#9c8157; }
+#controls .layout-key.key-weapons small { color:#eac084; }
+#controls .layout-key.key-systems { background:#223a32; border-color:#507d69; }
+#controls .layout-key.key-systems small { color:#a5d2ac; }
+#controls .layout-key.key-interface { background:#302d42; border-color:#75658f; }
+#controls .layout-key.key-interface small { color:#c3b3df; }
+#controls .layout-key.key-unused { color:#9badba; background:#19232d; border-color:#33434f; }
+#controls .layout-key.key-system { color:#778995; background:#15202a; border-color:#293946; }
+#controls .layout-key.key-system small { font-size:7px; color:#758794; }
+#controls .layout-key[aria-pressed="true"] { border-color:#f0c486; box-shadow:inset 0 0 0 1px #f0c486,0 0 12px #e6bd7d22; }
+#controls .layout-key.key-held { background:#426759; color:#fff; border-color:#d5f5df; transform:scale(.88,.86); }
+#controls .key-shortcut { position:absolute; right:3px; top:2px; font-style:normal; font-size:9px; color:#e2d5ba; }
+#controls .key-extra { flex:1; min-height:42px; min-width:40px; padding:7px 9px; }
+#controls .key-extra strong { font-size:10px; }
+#controls .pointer-map { display:flex; flex-direction:column; gap:11px; padding:15px 0; margin-top:10px; border-top:1px solid var(--setup-line); }
+#controls .pointer-map-title { display:flex; align-items:baseline; justify-content:space-between; gap:12px; }
+#controls .pointer-map-title strong { color:#c6d6e1; font-size:12px; font-weight:550; }
+#controls .pointer-map-title span { color:var(--setup-muted); font-size:10px; }
+#controls .pointer-buttons { display:flex; gap:6px; }
+#controls .pointer-buttons .key-unused { display:flex; }
+#controls .layout-extra { display:flex; align-items:center; flex-wrap:wrap; gap:6px; padding-top:12px; border-top:1px solid var(--setup-line); }
+#controls .layout-extra > span { margin-right:6px; font-size:10px; color:var(--setup-muted); }
+#controls .layout-extra .key-extra { flex:0 1 auto; }
+#controls .layout-reference { padding-top:12px; font-size:10px; color:#8f9fac; line-height:1.6; }
+#controls .layout-inspector { min-width:0; align-self:start; padding:16px; background:#1a2732; border:1px solid #3b5161; border-radius:9px; }
+#controls .layout-inspector-title { display:flex; align-items:center; gap:11px; padding-bottom:15px; border-bottom:1px solid #3c505e; }
+#controls .inspector-keycap { display:grid; place-items:center; min-width:44px; min-height:44px; padding:8px; border:1px solid #b69a6c; border-bottom-width:3px; border-radius:6px; color:var(--setup-accent); background:#313632; font-size:20px; }
+#controls .layout-inspector-title strong { display:block; font-size:12px; font-weight:600; }
+#controls .layout-inspector-title div > span { display:block; font-size:10px; color:var(--setup-muted); margin-top:4px; }
+#controls .layout-action { display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; padding:16px 0; border-bottom:1px solid #3c505e; }
+#controls .layout-action > div { flex:1 1 100%; }
+#controls .layout-action-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+#controls .map-action-category { color:var(--key-color); font-size:10px; }
+#controls .map-action-mode { color:#c0cfda; padding:2px 6px; border:1px solid #536776; border-radius:4px; font-size:9px; }
+#controls .layout-action strong { display:block; font-size:14px; font-weight:600; }
+#controls .layout-action p { color:#a5b4c0; font-size:11px; line-height:1.55; margin-top:7px; }
+#controls .layout-action .layout-chord { display:block; color:#d4e0e8; font-size:11px; margin-top:10px; }
+#controls .layout-action .setup-button { font-size:11px; padding:9px 12px; min-height:38px; }
+#controls .layout-fixed { font-size:11px; color:#b8c9b4; }
+#controls .layout-inspector-note, #controls .layout-empty { margin-top:12px; color:var(--setup-muted); font-size:11px; line-height:1.6; }
+#controls .layout-empty strong { color:#d3e0e8; font-weight:500; }
+#controls .layout-empty p { margin-top:7px; }
+#controls .map-scroll-hint { display:none; font-size:10px; color:#a6b8c6; margin-top:10px; }
+@media (max-width:1100px) { #controls .keyboard-body { grid-template-columns:minmax(0,1fr); } #controls .layout-inspector { grid-column:1; grid-row:auto; } #controls .map-scroll-hint { display:block; } }
+@media (max-width:600px) { #controls .keyboard-layout-tag { display:none; } #controls .map-hint { display:none; } #controls .pointer-map-title { flex-direction:column; gap:4px; } #controls .pointer-buttons { flex-wrap:wrap; } #controls .pointer-buttons .key-extra { flex-basis:30%; } }
+#controls .aim-test-target { position:absolute; transform:translate(-50%,-50%); width:5.88%; height:5.88%; min-width:20px; min-height:20px; border:1px dashed #b1d9dd; border-radius:50%; background:#91c3d933; pointer-events:none; }
+#controls .aim-test-target[hidden] { display:none; }
+#controls .aim-test-target.on-target { background:#a8d4a966; border-color:#c9efd3; border-style:solid; }
+#controls .aim-exercise { display:flex; align-items:center; justify-content:space-between; gap:20px; text-align:left; padding:0 0 16px; margin-bottom:17px; border-bottom:1px solid #55715e66; }
+#controls .aim-exercise output { font-size:12px; color:#bcd7c9; line-height:1.6; }
+#controls .aim-exercise button { flex-shrink:0; font-size:11px; padding:9px 12px; min-height:36px; }
+@media (max-width:1000px) {
+  #controls .keyboard-body { grid-template-columns:minmax(0,1fr); }
+  #controls .layout-inspector { grid-column:1; grid-row:auto; margin-top:14px; }
+  #controls .layout-action { align-items:center; }
+  #controls .layout-action > div { flex:1; }
+}
+@media (max-width:580px) {
+  #controls .aim-preset-options { gap:5px; }
+  #controls .aim-preset-options button { padding:10px 8px; }
+  #controls .aim-preset-options button > span { position:static; display:block; margin-top:6px; }
+  #controls .aim-preset-options strong { font-size:11px; }
+  #controls .aim-preset-options small { font-size:9px; line-height:1.45; }
+  #controls .aim-preset-heading { font-size:11px; }
+  #controls .keyboard-layout > summary { padding:13px; }
+  #controls .layout-legend { display:none; }
+  #controls .keyboard-body { padding:0 12px 12px; }
+  #controls .keyboard-row { min-width:440px; }
+  #controls .pointer-map { align-items:flex-start; flex-direction:column; gap:9px; }
+  #controls .pointer-buttons { width:100%; }
+  #controls .aim-exercise { flex-direction:column; align-items:flex-start; gap:10px; }
+}
+
+/* The map is an editor: alternate paths remain visible, and changes are reversible. */
+#controls .map-filters { display:flex; flex-wrap:wrap; gap:5px; }
+#controls .map-filters button { display:flex; align-items:center; gap:5px; padding:7px 9px; border:1px solid transparent; border-radius:5px; color:#aabcca; background:transparent; font-size:10px; min-height:32px; }
+#controls .map-filters button i { width:6px; height:6px; border-radius:50%; background:var(--key-color); }
+#controls .map-filters button[aria-pressed="true"] { background:#2c3a45; border-color:#778c9b; color:#f0f4f8; }
+#controls .map-filters button:hover { background:#25333e; }
+#controls .layout-key.key-related { outline:1px dotted #e9cb98; outline-offset:1px; }
+#controls .layout-key.key-modifier { border-style:dashed; border-color:#ebd7ab; background:#394337; }
+#controls .layout-key.key-dimmed { opacity:.38; }
+#controls .layout-key.key-dimmed:hover,#controls .layout-key.key-dimmed:focus-visible { opacity:1; }
+#controls .map-state-legend { display:block; margin-top:6px; color:#b1c1cc; }
+#controls .map-alternates { display:flex; flex-wrap:wrap; align-items:center; gap:5px; }
+#controls .map-alternates > span { flex:1 1 100%; font-size:10px; color:#94a9b7; margin-bottom:3px; }
+#controls .map-alternates button { background:#15212b; border:1px solid #4e6575; border-radius:4px; color:#d9e6ed; padding:6px 8px; font-size:10px; min-height:30px; }
+#controls .map-alternates button.current { border-color:#bb9968; color:#ebc487; }
+#controls .map-alternates button:hover { background:#2d414e; }
+#controls .map-assign { margin:15px 0 0; padding-top:12px; border-top:1px solid #3c505e; }
+#controls .map-assign summary { color:#d5e2eb; font-size:11px; cursor:pointer; min-height:30px; }
+#controls .map-assign label { display:block; margin:8px 0 6px; color:#b6c8d4; font-size:11px; }
+#controls .map-assign select { width:100%; min-height:40px; border:1px solid #688296; border-radius:5px; padding:8px; font:12px inherit; color:#edf3f8; background:#15232e; }
+#controls .map-assign p { color:#a4b8c6; font-size:10px; line-height:1.55; margin:10px 0; }
+#controls .map-assign .setup-button { width:100%; min-height:40px; }
+#controls .map-assign .setup-button:disabled { opacity:.45; }
+#controls .map-modifier-help { margin:14px 0; }
+#controls .map-modifier-help > strong { display:block; font-size:11px; color:#b7cbd6; margin-bottom:7px; }
+#controls .map-modifier-help button { display:block; width:100%; padding:8px; margin:6px 0; border:1px dashed #667664; border-radius:5px; color:#e1e6d7; text-align:left; font-size:11px; background:#27382f; }
+#controls .map-modifier-help small { display:block; margin-top:4px; color:#aabcaf; font-size:10px; }
+
+/* Rehearsal reads the real binding resolver while gameplay remains suspended. */
+#controls .map-test-button { flex-shrink:0; display:flex; align-items:center; justify-content:center; gap:10px; min-height:36px; padding:8px 12px; border:1px solid #637e72; border-radius:6px; background:#21372d; color:#c6e9d0; font-size:11px; }
+#controls .map-test-button[aria-pressed="true"] { border-color:#b8e3c3; background:#344f3c; color:#eaffef; }
+#controls .map-test-readout { padding:13px 15px; margin-bottom:14px; border:1px solid #789583; border-radius:8px; background:#192e26; }
+#controls .map-test-readout div > span { display:block; color:#a1c4ae; font-size:8px; letter-spacing:1px; }
+#controls .map-test-readout strong { display:block; font-size:15px; color:#e3f2e7; margin-top:7px; }
+#controls .map-test-readout p { font-size:12px; color:#c9e1d0; margin:5px 0 9px; }
+#controls .map-test-readout output { display:block; border-top:1px solid #5e786655; padding-top:9px; font-size:11px; color:#e3e9d2; }
+#controls .map-test-readout small { display:block; margin-top:8px; font-size:10px; color:#a5b9aa; }
+#controls .keyboard-stage:focus-visible { outline:2px solid #a2d7b3; outline-offset:5px; }
+#controls .layout-key.key-held { opacity:1; outline:2px solid #d2f1da; outline-offset:0; box-shadow:0 0 12px #92cda044; }
+@media(max-width:800px) { #controls .map-toolbar { align-items:flex-start; flex-wrap:wrap; } }
+
+/* Explore with arrows; Tab always exits the diagram in one step. */
+#controls select:focus-visible,#controls summary:focus-visible { outline:2px solid var(--setup-accent); outline-offset:4px; }
+#controls .map-navigation-help { color:#9cabb6; font-size:10px; line-height:1.5; margin:-4px 0 10px; }
+#controls .map-sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
+#controls .keyboard-layout > summary strong { letter-spacing:-.2px; }
+#controls .layout-key:focus-visible { z-index:2; outline-offset:2px; }
+#controls .keyboard-layout:has([data-map-test][aria-pressed="true"]) .map-navigation-help { display:none; }
+#controls .map-assign select { font-family:inherit; font-size:12px; }
+#controls .layout-key strong { overflow-wrap:anywhere; }
+@media(min-width:1101px) and (max-height:850px) {
+  #controls .setup-header { padding:18px 28px; }
+  #controls .setup-header h1 { font-size:23px; margin-top:5px; }
+  #controls .setup-tabs button { padding-top:13px; padding-bottom:13px; }
+  #controls .setup-footer { padding-top:12px; padding-bottom:12px; }
+  #controls .keyboard-layout > summary { min-height:56px; padding:11px 16px; }
+  #controls .keyboard-body { gap:15px; padding:14px; }
+  #controls .map-toolbar { margin-bottom:10px; }
+  #controls .layout-inspector { padding:13px; }
+}
+@media(max-width:1100px) {
+  #controls .layout-inspector { max-width:none; margin-top:0; }
+  #controls .layout-action > div { flex:1 1 100%; }
+  #controls .layout-inspector-title { justify-content:flex-start; }
+}
+@media(max-width:580px) {
+  #controls .keyboard-body { padding:12px; gap:16px; }
+  #controls .map-toolbar { gap:10px; }
+  #controls .map-filters { gap:4px; }
+  #controls .map-filters button { padding:8px; min-height:36px; }
+  #controls .map-test-button { width:100%; min-height:42px; }
+  #controls .map-navigation-help { font-size:10px; }
+  #controls .layout-action .setup-button,#controls .map-alternates button { min-height:40px; }
+  #controls .keyboard-layout > summary { gap:8px; }
+  #controls .keyboard-layout > summary strong { font-size:14px; }
+  #controls .keyboard-layout > summary small { font-size:11px; }
+  #controls .layout-reference { font-size:10px; }
+}
+@media(forced-colors:active) {
+  #controls .layout-key { border-color:ButtonText; }
+  #controls .layout-key.key-related { outline:2px dotted Highlight; }
+  #controls .layout-key.key-modifier { border:2px dashed Highlight; }
+  #controls .layout-key[aria-pressed="true"] { border:3px solid Highlight; }
+  #controls .layout-key.key-held { outline:3px solid Highlight; }
+  #controls .layout-key.key-dimmed { opacity:.7; }
+}
+
+/* Keep the entire keyboard in sight while its live feedback sits beside it. */
+#controls .keyboard-body.rehearsing { position:relative; }
+#controls .rehearsing .layout-inspector { display:none; }
+#controls .rehearsing .map-test-readout { position:absolute; right:18px; top:18px; width:246px; margin:0; padding:17px; }
+#controls .rehearsing .map-test-readout strong { font-size:18px; line-height:1.45; margin-top:16px; }
+#controls .rehearsing .map-test-readout p { line-height:1.6; margin:12px 0 20px; }
+#controls .rehearsing .map-test-readout small { line-height:1.7; margin-top:18px; }
+#controls .physical-key.key-arrow { padding:1px; gap:0; }
+#controls .physical-key.key-arrow strong { font-size:16px; line-height:1; }
+#controls .physical-key.key-arrow small { display:none; }
+@media(min-width:1101px) and (max-height:850px) { #controls .rehearsing .map-test-readout { right:14px; top:14px; } }
+@media(max-width:1100px) {
+  #controls .rehearsing .map-test-readout { position:sticky; top:0; right:auto; width:auto; z-index:3; padding:10px 12px; margin:0 0 12px; box-shadow:0 4px 12px #09161080; }
+  #controls .rehearsing .map-test-readout strong { font-size:13px; margin-top:5px; }
+  #controls .rehearsing .map-test-readout p { font-size:11px; margin:4px 0 6px; }
+  #controls .rehearsing .map-test-readout output { font-size:10px; padding-top:6px; }
+  #controls .rehearsing .map-test-readout small { font-size:9px; line-height:1.4; margin-top:5px; }
+}

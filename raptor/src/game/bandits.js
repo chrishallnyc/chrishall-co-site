@@ -77,6 +77,7 @@
 
 import * as THREE from "three";
 import { softDiscTexture } from "../engine/sprites.js";
+import { buildBanditModels, createBanditLiveryCache, updateBanditVisuals } from "../aircraft/bandit-models.js";
 
 export const MAX_BANDITS = 8;
 export const SLOTS_B = 14; // [x,y,z, vx,vy,vz, hp, state, stateT, wptIdx, cmdHdg, cmdPitch, cmdSpd, cooldown]
@@ -162,7 +163,7 @@ export class Bandits {
   // first anyway); it can also be attached post-construction like
   // battlefield.player: `bandits.battlefield = battlefield`. Without it,
   // raiders have nothing to dive on and fly the liner only.
-  constructor(scene, { terrain, battlefield = null } = {}) {
+  constructor(scene, { terrain, battlefield = null, quality = 'high' } = {}) {
     this.name = "bandits";
     this.terrain = terrain || null;
     this.battlefield = battlefield;
@@ -211,16 +212,16 @@ export class Bandits {
     this.root.name = "bandits";
     scene.add(this.root); // boot-time add — safe per the flightfx landmine
 
-    this._matRed = new THREE.MeshStandardMaterial({ color: 0x3c4046, roughness: 0.85, metalness: 0.25 });
-    this._matBlue = new THREE.MeshStandardMaterial({ color: 0x9aa2ad, roughness: 0.8, metalness: 0.2 });
-    // INC-6 ace livery: aggressor red (design §5 liveryTint) — the player
-    // can SEE which contact is the ace at a glance
-    this._matAce = new THREE.MeshStandardMaterial({ color: 0xb03a2e, roughness: 0.7, metalness: 0.3 });
+    this._liveryCache = createBanditLiveryCache();
+    this._visualFrame = { projectedPixels: Infinity, renderTime: 0 };
+    // Build each airframe once, then share immutable geometry across the
+    // pool. Livery swaps target paint only, preserving glass and hot metal.
+    const models = buildBanditModels(null, { quality });
     this.groups = []; this._variants = [];
     for (let i = 0; i < MAX_BANDITS; i++) {
       const g = new THREE.Group();
       g.rotation.order = "YXZ"; // yaw -> pitch -> roll for a +z-forward model
-      const vars = [this._buildDrone(), this._buildTransport(), this._buildFighter()];
+      const vars = models.map((model) => model.clone(true));
       for (const v of vars) { v.visible = false; g.add(v); }
       g.visible = false;
       g.position.set(0, -500, 0); // parked below the world (battlefield reserve pattern)
@@ -270,34 +271,6 @@ export class Bandits {
     this._q = new THREE.Quaternion();
     this._dir = new THREE.Vector3();
     this._sc = new THREE.Vector3();
-  }
-
-  // ---- silhouettes: composed boxes, nose along +z (three yaw == ENU bearing) ----
-  _buildFighter() {
-    const g = new THREE.Group();
-    const add = (w, h, d, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), this._matRed); m.position.set(x, y, z); g.add(m); };
-    add(1.6, 1.4, 15, 0, 0, 0);      // fuselage
-    add(12, 0.3, 4.5, 0, 0, -1.5);   // main wing
-    add(5.5, 0.25, 2, 0, 0.2, -6);   // stabilators
-    add(0.25, 2.4, 2.6, 0, 1.4, -6.2); // fin
-    return g;
-  }
-  _buildDrone() {
-    const g = new THREE.Group();
-    const add = (w, h, d, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), this._matRed); m.position.set(x, y, z); g.add(m); };
-    add(1.0, 1.0, 8, 0, 0, 0);       // fuselage
-    add(14, 0.2, 1.4, 0, 0.3, 1);    // long straight wing
-    add(3.2, 0.2, 1.2, 0, 0.6, -3.6); // tail
-    return g;
-  }
-  _buildTransport() {
-    const g = new THREE.Group();
-    const add = (w, h, d, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), this._matRed); m.position.set(x, y, z); g.add(m); };
-    add(3.4, 3.4, 30, 0, 0, 0);      // fuselage
-    add(34, 0.5, 5, 0, 1.4, 2);      // wing
-    add(12, 0.4, 3, 0, 1.0, -13);    // tailplane
-    add(0.5, 5.5, 4, 0, 3.0, -13);   // fin
-    return g;
   }
 
   alive(i) { return this.live[i] === 1 && this.state[i * SLOTS_B + 6] > 0; }
@@ -396,8 +369,7 @@ export class Bandits {
       // pose + show the pre-built mesh (never construct scene geometry here)
       const g = this.groups[slot], vars = this._variants[slot];
       for (let v = 0; v < 3; v++) vars[v].visible = v === k;
-      const mat = this.side[slot] ? this._matBlue : (ace ? this._matAce : this._matRed);
-      vars[k].traverse((m) => { if (m.isMesh) m.material = mat; });
+      this._liveryCache.apply(vars[k], this.side[slot] ? 'blue' : (ace ? 'ace' : 'red'));
       this._smokeLastPuff.set([u.x, u.y, z], slot * 3); // ENU, matches render's lx/ly/lz
       g.position.set(u.x, z, u.y); // ENU -> three (east, up, north)
       g.rotation.set(0, Math.atan2(this.state[o + 3], this.state[o + 4]), 0);
@@ -986,8 +958,11 @@ export class Bandits {
 
   // ---- render side ---- alpha = sim interpolation factor (player.js
   // prev-state pattern); banking leans into the applied turn rate
-  render(alpha, camera) {
+  render(alpha, camera, viewportHeight = globalThis.innerHeight ?? 720) {
     const a = this._prev, b = this.state;
+    const frame = this._visualFrame;
+    frame.renderTime = performance.now() * .001;
+    const projectionScale = Math.abs(camera.projectionMatrix.elements[5]) * viewportHeight * .5;
     for (let i = 0; i < MAX_BANDITS; i++) {
       if (!this.live[i]) continue;
       const o = i * SLOTS_B, g = this.groups[i];
@@ -995,6 +970,10 @@ export class Bandits {
       const ly = a[o + 1] + (b[o + 1] - a[o + 1]) * alpha;
       const lz = a[o + 2] + (b[o + 2] - a[o + 2]) * alpha;
       g.position.set(lx, lz, ly); // ENU -> three
+      const model = this._variants[i][this.kind[i]];
+      const distance = Math.max(1, g.position.distanceTo(camera.position));
+      frame.projectedPixels = model.userData.aircraft.maxDimension * projectionScale / distance;
+      updateBanditVisuals(model, frame);
       const vx = b[o + 3], vy = b[o + 4], vz = b[o + 5];
       const v = Math.hypot(vx, vy, vz);
       if (v > 1) {

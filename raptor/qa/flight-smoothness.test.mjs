@@ -108,7 +108,7 @@ test('rendering leaves deterministic flight state untouched', () => {
   assert.deepEqual(Array.from(player.fm.state), state);
 });
 
-test('recenter aligns aim to the aircraft and clears queued mouse movement', () => {
+test('recenter aligns aim to the flight path and clears queued mouse movement', () => {
   const { player } = fixture();
   player.fm.setAttitude(0.65, 0.3, 0.2);
   player.aimHeading = -2;
@@ -117,8 +117,10 @@ test('recenter aligns aim to the aircraft and clears queued mouse movement', () 
   player._mouseDy = -300;
   const state = Array.from(player.fm.state);
   player.recenterAim();
-  close(player.aimHeading, 0.65, 'recentered heading');
-  close(player.aimPitch, 0.3, 'recentered pitch');
+  // The aircraft is still travelling level/east despite its nose attitude.
+  // Capturing the nose instead would add angle of attack to the flight path.
+  close(player.aimHeading, 0, 'recentered course');
+  close(player.aimPitch, 0, 'recentered flight path');
   assert.equal(player._mouseDx, 0);
   assert.equal(player._mouseDy, 0);
   assert.deepEqual(Array.from(player.fm.state), state);

@@ -1,5 +1,124 @@
 # RAPTOR release notes
 
+## 1.6.0 — 2026-09-24
+
+The visual keyboard is now the main control editor, with a complete MacBook
+layout and a rehearsal mode that shows what your real inputs would do.
+
+- **Recognize the keyboard.** Function keys, punctuation, both Shift keys,
+  wider modifier keys and an inverted-T arrow cluster match US MacBook
+  positions. Categories have distinct colors and named filters. Fn and Touch ID
+  are explained as macOS controls rather than assignable inputs.
+- **Edit directly.** Choose an unused key to add an action without replacing
+  existing bindings. Inspect full shortcuts and all alternates; related keys
+  and required modifiers highlight together. Existing conflict choices, Undo,
+  the four-binding limit and Escape protection remain in force.
+- **Rehearse safely.** Press actual keys or use mouse buttons over the diagram
+  to see held-key lighting, resolved actions and the last input. Nothing fires,
+  moves or changes bindings. Rehearsal follows the same modifier precedence as
+  flight and clears interrupted Command shortcuts, focus loss and wheel pulses.
+- **Navigate comfortably.** Arrow keys move spatially, Enter reaches the
+  selected key's editor, and Tab leaves the diagram in one step. Narrow layouts
+  scroll the keyboard locally. Laptop rehearsal keeps the entire keyboard
+  visible beside its feedback; compact arrow keys retain full accessible names.
+
+Native and isolated browser checks cover geometry, navigation, assignment,
+conflicts, saved layouts, rehearsal safety and responsive layouts. Physical
+MacBook trackpad behavior has not been tested by the agent.
+
+## 1.5.0 — 2026-09-24
+
+Mouse and trackpad aiming now steer the aircraft as intended. The player had
+selected an unsupported instructor mode, which ignored horizontal aim and
+treated vertical aim as a sustained load command. Selecting the actual mouse
+instructor fixes that mismatch. Keyboard turns keep their new course when
+released, and recentering holds the current flight path without adding a climb.
+
+- **See and edit your controls.** An interactive keyboard and pointer map shows
+  current bindings, complete shortcuts and shared actions. Change a key or add
+  an alternate directly from the map, with the existing conflict choices and
+  Undo. Custom inputs outside the laptop layout remain visible and editable.
+- **Find a comfortable aiming feel.** Precise, Balanced and Responsive presets
+  work with separately saved mouse and MacBook trackpad sensitivities. A guided
+  five-target comfort check lets you try the feel in the safe Controls preview;
+  it does not move or fire the aircraft.
+- **Learn through real flight.** Five practice lessons measure steady flight,
+  throttle control, a heading change, a climb and level-off, and steady cruise.
+  The coach shows live targets and current keys, forgives brief wobbles, and
+  saves graduation in the browser. Free flight, replay and reset to level flight
+  are available throughout practice. Crashes pause on a safe aircraft before
+  you continue; recovery preserves earned training and returns keyboard focus
+  to the flight canvas.
+- **Adjust without losing your place.** Tune feel opens a paused panel for
+  sensitivity, device choice, inversion, instrument size and sound. Pause also
+  shows mission objectives and remaining time, with protection kept separate
+  from completion counts. An off-screen aim cue keeps recentering discoverable
+  while weapon and ammunition information remains visible.
+
+Native checks cover input behavior, course timing, persistence and a real
+flight-model course. Isolated browser checks exercise the controls map, aim
+targets, all five flown lessons, Quick tune, recovery and focus. Automated
+pointer input exercises the trackpad profile; physical MacBook trackpad testing
+has not been performed. See [README.md](README.md#verify-changes) for commands
+and optional playthrough recording.
+
+## 1.4.0 — 2026-09-24
+
+The sky and landscape now carry substantially more detail, with shaped volumetric
+clouds, fine cirrus, a physical night sky, smaller ocean waves, and improved
+terrain relief. The aircraft, flight setup, controls and combat audio from the
+preceding releases remain integrated.
+
+- **Clouds and sky:** full-resolution cloud lighting and edge-aware filtering,
+  secondary billows, tier-aware 8K cirrus fibres, and consistent Sun/Moon lighting
+  across the atmosphere, surfaces and water reflections.
+- **Water and terrain:** a 512² fine-wave cascade on HIGH/ULTRA, filtered glints,
+  coherent long-session wave phase, joined ocean meshes, packed-height
+  interpolation, close terrain detail, snow relief, and a central 16 km Valdez
+  region using real 5 m USGS IfSAR elevations.
+- **Night and motion:** catalogued stars, a mapped Moon at its actual angular
+  size, distant terrain occlusion, correct celestial motion, resets for camera
+  cuts and resolution changes, and rejection of stale history for newly visible
+  objects and replaced celestial geometry.
+- **Aircraft and quality:** preserve coating normal maps, native self-shadows
+  and volumetric exhaust in the curved world. Live presets update rendering;
+  settings identify when boot assets and shadow-map resolution need a restart.
+  WebGL2 retains physical atmosphere, cloud cards, material detail and improved
+  depth precision.
+
+The final five refinements focus on cloud structure, cirrus, fine water, night
+clarity and aircraft integration. Native 4K is demanding; the quality presets
+and fallback renderer remain available. See [GRAPHICS.md](GRAPHICS.md) for source credits,
+rendering contracts and reproducible validation commands.
+
+## 1.3.0 — 2026-09-24
+
+Aircraft now hold up to close inspection, with shaped airframes, detailed
+cockpits and mechanical interiors, physical coatings, and volumetric exhaust.
+The F-22 and all three enemy aircraft share quality-aware resources and switch
+to lighter geometry at a distance.
+
+- **Refine the F-22.** Rebuilt airframe surfaces, intake and weapons-bay
+  openings, pilot and instrument details, landing-gear hardware, and vectoring
+  engine nozzles preserve the existing articulated aircraft rig.
+- **Give each aircraft its own finish.** Authored paint, panel wear, glazing,
+  engine metal, and freshly baked contact shading respond to the game's sun,
+  atmosphere, and aircraft shadows.
+- **Improve the enemy fleet.** Fighters gain cockpit and exhaust interiors;
+  transports gain open cockpit windows and contoured engines; drones gain
+  shaped propellers and optical sensor apertures.
+- **Keep motion coherent.** Interpolated control surfaces, gear supports,
+  doors, and nozzles follow the visible aircraft without changing flight
+  simulation numerics. The flight setup and controls improvements from 1.1.0
+  remain intact.
+- **Inspect and reproduce the results.** The aircraft lab covers all four
+  models. Offline coating and contact-bake tools, geometry checks, and browser
+  captures exercise both WebGPU and WebGL rendering.
+
+Five further refinement passes polished coating response, canopy and engines,
+cockpit and gear, the enemy fleet, and exhaust/contact shading. Resource sharing,
+quality caps, and prebuilt distance levels keep the detail bounded.
+
 ## 1.2.0 — 2026-09-24
 
 Flight and combat audio now follows engine spool, aircraft motion and combat

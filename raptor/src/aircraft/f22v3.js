@@ -1,53 +1,51 @@
-// F-22 Raptor v3 — high-fidelity procedural lofted model.
-//
-// Same contract as f22.js (v2): buildF22() -> { group, parts }
-//   parts = { flaperonL/R, stabL/R, rudderL/R, nozzleL/R, canopy,
-//             bayMain, baySideL/R, gearNose, gearL/R }
-//   forward = -Z (nose z=-9.46, nozzle exits z=+9.46), +X starboard, +Y up.
-//   Length 18.92 m, span 13.56 m. Nozzle pivots are DIRECT children of the
-//   "f22" group at (±0.75, 0, 8.10) with the exit at pivot-local z=1.36
-//   (flightfx.js nests the AB plume there and reads parts.nozzleL.parent).
-//
-// v3 over v2:
-//   - indexed smooth-shaded lofts with a duplicated-vertex CREASE at the
-//     chine (v2 was non-indexed flat-shaded => razor-flat faceted sides)
-//   - 24-station fuselage: drooped radome, chined diamond forebody, canopy
-//     sill cheeks, dorsal spine fairing behind the canopy, wide flat
-//     lifting mid-body, boat-tail + tail booms for the stab/fin mounts
-//   - smooth bubble canopy (gold MeshPhysicalMaterial + baked fresnel
-//     vertex tint) with a separate sill frame band
-//   - wings/stabs/fins lofted with real airfoil thickness profiles
-//     (rounded LE, sharp TE, blunt flap-notch walls) instead of slabs
-//   - caret intakes with raked lips and a deep dark duct
-//   - 2D TVC nozzles: near-rectangular convergent/divergent shell with a
-//     horizontal paddle seam crease, external paddle plates, dark interior
-//   - procedural PBR paint via vertex colors (no textures, no UVs):
-//     Have-Glass gray-blue base with subtly darker RAM radome / chine +
-//     leading-edge tape / dorsal spine, 4-8% panel-line rows at the loft
-//     stations, belly counter-shade, straw->blue->scorched heat tint on
-//     the TVC petals, toned canopy sill frame
+// F-22 Raptor. The established import URL remains stable; aircraft metadata
+// records the structural revision. Forward -Z, starboard +X, up +Y, metres.
+// buildF22({quality}) returns {group, parts, ready}; the original 15 rig keys
+// and direct-root nozzle pivots remain stable. `ready` resolves static maps.
+// Reference-derived body/canopy data is in geometry/f22-airframe.js; physical
+// attachments are declared once in model metadata and consumed by FlightFX.
 
 import * as THREE from "three";
+import { buildCockpit } from "./cockpit.js";
+import { airframeHardware, mergeDetails, F22_GEAR_DIMENSIONS } from "./hardware.js";
+import { buildAirframeGeometry, airframeTop, F22_CANOPY, canopySection, F22_NOZZLE, F22_DIMENSIONS } from "./geometry/f22-airframe.js";
+import { surfacePatch } from "./geometry/patch.js";
+import { cleanSurface } from "./geometry/cleanup.js";
+import { createF22Coating } from "./f22-materials.js";
+import { buildMainWeaponsBays } from './weapons-bays.js';
+import { buildSideWeaponsBays } from './side-weapons-bays.js';
+import { prepareGearWing, buildGearBays, syncGearBays, buildGearDetail, addGearStays } from './gear-bays.js';
+import { GEAR_STOPS } from './geometry/f22-gear-layout.js';
+import { buildFinRootFairings } from './fin-root-fairing.js';
+import { addWingInsignia } from './national-markings.js';
+import { buildF119Nozzle } from './f119-nozzle.js';
+import { F22_LEVELS, F22_GEOMETRY_QUALITY, f22Quality } from './f22-quality.js';
+import { registerF22LodResources, bindF22Lod, updateF22Visuals, F22_LOD_THRESHOLDS } from './f22-lod.js';
+import { buildF22CockpitSilhouette, buildF22GearSilhouette } from './f22-detail-lod.js';
+export { updateF22Visuals } from './f22-lod.js';
+import { coatBodySurface } from './geometry/f22-body-coating-uv.js';
+import { coatLiftingSurface } from './geometry/f22-coating-uv.js';
+import { WING, TAIL, FIN, foil, wingLE, wingTE, wingTEeff, wingThick,
+  stabLE, stabTE, finLE, finTE, finHinge, finThick } from './geometry/f22-planform.js';
 
 const DEG = Math.PI / 180;
 
 // ---------------------------------------------------------------- materials
-function makeMaterials() {
+function makeMaterials(quality) {
   return {
     skin: new THREE.MeshStandardMaterial({
-      // Have-Glass gray-blue RAM overcoat: painted absorber, NOT bare metal.
-      // Tone zones (radome, LEs, spine, panel rows) ride in vertex colors.
-      // (#5c646e family, lifted a half-step: metalness eats diffuse energy
-      // in the env-map-less lab and the jet went near-black on the side)
-      color: 0x666e78, roughness: 0.55, metalness: 0.35, vertexColors: true,
+      // Match the mapped coating on untextured controls and intake lips.
+      color: 0x828b8f, roughness: 0.65, metalness: 0.07, vertexColors: true,
     }),
     canopy: new THREE.MeshPhysicalMaterial({
-      // gold via baked fresnel-ish vertex gradient + faint emissive (reads
-      // gold with no env map); physical so a future env map lights it right.
-      color: 0xffffff, vertexColors: true, roughness: 0.1, metalness: 0.45,
-      clearcoat: 1.0, clearcoatRoughness: 0.12, envMapIntensity: 1.2,
-      emissive: 0x6f4d12, emissiveIntensity: 0.38,
-      transparent: true, opacity: 0.6, side: THREE.DoubleSide,
+      color: 0xf1f3ed, roughness: 0.032, metalness: 0,
+      transmission: quality === 'low' ? 0 : .94, transparent: quality === 'low',
+      opacity: quality === 'low' ? .34 : 1, depthWrite: quality !== 'low', thickness: .018, ior: 1.52,
+      attenuationColor: 0xcabb87, attenuationDistance: .42,
+      specularColor: 0xf2dfb8, specularIntensity: .9,
+      clearcoat: .65, clearcoatRoughness: 0.045, envMapIntensity: 1.0,
+      iridescence: .12, iridescenceIOR: 1.3, iridescenceThicknessRange: [190, 240],
+      side: THREE.FrontSide,
     }),
     dark: new THREE.MeshStandardMaterial({      // nozzle / exhaust metal
       // heat-tint gradient (straw->blue->scorched) rides in vertex colors
@@ -55,12 +53,6 @@ function makeMaterials() {
     }),
     inlet: new THREE.MeshStandardMaterial({     // duct/exhaust cavity
       color: 0x0b0c0e, roughness: 0.95, metalness: 0.05, side: THREE.DoubleSide,
-    }),
-    gear: new THREE.MeshStandardMaterial({
-      color: 0x8f9399, roughness: 0.6, metalness: 0.5,
-    }),
-    tire: new THREE.MeshStandardMaterial({
-      color: 0x17181a, roughness: 0.92, metalness: 0.0,
     }),
   };
 }
@@ -129,21 +121,9 @@ function loft(rings, capStart, capEnd) {
   const g = new THREE.BufferGeometry();
   g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
   g.setIndex(idx);
+  cleanSurface(g);
   g.computeVertexNormals();
   return g;
-}
-
-// Catmull-Rom over a station table column (clamped ends).
-function crom(rows, col, z) {
-  let i = 0;
-  while (i < rows.length - 2 && z > rows[i + 1].z) i++;
-  const p0 = rows[Math.max(0, i - 1)], p1 = rows[i],
-        p2 = rows[Math.min(rows.length - 1, i + 1)],
-        p3 = rows[Math.min(rows.length - 1, i + 2)];
-  const t = p2.z === p1.z ? 0 : (z - p1.z) / (p2.z - p1.z);
-  const a = p0[col], b = p1[col], c = p2[col], d = p3[col];
-  return 0.5 * ((2 * b) + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t * t +
-                (-a + 3 * b - 3 * c + d) * t * t * t);
 }
 
 // Mirror an INDEXED geometry across the YZ plane with corrected winding.
@@ -160,6 +140,7 @@ function mirrorGeom(geom) {
   }
   idx.needsUpdate = true;
   g.computeVertexNormals();
+  g.computeBoundingBox();g.computeBoundingSphere();
   return g;
 }
 
@@ -181,7 +162,7 @@ function surfGeometry(stations, M, prof, capRoot = true, capTip = true) {
   const rings = [];
   for (const st of stations) {
     const c = st.zTE - st.zLE;
-    const tc = ((st.cut ?? st.zTE) - st.zLE) / c;
+    const tc = c > 1e-8 ? ((st.cut ?? st.zTE) - st.zLE) / c : 0;
     const ring = [];
     for (let i = 0; i <= M; i++) {              // bottom, LE -> cut TE
       const t = tc * (i / M);
@@ -199,26 +180,10 @@ function surfGeometry(stations, M, prof, capRoot = true, capTip = true) {
 }
 
 // airfoil: rounded LE, max depth ~37% chord, sharp TE (normalized to 1)
-const foil = (t) => 2.439 * Math.sqrt(Math.max(0, t)) * Math.pow(1 - t, 0.85);
 // control surface: blunt LE (hinge face), linear wedge to a sharp TE
-const wedge = (t) => Math.min(1, t / 0.1) * (1 - t) / 0.9;
+const wedge = (t) => 1 - t;
 
-// ------------------------------------------------------------- vertex color
-// All airframe tints are LINEAR-space multipliers over mats.skin's base coat
-// (vertex colors multiply material.color). 1.0 = base Have-Glass; RAM zones
-// (radome, leading edges, dorsal spine) sit subtly darker; panel lines are
-// 4-8% perceptual dips at the natural loft stations.
-const RAM_LE   = [0.68, 0.69, 0.73];  // leading-edge RAM tape (keeps blue lean)
-const RAM_NOSE = [0.78, 0.76, 0.72];  // radome coating (drier, warmer gray)
-const SPINE    = [0.80, 0.81, 0.85];  // dorsal RAM panels behind the canopy
-const clamp01 = (x) => Math.min(1, Math.max(0, x));
-const smoothT = (e0, e1, x) => {
-  const t = clamp01((x - e0) / (e1 - e0));
-  return t * t * (3 - 2 * t);
-};
-const mix3 = (a, b, t) =>
-  [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
-
+// Vertex tints are only used by small untextured hardware.
 function whiteColors(geom) {
   const n = geom.getAttribute("position").count;
   const col = new Float32Array(n * 3).fill(1);
@@ -233,282 +198,57 @@ function tintColors(geom, rgb) {                // constant per-part tint
   geom.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
 }
 
-// panel-line dip: 1.0 -> (1-depth) triangular falloff around each band.
-// hw must exceed the local loft ring spacing or a band can miss every row.
-function panelDip(v, bands, depth, hw) {
-  let k = 0;
-  for (const b of bands) {
-    const d = Math.abs(v - b);
-    if (d < hw) k = Math.max(k, 1 - d / hw);
-  }
-  return 1 - depth * k;
-}
-
-// fuselage/boom/sting bake: radome RAM cap, chine RAM band on the forebody,
-// dorsal spine panels, belly counter-shade, panel-line dips at the natural
-// stations (radome joint, canopy sill, intake join, wing root, booms), and
-// the aft heat scorch around the engine bay.
-const PANEL_BANDS = [-7.55, -6.55, -2.95, -1.70, 0.9, 2.35, 3.5, 5.0, 6.05];
-function bakeFuselageColors(geom) {
-  const p = geom.getAttribute("position"), nr = geom.getAttribute("normal");
-  const col = new Float32Array(p.count * 3);
-  for (let i = 0; i < p.count; i++) {
-    const x = p.getX(i), y = p.getY(i), z = p.getZ(i), ny = nr.getY(i);
-    let c = [1, 1, 1];
-    // radome: subtly darker/drier coating with a crisp joint at z~-7.5
-    c = mix3(c, RAM_NOSE, 1 - smoothT(-7.65, -7.35, z));
-    // chine RAM band on the forebody (crease sits at (w(z), yc(z)))
-    if (z > -9.2 && z < -2.4) {
-      const d = Math.hypot(Math.abs(x) - crom(FUS, "w", z), y - crom(FUS, "yc", z));
-      c = mix3(c, RAM_LE, 1 - smoothT(0.05, 0.22, d));
-    }
-    // dorsal spine panels behind the canopy
-    const sp = smoothT(-3.15, -2.55, z) * (1 - smoothT(2.2, 3.4, z)) *
-               smoothT(0.5, 0.85, ny);
-    c = mix3(c, SPINE, sp);
-    // belly counter-shade: undersides a touch lighter (kills the flat read)
-    let v = 1 + 0.05 * smoothT(0.25, 0.75, -ny);
-    v *= panelDip(z, PANEL_BANDS, 0.11, 0.09);
-    if (z > 5.6) {                              // engine-bay heat scorch
-      const f = Math.min(1, (z - 5.6) / 2.7);
-      v *= 1 - f * (y < -0.1 ? 0.42 : 0.30);
-    }
-    col[i * 3] = c[0] * v; col[i * 3 + 1] = c[1] * v; col[i * 3 + 2] = c[2] * v;
-  }
-  geom.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
-}
-
-// wing bake (wing-local: +x span, +z aft): LE RAM tape, root-join row where
-// the wing emerges from the loft (model |x|=2.26 -> wing-local ~0.66), one
-// mid-span panel row. Mirrors survive mirrorGeom (colors ride the vertices).
-function bakeWingColors(geom) {
-  const p = geom.getAttribute("position");
-  const col = new Float32Array(p.count * 3);
-  for (let i = 0; i < p.count; i++) {
-    const x = clamp01(p.getX(i) / W_SPAN) * W_SPAN, z = p.getZ(i);
-    const c = mix3([1, 1, 1], RAM_LE, 1 - smoothT(0.20, 0.90, z - wingLE(x)));
-    const v = panelDip(x, [0.70, 2.60], 0.10, 0.30);
-    col[i * 3] = c[0] * v; col[i * 3 + 1] = c[1] * v; col[i * 3 + 2] = c[2] * v;
-  }
-  geom.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
-}
-
-// stab bake (stab-local): LE RAM tape + root shadow row at the boom
-function bakeStabColors(geom) {
-  const p = geom.getAttribute("position");
-  const col = new Float32Array(p.count * 3);
-  for (let i = 0; i < p.count; i++) {
-    const x = Math.max(0, p.getX(i)), z = p.getZ(i);
-    const c = mix3([1, 1, 1], RAM_LE, 1 - smoothT(0.10, 0.60, z - stabLE(x)));
-    const v = panelDip(x, [0.0], 0.10, 0.35);
-    col[i * 3] = c[0] * v; col[i * 3 + 1] = c[1] * v; col[i * 3 + 2] = c[2] * v;
-  }
-  geom.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
-}
-
-// fin bake (fin-local: x up-along-fin, z chord): LE RAM tape, slightly
-// darker tip fairing, root shadow row at the boom shoulder
-function bakeFinColors(geom) {
-  const p = geom.getAttribute("position");
-  const col = new Float32Array(p.count * 3);
-  for (let i = 0; i < p.count; i++) {
-    const x = Math.max(0, p.getX(i)), z = p.getZ(i);
-    let c = mix3([1, 1, 1], RAM_LE, 1 - smoothT(0.10, 0.60, z - finLE(x)));
-    c = mix3(c, [0.86, 0.87, 0.90], smoothT(FIN_SPAN - 0.45, FIN_SPAN - 0.1, x));
-    const v = panelDip(x, [0.0], 0.10, 0.35);
-    col[i * 3] = c[0] * v; col[i * 3 + 1] = c[1] * v; col[i * 3 + 2] = c[2] * v;
-  }
-  geom.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
-}
-
-// F119 petal heat tint over mats.dark: gunmetal -> straw -> blue -> scorched
-// dark toward the exit (nozzle-local z 0 -> 1.36).
-const HEAT = [
-  [0.00, [0.72, 0.73, 0.76]],                   // shrouded fwd shell: gunmetal
-  [0.42, [0.90, 0.90, 0.92]],
-  [0.62, [1.90, 1.35, 0.55]],                   // straw (tints the metal glint)
-  [0.85, [0.55, 0.75, 1.55]],                   // blue
-  [1.00, [0.30, 0.28, 0.33]],                   // scorched exit lip
-];
-function bakeNozzleHeat(geom) {
-  const p = geom.getAttribute("position");
-  const col = new Float32Array(p.count * 3);
-  for (let i = 0; i < p.count; i++) {
-    const t = clamp01(p.getZ(i) / 1.36);
-    let j = 0;
-    while (j < HEAT.length - 2 && t > HEAT[j + 1][0]) j++;
-    const f = clamp01((t - HEAT[j][0]) / (HEAT[j + 1][0] - HEAT[j][0]));
-    const c = mix3(HEAT[j][1], HEAT[j + 1][1], f);
-    col[i * 3] = c[0]; col[i * 3 + 1] = c[1]; col[i * 3 + 2] = c[2];
-  }
-  geom.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
-}
-
-// ------------------------------------------------------------- fuselage
-// 24 stations nose->tail. Drooped radome tip; sharp chine (crease) rising
-// from y=.02 at the tip to the wing-root shoulder ~.47; canopy-sill cheeks
-// z -6..-3; dorsal spine fairing right behind the canopy; broad flat
-// mid-body (w 2.26); boat-tail into the nozzle shelf.
-const FUS = [
-  { z: -9.46, w: 0.02, yt: 0.05, yb: -0.01, yc: 0.02, nu: 1.9, nl: 1.9 },
-  { z: -8.90, w: 0.22, yt: 0.16, yb: -0.12, yc: 0.03, nu: 1.9, nl: 1.9 },
-  { z: -8.20, w: 0.44, yt: 0.28, yb: -0.24, yc: 0.04, nu: 1.85, nl: 2.0 },
-  { z: -7.40, w: 0.66, yt: 0.39, yb: -0.37, yc: 0.06, nu: 1.9, nl: 2.1 },
-  { z: -6.60, w: 0.86, yt: 0.47, yb: -0.48, yc: 0.08, nu: 2.0, nl: 2.2 },
-  { z: -5.90, w: 1.02, yt: 0.53, yb: -0.58, yc: 0.10, nu: 2.1, nl: 2.2 },
-  { z: -5.20, w: 1.14, yt: 0.56, yb: -0.66, yc: 0.13, nu: 2.2, nl: 2.3 },
-  { z: -4.60, w: 1.24, yt: 0.58, yb: -0.73, yc: 0.16, nu: 2.3, nl: 2.4 },
-  { z: -4.00, w: 1.33, yt: 0.60, yb: -0.80, yc: 0.19, nu: 2.4, nl: 2.4 },
-  { z: -3.55, w: 1.42, yt: 0.62, yb: -0.86, yc: 0.22, nu: 2.5, nl: 2.5 },
-  { z: -3.10, w: 1.66, yt: 0.68, yb: -0.90, yc: 0.27, nu: 2.7, nl: 2.6 },
-  { z: -2.60, w: 1.94, yt: 0.78, yb: -0.94, yc: 0.32, nu: 2.9, nl: 2.7 },
-  { z: -2.10, w: 2.14, yt: 0.88, yb: -0.96, yc: 0.37, nu: 3.0, nl: 2.7 },
-  { z: -1.60, w: 2.23, yt: 0.93, yb: -0.97, yc: 0.41, nu: 3.0, nl: 2.7 },
-  { z: -0.80, w: 2.26, yt: 0.95, yb: -0.98, yc: 0.45, nu: 3.0, nl: 2.7 },
-  { z:  0.00, w: 2.26, yt: 0.95, yb: -0.98, yc: 0.47, nu: 3.0, nl: 2.7 },
-  { z:  1.20, w: 2.24, yt: 0.92, yb: -0.97, yc: 0.47, nu: 3.0, nl: 2.7 },
-  { z:  2.40, w: 2.20, yt: 0.86, yb: -0.95, yc: 0.46, nu: 2.9, nl: 2.6 },
-  { z:  3.60, w: 2.14, yt: 0.78, yb: -0.91, yc: 0.43, nu: 2.9, nl: 2.6 },
-  { z:  4.80, w: 2.04, yt: 0.68, yb: -0.83, yc: 0.38, nu: 2.8, nl: 2.5 },
-  { z:  6.00, w: 1.88, yt: 0.57, yb: -0.68, yc: 0.30, nu: 2.6, nl: 2.4 },
-  { z:  7.00, w: 1.70, yt: 0.48, yb: -0.50, yc: 0.22, nu: 2.4, nl: 2.3 },
-  { z:  7.80, w: 1.55, yt: 0.42, yb: -0.36, yc: 0.14, nu: 2.3, nl: 2.2 },
-  { z:  8.60, w: 1.42, yt: 0.38, yb: -0.26, yc: 0.08, nu: 2.2, nl: 2.1 },
-  { z:  9.00, w: 1.33, yt: 0.33, yb: -0.20, yc: 0.05, nu: 2.2, nl: 2.1 },
-];
-
-function fuselageGeometry() {
-  const KU = 16, KL = 14, N = 210;
-  const z0 = FUS[0].z, z1 = FUS[FUS.length - 1].z;
-  const rings = [];
-  for (let i = 0; i <= N; i++) {
-    const u = i / N;                       // densify toward the nose
-    const z = z0 + (z1 - z0) * (u * u * 0.35 + u * 0.65);
-    const s = {
-      w: crom(FUS, "w", z), yt: crom(FUS, "yt", z), yb: crom(FUS, "yb", z),
-      yc: crom(FUS, "yc", z), nu: crom(FUS, "nu", z), nl: crom(FUS, "nl", z),
-    };
-    s.nu = Math.max(1.5, s.nu); s.nl = Math.max(1.5, s.nl);
-    s.w = Math.max(0.02, s.w);
-    rings.push(fullRing(halfSection(s, KU, KL)).map((p) => [p[0], p[1], z]));
-  }
-  return loft(rings, true, true);
-}
-
 // -------------------------------------------------------- tail booms
 // Side pods flanking the nozzles: the stab pivots bury into them and the
 // fins ride their inboard shoulder — gives the F-22 aft shelf silhouette.
 const BOOM = [
-  { z: 5.30, w: 0.30, yt: 0.28, yb: -0.18, yc: 0.06 },
-  { z: 6.60, w: 0.40, yt: 0.32, yb: -0.24, yc: 0.05 },
-  { z: 7.80, w: 0.38, yt: 0.26, yb: -0.19, yc: 0.04 },
-  { z: 8.80, w: 0.28, yt: 0.16, yb: -0.11, yc: 0.02 },
-  { z: 9.40, w: 0.06, yt: 0.04, yb: -0.02, yc: 0.01 },
+  { z: 4.90, cx: 1.78, w: .39, yt: .28, yb: -.32, yc: .04 },
+  { z: 5.885, cx: 1.66, w: .43, yt: .20, yb: -.26, yc: .01 },
+  { z: 6.75, cx: 1.40, w: .31, yt: .11, yb: -.20, yc: -.01 },
+  { z: 7.948, cx: 1.16, w: .03, yt: .01, yb: -.03, yc: -.01 },
 ];
-function boomGeometry() {
-  const rings = BOOM.map((s) =>
-    fullRing(halfSection({ ...s, nu: 2.5, nl: 2.5 }, 7, 6))
-      .map((p) => [p[0] + 1.72, p[1] + 0.06, s.z]));
-  return loft(rings, false, true);
-}
-
-// -------------------------------------------------------- aft sting
-// Centerline interfairing between/behind the nozzles ("beaver tail").
-const STING = [
-  { z: 6.80, w: 0.62, yt: 0.38, yb: -0.34 },
-  { z: 8.00, w: 0.50, yt: 0.28, yb: -0.24 },
-  { z: 9.00, w: 0.34, yt: 0.16, yb: -0.12 },
-  { z: 9.62, w: 0.06, yt: 0.04, yb: -0.02 },
-];
-function stingGeometry() {
-  const rings = STING.map((s) =>
-    fullRing(halfSection({ w: s.w, yt: s.yt, yb: s.yb, yc: (s.yt + s.yb) * 0.5,
-                           nu: 2.4, nl: 2.4 }, 6, 6))
-      .map((p) => [p[0], p[1], s.z]));
-  return loft(rings, false, true);
+function boomGeometry(detail) {
+  return loft(BOOM.map(s => fullRing(halfSection({ ...s, nu: 2.7, nl: 2.5 }, detail.boomUpper, detail.boomLower))
+    .map(p => [p[0] + s.cx, p[1], s.z])), false, true);
 }
 
 // ------------------------------------------------------------- canopy
-// Smooth bubble, well forward (z -6.0..-2.95, peak y 1.24 at ~27% length).
-// The rear rim fades into the rising dorsal spine of the fuselage loft.
-const CAN = [
-  { z: -6.00, w: 0.06, yt: 0.565, yb: 0.50 },
-  { z: -5.60, w: 0.36, yt: 0.80, yb: 0.46 },
-  { z: -5.10, w: 0.54, yt: 1.07, yb: 0.42 },
-  { z: -4.60, w: 0.62, yt: 1.26, yb: 0.40 },
-  { z: -4.15, w: 0.62, yt: 1.28, yb: 0.40 },
-  { z: -3.70, w: 0.56, yt: 1.16, yb: 0.42 },
-  { z: -3.30, w: 0.44, yt: 0.99, yb: 0.46 },
-  { z: -2.95, w: 0.10, yt: 0.72, yb: 0.55 },
-];
-function canopyGeometry() {
-  const rings = [];
-  const z0 = CAN[0].z, z1 = CAN[CAN.length - 1].z, N = 44;
-  for (let i = 0; i <= N; i++) {
-    const z = z0 + (z1 - z0) * (i / N);
-    const s = {
-      w: Math.max(0.03, crom(CAN, "w", z)), yt: crom(CAN, "yt", z),
-      yb: crom(CAN, "yb", z), nu: 2.05, nl: 2.6,
-    };
-    s.yc = s.yb + (s.yt - s.yb) * 0.28;
-    rings.push(fullRing(halfSection(s, 13, 4, false)).map((p) => [p[0], p[1], z]));
-  }
-  return loft(rings, true, true);
+// Continuous open glazing follows the measured canopy stations; a separate
+// seal and rim meet the explicit cockpit opening.
+function canopyGeometry(detail) {
+  return surfacePatch((u, v) => {
+    const z = F22_CANOPY[0].z + (F22_CANOPY.at(-1).z - F22_CANOPY[0].z) * v;
+    const c = canopySection(z), angle = (u - .5) * Math.PI;
+    return [c.w * Math.sin(angle), c.sill + (c.top - c.sill) * Math.pow(Math.max(0, Math.cos(angle)), .9), z];
+  }, { uSegments: detail.canopyU, vSegments: detail.canopyV, reverse: true, name: 'canopyGlazing' });
 }
-function canopyFrameGeometry() {                // sill band under the glass
+function canopyFrameGeometry(detail) {
   const rings = [];
-  const z0 = CAN[0].z + 0.02, z1 = CAN[CAN.length - 1].z - 0.02, N = 30;
-  for (let i = 0; i <= N; i++) {
-    const z = z0 + (z1 - z0) * (i / N);
-    const yb = crom(CAN, "yb", z);
-    const s = {
-      w: Math.max(0.04, crom(CAN, "w", z) + 0.035),
-      yt: yb + 0.10, yb: yb - 0.07, nu: 2.3, nl: 2.3,
-    };
-    s.yc = (s.yt + s.yb) * 0.5;
-    rings.push(fullRing(halfSection(s, 6, 3, false)).map((p) => [p[0], p[1], z]));
+  for (let i = 0; i <= detail.frame; i++) {
+    const z = F22_CANOPY[0].z + (F22_CANOPY.at(-1).z - F22_CANOPY[0].z) * i / detail.frame;
+    const c = canopySection(z);
+    const section = [[c.w * 1.02, c.sill + .012], [c.w * 1.07, c.sill - .045],
+      [c.w * .98, c.sill - .043], [c.w * .98, c.sill + .004]];
+    rings.push(section.map(([x,y]) => [x,y,z]));
   }
-  return loft(rings, true, true);
-}
-
-// Bake a fresnel-ish gold gradient into vertex colors: grazing surfaces
-// (|normal.y| small) go hot gold, the crown stays deep amber.
-function tintCanopy(geom) {
-  const p = geom.getAttribute("position"), n = geom.getAttribute("normal");
-  const col = new Float32Array(p.count * 3);
-  const deep = [0.72, 0.5, 0.18], hot = [1.0, 0.88, 0.48];
-  for (let i = 0; i < p.count; i++) {
-    const f = Math.pow(1 - Math.min(1, Math.abs(n.getY(i))), 1.5);
-    const t = Math.min(1, 0.32 + 0.68 * f);
-    col[i * 3]     = deep[0] + (hot[0] - deep[0]) * t;
-    col[i * 3 + 1] = deep[1] + (hot[1] - deep[1]) * t;
-    col[i * 3 + 2] = deep[2] + (hot[2] - deep[2]) * t;
-  }
-  geom.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+  const right = loft(rings, true, true), left = mirrorGeom(right);
+  const positions = new Float32Array(right.attributes.position.array.length + left.attributes.position.array.length);
+  const indices = [...right.index.array, ...Array.from(left.index.array, i => i + right.attributes.position.count)];
+  positions.set(right.attributes.position.array); positions.set(left.attributes.position.array, right.attributes.position.array.length);
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  g.setIndex(indices); g.computeVertexNormals(); return g;
 }
 
 // ------------------------------------------------------------- wing (right)
 // Clipped delta: LE sweep 42 deg, TE forward sweep 17 deg, raked tip.
-// Built in WING-LOCAL coords (root x=0 buried at model x=1.60, tip x=5.18
-// => model 6.78 = 13.56 m span) under a group at (1.60, 0.50, 0).
-const W_ROOT_X = 1.60, W_SPAN = 5.18;
-const TAN42 = Math.tan(42 * DEG), TAN17 = Math.tan(17 * DEG);
-const W_ROOT_LE = -1.25;
-const W_ROOT_TE = W_ROOT_LE + W_SPAN * TAN42 + 1.60 + W_SPAN * TAN17; // 6.597
-const wingLE = (x) => W_ROOT_LE + x * TAN42;
-const wingTE = (x) => W_ROOT_TE - x * TAN17;
-const FLAP_D = 0.90, FLAP_X1 = 3.90;
-const W_TIP_RAKE_X = 4.94;                      // rake from here to the tip
-const wingTEeff = (x) => {
-  if (x <= W_TIP_RAKE_X) return wingTE(x);
-  const t = (x - W_TIP_RAKE_X) / (W_SPAN - W_TIP_RAKE_X);
-  return wingTE(W_TIP_RAKE_X) * (1 - t) + (wingLE(W_SPAN) + 0.85) * t;
-};
-const wingThick = (x) => 0.16 - 0.125 * Math.pow(x / W_SPAN, 0.9);
+// Local +X runs outboard; the shared planform also drives texture authoring.
+const W_ROOT_X = WING.rootX, W_SPAN = WING.span;
+const FLAP_D = WING.flapDepth, FLAP_X1 = WING.flapSpan;
+const W_TIP_RAKE_X = WING.clippedTipStart;
 
-function wingGeometry() {
+function wingGeometry(detail) {
   const xs = [];
-  for (let i = 0; i <= 20; i++) xs.push((i / 20) * W_SPAN);
+  for (let i = 0; i <= detail.wing; i++) xs.push((i / detail.wing) * W_SPAN);
   xs.push(FLAP_X1 - 0.02, FLAP_X1 + 0.02, W_TIP_RAKE_X);
   xs.sort((a, b) => a - b);
   const stations = xs.map((x) => ({
@@ -516,7 +256,7 @@ function wingGeometry() {
     cut: x <= FLAP_X1 ? wingTE(x) - FLAP_D : undefined,
     th: wingThick(x),
   }));
-  return surfGeometry(stations, 18, foil);
+  return surfGeometry(stations, detail.chord, foil);
 }
 
 // flaperon: hinge line = wing notch front edge (17 deg sweep). Geometry in
@@ -524,241 +264,146 @@ function wingGeometry() {
 // rotation.x > 0 = TE down on the right wing (mirrored group flips it).
 const FLAP_HZ0 = wingTE(0) - FLAP_D;            // hinge z at root, wing-local
 const FLAP_ANG = Math.atan2((wingTE(FLAP_X1) - FLAP_D) - FLAP_HZ0, FLAP_X1);
-function flapGeometry() {
+function flapGeometry(detail) {
   const L = Math.hypot(FLAP_X1, (wingTE(FLAP_X1) - FLAP_D) - FLAP_HZ0);
   const [teR, teT] = rotXZ([
     [0, FLAP_D], [FLAP_X1, wingTE(FLAP_X1) - FLAP_HZ0],
   ].map((p) => [p[0], p[1]]), FLAP_ANG);
   const zTE = (x) => teR[1] + (teT[1] - teR[1]) * (x - teR[0]) / (teT[0] - teR[0]);
   const stations = [0, L * 0.5, L].map((x) => ({
-    x, zLE: 0, zTE: zTE(x), th: 0.05 - 0.02 * (x / L),
+    x, zLE: 0, zTE: zTE(x), th: wingThick(x * FLAP_X1 / L) * foil(1 - FLAP_D /
+      (wingTE(x * FLAP_X1 / L) - wingLE(x * FLAP_X1 / L))),
   }));
-  return surfGeometry(stations, 10, wedge);
+  return surfGeometry(stations, detail.control, wedge);
 }
 
 // -------------------------------------------------------- stabilator (right)
-// All-moving, on the tail boom. Pivot = lateral X axis at (1.72, 0.08, 7.40).
+// All-moving pentagonal tailplane; lateral X hinge at TAIL.pivot.
 // rotation.x sense identical to v2 (geometry z-aft in pivot-local coords).
-const ST_PIVOT = new THREE.Vector3(1.72, 0.08, 7.40);
-const stabLE = (x) => -1.80 + 0.92 * x;         // ~42.6 deg LE sweep
-function stabGeometry() {
-  const span = 2.95;
-  const zTE = (x) => 1.95 - 0.102 * x;
-  const stations = [];
-  for (let i = 0; i <= 9; i++) {
-    const x = (i / 9) * span;
-    stations.push({ x, zLE: stabLE(x), zTE: zTE(x), th: 0.085 - 0.055 * (x / span) });
-  }
-  return surfGeometry(stations, 14, foil);
+const ST_PIVOT = new THREE.Vector3(...TAIL.pivot), ST_SPAN = TAIL.span;
+function stabGeometry(detail) {
+  const xs = [...Array.from({length: detail.tail + 1}, (_,i) => ST_SPAN * i / detail.tail), 1.635, 1.740].sort((a,b) => a-b);
+  return surfGeometry(xs.map(x => ({ x, zLE: stabLE(x), zTE: stabTE(x), th: .074 - .053 * x / ST_SPAN })), detail.chord, foil);
 }
 
 // -------------------------------------------------------- vertical tail
 // Canted 28 deg outboard: built flat (span along +X), rolled +62 deg (R).
 // Fin-local: x = up-along-fin, z = chord (aft +). Rudder on the TE.
-const FIN_SPAN = 3.20;
-const FIN = { rootLE: 2.55, rootTE: 7.15, tipLE: 5.00, tipTE: 6.35,
-              hingeRoot: 5.90, hingeTip: 5.70 };
-const finLE = (x) => FIN.rootLE + x * (FIN.tipLE - FIN.rootLE) / FIN_SPAN;
-const finTE = (x) => FIN.rootTE + x * (FIN.tipTE - FIN.rootTE) / FIN_SPAN;
-const finHinge = (x) => FIN.hingeRoot + x * (FIN.hingeTip - FIN.hingeRoot) / FIN_SPAN;
-const finThick = (x) => 0.11 - 0.065 * (x / FIN_SPAN);
+const FIN_SPAN = FIN.span;
 
-function finGeometry() {                        // fixed fin, blunt at hinge
+function finGeometry(detail) {                        // fixed fin, blunt at hinge
   const stations = [];
-  for (let i = 0; i <= 9; i++) {
-    const x = (i / 9) * FIN_SPAN;
+  for (let i = 0; i <= detail.fin; i++) {
+    const x = (i / detail.fin) * FIN_SPAN;
     stations.push({ x, zLE: finLE(x), zTE: finTE(x), cut: finHinge(x),
                     th: finThick(x) });
   }
-  return surfGeometry(stations, 14, foil);
+  return surfGeometry(stations, detail.finChord, foil);
 }
 const RUD_ANG = Math.atan2(FIN.hingeTip - FIN.hingeRoot, FIN_SPAN);
-function rudderGeometry() {
-  const L = Math.hypot(FIN_SPAN, FIN.hingeTip - FIN.hingeRoot);
-  const [teR, teT] = rotXZ([
-    [0, FIN.rootTE - FIN.hingeRoot],
-    [FIN_SPAN, FIN.tipTE - FIN.hingeRoot],
-  ], RUD_ANG);
-  const zTE = (x) => teR[1] + (teT[1] - teR[1]) * (x - teR[0]) / (teT[0] - teR[0]);
-  const stations = [0, L * 0.5, L].map((x) => ({
-    x, zLE: 0, zTE: zTE(x), th: 0.05 - 0.028 * (x / L),
-  }));
-  return surfGeometry(stations, 10, wedge);
-}
-
-// -------------------------------------------------------- nozzles
-// Twin 2D TVC nozzles: near-rectangular convergent/divergent shell (the
-// chine crease doubles as the paddle/side-plate seam), external paddle
-// plates, dark recessed interior. Local +z aft, exit at z=1.36 (flightfx).
-const NOZ = [
-  { z: 0.00, w: 0.580, yt: 0.40, n: 2.4 },
-  { z: 0.30, w: 0.565, yt: 0.38, n: 3.0 },
-  { z: 0.62, w: 0.545, yt: 0.34, n: 3.8 },
-  { z: 0.95, w: 0.525, yt: 0.28, n: 4.8 },      // throat
-  { z: 1.36, w: 0.545, yt: 0.37, n: 6.0 },      // divergent exit
-];
-function nozzleGeometry() {
-  const rings = [];
-  const N = 12;
-  for (let i = 0; i <= N; i++) {
-    const z = (i / N) * 1.36;
-    const w = crom(NOZ, "w", z), yt = crom(NOZ, "yt", z),
-          n = Math.max(2, crom(NOZ, "n", z));
-    rings.push(fullRing(halfSection({ w, yt, yb: -yt, yc: 0, nu: n, nl: n }, 9, 9))
-      .map((p) => [p[0], p[1], z]));
-  }
-  return loft(rings, false, false);
-}
-function nozzleInteriorGeometry() {             // dark cavity + deep cap
-  const ring = (k, z) =>
-    fullRing(halfSection({ w: 0.545 * k, yt: 0.37 * k, yb: -0.37 * k, yc: 0,
-                           nu: 5.5, nl: 5.5 }, 8, 8))
-      .map((p) => [p[0], p[1], z]);
-  return loft([ring(0.93, 1.355), ring(0.6, 1.02)], false, true);
-}
-function paddlePlate(top) {                     // external divergent flap
-  const g = new THREE.BoxGeometry(0.82, 0.045, 0.5);
-  const m = new THREE.Matrix4();
-  const tilt = Math.atan2(0.37 - 0.28, 0.41) * (top ? -1 : 1);
-  m.makeRotationX(tilt);
-  g.applyMatrix4(m);
-  g.translate(0, top ? 0.345 : -0.345, 1.14);
-  return g;
-}
-
-// -------------------------------------------------------- intake (right)
-// Caret inlet under the chine flare: raked parallelogram lip (inboard-top
-// corner leads), crisp lip band, deep dark duct, diverter splitter plate.
-function quadRing(corners, n) {                 // corners [OT,OB,IB,IT] xyz
-  const pts = [];
-  for (let s = 0; s < 4; s++) {
-    const a = corners[s], b = corners[(s + 1) % 4];
-    for (let i = 0; i < n; i++) {
-      const t = i / n;
-      pts.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t,
-                a[2] + (b[2] - a[2]) * t]);
-    }
-  }
-  return pts;
-}
-function shrinkQuad(corners, k, dz) {           // toward centroid, pushed aft
-  let cx = 0, cy = 0, cz = 0;
-  for (const c of corners) { cx += c[0]; cy += c[1]; cz += c[2]; }
-  cx /= 4; cy /= 4; cz /= 4;
-  return corners.map((c) => [cx + (c[0] - cx) * k, cy + (c[1] - cy) * k,
-                             cz + (c[2] - cz) * k + dz]);
-}
-const INT_F = [                                 // front lip [OT,OB,IB,IT]
-  // parallelogram sheared inboard toward the bottom (caret lean)
-  [2.24, 0.06, -2.70], [1.96, -0.92, -2.42], [1.26, -0.84, -3.10], [1.32, 0.22, -3.72],
-];
-const INT_B = [                                 // back ring (sinks into loft)
-  [2.26, 0.12, -1.70], [2.04, -0.94, -1.70], [1.44, -0.86, -1.70], [1.86, 0.30, -1.70],
-];
-function intakeGeometry() {
-  const N = 6;
-  const front = quadRing(INT_F, N);
-  const back = quadRing(INT_B, N);
-  const rim = quadRing(shrinkQuad(INT_F, 0.965, 0.015), N);
-  const d1 = quadRing(shrinkQuad(INT_F, 0.90, 0.12), N);
-  const d2 = quadRing(shrinkQuad(INT_F, 0.74, 0.55), N);
-  const d3 = quadRing(shrinkQuad(INT_F, 0.52, 1.05), N);
-  return {
-    body: loft([front, back], false, true),     // outer wedge, sinks into loft
-    lip: loft([rim, front], false, false),      // hairline bright lip edge
-    duct: loft([d3, d2, d1, rim], true, false), // deep dark duct + throat cap
-  };
-}
-
-// -------------------------------------------------------- placeholder bits
-function gearLeg(mats, strutLen, wheelR, wheelW) {
-  const g = new THREE.Group();
-  const strut = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.06, 0.05, strutLen, 12), mats.gear);
-  strut.position.y = -strutLen / 2;
-  const wheel = new THREE.Mesh(
-    new THREE.CylinderGeometry(wheelR, wheelR, wheelW, 18), mats.tire);
-  wheel.rotation.z = Math.PI / 2;
-  wheel.position.y = -strutLen;
-  g.add(strut, wheel);
-  return g;
-}
-function doorSlab(mats, w, h, d) {
-  const g = new THREE.BoxGeometry(w, h, d);
-  // RAM-family tint: the side-bay door corner clips out of the lower hull
-  // bevel (pre-existing), and a base-coat slab there read as a white beacon
-  // against the dark belly — toned down it reads as an access panel.
-  tintColors(g, [0.55, 0.56, 0.60]);
-  return new THREE.Mesh(g, mats.skin);
+function rudderGeometry(detail) {
+  // Author the complete polygon in fin coordinates before moving it into
+  // the hinge frame. Starting hinge-aligned stations at X=0 clipped away
+  // the negative-X root trailing corner and lifted the rudder off its base.
+  const stations = Array.from({ length: detail.fin + 1 }, (_, i) => {
+    const x = FIN_SPAN * i / detail.fin;
+    return { x, zLE: finHinge(x), zTE: finTE(x),
+      th: finThick(x) * foil((finHinge(x) - finLE(x)) / (finTE(x) - finLE(x))) };
+  });
+  return surfGeometry(stations, detail.control, wedge)
+    .translate(0, 0, -FIN.hingeRoot).rotateY(RUD_ANG);
 }
 
 // ================================================================ buildF22
-export function buildF22() {
-  const mats = makeMaterials();
+function buildStructure({ level, mats, bodyFinish, liftingFinish }) {
+  const detail = F22_GEOMETRY_QUALITY[level];
   const group = new THREE.Group();
   group.name = "f22";
   const parts = {};
   const add = (mesh, name) => { mesh.name = name; group.add(mesh); return mesh; };
-  const skin = (geom, name, parent) => {
-    if (!geom.getAttribute("color")) whiteColors(geom);
-    const m = new THREE.Mesh(geom, mats.skin);
+  const skin = (geom, name, parent, coating) => {
+    if (!coating && !geom.getAttribute("color")) whiteColors(geom);
+    if (coating && !geom.getAttribute("uv")) coatLiftingSurface(geom, coating);
+    const m = new THREE.Mesh(geom, coating ? liftingFinish.material : mats.skin);
     m.name = name;
     (parent || group).add(m);
     return m;
   };
 
-  // ---- fuselage + booms + aft sting
-  const fusGeom = fuselageGeometry();
-  bakeFuselageColors(fusGeom);
-  skin(fusGeom, "fuselage");
-  const boomGeom = boomGeometry();
-  bakeFuselageColors(boomGeom);
-  skin(boomGeom, "boomR");
-  skin(mirrorGeom(boomGeom), "boomL");
-  const stingGeom = stingGeometry();
-  bakeFuselageColors(stingGeom);
-  skin(stingGeom, "sting");
+  // Reference-derived airframe: open intakes share their boundaries with the
+  // upper engine roofs, outer walls and lower ramps. No closed hull crosses
+  // the mouths. Independent charts retain detail on vertical surfaces.
+  const airframe = buildAirframeGeometry({quality:level});
+  const airframeGroup = new THREE.Group(); airframeGroup.name = 'airframe';
+  for (const surface of airframe) {
+    const material = surface.material === 'duct' ? mats.inlet : bodyFinish.material;
+    const mesh = new THREE.Mesh(surface.geometry, material);
+    mesh.name = surface.name; airframeGroup.add(mesh);
+  }
+  const boomGeom = boomGeometry(detail);
+  const finRoots=buildFinRootFairings({boomGeometry:boomGeom,coating:bodyFinish.material,quality:level});
+  for(const child of [...finRoots.children])airframeGroup.add(child);
+  const booms = [boomGeom, mirrorGeom(boomGeom)];
+  booms.forEach((geometry, index) => {
+    const mesh = new THREE.Mesh(coatBodySurface(geometry), bodyFinish.material);
+    mesh.name = index === 0 ? 'boomR' : 'boomL'; airframeGroup.add(mesh);
+    geometry.dispose();
+  });
+  group.add(mergeDetails(airframeGroup));
 
-  // ---- canopy: pivot at REAR sill (hinge axis = X; rotation.x < 0 opens)
+  // ---- canopy: aft sill pivot; positive local X raises the forward glazing.
   const canPivot = new THREE.Group();
-  canPivot.position.set(0, 0.55, -2.95);
-  const canGeom = canopyGeometry();
-  tintCanopy(canGeom);
-  canGeom.translate(0, -0.55, 2.95);
+  canPivot.position.set(0, 1.193, -3.81);
+  const canGeom = canopyGeometry(detail);
+  canGeom.translate(0, -1.193, 3.81);
   const glass = new THREE.Mesh(canGeom, mats.canopy);
   glass.name = "canopyGlass";
   canPivot.add(glass);
-  const frameGeom = canopyFrameGeometry();
-  frameGeom.translate(0, -0.55, 2.95);
+  const frameGeom = canopyFrameGeometry(detail);
+  frameGeom.translate(0, -1.193, 3.81);
   tintColors(frameGeom, [0.58, 0.59, 0.62]);   // dark sill frame, not gold
   skin(frameGeom, "canopyFrame", canPivot);
   add(canPivot, "canopy");
   parts.canopy = canPivot;
 
   // ---- wings (slight anhedral; rotation.z sense verified in the lab)
-  const wingGeomR = wingGeometry();
-  bakeWingColors(wingGeomR);
+  let wingGeomR = wingGeometry(detail);
   const wingR = new THREE.Group();
-  wingR.position.set(W_ROOT_X, 0.50, 0);
-  wingR.rotation.z = -2 * DEG;                  // drops the +X tip
-  skin(wingGeomR, "wingRmesh", wingR);
+  wingR.position.set(W_ROOT_X, 0.15, 0);
+  wingR.rotation.z = -WING.anhedral;                  // drops the +X tip
+  coatLiftingSurface(wingGeomR, "wing");
+  const gearWing=prepareGearWing(wingGeomR);wingGeomR=gearWing.geometry;
+  skin(wingGeomR, "wingRmesh", wingR, "wing");
   add(wingR, "wingR");
   const wingL = new THREE.Group();
-  wingL.position.set(-W_ROOT_X, 0.50, 0);
-  wingL.rotation.z = 2 * DEG;
-  skin(mirrorGeom(wingGeomR), "wingLmesh", wingL);
+  wingL.position.set(-W_ROOT_X, 0.15, 0);
+  wingL.rotation.z = WING.anhedral;
+  skin(mirrorGeom(wingGeomR), "wingLmesh", wingL, "wing");
   add(wingL, "wingL");
+  addWingInsignia(wingL,-1);addWingInsignia(wingR,1);
+  group.add(buildGearBays(bodyFinish.material,liftingFinish.material,level,gearWing.lowerWorld,gearWing.upperWorld));
+  gearWing.lowerWorld.dispose();gearWing.upperWorld.dispose();
+
+  for (const [wing, sign, color] of [[wingR, 1, 0x7cad97], [wingL, -1, 0x9e5148]]) {
+    const lens = new THREE.Mesh(new THREE.SphereGeometry(.035, 10, 6),
+      new THREE.MeshStandardMaterial({color, emissive:color, emissiveIntensity:.28, roughness:.22}));
+    lens.name = "navigationLens";
+    lens.scale.set(.6,.6,2.8);
+    lens.position.set(sign*(W_SPAN-.04),.008,3.75);
+    wing.add(lens);
+  }
 
   // flaperons: pivot local +X outboard along the hinge; rotation.x > 0 =
   // TE down on the right wing. The left flap is a mirrored geometry with a
   // mirrored hinge yaw (the wingL group itself is NOT mirrored).
-  const flapGeom = flapGeometry();
-  tintColors(flapGeom, [0.95, 0.95, 0.97]);    // control surface reads as its own panel
+  const flapGeom = flapGeometry(detail);
   const mkFlap = (mirrored) => {
     const pv = new THREE.Group();
     pv.position.set(0, 0, FLAP_HZ0);            // wing-local root hinge point
     pv.rotation.y = mirrored ? FLAP_ANG : -FLAP_ANG;
-    skin(mirrored ? mirrorGeom(flapGeom) : flapGeom.clone(), "flapMesh", pv);
+    const geometry = mirrored ? mirrorGeom(flapGeom) : flapGeom.clone();
+    pv.updateMatrix(); coatLiftingSurface(geometry, 'wing', pv.matrix);
+    skin(geometry, 'flapMesh', pv, 'wing');
     return pv;
   };
   parts.flaperonR = mkFlap(false); wingR.add(parts.flaperonR);
@@ -766,33 +411,35 @@ export function buildF22() {
   parts.flaperonR.name = "flaperonR"; parts.flaperonL.name = "flaperonL";
 
   // ---- stabilators (all-moving; hinge axis = X, lateral)
-  const stabGeom = stabGeometry();
-  bakeStabColors(stabGeom);
+  const stabGeom = stabGeometry(detail);
   const stabR = new THREE.Group();
   stabR.position.copy(ST_PIVOT);
-  skin(stabGeom, "stabRmesh", stabR);
+  coatLiftingSurface(stabGeom, "tail");
+  skin(stabGeom, "stabRmesh", stabR, "tail");
   add(stabR, "stabR"); parts.stabR = stabR;
   const stabL = new THREE.Group();
   stabL.position.set(-ST_PIVOT.x, ST_PIVOT.y, ST_PIVOT.z);
-  skin(mirrorGeom(stabGeom), "stabLmesh", stabL);
+  skin(mirrorGeom(stabGeom), "stabLmesh", stabL, "tail");
   add(stabL, "stabL"); parts.stabL = stabL;
 
   // ---- twin verticals canted 28 deg outboard (roll 62/118 deg from flat)
-  const finGeom = finGeometry();
-  bakeFinColors(finGeom);
-  const rudGeom = rudderGeometry();
-  tintColors(rudGeom, [0.95, 0.95, 0.97]);
+  const finGeom = finGeometry(detail);
+  coatLiftingSurface(finGeom, "fin");
+  const rudGeom = rudderGeometry(detail);
   // fin geometry is shared by both sides: the whole fin-local frame is
   // rolled (62 deg right / 118 deg left), so no geometry mirror (v2 scheme).
   const mkTail = (sideSign) => {
     const fin = new THREE.Group();
-    fin.position.set(1.58 * sideSign, 0.30, 0);
+    fin.position.set(FIN.rootX * sideSign, FIN.rootY, 0);
     fin.rotation.z = sideSign > 0 ? 62 * DEG : 118 * DEG;
-    skin(finGeom.clone(), "finMesh", fin);
+    const fixedFin=finGeom.clone(); coatLiftingSurface(fixedFin, "fin", undefined, sideSign);
+    skin(fixedFin, "finMesh", fin, "fin");
     const rud = new THREE.Group();
     rud.position.set(0, 0, FIN.hingeRoot);
     rud.rotation.y = -RUD_ANG;
-    skin(rudGeom.clone(), "rudMesh", rud);
+    const rudder = rudGeom.clone();
+    rud.updateMatrix(); coatLiftingSurface(rudder, 'fin', rud.matrix, sideSign);
+    skin(rudder, 'rudMesh', rud, 'fin');
     fin.add(rud);
     return { fin, rud };
   };
@@ -801,81 +448,127 @@ export function buildF22() {
   parts.rudderR = tR.rud; parts.rudderL = tL.rud;
   parts.rudderR.name = "rudderR"; parts.rudderL.name = "rudderL";
 
-  // ---- nozzles: pivots at (±0.75, 0, 8.10), DIRECT children of the group;
+  // ---- nozzles: reference-located pivots remain DIRECT children of the group;
   // hinge axis = X (2D pitch vectoring); exit plane at pivot-local z=1.36.
-  const nozGeom = nozzleGeometry();
-  bakeNozzleHeat(nozGeom);
-  const nozInt = nozzleInteriorGeometry();
-  const padT = paddlePlate(true), padB = paddlePlate(false);
-  tintColors(padT, [0.52, 0.58, 0.80]);        // external paddles: blued heat
-  tintColors(padB, [0.52, 0.58, 0.80]);
-  const mkNozzle = (x) => {
-    const pv = new THREE.Group();
-    pv.position.set(x, 0, 8.10);
-    pv.add(new THREE.Mesh(nozGeom, mats.dark));
-    pv.add(new THREE.Mesh(nozInt, mats.inlet));
-    pv.add(new THREE.Mesh(padT, mats.dark));
-    pv.add(new THREE.Mesh(padB, mats.dark));
-    return pv;
-  };
-  parts.nozzleR = mkNozzle(0.75); add(parts.nozzleR, "nozzleR");
-  parts.nozzleL = mkNozzle(-0.75); add(parts.nozzleL, "nozzleL");
+  parts.nozzleR = buildF119Nozzle({ quality:level });
+  parts.nozzleR.position.set(F22_NOZZLE.x, F22_NOZZLE.y, F22_NOZZLE.z);
+  add(parts.nozzleR, 'nozzleR');
+  parts.nozzleL = parts.nozzleR.clone(true);
+  parts.nozzleL.position.x = -F22_NOZZLE.x;
+  add(parts.nozzleL, 'nozzleL');
 
-  // ---- intakes: caret wedge + lip band + deep dark duct + diverter plate
-  const intk = intakeGeometry();
-  tintColors(intk.body, [0.93, 0.94, 0.96]);   // wedge reads as its own panel
-  tintColors(intk.lip, [0.70, 0.71, 0.74]);    // RAM-taped lip edge
-  skin(intk.body, "intakeR");
-  skin(intk.lip, "intakeLipR");
-  add(new THREE.Mesh(intk.duct, mats.inlet), "intakeDuctR");
-  skin(mirrorGeom(intk.body), "intakeL");
-  skin(mirrorGeom(intk.lip), "intakeLipL");
-  add(new THREE.Mesh(mirrorGeom(intk.duct), mats.inlet), "intakeDuctL");
-  const mkDiverter = (sideSign) => {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.05, 1.5), mats.inlet);
-    m.position.set(1.30 * sideSign, -0.30, -2.75);
-    m.rotation.z = -0.10 * sideSign;
-    m.rotation.y = 0.14 * sideSign;
-    return m;
-  };
-  add(mkDiverter(1), "diverterR");
-  add(mkDiverter(-1), "diverterL");
+  // Main weapon bays have conforming skins, separate physical hinges and
+  // enclosed interiors. The public left-door controller mirrors its partner.
+  const mainBays = buildMainWeaponsBays(bodyFinish.material, level);
+  parts.bayMain = mainBays.primary;
+  add(mainBays.primary, 'bayMain');
+  add(mainBays.counter, 'mainBayCounterDoor');
+  group.add(mainBays.cavity);
+  const sideBays=buildSideWeaponsBays(bodyFinish.material,level);
+  parts.baySideR=sideBays.right;parts.baySideL=sideBays.left;
+  add(sideBays.right,'baySideR');add(sideBays.left,'baySideL');group.add(sideBays.cavity);
 
-  // ---- weapons bays (placeholder doors at true hinge lines; same
-  // hinge conventions as v2)
-  // keel dips to -0.964 at the door edge — park the closed door fully
-  // inside the hull (it emerges when swung open on its -Z hinge line)
-  parts.bayMain = new THREE.Group();
-  parts.bayMain.position.set(-0.62, -0.90, 0.55);
-  const mainDoor = doorSlab(mats, 1.24, 0.03, 3.5);
-  mainDoor.position.x = 0.62;
-  parts.bayMain.add(mainDoor);
-  add(parts.bayMain, "bayMain");
-  const mkSideBay = (sideSign) => {
-    const pv = new THREE.Group();
-    // buried inside the lower hull bevel (the loft tucks in fast below the
-    // chine); the pivot sits at the hinge line and the door emerges when
-    // swung outboard — closed, it stays hidden like the real flush panel.
-    pv.position.set(1.70 * sideSign, -0.10, 0.45);
-    pv.rotation.z = 0.35 * sideSign;                 // lean with the side
-    const door = doorSlab(mats, 0.04, 0.72, 1.9);
-    door.position.y = -0.36;
-    pv.add(door);
-    return pv;
-  };
-  parts.baySideR = mkSideBay(1); add(parts.baySideR, "baySideR");
-  parts.baySideL = mkSideBay(-1); add(parts.baySideL, "baySideL");
-
-  // ---- landing gear (placeholders, extended; retract forward like v2)
-  parts.gearNose = gearLeg(mats, 1.35, 0.17, 0.12);
-  parts.gearNose.position.set(0, -0.5, -5.3);
+  // ---- manufacturer's nominal tire dimensions and photo-calibrated gear
+  // mounts. All three deployed contact patches sit at y=-1.973 metres.
+  parts.gearNose = new THREE.Group();
+  parts.gearNose.position.set(0, -.76, -3.81);
   add(parts.gearNose, "gearNose");
-  parts.gearR = gearLeg(mats, 1.0, 0.26, 0.20);
-  parts.gearR.position.set(1.85, -0.9, 1.9);
+  parts.gearR = new THREE.Group();
+  parts.gearR.position.set(1.22, -.50, 2.10);
   add(parts.gearR, "gearR");
-  parts.gearL = gearLeg(mats, 1.0, 0.26, 0.20);
-  parts.gearL.position.set(-1.85, -0.9, 1.9);
+  parts.gearL = new THREE.Group();
+  parts.gearL.position.set(-1.22, -.50, 2.10);
   add(parts.gearL, "gearL");
 
+  group.userData.aircraft = {
+    version: 4, forward: [0, 0, -1], ...F22_DIMENSIONS,
+    attachments: {
+      nozzleL: { part: 'nozzleL', position: [0, 0, F22_NOZZLE.exit], direction: [0, 0, 1] },
+      nozzleR: { part: 'nozzleR', position: [0, 0, F22_NOZZLE.exit], direction: [0, 0, 1] },
+      wingtipL: { part: null, position: [-6.78, -.1183, 3.76] },
+      wingtipR: { part: null, position: [6.78, -.1183, 3.76] },
+    },
+    hinges: {
+      ...Object.fromEntries(Object.keys(parts).map(name => [name, {
+        axis: name.startsWith('bay') ? [0, 0, 1] : [1, 0, 0],
+        minDeg: name.startsWith('nozzle') ? -20 : -25,
+        maxDeg: name.startsWith('nozzle') ? 20 : 25,
+      }])),
+      canopy: { axis: [1, 0, 0], minDeg: 0, maxDeg: 65 },
+      bayMain: { axis: [0, 0, 1], minDeg: -100, maxDeg: 0 },
+      baySideR: {axis:[0,0,1],minDeg:0,maxDeg:80},
+      baySideL: {axis:[0,0,1],minDeg:-80,maxDeg:0},
+      flaperonL: { axis: [1, 0, 0], minDeg: -20, maxDeg: 20 },
+      flaperonR: { axis: [1, 0, 0], minDeg: -20, maxDeg: 20 },
+      rudderL: { axis: [1, 0, 0], minDeg: -30, maxDeg: 30 },
+      rudderR: { axis: [1, 0, 0], minDeg: -30, maxDeg: 30 },
+      gearNose: { axis: [1, 0, 0], minDeg: 0, maxDeg: GEAR_STOPS.gearNose, stowedDeg: GEAR_STOPS.gearNose, deployedDeg: 0 },
+      gearR: { axis: [0, 0, 1], minDeg: 0, maxDeg: GEAR_STOPS.gearR, stowedDeg: GEAR_STOPS.gearR, deployedDeg: 0 },
+      gearL: { axis: [0, 0, 1], minDeg: GEAR_STOPS.gearL, maxDeg: 0, stowedDeg: GEAR_STOPS.gearL, deployedDeg: 0 },
+    },
+  };
   return { group, parts };
+}
+
+
+// One immutable geometry/resource family per selected quality. Every instance
+// gets independent pivots and mesh transforms, including cloned nozzle rigs.
+// Lower tiers never construct the high cockpit or request the high atlases.
+const modelResources = new Map();
+
+function createResources(quality) {
+  const mats = makeMaterials(quality);
+  const bodyFinish = createF22Coating('body', quality);
+  const liftingFinish = createF22Coating('lifting', quality);
+  const structures = {};
+  for (const level of F22_LEVELS.slice(F22_LEVELS.indexOf(quality)))
+    structures[level] = buildStructure({level,mats,bodyFinish,liftingFinish});
+  const primary = structures[quality];
+  registerF22LodResources(quality, structures);
+  const {group,parts} = primary;
+  if (quality === 'high') {
+    const cockpit = buildCockpit({canopyStations:F22_CANOPY});
+    cockpit.userData.f22LodVisible = ['high'];group.add(cockpit);
+    const hardware = airframeHardware(airframeTop);
+    hardware.userData.f22LodVisible = ['high'];group.add(hardware);
+  }
+  group.add(buildF22CockpitSilhouette());
+  for (const [name,kind,side,length] of [
+    ['gearNose','nose',1,.91455],['gearR','main',1,1.0031],['gearL','main',-1,1.0031],
+  ]) {
+    if (quality === 'high') {
+      const spec = F22_GEAR_DIMENSIONS[kind];
+      const detailed = buildGearDetail(length,spec.radius,spec.width,{kind,side});
+      detailed.name = 'gearDetail';detailed.userData.f22LodVisible = ['high'];
+      parts[name].add(detailed);
+    }
+    const silhouette = buildF22GearSilhouette(kind,side);
+    parts[name].userData.landingGear = {...silhouette.userData.landingGear};
+    parts[name].add(silhouette);
+  }
+  addGearStays(group);
+  group.userData.aircraft.lod = {quality,level:quality,thresholds:{...F22_LOD_THRESHOLDS}};
+  // Alternate structures contribute geometry only. Retain the primary
+  // materials, including any future scene-specific atmospheric decoration.
+  const retained = new Set();group.traverse(object=>{if(object.material)retained.add(object.material);});
+  for(const [level,built] of Object.entries(structures)) if(level !== quality)
+    built.group.traverse(object=>{if(object.material && !retained.has(object.material))object.material.dispose();});
+  bindF22Lod(group);
+  const ready = Promise.all([bodyFinish.ready,liftingFinish.ready]);
+  // Texture loaders already report failures. Mark the aggregate handled for
+  // synchronous game callers while retaining rejection for awaited lab/QA.
+  ready.catch(() => {});
+  return {group,partNames:Object.keys(parts),ready};
+}
+
+export function buildF22({quality='high',geometryLevel} = {}) {
+  quality = f22Quality(quality);
+  let resource = modelResources.get(quality);
+  if (!resource) {resource=createResources(quality);modelResources.set(quality,resource);}
+  const group = resource.group.clone(true);
+  const parts = Object.fromEntries(resource.partNames.map(name=>[name,group.getObjectByName(name)]));
+  bindF22Lod(group);
+  syncGearBays(group,1);
+  if (geometryLevel !== undefined) updateF22Visuals(group,{forceLevel:geometryLevel});
+  return {group,parts,ready:resource.ready};
 }

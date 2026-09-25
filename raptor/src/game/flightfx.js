@@ -20,7 +20,7 @@
 // when the render loop started — a brand-new top-level `scene.add(x)` after
 // boot silently never renders (confirmed with plain, untextured, non-
 // transparent test meshes; mutating an EXISTING object's material updates
-// instantly). So: the AB discs/shimmer are children of `parts.nozzleL/R`
+// instantly). The exhaust volumes are children of `parts.nozzleL/R`
 // directly (plain local coordinates — no manual world-space placement
 // needed). The vortex/smoke InstancedMeshes need to stay put in WORLD space
 // while the jet flies on, so they live under a `_worldFixed` group that IS
@@ -29,14 +29,12 @@
 // cancel, so instance matrices set in absolute world coordinates (exactly
 // as before) land in the right place regardless of where the jet is.
 //
-// Wingtip offset is EST from f22.js's WING table (root x=1.60, half-span
-// 5.18, LE sweep 42deg / TE sweep 17deg -> tip mid-chord sits at local
-// (~x=6.6, y=0.7, z=4.2) in the f22 model's own frame, forward=-Z/+X
-// starboard/+Y up). Nozzle exit is the nozzle pivot's local (0,0,1.36) —
-// the divergent-exit station in f22.js's nozzleGeometry().
+// Current aircraft declare wingtip and exhaust anchors in model metadata.
+// Legacy models retain the original estimates below as a compatibility path.
 
 import * as THREE from "three";
 import { Pool } from "../engine/pools.js";
+import { createExhaustPlume, updateExhaustPlume } from "../aircraft/exhaust-plume.js";
 
 // ---- wingtip condensation vortex ----
 const VORT_LIFE = 1.2;         // s — spec: fades over ~1.2s
@@ -51,14 +49,7 @@ const VORT_AOA_GATE = 15;      // alphaDeg >
 
 // ---- afterburner plume (throttle > 1.0) ----
 const AB_SPOOL_TAU = 0.4;      // s, EST light-off feel (f22data ENGINE.spoolTauAbS ~0.5)
-const AB_STACK = [
-  // distance fraction along the plume length, disc radius (m), tint, base opacity
-  { d: 0.05, r: 1.05, color: 0xfff7e6, op: 1.00 }, // white-hot core at the nozzle lip
-  { d: 0.28, r: 1.60, color: 0xffaa4a, op: 0.78 }, // orange mid
-  { d: 0.65, r: 2.30, color: 0xff5010, op: 0.50 }, // diffuse red-orange tail
-];
-const AB_LEN_BASE = 4.2, AB_LEN_AB = 7.5; // m, plume length at abStage 0 -> 1
-const SHIMMER_D = 0.14, SHIMMER_R = 2.0;  // heat-shimmer-suggestion quad
+const AB_LEN_BASE = 2.6, AB_LEN_AB = 5.2; // metres; maximum AB remains long and narrow
 
 // ---- mil-power haze (very faint — F119 is smokeless-ish) ----
 const SMOKE_TAU = 0.6;
@@ -66,23 +57,10 @@ const SMOKE_LIFE = 2.4;
 const SMOKE_INTERVAL = 0.12;
 const SMOKE_CAP = 48;
 const SMOKE_SIZE = 0.9;
-const SMOKE_ALPHA_MAX = 0.09;
+const SMOKE_ALPHA_MAX = 0.012;
 
 const WINGTIP = { x: 6.6, y: 0.35, z: 4.2 }; // f22-model-local, mirrored for the L side (y re-anchored to v3's drooped tip, D-052)
 const NOZZLE_EXIT_Z = 1.36;                 // nozzle-pivot-local, aft along the pivot's +Z
-
-function radialTexture(stops, size = 64) {
-  const c = document.createElement("canvas");
-  c.width = c.height = size;
-  const ctx = c.getContext("2d");
-  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  for (const [t, col] of stops) g.addColorStop(t, col);
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, size, size);
-  const tex = new THREE.CanvasTexture(c);
-  tex.needsUpdate = true;
-  return tex;
-}
 
 export class FlightFX {
   // jetGroup: the F-22's outer world-space group (testworld's `world.jet` /
@@ -96,15 +74,16 @@ export class FlightFX {
 
     // ---- anchors, parked inside the model's own hierarchy ----
     const f22Group = parts.nozzleL.parent; // the Math.PI-flipped "f22" group
+    const attachments = f22Group.userData.aircraft?.attachments;
     this._tipL = new THREE.Object3D();
-    this._tipL.position.set(-WINGTIP.x, WINGTIP.y, WINGTIP.z);
+    this._tipL.position.fromArray(attachments?.wingtipL?.position ?? [-WINGTIP.x, WINGTIP.y, WINGTIP.z]);
     this._tipR = new THREE.Object3D();
-    this._tipR.position.set(WINGTIP.x, WINGTIP.y, WINGTIP.z);
+    this._tipR.position.fromArray(attachments?.wingtipR?.position ?? [WINGTIP.x, WINGTIP.y, WINGTIP.z]);
     f22Group.add(this._tipL, this._tipR);
     this._nozL = new THREE.Object3D();
-    this._nozL.position.set(0, 0, NOZZLE_EXIT_Z);
+    this._nozL.position.fromArray(attachments?.nozzleL?.position ?? [0, 0, NOZZLE_EXIT_Z]);
     this._nozR = new THREE.Object3D();
-    this._nozR.position.set(0, 0, NOZZLE_EXIT_Z);
+    this._nozR.position.fromArray(attachments?.nozzleR?.position ?? [0, 0, NOZZLE_EXIT_Z]);
     parts.nozzleL.add(this._nozL);
     parts.nozzleR.add(this._nozR);
 
@@ -121,7 +100,6 @@ export class FlightFX {
     this._pTipL = new THREE.Vector3(); this._pTipR = new THREE.Vector3();
     this._pNozL = new THREE.Vector3(); this._pNozR = new THREE.Vector3();
     this._aftL = new THREE.Vector3(); this._aftR = new THREE.Vector3();
-    this._viewTmp = new THREE.Vector3();
     this._mid = new THREE.Vector3();
     this._m4 = new THREE.Matrix4();
     this._invWorld = new THREE.Matrix4();
@@ -152,33 +130,14 @@ export class FlightFX {
     this._smokePool = new Pool(SMOKE_CAP, () => ({ x: 0, y: 0, z: 0, age: 1e9 }));
     this._smokeCooldown = 0;
 
-    // ---- 2. AB plume: fixed disc stack + heat-shimmer per nozzle, parented
-    // directly to that nozzle (plain LOCAL z-offset along its own aft axis —
-    // no world-space math needed for position); each is still a camera-
-    // billboarded Mesh (lookAt each frame — same trick stars.js uses for its
-    // moon/halo discs, and lookAt() resolves correctly through the nozzle's
-    // own parent chain), additive for the hot core/mid/tail ----
-    const abTex = radialTexture([[0, "rgba(255,255,255,1)"], [0.4, "rgba(255,255,255,0.6)"], [1, "rgba(255,255,255,0)"]]);
-    const mkDisc = (color) => new THREE.Mesh(
-      new THREE.CircleGeometry(1, 16),
-      new THREE.MeshBasicMaterial({
-        map: abTex, color, transparent: true, opacity: 0, depthWrite: false,
-        blending: THREE.AdditiveBlending, fog: false,
-      })
-    );
-    const shimmerTex = radialTexture([[0, "rgba(255,230,190,0.35)"], [0.6, "rgba(255,210,160,0.12)"], [1, "rgba(255,210,160,0)"]]);
-    const mkShimmer = () => new THREE.Mesh(
-      new THREE.CircleGeometry(1, 12),
-      new THREE.MeshBasicMaterial({ map: shimmerTex, transparent: true, opacity: 0, depthWrite: false, fog: false })
-    );
-    this._plumeL = AB_STACK.map((s) => mkDisc(s.color));
-    this._plumeR = AB_STACK.map((s) => mkDisc(s.color));
-    this._shimmerL = mkShimmer();
-    this._shimmerR = mkShimmer();
-    for (const m of this._plumeL) parts.nozzleL.add(m);
-    for (const m of this._plumeR) parts.nozzleR.add(m);
-    parts.nozzleL.add(this._shimmerL);
-    parts.nozzleR.add(this._shimmerR);
+    // Longitudinal radiance follows the actual vectoring nozzles. Resource
+    // geometry and textures are shared; opacity is independent per engine.
+    this._plumeL = createExhaustPlume(this._nozL, 0);
+    this._plumeR = createExhaustPlume(this._nozR, 1);
+    this._liners = [];
+    for (const nozzle of [parts.nozzleL, parts.nozzleR]) nozzle.traverse(object => {
+      if (object.isMesh && object.material.name === 'F119-ceramic-liner') this._liners.push(object);
+    });
 
     this._t = 0;
     this._abStage = 0;
@@ -250,47 +209,16 @@ export class FlightFX {
     const machBoost = 1 + Math.min(fmOut.mach, 2) * 0.15; // plume elongates a bit at speed/altitude
     const len = (AB_LEN_BASE + (AB_LEN_AB - AB_LEN_BASE) * stage) * machBoost;
 
-    this._placeStack(this._plumeL, this._pNozL, this._aftL, len, stage, camera, 0);
-    this._placeStack(this._plumeR, this._pNozR, this._aftR, len, stage, camera, 1);
-    this._placeShimmer(this._shimmerL, this._pNozL, this._aftL, len, stage, camera, 0);
-    this._placeShimmer(this._shimmerR, this._pNozR, this._aftR, len, stage, camera, 1);
-  }
-
-  // ~1 = camera behind the jet looking up the tailpipe (brightest), ~-1 = camera ahead
-  _viewFacing(nozPos, aft, camera) {
-    this._viewTmp.copy(camera.position).sub(nozPos).normalize();
-    return this._viewTmp.dot(aft);
-  }
-
-  // discs are children of the nozzle pivot: NOZZLE_EXIT_Z + d*len is a plain
-  // local z-offset along the pivot's own aft axis, no world-space math.
-  _placeStack(discs, nozPos, aft, len, stage, camera, side) {
-    const boost = 0.75 + 0.5 * Math.max(0, this._viewFacing(nozPos, aft, camera));
-    for (let i = 0; i < discs.length; i++) {
-      const spec = AB_STACK[i], mesh = discs[i];
-      if (stage < 0.01) { mesh.material.opacity = 0; continue; }
-      const flick = 1 + 0.10 * Math.sin(this._t * 41 + i * 2.3 + side * 5) + 0.06 * Math.sin(this._t * 97 + i * 4.1);
-      mesh.position.set(0, 0, NOZZLE_EXIT_Z + spec.d * len);
-      mesh.lookAt(camera.position);
-      const r = spec.r * (0.55 + 0.45 * stage) * flick;
-      mesh.scale.set(r, r, r);
-      mesh.material.opacity = spec.op * stage * boost * flick;
+    updateExhaustPlume(this._plumeL, stage, len, this._t, camera.position);
+    updateExhaustPlume(this._plumeR, stage, len, this._t, camera.position);
+    for (const mesh of this._liners) {
+      mesh.material.emissive?.setRGB(.30 * stage, .045 * stage, .005 * stage);
     }
-  }
-
-  _placeShimmer(mesh, nozPos, aft, len, stage, camera, side) {
-    if (stage < 0.01) { mesh.material.opacity = 0; return; }
-    const wob = 1 + 0.08 * Math.sin(this._t * 17 + side * 3);
-    mesh.position.set(0, 0, NOZZLE_EXIT_Z + SHIMMER_D * len);
-    mesh.lookAt(camera.position);
-    const r = SHIMMER_R * (0.7 + 0.3 * stage) * wob;
-    mesh.scale.set(r, r, r);
-    mesh.material.opacity = 0.10 * stage;
   }
 
   // ---- 3. mil-power haze (very faint, no AB) ----
   _updateSmoke(throttleCmd, dt) {
-    const target = Math.max(0, Math.min(1, (throttleCmd - 0.55) / 0.45));
+    const target = Math.max(0, Math.min(1, (throttleCmd - 0.55) / 0.45)) * (1 - this._abStage);
     this._smokeStage += (target - this._smokeStage) * Math.min(1, dt / SMOKE_TAU);
     this._smokeCooldown -= dt;
     if (this._smokeStage > 0.02 && this._smokeCooldown <= 0) {

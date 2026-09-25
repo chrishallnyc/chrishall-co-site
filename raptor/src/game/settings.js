@@ -192,6 +192,12 @@ export function applySettings(s, ctx = live) {
     // edits must not interrupt a frame or reset temporal rendering history.
     if (ctx.renderer.getPixelRatio() !== ratio) ctx.renderer.setPixelRatio(ratio);
   }
+  // Cloud graph/asset selection is fixed at boot; this callback only changes
+  // the compiled compositor's integration scale and resets temporal history.
+  const effectiveTier = s.tier !== "AUTO" ? s.tier : (ctx.baseTier || "MED");
+  ctx.applyCloudQuality?.(effectiveTier);
+  ctx.applyTerrainQuality?.(effectiveTier);
+  ctx.applyAssetQuality?.();
   if (ctx.audio && ctx.audio.ctx) {
     const a = ctx.audio, t0 = a.ctx.currentTime;
     a.setMute?.(s.muted);
