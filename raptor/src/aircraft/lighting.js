@@ -175,6 +175,9 @@ export class AircraftLighting {
     this.refreshMaterials();
     const sun = this.atmosphere.sun, shadow = sun.shadow;
     this._sun.copy(this.atmosphere.sky.uSunDir.value).normalize();
+    // Retain the compiled shadow node but skip an unlit Sun's map draw.
+    shadow.autoUpdate = this.shadows && sun.intensity > 0;
+    if (!shadow.autoUpdate) shadow.needsUpdate = false;
     if (!this.shadows) {
       // Restore Atmosphere's origin-relative convention when its time-of-day
       // code moves the light. A retained player-relative target would tilt

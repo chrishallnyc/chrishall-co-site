@@ -1,0 +1,1937 @@
+{
+  "schema": 1,
+  "service": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer",
+  "sourceQueryURL": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/query?f=pjson&where=Category%3D1&geometry=%7B%22xmin%22%3A+-115.4688376937389%2C+%22ymin%22%3A+36.50778533635677%2C+%22xmax%22%3A+-115.3311623062611%2C+%22ymax%22%3A+36.618500521901886%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=%2A&returnGeometry=true&outSR=4326&returnTrueCurves=false&resultRecordCount=100",
+  "sourceRecords": [
+    {
+      "OBJECTID": 134696,
+      "Name": "m_3611529_se_11_060_20220704",
+      "MinPS": 0,
+      "MaxPS": 19.1,
+      "Category": 1,
+      "CenterX": -12846964.644848512,
+      "CenterY": 4373971.070033388,
+      "State": "NV",
+      "Year": 2022,
+      "raster_name": "m_3611529_se_11_060_20220704",
+      "download_url": "https://earthexplorer.usgs.gov/download/options/naip/3287222",
+      "acquisition_date": 1656892800000,
+      "agency": "USDA",
+      "vendor": "USDA-FSA-APFO",
+      "resolution_value": 0.6,
+      "resolution_units": "METER",
+      "band_count": 4,
+      "sensor_type": "CNIR",
+      "projection_name": "UTM",
+      "projection_zone": "11N",
+      "datum": "NAD83",
+      "recordURL": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/134696"
+    },
+    {
+      "OBJECTID": 134697,
+      "Name": "m_3611529_sw_11_060_20220704",
+      "MinPS": 0,
+      "MaxPS": 19.1,
+      "Category": 1,
+      "CenterX": -12853922.140425287,
+      "CenterY": 4373971.259739,
+      "State": "NV",
+      "Year": 2022,
+      "raster_name": "m_3611529_sw_11_060_20220704",
+      "download_url": "https://earthexplorer.usgs.gov/download/options/naip/3287223",
+      "acquisition_date": 1656892800000,
+      "agency": "USDA",
+      "vendor": "USDA-FSA-APFO",
+      "resolution_value": 0.6,
+      "resolution_units": "METER",
+      "band_count": 4,
+      "sensor_type": "CNIR",
+      "projection_name": "UTM",
+      "projection_zone": "11N",
+      "datum": "NAD83",
+      "recordURL": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/134697"
+    },
+    {
+      "OBJECTID": 134699,
+      "Name": "m_3611530_nw_11_060_20220704",
+      "MinPS": 0,
+      "MaxPS": 19.1,
+      "Category": 1,
+      "CenterX": -12840007.434792547,
+      "CenterY": 4382633.460182183,
+      "State": "NV",
+      "Year": 2022,
+      "raster_name": "m_3611530_nw_11_060_20220704",
+      "download_url": "https://earthexplorer.usgs.gov/download/options/naip/3287225",
+      "acquisition_date": 1656892800000,
+      "agency": "USDA",
+      "vendor": "USDA-FSA-APFO",
+      "resolution_value": 0.6,
+      "resolution_units": "METER",
+      "band_count": 4,
+      "sensor_type": "CNIR",
+      "projection_name": "UTM",
+      "projection_zone": "11N",
+      "datum": "NAD83",
+      "recordURL": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/134699"
+    },
+    {
+      "OBJECTID": 134701,
+      "Name": "m_3611530_sw_11_060_20220704",
+      "MinPS": 0,
+      "MaxPS": 19.1,
+      "Category": 1,
+      "CenterX": -12840007.51747285,
+      "CenterY": 4373971.262991005,
+      "State": "NV",
+      "Year": 2022,
+      "raster_name": "m_3611530_sw_11_060_20220704",
+      "download_url": "https://earthexplorer.usgs.gov/download/options/naip/3287227",
+      "acquisition_date": 1656892800000,
+      "agency": "USDA",
+      "vendor": "USDA-FSA-APFO",
+      "resolution_value": 0.6,
+      "resolution_units": "METER",
+      "band_count": 4,
+      "sensor_type": "CNIR",
+      "projection_name": "UTM",
+      "projection_zone": "11N",
+      "datum": "NAD83",
+      "recordURL": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/134701"
+    }
+  ],
+  "worldToGeographic": {
+    "centerLatitude": 36.6,
+    "centerLongitude": -115.4,
+    "metresPerDegreeLatitude": 111132.0,
+    "metresPerDegreeLongitude": 89369.64133827487
+  },
+  "worldBounds": {
+    "xmin": -6144,
+    "xmax": 6144,
+    "zmin": -10240,
+    "zmax": 2048
+  },
+  "interiorPixels": 2048,
+  "gutterPixels": 8,
+  "imagePixels": 2064,
+  "outputWorldMetresPerPixel": 1,
+  "sourceAcquisitionUTC": "2022-07-04",
+  "nativeSourceGsdM": 0.6,
+  "rendering": "NaturalColor, bilinear, explicit geographic edges, adjustAspectRatio=false",
+  "rights": {
+    "license": "public domain",
+    "primaryStatementURL": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer",
+    "credit": "USGS, USDA, The National Map: Orthoimagery. January 09, 2025."
+  },
+  "tiles": [
+    {
+      "id": "nellis-r0-c0",
+      "worldBounds": {
+        "xmin": -6144,
+        "xmax": -4096,
+        "zmin": 0,
+        "zmax": 2048
+      },
+      "imageWorldBounds": {
+        "xmin": -6152,
+        "xmax": -4088,
+        "zmin": -8,
+        "zmax": 2056
+      },
+      "bbox4326": [
+        -115.4688376937389,
+        36.59992801353346,
+        -115.44574260273158,
+        36.618500521901886
+      ],
+      "sourceIDs": [],
+      "blank": true,
+      "request": null,
+      "rawSHA256": null,
+      "sourceRGBABytesSHA256": null,
+      "alphaSHA256": null,
+      "bytes": null,
+      "sha256": null,
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r0-c1",
+      "worldBounds": {
+        "xmin": -4096,
+        "xmax": -2048,
+        "zmin": 0,
+        "zmax": 2048
+      },
+      "imageWorldBounds": {
+        "xmin": -4104,
+        "xmax": -2040,
+        "zmin": -8,
+        "zmax": 2056
+      },
+      "bbox4326": [
+        -115.44592163444482,
+        36.59992801353346,
+        -115.42282654343748,
+        36.618500521901886
+      ],
+      "sourceIDs": [],
+      "blank": true,
+      "request": null,
+      "rawSHA256": null,
+      "sourceRGBABytesSHA256": null,
+      "alphaSHA256": null,
+      "bytes": null,
+      "sha256": null,
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r0-c2",
+      "worldBounds": {
+        "xmin": -2048,
+        "xmax": 0,
+        "zmin": 0,
+        "zmax": 2048
+      },
+      "imageWorldBounds": {
+        "xmin": -2056,
+        "xmax": 8,
+        "zmin": -8,
+        "zmax": 2056
+      },
+      "bbox4326": [
+        -115.42300557515073,
+        36.59992801353346,
+        -115.39991048414339,
+        36.618500521901886
+      ],
+      "sourceIDs": [],
+      "blank": true,
+      "request": null,
+      "rawSHA256": null,
+      "sourceRGBABytesSHA256": null,
+      "alphaSHA256": null,
+      "bytes": null,
+      "sha256": null,
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r0-c3",
+      "worldBounds": {
+        "xmin": 0,
+        "xmax": 2048,
+        "zmin": 0,
+        "zmax": 2048
+      },
+      "imageWorldBounds": {
+        "xmin": -8,
+        "xmax": 2056,
+        "zmin": -8,
+        "zmax": 2056
+      },
+      "bbox4326": [
+        -115.40008951585662,
+        36.59992801353346,
+        -115.37699442484929,
+        36.618500521901886
+      ],
+      "sourceIDs": [
+        134699
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.40008951585662%2C36.59992801353346%2C-115.37699442484929%2C36.618500521901886&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134699%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:32:40.149424+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_095d1f2b_d046_440c_86fc_c574445a6af9.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.40008951585662,
+            "ymin": 36.59992801353346,
+            "xmax": -115.37699442484929,
+            "ymax": 36.618500521901886,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "e6ec964cb05d7ac8060a1bf97b90eaaecc8601816eee145d077fb3fe891ba696",
+      "sourceRGBABytesSHA256": "1ba9962fef93f16fe633aa9e34ea93c0e2c5fe88f31d4429fe0c9d01d9c36d8b",
+      "alphaSHA256": "2ee8b83a5209fbba1e23a93a3f6e157059612768d575486d7ae5af9398266f5b",
+      "bytes": 11338,
+      "sha256": "c5200bd7526feb9692923237e3f6c7fe875529925977fa4b97b919f266814ceb",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r0-c4",
+      "worldBounds": {
+        "xmin": 2048,
+        "xmax": 4096,
+        "zmin": 0,
+        "zmax": 2048
+      },
+      "imageWorldBounds": {
+        "xmin": 2040,
+        "xmax": 4104,
+        "zmin": -8,
+        "zmax": 2056
+      },
+      "bbox4326": [
+        -115.37717345656253,
+        36.59992801353346,
+        -115.3540783655552,
+        36.618500521901886
+      ],
+      "sourceIDs": [
+        134699
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.37717345656253%2C36.59992801353346%2C-115.3540783655552%2C36.618500521901886&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134699%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:32:45.411979+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_d10f7158_fd3f_400e_bdf0_038b8b6487d4.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.37717345656253,
+            "ymin": 36.59992801353346,
+            "xmax": -115.3540783655552,
+            "ymax": 36.618500521901886,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "271ef6d9832c7c01cc0b0f9eb7d5c31d802b2c6e44b4efab74ffa5bf61b00fcd",
+      "sourceRGBABytesSHA256": "b4b879598d703193146974fa2ab74100c3015683f906cda07f963d0d7c4aaa79",
+      "alphaSHA256": "a159abee4da92ee1d56c58cbe7d3ea21e39ba806dbaf618f7e284836402793b8",
+      "bytes": 925714,
+      "sha256": "0153b286484f9d20b0c19bc9b71f591b4cf2730e24e90d71ad515515df70636f",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r0-c5",
+      "worldBounds": {
+        "xmin": 4096,
+        "xmax": 6144,
+        "zmin": 0,
+        "zmax": 2048
+      },
+      "imageWorldBounds": {
+        "xmin": 4088,
+        "xmax": 6152,
+        "zmin": -8,
+        "zmax": 2056
+      },
+      "bbox4326": [
+        -115.35425739726843,
+        36.59992801353346,
+        -115.3311623062611,
+        36.618500521901886
+      ],
+      "sourceIDs": [
+        134699
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.35425739726843%2C36.59992801353346%2C-115.3311623062611%2C36.618500521901886&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134699%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:32:52.772146+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_a1e043df_96b5_49d2_8a49_50cef98a0f62.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.35425739726843,
+            "ymin": 36.59992801353346,
+            "xmax": -115.3311623062611,
+            "ymax": 36.618500521901886,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "81a4cb854e4f99d575196627faf0aabb405039f48bd4964eab26ac0c487d47c1",
+      "sourceRGBABytesSHA256": "019040eabc000a11cef164354e38016887a23ab6ef954865f1d812ab8d0c6ec2",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 1033156,
+      "sha256": "ddf9951bd135d75c257e028150bf67714c93919caa6fa79352acd78bee51a6a1",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r1-c0",
+      "worldBounds": {
+        "xmin": -6144,
+        "xmax": -4096,
+        "zmin": -2048,
+        "zmax": 0
+      },
+      "imageWorldBounds": {
+        "xmin": -6152,
+        "xmax": -4088,
+        "zmin": -2056,
+        "zmax": 8
+      },
+      "bbox4326": [
+        -115.4688376937389,
+        36.58149947809812,
+        -115.44574260273158,
+        36.600071986466546
+      ],
+      "sourceIDs": [],
+      "blank": true,
+      "request": null,
+      "rawSHA256": null,
+      "sourceRGBABytesSHA256": null,
+      "alphaSHA256": null,
+      "bytes": null,
+      "sha256": null,
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r1-c1",
+      "worldBounds": {
+        "xmin": -4096,
+        "xmax": -2048,
+        "zmin": -2048,
+        "zmax": 0
+      },
+      "imageWorldBounds": {
+        "xmin": -4104,
+        "xmax": -2040,
+        "zmin": -2056,
+        "zmax": 8
+      },
+      "bbox4326": [
+        -115.44592163444482,
+        36.58149947809812,
+        -115.42282654343748,
+        36.600071986466546
+      ],
+      "sourceIDs": [],
+      "blank": true,
+      "request": null,
+      "rawSHA256": null,
+      "sourceRGBABytesSHA256": null,
+      "alphaSHA256": null,
+      "bytes": null,
+      "sha256": null,
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r1-c2",
+      "worldBounds": {
+        "xmin": -2048,
+        "xmax": 0,
+        "zmin": -2048,
+        "zmax": 0
+      },
+      "imageWorldBounds": {
+        "xmin": -2056,
+        "xmax": 8,
+        "zmin": -2056,
+        "zmax": 8
+      },
+      "bbox4326": [
+        -115.42300557515073,
+        36.58149947809812,
+        -115.39991048414339,
+        36.600071986466546
+      ],
+      "sourceIDs": [],
+      "blank": true,
+      "request": null,
+      "rawSHA256": null,
+      "sourceRGBABytesSHA256": null,
+      "alphaSHA256": null,
+      "bytes": null,
+      "sha256": null,
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r1-c3",
+      "worldBounds": {
+        "xmin": 0,
+        "xmax": 2048,
+        "zmin": -2048,
+        "zmax": 0
+      },
+      "imageWorldBounds": {
+        "xmin": -8,
+        "xmax": 2056,
+        "zmin": -2056,
+        "zmax": 8
+      },
+      "bbox4326": [
+        -115.40008951585662,
+        36.58149947809812,
+        -115.37699442484929,
+        36.600071986466546
+      ],
+      "sourceIDs": [
+        134699
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.40008951585662%2C36.58149947809812%2C-115.37699442484929%2C36.600071986466546&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134699%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:32:51.039276+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_d5196dcf_de9a_4877_8e0f_57c9c5658d13.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.40008951585662,
+            "ymin": 36.58149947809812,
+            "xmax": -115.37699442484929,
+            "ymax": 36.600071986466546,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "1d82023ffd19c8089ef24cb68c5d90ee443965d59c0e8475d3d67a06c5939eaa",
+      "sourceRGBABytesSHA256": "a68d8b8f8218b099d3b1ff98bc0d2c85bef9f5fd8dd7c09f7a00cc065aa9b053",
+      "alphaSHA256": "f47bf69c72e1012eeb56ba534f82b1803729833fedbbedb7d756a38b52011cf6",
+      "bytes": 20364,
+      "sha256": "087033fd1168dffcfb24c746512ab74dbd6697162b446b16fc9454659ebd10a4",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r1-c4",
+      "worldBounds": {
+        "xmin": 2048,
+        "xmax": 4096,
+        "zmin": -2048,
+        "zmax": 0
+      },
+      "imageWorldBounds": {
+        "xmin": 2040,
+        "xmax": 4104,
+        "zmin": -2056,
+        "zmax": 8
+      },
+      "bbox4326": [
+        -115.37717345656253,
+        36.58149947809812,
+        -115.3540783655552,
+        36.600071986466546
+      ],
+      "sourceIDs": [
+        134699
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.37717345656253%2C36.58149947809812%2C-115.3540783655552%2C36.600071986466546&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134699%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:33:01.582361+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_fb63e5e4_45fd_4db9_91b1_9ad02e6f1ad5.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.37717345656253,
+            "ymin": 36.58149947809812,
+            "xmax": -115.3540783655552,
+            "ymax": 36.600071986466546,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "eff1ca903789685ae061bb1baf4c622943e55fa09f4e80a07da4e5643d44fb1e",
+      "sourceRGBABytesSHA256": "fc2bd7e51a491b423bb33b8c12f2d1e270a0633be1c5960fe4fb264c5a7d6876",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 932920,
+      "sha256": "879f3b3dc463af55275e430834f1eb6c11cfadcacb573034acfdad84a6c321a6",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r1-c5",
+      "worldBounds": {
+        "xmin": 4096,
+        "xmax": 6144,
+        "zmin": -2048,
+        "zmax": 0
+      },
+      "imageWorldBounds": {
+        "xmin": 4088,
+        "xmax": 6152,
+        "zmin": -2056,
+        "zmax": 8
+      },
+      "bbox4326": [
+        -115.35425739726843,
+        36.58149947809812,
+        -115.3311623062611,
+        36.600071986466546
+      ],
+      "sourceIDs": [
+        134699
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.35425739726843%2C36.58149947809812%2C-115.3311623062611%2C36.600071986466546&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134699%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:33:04.071355+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_0cb32d3b_0f02_4de6_9c24_518a4dfb9983.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.35425739726843,
+            "ymin": 36.58149947809812,
+            "xmax": -115.3311623062611,
+            "ymax": 36.600071986466546,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "0283ee62cf17a309cdd93b93d678bbd20ea02c04e128ce2530de7e5feec9f3d8",
+      "sourceRGBABytesSHA256": "623e2680e94bcb31155d1f319768e2352b94484be226b7b1f19c594b73223c2a",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 1163068,
+      "sha256": "58568399fcf68a92d7484527a63d770a6098ecbb8000726b2848ce6fc9eaebba",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r2-c0",
+      "worldBounds": {
+        "xmin": -6144,
+        "xmax": -4096,
+        "zmin": -4096,
+        "zmax": -2048
+      },
+      "imageWorldBounds": {
+        "xmin": -6152,
+        "xmax": -4088,
+        "zmin": -4104,
+        "zmax": -2040
+      },
+      "bbox4326": [
+        -115.4688376937389,
+        36.56307094266278,
+        -115.44574260273158,
+        36.581643451031205
+      ],
+      "sourceIDs": [
+        134697
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.4688376937389%2C36.56307094266278%2C-115.44574260273158%2C36.581643451031205&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134697%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:33:05.302934+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_8bbca4be_ef5d_486b_8166_16005b4885f8.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.4688376937389,
+            "ymin": 36.56307094266278,
+            "xmax": -115.44574260273158,
+            "ymax": 36.581643451031205,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "fe909e8da1c8d13d07ec7e192a9035bc9ca2c347fb685d05ccd13211fe9d6536",
+      "sourceRGBABytesSHA256": "9a007f5d5023405597fe17afcbb59f109fbd000a75c9af82ef14fe0f2959688d",
+      "alphaSHA256": "2e107691a61f4bceb6fee950b45d12b7d33d785bd72a699662dc495120a6b682",
+      "bytes": 40088,
+      "sha256": "345adeebbd38886bb7e65f8c3eea859aaa5b63702727c229ad2e5816af17cfcb",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r2-c1",
+      "worldBounds": {
+        "xmin": -4096,
+        "xmax": -2048,
+        "zmin": -4096,
+        "zmax": -2048
+      },
+      "imageWorldBounds": {
+        "xmin": -4104,
+        "xmax": -2040,
+        "zmin": -4104,
+        "zmax": -2040
+      },
+      "bbox4326": [
+        -115.44592163444482,
+        36.56307094266278,
+        -115.42282654343748,
+        36.581643451031205
+      ],
+      "sourceIDs": [
+        134696,
+        134697
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.44592163444482%2C36.56307094266278%2C-115.42282654343748%2C36.581643451031205&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134696%2C+134697%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:33:07.884980+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_1fdb7625_10d9_45cd_b931_aff2b6e102e1.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.44592163444482,
+            "ymin": 36.56307094266278,
+            "xmax": -115.42282654343748,
+            "ymax": 36.581643451031205,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "d933c1e0d61f1ef9545feed38c74aa0a11ce143e361eeeb2716aa9780e9b3ee2",
+      "sourceRGBABytesSHA256": "4a01d10d45566564687e9382794907cfbc384d0bdb269f326f7c84cafdff5ec1",
+      "alphaSHA256": "e7cd804d383403e060daf93fecca67a7dcc4085e718b29739be3487f5dde344d",
+      "bytes": 52734,
+      "sha256": "8f2b48da106843888de47781536d202771cbd573bdc209e85f8fbc22c3cfb630",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r2-c2",
+      "worldBounds": {
+        "xmin": -2048,
+        "xmax": 0,
+        "zmin": -4096,
+        "zmax": -2048
+      },
+      "imageWorldBounds": {
+        "xmin": -2056,
+        "xmax": 8,
+        "zmin": -4104,
+        "zmax": -2040
+      },
+      "bbox4326": [
+        -115.42300557515073,
+        36.56307094266278,
+        -115.39991048414339,
+        36.581643451031205
+      ],
+      "sourceIDs": [
+        134696
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.42300557515073%2C36.56307094266278%2C-115.39991048414339%2C36.581643451031205&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134696%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:33:08.843032+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_2f5f4b09_fe1e_4518_b076_87336f9d2977.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.42300557515073,
+            "ymin": 36.56307094266278,
+            "xmax": -115.39991048414339,
+            "ymax": 36.581643451031205,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "578443433a1155d49fe291b91cbbd2874131427a851fa60590b46d345a17f261",
+      "sourceRGBABytesSHA256": "f2f16d9b661eaec7101ed7016e7257081ab70b38d01d05f5eb48ecb90e8f21cd",
+      "alphaSHA256": "8e7cf5a149d49de35c0363a656d656731ae7450fdea1ede674a3d806017c1039",
+      "bytes": 57866,
+      "sha256": "a28d6898cf43df9fb7f75fd7ab70a465173cae618414f1d0af184626892e2dfd",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r2-c3",
+      "worldBounds": {
+        "xmin": 0,
+        "xmax": 2048,
+        "zmin": -4096,
+        "zmax": -2048
+      },
+      "imageWorldBounds": {
+        "xmin": -8,
+        "xmax": 2056,
+        "zmin": -4104,
+        "zmax": -2040
+      },
+      "bbox4326": [
+        -115.40008951585662,
+        36.56307094266278,
+        -115.37699442484929,
+        36.581643451031205
+      ],
+      "sourceIDs": [
+        134696,
+        134699
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.40008951585662%2C36.56307094266278%2C-115.37699442484929%2C36.581643451031205&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134696%2C+134699%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:33:13.334780+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_a7ba930f_ca5d_4569_974f_5ce10797628b.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.40008951585662,
+            "ymin": 36.56307094266278,
+            "xmax": -115.37699442484929,
+            "ymax": 36.581643451031205,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "d3ce547312599f640199d0035c383ce545fa0f6185c7482c49121ecb3ae86316",
+      "sourceRGBABytesSHA256": "faf5a200c90734dd5a28863afb1a9eae8f22019f156273e3f3521dba38600100",
+      "alphaSHA256": "3dc4cd0378dadfa1e2bde2ddefd39d67eb8bc86568e4aea3139fb8456c0dddf7",
+      "bytes": 65806,
+      "sha256": "dce7af137ce2a438a8eb97a42f9f5407f3184a047a9e2873dd47d540768e4319",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r2-c4",
+      "worldBounds": {
+        "xmin": 2048,
+        "xmax": 4096,
+        "zmin": -4096,
+        "zmax": -2048
+      },
+      "imageWorldBounds": {
+        "xmin": 2040,
+        "xmax": 4104,
+        "zmin": -4104,
+        "zmax": -2040
+      },
+      "bbox4326": [
+        -115.37717345656253,
+        36.56307094266278,
+        -115.3540783655552,
+        36.581643451031205
+      ],
+      "sourceIDs": [
+        134696,
+        134699,
+        134701
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.37717345656253%2C36.56307094266278%2C-115.3540783655552%2C36.581643451031205&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134696%2C+134699%2C+134701%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:33:13.742126+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_15258e08_13e3_4b01_8e04_717473c9c09b.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.37717345656253,
+            "ymin": 36.56307094266278,
+            "xmax": -115.3540783655552,
+            "ymax": 36.581643451031205,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "9575ada7a46750270b43540b6a66a6d7efec75474b2619a297ed821fac7150b9",
+      "sourceRGBABytesSHA256": "e4be34fe6ce3657f10e22347cc585e7fec1633fcb0bf4f537777e405e4227017",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 979348,
+      "sha256": "a138b48ed9b4e2ff13e37ffc388f569bb9ec6c83bee7423189b0245e3f647540",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r2-c5",
+      "worldBounds": {
+        "xmin": 4096,
+        "xmax": 6144,
+        "zmin": -4096,
+        "zmax": -2048
+      },
+      "imageWorldBounds": {
+        "xmin": 4088,
+        "xmax": 6152,
+        "zmin": -4104,
+        "zmax": -2040
+      },
+      "bbox4326": [
+        -115.35425739726843,
+        36.56307094266278,
+        -115.3311623062611,
+        36.581643451031205
+      ],
+      "sourceIDs": [
+        134699,
+        134701
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.35425739726843%2C36.56307094266278%2C-115.3311623062611%2C36.581643451031205&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134699%2C+134701%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:33:24.899196+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_aca58eb2_9af6_4144_93cb_3d669f0d4e63.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.35425739726843,
+            "ymin": 36.56307094266278,
+            "xmax": -115.3311623062611,
+            "ymax": 36.581643451031205,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "b2ec06ec30ebb9af06fa9872924469fa27e73e62a4590d97d1208ddfe8a90ee0",
+      "sourceRGBABytesSHA256": "1708f9dd85c56c4e3e4c9b7947cadc5d70c320f9aaa97b74aaeaaf070e9b036f",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 1065336,
+      "sha256": "7a481b342a7d0ab657a4fba27f6c6d39faac18094cc937a285b2aa45710cede1",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r3-c0",
+      "worldBounds": {
+        "xmin": -6144,
+        "xmax": -4096,
+        "zmin": -6144,
+        "zmax": -4096
+      },
+      "imageWorldBounds": {
+        "xmin": -6152,
+        "xmax": -4088,
+        "zmin": -6152,
+        "zmax": -4088
+      },
+      "bbox4326": [
+        -115.4688376937389,
+        36.54464240722744,
+        -115.44574260273158,
+        36.56321491559587
+      ],
+      "sourceIDs": [
+        134697
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.4688376937389%2C36.54464240722744%2C-115.44574260273158%2C36.56321491559587&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134697%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:33:25.907928+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_f561f8e9_ce28_4a1d_bf2d_63dab966b6cd.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.4688376937389,
+            "ymin": 36.54464240722744,
+            "xmax": -115.44574260273158,
+            "ymax": 36.56321491559587,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "a4c91638e98c341d93d012db4d900ad978a9d1c2fccd8f1b7db278dddfbb52cf",
+      "sourceRGBABytesSHA256": "c3b2af99fb86c5e10a0c60779743bc6815529f31c1930d840914dd5449622ba3",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 783742,
+      "sha256": "3b5e875a3a24a2a8a4ba624fe569c911622509f0ce788b257d386a5c11a0e482",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r3-c1",
+      "worldBounds": {
+        "xmin": -4096,
+        "xmax": -2048,
+        "zmin": -6144,
+        "zmax": -4096
+      },
+      "imageWorldBounds": {
+        "xmin": -4104,
+        "xmax": -2040,
+        "zmin": -6152,
+        "zmax": -4088
+      },
+      "bbox4326": [
+        -115.44592163444482,
+        36.54464240722744,
+        -115.42282654343748,
+        36.56321491559587
+      ],
+      "sourceIDs": [
+        134696,
+        134697
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.44592163444482%2C36.54464240722744%2C-115.42282654343748%2C36.56321491559587&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134696%2C+134697%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:33:36.392197+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_87f74884_3649_425a_9cfa_818b67b39613.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.44592163444482,
+            "ymin": 36.54464240722744,
+            "xmax": -115.42282654343748,
+            "ymax": 36.56321491559587,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "190f22c0b6b4eefe2ab0e12d38ac82fdf3ec33f3cc75fed3664430999224fb2d",
+      "sourceRGBABytesSHA256": "3552aad1253c7161c936ed247754d05dd5656d2ffd9ee8e0243322f1719fb7ce",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 928652,
+      "sha256": "89a01fb630843c463b7fef0dfb0f671520c39e019a48e0eee164a72037035cc0",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r3-c2",
+      "worldBounds": {
+        "xmin": -2048,
+        "xmax": 0,
+        "zmin": -6144,
+        "zmax": -4096
+      },
+      "imageWorldBounds": {
+        "xmin": -2056,
+        "xmax": 8,
+        "zmin": -6152,
+        "zmax": -4088
+      },
+      "bbox4326": [
+        -115.42300557515073,
+        36.54464240722744,
+        -115.39991048414339,
+        36.56321491559587
+      ],
+      "sourceIDs": [
+        134696
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.42300557515073%2C36.54464240722744%2C-115.39991048414339%2C36.56321491559587&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134696%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:33:35.760993+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_8b344dbc_1c30_412a_a973_4e8377973729.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.42300557515073,
+            "ymin": 36.54464240722744,
+            "xmax": -115.39991048414339,
+            "ymax": 36.56321491559587,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "2f23ddf14c25a39fefe372451929d8f32010bd745ca3480aef65b05c658214a5",
+      "sourceRGBABytesSHA256": "d5400805cc087b8166fd66e24abb135cb2494c2b9b950592dc73fc694261d3a1",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 883246,
+      "sha256": "777a8e1f31651150fd7e315bdc739023636297bba0c6cb0cb0216520d94470e1",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r3-c3",
+      "worldBounds": {
+        "xmin": 0,
+        "xmax": 2048,
+        "zmin": -6144,
+        "zmax": -4096
+      },
+      "imageWorldBounds": {
+        "xmin": -8,
+        "xmax": 2056,
+        "zmin": -6152,
+        "zmax": -4088
+      },
+      "bbox4326": [
+        -115.40008951585662,
+        36.54464240722744,
+        -115.37699442484929,
+        36.56321491559587
+      ],
+      "sourceIDs": [
+        134696,
+        134699,
+        134701
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.40008951585662%2C36.54464240722744%2C-115.37699442484929%2C36.56321491559587&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134696%2C+134699%2C+134701%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:33:47.435086+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_29ca9518_61a7_4297_907c_781071930c06.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.40008951585662,
+            "ymin": 36.54464240722744,
+            "xmax": -115.37699442484929,
+            "ymax": 36.56321491559587,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "cf2300d0247d4afd6231cab6b05f55d57f53c67e30b912fba82ac27d8997d349",
+      "sourceRGBABytesSHA256": "58ba3f4ca792469b95676d990d912e6d411f636a02774b49f3c7603db3f01235",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 728412,
+      "sha256": "1e37b0f952973f6ccbbff3d7cfd17087c875377572b0284e1e8c826ab093c4c7",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r3-c4",
+      "worldBounds": {
+        "xmin": 2048,
+        "xmax": 4096,
+        "zmin": -6144,
+        "zmax": -4096
+      },
+      "imageWorldBounds": {
+        "xmin": 2040,
+        "xmax": 4104,
+        "zmin": -6152,
+        "zmax": -4088
+      },
+      "bbox4326": [
+        -115.37717345656253,
+        36.54464240722744,
+        -115.3540783655552,
+        36.56321491559587
+      ],
+      "sourceIDs": [
+        134696,
+        134699,
+        134701
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.37717345656253%2C36.54464240722744%2C-115.3540783655552%2C36.56321491559587&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134696%2C+134699%2C+134701%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:33:48.184989+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_a45e31eb_a644_4f77_a8f1_450904e760ae.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.37717345656253,
+            "ymin": 36.54464240722744,
+            "xmax": -115.3540783655552,
+            "ymax": 36.56321491559587,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "4336a7eded36621d75a3e1d3fdd851c75ed8e561b8135fda211328aebe892dae",
+      "sourceRGBABytesSHA256": "53dfff32f6c55626c658dd371b5f3fbded4ecc4e25944537157d8c0fa31a1dcd",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 1047002,
+      "sha256": "810577f4f631dd35c7b1f4fb0a7c489fd32d34f9f7a34d769a1c023f3881b8a4",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r3-c5",
+      "worldBounds": {
+        "xmin": 4096,
+        "xmax": 6144,
+        "zmin": -6144,
+        "zmax": -4096
+      },
+      "imageWorldBounds": {
+        "xmin": 4088,
+        "xmax": 6152,
+        "zmin": -6152,
+        "zmax": -4088
+      },
+      "bbox4326": [
+        -115.35425739726843,
+        36.54464240722744,
+        -115.3311623062611,
+        36.56321491559587
+      ],
+      "sourceIDs": [
+        134699,
+        134701
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.35425739726843%2C36.54464240722744%2C-115.3311623062611%2C36.56321491559587&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134699%2C+134701%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:33:58.228318+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_09fb3895_77c2_4247_a53f_1a2c68adede5.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.35425739726843,
+            "ymin": 36.54464240722744,
+            "xmax": -115.3311623062611,
+            "ymax": 36.56321491559587,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "1b0447db73e8bfaec88c178bb07bfc1a6818a20baf416a2666c8357d9d56a3e5",
+      "sourceRGBABytesSHA256": "369178481f30bfa32483fd4a9548e16a4eaf669a743ddf5191c53b0e7d505a55",
+      "alphaSHA256": "a78e91e46f3f46ca29c64694c565aadb67c4ee5358cad55eb3781774dff1b449",
+      "bytes": 973426,
+      "sha256": "6567b1842e248c764c36d50141bd79eaabd409a5e8dd3b379436f96ddf1a44b0",
+      "overlapRepair": {
+        "pixels": 16,
+        "reason": "Adjacent exact-coordinate service exports disagree only in source mask; all common valid RGB is byte-identical. Re-fetch with every regional source ID reproduces the disagreement.",
+        "witnessTile": "nellis-r3-c4",
+        "witnessRawFile": "raw/nellis-r3-c4.png",
+        "witnessRawSHA256": "4336a7eded36621d75a3e1d3fdd851c75ed8e561b8135fda211328aebe892dae",
+        "witnessPixelRow": 263,
+        "witnessPixelColumns": [
+          2048,
+          2063
+        ],
+        "targetPixelRow": 263,
+        "targetPixelColumns": [
+          0,
+          15
+        ],
+        "targetOriginalRawFile": "raw/nellis-r3-c5.png",
+        "targetOriginalRawSHA256": "822e174ccba2072d87e69e66264c1b227180a761248f471bf2cdc515f7ee629c",
+        "remainingTransparentPixels": 6,
+        "interpolatedPixels": 0,
+        "inventedPixels": 0
+      }
+    },
+    {
+      "id": "nellis-r4-c0",
+      "worldBounds": {
+        "xmin": -6144,
+        "xmax": -4096,
+        "zmin": -8192,
+        "zmax": -6144
+      },
+      "imageWorldBounds": {
+        "xmin": -6152,
+        "xmax": -4088,
+        "zmin": -8200,
+        "zmax": -6136
+      },
+      "bbox4326": [
+        -115.4688376937389,
+        36.5262138717921,
+        -115.44574260273158,
+        36.54478638016053
+      ],
+      "sourceIDs": [
+        134697
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.4688376937389%2C36.5262138717921%2C-115.44574260273158%2C36.54478638016053&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134697%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:34:00.207273+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_5f892971_211a_49d4_9430_214b5ece0064.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.4688376937389,
+            "ymin": 36.5262138717921,
+            "xmax": -115.44574260273158,
+            "ymax": 36.54478638016053,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "684301f2259f2bf17121a4b7b7c01e80de32d3d3ae4b85dcda4e1761d05c5b1c",
+      "sourceRGBABytesSHA256": "9a7c550b53e451d311971fb01bf8cd51cb2ca11863203c239c741533ca5a9ef1",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 802778,
+      "sha256": "a89efdc4a9a5e9b727d89a937ab4493bb1cc11bd36c496a7b1e7b0ab6afc8124",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r4-c1",
+      "worldBounds": {
+        "xmin": -4096,
+        "xmax": -2048,
+        "zmin": -8192,
+        "zmax": -6144
+      },
+      "imageWorldBounds": {
+        "xmin": -4104,
+        "xmax": -2040,
+        "zmin": -8200,
+        "zmax": -6136
+      },
+      "bbox4326": [
+        -115.44592163444482,
+        36.5262138717921,
+        -115.42282654343748,
+        36.54478638016053
+      ],
+      "sourceIDs": [
+        134696,
+        134697
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.44592163444482%2C36.5262138717921%2C-115.42282654343748%2C36.54478638016053&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134696%2C+134697%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:34:10.387438+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_fccd2813_ec72_4d80_ba52_8e047b9d5df0.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.44592163444482,
+            "ymin": 36.5262138717921,
+            "xmax": -115.42282654343748,
+            "ymax": 36.54478638016053,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "737f611b4403cd1f79fb944e1b703addd5523d6745c7c2231382576e014eaa71",
+      "sourceRGBABytesSHA256": "19c9c9ccbb9afd6c401c024e314586e3aee3c862c70727bc01d7b77b77d8d4ab",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 815424,
+      "sha256": "a3fb82e6b5bc5e0da29e0b8a4c615ae346616052ed00646c5e81ef3c25346d9c",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r4-c2",
+      "worldBounds": {
+        "xmin": -2048,
+        "xmax": 0,
+        "zmin": -8192,
+        "zmax": -6144
+      },
+      "imageWorldBounds": {
+        "xmin": -2056,
+        "xmax": 8,
+        "zmin": -8200,
+        "zmax": -6136
+      },
+      "bbox4326": [
+        -115.42300557515073,
+        36.5262138717921,
+        -115.39991048414339,
+        36.54478638016053
+      ],
+      "sourceIDs": [
+        134696
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.42300557515073%2C36.5262138717921%2C-115.39991048414339%2C36.54478638016053&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134696%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:34:10.125407+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_843110fc_1bd2_469a_8036_68bd95353f0a.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.42300557515073,
+            "ymin": 36.5262138717921,
+            "xmax": -115.39991048414339,
+            "ymax": 36.54478638016053,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "427d9234b84c84464d055d23d43e9bd84042bc0e0c50afd512d7d1b6699de12a",
+      "sourceRGBABytesSHA256": "bc56a5330d1dfbc42437e7a7fc5e403114781aef70eac8c10c16d408294af905",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 773550,
+      "sha256": "97723913a88d138be25e767051f383b324d7a9e0fed3e1e6f06869e4c5be303c",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r4-c3",
+      "worldBounds": {
+        "xmin": 0,
+        "xmax": 2048,
+        "zmin": -8192,
+        "zmax": -6144
+      },
+      "imageWorldBounds": {
+        "xmin": -8,
+        "xmax": 2056,
+        "zmin": -8200,
+        "zmax": -6136
+      },
+      "bbox4326": [
+        -115.40008951585662,
+        36.5262138717921,
+        -115.37699442484929,
+        36.54478638016053
+      ],
+      "sourceIDs": [
+        134696,
+        134701
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.40008951585662%2C36.5262138717921%2C-115.37699442484929%2C36.54478638016053&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134696%2C+134701%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:34:20.397048+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_21088a98_21f4_45c0_87cb_e4e364c756a3.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.40008951585662,
+            "ymin": 36.5262138717921,
+            "xmax": -115.37699442484929,
+            "ymax": 36.54478638016053,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "bbd4b80ea849ac75d971687ed1f1382cf9934340f29b6cbdeab0a9bda8e39b84",
+      "sourceRGBABytesSHA256": "4c18241290ef9fcc85af0dbb5de554d2f6f0afb5090ac47349a2dcbea356dea5",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 874742,
+      "sha256": "e293d3737f54e0a6e7dc99bfc257abbc04691a33d2c4c367f84b51383da74600",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r4-c4",
+      "worldBounds": {
+        "xmin": 2048,
+        "xmax": 4096,
+        "zmin": -8192,
+        "zmax": -6144
+      },
+      "imageWorldBounds": {
+        "xmin": 2040,
+        "xmax": 4104,
+        "zmin": -8200,
+        "zmax": -6136
+      },
+      "bbox4326": [
+        -115.37717345656253,
+        36.5262138717921,
+        -115.3540783655552,
+        36.54478638016053
+      ],
+      "sourceIDs": [
+        134696,
+        134701
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.37717345656253%2C36.5262138717921%2C-115.3540783655552%2C36.54478638016053&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134696%2C+134701%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:34:21.391634+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_78e1da77_f2cf_4a21_a202_760a026d52f3.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.37717345656253,
+            "ymin": 36.5262138717921,
+            "xmax": -115.3540783655552,
+            "ymax": 36.54478638016053,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "7e04b6eab50941ac7dc17331980622dd7e290b753329e9df2cd040c3ce68e36b",
+      "sourceRGBABytesSHA256": "5c301dd16b0e9f2511d4c303f69af672d8d267845200218f8605879d00adc6ae",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 923666,
+      "sha256": "946d809f421c05a4e6ee9daedcdde045b479eddc202425906983924648bbc100",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r4-c5",
+      "worldBounds": {
+        "xmin": 4096,
+        "xmax": 6144,
+        "zmin": -8192,
+        "zmax": -6144
+      },
+      "imageWorldBounds": {
+        "xmin": 4088,
+        "xmax": 6152,
+        "zmin": -8200,
+        "zmax": -6136
+      },
+      "bbox4326": [
+        -115.35425739726843,
+        36.5262138717921,
+        -115.3311623062611,
+        36.54478638016053
+      ],
+      "sourceIDs": [
+        134701
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.35425739726843%2C36.5262138717921%2C-115.3311623062611%2C36.54478638016053&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134701%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:34:29.854625+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_b9f42dd0_69dd_4a5b_b9c6_ee436bd57c6c.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.35425739726843,
+            "ymin": 36.5262138717921,
+            "xmax": -115.3311623062611,
+            "ymax": 36.54478638016053,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "9c255baf6ff3482c5c323014a0fd399700f47ea2c7ee7b496d651ad4af904a82",
+      "sourceRGBABytesSHA256": "fc50a52ced09a4ed1f50193aea4d3fee18c0888964774ddefb057643efd031ee",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 974544,
+      "sha256": "6bbab8a15ed50cff76457cf7e47727ba3d45c8d22e34acc641f7e1e8ece0a6fe",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r5-c0",
+      "worldBounds": {
+        "xmin": -6144,
+        "xmax": -4096,
+        "zmin": -10240,
+        "zmax": -8192
+      },
+      "imageWorldBounds": {
+        "xmin": -6152,
+        "xmax": -4088,
+        "zmin": -10248,
+        "zmax": -8184
+      },
+      "bbox4326": [
+        -115.4688376937389,
+        36.50778533635677,
+        -115.44574260273158,
+        36.52635784472519
+      ],
+      "sourceIDs": [
+        134697
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.4688376937389%2C36.50778533635677%2C-115.44574260273158%2C36.52635784472519&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134697%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:34:32.360060+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_2b9ae9c1_de78_4f3b_9e1b_87ab8c775316.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.4688376937389,
+            "ymin": 36.50778533635677,
+            "xmax": -115.44574260273158,
+            "ymax": 36.52635784472519,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "2bf82eb2ff2d0eb71fb16e7e849bb2041f6378eb373edb4cb7cdb93cc29d40b8",
+      "sourceRGBABytesSHA256": "57dc1819988744755e495ef231885cdc65752fc4aaddd2cdc2aeb375768dcdc5",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 966650,
+      "sha256": "edf2b6f043b19687064b868b8b55ff4af891146efe83ee8a10b1c84beb9758b3",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r5-c1",
+      "worldBounds": {
+        "xmin": -4096,
+        "xmax": -2048,
+        "zmin": -10240,
+        "zmax": -8192
+      },
+      "imageWorldBounds": {
+        "xmin": -4104,
+        "xmax": -2040,
+        "zmin": -10248,
+        "zmax": -8184
+      },
+      "bbox4326": [
+        -115.44592163444482,
+        36.50778533635677,
+        -115.42282654343748,
+        36.52635784472519
+      ],
+      "sourceIDs": [
+        134696,
+        134697
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.44592163444482%2C36.50778533635677%2C-115.42282654343748%2C36.52635784472519&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134696%2C+134697%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:34:45.375353+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_02945b19_3611_494d_8705_f23b318a273a.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.44592163444482,
+            "ymin": 36.50778533635677,
+            "xmax": -115.42282654343748,
+            "ymax": 36.52635784472519,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "2e1e72257bc0bcb00cba48ad7532772de789ddd61d3d5d002398122c19af82e3",
+      "sourceRGBABytesSHA256": "04ab77e99ce56afb30497e22dee42146a9dc5c0c4bd362c030e2b7b43a1f144c",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 768496,
+      "sha256": "2a8d773f286990c7ebcf8caadcf633f8659827f6fc898150d9a6742fd508665b",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r5-c2",
+      "worldBounds": {
+        "xmin": -2048,
+        "xmax": 0,
+        "zmin": -10240,
+        "zmax": -8192
+      },
+      "imageWorldBounds": {
+        "xmin": -2056,
+        "xmax": 8,
+        "zmin": -10248,
+        "zmax": -8184
+      },
+      "bbox4326": [
+        -115.42300557515073,
+        36.50778533635677,
+        -115.39991048414339,
+        36.52635784472519
+      ],
+      "sourceIDs": [
+        134696
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.42300557515073%2C36.50778533635677%2C-115.39991048414339%2C36.52635784472519&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134696%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:34:45.937262+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_670fea32_3726_4611_b3f0_a7a2b2a1fcf4.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.42300557515073,
+            "ymin": 36.50778533635677,
+            "xmax": -115.39991048414339,
+            "ymax": 36.52635784472519,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "b9be2ca19322a35ee629589cd7c2723a012fb4e2b21eb2c2bc722f15bc033577",
+      "sourceRGBABytesSHA256": "03c48241b0e14e92b357078fe12c35ede9e64f3fc6af8cbab3588f9b2f59fff1",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 749346,
+      "sha256": "8c4a00210e99c5d2ac343471234c72e17fba5339e9b4422a42d05b6940c2067a",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r5-c3",
+      "worldBounds": {
+        "xmin": 0,
+        "xmax": 2048,
+        "zmin": -10240,
+        "zmax": -8192
+      },
+      "imageWorldBounds": {
+        "xmin": -8,
+        "xmax": 2056,
+        "zmin": -10248,
+        "zmax": -8184
+      },
+      "bbox4326": [
+        -115.40008951585662,
+        36.50778533635677,
+        -115.37699442484929,
+        36.52635784472519
+      ],
+      "sourceIDs": [
+        134696,
+        134701
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.40008951585662%2C36.50778533635677%2C-115.37699442484929%2C36.52635784472519&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134696%2C+134701%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:34:56.817255+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_55c974a1_8ee5_4526_8899_81da2316f2b2.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.40008951585662,
+            "ymin": 36.50778533635677,
+            "xmax": -115.37699442484929,
+            "ymax": 36.52635784472519,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "9e6d39c04faa6b57a58958ec6d2d084087e0894b993638491480383b54a0b935",
+      "sourceRGBABytesSHA256": "213dd051f6a346a155c9fb38371fd0bd78c38a5fa6758087f7a9055e43629a93",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 829586,
+      "sha256": "713ade6070574c666aac3a1be2f9b02084a4d27da9cd4658a919acbf618127bb",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r5-c4",
+      "worldBounds": {
+        "xmin": 2048,
+        "xmax": 4096,
+        "zmin": -10240,
+        "zmax": -8192
+      },
+      "imageWorldBounds": {
+        "xmin": 2040,
+        "xmax": 4104,
+        "zmin": -10248,
+        "zmax": -8184
+      },
+      "bbox4326": [
+        -115.37717345656253,
+        36.50778533635677,
+        -115.3540783655552,
+        36.52635784472519
+      ],
+      "sourceIDs": [
+        134696,
+        134701
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.37717345656253%2C36.50778533635677%2C-115.3540783655552%2C36.52635784472519&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134696%2C+134701%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:34:57.606291+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_92c79e46_fe26_4222_abbf_e1ca009eb6b6.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.37717345656253,
+            "ymin": 36.50778533635677,
+            "xmax": -115.3540783655552,
+            "ymax": 36.52635784472519,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "6d8d542992310605ee14f3e0494d2132de499862a18d270ba623eea70e389700",
+      "sourceRGBABytesSHA256": "63e641e0e1283c278d8a3a432978972f5323c34f75c3d6c77c1d7e1bc3ce4a03",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 887746,
+      "sha256": "95ec3f942311821f8046003d361de4500e1f1be4e067a2fc4bad03f6e7afaec8",
+      "overlapRepair": null
+    },
+    {
+      "id": "nellis-r5-c5",
+      "worldBounds": {
+        "xmin": 4096,
+        "xmax": 6144,
+        "zmin": -10240,
+        "zmax": -8192
+      },
+      "imageWorldBounds": {
+        "xmin": 4088,
+        "xmax": 6152,
+        "zmin": -10248,
+        "zmax": -8184
+      },
+      "bbox4326": [
+        -115.35425739726843,
+        36.50778533635677,
+        -115.3311623062611,
+        36.52635784472519
+      ],
+      "sourceIDs": [
+        134701
+      ],
+      "blank": false,
+      "request": {
+        "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?f=json&bbox=-115.35425739726843%2C36.50778533635677%2C-115.3311623062611%2C36.52635784472519&bboxSR=4326&imageSR=4326&size=2064%2C2064&format=png32&pixelType=U8&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A+%22NaturalColor%22%7D&mosaicRule=%7B%22mosaicMethod%22%3A+%22esriMosaicLockRaster%22%2C+%22lockRasterIds%22%3A+%5B134701%5D%2C+%22mosaicOperation%22%3A+%22MT_FIRST%22%7D&adjustAspectRatio=false&transparent=true",
+        "retrievedUTC": "2026-09-25T01:35:11.654685+00:00",
+        "status": 200,
+        "contentType": "application/json",
+        "response": {
+          "href": "https://imagery.nationalmap.gov/arcgis/rest/directories/imagery_output/USGSNAIPImagery_ImageServer/_ags_1ed3c9bc_5d9b_41b2_912d_f0d4a185bce9.png",
+          "width": 2064,
+          "height": 2064,
+          "extent": {
+            "xmin": -115.35425739726843,
+            "ymin": 36.50778533635677,
+            "xmax": -115.3311623062611,
+            "ymax": 36.52635784472519,
+            "spatialReference": {
+              "wkid": 4326,
+              "latestWkid": 4326
+            }
+          },
+          "scale": 0
+        }
+      },
+      "rawSHA256": "3fbf259b3ca6c88a78acdf6bf163d41ce9515eab16bd942311fd659a814f8bc1",
+      "sourceRGBABytesSHA256": "6b5961329108bc5ce20e328d1ada42f2a1e28712d6f24f8a97dd210de3dd7241",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "bytes": 1016144,
+      "sha256": "476a039ea70afc1fd313799129e09a27bee44fe96fb8af3ffe2b229760261a6a",
+      "overlapRepair": null
+    }
+  ]
+}

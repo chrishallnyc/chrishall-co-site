@@ -17,6 +17,8 @@ import { createTerrainGrid, TERRAIN_COARSE_INTERVALS, TERRAIN_FINE_INTERVALS,
 import { TerrainDetailTransition, tierHasNearTerrain } from "./terraindetail.js";
 import { TerrainSurfaceMotion } from "./terrainmotion.js";
 import { terrainMaterialNodes } from "./terrainmaterials.js";
+import { prepareTerrainPhoto } from "./terrainphoto.js";
+import { geographicImageryNode } from "./terrain-imagery-node.js";
 import {
   Fn, uniform, texture, textureLoad, ivec2, vec2, vec3, vec4, float, positionLocal, positionWorld,
   modelWorldMatrix, attribute, normalize, clamp, smoothstep, mix, max,
@@ -84,7 +86,7 @@ export class Terrain {
     } catch (_) { return null; }
   }
 
-  static async load(baseUrl, front = "NELLIS", cloudShadow = null, { drape = "16k", aerial = null, curvature = null, nearDetail = true, sourceManifest = null } = {}) {
+  static async load(baseUrl, front = "NELLIS", cloudShadow = null, { drape = "16k", aerial = null, curvature = null, nearDetail = true, sourceManifest = null, geographicImagery = null, photoDetail = null } = {}) {
     const meta = await (await fetch(`${baseUrl}_meta.json`)).json();
     const img = new Image();
     img.src = `${baseUrl}_h.png`;
@@ -96,6 +98,8 @@ export class Terrain {
     // meta.drape declares what exists — requesting a missing file would log
     // a console 404 and fail the console-clean QA gates.
     const has = (k) => drape && (meta.drape || []).includes(k);
+    const photoRequested = photoDetail?.requested === true && !(typeof location !== "undefined" && new URLSearchParams(location.search).get("terrainmaterials") === "0");
+    const photoP = prepareTerrainPhoto({ ...photoDetail, front, requested: photoRequested });
     const [albedoP, coverP, nrmP, aoP] = [
       has(`albedo_${drape}`) ? this._imgTex(`${baseUrl}_albedo_${drape}.jpg`, true) : null,
       has("cover") ? this._imgTex(`${baseUrl}_cover.png`, false) : null,
@@ -112,7 +116,7 @@ export class Terrain {
     for (let i = 0; i < heights.length; i++) {
       heights[i] = meta.minH + ((px[i * 4] << 8) | px[i * 4 + 1]) / 65535 * span;
     }
-    const [albedo, cover, nrm, ao] = await Promise.all([albedoP, coverP, nrmP, aoP]);
+    const [albedo, cover, nrm, ao, preparedPhoto] = await Promise.all([albedoP, coverP, nrmP, aoP, photoP]);
     // Geographic heights are fixed before materials, collision/ground-unit
     // placement and shoreline initialization. Never swap sources mid-flight.
     let sourceField = null;
@@ -127,9 +131,10 @@ export class Terrain {
         console.warn("Terrain source unavailable; canonical field retained:", error.message);
       }
     }
+    geographicImagery = await Promise.resolve(geographicImagery).catch(() => null);
     try {
-      return new Terrain(meta, heights, img, front, cloudShadow, { albedo, cover, nrm, ao }, aerial, curvature, nearDetail, sourceField);
-    } catch (error) { sourceField?.dispose(); throw error; }
+      return new Terrain(meta, heights, img, front, cloudShadow, { albedo, cover, nrm, ao, geographicImagery, photoDetail: preparedPhoto }, aerial, curvature, nearDetail, sourceField);
+    } catch (error) { sourceField?.dispose(); geographicImagery?.dispose(); preparedPhoto.dispose(); throw error; }
   }
 
   constructor(meta, heights, img, front = "NELLIS", cloudShadow = null, drape = {}, aerial = null, curvature = null, nearDetail = true, sourceField = null) {
@@ -145,6 +150,9 @@ export class Terrain {
     this.uPreviousDetailCamera = uniform(new THREE.Vector3());
     this.surfaceMotion = curvature ? null : new TerrainSurfaceMotion();
     this.drape = drape;
+    this.photoDetail = drape.photoDetail || null;
+    this.geographicImagery = drape.geographicImagery || null;
+    this._geographicEnabled = true;
     this.aerial = aerial; // MAXFI A3: { trans(wp), ins(wp), uSunI } or null
     this.front = front;
     // Projector retained for scene lighting; bind it to the directional Sun.
@@ -334,12 +342,15 @@ export class Terrain {
       ? sourceField.normalNode(mapPosition, bakedNormal, sampleBaseGeometryH)
       : bakedNormal).toVar("terrainBaseNormalWorld");
     const albedoTex = this.drape.albedo, coverTex = this.drape.cover, aoTex = this.drape.ao;
-    const imageColor = albedoTex ? texture(albedoTex, worldUV(mapPosition)).rgb : null;
+    const baseImageColor = albedoTex ? texture(albedoTex, worldUV(mapPosition)).rgb : null;
+    const imageColor = baseImageColor && this.geographicImagery
+      ? geographicImageryNode(this.geographicImagery, mapPosition, baseImageColor) : baseImageColor;
     const materialsEnabled = typeof location === "undefined" ||
       new URLSearchParams(location.search).get("terrainmaterials") !== "0";
     const detail = materialsEnabled ? terrainMaterialNodes({
       front: this.front, baseNormal, imageColor, worldPosition: mapPosition,
       coverage: coverTex ? texture(coverTex, worldUV(mapPosition)).r : float(1),
+      photoDetail: this.photoDetail,
     }) : null;
     const flatNormal = detail ? detail.normalWorld : baseNormal;
     const renderNormal = this.curvature ? this.curvature.normalNode(flatNormal, mapPosition) : flatNormal;
@@ -444,6 +455,7 @@ export class Terrain {
         const cov = coverTex ? texture(coverTex, worldUV(wp)).r : float(1.0);
         c = mix(c, ci, cov);
       }
+      if (detail?.albedoNode) c = detail.albedoNode(c);
       let waterK = null;
       if (shore) {
         // item 6a: fade imagery AND ramps to the water shader's own color
@@ -486,10 +498,14 @@ export class Terrain {
 
   setDetailTier(tier) {
     this.detailTransition.setEnabled(tierHasNearTerrain(tier));
+    this._geographicEnabled = tier === "HIGH" || tier === "ULTRA";
   }
 
   // Main-view update only. Other camera passes reuse this frame's geometry.
   update(camera, renderDt = 0) {
+    this.geographicImagery?.update({ x: camera.position.x, z: camera.position.z,
+      heightAboveGroundM: camera.position.y - this.heightAt(camera.position.x, camera.position.z),
+      enabled: this._geographicEnabled });
     this.surfaceMotion?.update(camera);
     const historyValid = (this.curvature || this.surfaceMotion).historyValid.value;
     this.detailTransition.advance(renderDt, historyValid);

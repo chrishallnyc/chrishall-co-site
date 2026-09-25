@@ -63,7 +63,7 @@ export function cloudNoiseFromData(data) {
 }
 
 // Explicit synchronous bake, suitable for the small fallback or offline tools.
-// Runtime Ultra selection goes through loadCloudNoise: never bake 256^3 on boot.
+// Runtime High/Ultra selection uses loadCloudNoise; only Standard bakes on fallback.
 export function makeCloudNoise(seed = 1337, options = {}) {
   return cloudNoiseFromData(bakeCloudNoiseData(seed, options));
 }
@@ -153,14 +153,14 @@ export async function loadCloudNoise({
   cloudNoiseSize({ resolution });
   const directory = new URL(baseURL, import.meta.url);
   if (!directory.pathname.endsWith("/")) throw new Error("Cloud-noise baseURL must be a directory");
-  const attempts = resolution === "ultra" && fallback ? ["ultra", "standard"] : [resolution];
+  const attempts = (resolution === "ultra" || resolution === "high") && fallback ? [resolution, "standard"] : [resolution];
   let lastError;
   for (const target of attempts) {
     try { return await loadAsset(directory, seed, target, signal); }
     catch (error) {
       if (signal?.aborted || !fallback) throw error;
       lastError = error;
-      onFallback?.({ from: target, to: target === "ultra" ? "standard asset" : "standard bake", error });
+      onFallback?.({ from: target, to: target !== "standard" ? "standard asset" : "standard bake", error });
     }
   }
   // The original 128/64 generator is the final offline/missing-asset fallback.

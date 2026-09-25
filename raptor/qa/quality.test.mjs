@@ -2,7 +2,7 @@ import test, { beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { QualityBenchmark } from '../src/engine/qualitybench.js';
-import { qualityProfile, qualityWorkload, cloudQuality, QUALITY_PROFILE_VERSION } from '../src/engine/cloudquality.js';
+import { qualityProfile, qualityWorkload, cloudQuality, cloudOptionsFromFlags, QUALITY_PROFILE_VERSION } from '../src/engine/cloudquality.js';
 import { detectTier, hasManualTier, setTier, saveBench, isCompatibleBench } from '../src/engine/quality.js';
 
 const storage = new Map();
@@ -50,7 +50,7 @@ test('water rendering overrides cannot reuse the default workload benchmark', ()
   const record = { ms: 16.7, tier: 'LOW', backend: 'webgpu', profile: measured };
   saveBench(record);
   assert.equal(detectTier({ backend: 'webgpu', profile: measured }), 'LOW');
-  for (const query of ['watergrid=legacy', 'waterslopes=legacy', 'watershadow=0', 'waterenvsize=64', 'aircraftAir=0', 'aircraftShadows=0', 'reverseDepth=0']) {
+  for (const query of ['watergrid=legacy', 'waterslopes=legacy', 'watershadow=0', 'waterenvsize=64', 'aircraftAir=0', 'aircraftShadows=0', 'reverseDepth=0', 'skycache=0', 'geographicdetail=0', 'terrainphoto=0']) {
     const options = { backend: 'webgpu', profile: profile('NELLIS', query) };
     assert.equal(isCompatibleBench(record, options), false, query);
     assert.equal(detectTier(options), 'HIGH', query);
@@ -92,6 +92,14 @@ test('noise resolution is independent of output scale and native mode remains fu
   assert.equal(cloudQuality('LOW', { mode: 'adaptive', noise: 'ultra' }).noise, 'ultra');
   assert.equal(cloudQuality('HIGH', { mode: 'adaptive', scale: .5 }).scale, .5);
   assert.throws(() => cloudQuality('HIGH', { mode: 'adaptive', scale: 0 }));
+  for (const [tier, noise] of [['LOW', 'standard'], ['MED', 'standard'], ['HIGH', 'high'], ['ULTRA', 'ultra']]) {
+    assert.equal(cloudQuality(tier).noise, noise);
+    for (const selected of ['standard', 'high', 'ultra']) {
+      assert.equal(cloudQuality(tier, cloudOptionsFromFlags(new URLSearchParams({ cloudnoise: selected }))).noise, selected);
+    }
+  }
+  assert.equal(cloudQuality('HIGH', cloudOptionsFromFlags(new URLSearchParams('cloudnoise=unknown'))).noise, 'high');
+  assert.throws(() => cloudQuality('HIGH', { noise: 'unknown' }), /noise resolution/);
 });
 
 // Execute the actual boot decision code with renderer/adapter test doubles.
@@ -197,7 +205,7 @@ test('actual post options enable raw selection by default only for actual revers
   ]) assert.equal(postDepthOption(query, reversed), raw, `${query}, actual reverse=${reversed}`);
 });
 
-test('new default-depth policy rejects old no-flag timing records, then caches the new workload normally', () => {
+test('current graphics policy rejects old no-flag timing records, then caches the new workload normally', () => {
   const measured = profile(), prefix = QUALITY_PROFILE_VERSION + '/';
   assert.ok(measured.startsWith(prefix));
   // This is the previous exact key format, before the explicit policy prefix.
@@ -206,6 +214,10 @@ test('new default-depth policy rejects old no-flag timing records, then caches t
   saveBench(legacy);
   const options = { backend: 'webgpu', profile: measured };
   assert.equal(isCompatibleBench(legacy, options), false); // main instantiates a benchmark
+  assert.equal(detectTier(options), 'HIGH');
+  const previous = { ...legacy, profile: 'graphics-atmosphere-v3/' + legacyProfile };
+  saveBench(previous);
+  assert.equal(isCompatibleBench(previous, options), false);
   assert.equal(detectTier(options), 'HIGH');
   saveBench({ ...legacy, profile: measured });
   assert.equal(detectTier(options), 'LOW');

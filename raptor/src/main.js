@@ -1,3 +1,4 @@
+import { loadTerrainImagery } from "./world/terrain-imagery-loader.js";
 import { installReversedDepthSort } from "./engine/reverseddepth.js";
 // RAPTOR boot: renderer (WebGPU with WebGL2 fallback), sim, input, debug, hooks.
 
@@ -35,7 +36,7 @@ import { AircraftLighting } from "./aircraft/lighting.js";
 import { updateF22Visuals } from "./aircraft/f22-lod.js";
 import { Soundscape } from "./game/soundscape.js";
 
-const VERSION = "1.6.0";
+const VERSION = "1.7.0";
 const PHASE = 12;
 
 // WebGPU and reverse-depth WebGL use [0,1]; ordinary WebGL uses [-1,1].
@@ -239,7 +240,15 @@ async function boot() {
           },
         };
         const { makeSkyRadiance } = await import("./world/sky-radiance.js");
+        let skyViewCache = null;
+        if (backend === "webgpu" && flags.get("skycache") !== "0") {
+          const { ObserverSkyViewCache } = await import("./world/sky-view-cache.js");
+          skyViewCache = new ObserverSkyViewCache({ renderer, luts, sourceUniforms, uFrameOrigin: uCamPos });
+          atmoH.skyViewCache = skyViewCache; state.skyViewCache = skyViewCache.stats;
+          window.addEventListener("pagehide", event => { if (!event.persisted) skyViewCache.dispose(); });
+        }
         const sharedSky = makeSkyRadiance({ luts, sourceUniforms, uFrameOrigin: uCamPos,
+          scatteringRadiance: skyViewCache?.radiance,
           cirrusAtlas: atmosphere.sky.cirrusAtlas, includeSolarDisc: true });
         atmosphere.sky.setHillaire(H.skySkyNode(nodeArgs), uSunI, sharedSky);
         // IBL's cube cameras are at the origin; only their ray direction is
@@ -347,8 +356,22 @@ async function boot() {
       // The complete field loads before ground placement and stays fixed
       // through later Auto/menu render-quality changes.
       const sourceManifest = sourcePreset === "16" ? "/assets/terrain/source/valdez-inland-16km.json" : null;
+      const geographicImagery = atmosphere.frontName === "NELLIS" && drape && backend === "webgpu"
+        && ["HIGH", "ULTRA"].includes(bootAssetTier) && flags.get("geographicdetail") !== "0"
+        ? loadTerrainImagery({
+          manifestURL: new URL("/assets/terrain/nellis-imagery/manifest.json", location.href),
+          maxTextureSize: textureLimit,
+          maxTextureArrayLayers: renderer.backend.device.limits.maxTextureArrayLayers,
+          onFailure: error => { state.terrainImageryFailure = String(error.message || error); },
+        }).then(stream => {
+          if (stream) window.addEventListener("pagehide", event => { if (!event.persisted) stream.dispose(); });
+          return stream;
+        }) : null;
       terrain = await Terrain.load("/assets/terrain/" + fg.asset, atmosphere.frontName,
-        groundCloudShadow, { drape, aerial: atmoH?.aerial, curvature, sourceManifest });
+        groundCloudShadow, { drape, aerial: atmoH?.aerial, curvature, sourceManifest, geographicImagery,
+          photoDetail: { tier: bootAssetTier,
+            requested: flags.get("terrainphoto") !== "0" && flags.get("terrainmaterials") !== "0" } });
+      window.addEventListener("pagehide", event => { if (!event.persisted) terrain?.photoDetail?.dispose(); });
       scene.add(terrain.group);
       if (fg.ocean && flags.get("nowater") !== "1") {
         let fft = null;
@@ -1059,14 +1082,33 @@ async function boot() {
   if (vol) { vol.uTime.value=0; vol.VC.updateCamera?.(camera); }
   if (atmoH) atmoH.uCamPos.value.copy(camera.position);
   atmosphere.update(camera);
+  atmoH?.skyViewCache?.update(camera.position);
   aircraftLighting.update(world.jet, terrain);
+  // Publish the final water environment before compiling the main graph.
+  // Publishing it later replaces envNode and recompiles the water material.
+  if (waterSkyEnvironment && waterSkyEnvironment.front < 0) {
+    try { waterSkyEnvironment.warmUp(camera, 0); }
+    catch (err) {
+      console.warn("Water environment warmup failed; existing scene IBL remains:", err && err.message);
+      waterSkyEnvironment.dispose(); waterSkyEnvironment = null;
+    }
+  }
   renderer.toneMappingExposure=atmosphere.exposure;
   if (!post) await renderer.compileAsync(scene,camera);
   // Real draws cover the post graph's own MRT, temporal and shadow variants.
   // No physics, input, audio or weapon effects advance during this warmup.
   for(let pass=0;pass<2;pass++) {
     await new Promise(requestAnimationFrame);
-    if(post)post.post.render();else renderer.render(scene,camera);
+    // Compile the real celestial MRT variants under the loading veil.
+    // Dusk should change uniforms, not stall the first visible night frame.
+    const celestial = pass === 0 ? [atmosphere.stars.points, atmosphere.stars.moon] : [];
+    const visibility = celestial.map(object => object.visible);
+    for (const object of celestial) object.visible = true;
+    try {
+      if(post)post.post.render();else renderer.render(scene,camera);
+    } finally {
+      celestial.forEach((object, i) => { object.visible = visibility[i]; });
+    }
     curvature?.endFrame();
     if (pass === 0) {
       curvature?.beginFrame(camera);
@@ -1223,6 +1265,7 @@ async function boot() {
     hud.update(player ? player.hudState() : testworldHudState(world, alpha));
     if (atmoH) atmoH.uCamPos.value.copy(camera.position);
     atmosphere.update(camera); // IBL sees the current observer on its first capture
+    atmoH?.skyViewCache?.update(camera.position);
     aircraftLighting.update(world.jet, terrain);
     uMoonAngularRadius.value = atmosphere.moonState.angularRadius;
     if (waterSkyEnvironment) {
