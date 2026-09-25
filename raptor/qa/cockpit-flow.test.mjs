@@ -76,6 +76,38 @@ test('campaign continuation follows the persisted next mission, never the curren
   assert.equal(flightContinuation(flight).nextMission, null);
 });
 
+test('a standalone direct link pauses for its named briefing before the mission starts', () => {
+  storage();
+  const h=harness({flags:'sortie=Y01&front=NEWYORK',reason:'scenario'});
+  let reason;
+  h.cockpit.pause=value=>{reason=value;};
+  h.cockpit.onReady();
+  assert.equal(reason,'scenario');
+  h.cockpit.showPause();
+  assert.equal(h.cockpit.pauseDialog.el.querySelector('h2').textContent,'Harbor Watch');
+  assert.equal(h.cockpit.pauseDialog.el.querySelector('.eyebrow').textContent,'Alternate history · Standalone scenario');
+  assert.match(h.body.innerHTML,/mission clock is paused/);
+  assert.match(h.body.innerHTML,/Begin Harbor Watch/);
+  assert.doesNotMatch(h.body.innerHTML,/Quick battle|data-next/);
+});
+
+test('standalone success and failure offer replay without campaign continuation or misleading progress copy', () => {
+  for(const over of [1,-1]) {
+    storage();
+    const h=harness({flags:'sortie=Y01&front=NEWYORK',reason:'result',over,saved:over===1?true:undefined});
+    h.cockpit.showPause();
+    assert.match(h.body.innerHTML,/Replay Harbor Watch/);
+    assert.match(h.body.innerHTML,/campaign progress is unchanged/);
+    assert.doesNotMatch(h.body.innerHTML,/data-next|Complete its objectives to advance/);
+    if(over<0)assert.match(h.body.innerHTML,/before any impact is depicted/);
+    h.body.querySelector('[data-restart]').onclick();
+    assert.equal(h.calls.confirmation.title,'Replay Harbor Watch?');
+    assert.equal(h.calls.confirmation.options.label,'Replay Harbor Watch');
+    h.calls.confirmation.action();
+    assert.equal(h.calls.reload,1);
+  }
+});
+
 test('operation continuation describes the next generated sortie only after the front is persisted', () => {
   storage();
   const before = freshSave('NELLIS'), mission = genMission(before);

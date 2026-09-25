@@ -3,14 +3,15 @@
 // FlightModel through the WT-style instructor. Runs as a SimCore system —
 // inputs are sampled per TICK (the replay/netcode boundary), rendering only
 // interpolates. Frames: FM world is ENU (+x east, +y north, +z up); the game
-// renders x=east, y=up, z=north — an improper axis swap, so orientation
-// crosses via basis vectors (makeBasis re-orthogonalizes handedness).
+// renders x=east, y=up, z=north — an improper axis swap. The view and
+// F-22 frame preserve that reflection; rotations cross via basis vectors.
 
 import * as THREE from "three";
 import { FlightModel, S } from "../sim/flight.js";
 import { Gun } from "./gun.js";
 import { Missiles } from "./missiles.js";
 import { createAircraftPose } from "../aircraft/pose.js";
+import { useENUF22Frame } from "../engine/renderhandedness.js";
 
 const MOUSE_SENS = 0.0028;      // rad of aim per px of mouse travel
 const THROTTLE_RATE = 0.45;     // per second held (0 -> 100% in ~2.2s)
@@ -19,9 +20,10 @@ const AIM_PITCH_LIM = 80 * Math.PI / 180;
 const CAMERA_UP_TAU = 0.07;   // short horizon easing; aiming direction stays immediate
 
 export class Player {
-  constructor(scene, { jet, parts, terrain, spawn, battlefield, directory }) {
-    this.jet = jet;             // the F-22 group (taken over from TestWorld)
+  constructor(scene, { jet, parts, terrain, spawn, battlefield, directory, obstacles = null }) {
+    this.jet = useENUF22Frame(jet); // F-22 group (taken over from TestWorld)
     this.terrain = terrain || null;
+    this.obstacles = obstacles;
     this.battlefield = battlefield || null;
     this.directory = directory || null; // W1 unified targets (ground + air)
     this.spawn = spawn;
@@ -236,7 +238,8 @@ export class Player {
 
     // gear-up terrain/water contact = crash → respawn (proper damage phase 8)
     const agl = st[S.PZ] - Math.max(groundH, 0);
-    if (agl < 1.5 && !this.gearDown) { this.crashes++; this.reset(); }
+    const structureHit = this.obstacles?.intersectsSegment(this._prev, st, 3);
+    if (structureHit || (agl < 1.5 && !this.gearDown)) { this.crashes++; this.reset(); }
   }
 
   hash(h) {

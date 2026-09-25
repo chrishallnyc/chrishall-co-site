@@ -88,6 +88,11 @@ const G = 9.81;
 // Per-front spectra. frac = share of the pinned total variance per lobe.
 // ---------------------------------------------------------------------------
 const SPECTRA = {
+  NEWYORK: {
+    hsTarget: 0.35, chop: 0.65,
+    foamThresh: 0.76, foamGain: 1.2, foamTauSec: 3.0,
+    lobes: [{ kind: "jonswap", U10: 4.5, fetchKm: 12, gamma: 3.3, dirDeg: 225, spreadPow: 4, frac: 1.0 }],
+  },
   VALDEZ: {
     hsTarget: 0.5, chop: 0.8,
     foamThresh: 0.72, foamGain: 2.0, foamTauSec: 4.0,

@@ -432,6 +432,10 @@ export class Terrain {
         // snow: altitude-gated, avoids the steepest faces, macro-raggedy line
         const snowLine = macro.mul(220.0).add(1000.0);
         c = mix(c, snow, smoothstep(snowLine, snowLine.add(180.0), h).mul(smoothstep(0.85, 0.45, slope)));
+      } else if (front === "NEWYORK") {
+        // A neutral coastal fallback remains plausible if aerial imagery is disabled.
+        c = mix(vec3(...srgbLin(0x70736b)), vec3(...srgbLin(0x46513e)), smoothstep(18, 110, h));
+        c = mix(c, vec3(...srgbLin(0x777971)), smoothstep(0.3, 0.8, slope));
       } else if (front === "MARIANAS") {
         const R = RAMPS.MARIANAS;
         const beach = vec3(...R.beach), jungle = vec3(...R.jungle), scrubl = vec3(...R.scrubland);
@@ -488,8 +492,8 @@ export class Terrain {
         const sd = texture(shore.tex, worldUV(wp)).r.mul(shore.maxDist);
         const wDeep = float(1.0).sub(smoothstep(-3.0, -1.0, h));
         waterK = wDeep.mul(smoothstep(40.0, 220.0, sd));
-        const deepW = front === "VALDEZ" ? srgbLin(0x0e2e33) : srgbLin(0x06334e);
-        const shalW = front === "VALDEZ" ? srgbLin(0x2e6b66) : srgbLin(0x2ba098);
+        const deepW = srgbLin(front === "VALDEZ" ? 0x0e2e33 : front === "NEWYORK" ? 0x122f3b : 0x06334e);
+        const shalW = srgbLin(front === "VALDEZ" ? 0x2e6b66 : front === "NEWYORK" ? 0x3c5855 : 0x2ba098);
         const waterC = mix(vec3(...shalW), vec3(...deepW), smoothstep(20.0, 520.0, sd));
         c = mix(c, waterC, waterK);
       }

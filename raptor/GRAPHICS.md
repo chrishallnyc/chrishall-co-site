@@ -176,6 +176,43 @@ bounded four-second load completes before material compilation; any failure
 keeps the procedural material. Other fronts and lower asset tiers do not fetch
 them. The packed array adds about 9.3 MiB over the procedural material textures.
 
+## New York terrain and city
+
+New York uses a 65.536 km square centered at 40.70° N, 74.00° W. USGS 3DEP
+elevations are sampled onto a 4096² heightfield; USGS/USDA NAIP imagery supplies
+16,384² and 4096² drapes. The 16K image has nominal 4 m output pixels; this does
+not increase the source imagery's resolution. The export aligns image pixel
+centers with the terrain grid and preserves the geographic aspect ratio.
+Tidal water uses a -15 m rendering floor rather than measured bathymetry.
+Source requests, raster metadata, hashes, and coverage are retained in the
+[terrain provenance](assets/terrain/newyork-provenance.json).
+
+`world/newyork.js` places about 56,000 simplified buildings from the NYC OTI
+Building Footprints snapshot. Source roof heights and ground elevations are
+converted from US feet to metres. The geometry uses oriented rectangular
+masses and authored facade shading, not complete footprint extrusions.
+Thirteen recognizable landmark silhouettes and six major bridges use original
+procedural geometry. The modern skyline includes One World Trade Center,
+Empire State, Chrysler, and the Statue of Liberty.
+
+Ordinary buildings share instanced box geometry and a facade material in
+spatial chunks; landmark and bridge parts are merged by material and chunk.
+Distance culling has hysteresis at the far visibility boundary. Facades retain
+filtered window detail and fade window emission with the Sun's elevation.
+The scene uses the shared atmospheric lighting and planet-curvature frame.
+CPU collision checks sweep the aircraft's segment through spatially indexed
+building and bridge volumes, independently of visual culling. Native checks
+bound city geometry and draw submissions; those budgets do not establish a
+frame rate on every device. Auto resolution and manual quality settings remain
+available for the combined city, sky, and water workload.
+
+Harbor Watch selects the `2001-aftermath` city variant. It excludes buildings
+with later construction years, omits the World Trade Center site, and adds
+24 instanced, non-interactive haze cards. No impact, fire, or destruction
+animation is simulated there. The contemporary footprint snapshot cannot
+restore demolished buildings or resolve unknown dates; the imagery is modern.
+This variant is a stylized alternate-history setting, not a historical survey.
+
 ## Assets
 
 - `bakery/bake_cloud_noise.mjs`: deterministic Standard/High/Ultra noise assets.
@@ -186,6 +223,11 @@ them. The packed array adds about 9.3 MiB over the procedural material textures.
   pair, with [source request, hashes and credits](assets/terrain/source/ASSET-CREDITS.md).
 - [Nellis imagery credits](assets/terrain/nellis-imagery/ASSET-CREDITS.md):
   USGS/USDA sources, geographic grid and base-image correction.
+- `bakery/bake_newyork.py`: New York's USGS heightfield and NAIP drapes, with
+  [source credits](assets/terrain/newyork-ASSET-CREDITS.md) and pinned export hashes.
+- `bakery/bake_newyork_city.py`: NYC building snapshot with
+  [source credits](assets/city/ASSET-CREDITS.md), construction years, and provenance.
+  [Map credits](terrain-credits.html) provides the player-facing attribution.
 - [Scanned material credits](assets/terrain-photo/ASSET-CREDITS.md): CC0 rock
   and snow, physical scales, hashes and filtered moment encoding.
 - [Lunar map credits](assets/sky/ASSET-CREDITS.md): source and attribution.
@@ -336,3 +378,15 @@ visual comparisons are still needed to accept shader or appearance changes.
 Frame-budget and environment-scheduling checks cover settling, manual overrides,
 bounded resolution changes and fair probe updates. Cloud checks cover initial
 cache warmup and the adaptive pass's shared lighting cache.
+
+### Geographic presentation handedness
+
+Simulation uses east/north/up, while the existing scene stores east/up/north.
+`installENUView(renderer, camera)` preserves this reflection in the main camera's
+true view inverse and includes view parity in WebGPU pipeline winding/cache
+keys and WebGL draw state. Shadow, reflection and fullscreen cameras retain
+their own parity. The F-22 outer frame reflects its authored right-handed model;
+the +Z-forward bandit models retain their existing frames. Authored tangent
+bitangents include object and view parity. No simulation poses, inputs, or hashes
+are changed. This corrects mirrored geography and pointer steering without
+rebaking geographic assets or changing the coordinate contract.

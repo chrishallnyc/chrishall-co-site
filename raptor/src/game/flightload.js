@@ -32,13 +32,14 @@ export async function loadRequestedFlight(flags, modules = importModules) {
       throw new Error('This mission link disables a required flight system.');
     }
     const M = await modules.missions();
-    let spec, extraLines = null, authored = null, campaign = null;
+    let spec, meta = null, extraLines = null, authored = null, campaign = null;
     if (request.kind === 'campaign') {
       const A = await modules.authored();
       const sortie = await A.loadSortie(request.id);
       spec = sortie.spec;
+      meta = sortie.meta;
       extraLines = sortie.lines;
-      authored = { A, id: request.id, saved: false };
+      authored = { A, id: request.id, saved: false, standalone: A.isStandaloneSortie?.(request.id) || false };
     } else if (request.kind === 'operation') {
       if (!['NELLIS', 'VALDEZ', 'MARIANAS'].includes(request.id)) throw new Error('Unknown operation region.');
       const E = await modules.operation();
@@ -49,7 +50,10 @@ export async function loadRequestedFlight(flags, modules = importModules) {
     } else {
       spec = M.loadMission(request.id);
     }
-    return { request, spec, authored, campaign, lines: { ...M.COMMS_LINES, ...extraLines } };
+    if (spec.bandits?.length && flags.get('bandits') === '0') {
+      throw new Error('This mission requires enemy aircraft, but this link disables them.');
+    }
+    return { request, spec, meta, authored, campaign, lines: { ...M.COMMS_LINES, ...extraLines } };
   } catch (cause) {
     throw new FlightLoadError('The selected mission could not be prepared.', { cause, request });
   }

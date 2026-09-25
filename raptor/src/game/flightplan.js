@@ -1,10 +1,14 @@
 export const PREFLIGHT_KEY='raptor.preflight.v1';
-export const FRONTS=['NELLIS','VALDEZ','MARIANAS'];
+export const FRONTS=['NELLIS','VALDEZ','MARIANAS','NEWYORK'];
 export const MODES=['practice','battle','campaign','operation'];
 export const TIMES=['noon','afternoon','golden'];
 export function validateFlightPlan(value) {
   const v=value && typeof value==='object'?value:{};
-  return {front:FRONTS.includes(v.front)?v.front:'NELLIS',mode:MODES.includes(v.mode)?v.mode:'practice',time:TIMES.includes(v.time)?v.time:'noon'};
+  const front=FRONTS.includes(v.front)?v.front:'NELLIS';
+  const mode=MODES.includes(v.mode)?v.mode:'practice';
+  // New York offers free flight and its explicitly selected standalone
+  // scenario. The linear campaign still chooses its own region.
+  return {front,mode:front==='NEWYORK'&&['battle','operation'].includes(mode)?'practice':mode,time:TIMES.includes(v.time)?v.time:'noon'};
 }
 export function flightURL(value, sortie) {
   const p=validateFlightPlan(value);
@@ -14,7 +18,7 @@ export function flightURL(value, sortie) {
     query.set('front',sortie.front);query.set('sortie',sortie.id);
   } else if(p.mode==='operation')query.set('op','1');
   else {
-    const golden={NELLIS:18.8,VALDEZ:21.4,MARIANAS:17.8};
+    const golden={NELLIS:18.8,VALDEZ:21.4,MARIANAS:17.8,NEWYORK:18.4};
     query.set('tod',String(p.time==='noon'?12:p.time==='afternoon'?15.5:golden[p.front]));
     if(p.mode==='practice'){query.set('mode','practice');query.set('nobattle','1');query.set('nomatch','1');}
   }

@@ -32,6 +32,9 @@ const TYPE = {
 
 // [type, xEast, yNorth, yaw(three-frame rad, cosmetic)]
 const FRONTS = {
+  // The city remains a civilian landscape. Only explicitly launched air
+  // scenarios introduce threats; there is no standing ground war here.
+  NEWYORK: [],
   NELLIS: [
     // supply convoy on the eastern basin floor
     ["supply_truck", 2600, -8200, 0.45], ["supply_truck", 2540, -8140, 0.45],
@@ -93,6 +96,8 @@ const RESERVE_TYPES = [
 //            variance 27.3m, sd 7.8m; 4.4 km from the Saipan ZSU (outside
 //            its 2600m AAA range — you can rearm unshelled).
 export const FRONT_AIRFIELDS = {
+  // JFK runway area, ENU relative to 40.70 N / 74.00 W.
+  NEWYORK: { x: 18680, y: -6520, r: 900 },
   NELLIS: { x: -3000, y: -8700, r: 900 },
   VALDEZ: { x: 0, y: -6000, r: 600 },
   MARIANAS: { x: -3200, y: -8000, r: 600 },

@@ -43,7 +43,7 @@ function compile(api,options={}){
  try{builder.build();}finally{console.warn=warn;}
  const uniforms=Object.values(builder.uniforms).flat();
  const names=uniforms.map(u=>u.node?.value?.name).filter(Boolean);
- const result={...f,vertex:builder.vertexShader,fragment:builder.fragmentShader,names,warnings};
+ const result={...f,vertex:builder.vertexShader,fragment:builder.fragmentShader,names,warnings,uniforms};
  target?.dispose();f.material.normalMap?.dispose();f.material.clearcoatNormalMap?.dispose();nodeMaterial.dispose();f.material.dispose();f.geometry.dispose();
  return result;
 }
@@ -72,6 +72,25 @@ for(const api of ['wgsl','glsl'])test(`${api} authored UV0 tangents do not repla
  assert.match(vertex,/uv1/,'Clearcoat retains its own UV1 chart');
  assert.match(fragment,api==='wgsl'?/dpdx\( planetObject0UnbentViewPosition \)/:/dFdx\( planetObject0UnbentViewPosition \)/,
   'Clearcoat reconstructs its derivative frame even when UV0 has authored tangents');
+});
+
+for(const api of ['wgsl','glsl'])test(`${api} authored tangent parity follows both the object and actual camera view`,()=>{
+ const {uniforms,fragment}=compile(api,{tangent:true});
+ const node=uniforms.map(u=>u.node).find(u=>u.name==='planetTangentHandedness');
+ assert.ok(node,'The authored frame receives a per-object handedness uniform');
+ assert.match(fragment,/planetTangentHandedness/);
+ for(const objectSign of [-1,1])for(const cameraSign of [-1,1]){
+  const object={matrixWorld:new THREE.Matrix4().makeScale(objectSign,1,1)};
+  const camera={matrixWorldInverse:new THREE.Matrix4().makeScale(cameraSign,1,1)};
+  node.update({object,camera});
+  assert.equal(node.value,objectSign*cameraSign);
+  const modelView=new THREE.Matrix4().multiplyMatrices(camera.matrixWorldInverse,object.matrixWorld);
+  const normal=new THREE.Vector3(0,0,1).applyNormalMatrix(new THREE.Matrix3().getNormalMatrix(modelView));
+  const tangent=new THREE.Vector3(1,0,0).transformDirection(modelView);
+  const rebuilt=new THREE.Vector3().crossVectors(normal,tangent).multiplyScalar(node.value);
+  const expected=new THREE.Vector3(0,1,0).transformDirection(modelView);
+  assert.ok(rebuilt.distanceTo(expected)<1e-12,'The mapped green channel follows the transformed surface bitangent');
+ }
 });
 
 test('planet bender rejects authored normal/MRT/deformation contracts',()=>{

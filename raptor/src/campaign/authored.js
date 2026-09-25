@@ -47,7 +47,16 @@ export const CAMPAIGN = [
   { id: "M10", front: "MARIANAS" },
 ];
 
+// Standalone scenarios are available immediately and never join the
+// campaign's unlock chain or completion count.
+export const SCENARIOS = [
+  { id: "Y01", front: "NEWYORK", title: "Harbor Watch", category: "Alternate history",
+    description: "A fictional New York air-defense mission set after the attacks of September 11, 2001." },
+];
+export function isStandaloneSortie(id) { return SCENARIOS.some(s => s.id === id); }
+
 const FILE = {
+  Y01: "newyork-01",
   N01: "nellis-01", N02: "nellis-02", V01: "valdez-01", V02: "valdez-02", M01: "marianas-01", M02: "marianas-02",
   N03: "nellis-03", N04: "nellis-04", V03: "valdez-03", V04: "valdez-04", M03: "marianas-03", M04: "marianas-04",
   N05: "nellis-05", N06: "nellis-06", V05: "valdez-05", V06: "valdez-06", M05: "marianas-05", M06: "marianas-06",
@@ -55,6 +64,7 @@ const FILE = {
   N09: "nellis-09", N10: "nellis-10", V09: "valdez-09", V10: "valdez-10", M09: "marianas-09", M10: "marianas-10",
 };
 const KEY = "raptor.auth.v1";
+const SCENARIO_KEY = "raptor.scenarios.v1";
 let lastSaveSucceeded = null;
 export function authSaveSucceeded() { return lastSaveSucceeded; }
 
@@ -79,21 +89,38 @@ export function isUnlocked(auth, idx) {
 }
 
 export function markDone(id) {
+  if (isStandaloneSortie(id)) {
+    const a = loadScenarioProgress();
+    if (!a.done[id]) {
+      a.done[id] = 1;
+      try { localStorage.setItem(SCENARIO_KEY, JSON.stringify(a)); lastSaveSucceeded = true; }
+      catch (_) { lastSaveSucceeded = false; }
+    } else lastSaveSucceeded = true;
+    return a;
+  }
   const a = loadAuth();
   if (!a.done[id]) { a.done[id] = 1; saveAuth(a); }
   else lastSaveSucceeded = true;
   return a;
 }
 
+export function loadScenarioProgress() {
+  try {
+    const a = JSON.parse(localStorage.getItem(SCENARIO_KEY) || "null");
+    if (a && a.v === 1 && a.done && typeof a.done === "object") return a;
+  } catch (_) { /* storage unavailable */ }
+  return { v: 1, done: {} };
+}
+
 // resolves the module, validates its spec through the one door, and hands
 // back the comms text table for the HUD. Throws on unknown id / invalid spec.
 export async function loadSortie(id) {
-  const file = FILE[id];
+  const file = Object.hasOwn(FILE, id) ? FILE[id] : null;
   if (!file) throw new Error("unknown sortie " + id);
   const [mod, L] = await Promise.all([
     import(`./sorties/${file}.js`),
     import("./sorties/lines.js"),
   ]);
   const s = mod.default;
-  return { id, meta: s, spec: loadMission(s.spec), lines: L.LINES || L.default || {} };
+  return { id, meta: s, spec: loadMission(s.spec), lines: { ...(L.LINES || L.default || {}), ...s.lines } };
 }

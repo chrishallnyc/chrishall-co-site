@@ -34,6 +34,15 @@ const PLACE_THRESH = 0.52;  // coverage above this births a puff
 // lighting, wind, and the shadow projector. Same table shape as daycycle's
 // STOPS and water's SEA_STATES.
 export const CLOUD_CLIMATES = {
+  NEWYORK: { // Clear coastal air leaves the skyline readable below scattered clouds.
+    coverage: 0.14, freq: 6, contrast: 3.0, seed: 404,
+    baseAlt: 2200, yJitter: 140, puffW: [900, 1600], puffH: [380, 700],
+    budget: 95, scatter: 0.15, towers: 0,
+    windFromDeg: 225, windSpd: 4.5,
+    lit: [1.0, 0.99, 0.97], shade: [0.54, 0.59, 0.66],
+    gradLo: 0.05, gradHi: 0.8, density: 0.88, baseSoft: 0.16, vertFadeK: 0.5,
+    shadowFloor: 0.55,
+  },
   VALDEZ: {   // maritime stratus deck: low, flat, gray, near-overcast
     coverage: 0.72, freq: 3, contrast: 1.8, seed: 101,
     baseAlt: 700, yJitter: 200, puffW: [2400, 3800], puffH: [240, 400],

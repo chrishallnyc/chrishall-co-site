@@ -3,7 +3,8 @@ import { ControlsMenu } from './controlsmenu.js';
 import * as SETTINGS from './settings.js';
 import { PilotLog, FRONTS, campaignCatalog, campaignProgress, operationSummary, missionTypeLabel } from './pilotlog.js';
 import { PREFLIGHT_KEY, validateFlightPlan, flightURL } from './flightplan.js';
-import { jetMark, escapeHTML, readLocal, writeLocal, createGuide, confirmAction, fullscreen } from './ui.js';
+import { loadSortie } from '../campaign/authored.js';
+import { GameDialog, jetMark, escapeHTML, readLocal, writeLocal, createGuide, confirmAction, fullscreen } from './ui.js';
 
 // Lightweight aircraft linework keeps preflight independent of the 3D renderer.
 const deckAircraft = `<svg class="deck-aircraft" viewBox="0 0 340 260" aria-hidden="true" focusable="false">
@@ -28,6 +29,16 @@ const MODES=[
   {id:'operation',name:'Operation',note:'A persistent front line',number:'04'},
 ];
 
+// The campaign chooses its destination. Availability and the next mode must
+// use that same visible destination, not a region from an earlier practice.
+export function flightdeckFront(plan, nextMission) {
+  return plan.mode==='campaign' ? (nextMission?.front || plan.front) : plan.front;
+}
+export function selectFlightMode(plan, mode, nextMission) {
+  const front=plan.mode==='campaign'&&mode!=='campaign' ? flightdeckFront(plan,nextMission) : plan.front;
+  return validateFlightPlan({...plan,front,mode});
+}
+
 export function showFlightdeck(state) {
   document.getElementById('veil')?.remove();
   document.getElementById('chrome')?.remove();
@@ -48,6 +59,7 @@ export function showFlightdeck(state) {
       <div class="deck-input" aria-label="Choose your aiming setup"><span>Aim with</span><div class="deck-input-choices" role="group" aria-label="Pointing device"><button type="button" class="ui-button" data-deck-device="mouse" aria-pressed="false">Mouse</button><button type="button" class="ui-button" data-deck-device="trackpad" aria-pressed="false">Trackpad</button></div></div>
       <div class="deck-control-warning" id="deck-control-warning" role="status" hidden><span></span><button type="button" class="ui-button" data-review-keys>Review missing keys ↗</button></div>
       <div class="launch-bar"><button id="flyBtn" class="ui-button primary launch-button" type="button"><span id="launch-action">Start flying</span><span aria-hidden="true">↗</span></button><span id="setup-summary"></span></div>
+      <aside class="deck-scenario" id="newyork-scenario" hidden><div><span class="eyebrow">NEW YORK · STANDALONE MISSION</span><h2>Harbor Watch</h2><p>An alternate-history defense of the city.</p></div><button class="text-button" type="button" data-scenario-brief>Read briefing <span aria-hidden="true">↗</span></button></aside>
       <p id="deck-status" class="deck-status" role="status" aria-live="polite"></p></div>
       <div class="deck-destination" id="deck-destination"><span class="destination-label" id="destination-mode">PRACTICE FLIGHT</span>${deckAircraft}<div class="destination-caption"><span class="eyebrow">YOUR FLIGHT TAKES YOU TO</span><strong id="destination-name">Nellis</strong><span id="destination-place">Nevada test range</span></div><span class="destination-compass" aria-hidden="true">N<br>↑</span></div>
     </section>
@@ -56,7 +68,7 @@ export function showFlightdeck(state) {
     <section class="launch-layout"><div class="region-picker"><div class="section-heading"><h2 id="region-label">Select a region</h2><span id="region-note">Real terrain. Different challenges.</span></div><div class="region-grid" role="group" aria-labelledby="region-label">${Object.entries(FRONTS).map(([id,f])=>`<button type="button" class="region-card" data-front="${id}" aria-pressed="false"><span class="region-art" style="--terrain-image:url('/assets/preflight/${f.asset}.webp')"><span class="region-tag">${f.tag}</span><span class="region-compass" aria-hidden="true">N<br>↑</span></span><span class="region-copy"><b>${f.name}</b><small>${f.place}</small></span><span class="region-check" aria-hidden="true">✓</span></button>`).join('')}</div><div class="time-picker"><span id="conditions-label">Time of day</span><div class="time-choices" role="group" aria-label="Time of day">${[['noon','High noon'],['afternoon','Afternoon'],['golden','Golden hour']].map(([id,label])=>`<button type="button" class="ui-button" data-time="${id}" aria-pressed="false">${label}</button>`).join('')}</div><span id="mission-conditions" hidden>Conditions are part of the mission.</span></div></div>
     <article class="flight-brief" aria-labelledby="brief-title"><p class="eyebrow" id="brief-eyebrow"></p><h2 id="brief-title"></h2><p id="brief-copy"></p><ul id="brief-features"></ul><button class="text-button" type="button" id="brief-more" hidden>Read the full briefing <span aria-hidden="true">↗</span></button><div class="brief-footer" id="brief-footer"></div></article></section>
     <div class="customize-actions"><button class="ui-button" type="button" data-customize-done>Done</button></div></div></details></main>
-    <footer class="deck-footer"><span id="deck-storage-note">Progress & preferences save in this browser.</span><div><button type="button" class="text-button" data-fullscreen>Fullscreen</button><a href="/audio-credits.html" target="_blank" rel="noopener">Sound credits ↗</a><a href="/devlog.html" target="_blank" rel="noopener">Development notes ↗</a><span>RAPTOR 1.11.0</span></div></footer></div>`;
+    <footer class="deck-footer"><span id="deck-storage-note">Progress & preferences save in this browser.</span><div><button type="button" class="text-button" data-fullscreen>Fullscreen</button><a href="/terrain-credits.html" target="_blank" rel="noopener">Map credits ↗</a><a href="/audio-credits.html" target="_blank" rel="noopener">Sound credits ↗</a><a href="/devlog.html" target="_blank" rel="noopener">Development notes ↗</a><span>RAPTOR 1.12.0</span></div></footer></div>`;
 
   function refreshSetup() {
     const s=SETTINGS.current();
@@ -77,11 +89,16 @@ export function showFlightdeck(state) {
   function setText(id,value){root.querySelector('#'+id).textContent=value;}
   function refresh() {
     const progress=campaignProgress(),next=catalog.find(c=>c.id===progress.next?.id);
+    const shownFront=flightdeckFront(plan,progress.next);
     const scripted=plan.mode==='campaign'||plan.mode==='operation';
-    for(const b of root.querySelectorAll('[data-mode]')){b.classList.toggle('selected',b.dataset.mode===plan.mode);b.setAttribute('aria-pressed',String(b.dataset.mode===plan.mode));}
+    for(const b of root.querySelectorAll('[data-mode]')){
+      b.classList.toggle('selected',b.dataset.mode===plan.mode);b.setAttribute('aria-pressed',String(b.dataset.mode===plan.mode));
+      const unavailable=FRONTS[shownFront][b.dataset.mode]===false;
+      b.disabled=unavailable;
+      b.title=unavailable?'Choose Nellis, Valdez or Marianas for this flight type.':'';
+    }
     for(const b of root.querySelectorAll('[data-front]')){
-      const chosen=plan.mode==='campaign'?(next?.front||plan.front):plan.front;
-      b.classList.toggle('selected',b.dataset.front===chosen);b.setAttribute('aria-pressed',String(b.dataset.front===chosen));
+      b.classList.toggle('selected',b.dataset.front===shownFront);b.setAttribute('aria-pressed',String(b.dataset.front===shownFront));
       b.disabled=plan.mode==='campaign';
     }
     for(const b of root.querySelectorAll('[data-time]')){b.classList.toggle('selected',b.dataset.time===plan.time);b.setAttribute('aria-pressed',String(b.dataset.time===plan.time));}
@@ -89,7 +106,7 @@ export function showFlightdeck(state) {
     root.querySelector('#mission-conditions').hidden=!scripted;
     setText('conditions-label',scripted?'Flight conditions':'Time of day');
     setText('region-label',plan.mode==='campaign'?'Your next mission region':'Select a region');
-    setText('region-note',plan.mode==='campaign'?'The campaign takes you across all three fronts.':'Real terrain. Different challenges.');
+    setText('region-note',plan.mode==='campaign'?'The campaign takes you across three combat regions.':plan.front==='NEWYORK'?'Free flight + Harbor Watch.':'Real terrain. Different challenges.');
     setText('campaign-count',`${progress.completed} / ${progress.total} campaign missions complete`);
     root.querySelector('#deck-campaign-meter').value=progress.completed;
     root.querySelector('#deck-campaign-meter').max=progress.total;
@@ -107,7 +124,12 @@ export function showFlightdeck(state) {
     setText('brief-eyebrow',info.eyebrow);setText('brief-title',info.title);setText('brief-copy',info.copy);briefFooter=info.foot;
     root.querySelector('#brief-features').innerHTML=info.features.map(f=>`<li>${escapeHTML(f)}</li>`).join('');
     root.querySelector('#brief-more').hidden=plan.mode!=='campaign';
-    const destination=FRONTS[plan.mode==='campaign'?(next?.front||plan.front):plan.front];
+    const destination=FRONTS[shownFront];
+    root.querySelector('#newyork-scenario').hidden=plan.front!=='NEWYORK'||plan.mode==='campaign';
+    if(plan.front==='NEWYORK'&&plan.mode==='practice'){
+      setText('brief-title','A city worth flying over.');
+      setText('brief-copy','Follow the Hudson past Manhattan, turn over the East River bridges, or trace the harbor out to the Atlantic. Your flight starts with the skyline ahead.');
+    }
     const mode=MODES.find(m=>m.id===plan.mode);
     const conditions=scripted?'Mission conditions':({noon:'High noon',afternoon:'Afternoon',golden:'Golden hour'}[plan.time]);
     setText('launch-action',info.action);setText('launch-label',`${mode.name} · ${destination.name}`);
@@ -140,13 +162,35 @@ export function showFlightdeck(state) {
     if(b.dataset.open==='controls'||b.dataset.open==='settings')controls.show(b.dataset.open);
     else if(b.dataset.open==='guide')guide.show();else log.show();
   };
-  for(const b of root.querySelectorAll('[data-mode]'))b.onclick=()=>{plan.mode=b.dataset.mode;refresh();};
-  for(const b of root.querySelectorAll('[data-front]'))b.onclick=()=>{plan.front=b.dataset.front;refresh();};
+  for(const b of root.querySelectorAll('[data-mode]'))b.onclick=()=>{Object.assign(plan,selectFlightMode(plan,b.dataset.mode,campaignProgress().next));refresh();};
+  for(const b of root.querySelectorAll('[data-front]'))b.onclick=()=>{Object.assign(plan,validateFlightPlan({...plan,front:b.dataset.front}));refresh();};
   for(const b of root.querySelectorAll('[data-time]'))b.onclick=()=>{plan.time=b.dataset.time;refresh();};
   root.querySelector('#brief-more').onclick=()=>log.show(campaignProgress().next?.id);
   for(const button of root.querySelectorAll('[data-deck-device]'))button.onclick=()=>{const settings=SETTINGS.saveSettings({pointingDevice:button.dataset.deckDevice});input.setOptions(SETTINGS.getAimOptions(settings));};
   root.querySelector('[data-review-keys]').onclick=()=>controls.showMissingControls();
   root.querySelector('#flyBtn').onclick=launch;
+  root.querySelector('[data-scenario-brief]').onclick=()=>{
+    const dialog=new GameDialog({title:'Harbor Watch',label:'New York · Alternate history',className:'scenario-dialog',onClose:()=>dialog.el.remove()});
+    const prepare=async()=>{
+      dialog.body.innerHTML='<p class="dialog-intro" role="status">Preparing your mission briefing…</p>';
+      try{
+        const sortie=await loadSortie('Y01');
+        if(!dialog.open)return;
+        const paragraphs=sortie.meta.briefingIds.map(id=>sortie.lines[id]).filter(Boolean);
+        dialog.body.innerHTML=`<div class="scenario-place"><span>NEW YORK HARBOR</span><b>September 11, 2001</b></div><div class="scenario-narrative">${paragraphs.map(p=>`<p>${escapeHTML(p)}</p>`).join('')}</div><div class="scenario-flight-plan"><span class="eyebrow">YOUR FLIGHT</span><ol><li>Establish overwatch above the harbor.</li><li>Follow control’s calls and intercept the two identified threats.</li><li>Keep both aircraft outside the city’s protected airspace.</li></ol></div><p class="scenario-note">The aircraft, additional threats and response are fictional. This mission does not recreate the attacks. Campaign progress stays separate.</p><div class="dialog-actions"><button class="ui-button" type="button" data-scenario-cancel>Back to free flight</button><button class="ui-button primary" type="button" data-scenario-launch>Launch Harbor Watch ↗</button></div>`;
+        dialog.body.querySelector('[data-scenario-cancel]').onclick=()=>dialog.close();
+        dialog.body.querySelector('[data-scenario-launch]').onclick=event=>{
+          event.currentTarget.disabled=true;event.currentTarget.textContent='Preparing flight…';
+          location.assign('?front=NEWYORK&sortie=Y01');
+        };
+      }catch{
+        if(!dialog.open)return;
+        dialog.body.innerHTML='<p class="dialog-intro" role="status">The briefing could not load. Try again, or close this window to return to free flight.</p><button class="ui-button" type="button" data-scenario-retry>Retry briefing</button>';
+        dialog.body.querySelector('[data-scenario-retry]').onclick=prepare;
+      }
+    };
+    dialog.show();prepare();
+  };
   root.querySelector('[data-customize-done]').onclick=()=>{const panel=root.querySelector('#flight-customize'),launch=root.querySelector('#flyBtn');panel.open=false;(launch.disabled?panel.querySelector('summary'):launch).focus();};
   root.querySelector('[data-fullscreen]').onclick=e=>fullscreen(e.currentTarget);
   refresh();

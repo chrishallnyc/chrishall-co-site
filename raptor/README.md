@@ -1,8 +1,9 @@
 # RAPTOR
 
-F-22 air combat across Nevada, Alaska, and the Marianas. Includes free practice,
-quick battles, a 30-mission campaign, and generated operations with persistent
-front lines. The game uses native JavaScript modules, vendored Three.js, WebGPU
+F-22 flight across Nevada, Alaska, the Marianas, and New York City. Includes free
+practice, quick battles, a 30-mission campaign, generated operations with
+persistent front lines, and New York's standalone Harbor Watch scenario.
+The game uses native JavaScript modules, vendored Three.js, WebGPU
 with a WebGL2 fallback, and a deterministic 120 Hz flight simulation.
 
 [Play RAPTOR](https://raptor.chall.net/) · [Release notes](CHANGELOG.md)
@@ -209,6 +210,41 @@ battle. Small preflight images keep setup lighter than loading full terrain
 textures. The installable PWA caches its small shell, not every flight asset:
 a connection is still needed to load a complete flight.
 
+## New York City
+
+Open **Customize flight → New York → Done → Start flying** for a modern harbor
+flight with Manhattan ahead. Explore the Hudson, East River, Statue of Liberty,
+and the city's major bridges. The 65.536 km region combines real USGS elevation
+and NAIP aerial imagery with about 56,000 simplified buildings derived from NYC
+Building Footprints, thirteen authored landmarks, and six bridges. Buildings
+and bridges have collision volumes. The geographic sources, transformations,
+and limitations are recorded in [Map credits](terrain-credits.html).
+
+New York offers free flight and **Harbor Watch**, a separately selected mission.
+It does not generate quick battles or operations. The thirty-mission campaign
+continues across its original three combat regions.
+
+Select New York, then **Harbor Watch → Read briefing** to review and launch the
+scenario. It opens paused: read the objectives and choose **Begin Harbor Watch**
+when ready. The fictional September 11, 2001 aftermath places your F-22 above
+the harbor with two additional hijacked transports approaching the city.
+Establish overwatch at the marked area, then intercept both identified aircraft
+before either crosses the Lower Manhattan or Midtown protection boundary.
+Keep the target ahead until **LOCK** appears, then press your missile binding
+(**Space** by default). The eight-minute deadline and both protected areas
+remain active throughout the mission.
+
+The historical attacks are not recreated. The scenario begins afterward with
+restrained haze at the World Trade Center site; a failed interception ends at
+the airspace boundary before any building impact. The F-22 deployment and
+additional threats are invented. Modern aerial imagery and construction-year
+filtering provide a stylized setting, not an exact 2001 reconstruction.
+Scenario completion is saved separately from campaign progress, and its result
+card offers **Replay Harbor Watch**.
+
+Direct links: [New York free flight](https://raptor.chall.net/?front=NEWYORK&mode=practice)
+and [Harbor Watch](https://raptor.chall.net/?front=NEWYORK&sortie=Y01).
+
 ## Where to work
 
 | Location | Responsibility |
@@ -220,10 +256,11 @@ a connection is still needed to load a complete flight.
 | [src/aircraft/](src/aircraft/) | Aircraft geometry, materials, articulation, visual detail, lighting, and coating textures. |
 | [src/sim/](src/sim/) | Aircraft dynamics, aerodynamic data, instructor and weapon data. |
 | [src/engine/](src/engine/) | Fixed-step simulation, input, controller mapping, audio, graphics quality, post-processing and asynchronous exposure. |
-| [src/world/](src/world/) | Terrain, atmosphere, clouds and water. |
+| [src/world/](src/world/) | Terrain, atmosphere, clouds, water, and New York city geometry. |
 | [src/campaign/](src/campaign/) | Authored sorties, mission progression and generated operations. |
 | [assets/](assets/), [vendor/](vendor/) | Runtime assets and pinned dependencies; Three.js version is in [THREE_VERSION](vendor/THREE_VERSION). |
 | [bakery/bake_terrain.py](bakery/bake_terrain.py) | Optional terrain regeneration from external USGS GeoTIFFs; its Python dependencies and source tiles are not needed to play. |
+| [bakery/bake_newyork.py](bakery/bake_newyork.py), [bake_newyork_city.py](bakery/bake_newyork_city.py) | Reproducible New York elevation, aerial imagery, and building snapshot preparation. |
 | [qa/](qa/) | Native regression tests and browser playthroughs. |
 
 Standalone development pages: [aircraft](f22lab.html), [clouds](cloudslab.html),
@@ -298,10 +335,25 @@ flight selection and loading failures, camera/interpolation, pause input
 boundaries, flight coaching, aircraft controls, and asynchronous exposure.
 They also cover AUTO's frame budget, shared reflection scheduling, interpolated
 HUD positions, effect timing, cloud-cache warmup and terrain preparation.
+New York checks cover the city snapshot and geometry budget, geographic placement,
+building and bridge collisions, era filtering, scenario loading, save isolation,
+and mission success, boundary failure, and timeout. Its flight-model integration
+check completes both interceptions using ordinary aim, throttle, and missile
+inputs with production aircraft, target, and missile physics.
 The coach includes a real flight-model integration check driven by pointer
 deltas and held throttle inputs, alongside pure course-state tests. Native
 checks use the vendored modules without an npm installation or GPU. See the
 audio validation commands below for browser-dependent audio checks.
+
+To run only the New York native checks:
+
+```sh
+node --import ./raptor/qa/register-three.mjs --test \
+  raptor/qa/newyork-city.test.mjs \
+  raptor/qa/newyork-assets.test.mjs \
+  raptor/qa/city-collision-player.test.mjs \
+  raptor/qa/newyork-mission.test.mjs
+```
 
 With the static server running, an **existing Playwright installation** and
 Google Chrome are required for the browser checks:
@@ -319,6 +371,8 @@ node raptor/qa/loading.browser.mjs
 node raptor/qa/accessibility.browser.mjs
 node raptor/qa/missions.browser.mjs
 node raptor/qa/pointing.browser.mjs
+node raptor/qa/newyork.browser.mjs
+node raptor/qa/renderhandedness.browser.mjs
 ```
 
 If Playwright is not resolvable from this checkout, point to its existing module
@@ -359,7 +413,7 @@ crash and off-screen aim probes are separate from the flown training course.
 `guidance` checks independent overlays, accessibility preview and graphics restart.
 `accessibility` checks modal isolation, mute migration and illustrative previews.
 `loading` checks loading stages and recovery from missing game/mission files.
-The missions check flies all three regions, checks HIGH/WebGL paths, and injects
+The missions check flies the three campaign regions, checks HIGH/WebGL paths, and injects
 end-of-mission outcomes to test saving and debrief transitions; it does not
 claim to beat the missions. Checks do not use your normal browser profile or
 progress. Run GPU playthroughs one at a time; recording and other GPU activity

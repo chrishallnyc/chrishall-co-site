@@ -183,3 +183,20 @@ kbd{background:#a0b9ca0d;border-color:#8a9daa45;border-bottom-color:#8a9daa75;bo
 .pause-exit .pause-note{margin:0;text-align:right;font-size:10px;max-width:280px}
 .pause-continuation{font-size:12px;line-height:1.65;color:var(--mid);margin:14px 0 0}
 @media(max-width:760px){.pause-dialog .dialog-header{padding:20px}.pause-dialog .dialog-body{padding:20px}.welcome-guidance{padding:14px}.welcome-guidance>p{font-size:14px}.welcome-keys{gap:11px 15px}.pause-handoff{gap:12px;flex-wrap:wrap}.pause-options>summary>span{font-size:9px}.pause-exit{align-items:flex-start;gap:12px}.pause-exit .pause-note{font-size:9px}.pause-options .pause-grid .ui-button{font-size:11px}}
+
+/* Four destinations, with the story kept separate from the peaceful first flight. */
+.region-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.deck-scenario{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-top:27px;padding-top:21px;border-top:1px solid var(--hair)}
+.deck-scenario .eyebrow{font-size:9px;letter-spacing:1.3px;color:var(--dim)}
+.deck-scenario h2{font-size:19px;font-weight:500;letter-spacing:-.3px;margin:7px 0 6px}
+.deck-scenario p{font-size:12px;line-height:1.6;color:var(--mid)}
+.deck-scenario .text-button{font-size:12px;white-space:nowrap;min-height:44px}
+.mode-card:disabled{opacity:.4}
+.scenario-dialog{max-width:720px}
+.scenario-place{display:flex;justify-content:space-between;gap:14px;padding:18px 0 22px;border-bottom:1px solid var(--hair);font:10px var(--mono);letter-spacing:1.3px;color:var(--dim)}
+.scenario-place b{color:var(--ink);font-weight:400;letter-spacing:.4px}
+.scenario-narrative{padding:20px 0 2px}.scenario-narrative p{font-size:14px;line-height:1.8;color:var(--mid);margin-bottom:16px;text-wrap:pretty}
+.scenario-flight-plan{padding:19px 21px;background:#8da7b20c;border:1px solid #9eb2be30;border-radius:8px;margin:4px 0 20px}
+.scenario-flight-plan .eyebrow{font-size:10px}.scenario-flight-plan ol{margin:12px 0 0;padding-left:18px;color:var(--ink);font-size:13px;line-height:1.7}.scenario-flight-plan li+li{margin-top:8px}
+.scenario-note{font-size:11px;line-height:1.7;color:var(--dim);margin-bottom:24px}
+@media(max-width:480px){.region-grid{grid-template-columns:1fr}.deck-scenario{gap:12px}.deck-scenario .eyebrow{font-size:8px}.scenario-place{flex-direction:column;gap:9px}.scenario-dialog .dialog-actions{flex-direction:column-reverse}.scenario-dialog .dialog-actions .ui-button{width:100%}}
