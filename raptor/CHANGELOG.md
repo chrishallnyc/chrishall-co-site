@@ -1,6 +1,6 @@
 # RAPTOR release notes
 
-## 1.6.0 — 2026-09-24
+## 1.7.0 — 2026-09-24
 
 Clouds gain finer internal structure and more accurate lighting; close terrain
 resolves real aerial detail, irregular rock and snow surfaces, and steep slopes.
@@ -15,11 +15,37 @@ resolves real aerial detail, irregular rock and snow surfaces, and steep slopes.
   work, and retain compiled Sun/Moon programs through day/night changes. Detail
   assets have fixed memory limits, load deadlines and base-material fallbacks.
 - **Integration:** preserve the flight school and controls improvements from
-  1.5.0, update quality benchmark identities, and cover asset failures, moving
+  1.5.0 and 1.6.0, update quality benchmark identities, and cover asset failures, moving
   tile residency, cloud-cache publication and both shader backends.
 
 High and Ultra add detail and memory use; native 4K remains demanding. Measured
 component improvements and their limits are documented in [GRAPHICS.md](GRAPHICS.md).
+
+## 1.6.0 — 2026-09-24
+
+The visual keyboard is now the main control editor, with a complete MacBook
+layout and a rehearsal mode that shows what your real inputs would do.
+
+- **Recognize the keyboard.** Function keys, punctuation, both Shift keys,
+  wider modifier keys and an inverted-T arrow cluster match US MacBook
+  positions. Categories have distinct colors and named filters. Fn and Touch ID
+  are explained as macOS controls rather than assignable inputs.
+- **Edit directly.** Choose an unused key to add an action without replacing
+  existing bindings. Inspect full shortcuts and all alternates; related keys
+  and required modifiers highlight together. Existing conflict choices, Undo,
+  the four-binding limit and Escape protection remain in force.
+- **Rehearse safely.** Press actual keys or use mouse buttons over the diagram
+  to see held-key lighting, resolved actions and the last input. Nothing fires,
+  moves or changes bindings. Rehearsal follows the same modifier precedence as
+  flight and clears interrupted Command shortcuts, focus loss and wheel pulses.
+- **Navigate comfortably.** Arrow keys move spatially, Enter reaches the
+  selected key's editor, and Tab leaves the diagram in one step. Narrow layouts
+  scroll the keyboard locally. Laptop rehearsal keeps the entire keyboard
+  visible beside its feedback; compact arrow keys retain full accessible names.
+
+Native and isolated browser checks cover geometry, navigation, assignment,
+conflicts, saved layouts, rehearsal safety and responsive layouts. Physical
+MacBook trackpad behavior has not been tested by the agent.
 
 ## 1.5.0 — 2026-09-24
 

@@ -38,14 +38,37 @@ names missing bindings, and links directly to **Needs a key** for repair.
 The launch button stays available as you scroll; campaign progress is visible
 before you choose a flight.
 
-In **Controls**, **Edit keys** opens your current keyboard and pointer map.
-Choose a lit key or mouse button to inspect its action and complete shortcut,
-then **Change key** or **+ Add key** for an alternate. The map uses QWERTY key
-positions and shows custom inputs outside that layout separately. You can also
-search the full action list by action or key. Conflicts let you move a key,
-explicitly share it, or keep your current setup. **Restore action** resets only that action and
-explains any occupied defaults; **Undo** reverses the most recent layout edit,
-including any keys moved from other actions. Only implemented actions are offered.
+The visual keyboard is the main editor in **Controls**; **Edit keys** returns
+there from farther down the page. It follows a complete US MacBook layout,
+including function keys, punctuation, both Shift keys, and the inverted-T arrow
+cluster. Action colors and category filters help locate flight, weapon, aircraft,
+and interface controls without moving keys around. Other keyboard and mouse
+inputs remain visible separately.
+
+Choose any key or mouse button to inspect its complete shortcuts. The inspector
+shows **Hold** or **Press**, the action description, and every alternate binding.
+Dotted outlines connect alternates; dashed outlines identify required modifiers.
+Use **Change key** to replace a binding, **+ Add key** to capture an alternate,
+or choose an action directly on an unused key. Direct assignment keeps existing
+bindings and cannot silently replace a fourth slot. Conflicts let you move a key,
+explicitly share it, or keep the current setup. Escape always remains available.
+**Restore action** resets only that action and explains occupied defaults;
+**Undo** reverses the last edit, including bindings moved from other actions.
+
+Use arrow keys to explore the diagram, **Enter** to reach the selected key's
+editor, and **Home / End** for the first / last key. **Tab** leaves the diagram
+in one step. On narrow screens, swipe the keyboard sideways; the menu itself
+stays within the window. The full searchable action list is still below aiming
+options. Only implemented actions are offered.
+
+**Rehearse keys** lights the actual keys you hold and reports the actions that
+the flight input resolver would trigger, including shortcuts and shared keys.
+The last tap remains visible. Gameplay stays paused and bindings stay unchanged;
+**Tab** leaves the rehearsal area, **Esc** finishes, and collapsing the keyboard
+also ends rehearsal. Focus loss and interrupted Command shortcuts clear held
+inputs. F1–F12 may require Fn depending on macOS settings; Fn and Touch ID are
+managed by macOS and cannot be assigned from the browser.
+
 **Test your controls** previews aiming and held keys without moving or firing the
 aircraft; the last tap stays visible after you release it. **Try aim targets**
 adds five short pointer exercises to check your sensitivity. **Center preview**
@@ -150,6 +173,7 @@ a connection is still needed to load a complete flight.
 | Location | Responsibility |
 | --- | --- |
 | [index.html](index.html), [src/main.js](src/main.js) | Entry point, renderer initialization, game loop and system wiring. |
+| [src/game/keyboardlayout.js](src/game/keyboardlayout.js), [controlsmenu.js](src/game/controlsmenu.js), [controls.css](src/game/controls.css) | Physical keyboard geometry, visual binding editor and rehearsal, shared before and during flight. |
 | [src/game/](src/game/) | Preflight, controls/settings, pause menu, pilot log, HUD, player and combat systems. |
 | [src/game/flightcoach.js](src/game/flightcoach.js), [quicktune.js](src/game/quicktune.js), [flightbrief.js](src/game/flightbrief.js) | Telemetry-based practice course, paused setup shortcuts and mission objective overview; wired by [cockpit.js](src/game/cockpit.js). |
 | [src/aircraft/](src/aircraft/) | Aircraft geometry, materials, articulation, visual detail, lighting, and coating textures. |
@@ -223,6 +247,7 @@ node raptor/qa/browser.mjs
 node raptor/qa/controls.browser.mjs
 node raptor/qa/controls-history.browser.mjs
 node raptor/qa/control-layout.browser.mjs
+node raptor/qa/keyboard-workshop.browser.mjs
 node raptor/qa/flight-school.browser.mjs
 node raptor/qa/guidance.browser.mjs
 node raptor/qa/loading.browser.mjs
@@ -238,6 +263,10 @@ entry point; `HEADED=1` shows the isolated browser while it runs:
 PLAYWRIGHT_MODULE=/absolute/path/to/playwright/index.mjs \
 HEADED=1 node raptor/qa/browser.mjs
 ```
+
+To record the visual keyboard workshop, use `RAPTOR_RECORD=1` with
+`raptor/qa/keyboard-workshop.browser.mjs`. It exercises the actual controls
+component in a fresh browser context without loading a flight scene.
 
 To watch and record the flight school playthrough:
 

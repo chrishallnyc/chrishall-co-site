@@ -1,4 +1,4 @@
-# Graphics 1.6 validation
+# Graphics 1.7 validation
 
 This release was refined through six passes: redundant rendering work;
 cloud morphology; cloud lighting and source resolution; geographic terrain and
