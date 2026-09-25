@@ -1,5 +1,24 @@
 # RAPTOR release notes
 
+## 1.14.0 — 2026-09-25
+
+**Pixel Wing** is a complete 16-bit arcade edition, playable at
+[/arcade/](https://raptor.chall.net/arcade/) and linked from the simulator.
+
+- Three original pixel-art worlds: turquoise Pacific Coast, copper Red Canyon,
+  and a neon Manhattan-inspired harbor with bridges and waterfront towers.
+- A roughly four-minute campaign with authored enemy formations, three distinct
+  bosses, automatic cannons, homing missiles, invulnerable dodge rolls, magnetic
+  pickups, scoring chains, and a choice of upgrades between sectors.
+- One-click launch, optional Relaxed difficulty, short instructions, pause,
+  victory and defeat screens, immediate replay, and a saved personal best.
+- Keyboard, pointer dragging, touch, and standard gamepad flight controls.
+  Leaving the window pauses the run. Reduced effects respect the system setting.
+- Three original synthesized chiptune arrangements and layered combat sounds.
+  Audio begins with a gesture, pauses with play, and remembers mute.
+- Native Canvas2D at 640 × 400 with crisp scaling and cached scenery/sprites;
+  the arcade loads independently of the simulator and its terrain assets.
+
 ## 1.13.1 — 2026-09-25
 
 - **Full-window flight on startup:** the world now fills the current window

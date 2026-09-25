@@ -6,7 +6,21 @@ persistent front lines, and New York's standalone Harbor Watch scenario.
 The game uses native JavaScript modules, vendored Three.js, WebGPU
 with a WebGL2 fallback, and a deterministic 120 Hz flight simulation.
 
-[Play RAPTOR](https://raptor.chall.net/) · [Release notes](CHANGELOG.md)
+[Play RAPTOR](https://raptor.chall.net/) · [Play Pixel Wing](https://raptor.chall.net/arcade/) · [Release notes](CHANGELOG.md)
+
+## Pixel Wing — the 16-bit arcade edition
+
+Open **[/arcade/](https://raptor.chall.net/arcade/)** for a separate, complete
+2D arcade shooter. One click starts a roughly four-minute adventure across
+Pacific Coast, Red Canyon, and Neon Harbor. Automatic cannons, homing missiles,
+dodge rolls, pickups, upgrades, three bosses, and an original chiptune score
+make a compact game with its own browser-saved personal best.
+
+Use WASD/arrows or drag to fly, Space for missiles, and Shift to dodge.
+Touch buttons and standard gamepad flight controls are supported. Choose
+**Relaxed** for more armor and slower enemy fire. See the
+[arcade README](arcade/README.md) for controls, architecture, credits, and tests.
+The arcade edition uses Canvas2D and needs no 3D assets or dependencies.
 
 ## Run locally
 
