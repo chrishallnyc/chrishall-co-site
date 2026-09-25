@@ -83,11 +83,12 @@ export class EngineVoice {
     this.textureStatus = 'procedural';
     this.dry = gain(ctx);
     this.activeGain = gain(ctx);
+    this.characterTrim = gain(ctx, 10 ** (-1.7 / 20));
     this.duckGain = gain(ctx);
     this.cabin = filter(ctx, "lowpass", 12000);
     this.distFilter = filter(ctx, "lowpass", 20000);
     this.distGain = gain(ctx);
-    this.activeGain.connect(this.cabin).connect(this.duckGain).connect(this.dry)
+    this.activeGain.connect(this.characterTrim).connect(this.cabin).connect(this.duckGain).connect(this.dry)
       .connect(this.distFilter).connect(this.distGain).connect(destination);
     this._distNode = { gainNode: this.distGain, filterNode: this.distFilter };
     this.engines = [];
@@ -100,6 +101,9 @@ export class EngineVoice {
       this.sources.push(pink, white);
       const core = noiseLayer(ctx, pink, 28, 310, 0, pan);
       const exhaust = noiseLayer(ctx, pink, 130, 2600, 0, pan);
+      const pressureFilter = filter(ctx, 'bandpass', 350, .8);
+      const pressureGain = gain(ctx, 0);
+      pink.connect(pressureFilter).connect(pressureGain).connect(pan);
       const burner = noiseLayer(ctx, pink, 32, 1700, 0, pan);
       // Broad fan/compressor resonances give the turbine a rotating-machine
       // texture instead of one uniform hiss. These are authored relationships,
@@ -120,15 +124,44 @@ export class EngineVoice {
       const shaftGain = gain(ctx, 0);
       shaft.connect(shaftGain).connect(pan);
       shaft.start();
-      const flutter = ctx.createOscillator();
-      flutter.frequency.value = 23 + side * 1.3;
-      const flutterGain = gain(ctx, 0);
+      // Long, independently seeded pressure motion. The seed derives from
+      // existing noise without advancing the caller's random stream.
+      const controlRng = new SfcRng(Math.floor(Math.abs(pink.buffer.getChannelData(0)[97]) * 1e9));
+      const knots = new Float32Array(Math.round((13.19 + side * .47) * 200));
+      const overlap = 200;
+      const raw = new Float32Array(knots.length + overlap);
+      let slow = 0, fast = 0;
+      for (let i = 0; i < raw.length; i++) {
+        const w = controlRng.f() * 2 - 1;
+        slow += .045 * (w - slow); fast += .32 * (w - fast);
+        raw[i] = .68 * slow + .32 * fast;
+      }
+      knots.set(raw.subarray(0, knots.length));
+      for (let i = 0; i < overlap; i++) knots[i] = raw[knots.length + i] * (1 - i / overlap) + raw[i] * (i / overlap);
+      normalize(knots, .9);
+      const controlBuffer = ctx.createBuffer(1, Math.round(ctx.sampleRate * (13.19 + side * .47)), ctx.sampleRate);
+      const controlData = controlBuffer.getChannelData(0);
+      for (let i = 0; i < controlData.length; i++) {
+        const x = i * knots.length / controlData.length, j = Math.floor(x), f = x - j;
+        controlData[i] = knots[j] * (1 - f) + knots[(j + 1) % knots.length] * f;
+      }
+      const flutter = loop(ctx, controlBuffer);
+      // Zero-mean irregular drift breaks exact noise-carrier repetitions.
+      // Peak excursions stay below 1.7%; no new source or caller RNG draw.
+      const pinkDrift = gain(ctx, .018), whiteDrift = gain(ctx, -.014);
+      flutter.connect(pinkDrift).connect(pink.playbackRate);
+      flutter.connect(whiteDrift).connect(white.playbackRate);
+      const flutterGain = gain(ctx, 0), coreMotion = gain(ctx, 0), exhaustMotion = gain(ctx, 0), pressureMotion = gain(ctx, 0);
       flutter.connect(flutterGain).connect(burner.volume.gain);
-      flutter.start();
+      flutter.connect(coreMotion).connect(core.volume.gain);
+      flutter.connect(exhaustMotion).connect(exhaust.volume.gain);
+      flutter.connect(pressureMotion).connect(pressureGain.gain);
       this.sources.push(shaft, flutter);
-      const wind = noiseLayer(ctx, white, 480, 4600, 0, pan);
+      const wind = noiseLayer(ctx, white, 240, 4600, 0, pan);
+      const gust = filter(ctx, 'lowpass', 5, .7), gustGain = gain(ctx, 0);
+      pink.connect(gust).connect(gustGain).connect(wind.volume.gain);
       const buffet = noiseLayer(ctx, pink, 24, 155, 0, pan);
-      this.engines.push({ side, pan, pink, white, core, exhaust, burner, turbineFilter, turbineGain, compressorFilter, compressorGain, bladeFilter, bladeGain, shaft, shaftGain, flutter, flutterGain, wind, buffet });
+      this.engines.push({ side, pan, pink, white, core, exhaust, pressureFilter, pressureGain, coreMotion, exhaustMotion, pressureMotion, gustGain, burner, turbineFilter, turbineGain, compressorFilter, compressorGain, bladeFilter, bladeGain, shaft, shaftGain, flutter, flutterGain, wind, buffet });
     }
     this.setState();
   }
@@ -150,6 +183,9 @@ export class EngineVoice {
       if (responseChanged) targets.delete(param);
       smooth(param, value, now, powerInput === "spool" ? 0.06 : commandLag);
     };
+    // Authored compensation for the pressure body's measured extra energy.
+    // This depends only on commanded/solved power, never a level detector.
+    power(this.characterTrim.gain, 10 ** (-(1.7 - 1.2 * ab) / 20), .35);
     const n2 = Math.pow(throttle, 0.72);
     const wind = Math.pow(Math.min(1.5, ias / 650), 1.6);
     const load = Math.max(clamp((Math.abs(g) - 3) / 6, 0, 1), clamp((Math.abs(aoa) - 12) / 23, 0, 1));
@@ -159,9 +195,15 @@ export class EngineVoice {
     for (const e of this.engines) {
       const pitch = this.doppler * (1 + e.side * 0.008);
       power(e.core.lp.frequency, (180 + n2 * 270) * pitch, 0.65);
-      power(e.core.volume.gain, (0.055 + 0.15 * n2) * combustion, 0.5);
+      power(e.core.volume.gain, (0.04 + 0.10 * n2) * combustion, 0.5);
       power(e.exhaust.lp.frequency, (650 + n2 * 2450) * pitch, 0.6);
       power(e.exhaust.volume.gain, (0.045 + 0.23 * n2 * n2) * combustion, 0.5);
+      power(e.pressureFilter.frequency, (230 + 330 * n2) * pitch, .6);
+      power(e.pressureGain.gain, (.09 + .1 * n2) * combustion, .5);
+      const motion = .18 + .32 * n2 * n2;
+      power(e.coreMotion.gain, (.04 + .10 * n2) * motion * combustion, .5);
+      power(e.exhaustMotion.gain, (.045 + .23 * n2 * n2) * motion * combustion, .5);
+      power(e.pressureMotion.gain, (.09 + .1 * n2) * motion * combustion, .5);
       const fanFrequency = (300 + 1100 * n2) * pitch;
       power(e.turbineFilter.frequency, fanFrequency, 0.75);
       power(e.compressorFilter.frequency, fanFrequency * 1.87, 0.75);
@@ -175,9 +217,10 @@ export class EngineVoice {
       power(e.shaftGain.gain, (0.0015 + 0.004 * n2) * combustion, 0.6);
       power(e.burner.volume.gain, (e.texture ? 0.21 : 0.37) * ab * combustion, 0.35);
       power(e.burner.lp.frequency, 1500 + 1900 * ab, 0.2);
-      power(e.flutter.frequency, (23 + e.side * 1.3 + 14 * n2) * pitch, 0.4);
-      power(e.flutterGain.gain, 0.028 * ab * combustion, 0.16);
+      power(e.flutter.playbackRate, (.65 + .9 * n2) * this.doppler, .4);
+      power(e.flutterGain.gain, (e.texture ? .10 : .15) * ab * combustion, .16);
       smooth(e.wind.volume.gain, wind * (view === "cockpit" ? 0.13 : 0.17), now, 0.25);
+      smooth(e.gustGain.gain, wind * .36, now, .25);
       smooth(e.wind.lp.frequency, 2800 + 2800 * Math.min(1, ias / 800), now, 0.4);
       smooth(e.buffet.volume.gain, (0.22 * load + 0.065 * transonic) * Math.min(1, ias / 160), now, 0.12);
       if (e.texture) {
@@ -223,19 +266,20 @@ function cannonBuffer(ctx, rng) {
     const start = Math.round(round * sr / 100);
     const weight = barrels[round % 6] * (0.87 + rng.f() * 0.13);
     const bodyHz = 145 + rng.f() * 90, metalHz = 1050 + rng.f() * 550;
-    let low = 0, previous = 0;
+    let low = 0, previous = 0, pressure = 0;
     for (let j = 0; j < Math.round(sr * 0.018); j++) {
       const t = j / sr, w = rng.f() * 2 - 1;
       low += (1 - Math.exp(-TAU * 2200 / sr)) * (w - low);
-      const crack = (w - 0.22 * previous) * 1.15 * Math.exp(-t / 0.00085);
-      const body = Math.sin(TAU * bodyHz * t) * 0.17 * Math.exp(-t / 0.0038);
-      const grit = low * 0.5 * Math.exp(-t / 0.0026);
-      const mechanism = Math.sin(TAU * metalHz * t) * 0.055 * Math.exp(-t / 0.0022);
-      data[(start + j) % data.length] += (crack + body + grit + mechanism) * weight * Math.min(1, t / 0.00006);
+      pressure += (1 - Math.exp(-TAU * 380 / sr)) * (w - pressure);
+      const crack = (w - 0.4 * previous) * 0.92 * Math.exp(-t / 0.00072);
+      const body = (pressure * 2.8 + Math.sin(TAU * bodyHz * t) * 0.075) * Math.exp(-t / 0.009);
+      const grit = (low - pressure) * 0.76 * Math.exp(-t / 0.0048);
+      const mechanism = (Math.sin(TAU * metalHz * t) + 0.4 * Math.sin(TAU * metalHz * 1.43 * t)) * 0.035 * Math.exp(-t / 0.0038);
+      data[(start + j) % data.length] += (crack + body + grit + mechanism) * weight * Math.min(1, t / 0.00006) * Math.min(1, (0.018 - t) / 0.003);
       previous = w;
     }
   }
-  normalize(data);
+  normalize(data, 0.6); // Match sustained energy to the reference, not peak loudness.
   return buffer;
 }
 
@@ -250,6 +294,20 @@ export class GunVoice {
     this.cabin = filter(ctx, 'lowpass', 12000);
     this.distGain = gain(ctx);
     this.burstGain.connect(this.cabin).connect(this.distFilter).connect(this.distGain).connect(this.dry).connect(destination);
+    // A passive short body response preserves the last pressure/metal decay
+    // after firing ceases. No new scheduled source or delayed trigger onset.
+    this.body = ctx.createConvolver();
+    const impulse = ctx.createBuffer(1, Math.round(ctx.sampleRate * 0.095), ctx.sampleRate);
+    const ir = impulse.getChannelData(0), bodyRng = new SfcRng(206113);
+    let bodyNoise = 0;
+    for (let i = 0; i < ir.length; i++) {
+      const t = i / ctx.sampleRate;
+      bodyNoise += (1 - Math.exp(-TAU * 750 / ctx.sampleRate)) * (bodyRng.f() * 2 - 1 - bodyNoise);
+      ir[i] = t < 0.003 ? 0 : (bodyNoise + Math.sin(TAU * 243 * t) * 0.07 + Math.sin(TAU * 617 * t) * 0.025) * Math.exp(-t / 0.022) * Math.min(1, (0.095 - t) / 0.012);
+    }
+    this.body.buffer = impulse;
+    this.bodyGain = gain(ctx, 0.12);
+    this.burstGain.connect(this.body).connect(this.bodyGain).connect(this.cabin);
     this._distNode = { gainNode: this.distGain, filterNode: this.distFilter };
     this.voices = new Set();
     this.maxVoices = 3;
@@ -306,7 +364,7 @@ export class GunVoice {
     if (!on) for (const voice of this.voices) this._stopAt(voice, now + 0.1);
     this._firing = !!on;
     this._end = Infinity;
-    this.onFire?.(!!on);
+    this.onFire?.(!!on, this._end);
   }
   burst(seconds = 0.5) {
     if (this.disposed) return;
@@ -314,6 +372,7 @@ export class GunVoice {
     this._end = this.ctx.currentTime + clamp(seconds, 0.02, 10);
     this.burstGain.gain.setTargetAtTime(0, this._end, 0.012);
     if (this.current) this._stopAt(this.current, this._end + 0.1);
+    this.onFire?.(true, this._end);
   }
   setPerspective(view) { smooth(this.cabin.frequency, view === 'cockpit' ? 2900 : 12000, this.ctx.currentTime, 0.18); }
   setDopplerFactor(f) {
@@ -324,7 +383,7 @@ export class GunVoice {
     if (this.disposed) return;
     this.disposed = true; this._firing = false;
     for (const voice of this.voices) { voice.src.onended = null; stop(voice.src); voice.cleanup(); }
-    this.dry.disconnect();
+    this.body.disconnect(); this.bodyGain.disconnect(); this.dry.disconnect();
   }
 }
 
@@ -525,6 +584,52 @@ function effectBuffer(ctx, rng, kind, duration) {
   return buffer;
 }
 
+function distantExplosion(ctx, original) {
+  const buffer = ctx.createBuffer(1, original.length, original.sampleRate);
+  const input = original.getChannelData(0), output = buffer.getChannelData(0);
+  const sr = original.sampleRate, taps = [[0,0.32],[0.017,0.31],[0.043,0.24],[0.087,0.18],[0.153,0.11],[0.241,0.065]];
+  let low = 0;
+  for (let i = 0; i < input.length; i++) {
+    let sum = 0;
+    for (const [delay, weight] of taps) { const at = i - Math.round(delay * sr); if (at >= 0) sum += input[at] * weight; }
+    low += (1 - Math.exp(-TAU * 620 / sr)) * (sum - low);
+    output[i] = low * Math.min(1, (input.length - 1 - i) / (sr * 0.08));
+  }
+  // Preserve integrated material energy. Geometric attenuation/air absorption
+  // remain in the existing live graph, separate from distance dispersion.
+  let before = 0, after = 0;
+  for (let i = 0; i < input.length; i++) { before += input[i] ** 2; after += output[i] ** 2; }
+  const match = Math.min(2.5, Math.sqrt(before / Math.max(1e-12, after)));
+  for (let i = 0; i < output.length; i++) output[i] *= match;
+  return buffer;
+}
+
+const EXPLOSION_DISTANCE_STEPS = 8;
+function explosionStageIndex(distance, steps = EXPLOSION_DISTANCE_STEPS) {
+  return Math.round(clamp((distance - 180) / (2400 - 180), 0, 1) * steps);
+}
+function explosionDistanceBank(ctx, originals, steps = EXPLOSION_DISTANCE_STEPS) {
+  const bank = Array.from({ length: steps + 1 }, (_, stage) => stage ? [] : originals);
+  for (let variant = 0; variant < originals.length; variant++) {
+    const original = originals[variant], near = original.getChannelData(0);
+    const far = distantExplosion(ctx, original).getChannelData(0);
+    const delta = new Float32Array(near.length);
+    for (let i = 0; i < delta.length; i++) {
+      // Preserve the first pressure front exactly at every distance. Only
+      // the body/tail disperses; stages are built once and shared by events.
+      const progress = clamp((i / original.sampleRate - 0.012) / 0.035, 0, 1);
+      delta[i] = (far[i] - near[i]) * progress * progress * (3 - 2 * progress);
+    }
+    for (let stage = 1; stage <= steps; stage++) {
+      const buffer = ctx.createBuffer(1, original.length, original.sampleRate), output = buffer.getChannelData(0);
+      const amount = stage / steps;
+      for (let i = 0; i < output.length; i++) output[i] = near[i] + delta[i] * amount;
+      bank[stage].push(buffer);
+    }
+  }
+  return bank;
+}
+
 function effectPriority(kind, requested) {
   if (Number.isFinite(requested)) return clamp(requested, 0.1, 5);
   if (kind === "impact" || kind === "fuel_out") return 3;
@@ -556,6 +661,7 @@ export class CombatEffects {
     this.maxVoices = 20;
     this.buffers = {};
     for (const [kind, spec] of Object.entries(EFFECTS)) this.buffers[kind] = Array.from({ length: 3 }, () => effectBuffer(ctx, rng, kind, spec.duration));
+    this.explosionStages = explosionDistanceBank(ctx, this.buffers.explosion);
     // A quiet stereo reflection tail puts impacts in space; dry transients
     // remain immediate and precise. There is no reverb on cockpit alerts.
     this.room = ctx.createConvolver();
@@ -620,12 +726,13 @@ export class CombatEffects {
       stop(victim.src);
       victim.cleanup();
     }
-    const src = this.ctx.createBufferSource();
-    src.buffer = this.buffers[kind][this.rng.int(3)];
-    src.playbackRate.value = 0.96 + this.rng.f() * 0.08;
     const world = Array.isArray(position) && position.length === 3 && position.every(Number.isFinite);
     const currentDistance = world && this.listenerPosition
       ? Math.hypot(...position.map((value, i) => value - this.listenerPosition[i])) : distance;
+    const src = this.ctx.createBufferSource();
+    const variant = this.rng.int(3);
+    src.buffer = (kind === 'explosion' ? this.explosionStages[explosionStageIndex(currentDistance)] : this.buffers[kind])[variant];
+    src.playbackRate.value = 0.96 + this.rng.f() * 0.08;
     const lowpass = filter(this.ctx, "lowpass", effectCutoff(currentDistance));
     const volume = gain(this.ctx, incoming.level / (world ? 1 : 1 + distance / 650));
     const panner = world ? this.ctx.createPanner() : this.ctx.createStereoPanner();
@@ -668,9 +775,14 @@ export class AudioBus {
     this.rng = new SfcRng(seed);
     this.master = gain(this.ctx, 0.9);
     this.engineGroup = gain(this.ctx);
-    this.engineGroup.connect(this.master);
+    // Make room around weapon attacks and spoken/radar information without
+    // lowering the user's engine fader or removing its low-frequency body.
+    this.engineFocus = filter(this.ctx, 'peaking', 1500, 0.65);
+    this.engineFocus.gain.value = 0;
+    this.engineGroup.connect(this.engineFocus).connect(this.master);
     this.engineVolume = 1;
     this.uiVolume = 1;
+    this.weaponsVolume = 1;
     this.weapons = gain(this.ctx);
     this.weapons.connect(this.master);
     this.highpass = filter(this.ctx, "highpass", 24);
@@ -708,7 +820,8 @@ export class AudioBus {
     this.gun = new GunVoice(this.ctx, this.weapons, this.rng);
     this.locks = new LockTones(this.ctx, this.master);
     this.effects = new CombatEffects(this.ctx, this.weapons, this.rng);
-    this.locks.onMode = () => this._duck();
+    this.locks.onMode = () => { this._duck(); this._focusMix(); };
+    this.gun.onFire = () => this._focusMix();
     this.radioActive = false;
     this.paused = !!paused;
     this.effects.paused = this.paused;
@@ -746,15 +859,31 @@ export class AudioBus {
     const seconds = radio ? 0.08 : launch && target < this.engineGroup.gain.value ? 0.045 : 0.3;
     smooth(this.engineGroup.gain, target, this.ctx.currentTime, seconds);
   }
+  _focusMix() {
+    if (!this.engineFocus || !this.gun || !this.locks) return;
+    const now = this.ctx.currentTime, param = this.engineFocus.gain;
+    const quiet = this.paused || this.hidden;
+    const radio = !quiet && this.uiVolume > 0 && this.radioActive;
+    const threat = !quiet && this.uiVolume > 0 && this.locks.mode === 'launch';
+    const firing = !quiet && this.weaponsVolume > 0 && this.gun.firing;
+    const base = radio ? -4.5 : threat ? -3 : 0;
+    const target = Math.min(base, firing ? -4.5 : 0);
+    const end = firing ? this.gun._end : Infinity;
+    if (this.focusTarget === target && this.focusEnd === end && this.focusBase === base) return;
+    this.focusTarget = target; this.focusEnd = end; this.focusBase = base;
+    param.cancelAndHoldAtTime(now);
+    param.setTargetAtTime(target, now, target < param.value ? 0.012 : 0.16);
+    if (Number.isFinite(end)) param.setTargetAtTime(base, Math.max(now, end), 0.16);
+  }
   setEngineVolume(value) { this.engineVolume = clamp(value, 0, 1); this._duck(); }
   setUiVolume(value) {
     this.uiVolume = clamp(value, 0, 1);
     smooth(this.locks.dry.gain, this.uiVolume, this.ctx.currentTime, 0.02);
     // An inaudible warning or radio call should not pull the engine down.
-    this._duck();
+    this._duck(); this._focusMix();
   }
-  setRadioActive(active) { this.radioActive = !!active; this._duck(); }
-  setWeaponsVolume(value) { smooth(this.weapons.gain, clamp(value, 0, 1), this.ctx.currentTime, 0.02); }
+  setRadioActive(active) { this.radioActive = !!active; this._duck(); this._focusMix(); }
+  setWeaponsVolume(value) { this.weaponsVolume = clamp(value, 0, 1); smooth(this.weapons.gain, this.weaponsVolume, this.ctx.currentTime, 0.02); this._focusMix(); }
   async resume() {
     if (this.disposed || this.hidden || !this.ownsContext) return false;
     try { if (this.ctx.state === "suspended" || this.ctx.state === "interrupted") await this.ctx.resume(); } catch (_) { return false; }
@@ -783,6 +912,7 @@ export class AudioBus {
     this.effects.paused = paused;
     this.scene.setPaused(paused);
     if (paused) { this.gun.fire(false); this.locks.setMode("off"); this.effects.stopAll(); }
+    this._focusMix();
   }
   setMute(value) {
     this.muted = !!value;
@@ -822,7 +952,7 @@ export class AudioBus {
       window.removeEventListener("pageshow", this._pageshow);
     }
     this.engine.dispose(); this.airframe.dispose(); this.scene.dispose(); this.gun.dispose(); this.locks.dispose(); this.effects.dispose();
-    this.analyser.disconnect(); this.master.disconnect(); this.weapons.disconnect(); this.engineGroup.disconnect();
+    this.analyser.disconnect(); this.master.disconnect(); this.weapons.disconnect(); this.engineGroup.disconnect(); this.engineFocus.disconnect();
     if (this.ownsContext && this.ctx.state !== "closed") this.ctx.close().catch(() => {});
   }
 }

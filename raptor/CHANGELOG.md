@@ -1,5 +1,28 @@
 # RAPTOR release notes
 
+## 1.9.0 — 2026-09-24
+
+The engine develops irregular pressure movement instead of repeating the same
+short noise texture. Cannon fire has a fuller body and a brief airframe decay,
+while distant blasts spread into a deeper, more diffuse tail.
+
+- **Engine character:** independent pressure motion and slight carrier drift
+  reduce measured loop recurrence while keeping cruise and afterburner close
+  to their previous loudness. Fuel loss still leaves aerodynamic sound intact.
+- **Weapons and distance:** cannon rounds retain immediate, aligned attacks.
+  Nine shared blast stages follow listener distance, preserving the initial
+  pressure front and scheduled arrival without adding voices per event.
+- **Combat clarity:** firing, incoming warnings and radio briefly reduce the
+  engine's midrange while preserving its low rumble and the user's faders.
+  Audio-clock recovery handles overlapping cues and finite bursts; muted cues
+  leave the engine unchanged.
+
+Native PCM checks at 44.1 and 48 kHz cover recurrence, material boundaries,
+headroom, scheduling, pause, fuel loss and disposal. The added engine controls
+and blast stages use about 17.1 MiB of PCM at 48 kHz; existing voice limits
+remain in force. Automated measurements establish signal behavior, not a
+subjective quality multiplier. Audition the mix in the sound room.
+
 ## 1.8.0 — 2026-09-24
 
 The F-22 and opposing fleet have smoother airframes, deeper mechanical
