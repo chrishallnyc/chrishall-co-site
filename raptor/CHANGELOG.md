@@ -4,7 +4,9 @@
 
 The F-22 and opposing fleet have smoother airframes, deeper mechanical
 construction and more natural material response under the sky at flight altitude.
-The rebuild was followed by five rendered refinement passes.
+The aircraft rebuild was followed by five rendered refinement passes. Clouds
+gain finer internal structure and more accurate lighting; close terrain resolves
+real aerial detail, irregular rock and snow surfaces, and steep slopes.
 
 - **Shape and assembly:** continuous cockpit and wing-root joins, rolled
   intake lips, formed bay/wheel-well structure and gear doors that clear the
@@ -21,10 +23,26 @@ The rebuild was followed by five rendered refinement passes.
   stable prebuilt distance levels, and daylight, overcast and low-sun lighting
   in the aircraft lab. Native and browser checks cover both render backends,
   articulation, quality changes, reflection refresh and simulation invariance.
+- **Clouds:** a new 192³/96³ High asset tier, reshaped Alaska cloud banks and
+  tropical erosion, and denser source-light integration. Lighting updates run
+  in bounded batches while preserving the original cloud opacity, depth and motion.
+- **Terrain:** correct the Nellis base image's geographic alignment and stream
+  one-metre aerial imagery near the flight area. Valdez gains optional scanned
+  rock and snow detail, with material projection that holds up on steep cliffs.
+- **Performance:** reuse observer-sky scattering, remove repeated ocean shoreline
+  work, and retain compiled Sun/Moon programs through day/night changes. Detail
+  assets have fixed memory limits, load deadlines and base-material fallbacks.
+- **Integration:** preserve the flight school and controls improvements from
+  1.5.0 and 1.6.0, update quality benchmark identities, and cover asset failures, moving
+  tile residency, cloud-cache publication and both shader backends.
 
 This release retains the flight school, controls, audio and world improvements
-from earlier releases. Native volumetric clouds and post-processing remain
-more demanding than the WebGL fallback; quality presets are still available.
+from earlier releases. High and Ultra add detail and memory use; native 4K
+remains demanding. Native volumetric clouds and post-processing remain more
+demanding than the WebGL fallback; quality presets remain available.
+See [GRAPHICS.md](GRAPHICS.md) for rendering contracts and comparison commands.
+The [cloud and terrain validation report](GRAPHICS-1.7.md) records component
+measurements and their limits; those timings do not measure the combined release.
 
 ## 1.6.0 — 2026-09-24
 

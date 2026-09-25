@@ -10,7 +10,7 @@ const SUN_COS = Math.cos(SUN_RADIUS);
 const DARK_SKY_RADIANCE = 0.00022 * 36 / 120000;
 
 export function makeSkyRadiance({ luts, sourceUniforms: U, uFrameOrigin,
-  cirrusAtlas, uTime = time, includeSolarDisc = false }) {
+  cirrusAtlas, uTime = time, includeSolarDisc = false, scatteringRadiance = null }) {
   const scattering = observerSkyNode({ tTex: luts.tTex, msTex: luts.msTex,
     uSunDir: U.uSunDir, uFrameOrigin, uMoonDir: U.uMoonDir,
     uMoonRatio: U.uMoonRatio, uMoonColor: U.uMoonColor });
@@ -26,7 +26,8 @@ export function makeSkyRadiance({ luts, sourceUniforms: U, uFrameOrigin,
     const horizon = sqrt(max(float(1).sub(float(R).div(radius).pow(2)), 0)).negate();
     const edge = max(fwidth(mu).mul(.5), .00001);
     const visible = smoothstep(horizon.sub(edge), horizon.add(edge), mu).toVar();
-    const L = scattering(observer, dir).mul(U.uSunI).toVar();
+    const L = (scatteringRadiance ? scatteringRadiance(observer, dir)
+      : scattering(observer, dir).mul(U.uSunI)).toVar();
 
     // The night candidate supplies the same physical mesopause emission.
     // No arbitrary RGB floor is introduced when the source is absent.

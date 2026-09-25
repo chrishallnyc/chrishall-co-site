@@ -206,7 +206,7 @@ try {
             s.tier = tier; r.aircraftLighting.setQuality(TIERS[tier]);
             await new Promise(done => { let n = 0; function frame() { if (++n === 12) done(); else requestAnimationFrame(frame); } requestAnimationFrame(frame); });
             samples.push({ tier, lod: r.world.f22.userData.aircraft.lod.level, shadows: r.aircraftLighting.shadows,
-              shadowUpdates: s.atmosphere.sun.shadow.autoUpdate,
+              shadowUpdates: s.atmosphere.sun.shadow.autoUpdate, sunIntensity: s.atmosphere.sun.intensity,
               shadowSize: r.aircraftLighting.stats.shadowSize,
               allocatedShadowSize: r.aircraftLighting.stats.allocatedShadowSize,
               requestedShadowSize: r.aircraftLighting.stats.requestedShadowSize,
@@ -216,7 +216,7 @@ try {
           return samples;
         });
         record.checks.push({ id: 'quality-cycle-lod-shadow-cap', pass: record.qualityCycle.every(s => s.lod === ({ LOW: 'low', MED: 'medium', HIGH: 'high' })[s.tier] && s.shadows === (s.tier !== 'LOW')) },
-          { id: 'quality-cycle-shadow-target-stable', pass: record.qualityCycle.every(s => s.allocatedShadowSize === record.before.lighting.allocatedShadowSize && s.shadowUpdates === s.shadows && s.shadowSize === (s.shadows ? s.allocatedShadowSize : 0)) },
+          { id: 'quality-cycle-shadow-target-stable', pass: record.qualityCycle.every(s => s.allocatedShadowSize === record.before.lighting.allocatedShadowSize && s.shadowUpdates === (s.shadows && s.sunIntensity > 0) && s.shadowSize === (s.shadows ? s.allocatedShadowSize : 0)) },
           { id: 'quality-cycle-material-cache-stable', pass: record.qualityCycle.every(s => s.materials === record.qualityCycle[0].materials) },
           { id: 'quality-cycle-sim-unchanged', pass: record.qualityCycle.every(s => s.hash === record.before.hash) });
       }

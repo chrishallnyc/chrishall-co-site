@@ -1,9 +1,10 @@
-// Small deterministic material tiles, expressed as height derivatives rather
-// than color noise. RG = world-meter height slopes; B = squared slope moment.
-// Linear mip filtering preserves the mean slope and its unresolved variance.
+// Deterministic terrain material tiles. RG = physical height derivatives;
+// B = squared slope moment; A = rock mineral reflectance residual or snow/
+// aggregate height. Linear mips preserve mean slopes and unresolved variance.
 import * as THREE from 'three';
+import {packTerrainPhotoArray,addTerrainPhotoDetail} from './terrainphoto.js';
 import { Fn, texture, vec2, vec3, float, normalize, max, min, clamp, mix,
-  smoothstep, dot, dFdx, dFdy, pow, sqrt, positionWorld } from 'three/tsl';
+  smoothstep, dot, dFdx, dFdy, pow, sqrt, positionWorld, abs } from 'three/tsl';
 
 const TILE_SIZE = 256;
 const sat = x => Math.min(1, Math.max(0, x));
@@ -37,7 +38,8 @@ const cell = (u, v, nx, ny, seed) => {
 // clumps span about 0.5m in a 32m tile, with centimeter relief.
 export function bakeTerrainDetail(kind, size = kind === 'snow' ? 512 : TILE_SIZE) {
   const rock=kind==='rock',snow=kind==='snow',periodM=rock?96:snow?64:32;
-  const heights=new Float32Array(size*size);
+  const heights=new Float32Array(size*size), minerals=rock?new Float32Array(size*size):null;
+  let mineralSum=0;
   for(let y=0;y<size;y++)for(let x=0;x<size;x++){
     const u=(x+.5)/size,v=(y+.5)/size;
     let h;
@@ -61,6 +63,13 @@ export function bakeTerrainDetail(kind, size = kind === 'snow' ? 512 : TILE_SIZE
       h+=(noise(u*18,v*18,18,981)-.5)*.18;
       h+=(noise(u*48,v*48,48,311)-.5)*.025;
       h-=.14*Math.exp(-Math.pow((c.second-c.first)/.10,2))*jointMask;
+      // Generic centimetre-scale weathering along broken mineral bedding.
+      // This shades a surface; it is not extra DEM or a geological survey.
+      const bedWarp=(noise(u*4,v*4,4,6323)-.5)*1.6;
+      const bedding=noise(u*8,v*48+bedWarp,8,9209,48)-.5;
+      h+=bedding*.085;
+      minerals[y*size+x]=bedding*.12+(noise(u*32,v*32,32,1277)-.5)*.045;
+      mineralSum+=minerals[y*size+x];
     }else{
       const c=cell(u,v,64,64,7189);
       const crown=Math.pow(Math.max(0,1-c.first*c.first*2.2),2);
@@ -68,6 +77,7 @@ export function bakeTerrainDetail(kind, size = kind === 'snow' ? 512 : TILE_SIZE
     }
     heights[y*size+x]=h;
   }
+  const mineralMean=mineralSum/(size*size);
   const values=new Float32Array(size*size*4),data=new Uint16Array(values.length),step=periodM/size;
   let minH=Infinity,maxH=-Infinity,mss=0,peakSlope=0;
   for(let y=0;y<size;y++)for(let x=0;x<size;x++){
@@ -75,7 +85,7 @@ export function bakeTerrainDetail(kind, size = kind === 'snow' ? 512 : TILE_SIZE
     const dx=Math.max(-.7,Math.min(.7,(at(x+1,y)-at(x-1,y))/(2*step)));
     const dz=Math.max(-.7,Math.min(.7,(at(x,y+1)-at(x,y-1))/(2*step)));
     const k=(y*size+x)*4,s2=dx*dx+dz*dz,h=at(x,y);
-    values[k]=dx;values[k+1]=dz;values[k+2]=s2;values[k+3]=h;
+    values[k]=dx;values[k+1]=dz;values[k+2]=s2;values[k+3]=rock?minerals[y*size+x]-mineralMean:h;
     minH=Math.min(minH,h);maxH=Math.max(maxH,h);mss+=s2;peakSlope=Math.max(peakSlope,Math.sqrt(s2));
   }
   for(let i=0;i<values.length;i++)data[i]=THREE.DataUtils.toHalfFloat(values[i]);
@@ -83,7 +93,12 @@ export function bakeTerrainDetail(kind, size = kind === 'snow' ? 512 : TILE_SIZE
 }
 
 let cached=null;
-function detailTextures(includeSnow = false) {
+function detailTextures(includeSnow = false, photoDetail = null) {
+  if(photoDetail?.status==='ready'){
+    if(photoDetail.disposed)throw Error('Terrain photo state disposed');
+    photoDetail.pack ||= packTerrainPhotoArray({rock:bakeTerrainDetail('rock'),aggregate:bakeTerrainDetail('aggregate'),snow:bakeTerrainDetail('snow')},photoDetail.photos);
+    return {surface:photoDetail.pack.array,snow:photoDetail.pack.array,pack:photoDetail.pack};
+  }
   if(cached && (!includeSnow || cached.snow))return cached;
   cached ||= {};
   const configure = (t, name) => {
@@ -124,15 +139,15 @@ export function terrainMaterialWeights(front, normalY, height, rgb=null, coverag
     if(front==='VALDEZ')snow=snow*(1-coverage)+ice*coverage;
   }
   if(front==='NELLIS')vegetation*=.4;
-  vegetation*=1-snow;
   const rock=(.08+.92*cliff)*(1-vegetation)*(1-snow);
+  vegetation*=1-snow;
   return {rock,vegetation,snow,land:sm(-.5,3,height)};
 }
 
-export function terrainMaterialNodes({front,baseNormal,imageColor=null,coverage=float(1),worldPosition=positionWorld}) {
+export function terrainMaterialNodes({front,baseNormal,imageColor=null,coverage=float(1),worldPosition=positionWorld,photoDetail=null}) {
   const snowEnabled=front==='VALDEZ' && (typeof location==='undefined' ||
     new URLSearchParams(location.search).get('snowdetail')!=='0');
-  const textures=detailTextures(snowEnabled),wp=worldPosition;
+  const textures=detailTextures(snowEnabled,front==='VALDEZ'?photoDetail:null),wp=worldPosition;
   const dx=dFdx(wp),dy=dFdy(wp);
   // Frobenius footprint is conservative and invariant to camera roll. A
   // max(dx,dy) estimate changes at 45 degrees and can modulate fine relief.
@@ -153,49 +168,87 @@ export function terrainMaterialNodes({front,baseNormal,imageColor=null,coverage=
     }
   }
   if(front==='NELLIS')vegetation=vegetation.mul(.4);
-  vegetation=vegetation.mul(snow.oneMinus()).toVar('terrainVegetation');
+  const vegetationBase=vegetation.toVar('terrainVegetationBase');
   snow=snow.toVar('terrainSnow');
   const land=smoothstep(-.5,3,wp.y).toVar('terrainLand');
-  const rock=cliff.mul(.92).add(.08).mul(vegetation.oneMinus()).mul(snow.oneMinus()).toVar('terrainRock');
-  const pair=(tex,periodA,periodB,angleA,angleB,label,layer=null)=>{
-    const tap=(period,angle)=>{
-      const c=Math.cos(angle),s=Math.sin(angle);
-      const uv=vec2(wp.x.mul(c).sub(wp.z.mul(s)),wp.x.mul(s).add(wp.z.mul(c))).div(period);
-      const source=texture(tex,uv);
-      const t=(layer===null?source:source.depth(layer)).toVar(label+'Sample'+period);
-      const slope=vec2(t.r.mul(c).add(t.g.mul(s)),t.g.mul(c).sub(t.r.mul(s)));
-      return {slope,lost:max(t.b.sub(dot(t.rg,t.rg)),0)};
-    };
-    const a=tap(periodA,angleA),b=tap(periodB,angleB);
-    const slope=a.slope.mul(.62).add(b.slope.mul(.38)).toVar(label+'Slope');
-    const lost=a.lost.mul(.62*.62).add(b.lost.mul(.38*.38)).toVar(label+'Lost');
-    return {slope,lost};
+  // Projection weights are continuous, signed-normal safe, and independent
+  // of the camera. All implicit texture samples stay in uniform control flow.
+  const w0=pow(abs(baseNormal),vec3(4));
+  const weights=w0.div(max(w0.x.add(w0.y).add(w0.z),1e-6)).toVar('terrainProjectionWeights');
+  const tangent=g=>g.sub(baseNormal.mul(dot(baseNormal,g)));
+  const tap=(tex,bakedPeriod,period,angle,plane,label,layer=null,offset=[0,0])=>{
+    const coordinates=plane==='x'?wp.zy:plane==='z'?wp.xy:wp.xz;
+    const c=Math.cos(angle),s=Math.sin(angle);
+    const uv=vec2(coordinates.x.mul(c).sub(coordinates.y.mul(s)),
+      coordinates.x.mul(s).add(coordinates.y.mul(c))).div(period).add(vec2(...offset));
+    const sampleUV=textures.pack&&(layer===0||layer===1)?uv.mul(.5):uv;
+    const source=texture(tex,sampleUV),m=(layer===null?source:source.depth(layer)).toVar(label);
+    // Stored slopes are height derivatives at bakedPeriod; stretching the
+    // tile scales both the resolved gradient and its squared moment.
+    const scale=bakedPeriod/period;
+    const u=m.r.mul(c).add(m.g.mul(s)).mul(scale),v=m.g.mul(c).sub(m.r.mul(s)).mul(scale);
+    const g=plane==='x'?vec3(0,v,u):plane==='z'?vec3(u,v,0):vec3(u,0,v);
+    return {gradient:tangent(g),moment:m.b.mul(scale*scale),aux:m.a};
   };
-  const coarse=pair(textures.surface,96,139,.6458,-.4014,'geology',0);
-  const fine=pair(textures.surface,32,47,-.2967,.9076,'aggregate',1);
-  const coarseGain=rock.mul(.95).mul(land);
-  const fineGain=mix(float(.7),float(.16),vegetation).mul(mix(float(1),float(.22),snow)).mul(land);
+  const tri=(tex,bakedPeriod,label,layer=null,pair=false)=>{
+    const axes=['x','y','z'],parts=[];
+    for(let i=0;i<3;i++){
+      const a=tap(tex,bakedPeriod,bakedPeriod,[.21,.6458,-.31][i],axes[i],label+axes[i]+'A',layer,
+        [[.173,.619],[0,0],[.731,.287]][i]);
+      if(pair){
+        const b=tap(tex,bakedPeriod,bakedPeriod*139/96,[-.63,-.4014,.72][i],axes[i],label+axes[i]+'B',layer,[.237,.513]);
+        parts.push({gradient:a.gradient.mul(.62).add(b.gradient.mul(.38)),
+          moment:a.moment.mul(.62).add(b.moment.mul(.38)),aux:a.aux.mul(.62).add(b.aux.mul(.38))});
+      }else parts.push(a);
+    }
+    const blend=key=>parts[0][key].mul(weights.x).add(parts[1][key].mul(weights.y)).add(parts[2][key].mul(weights.z));
+    return {gradient:blend('gradient').toVar(label+'Gradient'),moment:blend('moment'),aux:blend('aux')};
+  };
+  const coarse=tri(textures.surface,96,'geology',0,true);
+  const fine=tri(textures.surface,32,'aggregate',1);
   const coarseFade=smoothstep(5,1,fp),fineFade=smoothstep(.8,.12,fp);
-  let slopes=coarse.slope.mul(coarseGain).mul(coarseFade).add(fine.slope.mul(fineGain).mul(fineFade));
-  let snowLost=float(0);
+  // Keep the original micro aggregate's two-octave RMS when using one
+  // well-resolved tile per projection. The larger rock joints retain two.
+  const singleGain=Math.sqrt(.62*.62+.38*.38);
+  let windpack=null;
   if(snowEnabled){
-    const windpack=pair(textures.snow,64,91,-.52,-.44,'snowWindpack');
-    const snowGain=snow.mul(land),snowFade=smoothstep(3,.4,fp);
-    slopes=slopes.add(windpack.slope.mul(snowGain).mul(snowFade));
-    snowLost=windpack.lost.add(dot(windpack.slope,windpack.slope)
-      .mul(snowFade.mul(snowFade).oneMinus())).mul(snowGain.mul(snowGain));
+    windpack=tri(textures.snow,64,'snowWindpack',textures.pack?2:null);
+    // Only mixed material pixels move. No snow appears on bare terrain;
+    // fully snow-covered imagery stays covered. The ripple field is filtered
+    // at the same footprint as the normal, rather than a binary snow mask.
+    const snowEdge=clamp(windpack.aux.mul(-3),-.35,.35).mul(smoothstep(3,.4,fp));
+    snow=snow.add(snow.mul(snow.oneMinus()).mul(snowEdge)).clamp(0,1).toVar('terrainDepositedSnow');
   }
-  const detailNormal=normalize(vec3(slopes.x.negate(),1,slopes.y.negate()));
-  // Reorient the fine normal onto the actual terrain normal. A flat detail
-  // is the identity, and steep mountains keep their underlying orientation.
-  const q=baseNormal.add(vec3(0,1,0)),u=detailNormal.mul(vec3(-1,1,-1));
-  const normalWorld=normalize(q.mul(dot(q,u)).sub(u.mul(q.y))).toVar('terrainDetailedNormalWorld');
-  const lost=coarse.lost.add(dot(coarse.slope,coarse.slope).mul(coarseFade.mul(coarseFade).oneMinus())).mul(coarseGain.mul(coarseGain))
-    .add(fine.lost.add(dot(fine.slope,fine.slope).mul(fineFade.mul(fineFade).oneMinus())).mul(fineGain.mul(fineGain)))
-    .add(snowLost);
-  const baseR=mix(mix(mix(float(.94),float(.84),rock),float(.98),vegetation),float(.86),snow);
-  // Conservative variance-aware roughness; not a claim of an exact GGX
-  // variance conversion. Preserve unresolved relief without shiny aliasing.
+  vegetation=vegetationBase.mul(snow.oneMinus()).toVar('terrainVegetation');
+  const localRock=cliff.mul(.92).add(.08).mul(vegetationBase.oneMinus()).mul(snow.oneMinus());
+  const coarseGain=localRock.mul(.95).mul(land);
+  const fineGain=mix(float(.7),float(.16),vegetation).mul(mix(float(1),float(.22),snow)).mul(land).mul(singleGain);
+  const variance=(field,fade)=>max(field.moment.sub(dot(field.gradient,field.gradient).mul(fade.mul(fade))),0);
+  let gradient=coarse.gradient.mul(coarseGain).mul(coarseFade).add(fine.gradient.mul(fineGain).mul(fineFade));
+  let lost=variance(coarse,coarseFade).mul(coarseGain.mul(coarseGain))
+    .add(variance(fine,fineFade).mul(fineGain.mul(fineGain)));
+  if(windpack){
+    const snowGain=snow.mul(land).mul(singleGain),snowFade=smoothstep(3,.4,fp);
+    gradient=gradient.add(windpack.gradient.mul(snowGain).mul(snowFade));
+    lost=lost.add(variance(windpack,snowFade).mul(snowGain.mul(snowGain)));
+  }
+  // Surface gradients lie in N's tangent plane. Therefore dot(N,N-g)=1:
+  // no overhang flip or axis-sign ambiguity, and zero detail is identity.
+  const normalWorld=normalize(baseNormal.sub(gradient)).toVar('terrainDetailedNormalWorld');
+  const mineral=coarse.aux.mul(localRock).mul(land).mul(coarseFade).toVar('terrainMineralReflectance');
+  const baseR=mix(mix(mix(float(.94),float(.84),localRock),float(.98),vegetation),float(.86),snow)
+    .add(mineral.mul(-.35));
+  // Convex projected moments retain disagreement and unresolved relief;
+  // this is a conservative scalar roughness model, not anisotropic LEAN.
   const roughness=clamp(pow(pow(baseR,4).add(lost.mul(2)),.25),.8,.99);
-  return {normalWorld,roughness,land,textures};
+  const albedoNode=color=>{
+    const base=color,peak=max(base.r,max(base.g,base.b));
+    // Symmetric headroom preserves zero-mean mineral variation without
+    // dark freckles on already-white snow or clipping only positive lobes.
+    const bound=.1;
+    const headroom=clamp(float(1).sub(peak).div(max(peak,1e-5).mul(bound)),0,1);
+    return base.mul(float(1).add(mineral.mul(headroom)));
+  };
+  if(textures.pack)return addTerrainPhotoDetail({pack:textures.pack,front,wp,baseNormal,normalWorld,roughness,baseR,land,rock:localRock,snow,fp,albedoNode,textures});
+  return {normalWorld,roughness,land,textures,albedoNode};
 }

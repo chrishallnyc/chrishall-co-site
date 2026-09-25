@@ -31,9 +31,12 @@ const FRONTS = {
   },
   VALDEZ: {   // broken stratocumulus deck: thin, flat, wide cells
     coverage: 0.55, base: 1100, top: 2400,
-    covRepeat: 14000, baseRepeat: 7000, detailRepeat: 1050,
-    covSharp: 1.9, baseRound: 0.16, topSoft: 0.40, erode: 0.34,
+    covRepeat: 14000, baseRepeat: 2800, detailRepeat: 480,
+    covSharp: 1.9, baseRound: 0.16, topSoft: 0.52, erode: 0.40,
     sigma: 0.05, maxLen: 16000, shadow3D: false, shadowFloor: 0.62,
+    coreSupport: 0.82, nestedBillows: 0.44,
+    morphologyScale: [1, 1.2, 0.85], morphologyShear: [0.18, 0.04],
+    detailScale: [0.8, 1.1, 1], erosionColumn: true,
   },
   MARIANAS: { // trade cumulus deck + isolated towers to 5200 (tower mask ch.)
     coverage: 0.38, base: 550, top: 1900,
@@ -44,6 +47,8 @@ const FRONTS = {
     // and the shared 0.16 relief too shallow for a deck this thin)
     covSharp: 2.2, baseRound: 0.13, topSoft: 0.60, erode: 0.35, baseRelief: 0.30,
     sigma: 0.04, maxLen: 22000, shadow3D: true, shadowFloor: 0.50, coreSupport: 0.74, nestedBillows: 0.3,
+    morphologyScale: [1, 1, 1], morphologyShear: [0.10, 0.045],
+    detailScale: [0.68, 1.35, 1], erosionColumn: true,
   },
 };
 
@@ -256,7 +261,15 @@ export function cpuDensity(noise, front, x, y, z) {
   // 5. base shape: broad weather mass plus positively weighted inverted
   // Worley lobes. Inverted Worley peaks are billow centers; subtracting them
   // in a second remap suppressed the lobes and left extruded weather slabs.
-  tri4(noise.baseData, noise.baseN, x / P.baseRepeat, y / P.baseRepeat, z / P.baseRepeat, s4);
+  // Static shear and anisotropy give cells a vertical structure without
+  // moving the weather footprint or inventing density outside its support.
+  const shapeScale = P.morphologyScale || [1, 1, 1];
+  const shear = P.morphologyShear || [0, 0];
+  const height = y - P.base;
+  const shapeX = (x + height * shear[0]) * shapeScale[0];
+  const shapeY = y * shapeScale[1];
+  const shapeZ = (z + height * shear[1]) * shapeScale[2];
+  tri4(noise.baseData, noise.baseN, shapeX / P.baseRepeat, shapeY / P.baseRepeat, shapeZ / P.baseRepeat, s4);
   const wfbm = s4[1] * 0.625 + s4[2] * 0.25 + s4[3] * 0.125;
   // Nested 100–200 m billows break up otherwise smooth 400 m faces.
   // Center the extra bands near their canonical spatial mean, so this adds
@@ -277,12 +290,17 @@ export function cpuDensity(noise, front, x, y, z) {
   if (d <= 0) return 0;
   // 7. detail erosion: wispy at the base, billowy at the top. Erosion height
   //    uses the BASE layer span (not the tower-raised span) — both emitters.
-  tri4(noise.detailData, noise.detailN, x / P.detailRepeat, y / P.detailRepeat, z / P.detailRepeat, s4);
+  const detailScale = P.detailScale || [1, 1, 1];
+  tri4(noise.detailData, noise.detailN,
+    (x + height * shear[0]) * detailScale[0] / P.detailRepeat,
+    y * detailScale[1] / P.detailRepeat,
+    (z + height * shear[1]) * detailScale[2] / P.detailRepeat, s4);
   const dfbm = P.nestedBillows
     ? s4[0] * 0.40 + s4[1] * 0.35 + s4[2] * 0.25
     : s4[0] * 0.625 + s4[1] * 0.25 + s4[2] * 0.125;
-  const hfE = sat((y - P.base) / (P.top - P.base));
-  const e = (dfbm + (1 - 2 * dfbm) * sat(hfE * 5)) * P.erode;
+  const hfE = sat((y - P.base) / ((P.erosionColumn ? (P.towerTop || P.top) : P.top) - P.base));
+  const erosionBlend = P.erosionColumn ? smoothUnit(hfE) : sat(hfE * 5);
+  const e = (dfbm + (1 - 2 * dfbm) * erosionBlend) * P.erode;
   // 8. final density 0..1
   return sat((d - e) / (1 - e));
 }
@@ -338,7 +356,12 @@ function tslDensityBuilders(noise, P, covQ) {
   // steps 5-6 -> pre-erosion density
   const shape6 = Fn(([p, covAmt, grad]) => {
     // 5. base shape
-    const b = texture3D(noise.baseTex, p.div(P.baseRepeat));
+    const shapeScale = P.morphologyScale || [1, 1, 1];
+    const shear = P.morphologyShear || [0, 0];
+    const height = p.y.sub(P.base);
+    const q = vec3(p.x.add(height.mul(shear[0])).mul(shapeScale[0]),
+      p.y.mul(shapeScale[1]), p.z.add(height.mul(shear[1])).mul(shapeScale[2]));
+    const b = texture3D(noise.baseTex, q.div(P.baseRepeat));
     const wfbm = b.g.mul(0.625).add(b.b.mul(0.25)).add(b.a.mul(0.125));
     const nested = b.b.sub(0.48).mul(0.8).add(b.a.sub(0.48).mul(1.2))
       .mul(P.nestedBillows ?? 0);
@@ -356,12 +379,18 @@ function tslDensityBuilders(noise, P, covQ) {
   // steps 7-8 -> final density
   const erode8 = Fn(([p, d]) => {
     // 7. detail erosion
-    const det = texture3D(noise.detailTex, p.div(P.detailRepeat));
+    const detailScale = P.detailScale || [1, 1, 1];
+    const shear = P.morphologyShear || [0, 0];
+    const height = p.y.sub(P.base);
+    const q = vec3(p.x.add(height.mul(shear[0])).mul(detailScale[0]),
+      p.y.mul(detailScale[1]), p.z.add(height.mul(shear[1])).mul(detailScale[2]));
+    const det = texture3D(noise.detailTex, q.div(P.detailRepeat));
     const dfbm = P.nestedBillows
       ? det.r.mul(0.40).add(det.g.mul(0.35)).add(det.b.mul(0.25))
       : det.r.mul(0.625).add(det.g.mul(0.25)).add(det.b.mul(0.125));
-    const hfE = clamp(p.y.sub(P.base).div(P.top - P.base), 0.0, 1.0);
-    const e = mix(dfbm, dfbm.oneMinus(), clamp(hfE.mul(5.0), 0.0, 1.0)).mul(P.erode);
+    const hfE = clamp(p.y.sub(P.base).div((P.erosionColumn ? (P.towerTop || P.top) : P.top) - P.base), 0.0, 1.0);
+    const erosionBlend = P.erosionColumn ? smoothstep(0.0, 1.0, hfE) : clamp(hfE.mul(5.0), 0.0, 1.0);
+    const e = mix(dfbm, dfbm.oneMinus(), erosionBlend).mul(P.erode);
     // 8. final density
     return clamp(d.sub(e).div(e.oneMinus()), 0.0, 1.0);
   }).setLayout({ name: "cloudDensityErode", type: "float", inputs: [
@@ -475,8 +504,8 @@ export function updateCamera(camera) {
 
 // Every light ray samples the same final density as the view ray. Staging
 // avoids shape/detail fetches in empty weather or outside the layer slab.
-function makeSegmentLighting(P, density, topAll, geometry = null, dualSource = false, relativeOmission = .001) {
-  const lightDensity = Fn(([renderP]) => {
+function makeCloudLightDensity(P, density, geometry, name) {
+  return Fn(([renderP]) => {
     const p = geometry ? geometry.toMap(renderP).toVar('cloudLightMapPoint') : renderP;
     // The column clips every interval to the cloud slab before sampling.
     // Only the weather/shape/detail gates remain inside this shared helper.
@@ -490,12 +519,34 @@ function makeSegmentLighting(P, density, topAll, geometry = null, dualSource = f
       });
     });
     return value;
-  }).setLayout({ name: 'cloudLightDensity', type: 'float', inputs: [{ name: 'p', type: 'vec3' }] });
+  }).setLayout({ name, type: 'float', inputs: [{ name: 'p', type: 'vec3' }] });
+}
+
+// The producer shares the same final density and physical extinction as the
+// view/light integration. Its frozen curvature defines the cache's ray frame.
+export function makeCloudCacheDensity({ noise, front, curvature }) {
+  const P = FRONTS[front] || FRONTS.NELLIS;
+  const sample = makeCloudLightDensity(P, tslDensityBuilders(noise, P, covThreshold(noise, P.coverage)),
+    curvature ? createCloudGeometry(curvature) : null, 'cloudCacheDensity');
+  const top = P.towerTop || P.top;
+  const bounded = Fn(([p]) => {
+    const altitude = curvature ? curvature.inverseNode(p).y.toVar() : p.y;
+    const value = float(0).toVar();
+    // Producer boxes include long clear-air source extensions. The shared
+    // recipe is identically zero outside these physical global slab bounds.
+    If(altitude.greaterThanEqual(P.base).and(altitude.lessThanEqual(top)), () => { value.assign(sample(p)); });
+    return value;
+  }).setLayout({ name: 'cloudCacheBoundedDensity', type: 'float', inputs: [{ name: 'p', type: 'vec3' }] });
+  return { density: bounded, base: P.base, top, sigma: P.sigma };
+}
+
+function makeSegmentLighting(P, density, topAll, geometry = null, dualSource = false, relativeOmission = .001, lightCache = null) {
+  const lightDensity = makeCloudLightDensity(P, density, geometry, 'cloudLightDensity');
 
   // Growing intervals are gentler than the earlier doubling ladder. Clip
   // the final interval at the real slab exit, so a midpoint outside the slab
   // cannot erase the remaining in-cloud part of that interval.
-  const makeColumn = (name, ends) => Fn(([p, direction]) => {
+  const makeColumn = (name, ends, cacheKind = null) => Fn(([p, direction]) => {
     const column = float(0.0).toVar();
     let slabDistance;
     if (geometry) {
@@ -508,6 +559,9 @@ function makeSegmentLighting(P, density, topAll, geometry = null, dualSource = f
       slabDistance = select(upward, float(topAll).sub(p.y), float(P.base).sub(p.y))
         .div(safeY).clamp(0, ends[ends.length - 1]).toVar();
     }
+    const cached = lightCache && cacheKind !== null
+      ? lightCache.column(p, direction, slabDistance, cacheKind).toVar() : null;
+    const sampleOriginal = () => {
     let start = 0;
     for (const end of ends) {
       const intervalStart = start;
@@ -524,12 +578,21 @@ function makeSegmentLighting(P, density, topAll, geometry = null, dualSource = f
       });
       start = end;
     }
+    };
+    if (cached) {
+      If(cached.y.lessThan(1), sampleOriginal);
+      return mix(column.mul(P.sigma), cached.x, cached.y);
+    }
+    sampleOriginal();
     return column.mul(P.sigma);
   }).setLayout({ name, type: 'float', inputs: [
     { name: 'p', type: 'vec3' }, { name: 'direction', type: 'vec3' },
   ] });
-  const sunColumn = makeColumn('cloudSunColumn', LIGHT_SUN_ENDS);
-  const skyColumn = makeColumn('cloudSkyColumn', LIGHT_SKY_ENDS);
+  const sunColumn = makeColumn('cloudSunColumn', LIGHT_SUN_ENDS, 0);
+  const moonColumn = lightCache ? makeColumn('cloudMoonColumn', LIGHT_SUN_ENDS, 1) : sunColumn;
+  const skyColumns = lightCache ? [makeColumn('cloudSkyColumnPositive', LIGHT_SKY_ENDS, 2),
+    makeColumn('cloudSkyColumnNegative', LIGHT_SKY_ENDS, 3)] : null;
+  const skyColumn = lightCache ? null : makeColumn('cloudSkyColumn', LIGHT_SKY_ENDS);
   const skyDirections = [[0.7453559924999299,2/3,0],[-0.7453559924999299,2/3,0]];
   const diffuseTransfer = (tau) => {
     let sum = float(0.0);
@@ -541,8 +604,8 @@ function makeSegmentLighting(P, density, topAll, geometry = null, dualSource = f
 
   if (dualSource) return Fn(([p, sunDirection, solarPhase, solarColor, moonDirection, lunarPhase, lunarColor, skyColor]) => {
     const sky = float(0).toVar();
-    for (const direction of skyDirections) {
-      sky.addAssign(diffuseTransfer(skyColumn(p, vec3(...direction))).div(skyDirections.length));
+    for (let i = 0; i < skyDirections.length; i++) {
+      sky.addAssign(diffuseTransfer((skyColumns ? skyColumns[i] : skyColumn)(p, vec3(...skyDirections[i]))).div(skyDirections.length));
     }
     const diffuse = skyColor.mul(sky).toVar();
     const direct = vec3(0).toVar();
@@ -550,7 +613,7 @@ function makeSegmentLighting(P, density, topAll, geometry = null, dualSource = f
     // response is therefore an upper bound on each RGB source contribution.
     // Skip only if ALL channels fit within the allowed fraction of the
     // actual retained diffuse RGB. Zero tolerance is the strict reference.
-    const sourceColumn = (direction, phase, color) => {
+    const sourceColumn = (direction, phase, color, column) => {
       let transferBound = float(0);
       for (let j = 0; j < MS_A.length; j++) {
         transferBound = transferBound.add(mix(phase, float(ISO_PHASE), MS_PMIX[j]).mul(MS_A[j]));
@@ -559,7 +622,7 @@ function makeSegmentLighting(P, density, topAll, geometry = null, dualSource = f
       const limit = diffuse.mul(relativeOmission).toVar();
       const significant = upper.x.greaterThan(limit.x).or(upper.y.greaterThan(limit.y)).or(upper.z.greaterThan(limit.z));
       If(max(max(color.x, color.y), color.z).greaterThan(0).and(significant), () => {
-        const tau = sunColumn(p, direction).toVar();
+        const tau = column(p, direction).toVar();
         const transfer = float(0).toVar();
         for (let j = 0; j < MS_A.length; j++) {
           transfer.addAssign(exp(tau.mul(-MS_K[j]))
@@ -568,8 +631,8 @@ function makeSegmentLighting(P, density, topAll, geometry = null, dualSource = f
         direct.addAssign(color.mul(transfer));
       });
     };
-    sourceColumn(sunDirection, solarPhase, solarColor);
-    sourceColumn(moonDirection, lunarPhase, lunarColor);
+    sourceColumn(sunDirection, solarPhase, solarColor, sunColumn);
+    sourceColumn(moonDirection, lunarPhase, lunarColor, moonColumn);
     return direct.add(diffuse);
   }).setLayout({ name: 'cloudSegmentRadiance', type: 'vec3', inputs: [
     { name: 'p', type: 'vec3' }, { name: 'sunDirection', type: 'vec3' },
@@ -590,8 +653,8 @@ function makeSegmentLighting(P, density, topAll, geometry = null, dualSource = f
       }
     });
     const sky = float(0.0).toVar();
-    for (const direction of skyDirections) {
-      sky.addAssign(diffuseTransfer(skyColumn(p, vec3(...direction))).div(skyDirections.length));
+    for (let i = 0; i < skyDirections.length; i++) {
+      sky.addAssign(diffuseTransfer((skyColumns ? skyColumns[i] : skyColumn)(p, vec3(...skyDirections[i]))).div(skyDirections.length));
     }
     return sunColor.mul(sunlight).add(skyColor.mul(sky));
   }).setLayout({ name: 'cloudSegmentRadiance', type: 'vec3', inputs: [
@@ -612,7 +675,7 @@ export function cloudRayPhaseNode(uTime) {
     .onRenderUpdate(() => cloudRayPhase(uTime.value));
 }
 
-export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, front, noise, aerial, emit = null, curvature = null, jitterCoordinate = null }) {
+export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, front, noise, aerial, emit = null, curvature = null, jitterCoordinate = null, lightCache = null }) {
   const P = FRONTS[front] || FRONTS.NELLIS;
   const covQ = covThreshold(noise, P.coverage);
   const density = tslDensityBuilders(noise, P, covQ);
@@ -623,7 +686,7 @@ export function volCloudsNode({ beauty, depth, camera, uSunDir, uCamPos, uTime, 
     ...aerial.sourceTransport, curvature, referenceAltitude: (P.base + P.top) * .5,
   }) : null;
   const segmentRadiance = makeSegmentLighting(P, density, topAll, geometry, !!physicalSources,
-    aerial?.sourceTransport?.relativeOmission ?? .001);
+    aerial?.sourceTransport?.relativeOmission ?? .001, physicalSources ? lightCache : null);
   const uSunE = aerial ? aerial.uSunI : uniform(36.0); // unit-sun -> scene HDR scale
 
   const rayPhase = cloudRayPhaseNode(uTime);

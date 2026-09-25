@@ -118,7 +118,10 @@ export class Atmosphere {
     this.sun.position.copy(this._sunDir).multiplyScalar(20000);
     this.sun.intensity = paletteAt(el, "sunI", false);
     this.sun.color.copy(paletteAt(el, "sun", true));
-    this.sun.visible = this.sun.intensity > 0.01;
+    // Keep the light graph stable through dusk. A zero-energy source costs
+    // no radiance; removing the light rebuilds every receiving material.
+    if (this.sun.intensity <= 0.01) this.sun.intensity = 0;
+    this.sun.visible = true;
 
     this.hemi.intensity = paletteAt(el, "hemiI", false);
     this.hemi.color.copy(paletteAt(el, "hemiSky", true));
@@ -222,7 +225,8 @@ export class Atmosphere {
       ? [1, .98, .94] : [transmission[0], transmission[1] * .98, transmission[2] * .94]));
     this.moonLight.intensity = 4.2 * phase.irradianceRatio * gain
       * (this._receiverCelestialTransport ? 1 : visible);
-    this.moonLight.visible = this.moonLight.intensity > 1e-9;
+    if (this.moonLight.intensity <= 1e-9) this.moonLight.intensity = 0;
+    this.moonLight.visible = true;
     if (night > 0) {
       const physicalAmbient = new THREE.Color().setRGB(...skyMean).multiplyScalar(Math.PI * 4.2 / 36);
       const oldAmbient = this.hemi.color.clone().multiplyScalar(this.hemi.intensity);
@@ -286,8 +290,9 @@ export class Atmosphere {
   _regenIBL() {
     if (!this._pmrem) return;
     try {
-      const rt = this._pmrem.fromScene(this._iblScene, 0, 10, 60000);
-      if (this._envRT) this._envRT.dispose();
+      // Preserve the environment node/cache key across lighting changes.
+      // All six faces and convolution are submitted before the scene draw.
+      const rt = this._pmrem.fromScene(this._iblScene, 0, 10, 60000, { renderTarget: this._envRT });
       this._envRT = rt;
       this.scene.environment = rt.texture;
       // dry-front IBL trim rides with the item-2 rebalance (blue sky dome

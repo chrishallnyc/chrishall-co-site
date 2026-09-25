@@ -1,0 +1,1195 @@
+{
+  "schema": 1,
+  "front": "NELLIS",
+  "worldBounds": {
+    "xmin": -6144,
+    "xmax": 6144,
+    "zmin": -10240,
+    "zmax": 2048
+  },
+  "rows": 6,
+  "columns": 6,
+  "tileSizeM": 2048,
+  "interiorPixels": 2048,
+  "gutterPixels": 8,
+  "imagePixels": 2064,
+  "metresPerPixel": 1,
+  "pixelConvention": "north-first pixel centers, +z north",
+  "worldToGeographic": {
+    "centerLatitude": 36.6,
+    "centerLongitude": -115.4,
+    "metresPerDegreeLatitude": 111132.0,
+    "metresPerDegreeLongitude": 89369.64133827487
+  },
+  "source": {
+    "service": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer",
+    "credit": "USGS, USDA, The National Map: Orthoimagery. January 09, 2025.",
+    "acquisitionDates": [
+      "2022-07-04"
+    ],
+    "nativeGsdM": 0.6,
+    "license": "public domain",
+    "records": [
+      {
+        "OBJECTID": 134696,
+        "Name": "m_3611529_se_11_060_20220704",
+        "MinPS": 0,
+        "MaxPS": 19.1,
+        "Category": 1,
+        "CenterX": -12846964.644848512,
+        "CenterY": 4373971.070033388,
+        "State": "NV",
+        "Year": 2022,
+        "raster_name": "m_3611529_se_11_060_20220704",
+        "download_url": "https://earthexplorer.usgs.gov/download/options/naip/3287222",
+        "acquisition_date": 1656892800000,
+        "agency": "USDA",
+        "vendor": "USDA-FSA-APFO",
+        "resolution_value": 0.6,
+        "resolution_units": "METER",
+        "band_count": 4,
+        "sensor_type": "CNIR",
+        "projection_name": "UTM",
+        "projection_zone": "11N",
+        "datum": "NAD83",
+        "recordURL": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/134696"
+      },
+      {
+        "OBJECTID": 134697,
+        "Name": "m_3611529_sw_11_060_20220704",
+        "MinPS": 0,
+        "MaxPS": 19.1,
+        "Category": 1,
+        "CenterX": -12853922.140425287,
+        "CenterY": 4373971.259739,
+        "State": "NV",
+        "Year": 2022,
+        "raster_name": "m_3611529_sw_11_060_20220704",
+        "download_url": "https://earthexplorer.usgs.gov/download/options/naip/3287223",
+        "acquisition_date": 1656892800000,
+        "agency": "USDA",
+        "vendor": "USDA-FSA-APFO",
+        "resolution_value": 0.6,
+        "resolution_units": "METER",
+        "band_count": 4,
+        "sensor_type": "CNIR",
+        "projection_name": "UTM",
+        "projection_zone": "11N",
+        "datum": "NAD83",
+        "recordURL": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/134697"
+      },
+      {
+        "OBJECTID": 134699,
+        "Name": "m_3611530_nw_11_060_20220704",
+        "MinPS": 0,
+        "MaxPS": 19.1,
+        "Category": 1,
+        "CenterX": -12840007.434792547,
+        "CenterY": 4382633.460182183,
+        "State": "NV",
+        "Year": 2022,
+        "raster_name": "m_3611530_nw_11_060_20220704",
+        "download_url": "https://earthexplorer.usgs.gov/download/options/naip/3287225",
+        "acquisition_date": 1656892800000,
+        "agency": "USDA",
+        "vendor": "USDA-FSA-APFO",
+        "resolution_value": 0.6,
+        "resolution_units": "METER",
+        "band_count": 4,
+        "sensor_type": "CNIR",
+        "projection_name": "UTM",
+        "projection_zone": "11N",
+        "datum": "NAD83",
+        "recordURL": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/134699"
+      },
+      {
+        "OBJECTID": 134701,
+        "Name": "m_3611530_sw_11_060_20220704",
+        "MinPS": 0,
+        "MaxPS": 19.1,
+        "Category": 1,
+        "CenterX": -12840007.51747285,
+        "CenterY": 4373971.262991005,
+        "State": "NV",
+        "Year": 2022,
+        "raster_name": "m_3611530_sw_11_060_20220704",
+        "download_url": "https://earthexplorer.usgs.gov/download/options/naip/3287227",
+        "acquisition_date": 1656892800000,
+        "agency": "USDA",
+        "vendor": "USDA-FSA-APFO",
+        "resolution_value": 0.6,
+        "resolution_units": "METER",
+        "band_count": 4,
+        "sensor_type": "CNIR",
+        "projection_name": "UTM",
+        "projection_zone": "11N",
+        "datum": "NAD83",
+        "recordURL": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/134701"
+      }
+    ]
+  },
+  "tiles": [
+    {
+      "id": "nellis-r0-c0",
+      "row": 0,
+      "column": 0,
+      "worldBounds": {
+        "xmin": -6144,
+        "xmax": -4096,
+        "zmin": 0,
+        "zmax": 2048
+      },
+      "imageWorldBounds": {
+        "xmin": -6152,
+        "xmax": -4088,
+        "zmin": -8,
+        "zmax": 2056
+      },
+      "sourceIDs": [],
+      "sourceAcquisitionDates": [],
+      "blank": true,
+      "file": null,
+      "bytes": null,
+      "sha256": null,
+      "alphaSHA256": null,
+      "validInteriorPixelFraction": null
+    },
+    {
+      "id": "nellis-r0-c1",
+      "row": 0,
+      "column": 1,
+      "worldBounds": {
+        "xmin": -4096,
+        "xmax": -2048,
+        "zmin": 0,
+        "zmax": 2048
+      },
+      "imageWorldBounds": {
+        "xmin": -4104,
+        "xmax": -2040,
+        "zmin": -8,
+        "zmax": 2056
+      },
+      "sourceIDs": [],
+      "sourceAcquisitionDates": [],
+      "blank": true,
+      "file": null,
+      "bytes": null,
+      "sha256": null,
+      "alphaSHA256": null,
+      "validInteriorPixelFraction": null
+    },
+    {
+      "id": "nellis-r0-c2",
+      "row": 0,
+      "column": 2,
+      "worldBounds": {
+        "xmin": -2048,
+        "xmax": 0,
+        "zmin": 0,
+        "zmax": 2048
+      },
+      "imageWorldBounds": {
+        "xmin": -2056,
+        "xmax": 8,
+        "zmin": -8,
+        "zmax": 2056
+      },
+      "sourceIDs": [],
+      "sourceAcquisitionDates": [],
+      "blank": true,
+      "file": null,
+      "bytes": null,
+      "sha256": null,
+      "alphaSHA256": null,
+      "validInteriorPixelFraction": null
+    },
+    {
+      "id": "nellis-r0-c3",
+      "row": 0,
+      "column": 3,
+      "worldBounds": {
+        "xmin": 0,
+        "xmax": 2048,
+        "zmin": 0,
+        "zmax": 2048
+      },
+      "imageWorldBounds": {
+        "xmin": -8,
+        "xmax": 2056,
+        "zmin": -8,
+        "zmax": 2056
+      },
+      "sourceIDs": [
+        134699
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r0-c3.webp",
+      "bytes": 11338,
+      "sha256": "c5200bd7526feb9692923237e3f6c7fe875529925977fa4b97b919f266814ceb",
+      "alphaSHA256": "2ee8b83a5209fbba1e23a93a3f6e157059612768d575486d7ae5af9398266f5b",
+      "validInteriorPixelFraction": 0.0013880729675292969
+    },
+    {
+      "id": "nellis-r0-c4",
+      "row": 0,
+      "column": 4,
+      "worldBounds": {
+        "xmin": 2048,
+        "xmax": 4096,
+        "zmin": 0,
+        "zmax": 2048
+      },
+      "imageWorldBounds": {
+        "xmin": 2040,
+        "xmax": 4104,
+        "zmin": -8,
+        "zmax": 2056
+      },
+      "sourceIDs": [
+        134699
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r0-c4.webp",
+      "bytes": 925714,
+      "sha256": "0153b286484f9d20b0c19bc9b71f591b4cf2730e24e90d71ad515515df70636f",
+      "alphaSHA256": "a159abee4da92ee1d56c58cbe7d3ea21e39ba806dbaf618f7e284836402793b8",
+      "validInteriorPixelFraction": 0.9970307350158691
+    },
+    {
+      "id": "nellis-r0-c5",
+      "row": 0,
+      "column": 5,
+      "worldBounds": {
+        "xmin": 4096,
+        "xmax": 6144,
+        "zmin": 0,
+        "zmax": 2048
+      },
+      "imageWorldBounds": {
+        "xmin": 4088,
+        "xmax": 6152,
+        "zmin": -8,
+        "zmax": 2056
+      },
+      "sourceIDs": [
+        134699
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r0-c5.webp",
+      "bytes": 1033156,
+      "sha256": "ddf9951bd135d75c257e028150bf67714c93919caa6fa79352acd78bee51a6a1",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r1-c0",
+      "row": 1,
+      "column": 0,
+      "worldBounds": {
+        "xmin": -6144,
+        "xmax": -4096,
+        "zmin": -2048,
+        "zmax": 0
+      },
+      "imageWorldBounds": {
+        "xmin": -6152,
+        "xmax": -4088,
+        "zmin": -2056,
+        "zmax": 8
+      },
+      "sourceIDs": [],
+      "sourceAcquisitionDates": [],
+      "blank": true,
+      "file": null,
+      "bytes": null,
+      "sha256": null,
+      "alphaSHA256": null,
+      "validInteriorPixelFraction": null
+    },
+    {
+      "id": "nellis-r1-c1",
+      "row": 1,
+      "column": 1,
+      "worldBounds": {
+        "xmin": -4096,
+        "xmax": -2048,
+        "zmin": -2048,
+        "zmax": 0
+      },
+      "imageWorldBounds": {
+        "xmin": -4104,
+        "xmax": -2040,
+        "zmin": -2056,
+        "zmax": 8
+      },
+      "sourceIDs": [],
+      "sourceAcquisitionDates": [],
+      "blank": true,
+      "file": null,
+      "bytes": null,
+      "sha256": null,
+      "alphaSHA256": null,
+      "validInteriorPixelFraction": null
+    },
+    {
+      "id": "nellis-r1-c2",
+      "row": 1,
+      "column": 2,
+      "worldBounds": {
+        "xmin": -2048,
+        "xmax": 0,
+        "zmin": -2048,
+        "zmax": 0
+      },
+      "imageWorldBounds": {
+        "xmin": -2056,
+        "xmax": 8,
+        "zmin": -2056,
+        "zmax": 8
+      },
+      "sourceIDs": [],
+      "sourceAcquisitionDates": [],
+      "blank": true,
+      "file": null,
+      "bytes": null,
+      "sha256": null,
+      "alphaSHA256": null,
+      "validInteriorPixelFraction": null
+    },
+    {
+      "id": "nellis-r1-c3",
+      "row": 1,
+      "column": 3,
+      "worldBounds": {
+        "xmin": 0,
+        "xmax": 2048,
+        "zmin": -2048,
+        "zmax": 0
+      },
+      "imageWorldBounds": {
+        "xmin": -8,
+        "xmax": 2056,
+        "zmin": -2056,
+        "zmax": 8
+      },
+      "sourceIDs": [
+        134699
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r1-c3.webp",
+      "bytes": 20364,
+      "sha256": "087033fd1168dffcfb24c746512ab74dbd6697162b446b16fc9454659ebd10a4",
+      "alphaSHA256": "f47bf69c72e1012eeb56ba534f82b1803729833fedbbedb7d756a38b52011cf6",
+      "validInteriorPixelFraction": 0.01525735855102539
+    },
+    {
+      "id": "nellis-r1-c4",
+      "row": 1,
+      "column": 4,
+      "worldBounds": {
+        "xmin": 2048,
+        "xmax": 4096,
+        "zmin": -2048,
+        "zmax": 0
+      },
+      "imageWorldBounds": {
+        "xmin": 2040,
+        "xmax": 4104,
+        "zmin": -2056,
+        "zmax": 8
+      },
+      "sourceIDs": [
+        134699
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r1-c4.webp",
+      "bytes": 932920,
+      "sha256": "879f3b3dc463af55275e430834f1eb6c11cfadcacb573034acfdad84a6c321a6",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r1-c5",
+      "row": 1,
+      "column": 5,
+      "worldBounds": {
+        "xmin": 4096,
+        "xmax": 6144,
+        "zmin": -2048,
+        "zmax": 0
+      },
+      "imageWorldBounds": {
+        "xmin": 4088,
+        "xmax": 6152,
+        "zmin": -2056,
+        "zmax": 8
+      },
+      "sourceIDs": [
+        134699
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r1-c5.webp",
+      "bytes": 1163068,
+      "sha256": "58568399fcf68a92d7484527a63d770a6098ecbb8000726b2848ce6fc9eaebba",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r2-c0",
+      "row": 2,
+      "column": 0,
+      "worldBounds": {
+        "xmin": -6144,
+        "xmax": -4096,
+        "zmin": -4096,
+        "zmax": -2048
+      },
+      "imageWorldBounds": {
+        "xmin": -6152,
+        "xmax": -4088,
+        "zmin": -4104,
+        "zmax": -2040
+      },
+      "sourceIDs": [
+        134697
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r2-c0.webp",
+      "bytes": 40088,
+      "sha256": "345adeebbd38886bb7e65f8c3eea859aaa5b63702727c229ad2e5816af17cfcb",
+      "alphaSHA256": "2e107691a61f4bceb6fee950b45d12b7d33d785bd72a699662dc495120a6b682",
+      "validInteriorPixelFraction": 0.053681373596191406
+    },
+    {
+      "id": "nellis-r2-c1",
+      "row": 2,
+      "column": 1,
+      "worldBounds": {
+        "xmin": -4096,
+        "xmax": -2048,
+        "zmin": -4096,
+        "zmax": -2048
+      },
+      "imageWorldBounds": {
+        "xmin": -4104,
+        "xmax": -2040,
+        "zmin": -4104,
+        "zmax": -2040
+      },
+      "sourceIDs": [
+        134696,
+        134697
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r2-c1.webp",
+      "bytes": 52734,
+      "sha256": "8f2b48da106843888de47781536d202771cbd573bdc209e85f8fbc22c3cfb630",
+      "alphaSHA256": "e7cd804d383403e060daf93fecca67a7dcc4085e718b29739be3487f5dde344d",
+      "validInteriorPixelFraction": 0.06979560852050781
+    },
+    {
+      "id": "nellis-r2-c2",
+      "row": 2,
+      "column": 2,
+      "worldBounds": {
+        "xmin": -2048,
+        "xmax": 0,
+        "zmin": -4096,
+        "zmax": -2048
+      },
+      "imageWorldBounds": {
+        "xmin": -2056,
+        "xmax": 8,
+        "zmin": -4104,
+        "zmax": -2040
+      },
+      "sourceIDs": [
+        134696
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r2-c2.webp",
+      "bytes": 57866,
+      "sha256": "a28d6898cf43df9fb7f75fd7ab70a465173cae618414f1d0af184626892e2dfd",
+      "alphaSHA256": "8e7cf5a149d49de35c0363a656d656731ae7450fdea1ede674a3d806017c1039",
+      "validInteriorPixelFraction": 0.0663900375366211
+    },
+    {
+      "id": "nellis-r2-c3",
+      "row": 2,
+      "column": 3,
+      "worldBounds": {
+        "xmin": 0,
+        "xmax": 2048,
+        "zmin": -4096,
+        "zmax": -2048
+      },
+      "imageWorldBounds": {
+        "xmin": -8,
+        "xmax": 2056,
+        "zmin": -4104,
+        "zmax": -2040
+      },
+      "sourceIDs": [
+        134696,
+        134699
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r2-c3.webp",
+      "bytes": 65806,
+      "sha256": "dce7af137ce2a438a8eb97a42f9f5407f3184a047a9e2873dd47d540768e4319",
+      "alphaSHA256": "3dc4cd0378dadfa1e2bde2ddefd39d67eb8bc86568e4aea3139fb8456c0dddf7",
+      "validInteriorPixelFraction": 0.08017969131469727
+    },
+    {
+      "id": "nellis-r2-c4",
+      "row": 2,
+      "column": 4,
+      "worldBounds": {
+        "xmin": 2048,
+        "xmax": 4096,
+        "zmin": -4096,
+        "zmax": -2048
+      },
+      "imageWorldBounds": {
+        "xmin": 2040,
+        "xmax": 4104,
+        "zmin": -4104,
+        "zmax": -2040
+      },
+      "sourceIDs": [
+        134696,
+        134699,
+        134701
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r2-c4.webp",
+      "bytes": 979348,
+      "sha256": "a138b48ed9b4e2ff13e37ffc388f569bb9ec6c83bee7423189b0245e3f647540",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r2-c5",
+      "row": 2,
+      "column": 5,
+      "worldBounds": {
+        "xmin": 4096,
+        "xmax": 6144,
+        "zmin": -4096,
+        "zmax": -2048
+      },
+      "imageWorldBounds": {
+        "xmin": 4088,
+        "xmax": 6152,
+        "zmin": -4104,
+        "zmax": -2040
+      },
+      "sourceIDs": [
+        134699,
+        134701
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r2-c5.webp",
+      "bytes": 1065336,
+      "sha256": "7a481b342a7d0ab657a4fba27f6c6d39faac18094cc937a285b2aa45710cede1",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r3-c0",
+      "row": 3,
+      "column": 0,
+      "worldBounds": {
+        "xmin": -6144,
+        "xmax": -4096,
+        "zmin": -6144,
+        "zmax": -4096
+      },
+      "imageWorldBounds": {
+        "xmin": -6152,
+        "xmax": -4088,
+        "zmin": -6152,
+        "zmax": -4088
+      },
+      "sourceIDs": [
+        134697
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r3-c0.webp",
+      "bytes": 783742,
+      "sha256": "3b5e875a3a24a2a8a4ba624fe569c911622509f0ce788b257d386a5c11a0e482",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r3-c1",
+      "row": 3,
+      "column": 1,
+      "worldBounds": {
+        "xmin": -4096,
+        "xmax": -2048,
+        "zmin": -6144,
+        "zmax": -4096
+      },
+      "imageWorldBounds": {
+        "xmin": -4104,
+        "xmax": -2040,
+        "zmin": -6152,
+        "zmax": -4088
+      },
+      "sourceIDs": [
+        134696,
+        134697
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r3-c1.webp",
+      "bytes": 928652,
+      "sha256": "89a01fb630843c463b7fef0dfb0f671520c39e019a48e0eee164a72037035cc0",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r3-c2",
+      "row": 3,
+      "column": 2,
+      "worldBounds": {
+        "xmin": -2048,
+        "xmax": 0,
+        "zmin": -6144,
+        "zmax": -4096
+      },
+      "imageWorldBounds": {
+        "xmin": -2056,
+        "xmax": 8,
+        "zmin": -6152,
+        "zmax": -4088
+      },
+      "sourceIDs": [
+        134696
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r3-c2.webp",
+      "bytes": 883246,
+      "sha256": "777a8e1f31651150fd7e315bdc739023636297bba0c6cb0cb0216520d94470e1",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r3-c3",
+      "row": 3,
+      "column": 3,
+      "worldBounds": {
+        "xmin": 0,
+        "xmax": 2048,
+        "zmin": -6144,
+        "zmax": -4096
+      },
+      "imageWorldBounds": {
+        "xmin": -8,
+        "xmax": 2056,
+        "zmin": -6152,
+        "zmax": -4088
+      },
+      "sourceIDs": [
+        134696,
+        134699,
+        134701
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r3-c3.webp",
+      "bytes": 728412,
+      "sha256": "1e37b0f952973f6ccbbff3d7cfd17087c875377572b0284e1e8c826ab093c4c7",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r3-c4",
+      "row": 3,
+      "column": 4,
+      "worldBounds": {
+        "xmin": 2048,
+        "xmax": 4096,
+        "zmin": -6144,
+        "zmax": -4096
+      },
+      "imageWorldBounds": {
+        "xmin": 2040,
+        "xmax": 4104,
+        "zmin": -6152,
+        "zmax": -4088
+      },
+      "sourceIDs": [
+        134696,
+        134699,
+        134701
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r3-c4.webp",
+      "bytes": 1047002,
+      "sha256": "810577f4f631dd35c7b1f4fb0a7c489fd32d34f9f7a34d769a1c023f3881b8a4",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r3-c5",
+      "row": 3,
+      "column": 5,
+      "worldBounds": {
+        "xmin": 4096,
+        "xmax": 6144,
+        "zmin": -6144,
+        "zmax": -4096
+      },
+      "imageWorldBounds": {
+        "xmin": 4088,
+        "xmax": 6152,
+        "zmin": -6152,
+        "zmax": -4088
+      },
+      "sourceIDs": [
+        134699,
+        134701
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r3-c5.webp",
+      "bytes": 973426,
+      "sha256": "6567b1842e248c764c36d50141bd79eaabd409a5e8dd3b379436f96ddf1a44b0",
+      "alphaSHA256": "a78e91e46f3f46ca29c64694c565aadb67c4ee5358cad55eb3781774dff1b449",
+      "validInteriorPixelFraction": 0.9999985694885254
+    },
+    {
+      "id": "nellis-r4-c0",
+      "row": 4,
+      "column": 0,
+      "worldBounds": {
+        "xmin": -6144,
+        "xmax": -4096,
+        "zmin": -8192,
+        "zmax": -6144
+      },
+      "imageWorldBounds": {
+        "xmin": -6152,
+        "xmax": -4088,
+        "zmin": -8200,
+        "zmax": -6136
+      },
+      "sourceIDs": [
+        134697
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r4-c0.webp",
+      "bytes": 802778,
+      "sha256": "a89efdc4a9a5e9b727d89a937ab4493bb1cc11bd36c496a7b1e7b0ab6afc8124",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r4-c1",
+      "row": 4,
+      "column": 1,
+      "worldBounds": {
+        "xmin": -4096,
+        "xmax": -2048,
+        "zmin": -8192,
+        "zmax": -6144
+      },
+      "imageWorldBounds": {
+        "xmin": -4104,
+        "xmax": -2040,
+        "zmin": -8200,
+        "zmax": -6136
+      },
+      "sourceIDs": [
+        134696,
+        134697
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r4-c1.webp",
+      "bytes": 815424,
+      "sha256": "a3fb82e6b5bc5e0da29e0b8a4c615ae346616052ed00646c5e81ef3c25346d9c",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r4-c2",
+      "row": 4,
+      "column": 2,
+      "worldBounds": {
+        "xmin": -2048,
+        "xmax": 0,
+        "zmin": -8192,
+        "zmax": -6144
+      },
+      "imageWorldBounds": {
+        "xmin": -2056,
+        "xmax": 8,
+        "zmin": -8200,
+        "zmax": -6136
+      },
+      "sourceIDs": [
+        134696
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r4-c2.webp",
+      "bytes": 773550,
+      "sha256": "97723913a88d138be25e767051f383b324d7a9e0fed3e1e6f06869e4c5be303c",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r4-c3",
+      "row": 4,
+      "column": 3,
+      "worldBounds": {
+        "xmin": 0,
+        "xmax": 2048,
+        "zmin": -8192,
+        "zmax": -6144
+      },
+      "imageWorldBounds": {
+        "xmin": -8,
+        "xmax": 2056,
+        "zmin": -8200,
+        "zmax": -6136
+      },
+      "sourceIDs": [
+        134696,
+        134701
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r4-c3.webp",
+      "bytes": 874742,
+      "sha256": "e293d3737f54e0a6e7dc99bfc257abbc04691a33d2c4c367f84b51383da74600",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r4-c4",
+      "row": 4,
+      "column": 4,
+      "worldBounds": {
+        "xmin": 2048,
+        "xmax": 4096,
+        "zmin": -8192,
+        "zmax": -6144
+      },
+      "imageWorldBounds": {
+        "xmin": 2040,
+        "xmax": 4104,
+        "zmin": -8200,
+        "zmax": -6136
+      },
+      "sourceIDs": [
+        134696,
+        134701
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r4-c4.webp",
+      "bytes": 923666,
+      "sha256": "946d809f421c05a4e6ee9daedcdde045b479eddc202425906983924648bbc100",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r4-c5",
+      "row": 4,
+      "column": 5,
+      "worldBounds": {
+        "xmin": 4096,
+        "xmax": 6144,
+        "zmin": -8192,
+        "zmax": -6144
+      },
+      "imageWorldBounds": {
+        "xmin": 4088,
+        "xmax": 6152,
+        "zmin": -8200,
+        "zmax": -6136
+      },
+      "sourceIDs": [
+        134701
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r4-c5.webp",
+      "bytes": 974544,
+      "sha256": "6bbab8a15ed50cff76457cf7e47727ba3d45c8d22e34acc641f7e1e8ece0a6fe",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r5-c0",
+      "row": 5,
+      "column": 0,
+      "worldBounds": {
+        "xmin": -6144,
+        "xmax": -4096,
+        "zmin": -10240,
+        "zmax": -8192
+      },
+      "imageWorldBounds": {
+        "xmin": -6152,
+        "xmax": -4088,
+        "zmin": -10248,
+        "zmax": -8184
+      },
+      "sourceIDs": [
+        134697
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r5-c0.webp",
+      "bytes": 966650,
+      "sha256": "edf2b6f043b19687064b868b8b55ff4af891146efe83ee8a10b1c84beb9758b3",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r5-c1",
+      "row": 5,
+      "column": 1,
+      "worldBounds": {
+        "xmin": -4096,
+        "xmax": -2048,
+        "zmin": -10240,
+        "zmax": -8192
+      },
+      "imageWorldBounds": {
+        "xmin": -4104,
+        "xmax": -2040,
+        "zmin": -10248,
+        "zmax": -8184
+      },
+      "sourceIDs": [
+        134696,
+        134697
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r5-c1.webp",
+      "bytes": 768496,
+      "sha256": "2a8d773f286990c7ebcf8caadcf633f8659827f6fc898150d9a6742fd508665b",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r5-c2",
+      "row": 5,
+      "column": 2,
+      "worldBounds": {
+        "xmin": -2048,
+        "xmax": 0,
+        "zmin": -10240,
+        "zmax": -8192
+      },
+      "imageWorldBounds": {
+        "xmin": -2056,
+        "xmax": 8,
+        "zmin": -10248,
+        "zmax": -8184
+      },
+      "sourceIDs": [
+        134696
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r5-c2.webp",
+      "bytes": 749346,
+      "sha256": "8c4a00210e99c5d2ac343471234c72e17fba5339e9b4422a42d05b6940c2067a",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r5-c3",
+      "row": 5,
+      "column": 3,
+      "worldBounds": {
+        "xmin": 0,
+        "xmax": 2048,
+        "zmin": -10240,
+        "zmax": -8192
+      },
+      "imageWorldBounds": {
+        "xmin": -8,
+        "xmax": 2056,
+        "zmin": -10248,
+        "zmax": -8184
+      },
+      "sourceIDs": [
+        134696,
+        134701
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r5-c3.webp",
+      "bytes": 829586,
+      "sha256": "713ade6070574c666aac3a1be2f9b02084a4d27da9cd4658a919acbf618127bb",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r5-c4",
+      "row": 5,
+      "column": 4,
+      "worldBounds": {
+        "xmin": 2048,
+        "xmax": 4096,
+        "zmin": -10240,
+        "zmax": -8192
+      },
+      "imageWorldBounds": {
+        "xmin": 2040,
+        "xmax": 4104,
+        "zmin": -10248,
+        "zmax": -8184
+      },
+      "sourceIDs": [
+        134696,
+        134701
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r5-c4.webp",
+      "bytes": 887746,
+      "sha256": "95ec3f942311821f8046003d361de4500e1f1be4e067a2fc4bad03f6e7afaec8",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    },
+    {
+      "id": "nellis-r5-c5",
+      "row": 5,
+      "column": 5,
+      "worldBounds": {
+        "xmin": 4096,
+        "xmax": 6144,
+        "zmin": -10240,
+        "zmax": -8192
+      },
+      "imageWorldBounds": {
+        "xmin": 4088,
+        "xmax": 6152,
+        "zmin": -10248,
+        "zmax": -8184
+      },
+      "sourceIDs": [
+        134701
+      ],
+      "sourceAcquisitionDates": [
+        "2022-07-04"
+      ],
+      "blank": false,
+      "file": "tiles/nellis-r5-c5.webp",
+      "bytes": 1016144,
+      "sha256": "476a039ea70afc1fd313799129e09a27bee44fe96fb8af3ffe2b229760261a6a",
+      "alphaSHA256": "9e7dcac81e978f24c850c78c083778cdc7bbd324ebfc999c1407959a82925444",
+      "validInteriorPixelFraction": 1.0
+    }
+  ],
+  "overlapRepairs": [
+    {
+      "tile": "nellis-r3-c5",
+      "pixels": 16,
+      "reason": "Adjacent exact-coordinate service exports disagree only in source mask; all common valid RGB is byte-identical. Re-fetch with every regional source ID reproduces the disagreement.",
+      "witnessTile": "nellis-r3-c4",
+      "witnessRawFile": "raw/nellis-r3-c4.png",
+      "witnessRawSHA256": "4336a7eded36621d75a3e1d3fdd851c75ed8e561b8135fda211328aebe892dae",
+      "witnessPixelRow": 263,
+      "witnessPixelColumns": [
+        2048,
+        2063
+      ],
+      "targetPixelRow": 263,
+      "targetPixelColumns": [
+        0,
+        15
+      ],
+      "targetOriginalRawFile": "raw/nellis-r3-c5.png",
+      "targetOriginalRawSHA256": "822e174ccba2072d87e69e66264c1b227180a761248f471bf2cdc515f7ee629c",
+      "remainingTransparentPixels": 6,
+      "interpolatedPixels": 0,
+      "inventedPixels": 0
+    }
+  ]
+}
