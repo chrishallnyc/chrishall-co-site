@@ -4,6 +4,7 @@ import { Fn, If, uniform, texture, passTexture, uv, vec2, vec3, vec4, float, ive
   struct, mrt, min, max, abs, exp, select, normalize, getViewPosition } from 'three/tsl';
 import { CloudPass as BaseCloudPass } from './cloudpass.js';
 import { volCloudsNode } from './volclouds.js';
+import { CloudLightCache } from './cloudlightcache.js';
 import { cloudTemporalResult } from './cloudtemporal.js';
 
 const RawResult = struct({ radiance: 'vec4', metadata: 'vec4', motion: 'vec4', depth: 'float' });
@@ -74,8 +75,12 @@ export class SpatialCloudPass extends BaseCloudPass {
     this._material.depthTest = !reversed;
     if (builder.renderer.logarithmicDepthBuffer) throw new Error('Spatial cloud pass requires perspective depth');
     if (reversed) this.rawTarget.depthTexture.type = THREE.FloatType;
+    if (!this.lightCache && builder.renderer.backend.isWebGPUBackend && this.cloudOptions.curvature
+      && this.cloudOptions.aerial?.sourceTransport && this.cloudOptions.aerial?.celestial) {
+      this.lightCache = new CloudLightCache({ ...this.cloudOptions, camera: this.camera });
+    }
     const shared = builder.getSharedContext();
-    const integrated = this._integrate({ ...this.cloudOptions, beauty: this.beauty,
+    const integrated = this._integrate({ ...this.cloudOptions, lightCache: this.lightCache, beauty: this.beauty,
       depth: this.sceneDepth, camera: this.camera, emit: r => {
         // Crucially use the original ray/scene distance here, exactly once.
         const original = cloudTemporalResult(this, r, reversed).toVar();
@@ -148,6 +153,7 @@ export class SpatialCloudPass extends BaseCloudPass {
     this._rendererState = THREE.RendererUtils.resetRendererState(renderer, this._rendererState);
     const pending = { rawCaptureCount: 0 }; this._pendingFrame = pending;
     try {
+      this.lightCache?.update(renderer);
       renderer.setMRT(null);
       renderer.setRenderTarget(this.rawTarget); this._quad.render(renderer);
       renderer.setRenderTarget(this.outputTarget); this._compositionQuad.render(renderer);
@@ -160,6 +166,7 @@ export class SpatialCloudPass extends BaseCloudPass {
 
   dispose() {
     if (this._disposed) return; this._disposed = true;
+    this.lightCache?.dispose();
     this.rawTarget.dispose(); this._compositionMaterial.dispose(); super.dispose();
   }
 }

@@ -5,6 +5,7 @@ export const CLOUD_NOISE_VERSION = 1;
 export const CLOUD_JITTER_N = 128;
 export const CLOUD_NOISE_SIZES = Object.freeze({
   standard: Object.freeze({ baseN: 128, detailN: 64 }),
+  high: Object.freeze({ baseN: 192, detailN: 96 }),
   ultra: Object.freeze({ baseN: 256, detailN: 128 }),
 });
 // Physical field coordinates remain unchanged when the texture gets denser.
@@ -137,9 +138,9 @@ export function cloudNoiseSize(options = {}) {
   if (!size) throw new RangeError("Unknown cloud-noise resolution");
   const baseN = options.baseN ?? size.baseN, detailN = options.detailN ?? size.detailN;
   if (!Object.values(CLOUD_NOISE_SIZES).some(s => s.baseN === baseN && s.detailN === detailN)) {
-    throw new RangeError("Cloud-noise sizes must be 128/64 or 256/128");
+    throw new RangeError("Cloud-noise sizes must be 128/64, 192/96 or 256/128");
   }
-  return { baseN, detailN, resolution: baseN === 256 ? "ultra" : "standard" };
+  return { baseN, detailN, resolution: baseN === 256 ? "ultra" : baseN === 192 ? "high" : "standard" };
 }
 
 export function prepareCloudNoiseRecipe(seed = 1337) {
