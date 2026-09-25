@@ -172,7 +172,11 @@ try{
       canvas.requestPointerLock=()=>{const result=request();result?.catch(error=>{window.qaCaptureError=error.name+': '+error.message;});return result;};
     });
     await page.locator('[data-flight-action="capture"]').click();
-    await page.waitForFunction(()=>document.pointerLockElement?.id==='game'||window.qaCaptureError);
+    // The browser sets pointerLockElement before it queues pointerlockchange.
+    // Wait for the application's event handler as well as the native lock.
+    await page.waitForFunction(()=>(document.pointerLockElement?.id==='game'
+      && document.querySelector('[data-flight-action="capture"]').getAttribute('aria-pressed')==='true')
+      ||window.qaCaptureError);
     assert.equal(await page.evaluate(()=>window.qaCaptureError),undefined);
     assert.equal(await page.locator('[data-flight-action="capture"]').getAttribute('aria-pressed'),'true');
     await page.mouse.move(740,465,{steps:8});await page.waitForTimeout(300);

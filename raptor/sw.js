@@ -4,7 +4,7 @@
 // NEVER precached (browser HTTP cache handles them); this worker only makes
 // the app installable and the shell survivable offline. Cache is keyed by
 // version: bumping SHELL_VERSION on deploy retires the old cache.
-const SHELL_VERSION = "raptor-shell-v1.8.0";
+const SHELL_VERSION = "raptor-shell-v1.9.1";
 const SHELL = ["/", "/index.html", "/manifest.webmanifest", "/assets/icon-192.png", "/assets/icon-512.png"];
 
 self.addEventListener("install", (e) => {

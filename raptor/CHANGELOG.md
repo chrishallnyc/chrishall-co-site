@@ -1,5 +1,19 @@
 # RAPTOR release notes
 
+## 1.9.1 — 2026-09-24
+
+A calmer flight deck and smoother presentation in the air.
+
+- **Flight deck:** clearer type, quieter navigation, brighter region previews,
+  and F-22 linework give preflight more space and a stronger aircraft identity.
+  Amber selections, keycaps, setup menus and flight coaching share a more
+  consistent finish. Short transitions respect reduced-motion preferences.
+- **Flight feel:** the chase camera eases into banks while forward aiming stays
+  immediate. Cinematic camera easing follows elapsed time across refresh rates.
+- **Wingtip trails:** condensation keeps consistent spacing across frame rates,
+  with bounded catch-up and fresh starts after respawns, teleports or long gaps.
+  Particle capacity and flight physics are unchanged.
+
 ## 1.9.0 — 2026-09-24
 
 The engine develops irregular pressure movement instead of repeating the same
