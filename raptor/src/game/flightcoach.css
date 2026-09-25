@@ -1,20 +1,23 @@
-.flight-coach.practice-checklist{top:var(--flight-toolbar-bottom,100px);right:16px;width:276px;max-width:calc(100vw - 32px);padding:17px 18px 12px;background:#10171eed;border-color:#9da99855;max-height:calc(100dvh - var(--flight-toolbar-bottom,100px) - 75px);overflow:auto;color:var(--ink,#e9e7df)}
+.flight-coach.practice-checklist{top:var(--flight-toolbar-bottom,100px);right:16px;width:276px;max-width:calc(100vw - 32px);padding:17px 18px 12px;background:linear-gradient(135deg,#e8b46f07,transparent 65%),#121b23f5;border-color:#9da99855;border-radius:12px;box-shadow:0 8px 28px #00000024,inset 0 1px 0 #ffffff08;max-height:calc(100dvh - var(--flight-toolbar-bottom,100px) - 75px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;color:var(--ink,#e9e7df)}
 .flight-coach[hidden]{display:none!important}
 .flight-coach .coach-eyebrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px;font:9px var(--mono,monospace);letter-spacing:1.2px;color:var(--acc,#e8b46f)}
 .flight-coach h3{font-size:16px;line-height:1.35;margin:0 0 11px;font-weight:550;letter-spacing:-.15px}
 .flight-coach .coach-course{display:flex;gap:5px;list-style:none;margin:0 0 14px;padding:0}
-.flight-coach .coach-course li{display:block;flex:1;height:3px;padding:0;background:#6b788544;border-radius:2px}
+.flight-coach .coach-course li{display:block;flex:1;height:3px;padding:0;background:#6b788544;border-radius:2px;transition:background-color .24s ease}
 .flight-coach .coach-course li.current{background:var(--acc,#e8b46f)}
 .flight-coach .coach-course li.done{background:#abd9b1}
 .flight-coach .coach-instruction{font-size:11px;line-height:1.65;margin:0 0 12px;color:#d3dbe3}
 .flight-coach .coach-instruction kbd{font-size:10px;padding:1px 4px;white-space:nowrap}
-.flight-coach .coach-readout{padding:10px 11px;border:1px solid #8ca0b344;border-radius:5px;background:#31425433;display:flex;flex-direction:column;gap:5px}
-.flight-coach .coach-readout strong{font:13px var(--mono,monospace);font-weight:500;color:#f0f3f4}
+.flight-coach .coach-readout{padding:10px 11px;border:1px solid #8ca0b344;border-radius:8px;background:#31425440;box-shadow:inset 0 1px 0 #ffffff05;display:flex;flex-direction:column;gap:5px;transition:background-color .2s ease,border-color .2s ease}
+.flight-coach .coach-readout strong{font:13px var(--mono,monospace);font-weight:500;font-variant-numeric:tabular-nums;color:#f0f3f4}
 .flight-coach .coach-readout span{font-size:10px;color:#b7c3ce}
 .flight-coach .coach-hold{display:flex;gap:9px;align-items:baseline;justify-content:space-between;margin-top:12px;font-size:10px;color:#c5ced7;line-height:1.4}
 .flight-coach .coach-hold [data-coach-seconds]{white-space:nowrap;font:9px var(--mono,monospace);color:var(--acc,#e8b46f)}
-.flight-coach progress{display:block;width:100%;height:4px;margin:8px 0 0;accent-color:var(--acc,#e8b46f)}
-.flight-coach.on-target .coach-readout{border-color:#abd9b16b;background:#426e4929}
+.flight-coach progress{display:block;width:100%;height:4px;margin:8px 0 0;accent-color:var(--acc,#e8b46f);border:0;border-radius:4px;overflow:hidden;background:#6b788533}
+.flight-coach progress::-webkit-progress-bar{background:#6b788533;border-radius:4px}
+.flight-coach progress::-webkit-progress-value{background:var(--acc,#e8b46f);border-radius:4px;transition:width .2s ease}
+.flight-coach progress::-moz-progress-bar{background:var(--acc,#e8b46f);border-radius:4px}
+.flight-coach.on-target .coach-readout{border-color:#abd9b16b;background:#426e4938}
 .flight-coach.on-target [data-coach-feedback]{color:#b8dfb4}
 .flight-coach .coach-reassurance{margin:7px 0 12px;font-size:9px;color:#adb8c3}
 .flight-coach .coach-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
@@ -32,3 +35,4 @@
 /* Keep the altitude tape readable while the coach is open on a laptop. */
 @media(min-width:1101px){.flight-coach.practice-checklist{right:var(--flight-instrument-gutter,140px)}}
 @media(min-width:761px) and (max-width:1100px){.flight-coach.practice-checklist{right:var(--flight-instrument-gutter,140px);width:232px}}
+@media(prefers-reduced-motion:reduce){.flight-coach *,.flight-coach *::before,.flight-coach *::after{transition:none!important;animation:none!important}.flight-coach progress::-webkit-progress-value{transition:none!important}}
