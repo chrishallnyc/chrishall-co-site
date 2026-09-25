@@ -28,7 +28,7 @@ export async function loadRequestedFlight(flags, modules = importModules) {
   const request = requestedFlight(flags);
   if (!request) return null;
   try {
-    if (flags.get('nomatch') === '1' || flags.get('nobattle') === '1' || flags.get('demo') === '1') {
+    if (flags.get('nomatch') === '1' || flags.get('nobattle') === '1' || flags.get('demo') === '1' || flags.get('mode') === 'practice') {
       throw new Error('This mission link disables a required flight system.');
     }
     const M = await modules.missions();

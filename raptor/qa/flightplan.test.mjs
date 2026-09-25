@@ -22,5 +22,5 @@ test('operation uses its saved mission conditions rather than a stale preflight 
 });
 test('analytics query parameters cannot unexpectedly launch a combat flight',()=>{
   assert.equal(hasFlightRequest(new URLSearchParams('?utm_source=link&ref=friend')),false);
-  for(const search of ['?front=NELLIS','?sortie=N01','?gl=1','?demo=1'])assert.equal(hasFlightRequest(new URLSearchParams(search)),true);
+  for(const search of ['?mode=practice','?front=NELLIS','?sortie=N01','?gl=1','?demo=1'])assert.equal(hasFlightRequest(new URLSearchParams(search)),true);
 });

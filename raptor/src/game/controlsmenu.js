@@ -9,6 +9,44 @@ import { BindingHistory, planActionRestore, missingEssentialActions } from "./co
 const MODS = new Set(["ShiftLeft", "ShiftRight", "ControlLeft", "ControlRight", "AltLeft", "AltRight", "MetaLeft", "MetaRight"]);
 const CATEGORIES = { essentials: "Start here", missing: "Needs a key", all: "All controls", flight: "Flying", weapons: "Weapons", systems: "Aircraft", interface: "Interface" };
 const TABS = { controls: "Controls", display: "Display", audio: "Audio", accessibility: "Accessibility" };
+const KEYBOARD_ROWS = [
+  ["Escape", "Backquote", ..."1234567890".split("").map(n => "Digit" + n), "Minus", "Equal"],
+  [..."QWERTYUIOP"].map(key => "Key" + key),
+  [..."ASDFGHJKL"].map(key => "Key" + key),
+  [..."ZXCVBNM"].map(key => "Key" + key),
+  ["ControlLeft", "AltLeft", "MetaLeft", "Space", "MetaRight", "AltRight", "ArrowLeft", "ArrowUp", "ArrowDown", "ArrowRight"],
+];
+const POINTER_CODES = ["Mouse0", "Mouse1", "Mouse2", "WheelUp", "WheelDown"];
+const SHORT_ACTIONS = { throttle_up: "THR +", throttle_down: "THR −", roll_left: "BANK L", roll_right: "BANK R", pitch_up: "NOSE ↑", pitch_down: "NOSE ↓", yaw_left: "YAW L", yaw_right: "YAW R", fire_mguns: "CANNON", fire_aam: "MISSILE", gear: "GEAR", wheel_brakes: "BRAKE", menu: "PAUSE", game_pause: "PAUSE", help: "GUIDE", recenter_aim: "CENTER", hide_hud: "HUD", debug: "DETAILS" };
+const compactKey = code => ({ ControlLeft: "ctrl", AltLeft: "⌥", AltRight: "⌥", MetaLeft: "⌘", MetaRight: "⌘", Mouse0: "Left click", Mouse1: "Middle", Mouse2: "Right click" }[code] || keyName(code));
+
+// A preset is a starting point for one device, never a separate saved state.
+// Derive its name from the actual gain so slider edits cannot leave a stale badge.
+export function aimPresetState(settings) {
+  const trackpad = settings.pointingDevice === "trackpad";
+  const key = trackpad ? "trackpadSensitivity" : "mouseSensitivity";
+  const presets = [
+    { id: "precise", label: "Precise", note: "Finer corrections", value: trackpad ? 0.45 : 0.65 },
+    { id: "balanced", label: "Balanced", note: "A good starting point", value: trackpad ? 0.65 : 1 },
+    { id: "responsive", label: "Responsive", note: "Turn with less travel", value: trackpad ? 1 : 1.4 },
+  ];
+  const selected = presets.find(preset => Math.abs(preset.value - settings[key]) < 0.0001);
+  return { key, presets, selected: selected?.id || "custom", label: selected?.label || "Custom", value: settings[key] };
+}
+
+// Index by trigger, not every member of a chord. Option + Z belongs on Z;
+// clicking that key still exposes the complete chord and all shared actions.
+export function mappedControls(actions) {
+  const inputs = new Map();
+  for (const [id, action] of Object.entries(actions)) {
+    action.binds.forEach((chord, slot) => {
+      const code = chord.at(-1);
+      if (!inputs.has(code)) inputs.set(code, []);
+      inputs.get(code).push({ id, slot, chord, label: action.label, locked: action.lockedPrimary && slot === 0 });
+    });
+  }
+  return inputs;
+}
 const esc = (text) => String(text).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const nice = (chord) => esc(chordName(chord));
 const FOCUSABLE = 'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), summary, [tabindex="0"]';
@@ -25,6 +63,8 @@ export class ControlsMenu {
     this.tab = "controls";
     this.category = "essentials";
     this.query = "";
+    this.selectedCode = "KeyW";
+    this.layoutOpen = true;
     this.capturing = null;
     this.pending = null;
     this.confirming = null;
@@ -61,6 +101,7 @@ export class ControlsMenu {
     this._wheel = (event) => this._onWheel(event);
     this._blur = () => {
       this._heldMods = []; this.testDown.clear();
+      this._cancelAimHold?.();
       if (this.capturing) this._cancelCapture("Binding canceled because the window lost focus.");
       this._updateTest();
     };
@@ -96,6 +137,7 @@ export class ControlsMenu {
     this.open = false; this.capturing = this.pending = this.confirming = this.restoring = null;
     this.lastTest = null;
     this.testing = false; this.testDown.clear(); this._heldMods = [];
+    this._cancelAimHold?.();
     clearInterval(this._statusInterval);
     this.input.clear();
     this.input.suspended = this._previousSuspended;
@@ -179,13 +221,14 @@ export class ControlsMenu {
     else if (!event.shiftKey && (document.activeElement === last || !scope.contains(document.activeElement))) { event.preventDefault(); first.focus(); }
   }
 
-  _beginCapture(id, slot) {
+  _beginCapture(id, slot, returnFocus = "") {
     this.capturing = { id, slot }; this.pending = null; this.testing = false;
+    this.captureReturnFocus = returnFocus; this.testDown.clear();
     this._heldMods = []; this.captureError = "";
     this._render();
   }
   _cancelCapture(message) {
-    const focus = this.capturing ? `bind-${this.capturing.id}-${this.capturing.slot}` : "";
+    const focus = this.captureReturnFocus || (this.capturing ? `bind-${this.capturing.id}-${this.capturing.slot}` : "");
     this.capturing = this.pending = null; this._heldMods = [];
     this.notice = message; this._render(focus);
   }
@@ -208,7 +251,8 @@ export class ControlsMenu {
     const { id, slot } = this.capturing;
     if (this.history.change(`change ${this.input.actions[id].label}`, () => this.input.setBinding(id, slot, chord, { resolve }))) {
       this.notice = `${this.input.actions[id].label} → ${chordName(chord)}. ${this.input.storageAvailable ? "Saved on this browser." : "Session only. This binding resets when you launch or reload."}`;
-      this.capturing = this.pending = null; this._heldMods = []; this._render(`bind-${id}-${slot}`);
+      if (this.captureReturnFocus) this.selectedCode = chord.at(-1);
+      this.capturing = this.pending = null; this._heldMods = []; this._render(this.captureReturnFocus ? `map-edit-${id}-${slot}` : `bind-${id}-${slot}`);
     }
   }
   showMissingControls() {
@@ -258,15 +302,49 @@ export class ControlsMenu {
   _toggle(key, label, description, value) {
     return `<label class="setup-setting setup-toggle" for="setup-${key}"><span><strong>${label}</strong><small>${description}</small></span><input id="setup-${key}" data-setting="${key}" type="checkbox" ${value ? "checked" : ""}><span class="toggle-track" aria-hidden="true"></span></label>`;
   }
+  _aimPresetsHtml() {
+    const state = aimPresetState(current());
+    return `<div class="aim-presets"><div class="aim-preset-heading"><strong>Start with a feel</strong><output data-aim-preset-status aria-live="polite">${state.label} · ${valueLabel(state.key, state.value)}</output></div><div class="aim-preset-options" role="group" aria-label="Aiming sensitivity presets">${state.presets.map(preset => `<button type="button" data-aim-preset="${preset.id}" aria-pressed="${state.selected === preset.id}"><strong>${preset.label}</strong><small>${preset.note}</small><span>${valueLabel(state.key, preset.value)}</span></button>`).join("")}</div></div>`;
+  }
+  _updateAimPresets() {
+    const state = aimPresetState(current());
+    this.el.querySelectorAll("[data-aim-preset]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.aimPreset === state.selected)));
+    const output = this.el.querySelector("[data-aim-preset-status]");
+    if (output) output.textContent = `${state.label} · ${valueLabel(state.key, state.value)}`;
+  }
+  _layoutInspectorHtml() {
+    const entries = mappedControls(this.input.actions).get(this.selectedCode) || [];
+    if (!entries.length) return `<div class="layout-empty">Choose a lit key to see its action and change its binding. Every tile reflects your saved setup.</div>`;
+    return `<div class="layout-inspector-title"><strong>${esc(keyName(this.selectedCode))}</strong><span>${entries.length > 1 ? "All bindings using this trigger" : "Your current binding"}</span></div>${entries.map((entry, index) => `<div class="layout-action"><div><strong>${esc(entry.label)}</strong><span>${nice(entry.chord)}${entry.chord.length > 1 ? " · hold the full shortcut" : ""}</span></div>${entry.locked ? '<span class="layout-fixed">Always available</span>' : `<button type="button" class="setup-button" data-layout-edit="${entry.id}" data-slot="${entry.slot}" data-focus="map-edit-${entry.id}-${entry.slot}">Change key</button>`}${this.input.actions[entry.id].binds.length < 4 && entries.findIndex(item => item.id === entry.id) === index ? `<button type="button" class="setup-text-button" data-layout-add="${entry.id}" data-focus="map-add-${entry.id}" aria-label="Add an alternate key for ${esc(entry.label)}">+ Add key</button>` : ""}</div>`).join("")}<p class="layout-inspector-note">Add a key to keep the current binding. Your last key change can always be undone below.</p><button type="button" class="setup-text-button" data-action="all-keys">Search all actions ↓</button>`;
+  }
+  _keyboardHtml() {
+    const mapped = mappedControls(this.input.actions);
+    const key = (code, extra = false) => {
+      const entries = mapped.get(code) || [];
+      const labels = [...new Set(entries.map(entry => entry.label))];
+      const action = entries[0]?.id;
+      const category = action ? this.input.actions[action].cat : "";
+      const caption = labels.length > 1 ? `${labels.length} ACTIONS` : SHORT_ACTIONS[action] || "";
+      const label = extra ? keyName(code) : compactKey(code);
+      const modifier = part => /^Control/.test(part) ? "⌃" : /^Alt/.test(part) ? "⌥" : /^Meta/.test(part) ? "⌘" : /^Shift/.test(part) ? "⇧" : compactKey(part);
+      const displayLabel = entries.length === 1 && entries[0].chord.length > 1 ? `${entries[0].chord.slice(0, -1).map(modifier).join("")} + ${label}` : label;
+      const attrs = `class="layout-key ${category ? `key-${category}` : "key-unused"}${code === "Space" ? " key-space" : ""}${extra ? " key-extra" : ""}"`;
+      return entries.length ? `<button type="button" ${attrs} data-map-key="${code}" data-focus="map-${code}" aria-pressed="${code === this.selectedCode}" aria-label="${esc(keyName(code))}: ${esc(entries.map(entry => `${entry.label}${entry.chord.length > 1 ? ` (${chordName(entry.chord)})` : ""}`).join("; "))}. ${entries.every(entry => entry.locked) ? "Always available." : "Configure this key."}"><strong>${esc(displayLabel)}</strong><small>${esc(caption)}</small></button>` : `<span ${attrs} aria-hidden="true"><strong>${esc(label)}</strong></span>`;
+    };
+    const shown = new Set([...KEYBOARD_ROWS.flat(), ...POINTER_CODES]);
+    const extras = [...mapped.keys()].filter(code => !shown.has(code));
+    return `<details class="keyboard-layout" ${this.layoutOpen ? "open" : ""}><summary><span><strong>Your keyboard & pointer map</strong><small>Choose a lit key to change its action</small></span><span class="layout-legend" aria-hidden="true"><i></i> Controls <i></i> Weapons</span></summary><div class="keyboard-body"><div class="keyboard-rows" aria-label="Current keyboard bindings, QWERTY positions">${KEYBOARD_ROWS.map((row, index) => `<div class="keyboard-row keyboard-row-${index}">${row.map(code => key(code)).join("")}</div>`).join("")}</div><div class="pointer-map"><div class="pointer-map-title"><strong>${current().pointingDevice === "trackpad" ? "Trackpad or mouse movement" : "Mouse or trackpad movement"}</strong><span>Aim the nose · no click needed</span></div><div class="pointer-buttons" aria-label="Current mouse and wheel bindings">${POINTER_CODES.map(code => key(code)).join("")}</div></div>${extras.length ? `<div class="layout-extra"><span>Additional inputs</span>${extras.map(code => key(code, true)).join("")}</div>` : ""}<p class="layout-reference">QWERTY key positions · ⌥ Option · ⌃ Control · ⇧ Shift · ⌘ Command. Select a key for its complete shortcut.</p><section class="layout-inspector" aria-label="Selected control">${this._layoutInspectorHtml()}</section></div></details>`;
+  }
   _controlsHtml() {
     const settings = current();
     const trackpad = settings.pointingDevice === "trackpad";
     const gain = trackpad ? "trackpadSensitivity" : "mouseSensitivity";
     return `<div class="setup-controls-top"><div class="setup-intro"><span class="setup-kicker">YOUR AIRCRAFT. YOUR CONTROLS.</span><h2>A few keys. The whole sky.</h2><p>Aim with a mouse or one finger on your trackpad. Your keyboard handles the rest.</p></div><div class="setup-controls-actions"><button class="setup-button" data-action="keys">Edit keys <span aria-hidden="true">↓</span></button><button class="setup-button" data-focus="test-controls" data-action="test">${this.testing ? "Finish testing" : "Test your controls"}<span aria-hidden="true">↗</span></button></div></div>
       <section class="setup-device" aria-label="Aiming setup"><div class="device-heading"><strong>Choose your aiming feel</strong><span>Each sensitivity saves separately. Your keys stay the same.</span></div><div class="device-options" role="group" aria-label="Pointing device">${[["mouse", "Mouse + keyboard", "Full-range aiming · click or use a key to fire"], ["trackpad", "MacBook trackpad + keyboard", "Gentler aiming · steer without clicking or dragging"]].map(([id,title,note]) => `<button type="button" data-device="${id}" data-focus="device-${id}" aria-pressed="${settings.pointingDevice === id}"><span class="device-check" aria-hidden="true">${settings.pointingDevice === id ? "✓" : "○"}</span><span><strong>${title}</strong><small>${note}</small></span></button>`).join("")}</div><p class="device-note">${trackpad ? "Slide one finger to steer; lift and reposition between strokes. Use a keyboard binding for cannon fire. Two fingers scroll menus." : "Move the mouse to steer. Use your cannon binding to fire; add a mouse button or keyboard alternate below."} Both devices work in either profile; switch here to use their saved sensitivity.</p></section>
-      <div class="setup-mouse-card">${this._slider(gain, trackpad ? "Trackpad sensitivity" : "Mouse sensitivity", "Lower for finer aiming. Try it in the safe test below.", 0.35, 2, 0.05, settings[gain])}${this._toggle("invertY", "Invert vertical aim", "Move up to aim the nose down.", settings.invertY)}</div>
-      ${this.testing ? `<div class="input-test" tabindex="0" role="group" aria-label="Controls test area. Move your pointer, press keys or click here. Escape ends the test."><div class="test-heading"><span class="setup-kicker">SAFE INPUT TEST</span><span>Flight stays paused · Esc to finish</span><button type="button" class="setup-text-button" data-test-recenter>Center preview</button></div><div class="aim-test-surface" aria-label="Aim preview"><span class="aim-test-center" aria-hidden="true"></span><span class="aim-test-dot" aria-hidden="true"></span><output class="aim-test-reading">Move here to try your sensitivity</output></div><strong id="testKeys">Press a key or mouse button</strong><p id="testActions">See which action your input triggers. Nothing fires or moves.</p><div class="test-last-input"><span>LAST INPUT</span><output id="testLastInput" aria-live="polite">Tap a key to keep its result here.</output></div></div>` : ""}
+      ${this._aimPresetsHtml()}<div class="setup-mouse-card">${this._slider(gain, trackpad ? "Trackpad sensitivity" : "Mouse sensitivity", "Fine-tune your feel. Your other device keeps its own setting.", 0.35, 2, 0.05, settings[gain])}${this._toggle("invertY", "Invert vertical aim", "Move up to aim the nose down.", settings.invertY)}</div>
+      ${this.testing ? `<div class="input-test" tabindex="0" role="group" aria-label="Controls test area. Move your pointer, press keys or click here. Escape ends the test."><div class="test-heading"><span class="setup-kicker">SAFE INPUT TEST</span><span>Flight stays paused · Esc to finish</span><button type="button" class="setup-text-button" data-test-recenter>Center preview</button></div><div class="aim-test-surface" aria-label="Aim preview"><span class="aim-test-center" aria-hidden="true"></span><span class="aim-test-target" hidden aria-hidden="true"></span><span class="aim-test-dot" aria-hidden="true"></span><output class="aim-test-reading">Move here to try your sensitivity</output></div><div class="aim-exercise"><output data-aim-exercise-status aria-live="polite">Want to check your feel? Gently follow five targets.</output><button type="button" class="setup-button" data-test-targets>Try aim targets</button></div><strong id="testKeys">Press a key or mouse button</strong><p id="testActions">See which action your input triggers. Nothing fires or moves.</p><div class="test-last-input"><span>LAST INPUT</span><output id="testLastInput" aria-live="polite">Tap a key to keep its result here.</output></div></div>` : ""}
       <details class="setup-controller-options"><summary>Controller aiming</summary>${this._slider("gamepadSensitivity", "Right-stick sensitivity", "Independent of mouse and trackpad aiming. Vertical inversion applies to all devices.", 0.35, 2, 0.05, settings.gamepadSensitivity)}</details>
+      ${this._keyboardHtml()}
       <div class="setup-binding-layout"><aside class="setup-categories" aria-label="Control categories">${Object.entries(CATEGORIES).map(([id, label]) => `<button data-category="${id}" data-focus="category-${id}" class="${this.category === id ? "selected" : ""}" aria-pressed="${this.category === id}">${label}<span>${this._categoryCount(id)}</span></button>`).join("")}<div class="controller-card"><span class="controller-light"></span><strong id="controllerTitle">Keyboard & mouse ready</strong><small id="controllerDetail">Connect a standard controller and press a button to detect it.</small></div><button class="setup-text-button" data-action="reset-binds">Restore default keys</button></aside>
       <section class="setup-bindings"><div class="bindings-toolbar"><label class="setup-search"><span aria-hidden="true">⌕</span><input id="controlSearch" type="search" value="${esc(this.query)}" placeholder="Find an action or key…" aria-label="Search control actions or keys"></label><span id="bindingCount"></span></div><div id="bindingRows">${this._rowsHtml()}</div><p class="bindings-help">Click a key to change it. <strong>+ Add key</strong> keeps your current binding. Escape always opens the flight menu.</p></section></div>`;
   }
@@ -320,7 +398,7 @@ export class ControlsMenu {
       return `<div class="setup-section-heading"><span class="setup-kicker">A CLEARER VIEW</span><h2>Find your smooth spot.</h2><p>Start with Auto. Lower render resolution first if your flight feels slow.</p></div><section class="setup-settings-card"><div class="quality-heading"><div><strong>Graphics quality</strong><p>Resolution, terrain detail and shadow rendering adjust now. A new flight applies loaded detail and shadow-map resolution.</p></div><span class="setup-badge">${boot ? `Running ${esc(boot)}` : "Applies on launch"}</span></div><div class="quality-options">${["AUTO", ...Object.keys(TIERS)].map((tier) => `<button data-quality="${tier}" data-focus="quality-${tier}" aria-pressed="${settings.tier === tier}" class="${settings.tier === tier ? "selected" : ""}"><strong>${tier === "MED" ? "Medium" : tier[0] + tier.slice(1).toLowerCase()}</strong><small>${{ AUTO: "Recommended", LOW: "Fastest flight", MED: "Balanced", HIGH: "Rich detail", ULTRA: "Maximum detail" }[tier]}</small></button>`).join("")}</div>${this._graphicsStatusHtml()}${this._slider("renderScale", "Render resolution", "Lower uses fewer pixels. Flight instruments remain crisp.", 0.5, 1.5, 0.05, resolution)}${this._slider("fov", "Field of view", "Wider shows more sky; narrower brings targets closer. See the view when you resume.", 45, 90, 1, settings.fov)}${this._toggle("showFps", "Frame rate", "Show a small FPS readout while flying.", settings.showFps)}</section>`;
     }
     if (this.tab === "audio") return `<div class="setup-section-heading"><span class="setup-kicker">HEAR WHAT MATTERS</span><h2>Your cockpit mix.</h2><p>Keep warning tones clear, tune the engine roar, and choose whether radio messages are spoken.</p></div><section class="setup-settings-card">${this._toggle("muted", "Mute all audio", "Engine, weapons, warning tones and spoken radio. Menus stay quiet; resume to hear your changes.", settings.muted)}${this._slider("masterVol", "Master volume", "The volume of all game audio.", 0, 1, 0.05, settings.masterVol)}${this._slider("engineVol", "Engine", "Jet engine, airflow, airframe and nearby aircraft.", 0, 1, 0.05, settings.engineVol)}${this._slider("weaponsVol", "Weapons & effects", "Cannon, missiles, explosions and airframe strikes.", 0, 1, 0.05, settings.weaponsVol)}${this._slider("uiVol", "Warnings & radio", "Missile lock tones, launch warnings, and spoken radio.", 0, 1, 0.05, settings.uiVol)}${this._toggle("voice", "Spoken radio", "Uses a voice available in your browser. Radio text remains visible.", settings.voice)}</section><p class="setup-footnote" data-audio-storage>${this._audioStorageNote()}</p>`;
-    return `<div class="setup-section-heading"><span class="setup-kicker">BUILT AROUND YOU</span><h2>Make the sky easier to read.</h2><p>Reduce visual noise, make instruments larger, and keep the information you need.</p></div>${this._instrumentPreviewHtml()}<section class="setup-settings-card">${this._slider("hudScale", "Flight instruments", "Scale key HUD readings for comfortable viewing.", 0.8, 1.4, 0.05, settings.hudScale ?? 1)}${this._slider("subtitleScale", "Radio text size", "Make incoming radio messages easier to read.", 0.8, 1.6, 0.1, settings.subtitleScale)}${this._toggle("showHints", "Control reminders", "Show a compact reminder of your current keys in flight.", settings.showHints !== false)}${this._toggle("showChecklist", "Practice checklist", "Keep the first-flight checklist separate from your key reminders.", settings.showChecklist)}${this._toggle("motionReduce", "Reduce combat flashes", "Hide hit flashes and cannon muzzle flashes while flying.", settings.motionReduce)}<div class="setup-setting palette-setting"><span><strong>Target colors</strong><small>Preview friendly, enemy, and locked targets below.</small></span><div class="palette-options">${[["default", "Standard", "#7fb4e8", "#ff8a5c", "#ffd27a"], ["deuteranopia", "Red / green support", "#4fa8ff", "#ffa03c", "#fff"], ["tritanopia", "Blue / yellow support", "#3fc46e", "#ff4d6b", "#fff"]].map(([id, label, friendly, enemy, lock]) => `<button data-palette="${id}" data-focus="palette-${id}" aria-pressed="${settings.markerPalette === id}" class="${settings.markerPalette === id ? "selected" : ""}"><span class="palette-swatches" aria-hidden="true"><i style="color:${friendly}">◇</i><i style="color:${enemy}">△</i><i style="color:${lock}">◎</i></span>${label}</button>`).join("")}</div></div></section>`;
+    return `<div class="setup-section-heading"><span class="setup-kicker">BUILT AROUND YOU</span><h2>Make the sky easier to read.</h2><p>Reduce visual noise, make instruments larger, and keep the information you need.</p></div>${this._instrumentPreviewHtml()}<section class="setup-settings-card">${this._slider("hudScale", "Flight instruments", "Scale key HUD readings for comfortable viewing.", 0.8, 1.4, 0.05, settings.hudScale ?? 1)}${this._slider("subtitleScale", "Radio text size", "Make incoming radio messages easier to read.", 0.8, 1.6, 0.1, settings.subtitleScale)}${this._toggle("showHints", "Control reminders", "Show a compact reminder of your current keys in flight.", settings.showHints !== false)}${this._toggle("showChecklist", "Flight coach", "Keep flight school guidance separate from your key reminders.", settings.showChecklist)}${this._toggle("motionReduce", "Reduce combat flashes", "Hide hit flashes and cannon muzzle flashes while flying.", settings.motionReduce)}<div class="setup-setting palette-setting"><span><strong>Target colors</strong><small>Preview friendly, enemy, and locked targets below.</small></span><div class="palette-options">${[["default", "Standard", "#7fb4e8", "#ff8a5c", "#ffd27a"], ["deuteranopia", "Red / green support", "#4fa8ff", "#ffa03c", "#fff"], ["tritanopia", "Blue / yellow support", "#3fc46e", "#ff4d6b", "#fff"]].map(([id, label, friendly, enemy, lock]) => `<button data-palette="${id}" data-focus="palette-${id}" aria-pressed="${settings.markerPalette === id}" class="${settings.markerPalette === id ? "selected" : ""}"><span class="palette-swatches" aria-hidden="true"><i style="color:${friendly}">◇</i><i style="color:${enemy}">△</i><i style="color:${lock}">◎</i></span>${label}</button>`).join("")}</div></div></section>`;
   }
   _modalHtml() {
     if (this.restoring) {
@@ -342,6 +420,8 @@ export class ControlsMenu {
     return `<div class="setup-scrim"><section class="setup-modal capture-surface" role="dialog" aria-modal="true" aria-labelledby="captureTitle"><span class="setup-kicker">${this.capturing.slot === 0 ? "PRIMARY" : "ALTERNATE"} BINDING</span><h2 id="captureTitle">${esc(action.label)}</h2><div id="captureKeys" class="capture-keys">Press a key</div><p id="captureFeedback" aria-live="polite">You can also click a mouse button or turn the wheel. Escape cancels.</p><p class="setup-footnote">For a shortcut, hold a modifier and press another key. System shortcuts may be intercepted by your computer.</p><button class="setup-button" data-cancel-capture data-capture-control>Cancel · Esc</button></section></div>`;
   }
   _render(focusKey = "") {
+    clearTimeout(this._aimHoldTimeout);
+    this._cancelAimHold = null;
     const oldFocus = focusKey || document.activeElement?.dataset?.focus;
     const context = `${this.tab}:${this.category}`;
     const scrollTop = this._renderedContext === context ? this.el.querySelector(".setup-content")?.scrollTop || 0 : 0;
@@ -368,8 +448,33 @@ export class ControlsMenu {
     }));
     this.el.querySelectorAll("[data-restore-action]").forEach(button => button.addEventListener("click", () => this._beginRestore(button.dataset.restoreAction)));
   }
+  _wireLayoutInspector() {
+    this.el.querySelectorAll("[data-layout-edit]").forEach(button => button.addEventListener("click", () => this._beginCapture(button.dataset.layoutEdit, Number(button.dataset.slot), button.dataset.focus)));
+    this.el.querySelectorAll("[data-layout-add]").forEach(button => button.addEventListener("click", () => this._beginCapture(button.dataset.layoutAdd, this.input.actions[button.dataset.layoutAdd].binds.length, button.dataset.focus)));
+    this.el.querySelectorAll('[data-action="all-keys"]').forEach(button => button.addEventListener("click", () => { const search = this.el.querySelector("#controlSearch"); search?.scrollIntoView({block:"center"}); search?.focus({preventScroll:true}); }));
+  }
   _wire() {
     this._wireRows();
+    this._wireLayoutInspector();
+    this.el.querySelector(".keyboard-layout")?.addEventListener("toggle", event => { this.layoutOpen = event.target.open; });
+    this.el.querySelectorAll("[data-map-key]").forEach(button => button.addEventListener("click", () => {
+      this.selectedCode = button.dataset.mapKey;
+      this.el.querySelectorAll("[data-map-key]").forEach(key => key.setAttribute("aria-pressed", String(key.dataset.mapKey === this.selectedCode)));
+      const inspector = this.el.querySelector(".layout-inspector");
+      inspector.innerHTML = this._layoutInspectorHtml(); this._wireLayoutInspector();
+      inspector.scrollIntoView({ block: "nearest" });
+      inspector.querySelector("button")?.focus({ preventScroll: true });
+    }));
+    this.el.querySelectorAll("[data-aim-preset]").forEach(button => button.addEventListener("click", () => {
+      const state = aimPresetState(current()), preset = state.presets.find(item => item.id === button.dataset.aimPreset);
+      const settings = saveSettings({ [state.key]: preset.value });
+      this.input.setOptions(getAimOptions(settings));
+      this.el.querySelector(`[data-setting="${state.key}"]`).value = settings[state.key];
+      this.el.querySelector(`#value-${state.key}`).textContent = valueLabel(state.key, settings[state.key]);
+      this._updateAimPresets();
+      this.notice = `${preset.label} aiming applied. ${storageAvailable() ? "Saved for this device profile." : "Session only; browser storage is unavailable."}`;
+      this._updateStorageStatus();
+    }));
     this.el.querySelectorAll("[data-device]").forEach((button) => button.addEventListener("click", () => {
       const settings = saveSettings({ pointingDevice: button.dataset.device });
       this.input.setOptions(getAimOptions(settings));
@@ -381,12 +486,39 @@ export class ControlsMenu {
       const aim = { x: 0, y: 0 };
       let entered = false;
       const dot = preview.querySelector(".aim-test-dot"), reading = preview.querySelector("output");
+      const target = preview.querySelector(".aim-test-target"), feedback = this.el.querySelector("[data-aim-exercise-status]");
+      const targetButton = this.el.querySelector("[data-test-targets]");
+      // Keep every target reachable in one stroke even at the minimum gain
+      // on a narrow screen; a setup exercise must not require pointer capture.
+      const targets = [{ x: 6, y: 0, direction: "right" }, { x: -6, y: 0, direction: "left" }, { x: 0, y: -3, direction: "up" }, { x: 0, y: 3, direction: "down" }, { x: 0, y: 0, direction: "to the center" }];
+      let targetIndex = -1;
+      const cancelHold = () => { clearTimeout(this._aimHoldTimeout); this._aimHoldTimeout = null; target.classList.remove("on-target"); };
+      this._cancelAimHold = () => { entered = false; cancelHold(); };
+      const showTarget = () => {
+        const goal = targets[targetIndex];
+        target.hidden = !goal;
+        if (goal) {
+          target.style.left = `${50 + goal.x * 2.1}%`; target.style.top = `${50 + goal.y * 2.1}%`;
+          feedback.textContent = `Target ${targetIndex + 1} of 5 · move ${goal.direction}, then align the dot with the target briefly.`;
+        } else {
+          feedback.textContent = "Comfort check complete. Overshooting? Try Precise. Running out of room? Try Responsive.";
+          targetButton.textContent = "Try again";
+        }
+      };
+      const checkTarget = () => {
+        const goal = targets[targetIndex];
+        if (!goal || Math.hypot(aim.x - goal.x, aim.y - goal.y) > 1.4) { cancelHold(); return; }
+        target.classList.add("on-target");
+        if (this._aimHoldTimeout) return;
+        this._aimHoldTimeout = setTimeout(() => { cancelHold(); targetIndex++; showTarget(); }, 350);
+      };
       const redraw = () => {
         dot.style.left = `${50 + aim.x * 2.1}%`;
         dot.style.top = `${50 + aim.y * 2.1}%`;
         reading.textContent = `${Math.abs(aim.x).toFixed(1)}° ${aim.x < 0 ? "left" : "right"} · ${Math.abs(aim.y).toFixed(1)}° ${aim.y < 0 ? "up" : "down"}`;
       };
       preview.addEventListener("mouseenter", () => { entered = false; });
+      preview.addEventListener("mouseleave", () => { entered = false; cancelHold(); });
       preview.addEventListener("mousemove", (event) => {
         // Returning from a slider or the center button must not count the
         // distance traveled outside the preview as an aiming stroke.
@@ -394,14 +526,16 @@ export class ControlsMenu {
         const options = getAimOptions(), degrees = options.mouseSensitivity * 0.0028 * 180 / Math.PI;
         aim.x = Math.max(-20, Math.min(20, aim.x + (event.movementX || 0) * degrees));
         aim.y = Math.max(-20, Math.min(20, aim.y + (event.movementY || 0) * degrees * (options.invertY ? -1 : 1)));
-        redraw();
+        redraw(); checkTarget();
       });
-      this.el.querySelector("[data-test-recenter]").onclick = () => { aim.x = aim.y = 0; redraw(); };
+      this.el.querySelector("[data-test-recenter]").onclick = () => { aim.x = aim.y = 0; cancelHold(); redraw(); };
+      targetButton.onclick = () => { cancelHold(); aim.x = aim.y = 0; targetIndex = 0; entered = false; redraw(); showTarget(); targetButton.textContent = "Start over"; this.el.querySelector(".input-test").focus({ preventScroll: true }); };
     }
     this.el.querySelectorAll("[data-action]").forEach((button) => button.addEventListener("click", () => {
       const action = button.dataset.action;
       if (action === "close") this.close();
-      else if (action === "keys") { const search = this.el.querySelector("#controlSearch"); search?.scrollIntoView({block:"center"}); search?.focus({preventScroll:true}); }
+      else if (action === "keys") { const layout = this.el.querySelector(".keyboard-layout"); layout.open = true; this.layoutOpen = true; layout.scrollIntoView({block:"start"}); layout.querySelector("summary").focus({preventScroll:true}); }
+      else if (action === "all-keys") { /* wired with the replaceable map inspector */ }
       else if (action === "test") { this.testing = !this.testing; this.testDown.clear(); this.lastTest = null; this._render("test-controls"); }
       else if (action === "missing") this._showMissing();
       else if (action === "undo-keys") {
@@ -425,6 +559,7 @@ export class ControlsMenu {
       this.notice = storageAvailable() ? "Preferences saved." : "Session only. These options reset when you launch or reload.";
       this._updateStorageStatus();
       this._updateInstrumentPreview();
+      this._updateAimPresets();
     }));
     this.el.querySelector("[data-review-restart]")?.addEventListener("click",()=>this.close());
     this.el.querySelectorAll("[data-quality]").forEach((button) => button.addEventListener("click", () => { saveSettings({ tier: button.dataset.quality }); this.notice = storageAvailable() ? "Quality saved. Start a new flight to apply all graphics changes." : "Graphics preferences could not be saved. Changes apply only on this page."; this._render(`quality-${button.dataset.quality}`); }));
@@ -485,6 +620,7 @@ export class ControlsMenu {
     }
     const lastNode = this.el.querySelector("#testLastInput");
     if (lastNode) lastNode.textContent = this.lastTest || "Tap a key to keep its result here.";
+    this.el.querySelectorAll?.("[data-map-key]").forEach(key => key.classList.toggle("key-held", this.testDown.has(key.dataset.mapKey)));
   }
   _updateController() {
     const title = this.el.querySelector("#controllerTitle"), detail = this.el.querySelector("#controllerDetail");
@@ -503,6 +639,6 @@ export class ControlsMenu {
     window.removeEventListener("keydown", this._keyDown, true); window.removeEventListener("keyup", this._keyUp, true);
     window.removeEventListener("mousedown", this._mouseDown, true); window.removeEventListener("mouseup", this._mouseUp, true);
     window.removeEventListener("wheel", this._wheel, true); window.removeEventListener("blur", this._blur);
-    clearTimeout(this._testWheelTimeout); this.el.remove();
+    clearTimeout(this._testWheelTimeout); clearTimeout(this._aimHoldTimeout); this.el.remove();
   }
 }
