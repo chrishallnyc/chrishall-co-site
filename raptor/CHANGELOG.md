@@ -1,6 +1,6 @@
 # RAPTOR release notes
 
-## 1.6.0 — 2026-09-24
+## 1.7.0 — 2026-09-24
 
 The F-22 and opposing fleet have smoother airframes, deeper mechanical
 construction and more natural material response under the sky at flight altitude.
