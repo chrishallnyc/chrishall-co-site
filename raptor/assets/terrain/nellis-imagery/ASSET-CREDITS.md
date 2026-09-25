@@ -10,6 +10,6 @@ Forty-eight neighboring source-overlap checks cover 1,407,933 valid pixels: alph
 
 The Nellis 16K and 4K base JPEGs also retain their original geographic extent. Older 2048-pixel NAIP export blocks had their requested angular extent expanded to a square by the source service. The correction inverts the measured 1.243509522 aspect factor per block; boundary blocks use new, source-locked exports where the original image lacks data. The requested geographic coordinates are preserved with `adjustAspectRatio=false`.
 
-The repaired NAIP area covers 69.27% of the base. Original Sentinel fill, its geographic mapping, the coverage mask, elevations and normals are preserved. Legacy feather data remains across 0.241% of the full area where original source radiance cannot be recovered. This correction changes image placement, not terrain geometry.
+The geographic correction updates 70.40% of the base image. Original Sentinel fill, its geographic mapping, the coverage mask, elevations and normals are preserved. Legacy feather data remains across 0.241% of the full area where original source radiance cannot be recovered. This correction changes image placement, not terrain geometry.
 
 Independent one-metre geographic witnesses show a median normalized image correlation of 0.961 after correction and 79.3% lower high-pass alignment error. These are sampled image-registration checks, not a whole-scene realism score.
