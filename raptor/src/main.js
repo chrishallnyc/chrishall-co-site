@@ -232,7 +232,15 @@ async function boot() {
           },
         };
         const { makeSkyRadiance } = await import("./world/sky-radiance.js");
+        let skyViewCache = null;
+        if (backend === "webgpu" && flags.get("skycache") !== "0") {
+          const { ObserverSkyViewCache } = await import("./world/sky-view-cache.js");
+          skyViewCache = new ObserverSkyViewCache({ renderer, luts, sourceUniforms, uFrameOrigin: uCamPos });
+          atmoH.skyViewCache = skyViewCache; state.skyViewCache = skyViewCache.stats;
+          window.addEventListener("pagehide", event => { if (!event.persisted) skyViewCache.dispose(); });
+        }
         const sharedSky = makeSkyRadiance({ luts, sourceUniforms, uFrameOrigin: uCamPos,
+          scatteringRadiance: skyViewCache?.radiance,
           cirrusAtlas: atmosphere.sky.cirrusAtlas, includeSolarDisc: true });
         atmosphere.sky.setHillaire(H.skySkyNode(nodeArgs), uSunI, sharedSky);
         // IBL's cube cameras are at the origin; only their ray direction is
@@ -1047,6 +1055,7 @@ async function boot() {
   if (vol) { vol.uTime.value=0; vol.VC.updateCamera?.(camera); }
   if (atmoH) atmoH.uCamPos.value.copy(camera.position);
   atmosphere.update(camera);
+  atmoH?.skyViewCache?.update(camera.position);
   aircraftLighting.update(world.jet, terrain);
   // Publish the final water environment before compiling the main graph.
   // Publishing it later replaces envNode and recompiles the water material.
@@ -1217,6 +1226,7 @@ async function boot() {
     hud.update(player ? player.hudState() : testworldHudState(world, alpha));
     if (atmoH) atmoH.uCamPos.value.copy(camera.position);
     atmosphere.update(camera); // IBL sees the current observer on its first capture
+    atmoH?.skyViewCache?.update(camera.position);
     aircraftLighting.update(world.jet, terrain);
     uMoonAngularRadius.value = atmosphere.moonState.angularRadius;
     if (waterSkyEnvironment) {
