@@ -31,24 +31,55 @@ function fly(s) {
   }, 1 / 60);
 }
 
-test('starts a readable three-stage flight with a forgiving hitbox and explicit difficulty', () => {
+test('starts a four-city campaign with a forgiving hitbox and explicit difficulty', () => {
   const s = createGame();
   assert.equal(WIDTH, 640); assert.equal(HEIGHT, 400);
-  assert.deepEqual(STAGES.map(stage => stage.name), ['Pacific Coast', 'Red Canyon', 'Neon Harbor']);
+  assert.deepEqual(STAGES.map(({ id, name, bossType, bossName }) => [id, name, bossType, bossName]), [
+    ['new-york', 'New York City', 'carrier', 'Harbor Warden'],
+    ['san-francisco', 'San Francisco', 'leviathan', 'Fog Phantom'],
+    ['austin', 'Austin', 'mantis', 'Copper Viper'],
+    ['washington-dc', 'Washington, DC', 'sentinel', 'Capital Sentinel'],
+  ]);
+  assert.equal(s.mode, 'campaign'); assert.equal(s.stage, 0); assert.equal(s.startStage, 0);
   assert.equal(s.phase, 'playing'); assert.equal(s.player.r, 4);
   assert.equal(s.player.hp, 6); assert.equal(s.player.maxHp, 6);
   assert.equal(createGame({ difficulty: 'relaxed' }).player.maxHp, 8);
   assert.equal(createGame({ difficulty: 'unexpected' }).difficulty, 'arcade');
 });
 
-test('fixed simulation steps produce the same flight at 30, 60, and 120 render frames per second', () => {
+test('standalone cities start with a combat-ready loadout; invalid selections fall back safely', () => {
+  for (const [index, stage] of STAGES.entries()) {
+    const s = createGame({ mode: 'city', stageId: stage.id });
+    assert.equal(s.mode, 'city'); assert.equal(s.stage, index); assert.equal(s.startStage, index);
+    assert.equal(s.player.weapon, 3); assert.equal(s.player.hp, 8); assert.equal(s.player.maxHp, 8);
+    assert.ok(s.player.fireRate > 1.2); assert.ok(s.player.missileMax < 5.4);
+    assert.equal(s.player.missileCooldown, 0); assert.equal(s.player.rollCooldown, 0);
+    assert.deepEqual(s.player.upgrades, []);
+    assert.equal(createGame({ mode: 'city', stageId: stage.id, difficulty: 'relaxed' }).player.maxHp, 10);
+  }
+  for (const stageId of [undefined, null, '', 'chicago', 3, {}, '__proto__']) {
+    const s = createGame({ mode: 'city', stageId });
+    assert.equal(s.mode, 'city'); assert.equal(s.stage, 0); assert.equal(s.startStage, 0);
+    assert.doesNotThrow(() => advance(s, 2));
+  }
+  for (const mode of [undefined, 'campaign', 'invalid', null]) {
+    const s = createGame({ mode, stageId: 'washington-dc' });
+    assert.equal(s.mode, 'campaign'); assert.equal(s.stage, 0); assert.equal(s.startStage, 0);
+    assert.equal(s.player.weapon, 1);
+  }
+});
+
+test('every city retains identical simulation at 30, 60, and 120 render frames per second', () => {
   const publicState = s => ({
-    time: s.time, player: s.player, enemies: s.enemies, bullets: s.bullets,
+    mode: s.mode, startStage: s.startStage, stage: s.stage, time: s.time,
+    player: s.player, enemies: s.enemies, bullets: s.bullets,
     pickups: s.pickups, score: s.score, kills: s.kills, rng: s._rng,
   });
-  const snapshots = [30,60,120].map(fps => publicState(advance(createGame({ seed: 42 }), 8, { x: 1, y: -.1 }, fps)));
-  assert.deepEqual(snapshots[0], snapshots[1]);
-  assert.deepEqual(snapshots[1], snapshots[2]);
+  for (const options of [{}, ...STAGES.map(stage => ({ mode: 'city', stageId: stage.id }))]) {
+    const snapshots = [30,60,120].map(fps => publicState(advance(createGame({ ...options, seed: 42 }), 8, { x: 1, y: -.1 }, fps)));
+    assert.deepEqual(snapshots[0], snapshots[1], options.stageId);
+    assert.deepEqual(snapshots[1], snapshots[2], options.stageId);
+  }
 });
 
 test('identical seeds reproduce authored waves and different seeds vary their flight timing', () => {
@@ -161,24 +192,76 @@ test('all three upgrades make distinct persistent improvements and restore two a
   }
 });
 
-test('bosses have real health and only advance when destroyed; curtains always telegraph an escape lane', () => {
-  // Isolate boss behavior: no ordinary formations, friendly fire, or player death.
-  const s = createGame();
-  s.stage = 2; s.stageTime = STAGES[2].duration; s._wave = 1000;
-  s._fire = Infinity; s.player.invulnerable = Infinity;
-  let sawRing = false, sawCurtain = false, sawLance = false;
-  for (let frame = 0; frame < 30 * 60; frame++) {
-    stepGame(s, {}, 1 / 60);
-    const boss = s.boss;
-    sawRing ||= boss.pattern === 'ring'; sawLance ||= boss.pattern === 'lance';
-    if (boss.pattern === 'curtain' && s.telegraphs.length) {
-      sawCurtain = true;
-      assert.ok(s.telegraphs.every(line => Math.abs(line.x - boss._gap) >= 63));
-    }
+test('upgrades cannot advance a standalone sortie or run beyond the final campaign city', () => {
+  for (const stage of STAGES) {
+    const s = createGame({ mode: 'city', stageId: stage.id });
+    s.phase = 'upgrade';
+    const before = structuredClone(s);
+    assert.equal(chooseUpgrade(s, 'armor'), false);
+    assert.deepEqual(s, before);
   }
-  assert.equal(s.boss.hp, s.boss.maxHp); assert.equal(s.phase, 'playing');
-  assert.ok(sawRing && sawCurtain && sawLance);
-  assert.ok(s.bullets.length < 200); assert.ok(s.telegraphs.length <= 32);
+  const s = createGame(); s.stage = STAGES.length - 1; s.phase = 'upgrade';
+  assert.equal(chooseUpgrade(s, 'armor'), false); assert.equal(s.stage, 3);
+});
+
+test('every city has distinct opening formations', () => {
+  const openings = STAGES.map(stage => {
+    const s = advance(createGame({ mode: 'city', stageId: stage.id, seed: 42 }), 1.5);
+    assert.ok(s.enemies.length > 0);
+    return s.enemies.map(enemy => [enemy.kind, Math.round(enemy.x)]);
+  });
+  assert.equal(new Set(openings.map(opening => JSON.stringify(opening))).size, STAGES.length);
+});
+
+test('all four bosses cycle telegraphed attacks and stay alive until genuinely damaged', () => {
+  const expected = {
+    carrier: ['fan', 'sweep'],
+    leviathan: ['ring', 'lance', 'curtain'],
+    mantis: ['curtain', 'fan', 'crossfire'],
+    sentinel: ['pincer', 'curtain', 'ring', 'lance'],
+  };
+  for (const stage of STAGES) {
+    // Isolate each boss: no ordinary formations, friendly fire, or player death.
+    const s = createGame({ mode: 'city', stageId: stage.id });
+    s.stageTime = stage.duration; s._wave = 1000;
+    s._fire = Infinity; s.player.invulnerable = Infinity;
+    const patterns = new Set(); let sawBullets = false;
+    for (let frame = 0; frame < 30 * 60; frame++) {
+      const lastId = s._id;
+      stepGame(s, {}, 1 / 60);
+      const boss = s.boss;
+      assert.equal(boss.bossType, stage.bossType); assert.equal(boss.name, stage.bossName);
+      if (boss.pattern !== 'arrival') patterns.add(boss.pattern);
+      if (boss.pattern === 'curtain' && s.telegraphs.length) {
+        assert.ok(s.telegraphs.every(line => Math.abs(line.x - boss._gap) >= 63));
+      }
+      if (boss.pattern === 'pincer' && s.telegraphs.length) {
+        assert.equal(s.telegraphs.length, 2);
+        assert.deepEqual(s.telegraphs.map(line => line.x2), [boss._gap - 64, boss._gap + 64]);
+      }
+      if (boss.pattern === 'crossfire' && s.telegraphs.length) {
+        assert.equal(s.telegraphs.length, 2);
+        assert.ok(Math.abs(s.telegraphs[1].x - s.telegraphs[0].x - 96) < 1e-8);
+        if (boss._warning) {
+          assert.equal(s.telegraphs[0].x, boss.x - 48);
+          assert.equal(s.telegraphs[0].y, boss.y + boss.r * .55);
+        }
+      }
+      if (boss.pattern === 'pincer') {
+        for (const bullet of s.bullets.filter(bullet => bullet.id > lastId)) {
+          const bottomX = bullet.x + (HEIGHT - bullet.y) * bullet.vx / bullet.vy;
+          assert.ok(Math.abs(Math.abs(bottomX - boss._gap) - 64) < 1e-8,
+            'every trailing shot follows its warning line and preserves the escape corridor');
+        }
+      }
+      sawBullets ||= s.bullets.length > 0;
+      assert.ok(s.bullets.every(bullet => [bullet.x, bullet.y, bullet.vx, bullet.vy].every(Number.isFinite)));
+      assert.ok(s.bullets.length <= 400 && s.telegraphs.length <= 32);
+    }
+    assert.equal(s.boss.hp, s.boss.maxHp); assert.ok(s.boss.hp > 0);
+    assert.equal(s.phase, 'playing'); assert.equal(s.stageCleared, false);
+    assert.deepEqual([...patterns], expected[stage.bossType]); assert.ok(sawBullets);
+  }
 });
 
 test('inaction can really lose; a finished game cannot keep causing damage or scoring', () => {
@@ -219,7 +302,7 @@ test('a real boss defeat gets a safe 1.2-second celebration before the upgrade s
   assert.equal(s.particles.length, 0); assert.equal(s.floaters.length, 0);
 });
 
-test('ordinary controls complete every authored wave and boss in a genuine four-minute campaign', () => {
+test('ordinary controls complete all four city bosses in a genuine five-minute campaign', () => {
   const s = createGame({ seed: 1991 });
   const bosses = new Set(); const patterns = new Set(); const upgrades = [];
   let maxBullets = 0, maxParticles = 0, maxEnemies = 0;
@@ -227,7 +310,7 @@ test('ordinary controls complete every authored wave and boss in a genuine four-
     if (s.phase === 'upgrade') {
       upgrades.push(s.stage);
       assert.equal(s.boss.hp, 0);
-      assert.equal(chooseUpgrade(s, s.stage === 0 ? 'overdrive' : 'rockets'), true);
+      assert.equal(chooseUpgrade(s, ['overdrive', 'rockets', 'armor'][s.stage]), true);
     }
     if (s.phase !== 'playing') break;
     fly(s);
@@ -236,14 +319,45 @@ test('ordinary controls complete every authored wave and boss in a genuine four-
     maxParticles = Math.max(maxParticles,s.particles.length);
     maxEnemies = Math.max(maxEnemies,s.enemies.length);
   }
-  assert.equal(s.phase, 'won'); assert.equal(s.stage, 2); assert.equal(s.boss.hp, 0);
+  assert.equal(s.phase, 'won'); assert.equal(s.stage, 3); assert.equal(s.boss.hp, 0);
+  assert.equal(s.mode, 'campaign'); assert.equal(s.startStage, 0);
   assert.ok(Math.abs(s.clearTime - 1.2) < 1e-8, 'final victory also waits for its celebration');
-  assert.deepEqual(upgrades, [0,1]);
-  assert.deepEqual([...bosses], ['carrier','mantis','leviathan']);
-  assert.ok(patterns.has('curtain') && patterns.has('ring') && patterns.has('lance'));
-  assert.ok(s.time > 210 && s.time < 270, `campaign duration ${s.time}`);
-  assert.ok(s.kills >= 110); assert.equal(s.player.weapon, 3); assert.ok(s.player.hp > 0);
-  assert.ok(s.score > 50000); assert.ok(s.damageTaken > 0, 'pilot is mortal and takes genuine damage');
+  assert.deepEqual(upgrades, [0,1,2]);
+  assert.deepEqual(s.player.upgrades, ['overdrive', 'rockets', 'armor']);
+  assert.deepEqual([...bosses], ['carrier','leviathan','mantis','sentinel']);
+  assert.ok(['fan','sweep','curtain','ring','lance','crossfire','pincer'].every(pattern => patterns.has(pattern)));
+  assert.ok(s.time > 280 && s.time < 330, `campaign duration ${s.time}`);
+  assert.ok(s.kills >= 160); assert.equal(s.player.weapon, 3); assert.ok(s.player.hp > 0);
+  assert.ok(s.score > 80000); assert.ok(s.damageTaken > 0, 'pilot is mortal and takes genuine damage');
   assert.ok(maxBullets <= 400 && maxParticles <= 300 && maxEnemies <= 29);
   assert.ok(s.events.some(e => e.type === 'win'));
 });
+
+for (const [index, stage] of STAGES.entries()) {
+  test(`ordinary controls win ${stage.name} alone, with no campaign upgrades or extra city`, () => {
+    for (const options of [{ seed: 1991 }, { seed: 42 }, { seed: 7, difficulty: 'relaxed' }]) {
+      const s = createGame({ ...options, mode: 'city', stageId: stage.id });
+      const bosses = new Set(); let winEvents = 0;
+      for (let frame = 0; frame < 60 * 120 && s.phase === 'playing'; frame++) {
+        fly(s);
+        if (s.boss) bosses.add(s.boss.bossType);
+        winEvents += s.events.filter(event => event.type === 'win').length;
+        assert.ok(!s.events.some(event => event.type === 'stage'));
+        assert.equal(s.stage, index); assert.equal(s.startStage, index);
+        assert.ok(s.bullets.length <= 400 && s.enemies.length <= 29 && s.particles.length <= 300);
+        assert.ok(s.pickups.length <= 30 && s.floaters.length <= 24 && s.telegraphs.length <= 32);
+      }
+      assert.equal(s.phase, 'won', `${stage.id}, seed ${options.seed}`);
+      assert.equal(s.mode, 'city'); assert.equal(s.boss.hp, 0); assert.equal(winEvents, 1);
+      assert.deepEqual([...bosses], [stage.bossType]); assert.deepEqual(s.player.upgrades, []);
+      assert.ok(s.time > stage.duration + 5 && s.time < stage.duration + 40);
+      assert.ok(Math.abs(s.clearTime - 1.2) < 1e-8);
+      assert.ok(s.player.hp > 0 && s.kills >= 35 && s.score > 15000);
+      assert.equal(chooseUpgrade(s, 'overdrive'), false);
+      const before = [s.time, s.score, s.kills, s.stage, s.player.hp];
+      advance(s, 3, { x: 1, missile: true, roll: true });
+      assert.deepEqual([s.time, s.score, s.kills, s.stage, s.player.hp], before);
+      assert.equal(s.phase, 'won'); assert.equal(useMissile(s), false); assert.equal(useRoll(s), false);
+    }
+  });
+}

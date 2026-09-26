@@ -1,11 +1,12 @@
 {
- "updated": "2026-09-26T20:41:01+00:00",
- "version": "1.14.1",
- "now": "v1.14.1 — Four Cities artwork: ten pixel-art concept boards for New York, San Francisco, Austin and Washington, DC, with a fast gallery, original PNG downloads and a link from Pixel Wing.",
+ "updated": "2026-09-26T21:14:45+00:00",
+ "version": "1.15.0",
+ "now": "v1.15.0 — Four playable Pixel Wing cities: New York City, San Francisco, Austin and Washington, DC. Fly the complete campaign or launch any city with its own landmarks, boss and score record.",
  "nowPhase": 13,
  "paused": false,
- "pushes": 83,
+ "pushes": 84,
  "ledger": [
+  "2026-09-26 v1.15.0 — Pixel Wing flies four real cities: authored landmark routes for New York City, San Francisco, Austin and Washington, DC, distinct formations, four bosses and chiptune arrangements. Five-minute campaign with three upgrade stops, or fully armed standalone city missions. City links, separate campaign/city best scores, responsive mission selector and four-city browser playthrough coverage.",
   "2026-09-26 v1.14.1 — Four Cities artwork gallery: four city scenes plus title, aircraft, enemies and bosses, landmarks, effects and interface studies. Lightweight previews, full-resolution PNG downloads, keyboard browsing and a Pixel Wing navigation link. The collection presents proposed artwork; the playable arcade retains its three existing regions.",
   "2026-09-25 v1.14.0 — Pixel Wing launches at /arcade/: a separate Canvas2D game with three pixel-art sectors, authored formations and bosses, automatic cannons, homing missiles, dodge rolls, magnetic supplies, score chains and upgrades. One-click launch, Relaxed difficulty, keyboard/pointer/touch/gamepad flight, original synthesized music, pause and replay, and separate browser-saved scores. No 3D assets or runtime dependencies.",
   "2026-09-25 v1.13.1 — Flight now synchronizes the canvas with the current window before graphics warmup. Fixes half-screen startup rendering after a viewport change during loading; browser regression checks cover Retina growth, WebGL shrink, live resize and paused resize/resume.",

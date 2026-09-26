@@ -166,12 +166,14 @@ test('rapid fire is rate limited and prolonged combat has a bounded voice budget
   }
 }));
 
-test('all three scores and completion stingers schedule valid audio; a sleeping tab does not replay a backlog', () => withAudio(async (audio, timers) => {
+test('all four city scores and completion stingers schedule valid audio; a sleeping tab does not replay a backlog', () => withAudio(async (audio, timers) => {
   await audio.start();
-  for (let stage = 0; stage < 3; stage++) {
+  for (let stage = 0; stage < 4; stage++) {
     audio.update({ phase: 'playing', stage, player: { hp: 20, maxHp: 100 } });
+    assert.equal(audio.stage, stage, 'each city selects its own score');
     for (let bar = 0; bar < 8; bar++) {
       for (let step = 0; step < 16; step++) audio._musicStep(bar * 16 + step, audio.context.currentTime + 0.02 + step * 0.13);
+      assert.ok(audio._voices.size <= 48, 'every city arrangement respects the voice budget');
       audio.context.currentTime += 2.2;
     }
     for (const event of [{ type: 'pickup', kind: 'repair' }, { type: 'pickup', kind: 'score' }, { type: 'roll' }, { type: 'boss' }]) {
@@ -189,5 +191,43 @@ test('all three scores and completion stingers schedule valid audio; a sleeping 
   audio.event({ type: 'lose' });
   audio.context.currentTime += 3;
   audio.event({ type: 'stage', stage: 0 });
+  assert.equal(audio.stage, 0);
+}));
+
+test('Washington has a distinct phrase and keeps pause, mute and stage selection bounded', () => withAudio(async (audio, timers) => {
+  await audio.start();
+  const phrases = [];
+  const tone = audio._tone;
+  for (let stage = 0; stage < 4; stage++) {
+    const notes = [];
+    audio.setStage(stage);
+    audio._tone = (frequency, time, duration, gain, options) => {
+      if (options.vibrato) notes.push({ pitch: 12 * Math.log2(frequency), time, duration });
+    };
+    for (let step = 0; step < 128; step++) audio._musicStep(step, step);
+    audio._tone = tone;
+    assert.ok(notes.length >= 24, `city ${stage + 1} contains a complete lead phrase`);
+    phrases.push(notes.map(note => [Math.round(note.pitch - notes[0].pitch), note.time]));
+  }
+  for (const phrase of phrases.slice(0, 3)) assert.notDeepEqual(phrases[3], phrase,
+    'the capital theme changes melody and rhythm, rather than only transposing an earlier score');
+  audio.update({ phase: 'playing', stage: 3 });
+  assert.equal(audio.stage, 3);
+  assert.equal(timers.size, 1);
+  audio.setPaused(true);
+  assert.equal(timers.size, 0);
+  assert.equal(audio._voices.size, 0);
+  audio.setPaused(false);
+  assert.equal(timers.size, 1);
+  audio.setMuted(true);
+  assert.equal(timers.size, 0);
+  assert.equal(audio._voices.size, 0);
+  audio.setMuted(false);
+  assert.equal(timers.size, 1);
+  audio.setStage(Infinity);
+  assert.equal(audio.stage, 3);
+  audio.setStage(99);
+  assert.equal(audio.stage, 3);
+  audio.setStage(-1);
   assert.equal(audio.stage, 0);
 }));

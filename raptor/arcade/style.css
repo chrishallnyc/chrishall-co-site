@@ -7,3 +7,64 @@
 @media(max-width:480px) and (orientation:portrait){.app{justify-content:flex-start;padding-top:16px}.screen{aspect-ratio:8/11;min-height:550px;margin-top:16px}#game{object-fit:cover;object-position:center;image-rendering:pixelated}.screen[data-view=title] #game{object-fit:cover}.screen:not([data-view=title]){aspect-ratio:1;min-height:360px}.screen:not([data-view=title]) #game{object-fit:contain}.title-screen{padding:9% 7%;background:linear-gradient(90deg,#10182eea,#10182e5c)}.title-copy{max-width:90%;padding-top:9%}h1{font-size:12vw}.subtitle{font-size:3.5vw;margin-bottom:24px}.eyebrow{font-size:7px}.intro{font-size:23px;margin-bottom:25px}.primary{padding:16px 17px}.launch{min-width:228px}.difficulty{margin-top:18px}.difficulty button{font-size:8px}.small-note{font-size:10px}.title-record{top:7%;right:7%}.title-record .eyebrow{font-size:6px}.route{left:7%;right:7%;bottom:6%;padding-top:16px}.route button{font-size:6px}.route button small{font-size:7px;margin-bottom:7px}.site-footer{gap:12px}.hud-top{padding-top:12px}.upgrade-options{flex-direction:column;gap:8px;margin:17px 0}.upgrade-option{max-width:none;padding:12px;display:grid;grid-template-columns:25px 1fr;gap:0 10px}.upgrade-option .upgrade-icon{grid-row:1/3;margin:0;align-self:center}.upgrade-option b{margin:0 0 3px;font-size:8px}.upgrade-option small{font-size:10px}.upgrade-option .choose{display:none}.upgrade-panel h2{font-size:19px}.upgrade-panel .eyebrow{font-size:6px}.screen[data-view=upgrade]{min-height:400px}.menu-panel>p:not(.eyebrow){font-size:12px}.menu-panel>small{font-size:9px;line-height:1.6}.result-panel>.primary{margin-top:18px}.ability{min-height:48px}}
 @media(max-height:480px) and (orientation:landscape){.app{padding:0;justify-content:center}.site-header,.site-footer{display:none}.screen{width:min(100%,calc(100svh*1.6));height:min(100svh,62.5vw);min-height:0;border:0}.title-screen{align-items:center;padding:4% 6%}.title-copy{max-width:60%;padding:0 0 5%}.title-copy h1{font-size:14vh}.title-copy .intro{font-size:19px;margin-bottom:15px}.title-copy .eyebrow{font-size:6px}.title-copy .subtitle{margin-bottom:12px}.title-copy .difficulty{margin-top:10px}.route{bottom:4%}.route-label{display:none}.title-record{top:6%}.title-record b{font-size:12px}.primary{padding:12px 15px}.upgrade-options{margin:18px 0}.menu-panel>small{display:none}.menu-panel h2{font-size:22px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Every city is a playable destination. Keep the campaign and city choices visible. */
+.launch #launch-label{font:inherit;line-height:1.5}
+.title-copy{padding-bottom:10%}
+.route{display:block;bottom:4%;padding-top:12px}
+.route-label{display:block;margin-bottom:8px;font-size:7px;letter-spacing:.08em}
+.route>div{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;width:100%}
+.route button{padding:10px 11px;min-height:54px;border:1px solid #bddeda36;background:#0d1b30c9;font-size:9px;line-height:1.5}
+.route button small{font-size:6px;line-height:1.5;letter-spacing:.025em;margin-bottom:5px}
+.route button:hover{color:var(--ink);border-color:#bddeda88;background:#18283eea}
+.route button[aria-pressed=true]{color:var(--gold);border-color:var(--gold);background:#26313beb;box-shadow:inset 0 -2px var(--gold)}
+#mission-note{margin:9px 0 0;font-size:11px;line-height:1.4;color:#c0d0d0;min-height:16px;max-width:none}
+@media(max-height:700px) and (min-width:761px){
+  .title-copy{padding-bottom:11%}
+  .route{bottom:3%;padding-top:8px}
+  .route-label{margin-bottom:5px;font-size:6px}
+  .route button{min-height:44px;padding:7px 9px;font-size:8px}
+  .route button small{font-size:5px;margin-bottom:3px}
+  #mission-note{font-size:10px;margin-top:6px}
+}
+@media(max-width:760px){
+  .title-copy{padding-top:0;padding-bottom:0}
+  .title-copy .intro{margin-bottom:12px}
+  .route{bottom:4%;padding-top:8px}
+  .route>div{gap:5px}
+  .route button{padding:7px 6px;min-height:48px;font-size:7px}
+  .route button small{font-size:5px;margin-bottom:4px}
+  .route-label{font-size:6px;margin-bottom:6px}
+  #mission-note{font-size:9px;margin-top:7px;min-height:25px;max-width:100%}
+}
+@media(max-width:480px) and (orientation:portrait){
+  .screen[data-view=title]{min-height:650px;aspect-ratio:8/15}
+  .title-copy{padding-top:10%;max-width:100%}
+  .title-copy .intro{margin-bottom:19px}
+  .route{bottom:4%;left:7%;right:7%;padding-top:12px}
+  .route>div{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .route button{min-height:48px;font-size:8px;padding:8px 9px}
+  .route button[data-mission=campaign]{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;min-height:40px}
+  .route button[data-mission=campaign] small{margin:0;order:1}
+  .route button small{font-size:5px}
+  #mission-note{font-size:10px;min-height:42px}
+}
+@media(min-width:481px) and (max-width:760px) and (min-height:481px){
+  .screen[data-view=title]{aspect-ratio:6/5;min-height:480px}
+  .screen[data-view=title] #game{object-fit:cover}
+  .title-copy{padding-top:3%}
+}
+@media(max-height:480px) and (orientation:landscape){
+  .title-copy{padding-bottom:18%;padding-top:0}
+  .title-copy .intro{font-size:16px;line-height:1.25;margin-bottom:11px}
+  .title-copy .subtitle{margin-bottom:8px}
+  .title-copy h1{font-size:12vh}
+  .title-copy .eyebrow{margin-bottom:6px}
+  .title-copy .difficulty{margin-top:9px}
+  .title-copy .small-note{font-size:8px;margin-top:4px;line-height:1.3}
+  .route{bottom:3%;padding-top:7px}
+  .route-label{display:none}
+  .route button{min-height:42px;padding:6px;font-size:7px}
+  .route button small{font-size:5px;margin-bottom:3px}
+  #mission-note{margin-top:5px;font-size:9px;min-height:13px}
+}

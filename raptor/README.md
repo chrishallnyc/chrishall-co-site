@@ -11,10 +11,12 @@ with a WebGL2 fallback, and a deterministic 120 Hz flight simulation.
 ## Pixel Wing — the 16-bit arcade edition
 
 Open **[/arcade/](https://raptor.chall.net/arcade/)** for a separate, complete
-2D arcade shooter. One click starts a roughly four-minute adventure across
-Pacific Coast, Red Canyon, and Neon Harbor. Automatic cannons, homing missiles,
-dodge rolls, pickups, upgrades, three bosses, and an original chiptune score
-make a compact game with its own browser-saved personal best.
+2D arcade shooter. Choose the roughly five-minute campaign through **New York
+City, San Francisco, Austin, and Washington, DC**, or launch any city directly.
+Fly past recognizable landmarks, clear authored enemy formations, and defeat
+each city's boss. Automatic cannons, homing missiles, dodge rolls, pickups,
+three campaign upgrade stops, and four original chiptune arrangements accompany
+the flight. Campaign and individual city records save separately in your browser.
 
 Use WASD/arrows or drag to fly, Space for missiles, and Shift to dodge.
 Touch buttons and standard gamepad flight controls are supported. Choose
@@ -26,8 +28,8 @@ The [Four Cities artwork gallery](https://raptor.chall.net/artwork/four-cities/)
 presents ten pixel-art concept boards for New York City, San Francisco, Austin,
 and Washington, DC, with aircraft, enemies, landmarks, effects, and interfaces.
 Browse lightweight previews, enlarge any board, or download its original PNG.
-These proposed city environments are artwork; Pixel Wing still plays across
-its three existing regions. See the [artwork README](artwork/four-cities/README.md)
+The collection accompanies the playable city missions; the game renders its
+own authored pixel scenery and sprites. See the [artwork README](artwork/four-cities/README.md)
 for the selected renders, refinement record, portable gallery packaging, and QA.
 
 ## Run locally

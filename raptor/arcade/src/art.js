@@ -3,10 +3,12 @@
  * resolution: no downloaded textures, canvas gradients, or per-frame noise.
  * Scenery and sprite poses are drawn once, then blitted on the flight canvas.
  */
+import { STAGES } from './sim.js';
+import { CITY_HEIGHT, CITY_VISTAS, cityCameraOffset, createCityScenes } from './city-scenes.js';
 
 const W = 640;
 const H = 400;
-const WORLD_H = 2048;
+const WORLD_H = CITY_HEIGHT;
 const TAU = Math.PI * 2;
 
 export const PALETTE = Object.freeze({
@@ -115,17 +117,6 @@ function tree(c, x, y, variant = 0, dark = false) {
   box(c, dark ? '#568271' : '#9fb980', x + 2, y, 2, 2);
 }
 
-function palm(c, x, y) {
-  line(c, '#45665b', x + 3, y + 9, x + 10, y + 14, 2);
-  line(c, '#775b48', x, y, x + 2, y + 9, 2);
-  line(c, '#3d7050', x, y, x - 9, y + 4, 2);
-  line(c, '#3d7050', x, y, x + 8, y + 4, 2);
-  line(c, '#4e8861', x, y, x - 7, y - 4, 2);
-  line(c, '#70a474', x, y, x + 8, y - 4, 2);
-  line(c, '#7ca574', x, y, x + 1, y - 7, 2);
-  box(c, '#acc38c', x, y - 1, 2, 2);
-}
-
 function boat(c, x, y, size = 1, color = '#d0d5c1') {
   poly(c, '#255a63', [[x - 4 * size, y - 11 * size], [x + 6 * size, y - 9 * size],
     [x + 6 * size, y + 10 * size], [x - 3 * size, y + 11 * size]]);
@@ -140,17 +131,6 @@ function boat(c, x, y, size = 1, color = '#d0d5c1') {
   box(c, '#82b6ad', x - size, y + 13 * size, 2 * size, 8 * size);
 }
 
-function smallBuilding(c, x, y, w, h, roof = '#d4c5a0') {
-  box(c, '#526969', x + 5, y + 6, w + 2, h + 2);
-  box(c, '#4a6062', x, y + 3, w + 2, h + 3);
-  box(c, '#8e927d', x + 1, y + 2, w, h + 1);
-  box(c, roof, x, y, w, h);
-  box(c, '#ebe0b7', x, y, w, 1);
-  box(c, '#667778', x + 3, y + 3, 4, 3);
-  box(c, '#eeedce', x + 3, y + 3, 3, 1);
-  for (let i = 3; i < w - 2; i += 5) box(c, '#49575b', x + i, y + h + 1, 2, 2);
-}
-
 function waves(c, rng, predicate, count, night = false) {
   const colors = night ? ['#19364c', '#1d3e51', '#234d5e', '#2e5a65'] : ['#24636f', '#286f7a', '#35838a', '#469397'];
   for (let i = 0; i < count; i++) {
@@ -161,204 +141,6 @@ function waves(c, rng, predicate, count, night = false) {
     if (i % 4 === 0) box(c, colors[i % colors.length], x + 3, y + 2, w - 2, 1);
     if (i % 13 === 0) box(c, night ? '#426a75' : '#79b4ad', x + 1, y - 1, 4, 1);
   }
-}
-
-function drawCoast() {
-  const { canvas, ctx: c } = surface(W, WORLD_H);
-  const rng = random(18061992);
-  const coast = y => 182 + Math.sin(y / WORLD_H * TAU * 3) * 32 + Math.sin(y / WORLD_H * TAU * 7) * 14;
-  box(c, '#205967', 0, 0, W, WORLD_H);
-  // The continental shelf and rock faces are broad, clean bands. Tiny beach
-  // highlights follow the same coastline, rather than floating randomly.
-  for (let y = 0; y < WORLD_H; y += 2) {
-    const e = Math.round(coast(y) / 2) * 2;
-    box(c, '#286c76', 0, y, e + 54, 2);
-    box(c, '#32828a', 0, y, e + 28, 2);
-    box(c, '#57a09b', 0, y, e + 12, 2);
-    box(c, '#95c1b0', 0, y, e + 5, 2);
-    box(c, '#d6d2a3', 0, y, e, 2);
-    box(c, '#c5b28b', 0, y, e - 7, 2);
-    box(c, '#789074', 0, y, e - 13, 2);
-    box(c, '#628477', 0, y, e - 23, 2);
-    if ((y % 30) < 15) box(c, '#cee0c5', e + 4, y, 2, 2);
-    if ((y % 17) < 7) box(c, '#8ca38c', e - 17, y, 5, 2);
-  }
-  waves(c, rng, (x, y) => x > coast(y) + 22, 6000);
-  // Coastal highway, with a shoulder, center line, roadside wall and bends.
-  const road = [];
-  for (let y = 0; y <= WORLD_H; y += 6) road.push([coast(y) - 51, y]);
-  outline(c, '#4e736d', road, 15, false);
-  outline(c, '#b5b599', road, 11, false);
-  outline(c, '#485a64', road, 8, false);
-  for (let y = 0; y < WORLD_H; y += 18) line(c, '#c5c4a4', coast(y) - 51, y, coast(y + 7) - 51, y + 7);
-  for (let i = 0; i < 620; i++) {
-    const y = rng() * WORLD_H; const x = rng() * Math.max(20, coast(y) - 74);
-    if (i % 3) tree(c, x, y, i % 2);
-    else box(c, i % 2 ? '#79987c' : '#567d70', x, y, 5 + rng() * 14, 2 + rng() * 5);
-  }
-  for (let y = 60; y < WORLD_H - 30; y += 24) {
-    if (Math.floor(y / 200) % 3) palm(c, coast(y) - 23, y);
-  }
-  // Little towns have actual streets and courtyards, with blue swimming pools.
-  for (let block = 0; block < 5; block++) {
-    const y = 160 + block * 350;
-    const x = 18 + (block % 2) * 10;
-    box(c, '#819384', x - 6, y - 12, 100, 119);
-    box(c, '#bbc0a0', x - 3, y + 43, 108, 7);
-    box(c, '#576972', x - 3, y + 45, 108, 3);
-    box(c, '#b7b59a', x + 44, y - 12, 6, 119);
-    for (let row = 0; row < 2; row++) {
-      for (let col = 0; col < 3; col++) {
-        const bx = x + col * 33; const by = y + row * 63;
-        smallBuilding(c, bx, by, 23, 19, (col + row) % 2 ? '#b5b6a1' : '#d0c5a3');
-        box(c, '#c8cfad', bx + 6, by + 25, 15, 8);
-        box(c, '#4595a0', bx + 8, by + 27, 11, 4);
-        palm(c, bx - 1, by + 30);
-      }
-    }
-  }
-  // Harbor: one broad breakwater, three piers, warehouses and colored stacks.
-  const harborY = 1180; const hx = coast(harborY) - 8;
-  box(c, '#355a64', hx - 15, harborY - 30, 32, 170);
-  box(c, '#a0ac9b', hx - 14, harborY - 32, 26, 170);
-  box(c, '#7e9390', hx - 12, harborY - 30, 20, 166);
-  for (let p = 0; p < 3; p++) {
-    const py = harborY + p * 47;
-    box(c, '#173d51', hx + 8, py + 6, 81, 12);
-    box(c, '#a7b6a4', hx + 8, py, 79, 9);
-    box(c, '#566f78', hx + 13, py + 2, 67, 5);
-    for (let q = 0; q < 4; q++) {
-      box(c, '#d0c5a0', hx + 18 + q * 19, py, 2, 9);
-      box(c, q % 2 ? '#779b92' : '#ab8066', hx - 28 - (q % 2) * 16, py + Math.floor(q / 2) * 11, 12, 7);
-    }
-    boat(c, hx + 32, py + 27, 1.2);
-  }
-  for (let i = 0; i < 3; i++) smallBuilding(c, hx - 64, harborY - 15 + i * 49, 25, 34, '#aeb8a3');
-  // Offshore islands, their shallows, ochre rock ledges and palms.
-  for (let i = 0; i < 6; i++) {
-    const ix = 508 + Math.sin(i * 1.8) * 42; const iy = 80 + i * 322;
-    const points = [[ix - 40, iy + 15], [ix - 26, iy - 17], [ix + 4, iy - 30], [ix + 31, iy - 13],
-      [ix + 44, iy + 20], [ix + 29, iy + 65], [ix, iy + 88], [ix - 30, iy + 67]];
-    const scaled = (factor, dy = 0) => points.map(([x, y]) => [ix + (x - ix) * factor, iy + (y - iy) * factor + dy]);
-    poly(c, '#2b7c85', scaled(1.25));
-    poly(c, '#499f9e', scaled(1.1));
-    poly(c, '#91c4b7', scaled(1.02));
-    poly(c, '#52786f', scaled(.97, 6));
-    poly(c, '#b6b58c', points);
-    poly(c, '#e1d7a8', scaled(.91, -3));
-    poly(c, '#789578', scaled(.75, -5));
-    poly(c, '#5e8571', scaled(.6, -8));
-    line(c, '#b9cba9', ix - 22, iy + 6, ix - 4, iy - 17, 2);
-    for (let t = 0; t < 6; t++) palm(c, ix - 16 + rng() * 30, iy + 2 + rng() * 50);
-    if (i === 2) {
-      smallBuilding(c, ix + 2, iy + 35, 12, 15, '#e9debc');
-      box(c, '#777d77', ix + 5, iy + 19, 6, 18);
-      box(c, '#e6dcb7', ix + 5, iy + 17, 6, 15);
-      box(c, '#a56d60', ix + 3, iy + 14, 10, 5);
-      box(c, '#e7c991', ix + 6, iy + 15, 4, 2);
-    }
-  }
-  for (let i = 0; i < 11; i++) boat(c, 283 + rng() * 130, 110 + i * 179, i % 4 ? .85 : 1.35, i % 3 ? '#d0d5c1' : '#e6c59f');
-  return canvas;
-}
-
-function drawCanyon() {
-  const { canvas, ctx: c } = surface(W, WORLD_H);
-  const rng = random(25051995);
-  const center = y => 321 + 46 * Math.sin(y / WORLD_H * TAU * 3) + 15 * Math.sin(y / WORLD_H * TAU * 7);
-  const width = y => 63 + 15 * Math.sin(y / WORLD_H * TAU * 5);
-  const left = y => center(y) - width(y);
-  const right = y => center(y) + width(y);
-  box(c, '#b86e60', 0, 0, W, WORLD_H);
-  for (let y = 0; y < WORLD_H; y += 2) {
-    const l = Math.round(left(y) / 2) * 2; const r = Math.round(right(y) / 2) * 2;
-    // Each terrace owns a light top, a saturated wall and a cool bottom shadow.
-    box(c, '#a75d59', l - 78, y, r - l + 156, 2);
-    box(c, '#cd8466', l - 65, y, r - l + 130, 2);
-    box(c, '#8a5161', l - 43, y, r - l + 86, 2);
-    box(c, '#db9471', l - 35, y, r - l + 70, 2);
-    box(c, '#a25d5f', l - 26, y, r - l + 52, 2);
-    box(c, '#714765', l - 13, y, r - l + 35, 2);
-    box(c, '#484060', l + 2, y, r - l + 11, 2);
-    box(c, '#597783', l + 11, y, r - l - 17, 2);
-    box(c, '#3f6679', l + 19, y, r - l - 33, 2);
-    box(c, '#34566e', l + 37, y, r - l - 60, 2);
-    if (y % 32 < 12) {
-      box(c, '#edaf81', l - 35, y, 3, 2);
-      box(c, '#e39b76', r + 26, y, 5, 2);
-    }
-  }
-  // Broken sediment contours, little gullies, shadowed boulders and scrub.
-  for (let i = 0; i < 2500; i++) {
-    const y = rng() * WORLD_H; const x = rng() * W;
-    if (x > left(y) - 90 && x < right(y) + 90) continue;
-    const w = 3 + rng() * 17; const h = 2 + rng() * 3;
-    box(c, i % 4 ? '#c98065' : '#a35f5c', x, y, w, h);
-    if (i % 8 === 0) {
-      box(c, '#8a5560', x + 4, y + 5, w + 2, 4);
-      box(c, '#c58a73', x, y, w, 6);
-      box(c, '#e0a080', x, y, w - 2, 2);
-    }
-    if (i % 31 === 0) {
-      box(c, '#6a6a68', x, y - 3, 2, 8);
-      box(c, '#777d6f', x - 2, y, 6, 2);
-    }
-  }
-  for (let y = 0; y < WORLD_H; y += 10) {
-    const x = left(y) - 112;
-    line(c, '#845960', x, y, left(y + 10) - 112, y + 10, 12);
-    line(c, '#d1a185', x, y, left(y + 10) - 112, y + 10, 8);
-    line(c, '#ad8c80', x, y, left(y + 10) - 112, y + 10, 4);
-  }
-  for (let i = 0; i < 1800; i++) {
-    const y = rng() * WORLD_H; const x = left(y) + 22 + rng() * (width(y) * 2 - 48);
-    box(c, i % 3 ? '#467384' : '#709195', x, y, 3 + rng() * 9, 1);
-    if (!(i % 8)) box(c, '#a2b4b0', x, y, 3, 1);
-  }
-  // Rails cross the canyon on deep steel trestles: the shadow remains in water.
-  for (let i = 0; i < 4; i++) {
-    const y = 290 + i * 480; const l = left(y) - 74; const r = right(y) + 74;
-    poly(c, '#39415a', [[l + 6, y + 21], [r + 10, y + 21], [r + 10, y + 37], [l + 6, y + 37]]);
-    for (let x = l + 12; x < r; x += 23) {
-      line(c, '#634e61', x, y + 9, x + 16, y + 33, 3);
-      line(c, '#b68677', x + 15, y + 9, x + 15, y + 24, 2);
-    }
-    box(c, '#5b4c61', l, y, r - l, 14);
-    box(c, '#d2b09a', l, y, r - l, 2);
-    box(c, '#afa090', l, y + 10, r - l, 2);
-    for (let x = l; x < r; x += 6) box(c, '#8c797c', x, y + 3, 2, 7);
-    box(c, '#d0b29b', l, y + 3, r - l, 1);
-    box(c, '#d0b29b', l, y + 8, r - l, 1);
-    if (i % 2) {
-      for (let q = 0; q < 3; q++) {
-        box(c, '#563f56', l + 48 + q * 27, y + 4, 23, 7);
-        box(c, q === 0 ? '#d3a977' : '#b47765', l + 47 + q * 27, y + 2, 23, 7);
-        box(c, '#e2c49d', l + 49 + q * 27, y + 2, 19, 1);
-      }
-    }
-  }
-  // A mining settlement adds scale, not just texture.
-  for (let i = 0; i < 3; i++) {
-    const x = i % 2 ? 499 : 28; const y = 510 + i * 560;
-    box(c, '#a17165', x - 7, y - 12, 108, 126);
-    box(c, '#d0a58a', x - 4, y + 54, 110, 9);
-    smallBuilding(c, x + 4, y, 31, 43, '#b7a49a');
-    smallBuilding(c, x + 48, y + 4, 34, 23, '#8e9b95');
-    for (let q = 0; q < 3; q++) {
-      box(c, '#735b64', x + 49 + q * 13, y + 37, 10, 11);
-      box(c, '#d1af8c', x + 48 + q * 13, y + 35, 10, 8);
-      box(c, '#e3c3a0', x + 49 + q * 13, y + 34, 8, 2);
-    }
-    for (let q = 0; q < 3; q++) {
-      box(c, '#745262', x + 5 + q * 30, y + 83, 24, 20);
-      poly(c, '#ca8a6b', [[x + q * 30, y + 90], [x + 10 + q * 30, y + 70], [x + 20 + q * 30, y + 75], [x + 27 + q * 30, y + 92]]);
-      line(c, '#e5ac80', x + q * 30, y + 89, x + 10 + q * 30, y + 71, 2);
-    }
-    line(c, '#4e4b5d', x + 75, y + 85, x + 97, y + 60, 3);
-    line(c, '#d7b390', x + 74, y + 84, x + 96, y + 59);
-    box(c, '#536073', x + 91, y + 57, 8, 6);
-  }
-  return canvas;
 }
 
 function cityBuilding(c, rng, x, y, w, h, tall = false) {
@@ -527,7 +309,20 @@ function drawHarbor() {
   };
   tower(394, 845, 0);
   tower(470, 923, 1);
-  tower(426, 1460, 1);
+  // One World Trade Center: a tapered glass prism rather than another Midtown
+  // wedding-cake crown. Its antenna makes Lower Manhattan read at native size.
+  const wx = 430; const wy = 1470;
+  poly(c, '#10253d', [[wx - 17, wy - 8], [wx + 25, wy - 4], [wx + 35, wy + 54], [wx - 8, wy + 49]]);
+  poly(c, '#77909c', [[wx - 8, wy - 70], [wx + 8, wy - 70], [wx + 18, wy + 28], [wx - 18, wy + 28]]);
+  poly(c, '#465e7b', [[wx + 1, wy - 70], [wx + 8, wy - 70], [wx + 18, wy + 28], [wx - 5, wy + 28]]);
+  line(c, '#aac7c7', wx - 8, wy - 70, wx - 18, wy + 28);
+  for (let y = wy - 61; y < wy + 26; y += 5) {
+    const half = 8 + (y - (wy - 70)) / 10;
+    line(c, '#718995', wx - half + 2, y, wx + half - 2, y);
+  }
+  box(c, '#b0c6c6', wx - 8, wy - 72, 16, 2);
+  line(c, '#d7d4ba', wx, wy - 72, wx, wy - 109);
+  box(c, '#e1b395', wx, wy - 110, 1, 2);
   // The lower Manhattan waterfront, ferry slips and Battery Park.
   for (let i = 0; i < 8; i++) {
     const y = 950 + i * 71; const x = manLeft(y);
@@ -551,17 +346,27 @@ function drawHarbor() {
   suspensionBridge(c, 511, 642, 1000, '#b4a496');
   suspensionBridge(c, 508, 642, 255, '#aaa18e');
   suspensionBridge(c, 81, 315, 131, '#909e9e');
-  // Liberty Island and the statue's tiny green copper silhouette.
+  // Liberty Island and the statue's copper silhouette: crown, tablet, raised
+  // torch and robe remain separate pixel clusters even at the native scale.
   const lx = 250; const ly = 1835;
   poly(c, '#355159', [[lx - 27, ly], [lx - 12, ly - 18], [lx + 12, ly - 19], [lx + 30, ly], [lx + 16, ly + 29], [lx - 13, ly + 30]]);
   poly(c, '#75817c', [[lx - 22, ly], [lx - 10, ly - 15], [lx + 11, ly - 16], [lx + 26, ly], [lx + 12, ly + 24], [lx - 12, ly + 25]]);
   poly(c, '#3b635b', [[lx - 18, ly], [lx - 9, ly - 11], [lx + 9, ly - 12], [lx + 21, ly], [lx + 10, ly + 20], [lx - 10, ly + 20]]);
-  box(c, '#a6a48b', lx - 5, ly + 1, 13, 11);
-  box(c, '#718d80', lx - 3, ly - 10, 8, 16);
-  box(c, '#9fbaa1', lx - 3, ly - 11, 3, 17);
-  box(c, '#92b39d', lx - 2, ly - 15, 5, 5);
-  line(c, '#a4c2a6', lx - 2, ly - 7, lx - 7, ly - 19, 2);
-  box(c, '#edc28b', lx - 8, ly - 22, 3, 3);
+  box(c, '#7a8275', lx - 7, ly + 6, 19, 13);
+  box(c, '#b0ac8f', lx - 8, ly + 1, 18, 13);
+  box(c, '#c1b79a', lx - 10, ly - 1, 22, 3);
+  poly(c, '#6c9988', [[lx - 3, ly - 28], [lx + 4, ly - 27], [lx + 10, ly + 1], [lx - 8, ly + 1]]);
+  poly(c, '#9dbda0', [[lx - 3, ly - 28], [lx + 1, ly - 26], [lx - 1, ly + 1], [lx - 7, ly + 1]]);
+  line(c, '#b5cbaa', lx - 3, ly - 22, lx - 14, ly - 44, 3);
+  box(c, '#759889', lx + 5, ly - 25, 6, 12);
+  box(c, '#bdd0ac', lx + 5, ly - 25, 5, 1);
+  box(c, '#a4c5a7', lx - 3, ly - 35, 7, 8);
+  for (const [dx, dy] of [[-5, -38], [-2, -42], [2, -43], [6, -39]]) {
+    line(c, '#adc7a9', lx, ly - 33, lx + dx, ly + dy);
+  }
+  box(c, '#aac5a5', lx - 16, ly - 47, 5, 3);
+  box(c, '#e3be85', lx - 15, ly - 52, 3, 5);
+  box(c, '#f2d29b', lx - 14, ly - 53, 1, 3);
   for (let i = 0; i < 13; i++) boat(c, 150 + rng() * 107, 73 + i * 148, i % 3 ? .8 : 1.35, '#9eaeb3');
   // Piers cast little vertical trails of warm reflection into the Hudson.
   for (let y = 51; y < WORLD_H; y += 73) {
@@ -725,6 +530,39 @@ function bossSprite(kind) {
     shape('#754f73', [[-7, -17], [0, -22], [7, -17], [7, 3], [0, 10], [-7, 3]]);
     shape('#e98c9f', [[-4, -13], [0, -18], [4, -13], [4, 0], [0, 5], [-4, 0]]);
     box(c, '#ffe1b9', cx - 1, cy - 11, 2, 10);
+  } else if (kind === 'sentinel') {
+    // A fourth, unmistakable silhouette: four armored quadrants surrounding a
+    // diamond reactor. Broad ivory shields contrast with the spring parkland.
+    shape('#151c32', [[0, -56], [26, -35], [47, -37], [65, -52], [92, -32], [96, 9], [80, 22],
+      [87, 41], [65, 51], [39, 25], [22, 35], [0, 58], [-22, 35], [-39, 25], [-65, 51],
+      [-87, 41], [-80, 22], [-96, 9], [-92, -32], [-65, -52], [-47, -37], [-26, -35]]);
+    shape('#62717e', [[0, -52], [25, -31], [49, -33], [65, -48], [88, -30], [92, 7], [75, 21],
+      [82, 39], [66, 46], [40, 20], [20, 32], [0, 53], [-20, 32], [-40, 20], [-66, 46],
+      [-82, 39], [-75, 21], [-92, 7], [-88, -30], [-65, -48], [-49, -33], [-25, -31]]);
+    for (const sign of [-1, 1]) {
+      shape(sign < 0 ? '#d3ceae' : '#9aa9a1', [[sign * 30, -27], [sign * 50, -29], [sign * 65, -44],
+        [sign * 84, -29], [sign * 88, 4], [sign * 67, 17], [sign * 38, 9]]);
+      shape(sign < 0 ? '#b4b6a1' : '#758a91', [[sign * 42, 14], [sign * 67, 21],
+        [sign * 76, 37], [sign * 67, 41], [sign * 47, 21]]);
+      stroke('#efdfb8', [[sign * 32, -25], [sign * 50, -27], [sign * 65, -41], [sign * 81, -28]]);
+      stroke('#34495c', [[sign * 56, -20], [sign * 70, -25], [sign * 75, -13], [sign * 67, -6], [sign * 53, -10]], 3);
+      shape('#49556c', [[sign * 30, -16], [sign * 45, -18], [sign * 55, -3], [sign * 41, 12], [sign * 30, 6]]);
+      const x = cx + sign * 70;
+      box(c, '#27384e', x - 5, cy + 4, 10, 25);
+      box(c, '#bd899a', x - 3, cy + 5, 6, 21);
+      box(c, '#f0bdac', x - 2, cy + 23, 4, 6);
+      box(c, '#26384d', x - 7, cy - 36, 14, 5);
+      box(c, '#a5d3c7', x - 6, cy - 36, 12, 2);
+      stroke('#d2bd9e', [[sign * 84, -22], [sign * 85, 3], [sign * 71, 12]]);
+    }
+    shape('#263b52', [[0, -46], [24, -24], [24, 22], [0, 47], [-24, 22], [-24, -24]]);
+    shape('#7d9296', [[0, -42], [18, -22], [18, 19], [0, 40], [-18, 19], [-18, -22]]);
+    shape('#bfd0b9', [[0, -37], [13, -20], [13, 14], [0, 32], [-13, 14], [-13, -20]]);
+    shape('#46576d', [[0, -28], [9, -16], [9, 10], [0, 22], [-9, 10], [-9, -16]]);
+    shape('#a67291', [[0, -22], [5, -13], [5, 7], [0, 14], [-5, 7], [-5, -13]]);
+    box(c, '#f2c4b9', cx - 2, cy - 13, 4, 17);
+    box(c, '#ffe0bd', cx - 1, cy - 10, 2, 10);
+    stroke('#f0dab1', [[0, -49], [-19, -27]]);
   } else {
     shape('#091329', [[0, -51], [21, -29], [46, -21], [72, -45], [92, -41], [96, 17], [82, 37], [67, 26], [52, 11],
       [35, 24], [18, 28], [7, 50], [-7, 50], [-18, 28], [-35, 24], [-52, 11], [-67, 26], [-82, 37], [-96, 17], [-92, -41], [-72, -45], [-46, -21], [-21, -29]]);
@@ -896,15 +734,16 @@ export function createRenderer(canvas) {
   canvas.height = H;
   const c = canvas.getContext('2d', { alpha: false });
   c.imageSmoothingEnabled = false;
-  const worlds = [drawCoast(), drawCanyon(), drawHarbor()];
+  const worlds = [drawHarbor(), ...createCityScenes({ surface, random, box, poly, line, outline, tree, boat })];
   const sprites = {
     scout: scoutSprite('scout'), striker: scoutSprite('striker'), ace: scoutSprite('ace'), gunship: gunshipSprite(),
     carrier: bossSprite('carrier'), mantis: bossSprite('mantis'), leviathan: bossSprite('leviathan'),
+    sentinel: bossSprite('sentinel'),
   };
   const shadows = {}; const flashes = {};
   for (const [key, sprite] of Object.entries(sprites)) {
     shadows[key] = spriteShadow(sprite);
-    const boss = key === 'carrier' || key === 'mantis' || key === 'leviathan';
+    const boss = STAGES.some(stage => stage.bossType === key);
     flashes[key] = flashSprite(sprite, boss ? .28 : .48);
   }
   const heroes = [-2, -1, 0, 1, 2].map(bank => heroSprite(bank));
@@ -922,22 +761,21 @@ export function createRenderer(canvas) {
   function render(state, { attract = false, reducedMotion = false } = {}) {
     if (destroyed) return;
     const time = Number.isFinite(state?.time) ? state.time : 0;
-    const stage = Math.max(0, Math.min(2, Math.floor(state?.stage || 0)));
+    const stage = Math.max(0, Math.min(STAGES.length - 1, Math.floor(state?.stage || 0)));
     const scroll = Number.isFinite(state?.scroll) ? state.scroll : time * 25;
-    // The title's harbor camera opens over Manhattan. The full game keeps the
-    // whole map, including Liberty Island and the approach through the bay.
-    const anchor = attract && stage === 2 ? 1200 : WORLD_H;
-    const offset = ((anchor - scroll * .6) % WORLD_H + WORLD_H) % WORLD_H;
+    // Cached authored strips traverse once, bottom to top, and hold at the boss.
+    // No modulo means a long boss fight never repeats Liberty or the Capitol.
+    const offset = attract ? CITY_VISTAS[stage]
+      : cityCameraOffset(state?.stageTime, STAGES[stage].duration);
     c.globalAlpha = 1;
     c.globalCompositeOperation = 'source-over';
     c.drawImage(worlds[stage], 0, -Math.floor(offset));
-    if (offset > WORLD_H - H) c.drawImage(worlds[stage], 0, WORLD_H - Math.floor(offset));
     // Shadowed wisps travel on a separate depth plane. Their broad placement
     // protects the central aiming lane, including the tiny player hitbox.
-    if (stage === 0) {
+    if (stage === 1) {
       for (let i = 0; i < 3; i++) {
         const x = i % 2 ? 508 : -80 + i * 11;
-        const y = ((scroll * .88 + i * 177) % 650) - 160;
+        const y = (((reducedMotion ? 0 : scroll) * .88 + i * 177) % 650) - 160;
         c.globalAlpha = .14;
         c.drawImage(cloudShadow, x + 24, Math.round(y + 31));
         c.globalAlpha = .28;
@@ -947,7 +785,7 @@ export function createRenderer(canvas) {
     }
     // Harbor rain is a sparse hand-placed lattice. It never strobes or obscures
     // danger bullets; reduced motion freezes the decorative weather.
-    if (stage === 2) {
+    if (stage === 0) {
       c.globalAlpha = .22;
       const rainTime = reducedMotion ? 0 : time;
       for (let i = 0; i < 35; i++) {
@@ -966,13 +804,13 @@ export function createRenderer(canvas) {
     // shadow over another plane at the same altitude.
     c.globalAlpha = .32;
     for (const enemy of enemies) {
-      const key = enemy.kind === 'boss' ? enemy.bossType || ['carrier', 'mantis', 'leviathan'][stage] : enemy.kind;
+      const key = enemy.kind === 'boss' ? enemy.bossType || STAGES[stage].bossType : enemy.kind;
       const sprite = shadows[key] || shadows.scout;
       c.drawImage(sprite, Math.round(enemy.x - sprite.width / 2 + 12), Math.round(enemy.y - sprite.height / 2 + 20));
     }
     c.globalAlpha = 1;
     for (const enemy of enemies) {
-      const key = enemy.kind === 'boss' ? enemy.bossType || ['carrier', 'mantis', 'leviathan'][stage] : enemy.kind;
+      const key = enemy.kind === 'boss' ? enemy.bossType || STAGES[stage].bossType : enemy.kind;
       const sprite = (enemy.flash > 0 && !reducedMotion ? flashes[key] : sprites[key]) || sprites.scout;
       const x = Math.round(enemy.x); const y = Math.round(enemy.y);
       if (enemy.kind !== 'boss') {
@@ -1001,7 +839,7 @@ export function createRenderer(canvas) {
       if (enemy.kind === 'boss' && enemy.windup > 0) {
         const strength = Math.max(0, Math.min(1, enemy.windup));
         c.globalAlpha = .45 + strength * .5;
-        pixelRing(c, stage === 1 ? '#ffc199' : '#b3eee0', x, y - 5, 10 + (1 - strength) * 18, 1, true);
+        pixelRing(c, stage === 2 ? '#ffc199' : '#b3eee0', x, y - 5, 10 + (1 - strength) * 18, 1, true);
         box(c, '#fff0c9', x - 1, y - 7, 3, 4);
         c.globalAlpha = 1;
       }

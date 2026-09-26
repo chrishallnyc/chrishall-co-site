@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#10182e">
-  <meta name="description" content="A little jet. A big adventure. RAPTOR Pixel Wing is a gorgeous 16-bit arcade flight game with three skies, giant bosses, and an original chiptune score. Play in your browser.">
+  <meta name="description" content="Fly New York City, San Francisco, Austin and Washington, DC in RAPTOR Pixel Wing. Four playable pixel-art city missions, four bosses, and an original chiptune score. Play the campaign or choose a city.">
   <title>RAPTOR · Pixel Wing</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23ffbd6c' d='M7 0h2v5h2v2h2v2h3v2h-5v2h2v2H9v-2H7v2H3v-2h2v-2H0V9h3V7h2V5h2Z'/%3E%3C/svg%3E">
   <link rel="preload" as="font" href="./assets/silkscreen.ttf" type="font/ttf" crossorigin>
@@ -28,17 +28,27 @@
       <section id="title-screen" class="title-screen" aria-labelledby="game-title">
         <div class="title-copy"><p class="eyebrow"><span class="live-pixel" aria-hidden="true"></span>16-BIT AIR SUPERIORITY</p>
           <h1 id="game-title">RAPTOR</h1><p class="subtitle">PIXEL WING</p>
-          <p class="intro">A little jet.<br>A big adventure.</p>
-          <button id="launch" class="primary launch" disabled>Preparing flight… <span aria-hidden="true">↗</span></button>
+          <p class="intro">Four cities.<br>One good jet.</p>
+          <button id="launch" class="primary launch" disabled><span id="launch-label">Preparing flight…</span><span aria-hidden="true">↗</span></button>
           <fieldset class="difficulty"><legend>Flight style</legend><button type="button" data-difficulty="arcade" aria-pressed="true">Arcade</button><button type="button" data-difficulty="relaxed" aria-pressed="false">Relaxed</button></fieldset>
           <p id="difficulty-note" class="small-note">Chase the score. Make every dodge count.</p>
         </div>
-        <div class="title-record"><span class="eyebrow">YOUR BEST</span><b id="title-best">000000</b><span class="record-star" aria-hidden="true">✦</span></div>
-        <div class="route"><span class="route-label">THREE SKIES.<br>ONE GOOD JET.</span><div role="group" aria-label="Preview a region"><button data-preview="0" aria-pressed="true"><small>01</small>Pacific coast</button><button data-preview="1" aria-pressed="false"><small>02</small>Red canyon</button><button data-preview="2" aria-pressed="false"><small>03</small>Neon harbor</button></div></div>
+        <div class="title-record"><span class="eyebrow" id="title-best-label">CAMPAIGN BEST</span><b id="title-best">000000</b><span class="record-star" aria-hidden="true">✦</span></div>
+        <div class="route">
+          <span class="route-label">CHOOSE YOUR FLIGHT</span>
+          <div role="group" aria-label="Choose a campaign or city mission" aria-describedby="mission-note">
+            <button data-mission="campaign" aria-pressed="true"><small>ALL FOUR CITIES</small>Campaign</button>
+            <button data-mission="new-york" aria-pressed="false"><small>01 · BLUE HOUR</small>New York</button>
+            <button data-mission="san-francisco" aria-pressed="false"><small>02 · MORNING FOG</small>San Francisco</button>
+            <button data-mission="austin" aria-pressed="false"><small>03 · TEXAS DUSK</small>Austin</button>
+            <button data-mission="washington-dc" aria-pressed="false"><small>04 · SPRING LIGHT</small>Washington, DC</button>
+          </div>
+          <p id="mission-note">Four cities, four bosses. Start in New York and earn upgrades between missions.</p>
+        </div>
       </section>
 
       <section id="flight-hud" class="flight-hud" aria-label="Flight instruments" hidden>
-        <div class="hud-top"><div class="score-block"><span>SCORE</span><b id="score">000000</b><small id="streak">Find your rhythm</small></div><div class="stage-block"><span id="stage-number">SECTOR 01 / 03</span><b id="stage-name">PACIFIC COAST</b><div class="progress-track"><i id="stage-progress"></i></div></div><div class="health-block"><span>AIRFRAME <button id="pause" aria-label="Pause flight">Ⅱ</button></span><div id="hearts" aria-label="Airframe health"></div></div></div>
+        <div class="hud-top"><div class="score-block"><span>SCORE</span><b id="score">000000</b><small id="streak">Find your rhythm</small></div><div class="stage-block"><span id="stage-number">CITY 01 / 04</span><b id="stage-name">NEW YORK CITY</b><div class="progress-track"><i id="stage-progress"></i></div></div><div class="health-block"><span>AIRFRAME <button id="pause" aria-label="Pause flight">Ⅱ</button></span><div id="hearts" aria-label="Airframe health"></div></div></div>
         <div id="boss-hud" class="boss-hud" hidden><span id="boss-name">HOSTILE ACE</span><div><i id="boss-health"></i></div></div>
         <p id="stage-banner" class="stage-banner" aria-live="polite"></p>
         <div class="hud-bottom"><span class="weapon-label">AUTO CANNON <b id="weapon-level">I</b></span><div class="ability-buttons"><button id="missile" class="ability" aria-label="Launch missiles, Space"><span class="ability-meter"></span><kbd>SPACE</kbd><b>MISSILES</b><small>READY</small></button><button id="roll" class="ability" aria-label="Dodge roll, Shift"><span class="ability-meter"></span><kbd>SHIFT</kbd><b>DODGE</b><small>READY</small></button></div></div>
@@ -54,10 +64,10 @@
       <section id="load-error" class="overlay" hidden><div class="menu-panel"><p class="eyebrow">STILL ON THE GROUND</p><h2>One more try.</h2><p>A game file couldn’t load. Check your connection, then reload.</p><button onclick="location.reload()" class="primary">Reload game ↗</button></div></section>
     </main>
 
-    <footer class="site-footer"><p id="control-hint"><kbd>WASD</kbd> / <kbd>↑↓←→</kbd> fly <span>·</span> <kbd>SPACE</kbd> missiles <span>·</span> <kbd>SHIFT</kbd> dodge</p><p><span class="footer-spark" aria-hidden="true">✦</span> Small pixels. All heart. <span class="version">v1.0</span></p></footer>
+    <footer class="site-footer"><p id="control-hint"><kbd>WASD</kbd> / <kbd>↑↓←→</kbd> fly <span>·</span> <kbd>SPACE</kbd> missiles <span>·</span> <kbd>SHIFT</kbd> dodge</p><p><span class="footer-spark" aria-hidden="true">✦</span> Four cities. All heart. <span class="version">v1.1</span></p></footer>
   </div>
 
-  <dialog id="help-dialog" aria-labelledby="help-title"><button class="dialog-close" aria-label="Close instructions">×</button><p class="eyebrow">YOUR VERY SHORT FLIGHT MANUAL</p><h2 id="help-title">You fly.<br>We handle the trigger.</h2><p>Clear three skies and their bosses. Collect glowing supplies, keep a streak going, and choose an upgrade between sectors.</p><dl><div><dt>FLY</dt><dd>WASD or arrows. You can also drag anywhere in the flight arena.</dd></div><div><dt>MISSILES</dt><dd>Space, controller A, or tap Missiles. Powerful wing rockets recharge automatically.</dd></div><div><dt>DODGE</dt><dd>Shift, controller B, or tap Dodge. Roll through danger without taking a hit.</dd></div><div><dt>TAKE A BREAK</dt><dd>Escape or P pauses. Leaving the tab pauses your flight, too.</dd></div></dl><p class="help-note">Cannons fire automatically. The little light at your jet’s center is the part to keep clear of enemy fire.</p><button class="primary dialog-close-button">Got it. Let’s fly. ↗</button></dialog>
+  <dialog id="help-dialog" aria-labelledby="help-title"><button class="dialog-close" aria-label="Close instructions">×</button><p class="eyebrow">YOUR VERY SHORT FLIGHT MANUAL</p><h2 id="help-title">You fly.<br>We handle the trigger.</h2><p>Play the four-city campaign through New York, San Francisco, Austin and Washington, DC, earning upgrades between bosses. Or choose one city for a short mission with a fully armed jet. City and campaign best scores are saved separately.</p><dl><div><dt>FLY</dt><dd>WASD or arrows. You can also drag anywhere in the flight arena.</dd></div><div><dt>MISSILES</dt><dd>Space, controller A, or tap Missiles. Powerful wing rockets recharge automatically.</dd></div><div><dt>DODGE</dt><dd>Shift, controller B, or tap Dodge. Roll through danger without taking a hit.</dd></div><div><dt>TAKE A BREAK</dt><dd>Escape or P pauses. Leaving the tab pauses your flight, too.</dd></div></dl><p class="help-note">Cannons fire automatically. The little light at your jet’s center is the part to keep clear of enemy fire.</p><button class="primary dialog-close-button">Got it. Let’s fly. ↗</button></dialog>
   <p id="announcement" class="sr-only" role="status" aria-live="polite"></p>
   <noscript><div class="no-script">Pixel Wing needs JavaScript to fly. Enable it and reload.</div></noscript>
   <script type="module">import('./src/main.js').catch(error=>{console.error(error);document.getElementById('load-error').hidden=false;});</script>

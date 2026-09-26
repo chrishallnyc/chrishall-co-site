@@ -3,9 +3,10 @@ export const WIDTH = 640;
 export const HEIGHT = 400;
 
 export const STAGES = Object.freeze([
-  Object.freeze({ id: 'pacific', name: 'Pacific Coast', subtitle: 'Sunrise over the islands', bossName: 'Iron Gull', bossType: 'carrier', duration: 56, color: '#56d8cb' }),
-  Object.freeze({ id: 'canyon', name: 'Red Canyon', subtitle: 'Through the copper corridor', bossName: 'Sand Mantis', bossType: 'mantis', duration: 58, color: '#ffb769' }),
-  Object.freeze({ id: 'harbor', name: 'Neon Harbor', subtitle: 'One last flight over the city', bossName: 'Night Leviathan', bossType: 'leviathan', duration: 60, color: '#b59dff' }),
+  Object.freeze({ id: 'new-york', name: 'New York City', subtitle: 'Blue hour over the harbor', bossName: 'Harbor Warden', bossType: 'carrier', duration: 54, color: '#95c9ed' }),
+  Object.freeze({ id: 'san-francisco', name: 'San Francisco', subtitle: 'Through the Golden Gate fog', bossName: 'Fog Phantom', bossType: 'leviathan', duration: 56, color: '#95e6db' }),
+  Object.freeze({ id: 'austin', name: 'Austin', subtitle: 'Sunset along Lady Bird Lake', bossName: 'Copper Viper', bossType: 'mantis', duration: 58, color: '#ffbd6c' }),
+  Object.freeze({ id: 'washington-dc', name: 'Washington, DC', subtitle: 'Spring light over the Mall', bossName: 'Capital Sentinel', bossType: 'sentinel', duration: 60, color: '#e9bbce' }),
 ]);
 
 export const UPGRADE_CHOICES = Object.freeze([
@@ -28,12 +29,33 @@ const ENEMY = {
   ace: { hp: 10, r: 14, speed: 51, score: 250, fire: 1.7 },
 };
 
-// Each formation has an arrival, a readable rhythm, and room to pass between groups.
-const WAVES = [
-  [[1.4,'scout',4,.24],[5.5,'scout',4,.76],[10,'striker',3,.5],[15,'scout',5,.5],[20,'gunship',1,.32],[23,'scout',4,.72],[28,'ace',2,.35],[33,'striker',4,.52],[38,'gunship',1,.72],[41,'scout',5,.3],[46,'ace',3,.54],[51,'striker',3,.5]],
-  [[1.4,'ace',3,.28],[5.8,'scout',5,.68],[10,'striker',4,.5],[15,'gunship',2,.5],[20,'ace',3,.7],[25,'scout',6,.5],[30,'striker',4,.3],[35,'gunship',2,.5],[40,'ace',4,.5],[45,'striker',4,.65],[50,'scout',6,.5],[54,'ace',2,.28]],
-  [[1.4,'striker',4,.5],[5.8,'ace',3,.7],[10,'gunship',2,.5],[15,'scout',6,.5],[20,'ace',4,.35],[25,'striker',5,.5],[30,'gunship',2,.5],[35,'ace',4,.65],[40,'scout',6,.5],[45,'gunship',2,.5],[50,'striker',5,.5],[55,'ace',3,.5]],
-];
+// Arrival time, aircraft, count and horizontal center. Each city has its own
+// formation rhythm; clear gaps between groups leave time to collect supplies.
+const WAVES = {
+  // Harbor approaches: alternating banks build to a broad Midtown formation.
+  'new-york': [[1.4,'scout',4,.24],[5.5,'scout',4,.76],[10,'striker',3,.5],[15,'scout',5,.5],
+    [20,'gunship',1,.32],[23,'scout',4,.72],[28,'ace',2,.35],[33,'striker',4,.52],
+    [38,'gunship',1,.72],[41,'scout',5,.3],[46,'ace',3,.54],[50,'striker',3,.5]],
+  // Bay sweeps: fast aces cross the fog, with paired gunships holding the bridge.
+  'san-francisco': [[1.4,'ace',2,.25],[5,'ace',2,.75],[9,'scout',5,.5],[14,'striker',3,.3],
+    [18,'scout',4,.72],[22,'gunship',2,.5],[27,'ace',3,.3],[32,'striker',4,.65],
+    [36,'gunship',1,.5],[40,'scout',6,.5],[45,'ace',3,.7],[50,'striker',4,.35]],
+  // River crossings: offset striker pairs alternate with slow lake patrols.
+  'austin': [[1.4,'striker',3,.25],[4,'striker',3,.75],[9,'scout',5,.5],[14,'gunship',1,.35],
+    [18,'ace',3,.65],[23,'striker',3,.28],[26,'striker',3,.72],[31,'gunship',2,.5],
+    [36,'scout',6,.5],[41,'ace',3,.32],[46,'striker',4,.65],[51,'ace',3,.68],[54,'scout',4,.35]],
+  // Capital approach: disciplined central formations break into two flank attacks.
+  'washington-dc': [[1.4,'scout',6,.5],[6,'striker',4,.5],[11,'ace',3,.25],[15,'ace',3,.75],
+    [20,'gunship',2,.5],[25,'scout',5,.3],[29,'striker',4,.7],[34,'ace',4,.5],
+    [39,'gunship',2,.5],[44,'scout',6,.5],[49,'striker',4,.3],[54,'ace',3,.7]],
+};
+
+const BOSSES = {
+  carrier: { hp: 500, r: 36, rx: 64, ry: 32, extent: 152, drift: .42, cadence: 2.2, patterns: ['fan','sweep'] },
+  leviathan: { hp: 800, r: 44, rx: 79, ry: 39, extent: 172, drift: .48, cadence: 2.1, patterns: ['ring','lance','curtain'] },
+  mantis: { hp: 1000, r: 40, rx: 70, ry: 37, extent: 192, drift: .6, cadence: 2, patterns: ['curtain','fan','crossfire'] },
+  sentinel: { hp: 1150, r: 46, rx: 86, ry: 42, extent: 140, drift: .4, cadence: 1.95, patterns: ['pincer','curtain','ring','lance'] },
+};
 
 function random(s) {
   let t = s._rng += 0x6d2b79f5;
@@ -45,16 +67,21 @@ function random(s) {
 function emit(s, type, props = {}) { s.events.push({ type, ...props }); }
 function id(s) { return ++s._id; }
 
-export function createGame({ seed = 0x52415054, difficulty = 'arcade' } = {}) {
+export function createGame({ seed = 0x52415054, difficulty = 'arcade', mode = 'campaign', stageId } = {}) {
   const relaxed = difficulty === 'relaxed';
+  mode = mode === 'city' ? 'city' : 'campaign';
+  const city = mode === 'city';
+  const startStage = city ? Math.max(0, STAGES.findIndex(stage => stage.id === stageId)) : 0;
+  const armor = (relaxed ? 8 : 6) + (city ? 2 : 0);
   return {
-    phase: 'playing', difficulty: relaxed ? 'relaxed' : 'arcade', stage: 0,
+    phase: 'playing', difficulty: relaxed ? 'relaxed' : 'arcade', mode, startStage, stage: startStage,
     time: 0, stageTime: 0, scroll: 0, stageProgress: 0, stageCleared: false, clearTime: 0,
     player: {
       id: 0, kind: 'player', x: 320, y: 320, vx: 0, vy: 0, r: 4, age: 0,
-      hp: relaxed ? 8 : 6, maxHp: relaxed ? 8 : 6, invulnerable: 1.2,
-      rollTime: 0, rollCooldown: 0, rollMax: 3, missileCooldown: 0, missileMax: 7,
-      weapon: 1, bank: 0, flash: 0, fireRate: 1, upgrades: [],
+      hp: armor, maxHp: armor, invulnerable: 1.2,
+      rollTime: 0, rollCooldown: 0, rollMax: 3, missileCooldown: 0, missileMax: city ? 7 * .77 : 7,
+      // A standalone sortie needs a full loadout without earning earlier city upgrades.
+      weapon: city ? 3 : 1, bank: 0, flash: 0, fireRate: city ? 1 / .82 : 1, upgrades: [],
     },
     enemies: [], bullets: [], pickups: [], particles: [], floaters: [], telegraphs: [],
     score: 0, kills: 0, combo: 0, multiplier: 1, boss: null, events: [],
@@ -79,7 +106,8 @@ export function useRoll(s) {
 }
 
 export function chooseUpgrade(s, upgradeId) {
-  if (s.phase !== 'upgrade' || !UPGRADE_CHOICES.some(choice => choice.id === upgradeId)) return false;
+  if (s.mode !== 'campaign' || s.stage >= STAGES.length - 1 || s.phase !== 'upgrade'
+    || !UPGRADE_CHOICES.some(choice => choice.id === upgradeId)) return false;
   const p = s.player;
   if (upgradeId === 'overdrive') p.fireRate *= 1 / .82;
   if (upgradeId === 'armor') p.maxHp++;
@@ -119,11 +147,12 @@ function spawnWave(s, wave) {
 
 function spawnBoss(s) {
   const stage = STAGES[s.stage];
-  const hp = [500, 800, 1100][s.stage];
+  const config = BOSSES[stage.bossType];
+  const hp = config.hp;
   const boss = {
     id: id(s), kind: 'boss', bossType: stage.bossType, name: stage.bossName,
-    x: 320, y: -80, vx: 0, vy: 0, hp, maxHp: hp, r: [36,40,44][s.stage],
-    rx: [64,70,79][s.stage], ry: [32,37,39][s.stage], age: 0, bank: 0, flash: 0,
+    x: 320, y: -80, vx: 0, vy: 0, hp, maxHp: hp, r: config.r,
+    rx: config.rx, ry: config.ry, age: 0, bank: 0, flash: 0,
     windup: 0, pattern: 'arrival', _fire: 3.1, _cycle: 0, _warning: false,
     _aim: Math.PI / 2, _gap: 320, _score: 3000 + s.stage * 2000,
   };
@@ -164,9 +193,8 @@ function warnBoss(s, e) {
   e._warning = true;
   e._aim = Math.atan2(s.player.y - e.y, s.player.x - e.x);
   e._gap = clamp(s.player.x, 80, 560);
-  const pattern = s.stage === 0 ? (e._cycle % 2 ? 'sweep' : 'fan')
-    : s.stage === 1 ? (e._cycle % 2 ? 'fan' : 'curtain')
-      : ['ring', 'curtain', 'lance'][e._cycle % 3];
+  const patterns = BOSSES[e.bossType].patterns;
+  const pattern = patterns[e._cycle % patterns.length];
   e.pattern = pattern;
   if (pattern === 'curtain') {
     for (let x = 24; x < WIDTH; x += 40) {
@@ -174,6 +202,22 @@ function warnBoss(s, e) {
       s.telegraphs.push({ kind: 'line', x, y: 68, x2: x, y2: HEIGHT,
         life: .65, maxLife: .65, color: '#ffb769' });
     }
+  } else if (pattern === 'pincer') {
+    for (const sign of [-1, 1]) {
+      const x = sign < 0 ? 24 : WIDTH - 24;
+      s.telegraphs.push({ kind: 'line', x, y: 88, x2: e._gap + sign * 64, y2: HEIGHT,
+        life: .65, maxLife: .65, color: '#ff94df' });
+    }
+  } else if (pattern === 'crossfire') {
+    e._crossWarnings = [];
+    e._crossAims = [-48, 48].map(offset => {
+      const x = e.x + offset, y = e.y + e.r * .55;
+      const aim = Math.atan2(s.player.y - y, s.player.x - x);
+      const warning = { kind: 'line', x, y, x2: x + Math.cos(aim) * 460, y2: y + Math.sin(aim) * 460,
+        life: .65, maxLife: .65, color: '#ffb769' };
+      s.telegraphs.push(warning); e._crossWarnings.push(warning);
+      return aim;
+    });
   } else if (pattern === 'ring') {
     s.telegraphs.push({ kind: 'circle', x: e.x, y: e.y, r: e.r + 17,
       life: .65, maxLife: .65, color: '#ff94df' });
@@ -192,6 +236,18 @@ function fireBoss(s, e) {
       if (Math.abs(x - e._gap) < 63) continue;
       shot(s, x, 72, Math.PI / 2, speed + 13, 3, 'lance');
     }
+  } else if (e.pattern === 'pincer') {
+    // The inward streams leave a wide corridor around the telegraphed center.
+    for (const sign of [-1, 1]) {
+      const x = sign < 0 ? 24 : WIDTH - 24;
+      const aim = Math.atan2(HEIGHT - 88, e._gap + sign * 64 - x);
+      for (let n = 0; n < 5; n++) shot(s, x - Math.cos(aim) * n * 14,
+        88 - Math.sin(aim) * n * 14, aim, speed + 15, 3, 'lance');
+    }
+  } else if (e.pattern === 'crossfire') {
+    for (const [index, offset] of [-48, 48].entries()) {
+      fan(s, { ...e, x: e.x + offset }, e._crossAims[index], 4, .14, speed + 7, 3);
+    }
   } else if (e.pattern === 'ring') {
     const count = desperate ? 24 : 20;
     for (let n = 0; n < count; n++) shot(s, e.x, e.y, n / count * TAU + e.age * .18, speed - 14, 3.5);
@@ -207,7 +263,7 @@ function fireBoss(s, e) {
     fan(s, e, e._aim, 7 + s.stage * 2, .16, speed, 3.5);
   }
   e._warning = false; e.windup = 0; e._cycle++;
-  e._fire = (2.2 - s.stage * .17) * (desperate ? .9 : 1);
+  e._fire = BOSSES[e.bossType].cadence * (desperate ? .9 : 1);
 }
 
 function moveEnemies(s, dt) {
@@ -217,11 +273,19 @@ function moveEnemies(s, dt) {
     const oldX = e.x;
     if (e.kind === 'boss') {
       e.y += (76 - e.y) * (1 - Math.exp(-1.25 * dt));
-      const extent = [152, 192, 158][s.stage];
-      e.x = 320 + Math.sin(Math.max(0, e.age - 1.5) * [.42,.6,.48][s.stage]) * extent;
+      const config = BOSSES[e.bossType];
+      e.x = 320 + Math.sin(Math.max(0, e.age - 1.5) * config.drift) * config.extent;
       e._fire -= dt;
       if (!e._warning && e._fire <= .65) warnBoss(s, e);
       if (e._warning) e.windup = clamp(1 - e._fire / .65, 0, 1);
+      if (e._warning && e.pattern === 'crossfire') {
+        // These turrets move during the windup; keep their captured aim visible.
+        for (const [index, offset] of [-48, 48].entries()) {
+          const line = e._crossWarnings[index], aim = e._crossAims[index];
+          line.x = e.x + offset; line.y = e.y + e.r * .55;
+          line.x2 = line.x + Math.cos(aim) * 460; line.y2 = line.y + Math.sin(aim) * 460;
+        }
+      }
       if (e._fire <= 0) fireBoss(s, e);
     } else {
       const config = ENEMY[e.kind];
@@ -480,7 +544,7 @@ function tick(s, input, dt) {
     }
     effects(s, dt);
     if (s.clearTime >= CLEAR_DURATION - 1e-10) {
-      s.phase = s.stage === STAGES.length - 1 ? 'won' : 'upgrade';
+      s.phase = s.mode === 'city' || s.stage === STAGES.length - 1 ? 'won' : 'upgrade';
       emit(s, s.phase === 'won' ? 'win' : 'stage', { stage: s.stage });
     }
     return;
@@ -488,7 +552,7 @@ function tick(s, input, dt) {
   s.time += dt; s.stageTime += dt; s.scroll += (s.boss ? 35 : 64 + s.stage * 6) * dt;
   s._comboTime -= dt;
   if (s._comboTime <= 0) { s.combo = 0; s.multiplier = 1; }
-  const waves = WAVES[s.stage];
+  const waves = WAVES[STAGES[s.stage].id];
   while (s._wave < waves.length && s.stageTime >= waves[s._wave][0]) spawnWave(s, waves[s._wave++]);
   if (!s._bossSpawned && s.stageTime >= STAGES[s.stage].duration) spawnBoss(s);
   s.stageProgress = s.boss ? .85 + .15 * (1 - s.boss.hp / s.boss.maxHp)

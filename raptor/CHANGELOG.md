@@ -1,5 +1,23 @@
 # RAPTOR release notes
 
+## 1.15.0 — 2026-09-26
+
+**Four playable cities in Pixel Wing:** New York City, San Francisco, Austin,
+and Washington, DC now form the arcade campaign at
+[/arcade/](https://raptor.chall.net/arcade/).
+
+- Recognizable landmarks along four authored pixel-art routes: Liberty and
+  Midtown, Golden Gate and the bay, Congress Avenue and Lady Bird Lake, and
+  the monuments of the National Mall. Each route holds its final boss vista.
+- Distinct enemy formations and four bosses: Harbor Warden, Fog Phantom,
+  Copper Viper, and Capital Sentinel, with readable attack warnings.
+- A roughly five-minute campaign with three upgrade stops, or direct city
+  selection with a fully armed jet, extra armor, and immediate retry.
+- Separate campaign and city best scores, preserving the earlier saved best;
+  shareable city links, responsive mission selection, and city-aware HUD labels.
+- Four synthesized chiptune arrangements, including a new Washington score.
+  The ten-board artwork gallery accompanies the game's code-drawn scenery.
+
 ## 1.14.1 — 2026-09-26
 
 - **Four Cities artwork:** ten pixel-art concept boards covering New York City,

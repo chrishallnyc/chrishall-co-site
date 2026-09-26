@@ -6,11 +6,17 @@ import { canvasPoint, readController } from './input.js';
 const $ = id => document.getElementById(id);
 const key = 'raptor.arcade.v1';
 let persistent = true;
-const defaults = { best: 0, runs: 0, wins: 0, difficulty: 'arcade', muted: false, reduced: null };
+const defaults = { best: 0, campaignBest: 0, cityBests: {}, runs: 0, wins: 0, difficulty: 'arcade', muted: false, reduced: null };
 let preferences;
 try { preferences = { ...defaults, ...JSON.parse(localStorage.getItem(key) || '{}') }; }
 catch { preferences = { ...defaults }; persistent = false; }
 if (!Number.isFinite(preferences.best) || preferences.best < 0) preferences.best = 0;
+if (!Number.isFinite(preferences.campaignBest) || preferences.campaignBest < 0) preferences.campaignBest = 0;
+const savedCityBests = preferences.cityBests;
+preferences.cityBests = Object.fromEntries(STAGES.map(stage => {
+  const value = savedCityBests?.[stage.id];
+  return [stage.id, Number.isFinite(value) && value >= 0 ? value : 0];
+}));
 if (!['arcade', 'relaxed'].includes(preferences.difficulty)) preferences.difficulty = 'arcade';
 for (const field of ['runs', 'wins']) {
   if (!Number.isSafeInteger(preferences[field]) || preferences[field] < 0) preferences[field] = 0;
@@ -25,10 +31,13 @@ const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 const portraitScreen = matchMedia('(max-width:480px) and (orientation:portrait)');
 const reduced = () => preferences.reduced ?? motionPreference.matches;
 const scoreText = value => Math.floor(value || 0).toString().padStart(6, '0');
-const stageName = index => STAGES[index]?.name || ['Pacific Coast', 'Red Canyon', 'Neon Harbor'][index] || 'Sky clear';
+const stageName = index => STAGES[index]?.name || 'Sky clear';
+const shortCityName = stage => stage.id === 'new-york' ? 'New York' : stage.name;
+const requestedCity = new URLSearchParams(location.search).get('city');
+let selectedMission = STAGES.some(stage => stage.id === requestedCity) ? requestedCity : 'campaign';
 let state = createGame({ difficulty: preferences.difficulty });
 let view = 'title', paused = false, previousPhase = 'playing', recorded = false;
-let menuTime = 0, menuStage = 0, last = performance.now(), uiClock = 0;
+let menuTime = 0, menuStage = Math.max(0, STAGES.findIndex(stage => stage.id === selectedMission)), last = performance.now(), uiClock = 0;
 let controllerPause = false, pointerId = null;
 const keys = new Set(), pointer = { active: false, x: WIDTH / 2, y: HEIGHT * .8 };
 const telemetry = { frames: 0, lastFrameMs: 0, maxFrameMs: 0, errors: [] };
@@ -46,7 +55,10 @@ function setView(next) {
   for (const name of overlayNames) $(name + '-screen').hidden = name !== next;
   $('flight-hud').hidden = next !== 'playing';
   clearInput();
-  if (next === 'playing') canvas.focus({ preventScroll: true });
+  if (next === 'playing') {
+    updateArenaLabel();
+    canvas.focus({ preventScroll: true });
+  }
 }
 
 async function wakeAudio() {
@@ -55,7 +67,7 @@ async function wakeAudio() {
 }
 
 function updatePreferences() {
-  $('title-best').textContent = scoreText(preferences.best);
+  updateMission();
   $('sound').setAttribute('aria-pressed', String(!preferences.muted));
   $('sound').setAttribute('aria-label', preferences.muted ? 'Sound off. Turn sound on' : 'Sound on. Mute sound');
   $('sound').querySelector('span').textContent = preferences.muted ? 'Sound off' : 'Sound on';
@@ -65,14 +77,39 @@ function updatePreferences() {
   $('difficulty-note').textContent = preferences.difficulty === 'relaxed' ? 'More armor. Slower enemy fire. Same big adventure.' : 'Chase the score. Make every dodge count.';
 }
 
+function missionBest(mode = selectedMission === 'campaign' ? 'campaign' : 'city', stageIndex = menuStage) {
+  return mode === 'city' ? preferences.cityBests[STAGES[stageIndex].id] : preferences.campaignBest;
+}
+
+function updateMission() {
+  const campaign = selectedMission === 'campaign';
+  const stage = STAGES[menuStage];
+  for (const button of document.querySelectorAll('[data-mission]')) {
+    button.setAttribute('aria-pressed', String(button.dataset.mission === selectedMission));
+  }
+  $('launch-label').textContent = campaign ? 'Start campaign' : `Fly ${shortCityName(stage)}`;
+  $('mission-note').textContent = campaign
+    ? 'Four cities, four bosses. Start in New York and earn upgrades between missions.'
+    : `${stage.subtitle}. One city, one boss. Your jet starts fully armed.`;
+  $('title-best-label').textContent = campaign ? 'CAMPAIGN BEST' : 'CITY BEST';
+  $('title-best').textContent = scoreText(missionBest());
+  updateArenaLabel();
+}
+
+function updateArenaLabel() {
+  const city = stageName(view === 'title' ? menuStage : state.stage);
+  const label = `${city} pixel-art flight arena. Use arrow keys or WASD to fly; Space launches missiles; Shift performs a dodge roll.`;
+  if (canvas.getAttribute('aria-label') !== label) canvas.setAttribute('aria-label', label);
+}
+
 function begin() {
   if (!$('help-dialog').open) {
-    state = createGame({ difficulty: preferences.difficulty });
+    state = createGame({ difficulty: preferences.difficulty, mode: selectedMission === 'campaign' ? 'campaign' : 'city', stageId: selectedMission });
     previousPhase = state.phase; recorded = false; paused = false; controllerPause = false;
     last = performance.now(); uiClock = 0;
-    audio.setStage(0); audio.setPaused(false);
+    audio.setStage(state.stage); audio.setPaused(false);
     setView('playing'); updateHUD(); wakeAudio();
-    $('announcement').textContent = 'Flight started. Pacific Coast. Cannons fire automatically.';
+    $('announcement').textContent = `${state.mode === 'city' ? 'City mission' : 'Campaign'} started. ${stageName(state.stage)}. Cannons fire automatically.`;
   }
 }
 
@@ -95,21 +132,26 @@ function title() {
 function recordRun() {
   if (recorded) return;
   recorded = true;
-  const best = state.score > preferences.best;
-  preferences.best = Math.max(preferences.best, state.score);
+  const best = state.score > missionBest(state.mode, state.startStage);
+  if (state.mode === 'city') preferences.cityBests[STAGES[state.startStage].id] = Math.max(missionBest(state.mode, state.startStage), state.score);
+  else preferences.campaignBest = Math.max(preferences.campaignBest, state.score);
   preferences.runs = Math.max(0, Number(preferences.runs) || 0) + 1;
   if (state.phase === 'won') preferences.wins = Math.max(0, Number(preferences.wins) || 0) + 1;
   save();
   const won = state.phase === 'won';
-  $('result-kicker').textContent = won ? 'ALL THREE SKIES ARE YOURS' : 'EVERY GREAT PILOT STARTS SOMEWHERE';
-  $('result-title').textContent = won ? 'Ace of the skies.' : 'One more flight?';
-  $('result-copy').textContent = won ? 'Coast, canyon, harbor. A little jet just did a very big thing.' : 'Keep moving, roll through the tight spots, and let those missiles fly.';
+  const city = stageName(state.startStage);
+  $('result-kicker').textContent = won ? (state.mode === 'city' ? `${city.toUpperCase()} CLEAR` : 'ALL FOUR CITIES ARE YOURS') : 'EVERY GREAT PILOT STARTS SOMEWHERE';
+  $('result-title').textContent = won ? (state.mode === 'city' ? 'City secured.' : 'Ace of the cities.') : 'One more flight?';
+  $('result-copy').textContent = won
+    ? (state.mode === 'city' ? `${city}'s skies are clear. Try another city or take on the full campaign.` : 'New York, San Francisco, Austin, Washington. Four cities, one good jet.')
+    : 'Keep moving, roll through the tight spots, and let those missiles fly.';
   $('final-score').textContent = scoreText(state.score);
   $('final-kills').textContent = state.kills;
   const time = Math.floor(state.time);
   $('final-time').textContent = `${Math.floor(time / 60)}:${String(time % 60).padStart(2, '0')}`;
-  $('new-best').textContent = best ? (persistent ? '✦ A NEW PERSONAL BEST ✦' : '✦ SESSION BEST · STORAGE UNAVAILABLE') : `PERSONAL BEST ${scoreText(preferences.best)}${persistent ? '' : ' · THIS SESSION'}`;
-  $('announcement').textContent = `${won ? 'All sectors cleared.' : 'Flight ended.'} Score ${Math.floor(state.score)}.`;
+  const bestLabel = state.mode === 'city' ? 'CITY BEST' : 'CAMPAIGN BEST';
+  $('new-best').textContent = best ? (persistent ? `✦ A NEW ${bestLabel} ✦` : '✦ SESSION BEST · STORAGE UNAVAILABLE') : `${bestLabel} ${scoreText(missionBest(state.mode, state.startStage))}${persistent ? '' : ' · THIS SESSION'}`;
+  $('announcement').textContent = `${won ? (state.mode === 'city' ? `${city} cleared.` : 'All four cities cleared.') : 'Flight ended.'} Score ${Math.floor(state.score)}.`;
   setView('result'); $('retry').focus({ preventScroll: true });
 }
 
@@ -137,10 +179,11 @@ function upgrade() {
 
 let healthSignature = '';
 function updateHUD() {
+  updateArenaLabel();
   const p = state.player;
   $('score').textContent = scoreText(state.score);
   $('streak').textContent = state.multiplier > 1 ? `×${state.multiplier} · ${state.combo} CHAIN` : 'Find your rhythm';
-  $('stage-number').textContent = `SECTOR ${String(state.stage + 1).padStart(2, '0')} / 03`;
+  $('stage-number').textContent = state.mode === 'city' ? 'CITY MISSION' : `CITY ${String(state.stage + 1).padStart(2, '0')} / ${String(STAGES.length).padStart(2, '0')}`;
   $('stage-name').textContent = stageName(state.stage).toUpperCase();
   $('stage-progress').style.width = `${Math.max(0, Math.min(1, state.stageProgress || 0)) * 100}%`;
   const health = `${p.hp}/${p.maxHp}`;
@@ -159,12 +202,12 @@ function updateHUD() {
   const boss = state.boss;
   $('boss-hud').hidden = !boss || boss.hp <= 0;
   if (boss && boss.hp > 0) {
-    $('boss-name').textContent = boss.name || ['TIDEBREAKER', 'IRON WING', 'ARCLIGHT'][state.stage];
+    $('boss-name').textContent = boss.name || STAGES[state.stage].bossName;
     $('boss-health').style.width = `${Math.max(0, boss.hp / boss.maxHp) * 100}%`;
   }
-  const banner = state.stageCleared ? 'SECTOR CLEAR · WELL FLOWN' : state.stageTime < 3.2 ? `${String(state.stage + 1).padStart(2, '0')} / ${stageName(state.stage).toUpperCase()}` : '';
+  const banner = state.stageCleared ? 'CITY CLEAR · WELL FLOWN' : state.stageTime < 3.2 ? stageName(state.stage).toUpperCase() : '';
   if ($('stage-banner').textContent !== banner) $('stage-banner').textContent = banner;
-  $('first-tip').hidden = state.stage !== 0 || state.stageTime > 8 || !!boss;
+  $('first-tip').hidden = state.stage !== state.startStage || state.stageTime > 8 || !!boss;
 }
 
 function inputFrame() {
@@ -213,9 +256,15 @@ $('roll').onclick = () => { if (view === 'playing') useRoll(state); };
 $('sound').onclick = () => { preferences.muted = !preferences.muted; save(); audio.setMuted(preferences.muted); updatePreferences(); if (!preferences.muted) wakeAudio(); };
 $('motion').onclick = () => { preferences.reduced = !reduced(); save(); updatePreferences(); };
 for (const button of document.querySelectorAll('[data-difficulty]')) button.onclick = () => { preferences.difficulty = button.dataset.difficulty; save(); updatePreferences(); };
-for (const button of document.querySelectorAll('[data-preview]')) button.onclick = () => {
-  menuStage = Number(button.dataset.preview);
-  for (const candidate of document.querySelectorAll('[data-preview]')) candidate.setAttribute('aria-pressed', String(candidate === button));
+for (const button of document.querySelectorAll('[data-mission]')) button.onclick = () => {
+  selectedMission = button.dataset.mission;
+  menuStage = Math.max(0, STAGES.findIndex(stage => stage.id === selectedMission));
+  menuTime = 0;
+  const url = new URL(location.href);
+  if (selectedMission === 'campaign') url.searchParams.delete('city');
+  else url.searchParams.set('city', selectedMission);
+  history.replaceState(null, '', url);
+  updateMission();
 };
 $('help').onclick = () => { if (view === 'playing') pause(); $('help-dialog').showModal(); };
 for (const button of document.querySelectorAll('.dialog-close,.dialog-close-button')) button.onclick = () => $('help-dialog').close();
@@ -256,17 +305,17 @@ addEventListener('pagehide', event => {
   else audio.destroy();
 });
 updatePreferences(); setView('title');
-$('launch').disabled = false; $('launch').innerHTML = 'Take flight <span aria-hidden="true">↗</span>';
+$('launch').disabled = false;
 // Read-only diagnostics are useful during browser QA and live support. The
 // mutable simulation is exposed only under an explicit local QA flag.
 window.__PIXEL_RAPTOR = {
   get ready() { return true; }, get view() { return view; }, get phase() { return state.phase; },
-  get snapshot() { return { stage: state.stage, time: state.time, score: state.score, kills: state.kills, player: { ...state.player, upgrades: [...state.player.upgrades] }, enemies: state.enemies.length, bullets: state.bullets.length, boss: state.boss ? { name: state.boss.name, hp: state.boss.hp } : null }; },
+  get snapshot() { return { mode: state.mode, startStage: state.startStage, stage: state.stage, stageId: STAGES[state.stage]?.id, stageName: stageName(state.stage), time: state.time, score: state.score, kills: state.kills, player: { ...state.player, upgrades: [...state.player.upgrades] }, enemies: state.enemies.length, bullets: state.bullets.length, boss: state.boss ? { name: state.boss.name, hp: state.boss.hp } : null }; },
   get performance() { return { ...telemetry, errors: [...telemetry.errors] }; },
 };
 if (new URLSearchParams(location.search).has('qa')) Object.assign(window.__PIXEL_RAPTOR, {
   getState: () => state,
-  getAudio: () => ({ state: audio.context?.state || 'uninitialized', muted: audio.muted, voices: audio._voices.size, musicActive: audio._timer !== null }),
+  getAudio: () => ({ stage: audio.stage, state: audio.context?.state || 'uninitialized', muted: audio.muted, voices: audio._voices.size, musicActive: audio._timer !== null }),
   advance(seconds, input = neutralInput) { for (let t = 0; t < seconds; t += 1 / 120) { stepGame(state, input, 1 / 120); if (state.phase !== 'playing') break; } },
 });
 requestAnimationFrame(draw);

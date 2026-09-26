@@ -29,10 +29,31 @@ const HARMONY = [
   [0, [0, 3, 7, 10]], [-7, [0, 3, 7, 10]],
   [-4, [0, 4, 7, 11]], [-5, [0, 4, 7, 10]],
 ];
+// Washington answers the earlier minor-key phrases with a brighter, spacious
+// original theme. Its held notes and offbeat bass leave the combat cues clear.
+const CAPITAL_MELODY = [
+  [[0, 7, 3], [5, 4, 2], [8, 2, 2], [12, 0, 3]],
+  [[1, 4, 2.5], [5, 7, 2], [9, 9, 3], [14, 7, 1.5]],
+  [[0, 5, 3], [4, 4, 2], [8, 2, 3], [13, -3, 2]],
+  [[2, 2, 3], [7, 6, 2], [11, 9, 2], [14, 7, 1.5]],
+  [[0, 11, 3], [5, 9, 2], [8, 7, 2.5], [12, 4, 3]],
+  [[1, 9, 2.5], [5, 7, 2], [9, 4, 3], [14, 2, 1.5]],
+  [[0, 5, 2.5], [4, 9, 2], [8, 7, 3], [13, 4, 2]],
+  [[0, 6, 2.5], [4, 2, 2], [8, -1, 2], [12, 0, 3.5]],
+];
+const CAPITAL_HARMONY = [
+  [0, [0, 4, 7, 11]], [-3, [0, 3, 7, 10]],
+  [-7, [0, 4, 7, 11]], [-5, [0, 4, 7, 9]],
+  [0, [0, 4, 7, 11]], [-3, [0, 3, 7, 10]],
+  [-7, [0, 4, 7, 9]], [-5, [0, 4, 7, 10]],
+];
 const SCORES = [
   { tonic: 50, bpm: 116, cutoff: 2400, arp: 0.025, lead: 0.066 },
   { tonic: 52, bpm: 124, cutoff: 2150, arp: 0.032, lead: 0.064 },
   { tonic: 53, bpm: 120, cutoff: 2800, arp: 0.029, lead: 0.060 },
+  { tonic: 55, bpm: 112, cutoff: 2300, arp: 0.026, lead: 0.063,
+    melody: CAPITAL_MELODY, harmony: CAPITAL_HARMONY,
+    arpeggio: [0, 2, 3, 1, 2, 1, 3, 2], bass: [0, 4, 7, 8, 12, 15] },
 ];
 const RATE_LIMITS = {
   shoot: 0.085, enemyHit: 0.07, playerHit: 0.12, explosion: 0.04,
@@ -281,7 +302,7 @@ export class ArcadeAudio {
   _musicStep(step, t) {
     const score = SCORES[this.stage], beat = 60 / score.bpm, sixteenth = beat / 4;
     const bar = Math.floor(step / 16) % 8, s = step % 16;
-    const [offset, intervals] = HARMONY[bar], root = score.tonic + offset;
+    const [offset, intervals] = (score.harmony || HARMONY)[bar], root = score.tonic + offset;
     const intensity = this._boss ? 1.17 : 1;
     const music = { bus: 'music' };
 
@@ -291,18 +312,19 @@ export class ArcadeAudio {
         { ...music, shape: 'triangle', cutoff: 1400, attack: 0.08, release: 0.25, pan: (i - 1.5) * 0.18 }));
     }
     // A syncopated octave bass, with a fifth leading into the next bar.
-    if ([0, 3, 6, 8, 11, 14].includes(s)) {
-      const interval = s === 14 ? 7 : (s === 6 || s === 11 ? 12 : 0);
+    const bass = score.bass || [0, 3, 6, 8, 11, 14];
+    if (bass.includes(s)) {
+      const interval = s === bass[5] ? 7 : (s === bass[2] || s === bass[4] ? 12 : 0);
       this._tone(NOTE(root - 12 + interval), t, sixteenth * (s === 0 || s === 8 ? 2.7 : 1.6), 0.145 * intensity,
         { ...music, shape: 'triangle', cutoff: 550, attack: 0.006, release: 0.045 });
     }
     // Alternating stereo arpeggios are quiet texture, not a competing tune.
     if (s % 2 === 0) {
-      const pattern = this.stage === 1 ? [0, 2, 1, 3, 2, 0, 3, 1] : [0, 1, 2, 3, 2, 1, 3, 1];
+      const pattern = score.arpeggio || (this.stage === 1 ? [0, 2, 1, 3, 2, 0, 3, 1] : [0, 1, 2, 3, 2, 1, 3, 1]);
       this._tone(NOTE(root + 24 + intervals[pattern[s / 2]]), t, sixteenth * 1.3, score.arp,
         { ...music, shape: 'sine', attack: 0.008, pan: s % 4 ? 0.32 : -0.32 });
     }
-    const melody = MELODY[bar].find(note => note[0] === s);
+    const melody = (score.melody || MELODY)[bar].find(note => note[0] === s);
     if (melody) {
       const note = score.tonic + 24 + melody[1];
       this._tone(NOTE(note), t, sixteenth * melody[2], score.lead,

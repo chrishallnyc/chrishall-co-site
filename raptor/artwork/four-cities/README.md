@@ -3,8 +3,9 @@
 Ten concept boards, reviewed across three refinement passes. Open the
 [public gallery](https://raptor.chall.net/artwork/four-cities/) or
 [local gallery](index.html) to view the collection and download individual PNGs.
-The four named city maps are proposed artwork. The playable Pixel Wing campaign
-continues through Pacific Coast, Red Canyon, and Neon Harbor.
+Play all four cities in [Pixel Wing](https://raptor.chall.net/arcade/), either
+as one campaign or as individual missions. This gallery is the companion
+concept collection; the game uses its own authored pixel scenery and sprites.
 
 ## Deliverables
 
@@ -21,7 +22,7 @@ continues through Pacific Coast, Red Canyon, and Neon Harbor.
 | 09-effects | Weapons, pickups and effects — Combat language / animation studies |
 | 10-interface | Interface and campaign flow — Title / region / briefing / flight / pause / debrief |
 
-The four city keyframes lead the presentation. The six supporting boards cover title art, player/ally/transport craft, enemies and four proposed bosses, landmark/terrain families, weapons and effects, and six interface states.
+The four city keyframes lead the presentation. The six supporting boards cover title art, player/ally/transport craft, enemies and four city boss designs, landmark/terrain families, weapons and effects, and six interface states.
 
 ## Visual contract
 
@@ -34,11 +35,11 @@ City scenes use deliberate spatial compression. They are illustrated arcade maps
 - Austin: Lady Bird Lake, Congress Avenue Bridge and the Capitol spine; warm dusk.
 - Washington, DC: low monumental skyline, east-west Mall, Tidal Basin to the south; spring daylight.
 
-## Proposed content and production limits
+## Relationship to the playable game
 
-The existing arcade has three fictional regions and three bosses. These four named city maps and a fourth city boss are proposals. This presentation keeps the F-22, clear hostile silhouettes, automatic guns, missiles, dodge, pickups, upgrades and score-based arcade flow, while illustrating a more expansive mission interface inspired by Raptor.
+Pixel Wing now includes New York City, San Francisco, Austin, and Washington, DC as playable levels, with four bosses, individual city selection, three campaign upgrade stops, and separate score records. Its native Canvas2D art supplies landmark routes, animated aircraft, combat effects, and gameplay interfaces. See the [arcade README](../../arcade/README.md) for city links, controls, and verification.
 
-Generated boards are visual concepts. Sprite animation, clean alpha extraction, exact cell registration, seamless terrain tiles, geographic collision data, gameplay tuning, accessibility review, and runtime integration remain production tasks. Do not treat generated sheet layouts as drop-in sprite atlases.
+These generated boards remain visual concepts. They illustrate a broader art direction and interface study; their sheet layouts are not runtime sprite atlases or exact screenshots of the playable levels.
 
 ## Prompt set and files
 

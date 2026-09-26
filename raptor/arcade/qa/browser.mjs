@@ -13,9 +13,15 @@ const out = (process.env.RAPTOR_TEST_OUTPUT || '.context/arcade/qa').replace(/\/
 await mkdir(out, { recursive: true });
 const browser = await chromium.launch({ channel: 'chrome', headless: process.env.HEADED !== '1' });
 const contexts = [], checks = [], errors = [], badResponses = [], metrics = {};
+const CITIES = [
+  { id: 'new-york', name: 'New York City', boss: 'carrier' },
+  { id: 'san-francisco', name: 'San Francisco', boss: 'leviathan' },
+  { id: 'austin', name: 'Austin', boss: 'mantis' },
+  { id: 'washington-dc', name: 'Washington, DC', boss: 'sentinel' },
+];
 let activePage;
 
-async function newPage(options = {}, prepare) {
+async function newPage(options = {}, prepare, destination = url) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 960 }, serviceWorkers: 'block', ...options });
   contexts.push(context);
   if (prepare) await prepare(context);
@@ -24,7 +30,7 @@ async function newPage(options = {}, prepare) {
   page.on('console', message => { if (message.type() === 'error') errors.push({ page: page.url(), message: message.text() }); });
   page.on('response', response => { if (response.status() >= 400) badResponses.push({ status: response.status(), url: response.url() }); });
   activePage = page;
-  await page.goto(url.href, { waitUntil: 'networkidle' });
+  await page.goto(destination.href, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => window.__PIXEL_RAPTOR?.ready);
   return page;
 }
@@ -39,6 +45,10 @@ const view = (page, expected) => page.waitForFunction(value => __PIXEL_RAPTOR.vi
 const snapshot = page => page.evaluate(() => __PIXEL_RAPTOR.snapshot);
 const extraSizes = [[844, 390], [600, 800], [600, 450]];
 async function launch(page) { await page.locator('#launch').click(); await view(page, 'playing'); }
+async function arenaLabel(page, city) {
+  const label = await page.locator('#game').getAttribute('aria-label');
+  assert.ok(label?.startsWith(`${city} pixel-art flight arena.`), `arena label identifies ${city}: ${label}`);
+}
 async function freshLayout(page, width, height) {
   await page.setViewportSize({ width, height });
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
@@ -79,19 +89,27 @@ try {
   await check('title offers one launch action and does not start audio before a gesture', 'real browser', async () => {
     assert.equal(await page.locator('#title-screen .primary:visible').count(), 1);
     assert.equal(await page.locator('#launch').isEnabled(), true);
-    assert.match(await page.locator('#launch').textContent(), /Take flight/);
+    assert.match(await page.locator('#launch').textContent(), /Start campaign/);
+    assert.equal(await page.locator('[data-mission]').count(), CITIES.length + 1);
+    assert.equal(await page.locator('[data-mission][aria-pressed="true"]').getAttribute('data-mission'), 'campaign');
+    assert.match(await page.locator('#title-best-label').textContent(), /campaign/i);
     assert.equal(await page.locator('#title-best').textContent(), '000000');
     assert.equal(await page.evaluate(() => __PIXEL_RAPTOR.view), 'title');
     assert.equal(await page.evaluate(() => __PIXEL_RAPTOR.getAudio().state), 'uninitialized');
     await shot(page, '01-title-desktop');
   });
 
-  await check('all three previews render visibly different original scenery', 'rendered pixels', async () => {
+  await check('all four city previews render visibly different original scenery', 'rendered pixels', async () => {
     const colors = [];
-    for (let stage = 0; stage < 3; stage++) {
-      await page.locator(`[data-preview="${stage}"]`).click();
+    for (let stage = 0; stage < CITIES.length; stage++) {
+      await page.locator(`[data-mission="${CITIES[stage].id}"]`).click();
       await page.waitForTimeout(90);
-      assert.equal(await page.locator('[data-preview][aria-pressed="true"]').count(), 1);
+      assert.equal(await page.locator('[data-mission][aria-pressed="true"]').count(), 1);
+      assert.equal(await page.locator('[data-mission][aria-pressed="true"]').getAttribute('data-mission'), CITIES[stage].id);
+      assert.match(await page.locator('#launch').textContent(), /Fly /);
+      await arenaLabel(page, CITIES[stage].name);
+      assert.equal(new URL(page.url()).searchParams.get('city'), CITIES[stage].id);
+      assert.equal(new URL(page.url()).searchParams.get('qa'), '1');
       const color = await page.locator('#game').evaluate(canvas => {
         const data = canvas.getContext('2d').getImageData(0, 0, 640, 400).data;
         const sums = [0, 0, 0]; let samples = 0, distinct = new Set();
@@ -111,7 +129,8 @@ try {
         `stages ${a + 1} and ${b + 1} have distinct scene palettes`);
     }
     metrics.previewColors = colors;
-    await page.locator('[data-preview="0"]').click();
+    await page.locator('[data-mission="campaign"]').click();
+    assert.equal(new URL(page.url()).searchParams.has('city'), false);
   });
 
   await check('phone, landscape and tablet openings keep launch, setup and region choices separate', 'responsive layout', async () => {
@@ -126,7 +145,8 @@ try {
       assert.ok(bounds.launch.x >= 0 && bounds.launch.right <= width && bounds.launch.bottom <= height, 'launch stays visible');
       assert.ok(bounds.launch.bottom <= bounds.difficulty.y + 1, 'launch and difficulty do not overlap');
       assert.ok(bounds.difficulty.bottom <= bounds.note.y + 1, 'difficulty and its explanation do not overlap');
-      assert.ok(bounds.note.bottom + 5 <= bounds.route.y, 'setup copy does not collide with the region selector');
+      assert.ok(bounds.note.bottom + 5 <= bounds.route.y,
+        `${width}x${height}: setup copy ends at ${bounds.note.bottom.toFixed(1)} but the mission selector begins at ${bounds.route.y.toFixed(1)}`);
       assert.ok(bounds.route.bottom <= bounds.screen.bottom + 1, 'region selector stays inside its screen');
       const canvasShape = await page.locator('#game').evaluate(canvas => {
         const rect = canvas.getBoundingClientRect();
@@ -153,6 +173,8 @@ try {
     await page.waitForFunction(() => __PIXEL_RAPTOR.getAudio().state === 'running' && __PIXEL_RAPTOR.getAudio().voices > 0);
     const sound = await page.evaluate(() => __PIXEL_RAPTOR.getAudio());
     assert.equal(sound.muted, false); assert.equal(sound.musicActive, true);
+    assert.equal(sound.stage, 0);
+    assert.equal((await snapshot(page)).mode, 'campaign');
     assert.equal(await page.evaluate(() => document.activeElement.id), 'game');
     assert.equal((await snapshot(page)).player.maxHp, 8);
     assert.equal(await page.locator('#flight-hud').isVisible(), true);
@@ -278,7 +300,7 @@ try {
     await fixture(transitions, 'upgrade', 8000, 65);
     assert.equal(await transitions.locator('[data-upgrade]').count(), 3);
     assert.equal(await transitions.evaluate(() => document.activeElement.dataset.upgrade), 'overdrive');
-    assert.match(await transitions.locator('#next-region').textContent(), /RED CANYON/);
+    assert.match(await transitions.locator('#next-region').textContent(), /SAN FRANCISCO/);
     const t = (await snapshot(transitions)).time; await transitions.waitForTimeout(160);
     assert.equal((await snapshot(transitions)).time, t, 'simulation waits while choosing');
     await shot(transitions, '07-upgrade');
@@ -293,23 +315,36 @@ try {
     assert.equal(after.stage, 1); assert.ok(after.player.fireRate > 1);
     assert.deepEqual(after.player.upgrades, ['overdrive']);
     assert.equal(await transitions.evaluate(() => document.activeElement.id), 'game');
+    await arenaLabel(transitions, 'San Francisco');
+    await transitions.locator('#sound').click();
+    await arenaLabel(transitions, 'San Francisco');
+    await transitions.locator('#sound').click();
+    await arenaLabel(transitions, 'San Francisco');
   });
 
-  await check('second upgrade equips rockets and final victory records a completed run once', 'injected completion fixtures; UI and storage only', async () => {
+  await check('second and third upgrades enter Austin and Washington before recording campaign victory once', 'injected completion fixtures; UI and storage only', async () => {
     await fixture(transitions, 'upgrade', 17000, 135);
-    assert.match(await transitions.locator('#next-region').textContent(), /NEON HARBOR/);
+    assert.match(await transitions.locator('#next-region').textContent(), /AUSTIN/);
     await transitions.locator('[data-upgrade="rockets"]').click(); await view(transitions, 'playing');
     const after = await snapshot(transitions);
     assert.equal(after.stage, 2); assert.ok(after.player.missileMax < 7);
     assert.deepEqual(after.player.upgrades, ['overdrive', 'rockets']);
-    await fixture(transitions, 'won', 36000, 218);
-    assert.match(await transitions.locator('#result-title').textContent(), /Ace of the skies/);
+    await arenaLabel(transitions, 'Austin');
+    await fixture(transitions, 'upgrade', 27000, 205);
+    assert.match(await transitions.locator('#next-region').textContent(), /WASHINGTON, DC/);
+    await transitions.locator('[data-upgrade="armor"]').click(); await view(transitions, 'playing');
+    const capital = await snapshot(transitions);
+    assert.equal(capital.stage, 3); assert.equal(capital.player.maxHp, after.player.maxHp + 1);
+    assert.deepEqual(capital.player.upgrades, ['overdrive', 'rockets', 'armor']);
+    await arenaLabel(transitions, 'Washington, DC');
+    await fixture(transitions, 'won', 36000, 298);
+    assert.match(await transitions.locator('.result-panel').textContent(), /ALL FOUR CITIES ARE YOURS/i);
     assert.equal(await transitions.locator('#final-score').textContent(), '036000');
-    assert.equal(await transitions.locator('#final-time').textContent(), '3:38');
+    assert.equal(await transitions.locator('#final-time').textContent(), '4:58');
     assert.equal(await transitions.evaluate(() => document.activeElement.id), 'retry');
     await transitions.waitForTimeout(180);
     const saved = await transitions.evaluate(() => JSON.parse(localStorage.getItem('raptor.arcade.v1')));
-    assert.equal(saved.best, 36000); assert.equal(saved.runs, 1); assert.equal(saved.wins, 1);
+    assert.equal(saved.campaignBest, 36000); assert.equal(saved.runs, 1); assert.equal(saved.wins, 1);
     await shot(transitions, '08-victory');
     for (const [width, height] of extraSizes) {
       await freshLayout(transitions, width, height);
@@ -323,13 +358,14 @@ try {
     await transitions.locator('#retry').click(); await view(transitions, 'playing');
     const reset = await snapshot(transitions);
     assert.equal(reset.stage, 0); assert.equal(reset.score, 0); assert.equal(reset.kills, 0);
+    await arenaLabel(transitions, 'New York City');
     assert.ok(reset.time < 1); assert.equal(reset.player.hp, reset.player.maxHp);
     assert.deepEqual(reset.player.upgrades, []); assert.equal(reset.player.missileMax, 7);
     await fixture(transitions, 'lost', 7000, 62);
     assert.match(await transitions.locator('#result-title').textContent(), /One more flight/);
     assert.equal(await transitions.locator('#final-time').textContent(), '1:02');
     const saved = await transitions.evaluate(() => JSON.parse(localStorage.getItem('raptor.arcade.v1')));
-    assert.equal(saved.best, 36000); assert.equal(saved.runs, 2); assert.equal(saved.wins, 1);
+    assert.equal(saved.campaignBest, 36000); assert.equal(saved.runs, 2); assert.equal(saved.wins, 1);
     await shot(transitions, '09-defeat');
     await transitions.locator('#back-title').click(); await view(transitions, 'title');
     assert.equal(await transitions.locator('#title-best').textContent(), '036000');
@@ -337,15 +373,91 @@ try {
     assert.equal(await transitions.locator('#title-best').textContent(), '036000');
   });
 
+  await check('every selected city launches real flight with its own score, retries that mission and keeps independent records', 'real city launch and retry; injected results for persistence only', async () => {
+    const sorties = await newPage({}, context => context.addInitScript(() => {
+      if (!localStorage.getItem('raptor.arcade.v1')) localStorage.setItem('raptor.arcade.v1', JSON.stringify({
+        best: 900000, campaignBest: 12345, cityBests: {}, runs: 0, wins: 0,
+      }));
+    }));
+    const expectedBests = {};
+    for (const [stage, city] of CITIES.entries()) {
+      await sorties.locator(`[data-mission="${city.id}"]`).click();
+      assert.equal(await sorties.locator('#title-best').textContent(), '000000');
+      await launch(sorties);
+      await sorties.waitForFunction(index => __PIXEL_RAPTOR.snapshot.time > .15
+        && __PIXEL_RAPTOR.getAudio().stage === index && __PIXEL_RAPTOR.getAudio().musicActive, stage);
+      const state = await snapshot(sorties);
+      assert.deepEqual({ mode: state.mode, stage: state.stage, startStage: state.startStage, id: state.stageId, name: state.stageName },
+        { mode: 'city', stage, startStage: stage, id: city.id, name: city.name });
+      assert.equal(state.player.weapon, 3, 'standalone city launches with the complete cannon loadout');
+      assert.ok(state.player.missileMax < 7, 'standalone city has its own full mission loadout');
+      assert.match(await sorties.locator('#stage-number').textContent(), /CITY MISSION/);
+      assert.equal(await sorties.locator('#stage-name').textContent(), city.name.toUpperCase());
+      await arenaLabel(sorties, city.name);
+      await shot(sorties, `city-${city.id}-flight`);
+      const score = 5000 + stage * 1000;
+      await fixture(sorties, 'won', score, 85 + stage);
+      assert.match(await sorties.locator('.result-panel').textContent(), new RegExp(`${city.name} CLEAR`, 'i'));
+      expectedBests[city.id] = score;
+      let saved = await sorties.evaluate(() => JSON.parse(localStorage.getItem('raptor.arcade.v1')));
+      assert.equal(saved.best, 900000, 'the historical three-region record is preserved');
+      assert.equal(saved.campaignBest, 12345, 'city results cannot overwrite the campaign record');
+      for (const candidate of CITIES) assert.equal(saved.cityBests[candidate.id] ?? 0, expectedBests[candidate.id] ?? 0,
+        `${candidate.name} keeps its own best`);
+      assert.equal(saved.runs, stage * 2 + 1); assert.equal(saved.wins, stage + 1);
+      await sorties.locator('#retry').click(); await view(sorties, 'playing');
+      const replay = await snapshot(sorties);
+      assert.equal(replay.stage, stage); assert.equal(replay.startStage, stage);
+      assert.equal(replay.mode, 'city'); assert.equal(replay.stageId, city.id);
+      await arenaLabel(sorties, city.name);
+      assert.equal(replay.score, 0); assert.deepEqual(replay.player.upgrades, []);
+      await fixture(sorties, 'lost', 100, 8);
+      saved = await sorties.evaluate(() => JSON.parse(localStorage.getItem('raptor.arcade.v1')));
+      for (const candidate of CITIES) assert.equal(saved.cityBests[candidate.id] ?? 0, expectedBests[candidate.id] ?? 0,
+        'a lower retry score cannot erase a city record');
+      assert.equal(saved.runs, (stage + 1) * 2); assert.equal(saved.wins, stage + 1);
+      await sorties.locator('#back-title').click(); await view(sorties, 'title');
+      assert.equal(await sorties.locator('#title-best').textContent(), String(score).padStart(6, '0'));
+      assert.equal(await sorties.locator('[data-mission][aria-pressed="true"]').getAttribute('data-mission'), city.id);
+    }
+    await sorties.reload({ waitUntil: 'networkidle' }); await view(sorties, 'title');
+    assert.equal(await sorties.locator('[data-mission][aria-pressed="true"]').getAttribute('data-mission'), 'washington-dc');
+    assert.equal(await sorties.locator('#title-best').textContent(), '008000');
+    await sorties.locator('[data-mission="campaign"]').click();
+    assert.equal(await sorties.locator('#title-best').textContent(), '012345');
+    assert.match(await sorties.locator('#title-best-label').textContent(), /campaign/i);
+    metrics.cityMissionRecords = expectedBests;
+    await sorties.context().close();
+  });
+
+  await check('city deep links select the matching mission and unknown cities safely return to campaign', 'real URL navigation and flight launch', async () => {
+    for (const [stage, city] of CITIES.entries()) {
+      const destination = new URL(url); destination.searchParams.set('city', city.id);
+      const direct = await newPage({}, undefined, destination);
+      assert.equal(await direct.locator('[data-mission][aria-pressed="true"]').getAttribute('data-mission'), city.id);
+      await launch(direct);
+      assert.equal((await snapshot(direct)).stage, stage);
+      assert.equal((await snapshot(direct)).mode, 'city');
+      await direct.context().close();
+    }
+    const destination = new URL(url); destination.searchParams.set('city', 'unknown-city');
+    const invalid = await newPage({}, undefined, destination);
+    assert.equal(await invalid.locator('[data-mission][aria-pressed="true"]').getAttribute('data-mission'), 'campaign');
+    await launch(invalid);
+    assert.equal((await snapshot(invalid)).mode, 'campaign');
+    assert.equal((await snapshot(invalid)).stage, 0);
+    await invalid.context().close();
+  });
+
   if (process.env.RAPTOR_FULL_FLIGHT === '1') {
     const flight = await newPage();
-    await check('a full relaxed campaign earns all three boss kills and victory through real browser controls', 'real full flight; no state mutation or accelerated simulation', async () => {
+    await check('a full relaxed campaign earns all four city boss kills and victory through real browser controls', 'real full flight; no state mutation or accelerated simulation', async () => {
       await flight.locator('[data-difficulty="relaxed"]').click();
       await launch(flight);
       const began = performance.now(), stages = new Set(), bosses = new Set(), patterns = new Set(), celebrations = new Set();
       const upgrades = [], timeline = [];
       let dragging = false, logAt = 0, lastState;
-      while (performance.now() - began < 420000) {
+      while (performance.now() - began < 540000) {
         const current = await flight.evaluate(() => {
           const s = __PIXEL_RAPTOR.getState(), p = s.player;
           const targets = s.enemies.filter(e => e.hp > 0 && e.y > 0 && e.y < p.y - 45)
@@ -369,7 +481,7 @@ try {
         if (current.view === 'upgrade') {
           if (dragging) { await flight.mouse.up(); dragging = false; }
           await shot(flight, `flight-sector-${current.stage + 1}-cleared`);
-          const choice = current.stage === 0 ? 'overdrive' : 'rockets';
+          const choice = ['overdrive', 'rockets', 'armor'][current.stage];
           await flight.locator(`[data-upgrade="${choice}"]`).click();
           await view(flight, 'playing'); upgrades.push(choice); continue;
         }
@@ -403,29 +515,31 @@ try {
         hp: lastState?.player.hp, maxHp: lastState?.player.maxHp, weapon: lastState?.player.weapon, upgrades,
         bosses: [...bosses], patterns: [...patterns], celebrations: [...celebrations], timeline };
       assert.equal(lastState?.phase, 'won', 'a mortal player wins through normal controls');
-      assert.deepEqual(upgrades, ['overdrive', 'rockets']);
-      assert.deepEqual([...bosses], ['carrier', 'mantis', 'leviathan']);
-      assert.deepEqual([...celebrations], [0, 1, 2]);
-      assert.ok(lastState.time > 180 && lastState.time < 360);
+      assert.deepEqual(upgrades, ['overdrive', 'rockets', 'armor']);
+      assert.deepEqual([...bosses], CITIES.map(city => city.boss));
+      assert.deepEqual([...celebrations], [0, 1, 2, 3]);
+      assert.ok(lastState.time > 240 && lastState.time < 480);
       assert.ok(lastState.player.hp > 0 && lastState.player.weapon === 3);
       assert.ok(lastState.score > 30000 && lastState.kills > 90);
       await view(flight, 'result');
       assert.equal(await flight.locator('#final-score').textContent(), String(Math.floor(lastState.score)).padStart(6, '0'));
       const saved = await flight.evaluate(() => JSON.parse(localStorage.getItem('raptor.arcade.v1')));
-      assert.equal(saved.wins, 1); assert.equal(saved.runs, 1); assert.equal(saved.best, lastState.score);
+      assert.equal(saved.wins, 1); assert.equal(saved.runs, 1); assert.equal(saved.campaignBest, lastState.score);
     });
   }
 
   await check('valid JSON with corrupt preference types safely boots and records exactly one run', 'corrupt storage fixture', async () => {
     const corrupt = await newPage({}, context => context.addInitScript(() => {
       localStorage.setItem('raptor.arcade.v1', JSON.stringify({ reduced: { toString: null, valueOf: null },
-        runs: { toString: null, valueOf: null }, wins: [], muted: 'false', best: -1, difficulty: 'unknown' }));
+        runs: { toString: null, valueOf: null }, wins: [], muted: 'false', best: -1, difficulty: 'unknown',
+        campaignBest: {}, cityBests: { 'new-york': -5, 'san-francisco': '5000', austin: [], 'washington-dc': null, unknown: 99999 } }));
     }));
     assert.equal(await corrupt.locator('#title-best').textContent(), '000000');
     assert.equal(await corrupt.locator('#sound').getAttribute('aria-pressed'), 'true');
     await launch(corrupt); await fixture(corrupt, 'lost', 1100, 18);
     const stored = await corrupt.evaluate(() => JSON.parse(localStorage.getItem('raptor.arcade.v1')));
-    assert.equal(stored.runs, 1); assert.equal(stored.wins, 0); assert.equal(stored.best, 1100);
+    assert.equal(stored.runs, 1); assert.equal(stored.wins, 0); assert.equal(stored.campaignBest, 1100);
+    assert.deepEqual(stored.cityBests, Object.fromEntries(CITIES.map(city => [city.id, 0])));
     assert.equal(stored.muted, false); assert.equal(stored.reduced, null); assert.equal(stored.difficulty, 'arcade');
   });
 
@@ -434,7 +548,7 @@ try {
     assert.equal(await invalid.locator('#launch').isEnabled(), true);
     await launch(invalid); await fixture(invalid, 'lost', 1200, 19);
     const stored = await invalid.evaluate(() => JSON.parse(localStorage.getItem('raptor.arcade.v1')));
-    assert.equal(stored.runs, 1); assert.equal(stored.best, 1200);
+    assert.equal(stored.runs, 1); assert.equal(stored.campaignBest, 1200);
     assert.doesNotMatch(await invalid.locator('#new-best').textContent(), /STORAGE UNAVAILABLE/);
   });
 
