@@ -3,7 +3,14 @@
 A complete browser arcade game, built with native Canvas2D and Web Audio.
 No installation, dependencies, build, account, or server-side state.
 
-[Play Pixel Wing](https://raptor.chall.net/arcade/)
+[Play Pixel Wing](https://raptor.chall.net/arcade/) · [Four Cities artwork](https://raptor.chall.net/artwork/four-cities/)
+
+The **Four-city artwork** link in the game header opens ten concept boards for
+New York City, San Francisco, Austin, and Washington, DC, plus the shared art
+kit. These are proposed environments and visual studies; the playable campaign
+continues through Pacific Coast, Red Canyon, and Neon Harbor. The
+[artwork README](../artwork/four-cities/README.md) covers viewing, PNG downloads,
+portable gallery packaging, and its separate browser checks.
 
 ## Play
 
@@ -32,7 +39,7 @@ key `raptor.arcade.v1`; unavailable storage does not prevent play.
 
 ## Run and verify
 
-From the repository root:
+From the website project directory (`projects/chrishall-co-site` in the monorepo):
 
 ```sh
 python3 -m http.server 8193 --bind 127.0.0.1 --directory raptor

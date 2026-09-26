@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10182e">
+  <meta name="description" content="Raptor's four-city pixel-art collection: New York, San Francisco, Austin, Washington, and the aircraft, effects and interfaces that connect them.">
+  <title>RAPTOR — Four cities in pixels</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2395e6db' d='M7 0h2v5h2v2h2v2h3v2h-5v2h2v2H9v-2H7v2H3v-2h2v-2H0V9h3V7h2V5h2Z'/%3E%3C/svg%3E">
+  <style>
+    @font-face { font-family: Pixel; src: url('../../arcade/assets/silkscreen.ttf') format('truetype'); font-display: swap; }
+    :root { color-scheme: dark; --ink: #10182e; --paper: #fff2ce; --muted: #a6b1c3; --mint: #95e6db; --rule: #344058; --frame: #151f35; }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 100px; }
+    body { margin: 0; background: var(--ink); color: var(--paper); font: 16px/1.6 system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    body.lightbox-open { overflow: hidden; }
+    [hidden] { display: none !important; }
+    a { color: inherit; text-underline-offset: .3em; }
+    a:hover { color: var(--mint); }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { font: inherit; }
+    button:not(:disabled), a { touch-action: manipulation; }
+    :focus-visible { outline: 3px solid var(--mint); outline-offset: 5px; }
+    .skip-link { position: fixed; z-index: 5; top: 12px; left: 12px; padding: 12px 18px; background: var(--paper); color: var(--ink); transform: translateY(-160%); }
+    .skip-link:focus { transform: none; }
+    .wrap { width: min(1320px, calc(100% - 80px)); margin-inline: auto; }
+    .eyebrow, .plate-number, .edition, .nav-label, .section-count { font: 11px/1.7 Pixel, monospace; letter-spacing: .04em; text-transform: uppercase; }
+    .masthead { padding-top: 36px; }
+    .masthead-top { display: flex; justify-content: space-between; gap: 20px; padding-bottom: 24px; border-bottom: 1px solid var(--rule); }
+    .masthead-top p { margin: 0; }
+    .masthead-top .eyebrow { color: var(--mint); }
+    .edition { color: var(--muted); text-align: right; }
+    h1 { margin: 30px 0 24px; font: 400 clamp(64px, 16.8vw, 230px)/1 Pixel, monospace; letter-spacing: -.065em; }
+    .intro { display: grid; grid-template-columns: 1.25fr 1fr; gap: 60px; align-items: end; margin: 0 0 52px; }
+    .intro h2 { margin: 0; font-size: clamp(28px, 4vw, 52px); font-weight: 450; letter-spacing: -.04em; line-height: 1.15; }
+    .intro p { max-width: 440px; margin: 0; color: var(--muted); font-size: 17px; }
+    .overview-links { display: flex; flex-wrap: wrap; gap: 12px 24px; margin: -22px 0 40px; font-size: 13px; color: var(--mint); }
+    .collection-nav { position: sticky; top: 0; z-index: 2; background: var(--ink); border-block: 1px solid var(--rule); }
+    .nav-inner { display: flex; align-items: center; gap: 26px; min-height: 72px; }
+    .nav-label { color: var(--muted); white-space: nowrap; }
+    .collection-nav ul { display: flex; flex: 1; flex-wrap: wrap; gap: 4px 24px; list-style: none; margin: 0; padding: 12px 0; }
+    .collection-nav a { display: inline-block; padding: 6px 0; font-size: 13px; text-decoration: none; }
+    .collection-nav a span { padding-right: 5px; font: 10px Pixel, monospace; color: var(--muted); }
+    .collection-nav li:last-child { margin-left: auto; }
+    main { padding-top: 72px; }
+    .section-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; margin-bottom: 32px; }
+    .section-heading h2 { font: 400 clamp(17px, 2vw, 24px)/1.6 Pixel, monospace; margin: 0; }
+    .section-count { color: var(--muted); white-space: nowrap; }
+    figure { margin: 0; scroll-margin-top: 100px; }
+    .city-plate { margin-bottom: 84px; }
+    .plate-view { display: block; position: relative; width: 100%; aspect-ratio: 8 / 5; padding: 0; border: 1px solid var(--rule); background: var(--frame); color: var(--muted); overflow: hidden; text-align: center; text-decoration: none; cursor: zoom-in; }
+    .plate-view img { width: 100%; height: 100%; display: block; object-fit: contain; image-rendering: pixelated; }
+    .pending { position: absolute; inset: 0; display: grid; place-content: center; padding: 24px; font: 12px/1.8 Pixel, monospace; pointer-events: none; }
+    .expand-label { position: absolute; bottom: 18px; right: 18px; padding: 7px 11px; background: var(--ink); border: 1px solid var(--rule); color: var(--paper); font-size: 12px; opacity: 0; transition: opacity .15s ease; }
+    .plate-view:hover .expand-label, .plate-view:focus-visible .expand-label { opacity: 1; }
+    figcaption { display: grid; grid-template-columns: 56px 1fr auto; gap: 18px; align-items: start; padding-top: 22px; }
+    .plate-number { margin: 4px 0 0; color: var(--mint); }
+    figcaption h3 { margin: 0 0 4px; font-size: clamp(24px, 3vw, 36px); font-weight: 450; letter-spacing: -.035em; line-height: 1.2; }
+    figcaption p { margin: 0; color: var(--muted); font-size: 14px; }
+    .plate-actions { display: flex; flex-wrap: wrap; gap: 8px 16px; padding-top: 3px; font-size: 12px; }
+    .plate-actions a { padding-block: 5px; white-space: nowrap; }
+    .kit-section { border-top: 1px solid var(--rule); padding-top: 48px; }
+    .kit-intro { margin: -10px 0 40px; max-width: 620px; color: var(--muted); }
+    .kit-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px 30px; }
+    .kit-grid figcaption { grid-template-columns: 34px 1fr; gap: 12px; padding-top: 18px; }
+    .kit-grid figcaption h3 { font-size: 23px; }
+    .kit-grid .plate-actions { grid-column: 2; padding-top: 0; }
+    footer { display: grid; grid-template-columns: 1fr auto; gap: 28px; padding-block: 38px 44px; margin-top: 88px; border-top: 1px solid var(--rule); color: var(--muted); font-size: 13px; }
+    footer p { margin: 0; max-width: 650px; }
+    footer .eyebrow { display: block; margin-bottom: 10px; color: var(--paper); }
+    footer a { display: inline-block; padding-block: 4px; }
+    .footer-links { display: flex; flex-wrap: wrap; align-items: start; gap: 12px 22px; }
+    noscript p { margin: 0 0 32px; padding: 18px; border: 1px solid var(--rule); color: var(--muted); }
+    dialog { width: min(1500px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px); padding: 22px; border: 1px solid var(--rule); background: var(--ink); color: var(--paper); }
+    dialog::backdrop { background: rgb(5 10 20 / 94%); }
+    .lightbox-bar { display: flex; align-items: start; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
+    .lightbox-bar h2 { margin: 0; font-size: clamp(18px, 3vw, 26px); font-weight: 500; letter-spacing: -.03em; }
+    #lightbox-caption { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+    .lightbox-button { padding: 10px 14px; border: 1px solid var(--rule); background: transparent; color: var(--paper); cursor: pointer; white-space: nowrap; }
+    .lightbox-button:hover { color: var(--mint); border-color: var(--mint); }
+    .lightbox-button:disabled { opacity: .4; cursor: default; }
+    .lightbox-stage { position: relative; height: min(68vh, 850px); height: min(68dvh, 850px); background: #0b1222; }
+    .lightbox-art { display: block; width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
+    #lightbox-status { position: absolute; inset: 0; display: grid; place-content: center; margin: 0; padding: 24px; text-align: center; color: var(--muted); font-size: 14px; }
+    .lightbox-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px 24px; margin-top: 18px; }
+    .lightbox-paging { display: flex; align-items: center; gap: 16px; }
+    #lightbox-position { font: 11px Pixel, monospace; color: var(--muted); }
+    .lightbox-bottom a { font-size: 13px; }
+    #lightbox-help { margin: 12px 0 0; color: var(--muted); font-size: 11px; }
+    @media (hover: none) { .expand-label { opacity: 1; } }
+    @media (max-width: 800px) {
+      .wrap { width: calc(100% - 40px); }
+      .masthead { padding-top: 24px; }
+      .intro { grid-template-columns: 1fr; gap: 20px; margin-bottom: 32px; }
+      .intro p { max-width: 550px; font-size: 15px; }
+      .nav-inner { gap: 0; min-height: 60px; }
+      .nav-label { display: none; }
+      .collection-nav ul { gap: 0 20px; padding: 9px 0; }
+      .collection-nav li:last-child { margin-left: 0; }
+      main { padding-top: 44px; }
+      .section-heading { align-items: start; gap: 14px; margin-bottom: 24px; }
+      .section-count { font-size: 9px; padding-top: 3px; }
+      .city-plate { margin-bottom: 52px; }
+      figcaption { grid-template-columns: 34px 1fr; gap: 12px; padding-top: 16px; }
+      .plate-actions { grid-column: 2; padding-top: 0; }
+      .kit-grid { grid-template-columns: 1fr; gap: 38px; }
+      footer { grid-template-columns: 1fr; margin-top: 56px; }
+      dialog { padding: 15px; }
+      .lightbox-stage { height: 56vh; height: 56dvh; }
+    }
+    @media (max-width: 420px) {
+      .wrap { width: calc(100% - 28px); }
+      .masthead-top { gap: 10px; }
+      .masthead-top .eyebrow, .edition { font-size: 9px; }
+      .collection-nav ul { gap: 0 14px; }
+      .collection-nav a { font-size: 12px; }
+      .collection-nav a span { display: none; }
+      .section-heading { display: block; }
+      .section-count { display: block; margin-top: 7px; }
+      .lightbox-bar { gap: 10px; }
+      .lightbox-button { padding: 8px 10px; font-size: 13px; }
+      .lightbox-paging { gap: 10px; }
+      .expand-label { bottom: 10px; right: 10px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#cities">Skip to the artwork</a>
+  <header class="masthead wrap" id="top">
+    <div class="masthead-top">
+      <p class="eyebrow">Pixel Wing / Four-city artwork</p>
+      <p class="edition">Edition 01<br>10 plates · 4 cities</p>
+    </div>
+    <h1>RAPTOR</h1>
+    <div class="intro">
+      <h2>Four cities.<br>One small jet.</h2>
+      <p>Harbor lights, morning fog, warm Texas dusk and spring over the capital. A pixel-art world, from the places we fly to the smallest spark.</p>
+    </div>
+    <div class="overview-links" aria-label="Artwork overview sheets"><a href="../../output/imagegen/four-cities/city-overview.png" target="_blank" rel="noopener">Four cities at a glance ↗</a><a href="../../output/imagegen/four-cities/art-kit-overview.png" target="_blank" rel="noopener">Shared artwork overview ↗</a><a href="../../output/imagegen/four-cities/complete-overview.png" download target="_blank" rel="noopener">Download complete contact sheet ↓</a></div>
+  </header>
+  <nav class="collection-nav" aria-label="Artwork collection">
+    <div class="nav-inner wrap">
+      <span class="nav-label">The plates</span>
+      <ul>
+        <li><a href="#01-new-york"><span>01</span>New York</a></li>
+        <li><a href="#02-san-francisco"><span>02</span>San Francisco</a></li>
+        <li><a href="#03-austin"><span>03</span>Austin</a></li>
+        <li><a href="#04-washington-dc"><span>04</span>Washington, DC</a></li>
+        <li><a href="#shared-kit"><span>05—10</span>The shared art kit</a></li>
+      </ul>
+    </div>
+  </nav>
+  <main class="wrap">
+    <noscript><p>Select any plate to open its full-resolution image. PNG downloads are available below each plate.</p></noscript>
+    <section id="cities" aria-labelledby="cities-title">
+      <div class="section-heading"><h2 id="cities-title">The city scenes</h2><span class="section-count">01—04 / Environment studies</span></div>
+      <figure class="city-plate" id="01-new-york" data-title="New York City" data-subtitle="Blue hour / harbor to Midtown">
+        <a class="plate-view" href="../../output/imagegen/four-cities/01-new-york.png" target="_blank" rel="noopener" aria-label="View artwork at full resolution: New York City">
+          <img src="../../output/imagegen/four-cities/previews/01-new-york.webp" alt="New York City pixel-art environment study, from the harbor to Midtown at blue hour." width="1280" height="800" decoding="async" loading="eager" fetchpriority="high">
+          <span class="pending" hidden>Loading preview…</span><span class="expand-label" aria-hidden="true">Explore plate +</span>
+        </a>
+        <figcaption><span class="plate-number">01</span><div><h3>New York City</h3><p>Blue hour / harbor to Midtown</p></div><div class="plate-actions"><a href="../../output/imagegen/four-cities/01-new-york.png" target="_blank" rel="noopener">Full resolution ↗</a><a href="../../output/imagegen/four-cities/01-new-york.png" download="01-new-york.png" target="_blank" rel="noopener">Download PNG ↓</a></div></figcaption>
+      </figure>
+      <figure class="city-plate" id="02-san-francisco" data-title="San Francisco" data-subtitle="Morning fog / Golden Gate and the bay">
+        <a class="plate-view" href="../../output/imagegen/four-cities/02-san-francisco.png" target="_blank" rel="noopener" aria-label="View artwork at full resolution: San Francisco">
+          <img src="../../output/imagegen/four-cities/previews/02-san-francisco.webp" alt="San Francisco pixel-art environment study, with morning fog over the Golden Gate and the bay." width="1280" height="800" decoding="async" loading="lazy">
+          <span class="pending" hidden>Loading preview…</span><span class="expand-label" aria-hidden="true">Explore plate +</span>
+        </a>
+        <figcaption><span class="plate-number">02</span><div><h3>San Francisco</h3><p>Morning fog / Golden Gate and the bay</p></div><div class="plate-actions"><a href="../../output/imagegen/four-cities/02-san-francisco.png" target="_blank" rel="noopener">Full resolution ↗</a><a href="../../output/imagegen/four-cities/02-san-francisco.png" download="02-san-francisco.png" target="_blank" rel="noopener">Download PNG ↓</a></div></figcaption>
+      </figure>
+      <figure class="city-plate" id="03-austin" data-title="Austin, Texas" data-subtitle="Sunset / Lady Bird Lake and Congress Avenue">
+        <a class="plate-view" href="../../output/imagegen/four-cities/03-austin-v4.png" target="_blank" rel="noopener" aria-label="View artwork at full resolution: Austin, Texas">
+          <img src="../../output/imagegen/four-cities/previews/03-austin.webp" alt="Austin pixel-art environment study, with sunset over Lady Bird Lake and Congress Avenue." width="1280" height="800" decoding="async" loading="lazy">
+          <span class="pending" hidden>Loading preview…</span><span class="expand-label" aria-hidden="true">Explore plate +</span>
+        </a>
+        <figcaption><span class="plate-number">03</span><div><h3>Austin, Texas</h3><p>Sunset / Lady Bird Lake and Congress Avenue</p></div><div class="plate-actions"><a href="../../output/imagegen/four-cities/03-austin-v4.png" target="_blank" rel="noopener">Full resolution ↗</a><a href="../../output/imagegen/four-cities/03-austin-v4.png" download="03-austin-v4.png" target="_blank" rel="noopener">Download PNG ↓</a></div></figcaption>
+      </figure>
+      <figure class="city-plate" id="04-washington-dc" data-title="Washington, DC" data-subtitle="Spring light / the Mall and Tidal Basin">
+        <a class="plate-view" href="../../output/imagegen/four-cities/04-washington-dc.png" target="_blank" rel="noopener" aria-label="View artwork at full resolution: Washington, DC">
+          <img src="../../output/imagegen/four-cities/previews/04-washington-dc.webp" alt="Washington, DC pixel-art environment study, with spring light over the National Mall and Tidal Basin." width="1280" height="800" decoding="async" loading="lazy">
+          <span class="pending" hidden>Loading preview…</span><span class="expand-label" aria-hidden="true">Explore plate +</span>
+        </a>
+        <figcaption><span class="plate-number">04</span><div><h3>Washington, DC</h3><p>Spring light / the Mall and Tidal Basin</p></div><div class="plate-actions"><a href="../../output/imagegen/four-cities/04-washington-dc.png" target="_blank" rel="noopener">Full resolution ↗</a><a href="../../output/imagegen/four-cities/04-washington-dc.png" download="04-washington-dc.png" target="_blank" rel="noopener">Download PNG ↓</a></div></figcaption>
+      </figure>
+    </section>
+    <section class="kit-section" id="shared-kit" aria-labelledby="kit-title">
+      <div class="section-heading"><h2 id="kit-title">The shared art kit</h2><span class="section-count">05—10 / The world in detail</span></div>
+      <p class="kit-intro">A common visual language across every city: the jet and its rivals, the streets below, the light of a missile and the next mission on the board.</p>
+      <div class="kit-grid">
+        <figure id="05-title-art" data-title="Title artwork" data-subtitle="Four cities / one campaign">
+          <a class="plate-view" href="../../output/imagegen/four-cities/05-title-art-v2.png" target="_blank" rel="noopener" aria-label="View artwork at full resolution: Title artwork">
+            <img src="../../output/imagegen/four-cities/previews/05-title-art.webp" alt="Raptor title artwork bringing the four city environments into one campaign composition." width="1280" height="800" decoding="async" loading="lazy">
+            <span class="pending" hidden>Loading preview…</span><span class="expand-label" aria-hidden="true">Explore plate +</span>
+          </a>
+          <figcaption><span class="plate-number">05</span><div><h3>Title artwork</h3><p>Four cities / one campaign</p></div><div class="plate-actions"><a href="../../output/imagegen/four-cities/05-title-art-v2.png" target="_blank" rel="noopener">Full resolution ↗</a><a href="../../output/imagegen/four-cities/05-title-art-v2.png" download="05-title-art-v2.png" target="_blank" rel="noopener">Download PNG ↓</a></div></figcaption>
+        </figure>
+        <figure id="06-aircraft" data-title="Aircraft and flight states" data-subtitle="Player / allies / transport">
+          <a class="plate-view" href="../../output/imagegen/four-cities/06-aircraft-v2.png" target="_blank" rel="noopener" aria-label="View artwork at full resolution: Aircraft and flight states">
+            <img src="../../output/imagegen/four-cities/previews/06-aircraft.webp" alt="Pixel-art aircraft design board covering the player jet, flight states, allies and transport aircraft." width="1280" height="800" decoding="async" loading="lazy">
+            <span class="pending" hidden>Loading preview…</span><span class="expand-label" aria-hidden="true">Explore plate +</span>
+          </a>
+          <figcaption><span class="plate-number">06</span><div><h3>Aircraft and flight states</h3><p>Player / allies / transport</p></div><div class="plate-actions"><a href="../../output/imagegen/four-cities/06-aircraft-v2.png" target="_blank" rel="noopener">Full resolution ↗</a><a href="../../output/imagegen/four-cities/06-aircraft-v2.png" download="06-aircraft-v2.png" target="_blank" rel="noopener">Download PNG ↓</a></div></figcaption>
+        </figure>
+        <figure id="07-enemies-bosses" data-title="Enemies and bosses" data-subtitle="Combat silhouettes / four city encounters">
+          <a class="plate-view" href="../../output/imagegen/four-cities/07-enemies-bosses.png" target="_blank" rel="noopener" aria-label="View artwork at full resolution: Enemies and bosses">
+            <img src="../../output/imagegen/four-cities/previews/07-enemies-bosses.webp" alt="Pixel-art enemy and boss concepts with distinct combat silhouettes for four city encounters." width="1280" height="800" decoding="async" loading="lazy">
+            <span class="pending" hidden>Loading preview…</span><span class="expand-label" aria-hidden="true">Explore plate +</span>
+          </a>
+          <figcaption><span class="plate-number">07</span><div><h3>Enemies and bosses</h3><p>Combat silhouettes / four city encounters</p></div><div class="plate-actions"><a href="../../output/imagegen/four-cities/07-enemies-bosses.png" target="_blank" rel="noopener">Full resolution ↗</a><a href="../../output/imagegen/four-cities/07-enemies-bosses.png" download="07-enemies-bosses.png" target="_blank" rel="noopener">Download PNG ↓</a></div></figcaption>
+        </figure>
+        <figure id="08-city-kit" data-title="City terrain and landmark kit" data-subtitle="Four environment families">
+          <a class="plate-view" href="../../output/imagegen/four-cities/08-city-kit.png" target="_blank" rel="noopener" aria-label="View artwork at full resolution: City terrain and landmark kit">
+            <img src="../../output/imagegen/four-cities/previews/08-city-kit.webp" alt="Pixel-art terrain and landmark studies for New York, San Francisco, Austin and Washington, DC." width="1280" height="800" decoding="async" loading="lazy">
+            <span class="pending" hidden>Loading preview…</span><span class="expand-label" aria-hidden="true">Explore plate +</span>
+          </a>
+          <figcaption><span class="plate-number">08</span><div><h3>City terrain and landmark kit</h3><p>Four environment families</p></div><div class="plate-actions"><a href="../../output/imagegen/four-cities/08-city-kit.png" target="_blank" rel="noopener">Full resolution ↗</a><a href="../../output/imagegen/four-cities/08-city-kit.png" download="08-city-kit.png" target="_blank" rel="noopener">Download PNG ↓</a></div></figcaption>
+        </figure>
+        <figure id="09-effects" data-title="Weapons, pickups and effects" data-subtitle="Combat language / animation studies">
+          <a class="plate-view" href="../../output/imagegen/four-cities/09-effects.png" target="_blank" rel="noopener" aria-label="View artwork at full resolution: Weapons, pickups and effects">
+            <img src="../../output/imagegen/four-cities/previews/09-effects.webp" alt="Pixel-art studies of weapons, supply pickups, trails and combat animation effects." width="1280" height="800" decoding="async" loading="lazy">
+            <span class="pending" hidden>Loading preview…</span><span class="expand-label" aria-hidden="true">Explore plate +</span>
+          </a>
+          <figcaption><span class="plate-number">09</span><div><h3>Weapons, pickups and effects</h3><p>Combat language / animation studies</p></div><div class="plate-actions"><a href="../../output/imagegen/four-cities/09-effects.png" target="_blank" rel="noopener">Full resolution ↗</a><a href="../../output/imagegen/four-cities/09-effects.png" download="09-effects.png" target="_blank" rel="noopener">Download PNG ↓</a></div></figcaption>
+        </figure>
+        <figure id="10-interface" data-title="Interface and campaign flow" data-subtitle="Title / region / briefing / flight / pause / debrief">
+          <a class="plate-view" href="../../output/imagegen/four-cities/10-interface.png" target="_blank" rel="noopener" aria-label="View artwork at full resolution: Interface and campaign flow">
+            <img src="../../output/imagegen/four-cities/previews/10-interface.webp" alt="Pixel-art interface concepts for the title, region selection, briefing, flight, pause and debrief screens." width="1280" height="1280" decoding="async" loading="lazy">
+            <span class="pending" hidden>Loading preview…</span><span class="expand-label" aria-hidden="true">Explore plate +</span>
+          </a>
+          <figcaption><span class="plate-number">10</span><div><h3>Interface and campaign flow</h3><p>Title / region / briefing / flight / pause / debrief</p></div><div class="plate-actions"><a href="../../output/imagegen/four-cities/10-interface.png" target="_blank" rel="noopener">Full resolution ↗</a><a href="../../output/imagegen/four-cities/10-interface.png" download="10-interface.png" target="_blank" rel="noopener">Download PNG ↓</a></div></figcaption>
+        </figure>
+      </div>
+    </section>
+  </main>
+  <footer class="wrap">
+    <div><span class="eyebrow">Raptor / Four cities in pixels</span><p>An artwork collection for the proposed four-city edition. City layouts are composed for the arcade perspective; aircraft, effects and interface boards are visual development studies.</p></div>
+    <div class="footer-links"><a href="https://raptor.chall.net/arcade/">Play Pixel Wing ↗</a><a href="README.md">Art direction</a><a href="#top">Back to top ↑</a></div>
+  </footer>
+  <dialog id="lightbox" aria-labelledby="lightbox-title" aria-describedby="lightbox-help">
+    <div class="lightbox-bar"><div><h2 id="lightbox-title"></h2><p id="lightbox-caption"></p></div><button class="lightbox-button" id="lightbox-close" type="button" autofocus>Close ×</button></div>
+    <div class="lightbox-stage"><img class="lightbox-art" id="lightbox-image" alt=""><p id="lightbox-status" role="status" hidden></p></div>
+    <div class="lightbox-bottom"><div class="lightbox-paging"><button class="lightbox-button" id="lightbox-previous" type="button" aria-label="Previous artwork">← Previous</button><span id="lightbox-position" aria-live="polite"></span><button class="lightbox-button" id="lightbox-next" type="button" aria-label="Next artwork">Next →</button></div><div class="plate-actions"><a id="lightbox-full" target="_blank" rel="noopener">Full resolution ↗</a><a id="lightbox-download" download target="_blank" rel="noopener">Download PNG ↓</a></div></div>
+    <p id="lightbox-help">Use the left and right arrow keys to browse the artwork. Press Escape to close.</p>
+  </dialog>
+  <script>
+    // Keep the collection local: paths are mirrored from manifest.json so file:// needs no fetch.
+    const figures = Array.from(document.querySelectorAll('figure[data-title]'));
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImage = document.getElementById('lightbox-image');
+    const lightboxStatus = document.getElementById('lightbox-status');
+    const previous = document.getElementById('lightbox-previous');
+    const next = document.getElementById('lightbox-next');
+    let activeFigure = null;
+    let opener = null;
+
+    function showFigure(figure) {
+      const image = figure.querySelector('img');
+      const fullImage = figure.querySelector('.plate-view').href;
+      activeFigure = figure;
+      lightboxImage.hidden = true;
+      lightboxStatus.textContent = 'Loading full-resolution artwork…';
+      lightboxStatus.hidden = false;
+      lightboxImage.src = fullImage;
+      lightboxImage.alt = image.alt;
+      document.getElementById('lightbox-title').textContent = figure.dataset.title;
+      document.getElementById('lightbox-caption').textContent = figure.dataset.subtitle;
+      document.getElementById('lightbox-full').href = fullImage;
+      const download = document.getElementById('lightbox-download');
+      download.href = fullImage;
+      download.download = figure.querySelector('a[download]').download;
+      document.getElementById('lightbox-position').textContent = `${figures.indexOf(figure) + 1} / ${figures.length}`;
+      previous.disabled = next.disabled = figures.length < 2;
+    }
+
+    function moveFigure(direction) {
+      if (figures.length < 2) return;
+      const index = figures.indexOf(activeFigure);
+      showFigure(figures[(index + direction + figures.length) % figures.length]);
+    }
+
+    for (const figure of figures) {
+      const image = figure.querySelector('img');
+      const link = figure.querySelector('.plate-view');
+      const status = figure.querySelector('.pending');
+      figure.dataset.ready = 'loading';
+      status.hidden = false;
+      function setAvailable(ready) {
+        figure.dataset.ready = String(ready);
+        image.hidden = !ready;
+        status.textContent = ready ? '' : 'Preview unavailable — open full resolution below.';
+        status.hidden = ready;
+      }
+      image.addEventListener('load', () => setAvailable(image.naturalWidth > 0));
+      image.addEventListener('error', () => setAvailable(false));
+      if (image.complete) setAvailable(image.naturalWidth > 0);
+      if (typeof lightbox.showModal !== 'function') continue;
+      link.setAttribute('aria-haspopup', 'dialog');
+      link.addEventListener('click', event => {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        opener = link;
+        showFigure(figure);
+        lightbox.showModal();
+        document.body.classList.add('lightbox-open');
+      });
+    }
+
+    lightboxImage.addEventListener('load', () => {
+      lightboxImage.hidden = false;
+      lightboxStatus.hidden = true;
+    });
+    lightboxImage.addEventListener('error', () => {
+      lightboxImage.hidden = true;
+      lightboxStatus.textContent = 'The artwork could not load. Try the full-resolution link below.';
+      lightboxStatus.hidden = false;
+    });
+    document.getElementById('lightbox-close').addEventListener('click', () => lightbox.close());
+    previous.addEventListener('click', () => moveFigure(-1));
+    next.addEventListener('click', () => moveFigure(1));
+    lightbox.addEventListener('keydown', event => {
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        moveFigure(event.key === 'ArrowLeft' ? -1 : 1);
+      }
+    });
+    lightbox.addEventListener('click', event => {
+      if (event.target !== lightbox) return;
+      const bounds = lightbox.getBoundingClientRect();
+      if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) lightbox.close();
+    });
+    lightbox.addEventListener('close', () => {
+      document.body.classList.remove('lightbox-open');
+      opener?.focus({ preventScroll: true });
+    });
+  </script>
+</body>
+</html>

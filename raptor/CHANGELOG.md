@@ -1,5 +1,16 @@
 # RAPTOR release notes
 
+## 1.14.1 — 2026-09-26
+
+- **Four Cities artwork:** ten pixel-art concept boards covering New York City,
+  San Francisco, Austin and Washington, DC, plus title art, aircraft, enemies and
+  bosses, landmarks, effects and interface studies.
+- A responsive [artwork gallery](https://raptor.chall.net/artwork/four-cities/)
+  with lightweight previews, full-resolution PNG downloads, keyboard browsing,
+  overview sheets and a link from Pixel Wing.
+- Refined Austin landmarks and aircraft roll studies. These boards propose the
+  art direction; the playable arcade keeps its three existing regions.
+
 ## 1.14.0 — 2026-09-25
 
 **Pixel Wing** is a complete 16-bit arcade edition, playable at

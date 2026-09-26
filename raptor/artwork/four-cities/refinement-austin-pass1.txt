@@ -1,0 +1,4 @@
+Use case: precise-object-edit.
+Edit target: the supplied finished Austin pixel-art scene, with its already completed bridge.
+Change only one duplicated building: the tall blue crystalline-crowned tower in the LEFT skyline, around x=430, y=180 to 490 in this 1920x1200 image. Replace its distinctive spiky glass crown with a simpler flat stepped roof and rectangular blue-gray glass facade, keeping the same footprint, height, and surrounding buildings. Preserve the prominent crystalline-crowned tower closer to the middle near x=920. The two towers must look architecturally different.
+Keep all other pixels and the composition as close as possible to the supplied original: the Capitol, completed Congress Avenue Bridge connecting BOTH banks, river, south bank food trucks, bat swarm, aircraft, projectiles, sunset, camera framing, palette and crisp pixel texture. No additional objects, text, duplicate landmarks, or new bridges.

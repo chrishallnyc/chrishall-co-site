@@ -1,0 +1,6 @@
+Use case: precise-object-edit.
+Edit target: the supplied F-22 aircraft and flight-state design sheet.
+Correct only the top two rows, keeping the dark background, frame rules, all lower rows, aircraft shape, titanium/mint/orange palette, detailed pixel texture, canvas size and generous spacing.
+Top row: five equal-size F-22 views showing neutral, shallow left BANK, deep left BANK, shallow right BANK, deep right BANK. Every nose points vertically UP the sheet, not diagonally sideways. Banking is rotation about the aircraft's nose-to-tail LONGITUDINAL axis: one wing foreshortens and one body side becomes visible. The nose direction stays up; never rotate a flat overhead sprite in the page.
+Second row: seven left-to-right stages of a full 360-degree longitudinal BARREL ROLL: upright top view, left bank, nearly edge-on side, inverted underside view, opposite edge-on side, right bank, upright top view again. All seven noses still point UP. In the inverted center view show the pale underside, intake/bay panels and gear-door outlines, NOT the canopy. Vary the silhouette by perspective as a real jet rolls around its longitudinal axis; do not make a sequence of the same top view spinning clockwise in the picture plane.
+Preserve bottom two rows exactly, including the damage/exhaust examples, shadow, inspection views, transport and small drone. No captions or labels.

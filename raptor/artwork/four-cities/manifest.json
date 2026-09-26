@@ -1,0 +1,72 @@
+[
+  {
+    "id": "01-new-york",
+    "title": "New York City",
+    "subtitle": "Blue hour / harbor to Midtown",
+    "file": "../../output/imagegen/four-cities/01-new-york.png",
+    "preview": "../../output/imagegen/four-cities/previews/01-new-york.webp"
+  },
+  {
+    "id": "02-san-francisco",
+    "title": "San Francisco",
+    "subtitle": "Morning fog / Golden Gate and the bay",
+    "file": "../../output/imagegen/four-cities/02-san-francisco.png",
+    "preview": "../../output/imagegen/four-cities/previews/02-san-francisco.webp"
+  },
+  {
+    "id": "03-austin",
+    "title": "Austin, Texas",
+    "subtitle": "Sunset / Lady Bird Lake and Congress Avenue",
+    "file": "../../output/imagegen/four-cities/03-austin-v4.png",
+    "preview": "../../output/imagegen/four-cities/previews/03-austin.webp"
+  },
+  {
+    "id": "04-washington-dc",
+    "title": "Washington, DC",
+    "subtitle": "Spring light / the Mall and Tidal Basin",
+    "file": "../../output/imagegen/four-cities/04-washington-dc.png",
+    "preview": "../../output/imagegen/four-cities/previews/04-washington-dc.webp"
+  },
+  {
+    "id": "05-title-art",
+    "title": "Title artwork",
+    "subtitle": "Four cities / one campaign",
+    "file": "../../output/imagegen/four-cities/05-title-art-v2.png",
+    "preview": "../../output/imagegen/four-cities/previews/05-title-art.webp"
+  },
+  {
+    "id": "06-aircraft",
+    "title": "Aircraft and flight states",
+    "subtitle": "Player / allies / transport",
+    "file": "../../output/imagegen/four-cities/06-aircraft-v2.png",
+    "preview": "../../output/imagegen/four-cities/previews/06-aircraft.webp"
+  },
+  {
+    "id": "07-enemies-bosses",
+    "title": "Enemies and bosses",
+    "subtitle": "Combat silhouettes / four city encounters",
+    "file": "../../output/imagegen/four-cities/07-enemies-bosses.png",
+    "preview": "../../output/imagegen/four-cities/previews/07-enemies-bosses.webp"
+  },
+  {
+    "id": "08-city-kit",
+    "title": "City terrain and landmark kit",
+    "subtitle": "Four environment families",
+    "file": "../../output/imagegen/four-cities/08-city-kit.png",
+    "preview": "../../output/imagegen/four-cities/previews/08-city-kit.webp"
+  },
+  {
+    "id": "09-effects",
+    "title": "Weapons, pickups and effects",
+    "subtitle": "Combat language / animation studies",
+    "file": "../../output/imagegen/four-cities/09-effects.png",
+    "preview": "../../output/imagegen/four-cities/previews/09-effects.webp"
+  },
+  {
+    "id": "10-interface",
+    "title": "Interface and campaign flow",
+    "subtitle": "Title / region / briefing / flight / pause / debrief",
+    "file": "../../output/imagegen/four-cities/10-interface.png",
+    "preview": "../../output/imagegen/four-cities/previews/10-interface.webp"
+  }
+]

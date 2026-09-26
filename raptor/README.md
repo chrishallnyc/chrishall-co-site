@@ -6,7 +6,7 @@ persistent front lines, and New York's standalone Harbor Watch scenario.
 The game uses native JavaScript modules, vendored Three.js, WebGPU
 with a WebGL2 fallback, and a deterministic 120 Hz flight simulation.
 
-[Play RAPTOR](https://raptor.chall.net/) · [Play Pixel Wing](https://raptor.chall.net/arcade/) · [Release notes](CHANGELOG.md)
+[Play RAPTOR](https://raptor.chall.net/) · [Play Pixel Wing](https://raptor.chall.net/arcade/) · [Four Cities artwork](https://raptor.chall.net/artwork/four-cities/) · [Release notes](CHANGELOG.md)
 
 ## Pixel Wing — the 16-bit arcade edition
 
@@ -22,9 +22,17 @@ Touch buttons and standard gamepad flight controls are supported. Choose
 [arcade README](arcade/README.md) for controls, architecture, credits, and tests.
 The arcade edition uses Canvas2D and needs no 3D assets or dependencies.
 
+The [Four Cities artwork gallery](https://raptor.chall.net/artwork/four-cities/)
+presents ten pixel-art concept boards for New York City, San Francisco, Austin,
+and Washington, DC, with aircraft, enemies, landmarks, effects, and interfaces.
+Browse lightweight previews, enlarge any board, or download its original PNG.
+These proposed city environments are artwork; Pixel Wing still plays across
+its three existing regions. See the [artwork README](artwork/four-cities/README.md)
+for the selected renders, refinement record, portable gallery packaging, and QA.
+
 ## Run locally
 
-From the repository root:
+From the website project directory (`projects/chrishall-co-site` in the monorepo):
 
 ```sh
 python3 -m http.server 8082 --bind 127.0.0.1 --directory raptor
@@ -353,6 +361,7 @@ and [Harbor Watch](https://raptor.chall.net/?front=NEWYORK&sortie=Y01).
 | [src/world/](src/world/) | Terrain, atmosphere, clouds, water, and New York city geometry. |
 | [src/campaign/](src/campaign/) | Authored sorties, mission progression and generated operations. |
 | [assets/](assets/), [vendor/](vendor/) | Runtime assets and pinned dependencies; Three.js version is in [THREE_VERSION](vendor/THREE_VERSION). |
+| [artwork/four-cities/](artwork/four-cities/), [output/imagegen/four-cities/](output/imagegen/four-cities/) | Four Cities concept gallery, prompts, selected PNGs, display previews, and overview sheets; separate from runtime game art. |
 | [bakery/bake_terrain.py](bakery/bake_terrain.py) | Optional terrain regeneration from external USGS GeoTIFFs; its Python dependencies and source tiles are not needed to play. |
 | [bakery/bake_newyork.py](bakery/bake_newyork.py), [bake_newyork_city.py](bakery/bake_newyork_city.py) | Reproducible New York elevation, aerial imagery, and building snapshot preparation. |
 | [qa/](qa/) | Native regression tests and browser playthroughs. |
@@ -422,7 +431,7 @@ integration; compatibility handling is documented alongside those checks.
 
 ## Verify changes
 
-From the repository root, with Node.js 26 (used for the current checks):
+From the website project directory, with Node.js 26 (used for the current checks):
 
 ```sh
 node --import ./raptor/qa/register-three.mjs --test raptor/qa/*.test.mjs raptor/tests/*.test.mjs
@@ -487,6 +496,19 @@ node raptor/qa/newyork.browser.mjs
 node raptor/qa/renderhandedness.browser.mjs
 ```
 
+The standalone artwork gallery has its own browser check. It opens the local
+gallery directly by default; set `RAPTOR_BASE_URL` to also verify HTTP downloads:
+
+```sh
+node raptor/qa/artwork-gallery.browser.mjs
+RAPTOR_BASE_URL=http://127.0.0.1:8082/ node raptor/qa/artwork-gallery.browser.mjs
+```
+
+It covers previews and originals, lazy loading, keyboard and mobile browsing,
+PNG downloads, missing-preview recovery, and viewing with JavaScript disabled.
+Artifacts default to `.context/raptor-artwork/qa/` at the workspace root. See
+[gallery QA details](artwork/four-cities/README.md#verify-the-gallery).
+
 If Playwright is not resolvable from this checkout, point to its existing module
 entry point; `HEADED=1` shows the isolated browser while it runs:
 
@@ -509,7 +531,7 @@ HEADED=1 RECORD=1 node raptor/qa/flight-school.browser.mjs
 | QA environment variable | Meaning |
 | --- | --- |
 | `PLAYWRIGHT_MODULE` | Optional absolute path to an existing Playwright module entry point. |
-| `RAPTOR_BASE_URL` | Server URL; default `http://localhost:8082/`, except `viewport` uses port 8097. Its command above overrides this to match the local server. |
+| `RAPTOR_BASE_URL` | Server URL; default `http://localhost:8082/`, except `viewport` uses port 8097 and `artwork-gallery` opens its local `file://` page. The commands above override these defaults to match the local server. |
 | `RAPTOR_TEST_OUTPUT` | Optional artifact directory; each script has its own default under `.context/`. |
 | `RAPTOR_TEST_BACKEND` | `webgpu` selects WebGPU for the tactical-map browser check; its default is `webgl`. For `viewport`, `webgpu` or `webgl` selects one scenario; the default runs both. |
 | `HEADED` | `1` shows Chrome; otherwise the scripts run headless. |

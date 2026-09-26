@@ -1,0 +1,102 @@
+{
+  "generated_at_utc": "2026-09-26T07:40:22.715516+00:00",
+  "mode": "user-approved imagegen CLI/API fallback",
+  "model_requested": "gpt-image-2",
+  "quality_requested": "high",
+  "initial_generations": 10,
+  "targeted_image_edits": 4,
+  "prompt_set": "prompts.jsonl",
+  "postprocessing": "Title lettering typeset in locally licensed Silkscreen at a 640x400 logical resolution and enlarged with nearest-neighbor sampling; original scene pixels preserved.",
+  "boards": [
+    {
+      "id": "01-new-york",
+      "file": "../../output/imagegen/four-cities/01-new-york.png",
+      "width": 1920,
+      "height": 1200,
+      "bytes": 4387433,
+      "sha256": "034071af3f51481df298531a7f8456c8fdcc2a7865b90501824526a1ad34a833"
+    },
+    {
+      "id": "02-san-francisco",
+      "file": "../../output/imagegen/four-cities/02-san-francisco.png",
+      "width": 1920,
+      "height": 1200,
+      "bytes": 4901960,
+      "sha256": "02d7064c95104d700b3dd10a2abb8e0d7dcd5f537761fc9aef385689f05a3a98"
+    },
+    {
+      "id": "03-austin",
+      "file": "../../output/imagegen/four-cities/03-austin-v4.png",
+      "width": 1920,
+      "height": 1200,
+      "bytes": 3964070,
+      "sha256": "891994343526ba0e2eb7d2018140459f73683d0c02e9c6cc5a8fe8d28e4ceebd"
+    },
+    {
+      "id": "04-washington-dc",
+      "file": "../../output/imagegen/four-cities/04-washington-dc.png",
+      "width": 1920,
+      "height": 1200,
+      "bytes": 5014870,
+      "sha256": "633be9809e25582f37d01c9ca0bd1b795829ea138611991af94956201370a3f7"
+    },
+    {
+      "id": "05-title-art",
+      "file": "../../output/imagegen/four-cities/05-title-art-v2.png",
+      "width": 1920,
+      "height": 1200,
+      "bytes": 3578484,
+      "sha256": "405f637df55a1daae8b77f53c5ac47bf81899388ebb92ed6a86420d6a1ab8130"
+    },
+    {
+      "id": "06-aircraft",
+      "file": "../../output/imagegen/four-cities/06-aircraft-v2.png",
+      "width": 1920,
+      "height": 1200,
+      "bytes": 3271971,
+      "sha256": "417b98d2cf4fd1f398d895c3253e9ccd06f756a9fd6b2e09dad5399998cafe42"
+    },
+    {
+      "id": "07-enemies-bosses",
+      "file": "../../output/imagegen/four-cities/07-enemies-bosses.png",
+      "width": 1920,
+      "height": 1200,
+      "bytes": 2771622,
+      "sha256": "917e07b71ea6e35321fa19623d8604d1e2c6a077989b7ac2906b98d09ef4a736"
+    },
+    {
+      "id": "08-city-kit",
+      "file": "../../output/imagegen/four-cities/08-city-kit.png",
+      "width": 1920,
+      "height": 1200,
+      "bytes": 3948078,
+      "sha256": "52fbcee3f16f4a35fe6cafc0f438737012e19f46002e92c4a69722b0470de42d"
+    },
+    {
+      "id": "09-effects",
+      "file": "../../output/imagegen/four-cities/09-effects.png",
+      "width": 1920,
+      "height": 1200,
+      "bytes": 2009647,
+      "sha256": "d1c762b5eddb6dcfa09ee53390439454d823649454bdcab3ab09a3e609a9700d"
+    },
+    {
+      "id": "10-interface",
+      "file": "../../output/imagegen/four-cities/10-interface.png",
+      "width": 2048,
+      "height": 2048,
+      "bytes": 6214488,
+      "sha256": "a062b40b6c56f4c1b64c9df42305f543e6ea1646df045ad4341036453bedf86d"
+    }
+  ],
+  "refined_at_utc": "2026-09-26T20:42:52+00:00",
+  "refinement_prompts": [
+    "refinement-austin.txt",
+    "refinement-austin-pass1.txt",
+    "refinement-aircraft-pass1.txt",
+    "refinement-austin-masked.txt"
+  ],
+  "refinement_notes": "Austin bridge edit selected; first duplicate-tower edit did not meet the visual brief and was superseded by the masked correction. Aircraft roll board selected after one edit. Earlier renders remain in the ignored workspace archive.",
+  "mask": "refinement-austin-mask.png",
+  "preview_postprocessing": "1280-pixel-wide nearest-neighbor reduction, encoded as lossless WebP; PNG originals retained for full-resolution viewing and download."
+}
