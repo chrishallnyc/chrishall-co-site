@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preload" as="image" type="image/webp" fetchpriority="high"
+  imagesrcset="images/chris-hall-seated-small.webp 400w, images/chris-hall-seated.webp 1200w"
+  imagesizes="(max-width: 319px) 80px, (max-width: 370px) 96px, (max-width: 600px) 112px, (max-width: 79.99em) 160px, (hover: none) and (pointer: coarse) 160px, clamp(15.25rem, 15vw, 18rem)">
 <title>CHALL.NET — Chris Hall</title>
 <meta name="description" content="Chris Hall — Senior Video Producer at Y Combinator. San Francisco.">
 <link rel="canonical" href="https://chall.net/">
@@ -260,6 +263,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 <script>
 (function(){
   var wrap=document.querySelector('.tlwrap'); if(!wrap) return;
+  var list=wrap.querySelector('.tl'), listSize='';
   var compactLayout=window.matchMedia('(max-width: 79.99em), (hover: none) and (pointer: coarse)');
   var openSkill=null, renderedCompact=compactLayout.matches, lastFocusedKey=null;
   document.addEventListener('focusin',function(e){
@@ -343,20 +347,25 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
       return;
     }
     sec.querySelectorAll('.bands').forEach(function(b){b.remove();});
-    var lis=[].slice.call(wrap.querySelectorAll('.tl li'));
+    var lis=[].slice.call(list.children);
     var wr=wrap.getBoundingClientRect();
-    var rows=lis.map(function(li){return {y:parseInt(li.querySelector('b').textContent,10),el:li};});
-    function mid(el){var r=el.getBoundingClientRect();return r.top+r.height/2-wr.top;}
+    // Read milestone geometry once, before inserting any absolute rails.
+    var rows=lis.map(function(li){
+      var r=li.getBoundingClientRect();
+      return {y:parseInt(li.querySelector('b').textContent,10),mid:r.top+r.height/2-wr.top,bottom:r.bottom-wr.top};
+    });
+    var listRect=list.getBoundingClientRect();
+    listSize=listRect.width+':'+listRect.height;
     function yPos(year){
-      for(var i=0;i<rows.length;i++) if(rows[i].y===year) return mid(rows[i].el);
+      for(var i=0;i<rows.length;i++) if(rows[i].y===year) return rows[i].mid;
       var lo=null,hi=null;
       rows.forEach(function(r){ if(r.y<year) lo=r; if(r.y>year&&!hi) hi=r; });
-      if(!lo) return mid(hi.el); if(!hi) return mid(lo.el);
-      var a=mid(lo.el),b=mid(hi.el);
+      if(!lo) return hi.mid; if(!hi) return lo.mid;
+      var a=lo.mid,b=hi.mid;
       return a+(b-a)*((year-lo.y)/(hi.y-lo.y));
     }
-    var last=lis[lis.length-1].getBoundingClientRect();
-    var endY=last.bottom-wr.top;
+    var endY=rows[rows.length-1].bottom;
+    var rails=document.createDocumentFragment();
     function rail(c,side){
       var top=yPos(c.f), bot=c.t?yPos(c.t):endY;
       var d=document.createElement('div');
@@ -382,14 +391,15 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
         d.addEventListener('click',function(ev){ev.stopPropagation();showTip(d,c);});
         d.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); showTip(d,c); } });
       }
-      wrap.appendChild(d);
+      rails.appendChild(d);
     }
     CL.forEach(function(c){rail(c,'r');});
     SK.forEach(function(c){rail(c,'l');});
     var gl=document.createElement('div'); gl.className='glab l'; gl.textContent='skills';
-    gl.style.left='0px'; wrap.appendChild(gl);
+    gl.style.left='0px'; rails.appendChild(gl);
     var gr=document.createElement('div'); gr.className='glab'; gr.textContent='clients';
-    gr.style.right='0px'; wrap.appendChild(gr);
+    gr.style.right='0px'; rails.appendChild(gr);
+    wrap.appendChild(rails);
     // Absolute labels can extend past their data ranges. Include that space
     // in normal page flow so the biography and footer never cover the labels.
     var wrapBottom=wrap.getBoundingClientRect().bottom;
@@ -460,7 +470,6 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
     if(frame) return;
     frame=requestAnimationFrame(function(){ frame=0; build(); });
   }
-  window.addEventListener('load',scheduleBuild);
   compactLayout.addEventListener('change',scheduleBuild);
   window.addEventListener('resize',function(){
     var width=document.documentElement.clientWidth;
@@ -472,13 +481,15 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
   // Font changes and text reflow can move milestones without a window resize.
   // Observe the list, not the wrapper whose padding build() adjusts.
   if('ResizeObserver' in window){
-    var listSize='';
-    new ResizeObserver(function(entries){
-      var rect=entries[0].contentRect, size=rect.width+':'+rect.height;
+    new ResizeObserver(function(){
+      if(compactLayout.matches) return;
+      var rect=list.getBoundingClientRect(), size=rect.width+':'+rect.height;
       if(size===listSize) return;
       listSize=size;
-      if(!compactLayout.matches) scheduleBuild();
-    }).observe(wrap.querySelector('.tl'));
+      scheduleBuild();
+    }).observe(list);
+  } else {
+    window.addEventListener('load',scheduleBuild);
   }
 })();
 </script>

@@ -1,6 +1,8 @@
 # chrishall.co
 
-Personal homepage for Chris Hall — media operator. Static site served via GitHub Pages.
+Personal homepage for Chris Hall — media operator. The public site at chall.net
+is served by Vercel from the public mirror's `main` branch. The mirror also
+retains its GitHub Pages deployment.
 
 The homepage pairs a seated black-and-white portrait with the career timeline.
 Its markup and styles live in `index.html`; the two responsive portrait assets
@@ -14,6 +16,13 @@ use a smaller portrait and wrapping labels.
 Skill disclosures preserve their state and keyboard focus across viewport
 changes; height-only browser chrome changes do not rebuild them. Timeline
 size changes also recalculate desktop rails, keeping them aligned after reflow.
+
+The portrait has a responsive, high-priority preload; keep its `imagesrcset`
+and `imagesizes` synchronized with the image's `srcset` and `sizes`. The image
+files retain their original encoding and quality. Desktop rails cache each
+milestone's geometry and are inserted together. The size observer skips its
+unchanged initial notification, avoiding redundant startup builds while
+retaining later reflow updates (with a load fallback for older browsers).
 
 Preview from this directory:
 
