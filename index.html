@@ -39,7 +39,7 @@ a:hover { color: var(--ink); text-decoration: underline; }
 a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--acc, var(--ink)); outline-offset: 2px; }
 .intro .brand { font-weight: 700; color: var(--ink); display:flex; align-items:center; gap:10px; }
 .intro .brand { font-size: 25px; letter-spacing: 2.5px; line-height: 1.2; margin-bottom: 17px; }
-.composition { max-width: 1196px; margin: auto; display: grid; grid-template-columns: 244px minmax(0, 860px); gap: 70px; align-items: start; }
+.composition { max-width: 1196px; margin: auto; display: grid; grid-template-columns: 244px minmax(0, 860px); column-gap: 70px; row-gap: 16px; align-items: start; }
 .identity { min-width: 0; }
 .role { font-size: 12px; line-height: 1.65; }
 .role b { white-space: nowrap; }
@@ -49,7 +49,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 .portrait img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 53% 75%; transform: scale(1.12); transform-origin: 53% 55%; }
 .foot { max-width: 1196px; margin: 34px auto 0; padding-top: 18px; border-top: 1px solid #cecbc1; display: flex; justify-content: space-between; gap: 20px; font-size: 11px; color: var(--mid); }
 
-.sec { width: 100%; max-width: 860px; margin: 0; }
+.sec { grid-column: 2; grid-row: 1; width: 100%; max-width: 860px; margin: 0; }
 .sec h2 { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--ink);
   display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
 .tl { list-style: none; border-left: 1px solid var(--hair); margin-left: 46px; }
@@ -59,13 +59,15 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 .tl .loc { position: absolute; left: -46px; top: 50%; transform: translateY(-50%); width: 36px; text-align: right; font-size: 10px; letter-spacing: 1px; color: var(--dim); }
 .intro { width: 100%; margin: 0; color: var(--mid); }
 .intro b { color: var(--ink); }
-.bio { margin-top: 20px; }
+.bio { grid-column: 1 / -1; grid-row: 2; }
 .bio summary { cursor: pointer; color: var(--dim); font-size: 10px; letter-spacing: 1.3px; text-transform: uppercase; list-style: none; display: inline-block; min-height: 26px; padding: 4px 0; }
 .bio summary::-webkit-details-marker { display: none; }
 .bio summary::after { content: " +"; }
 .bio[open] summary::after { content: " −"; }
 .bio p { margin: 10px 0 0; }
-.bio-copy { max-width: 600px; font-size: 12px; line-height: 1.8; padding-bottom: 10px; }
+.bio-copy { max-width: 680px; font-size: 12px; line-height: 1.8; padding-bottom: 10px; }
+.text-link { color: inherit; text-decoration: underline; text-decoration-color: var(--hair); text-underline-offset: 3px; }
+.text-link:hover { text-decoration-color: currentColor; }
 .tlwrap { position: relative; padding-right: 224px; padding-left: 210px; padding-top: 22px; padding-bottom: 6px; }
 .rail { position: absolute; width: 2px; background: var(--mid); }
 .rail.on { background: linear-gradient(180deg, var(--mid) 78%, transparent); }
@@ -96,9 +98,10 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 
 @media (max-width: 1240px) {
   .composition { max-width: 860px; display: block; }
-  .intro { display: grid; grid-template-columns: 1fr 160px; column-gap: 35px; padding-bottom: 24px; border-bottom: 1px solid #cecbc1; margin-bottom: 28px; }
-  .portrait { grid-column: 2; grid-row: 1 / 4; margin: 0; height: 192px; }
-  .work-note, .bio { margin-top: 10px; }
+  .intro { display: grid; grid-template-columns: 1fr 160px; column-gap: 35px; }
+  .portrait { grid-column: 2; grid-row: 1 / 3; margin: 0; height: 192px; }
+  .work-note { margin-top: 10px; }
+  .bio { margin-top: 10px; padding-bottom: 24px; border-bottom: 1px solid #cecbc1; margin-bottom: 28px; }
   .foot { max-width: 860px; }
 }
 
@@ -106,13 +109,13 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 .band { display: none; }
 @media (max-width: 719px) {
   #page { padding: 28px 22px 24px; }
-  .intro { grid-template-columns: 1fr 112px; gap: 0 22px; padding-bottom: 18px; }
+  .intro { grid-template-columns: 1fr 112px; gap: 0 22px; }
   .intro .brand { font-size: 22px; letter-spacing: 2px; margin-bottom: 13px; }
   .intro-note { line-height: 1.7; }
   .portrait { height: 166px; align-self: start; }
   .work-note { font-size: 10px; }
   .bio summary { min-height: 36px; padding-top: 10px; }
-  .bio[open] { grid-column: 1 / -1; }
+  .bio { padding-bottom: 18px; }
   .sec h2 { margin-bottom: 10px; }
   .foot { margin-top: 30px; font-size: 10px; }
   /* timeline: full width, rails off */
@@ -168,7 +171,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 <header class="intro">
 <div class="identity">
 <h1 class="brand">CHRIS HALL</h1>
-<p class="role">Senior Video Producer at <b>Y Combinator.</b></p>
+<p class="role">Senior Video Producer at <b><a class="text-link" href="https://www.ycombinator.com/">Y Combinator</a>.</b></p>
 <p class="intro-note">New York–born media operator.<br>Based in San Francisco.</p>
 </div>
 <figure class="portrait">
@@ -178,32 +181,32 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
     width="1200" height="1800" alt="Chris Hall seated among foliage, in black and white"
     fetchpriority="high" decoding="async">
 </figure>
-<p class="work-note">Known for work with Garry Tan, Jessica Livingston, Y Combinator, and more.</p>
+<p class="work-note">Known for work with <a class="text-link" href="https://x.com/garrytan">Garry Tan</a>, <a class="text-link" href="https://x.com/jesslivingston">Jessica Livingston</a>, <a class="text-link" href="https://www.ycombinator.com/">Y Combinator</a>, and more.</p>
+</header>
 <details class="bio">
 <summary>About Chris</summary>
 <div class="bio-copy">
 <p>I’m a New York–born media operator based in San Francisco, working across video, audio, photography, and live production.</p>
-<p>After co-founding and operating startups, I founded <b>Hall Media</b> in 2019 to help founders and executives develop their media presence. I’ve produced <b>Garry Tan’s</b> video content since 2020 and produce <b>The Social Radars</b> with Jessica Livingston and Carolynn Levy.</p>
-<p>In January 2026, I joined <b>Y Combinator</b> as Senior Video Producer.</p>
+<p>After co-founding and operating startups, I founded <b>Hall Media</b> in 2019 to help founders and executives develop their media presence. I’ve produced <b><a class="text-link" href="https://x.com/garrytan">Garry Tan</a>’s</b> video content since 2020 and produce <b><a class="text-link" href="https://www.youtube.com/@TheSocialRadars">The Social Radars</a></b> with <a class="text-link" href="https://x.com/jesslivingston">Jessica Livingston</a> and Carolynn Levy.</p>
+<p>In January 2026, I joined <b><a class="text-link" href="https://www.ycombinator.com/">Y Combinator</a></b> as Senior Video Producer.</p>
 </div>
 </details>
-</header>
 
 <section class="sec" id="timeline" aria-labelledby="timeline-heading">
 <h2 id="timeline-heading">TIMELINE</h2>
 <div class="tlwrap">
 <ul class="tl">
   <li><span class="loc">NYC</span><b>2009</b>freelance photo . video . audio — new york city, 220+ productions</li>
-  <li><b>2012</b>young people's chorus of nyc — content lead, toured japan . china . usa</li>
+  <li><b>2012</b><a class="text-link" href="https://ypc.org/">young people's chorus of nyc</a> — content lead, toured japan . china . usa</li>
   <li><b>2014</b>kickster, co-founder — #1 sneaker app on the app store</li>
   <li><b>2016</b>dj khaled snapchat campaign — 300M+ impressions</li>
   <li><b>2017</b>showroom, co-founder — premium merch for top creators</li>
   <li><b>2019</b>hall media, founder — media systems for founders &amp; executives</li>
-  <li><b>2020</b>garry tan — executive producer</li>
-  <li><b>2021</b>boerum studios, co-founder — commercial photo + video studio, brooklyn</li>
-  <li><span class="loc">FL</span><b>2023</b>jessica livingston — executive producer</li>
-  <li><span class="loc">SF</span><b>2025</b>may — moved to sf to work more with garry tan in person</li>
-  <li><b>2026</b>january — joined y combinator . senior video producer — san francisco</li>
+  <li><b>2020</b><a class="text-link" href="https://x.com/garrytan">garry tan</a> — executive producer</li>
+  <li><b>2021</b><a class="text-link" href="https://www.boerumstudios.com/">boerum studios</a>, co-founder — commercial photo + video studio, brooklyn</li>
+  <li><span class="loc">FL</span><b>2023</b><a class="text-link" href="https://x.com/jesslivingston">jessica livingston</a> — executive producer</li>
+  <li><span class="loc">SF</span><b>2025</b>may — moved to sf to work more with <a class="text-link" href="https://x.com/garrytan">garry tan</a> in person</li>
+  <li><b>2026</b>january — joined <a class="text-link" href="https://www.youtube.com/@ycombinator">y combinator</a> . senior video producer — san francisco</li>
 </ul>
 </div>
 </section>
@@ -211,7 +214,6 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 
 <footer class="foot">
   <a href="mailto:chris@hallmedia.co" class="contact-link">Get in touch ↗</a>
-  <a href="/terrain/" class="ver">terrain atlas ↗</a>
 </footer>
 </main>
 <script>
@@ -242,7 +244,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
   });
   var CL=[
     {n:"carmelo anthony",f:2011,t:2012,c:1},
-    {n:"ypc of nyc",f:2012,t:2015,c:0},
+    {n:"ypc of nyc",f:2012,t:2015,c:0,url:"https://ypc.org/"},
     {n:"dj khaled",f:2016,t:2018,c:0},
     {n:"tao group",f:2017,t:2022,c:1},
     {n:"doja cat",f:2017,t:2020,c:2},
@@ -253,9 +255,9 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
     {n:"girl with no job",f:2017,t:2020,c:7},
     {n:"ray dalio",f:2019,t:2020,c:0},
     {n:"initialized capital",f:2020.5,t:2023,c:3},
-    {n:"garry tan",f:2020,t:null,c:8},
-    {n:"jessica livingston",f:2022,t:null,c:2},
-    {n:"y combinator",f:2026,t:null,c:7}
+    {n:"garry tan",f:2020,t:null,c:8,url:"https://x.com/garrytan"},
+    {n:"jessica livingston",f:2022,t:null,c:2,url:"https://x.com/jesslivingston"},
+    {n:"y combinator",f:2026,t:null,c:7,url:"https://www.ycombinator.com/"}
   ];
   var SK=[
     {n:"video production",f:2009,c:0,w:"months earlier, the first video dslrs shipped — nikon d90 . canon 5d mk ii. cinematic video had just left hollywood"},
@@ -269,6 +271,8 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
     {n:"software building",f:2026,c:8,w:"the agentic era, month one — 'vibe coding' had just been named word of the year"}
   ];
   function build(){
+    hideTip();
+    wrap.style.paddingBottom='';
     wrap.querySelectorAll('.rail,.glab').forEach(function(r){r.remove();});
     var sec=wrap.parentElement;
     sec.querySelectorAll('.band').forEach(function(b){b.remove();});
@@ -298,7 +302,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
       // Only turn labels upward when they begin at the final milestone.
       // Shorter ongoing relationships must not overlap earlier clients.
       var sh=(c.f>=rows[rows.length-1].y)?' class="up"':'';
-      d.innerHTML='<u class="t"></u>'+(c.t?'<u class="b"></u>':'')+'<span'+sh+'>'+c.n+'</span>';
+      d.innerHTML='<u class="t"></u>'+(c.t?'<u class="b"></u>':'')+'<span'+sh+'>'+(c.url?'<a href="'+c.url+'">'+c.n+'</a>':c.n)+'</span>';
       if(c.w){
         d.classList.add('tipd');
         tipData.set(d,c);
@@ -318,6 +322,15 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
     gl.style.left='0px'; wrap.appendChild(gl);
     var gr=document.createElement('div'); gr.className='glab'; gr.textContent='clients';
     gr.style.right='0px'; wrap.appendChild(gr);
+    // Absolute labels can extend past their data ranges. Include that space
+    // in normal page flow so the biography and footer never cover the labels.
+    var wrapBottom=wrap.getBoundingClientRect().bottom;
+    var labelsBottom=wrapBottom;
+    wrap.querySelectorAll('.rail span').forEach(function(label){
+      labelsBottom=Math.max(labelsBottom,label.getBoundingClientRect().bottom);
+    });
+    var bottomPadding=parseFloat(getComputedStyle(wrap).paddingBottom)||0;
+    wrap.style.paddingBottom=(bottomPadding+Math.max(0,labelsBottom-wrapBottom))+'px';
   }
   /* ── mobile: horizontal band charts — same data, readable at 390px ── */
   function buildBands(sec){
@@ -331,7 +344,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
         var yy="'"+String(Math.floor(c.f)).slice(2);
         var yr=c.t?(yy+"\u2009\u2013\u2009'"+String(Math.floor(c.t)).slice(2)):(yy+"\u2009\u2013\u2009now");
         var x0=pct(c.f), x1=pct(c.t||Y1);
-        r.innerHTML='<div class="bl"><span class="nm">'+c.n+'</span><span class="byr">'+yr+'</span></div>'
+        r.innerHTML='<div class="bl"><span class="nm">'+(c.url?'<a href="'+c.url+'">'+c.n+'</a>':c.n)+'</span><span class="byr">'+yr+'</span></div>'
           +'<div class="btrack"><i class="bseg'+(c.t?'':' on')+'" style="left:'+x0.toFixed(1)+'%;width:'+Math.max(x1-x0,1.5).toFixed(1)+'%"></i></div>'
           +(c.w?'<div class="bnote"><span class="k">the world, same moment</span>'+c.w+'</div>':'');
         if(c.w){
