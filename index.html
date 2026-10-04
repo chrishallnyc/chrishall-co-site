@@ -27,38 +27,45 @@ body {
   color: var(--ink);
   font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
   font-size: 13px; line-height: 1.5;
-  min-height: 100vh;
-  image-rendering: pixelated;
+  image-rendering: auto;
 }
 #page {
   background: var(--bg);
   position: relative;
-  min-height: 100vh;
-  padding: 26px clamp(14px, 4vw, 46px);
+  padding: 36px 38px 28px;
 }
 a { color: var(--mid); text-decoration: none; }
 a:hover { color: var(--ink); text-decoration: underline; }
 a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--acc, var(--ink)); outline-offset: 2px; }
 .intro .brand { font-weight: 700; color: var(--ink); display:flex; align-items:center; gap:10px; }
-.intro .brand { font-size: clamp(22px, 4.5vw, 34px); letter-spacing: 6px; margin-bottom: 10px; }
-.foot { max-width: 1100px; margin: 26px auto 0; text-align: center; color: var(--mid); }
+.intro .brand { font-size: 25px; letter-spacing: 2.5px; line-height: 1.2; margin-bottom: 17px; }
+.composition { max-width: 1196px; margin: auto; display: grid; grid-template-columns: 244px minmax(0, 860px); gap: 70px; align-items: start; }
+.identity { min-width: 0; }
+.role { font-size: 12px; line-height: 1.65; }
+.role b { white-space: nowrap; }
+.intro-note { font-size: 11px; line-height: 1.75; margin-top: 10px; }
+.work-note { font-size: 11px; line-height: 1.8; margin-top: 18px; color: var(--mid); }
+.portrait { height: 292px; margin: 24px 0 0; min-width: 0; position: relative; overflow: hidden; background: #dcd8ce; }
+.portrait img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 53% 75%; transform: scale(1.12); transform-origin: 53% 55%; }
+.foot { max-width: 1196px; margin: 34px auto 0; padding-top: 18px; border-top: 1px solid #cecbc1; display: flex; justify-content: space-between; gap: 20px; font-size: 11px; color: var(--mid); }
 
-.sec { max-width: 860px; margin: 30px auto 0; }
-.sec h2 { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--ink);
-  display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.sec { width: 100%; max-width: 860px; margin: 0; }
+.sec h2 { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--ink);
+  display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
 .tl { list-style: none; border-left: 1px solid var(--hair); margin-left: 46px; }
 .tl li { position: relative; padding: 4px 0 4px 20px; color: var(--mid); }
 .tl li::before { content:""; position: absolute; left: 0; top: 50%; width: 12px; height: 1px; background: var(--hair); }
 .tl b { color: var(--ink); font-weight: 700; margin-right: 8px; }
 .tl .loc { position: absolute; left: -46px; top: 50%; transform: translateY(-50%); width: 36px; text-align: right; font-size: 10px; letter-spacing: 1px; color: var(--dim); }
-.intro { max-width: 860px; margin: 24px auto 0; color: var(--mid); }
+.intro { width: 100%; margin: 0; color: var(--mid); }
 .intro b { color: var(--ink); }
-.bio { margin-top: 10px; }
-.bio summary { cursor: pointer; color: var(--dim); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; list-style: none; }
+.bio { margin-top: 20px; }
+.bio summary { cursor: pointer; color: var(--dim); font-size: 10px; letter-spacing: 1.3px; text-transform: uppercase; list-style: none; display: inline-block; min-height: 26px; padding: 4px 0; }
 .bio summary::-webkit-details-marker { display: none; }
 .bio summary::after { content: " +"; }
 .bio[open] summary::after { content: " −"; }
 .bio p { margin: 10px 0 0; }
+.bio-copy { max-width: 600px; font-size: 12px; line-height: 1.8; padding-bottom: 10px; }
 .tlwrap { position: relative; padding-right: 224px; padding-left: 210px; padding-top: 22px; padding-bottom: 6px; }
 .rail { position: absolute; width: 2px; background: var(--mid); }
 .rail.on { background: linear-gradient(180deg, var(--mid) 78%, transparent); }
@@ -83,20 +90,36 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
   color: var(--dim); margin-bottom: 5px; }
 #tip b { color: var(--ink); }
 .foot a { color: var(--dim); }
-.foot .ver { font-size: 11px; letter-spacing: 2px; text-decoration: none; }
+.foot .ver { font-size: 10px; letter-spacing: 1px; text-decoration: none; }
 .foot .ver:hover { color: var(--ink); }
+.foot .contact-link { color: var(--ink); }
+
+@media (max-width: 1240px) {
+  .composition { max-width: 860px; display: block; }
+  .intro { display: grid; grid-template-columns: 1fr 160px; column-gap: 35px; padding-bottom: 24px; border-bottom: 1px solid #cecbc1; margin-bottom: 28px; }
+  .portrait { grid-column: 2; grid-row: 1 / 4; margin: 0; height: 192px; }
+  .work-note, .bio { margin-top: 10px; }
+  .foot { max-width: 860px; }
+}
 
 /* ── MOBILE (≤719px): the dual-sided gantt becomes horizontal bands ── */
 .band { display: none; }
 @media (max-width: 719px) {
-  #page { padding: 18px 16px; }
-  .intro { margin-top: 16px; }
-  .intro .brand { letter-spacing: 4px; }
+  #page { padding: 28px 22px 24px; }
+  .intro { grid-template-columns: 1fr 112px; gap: 0 22px; padding-bottom: 18px; }
+  .intro .brand { font-size: 22px; letter-spacing: 2px; margin-bottom: 13px; }
+  .intro-note { line-height: 1.7; }
+  .portrait { height: 166px; align-self: start; }
+  .work-note { font-size: 10px; }
+  .bio summary { min-height: 36px; padding-top: 10px; }
+  .bio[open] { grid-column: 1 / -1; }
+  .sec h2 { margin-bottom: 10px; }
+  .foot { margin-top: 30px; font-size: 10px; }
   /* timeline: full width, rails off */
   .tlwrap { padding: 6px 0 0 !important; }
   .rail, .glab { display: none !important; }
   .tl { margin-left: 40px; }
-  .tl li { padding: 5px 0 5px 16px; }
+  .tl li { font-size: 12px; line-height: 1.65; padding: 8px 0 8px 16px; }
   .tl .loc { left: -40px; }
   /* bands */
   .band { display: block; margin-top: 26px; }
@@ -124,7 +147,13 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
     color: var(--dim); margin-top: 8px; padding-top: 5px; border-top: 1px solid var(--hair); }
 }
 
+@media (max-width: 370px) {
+  #page { padding: 23px 16px; }
+  .intro { grid-template-columns: 1fr 90px; gap: 0 14px; }
+}
+
 #page::before { content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+  opacity: .48;
   background: radial-gradient(circle, #d9d4c4 1.1px, transparent 1.55px) 0 0 / 20px 20px;
   -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,1) 0, rgba(0,0,0,1) calc(50% - 470px), rgba(0,0,0,0.45) calc(50% - 380px), rgba(0,0,0,0.45) calc(50% + 380px), rgba(0,0,0,1) calc(50% + 470px), rgba(0,0,0,1) 100%);
   mask-image: linear-gradient(90deg, rgba(0,0,0,1) 0, rgba(0,0,0,1) calc(50% - 470px), rgba(0,0,0,0.45) calc(50% - 380px), rgba(0,0,0,0.45) calc(50% + 380px), rgba(0,0,0,1) calc(50% + 470px), rgba(0,0,0,1) 100%);
@@ -133,27 +162,35 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 </style>
 </head>
 <body>
-<div id="page">
+<main id="page">
 
-<div class="intro">
+<div class="composition">
+<header class="intro">
+<div class="identity">
 <h1 class="brand">CHRIS HALL</h1>
-NYC-born media operator. <b>~15 years</b> across video, audio, photo and live production —
-now producing flagship content inside <b>Y Combinator</b>.
-<details class="bio">
-<summary>more</summary>
-<p><b>NYC-born media operator</b> building high-leverage content systems for founders at the highest level.
-Early technical training in television, film, music and photography; firsthand startup experience across
-consumer apps, influencer monetization and brand growth. After co-founding and operating multiple startups,
-founded <b>Hall Media</b> in 2019 — durable personal brands and long-term media strategy for executives and founders.
-Producer of <b>Garry Tan's</b> personal video content since 2020, and of <b>Jessica Livingston's</b> podcast
-The Social Radars (w/ Carolynn Levy) since 2022 — storytelling, systems, and operator-level execution. Joined
-<b>Y Combinator</b> full-time in January 2026 as Senior Video Producer, overseeing flagship content at one of
-the most influential institutions in global technology.</p>
-</details>
+<p class="role">Senior Video Producer at <b>Y Combinator.</b></p>
+<p class="intro-note">New York–born media operator.<br>Based in San Francisco.</p>
 </div>
+<figure class="portrait">
+  <img src="images/chris-hall-seated.webp"
+    srcset="images/chris-hall-seated-small.webp 400w, images/chris-hall-seated.webp 1200w"
+    sizes="(max-width: 370px) 90px, (max-width: 719px) 112px, (max-width: 1240px) 160px, 244px"
+    width="1200" height="1800" alt="Chris Hall seated among foliage, in black and white"
+    fetchpriority="high" decoding="async">
+</figure>
+<p class="work-note">Known for work with Garry Tan, Jessica Livingston, Y Combinator, and more.</p>
+<details class="bio">
+<summary>About Chris</summary>
+<div class="bio-copy">
+<p>I’m a New York–born media operator based in San Francisco, working across video, audio, photography, and live production.</p>
+<p>After co-founding and operating startups, I founded <b>Hall Media</b> in 2019 to help founders and executives develop their media presence. I’ve produced <b>Garry Tan’s</b> video content since 2020 and produce <b>The Social Radars</b> with Jessica Livingston and Carolynn Levy.</p>
+<p>In January 2026, I joined <b>Y Combinator</b> as Senior Video Producer.</p>
+</div>
+</details>
+</header>
 
-<div class="sec">
-<h2>TIMELINE</h2>
+<section class="sec" id="timeline" aria-labelledby="timeline-heading">
+<h2 id="timeline-heading">TIMELINE</h2>
 <div class="tlwrap">
 <ul class="tl">
   <li><span class="loc">NYC</span><b>2009</b>freelance photo . video . audio — new york city, 220+ productions</li>
@@ -166,17 +203,17 @@ the most influential institutions in global technology.</p>
   <li><b>2021</b>boerum studios, co-founder — commercial photo + video studio, brooklyn</li>
   <li><span class="loc">FL</span><b>2023</b>jessica livingston — executive producer</li>
   <li><span class="loc">SF</span><b>2025</b>may — moved to sf to work more with garry tan in person</li>
-  <li><b>2025</b>december — agi arrives</li>
   <li><b>2026</b>january — joined y combinator . senior video producer — san francisco</li>
 </ul>
 </div>
+</section>
 </div>
 
-<div class="foot">
-  <a href="/terrain/" class="ver">terrain atlas ↗</a><span aria-hidden="true"> · </span>
-  <a href="/changelog.html" class="ver">v1.36.0</a>
-</div>
-</div>
+<footer class="foot">
+  <a href="mailto:chris@hallmedia.co" class="contact-link">Get in touch ↗</a>
+  <a href="/terrain/" class="ver">terrain atlas ↗</a>
+</footer>
+</main>
 <script>
 (function(){
   var wrap=document.querySelector('.tlwrap'); if(!wrap) return;
@@ -258,8 +295,9 @@ the most influential institutions in global technology.</p>
       d.style.top=top+'px'; d.style.height=Math.max(bot-top,18)+'px';
       if(side==='r'){ d.style.right=((8-c.c)*S)+'px'; } else { d.style.left=(c.c*S)+'px'; }
       d.title=c.t?c.n:'';
-      var h=Math.max(bot-top,18);
-      var sh=(h<140 && bot>endY-60)?' class="up"':'';
+      // Only turn labels upward when they begin at the final milestone.
+      // Shorter ongoing relationships must not overlap earlier clients.
+      var sh=(c.f>=rows[rows.length-1].y)?' class="up"':'';
       d.innerHTML='<u class="t"></u>'+(c.t?'<u class="b"></u>':'')+'<span'+sh+'>'+c.n+'</span>';
       if(c.w){
         d.classList.add('tipd');
