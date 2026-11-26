@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preload" as="image" type="image/jpeg" fetchpriority="high" media="not all and (max-aspect-ratio: 4/5)"
-  imagesrcset="images/poster-wide-1600.jpg 1600w, images/poster-wide-2400.jpg 2400w" imagesizes="max(100vw, 160vh)">
+  imagesrcset="images/poster-waist-1600.jpg 1600w, images/poster-waist-2400.jpg 2400w" imagesizes="max(100vw, 160vh)">
 <link rel="preload" as="image" type="image/jpeg" fetchpriority="high" media="(max-aspect-ratio: 4/5)"
   imagesrcset="images/poster-tall-800.jpg 800w, images/poster-tall-1170.jpg 1170w" imagesizes="100vw">
 <link rel="preload" as="font" type="font/woff2" href="fonts/newsreader-display-500.woff2" crossorigin>
@@ -51,7 +51,7 @@ a:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
    cut-out of Chris on top, so the name passes behind his head. */
 .poster .art { position: absolute; inset: 0; }
 .poster .art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 42%; }
-.poster .cut img { -webkit-mask: url(images/poster-wide-mask.png) 50% 42% / cover no-repeat; mask: url(images/poster-wide-mask.png) 50% 42% / cover no-repeat; }
+.poster .cut img { -webkit-mask: url(images/poster-waist-mask.png) 50% 42% / cover no-repeat; mask: url(images/poster-waist-mask.png) 50% 42% / cover no-repeat; }
 .poster .name { position: absolute; left: 0; right: 0; top: 3.2vh; margin: 0; display: grid; grid-template-columns: 1fr 1fr; column-gap: calc(var(--imgw) * .062); white-space: nowrap; mix-blend-mode: multiply; opacity: .93;
   font: 500 min(calc(var(--imgw) * .164), calc((92vw - var(--imgw) * .062) / 4.05))/1 "Newsreader Display", Georgia, "Times New Roman", serif; letter-spacing: -.04em; }
 .poster .name span:first-child { justify-self: end; }
@@ -204,12 +204,12 @@ footer { clear: both; margin-top: 26px; padding-top: 14px; border-top: 1px solid
   <div class="art">
     <picture>
       <source media="(max-aspect-ratio: 4/5)" srcset="images/poster-tall-800.jpg 800w, images/poster-tall-1170.jpg 1170w" sizes="100vw">
-      <img src="images/poster-wide-1600.jpg" srcset="images/poster-wide-1600.jpg 1600w, images/poster-wide-2400.jpg 2400w" sizes="max(100vw, 160vh)" width="2400" height="1500" alt="Chris Hall standing against a white brick wall, beside a palm" fetchpriority="high" decoding="async">
+      <img src="images/poster-waist-1600.jpg" srcset="images/poster-waist-1600.jpg 1600w, images/poster-waist-2400.jpg 2400w" sizes="max(100vw, 160vh)" width="2400" height="1500" alt="Chris Hall standing against a white brick wall, beside a palm" fetchpriority="high" decoding="async">
     </picture>
     <p class="name" aria-hidden="true"><span>Chris</span><span>Hall</span></p>
     <picture class="cut" aria-hidden="true">
       <source media="(max-aspect-ratio: 4/5)" srcset="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
-      <img src="images/poster-wide-1600.jpg" srcset="images/poster-wide-1600.jpg 1600w, images/poster-wide-2400.jpg 2400w" sizes="max(100vw, 160vh)" width="2400" height="1500" alt="" decoding="async">
+      <img src="images/poster-waist-1600.jpg" srcset="images/poster-waist-1600.jpg 1600w, images/poster-waist-2400.jpg 2400w" sizes="max(100vw, 160vh)" width="2400" height="1500" alt="" decoding="async">
     </picture>
   </div>
   <p class="credits"><span><i>producer of</i> Y Combinator on YouTube</span> <span><i>executive producer for</i> Garry Tan</span> <span><i>executive producer of</i> The Social Radars</span> <span><i>with</i> Jessica Livingston <i>and</i> Carolynn Levy</span> <span><i>founder of</i> Hall Media</span> <span><i>New York City to</i> San Francisco</span> <span><i>inquiries</i> <a href="mailto:chris@chall.net">chris@chall.net</a></span></p>

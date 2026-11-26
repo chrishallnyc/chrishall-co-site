@@ -26,15 +26,18 @@ projects that live in this folder.
 
 Markup and styles live in `index.html`; there is no script. Files it uses:
 
-- `images/poster-wide-1600.jpg`, `images/poster-wide-2400.jpg` — the poster
+- `images/poster-waist-1600.jpg`, `images/poster-waist-2400.jpg` — the poster
   photograph for every window wider than 4:5.
-- `images/poster-wide-mask.png` — a cut-out of Chris in the wide photograph
+- `images/poster-waist-mask.png` — a cut-out of Chris in the wide photograph
   (black, with his outline in the alpha channel). A second copy of the
   photograph is drawn through it on top of the name, which is what puts the
   name behind his head. It was made with the macOS person-segmentation
   framework. If the wide photograph is ever re-cropped, the mask must be
   regenerated from the same crop, and both must keep the same aspect ratio
   and the same `object-position` / `mask-position`.
+  Browsers keep images for a day, so a re-cropped photograph must also get a
+  new file name (as these did: `poster-wide-*` became `poster-waist-*`), or
+  returning visitors see the new layout over the old picture.
 - `images/poster-tall-800.jpg`, `images/poster-tall-1170.jpg` — the upright
   crop for phones and narrow windows. He stands below the name there, so no
   cut-out is used and the credits sit centred at the foot.
