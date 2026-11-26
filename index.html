@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<link rel="preload" as="image" type="image/jpeg" fetchpriority="high" media="(min-aspect-ratio: 5/4)"
+<link rel="preload" as="image" type="image/jpeg" fetchpriority="high" media="not all and (max-aspect-ratio: 4/5)"
   imagesrcset="images/poster-wide-1600.jpg 1600w, images/poster-wide-2400.jpg 2400w" imagesizes="100vw">
-<link rel="preload" as="image" type="image/jpeg" fetchpriority="high" media="(max-aspect-ratio: 5/4)"
+<link rel="preload" as="image" type="image/jpeg" fetchpriority="high" media="(max-aspect-ratio: 4/5)"
   imagesrcset="images/poster-tall-800.jpg 800w, images/poster-tall-1170.jpg 1170w" imagesizes="100vw">
 <link rel="preload" as="font" type="font/woff2" href="fonts/newsreader-display-500.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="fonts/archivo-condensed-caps.woff2" crossorigin>
@@ -45,59 +45,93 @@ a:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
 .poster .art { position: absolute; inset: 0; display: block; }
 .poster .art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
 .poster .top, .poster .name, .poster .credits { position: absolute; margin: 0; mix-blend-mode: multiply; }
-.poster .top { left: 0; right: 0; top: 2.5vh; text-align: center; font: 600 clamp(11px, .95vw, 14px)/1 "Archivo Condensed", "Arial Narrow", sans-serif; font-stretch: 78%; letter-spacing: .42em; text-indent: .42em; text-transform: uppercase; color: var(--red); }
+.poster .top { left: 0; right: 0; top: 2.5vh; text-align: center; font: 600 clamp(11px, .95vw, 22px)/1 "Archivo Condensed", "Arial Narrow", sans-serif; font-stretch: 78%; letter-spacing: .42em; text-indent: .42em; text-transform: uppercase; color: var(--red); }
 .poster .name { left: 0; right: 0; top: 6vh; text-align: center; white-space: nowrap; font: 500 min(16.4vw, 33vh)/1 "Newsreader Display", Georgia, "Times New Roman", serif; letter-spacing: -.04em; opacity: .93; }
-.poster .credits { left: 68.5%; right: 4%; bottom: calc(var(--peek) + 5vh); font: 600 clamp(15px, 1.34vw, 20.5px)/1.4 "Archivo Condensed", "Arial Narrow", sans-serif; font-stretch: 62%; letter-spacing: .075em; text-transform: uppercase; }
+.poster .credits { left: 68.5%; right: 4%; bottom: calc(var(--peek) + 5vh); font: 600 clamp(15px, 1.34vw, 30px)/1.4 "Archivo Condensed", "Arial Narrow", sans-serif; font-stretch: 62%; letter-spacing: .075em; text-transform: uppercase; }
 .poster .credits span { display: block; white-space: nowrap; }
-.poster .credits i { margin: 0 .25em 0 .1em; font-style: normal; font-size: .66em; font-weight: 500; letter-spacing: .12em; }
+.poster .credits i { margin: 0 .05em 0 .1em; font-style: normal; font-size: .66em; font-weight: 500; letter-spacing: .12em; }
 .poster .credits a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--red); }
 .poster .shade { position: absolute; inset: 0; background: #0c0b09; opacity: 0; pointer-events: none; }
-/* Narrow and upright windows use the tall photograph, with the credits centred at its foot. */
+/* Landscape windows that are not very wide: keep the credits clear of his sleeve. */
+@media (min-aspect-ratio: 5001/4000) and (max-aspect-ratio: 3/2) {
+  .poster .credits { left: 71.5%; right: 2%; font-size: clamp(14px, 1.25vw, 20.5px); }
+}
+/* Squarish and upright windows: there is no room beside him, so the credits sit centred at the foot. */
 @media (max-aspect-ratio: 5/4) {
-  .poster .name { font-size: min(21.5vw, 22vh); }
-  .poster .top { top: 3vh; font-size: 10px; }
-  .poster .art::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 52%; background: linear-gradient(to top, rgba(12,11,9,.9) 22%, rgba(12,11,9,0)); }
+  .poster .top { top: 3vh; font-size: clamp(10px, 2.6vw, 16px); }
+  .poster .art::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 56%; background: linear-gradient(to top, rgba(12,11,9,.9) 34%, rgba(12,11,9,0)); }
   .poster .credits { left: 6%; right: 6%; bottom: calc(var(--peek) + 3.4vh); text-align: center; color: #f3efe6; mix-blend-mode: normal; font-size: clamp(13.5px, 3.7vw, 19px); }
+  .poster .credits i { font-size: max(.74em, 10.5px); }
   .poster .credits a { border-bottom-color: #ff6a5c; }
 }
-@media (min-aspect-ratio: 5/4) and (max-height: 520px) { .poster .credits { display: none; } }
+/* Small squarish windows have no room for the credits without covering his face. */
+@media (max-aspect-ratio: 5/4) and (min-aspect-ratio: 4001/5000) and (max-height: 640px) {
+  .poster .credits, .poster .art::after { display: none; }
+}
+/* Clearly upright windows use the upright photograph, and the name can run edge to edge. */
+@media (max-aspect-ratio: 4/5) {
+  .poster .name { font-size: min(21vw, 22vh); }
+}
+/* Short landscape windows (a phone on its side): a smaller name, and frame him, not the top of the wall. */
+@media (min-aspect-ratio: 5001/4000) and (max-height: 560px) {
+  :root { --peek: 60px; }
+  .poster .top { top: 6px; font-size: 9px; }
+  .poster .name { top: 19px; font-size: min(16.4vw, 24vh); }
+  .poster .art img { object-position: 50% 30%; }
+  .poster .credits { display: none; }
+}
 
 /* ---------- The hand-off: the article is a sheet that rests at the foot of the poster ---------- */
 .sheet { position: relative; z-index: 1; margin-top: calc(-1 * var(--peek)); background: #fff; border-radius: 22px 22px 0 0; box-shadow: 0 -1px 0 rgba(0,0,0,.10), 0 -18px 44px rgba(0,0,0,.20); }
 /* The visible edge of the sheet is the cue that there is more: a grabber, and the article's own title. */
 .grab { position: absolute; left: 0; right: 0; top: 0; height: var(--peek); z-index: 2; display: block; border-radius: 22px 22px 0 0; }
-.grab::before { content: ""; position: absolute; left: 50%; top: 10px; width: 44px; height: 4px; margin-left: -22px; border-radius: 2px; background: #c2c6cc; }
-.grab::after { content: "\2193"; position: absolute; right: max(44px, calc(50% - 480px)); top: 36px; font: 400 18px/1 -apple-system, "Helvetica Neue", Arial, sans-serif; color: var(--sub); }
+.grab:focus-visible { outline-offset: -4px; }
+.grab::before { content: ""; position: absolute; left: 50%; top: 10px; width: clamp(44px, 3.4vw, 72px); height: 4px; transform: translateX(-50%); border-radius: 2px; background: #b9bec5; }
+.grab::after { content: "\2193"; position: absolute; right: max(44px, calc(50% - 480px)); top: 36px; font: 400 clamp(18px, 1.3vw, 22px)/1 -apple-system, "Helvetica Neue", Arial, sans-serif; color: var(--sub); }
+@media (min-aspect-ratio: 5001/4000) and (max-height: 560px) { .grab::before { top: 7px; } .grab::after { top: 22px; } }
 
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }
   /* One small lift, once, so the sheet reads as something to pull up. */
-  .sheet { animation: nudge 1100ms cubic-bezier(.3, .6, .2, 1) 1600ms 1 both; }
-  .grab::after { animation: bob 1800ms ease-in-out 2800ms 3 both; }
+  .sheet { animation: nudge 1100ms cubic-bezier(.3, .6, .2, 1) 1600ms 1; }
+  .grab::after { animation: bob 1800ms ease-in-out 2800ms 3; }
   @keyframes nudge { 0%, 100% { transform: translateY(0); } 38% { transform: translateY(-16px); } }
   @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
 }
-/* Where the browser can tie animation to scrolling, the poster answers the sheet: the camera
-   pushes in, the frame darkens, the lettering lifts away, and the sheet's corners square off
-   as it reaches the top. Elsewhere the sheet simply slides over the fixed poster. */
+/* Where the browser can tie animation to scrolling, the poster answers the sheet. Every range
+   ends where the sheet lands (one window height, less the edge already showing). Only opacity
+   and transform move, so the work stays off the main thread. Elsewhere, and with reduced
+   motion, the sheet simply slides over the fixed poster. */
 @supports (animation-timeline: scroll()) {
   @media (prefers-reduced-motion: no-preference) {
-    .poster .art { transform-origin: 50% 42%; animation: push linear both; animation-timeline: scroll(root block); animation-range: 0 100svh; }
-    .poster .shade { animation: dim linear both; animation-timeline: scroll(root block); animation-range: 0 100svh; }
-    .poster .name { animation: lift linear both; animation-timeline: scroll(root block); animation-range: 0 80svh; }
-    .poster .top, .poster .credits { animation: fade linear both; animation-timeline: scroll(root block); animation-range: 0 42svh; }
-    .sheet { animation: nudge 1100ms cubic-bezier(.3, .6, .2, 1) 1600ms 1 both, square linear both; animation-timeline: auto, scroll(root block); animation-range: normal, 72svh 100svh; }
-    @keyframes push { to { transform: scale(1.085); } }
-    @keyframes dim { to { opacity: .52; } }
-    @keyframes lift { to { transform: translateY(-7vh); opacity: 0; } }
+    .poster .shade { animation: dim 1ms linear both; animation-timeline: scroll(root block); animation-range: 0 calc(100svh - var(--peek)); }
+    .poster .top { animation: fade 1ms linear both; animation-timeline: scroll(root block); animation-range: 0 16svh; }
+    .poster .name { animation: fade 1ms linear both; animation-timeline: scroll(root block); animation-range: 4svh 58svh; }
+    .poster .credits { animation: fade 1ms linear both; animation-timeline: scroll(root block); animation-range: 0 34svh; }
+    /* The cue has done its job once the sheet is nearly up; it fades and stops taking clicks. */
+    .grab { animation: gone 1ms linear both; animation-timeline: scroll(root block); animation-range: calc(62svh - var(--peek)) calc(96svh - var(--peek)); }
+    /* Once the sheet has landed the poster is hidden, so its rounded corners sit on plain white. */
+    .poster { animation: away 1ms linear both; animation-timeline: scroll(root block); animation-range: calc(100svh - var(--peek) - 1px) calc(100svh - var(--peek)); }
+    @keyframes dim { to { opacity: .55; } }
     @keyframes fade { to { opacity: 0; } }
-    @keyframes square { to { border-radius: 0; } }
+    @keyframes gone { to { opacity: 0; visibility: hidden; } }
+    @keyframes away { to { visibility: hidden; } }
+  }
+  /* With a mouse or trackpad there is room for depth as well: the camera pushes in and the
+     lettering drifts up with it. Touch screens keep to fades, which never stutter. */
+  @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+    .poster .art { transform-origin: 50% 42%; animation: push 1ms linear both; animation-timeline: scroll(root block); animation-range: 0 calc(100svh - var(--peek)); }
+    .poster .top { animation-name: liftfade; }
+    .poster .name { animation-name: liftfade; }
+    @keyframes push { to { transform: scale(1.085); } }
+    @keyframes liftfade { to { transform: translateY(-4vh); opacity: 0; } }
   }
 }
 
 /* ---------- Stage two: the article ---------- */
+@media (min-aspect-ratio: 5001/4000) and (max-height: 560px) { main#top { padding-top: 14px; } }
 main { max-width: 1048px; margin: 0 auto; padding: 26px max(44px, env(safe-area-inset-right, 0px)) 60px max(44px, env(safe-area-inset-left, 0px)); }
-h1 { margin: 0 0 16px; padding-bottom: 6px; border-bottom: 1px solid var(--line); font: 400 1.8rem/1.3 "Linux Libertine", Georgia, Times, serif; }
+h1 { margin: 0 0 18px; padding-bottom: 6px; border-bottom: 1px solid var(--line); font: 400 1.8rem/1.3 "Linux Libertine", Georgia, Times, serif; }
 
 .article p { margin: .5em 0 .8em; }
 .article h2 { margin: 1.2em 0 .35em; padding-bottom: 3px; border-bottom: 1px solid var(--line); font: 400 1.5rem/1.3 "Linux Libertine", Georgia, Times, serif; }
@@ -170,12 +204,12 @@ footer { clear: both; margin-top: 26px; padding-top: 14px; border-top: 1px solid
 <body>
 <header class="poster">
   <picture class="art">
-    <source media="(max-aspect-ratio: 5/4)" srcset="images/poster-tall-800.jpg 800w, images/poster-tall-1170.jpg 1170w" sizes="100vw">
+    <source media="(max-aspect-ratio: 4/5)" srcset="images/poster-tall-800.jpg 800w, images/poster-tall-1170.jpg 1170w" sizes="100vw">
     <img src="images/poster-wide-1600.jpg" srcset="images/poster-wide-1600.jpg 1600w, images/poster-wide-2400.jpg 2400w" sizes="100vw" width="2400" height="1500" alt="Chris Hall standing against a white brick wall, beside a palm" fetchpriority="high" decoding="async">
   </picture>
   <p class="top">A Hall Media production</p>
   <p class="name" aria-hidden="true">Chris Hall</p>
-  <p class="credits"><span><i>producer of</i>Y Combinator on YouTube</span> <span><i>executive producer for</i>Garry Tan</span> <span><i>executive producer of</i>The Social Radars</span> <span><i>with</i>Jessica Livingston <i>and</i>Carolynn Levy</span> <span><i>founder of</i>Hall Media</span> <span><i>New York City to</i>San Francisco</span> <span><i>inquiries</i><a href="mailto:chris@hallmedia.co">chris@hallmedia.co</a></span></p>
+  <p class="credits"><span><i>producer of</i> Y Combinator on YouTube</span> <span><i>executive producer for</i> Garry Tan</span> <span><i>executive producer of</i> The Social Radars</span> <span><i>with</i> Jessica Livingston <i>and</i> Carolynn Levy</span> <span><i>founder of</i> Hall Media</span> <span><i>New York City to</i> San Francisco</span> <span><i>inquiries</i> <a href="mailto:chris@hallmedia.co">chris@hallmedia.co</a></span></p>
   <div class="shade"></div>
 </header>
 
