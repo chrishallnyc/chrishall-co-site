@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preload" as="image" type="image/jpeg" fetchpriority="high" media="not all and (max-aspect-ratio: 4/5)"
-  imagesrcset="images/poster-wide-1600.jpg 1600w, images/poster-wide-2400.jpg 2400w" imagesizes="100vw">
+  imagesrcset="images/poster-wide-1600.jpg 1600w, images/poster-wide-2400.jpg 2400w" imagesizes="max(100vw, 160vh)">
 <link rel="preload" as="image" type="image/jpeg" fetchpriority="high" media="(max-aspect-ratio: 4/5)"
   imagesrcset="images/poster-tall-800.jpg 800w, images/poster-tall-1170.jpg 1170w" imagesizes="100vw">
 <link rel="preload" as="font" type="font/woff2" href="fonts/newsreader-display-500.woff2" crossorigin>
-<link rel="preload" as="font" type="font/woff2" href="fonts/archivo-condensed-caps.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="fonts/six-caps-credits.woff2" crossorigin>
 <title>Chris Hall — chall.net</title>
 <meta name="description" content="Chris Hall — Senior Video Producer at Y Combinator and founder of Hall Media. San Francisco.">
 <link rel="canonical" href="https://chall.net/">
@@ -38,46 +38,48 @@ a:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
 
 /* ---------- Stage one: the poster ---------- */
 @font-face { font-family: "Newsreader Display"; font-weight: 500; font-display: swap; src: url(fonts/newsreader-display-500.woff2) format("woff2"); }
-@font-face { font-family: "Archivo Condensed"; font-weight: 500 600; font-stretch: 62% 80%; font-display: swap; src: url(fonts/archivo-condensed-caps.woff2) format("woff2"); }
-:root { --peek: 86px; --wall: #e9e5d9; --ink-poster: #17130f; --red: #b3160c; }
+@font-face { font-family: "Six Caps"; font-weight: 400; font-display: block; src: url(fonts/six-caps-credits.woff2) format("woff2"); }
+/* Stand-ins for the credit face, scaled down to its width, in case the file never arrives. */
+@font-face { font-family: "Credits Narrow"; src: local("Arial Narrow"); size-adjust: 46%; }
+@font-face { font-family: "Credits Plain"; src: local("Arial"), local("Helvetica"); size-adjust: 38%; }
+:root { --peek: 86px; --wall: #e9e5d9; --ink-poster: #17130f; --red: #b3160c;
+  /* The photograph always covers the window, so its drawn width is the larger of these. */
+  --imgw: max(100vw, 160vh); }
 
 .poster { position: sticky; top: 0; z-index: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--wall); color: var(--ink-poster); }
-.poster .art { position: absolute; inset: 0; display: block; }
-.poster .art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
-.poster .top, .poster .name, .poster .credits { position: absolute; margin: 0; mix-blend-mode: multiply; }
-.poster .top { left: 0; right: 0; top: 2.5vh; text-align: center; font: 600 clamp(11px, .95vw, 22px)/1 "Archivo Condensed", "Arial Narrow", sans-serif; font-stretch: 78%; letter-spacing: .42em; text-indent: .42em; text-transform: uppercase; color: var(--red); }
-.poster .name { left: 0; right: 0; top: 6vh; text-align: center; white-space: nowrap; font: 500 min(16.4vw, 33vh)/1 "Newsreader Display", Georgia, "Times New Roman", serif; letter-spacing: -.04em; opacity: .93; }
-.poster .credits { left: 68.5%; right: 4%; bottom: calc(var(--peek) + 5vh); font: 600 clamp(15px, 1.34vw, 30px)/1.4 "Archivo Condensed", "Arial Narrow", sans-serif; font-stretch: 62%; letter-spacing: .075em; text-transform: uppercase; }
+/* Three layers move as one picture: the photograph, the name lettered on the wall, and a
+   cut-out of Chris on top, so the name passes behind his head. */
+.poster .art { position: absolute; inset: 0; }
+.poster .art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 42%; }
+.poster .cut img { -webkit-mask: url(images/poster-wide-mask.png) 50% 42% / cover no-repeat; mask: url(images/poster-wide-mask.png) 50% 42% / cover no-repeat; }
+.poster .name { position: absolute; left: 0; right: 0; top: 3.2vh; margin: 0; display: grid; grid-template-columns: 1fr 1fr; column-gap: calc(var(--imgw) * .062); white-space: nowrap; mix-blend-mode: multiply; opacity: .93;
+  font: 500 min(calc(var(--imgw) * .164), calc((92vw - var(--imgw) * .062) / 4.05))/1 "Newsreader Display", Georgia, "Times New Roman", serif; letter-spacing: -.04em; }
+.poster .name span:first-child { justify-self: end; }
+.poster .credits { position: absolute; left: calc(50vw + var(--imgw) * .185); right: 2.5vw; bottom: calc(var(--peek) + 4.6vh); margin: 0; mix-blend-mode: multiply; font: 400 clamp(15px, calc((47.5vw - var(--imgw) * .185) / 14.6), 46px)/1.13 "Six Caps", "Credits Narrow", "Credits Plain", sans-serif; letter-spacing: .085em; text-transform: uppercase; }
 .poster .credits span { display: block; white-space: nowrap; }
-.poster .credits i { margin: 0 .05em 0 .1em; font-style: normal; font-size: .66em; font-weight: 500; letter-spacing: .12em; }
+.poster .credits i { margin: 0 .05em 0 .06em; font-style: normal; font-size: .62em; letter-spacing: .14em; }
 .poster .credits a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--red); }
 .poster .shade { position: absolute; inset: 0; background: #0c0b09; opacity: 0; pointer-events: none; }
-/* Landscape windows that are not very wide: keep the credits clear of his sleeve. */
-@media (min-aspect-ratio: 5001/4000) and (max-aspect-ratio: 3/2) {
-  .poster .credits { left: 71.5%; right: 2%; font-size: clamp(14px, 1.25vw, 20.5px); }
-}
 /* Squarish and upright windows: there is no room beside him, so the credits sit centred at the foot. */
 @media (max-aspect-ratio: 5/4) {
-  .poster .top { top: 3vh; font-size: clamp(10px, 2.6vw, 16px); }
   .poster .art::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 56%; background: linear-gradient(to top, rgba(12,11,9,.9) 34%, rgba(12,11,9,0)); }
-  .poster .credits { left: 6%; right: 6%; bottom: calc(var(--peek) + 3.4vh); text-align: center; color: #f3efe6; mix-blend-mode: normal; font-size: clamp(13.5px, 3.7vw, 19px); }
-  .poster .credits i { font-size: max(.74em, 10.5px); }
+  .poster .credits { left: 4vw; right: 4vw; bottom: calc(var(--peek) + 3vh); text-align: center; color: #f3efe6; mix-blend-mode: normal; font-size: clamp(19px, 6vw, 40px); }
+  .poster .credits i { font-size: .68em; }
   .poster .credits a { border-bottom-color: #ff6a5c; }
 }
 /* Small squarish windows have no room for the credits without covering his face. */
 @media (max-aspect-ratio: 5/4) and (min-aspect-ratio: 4001/5000) and (max-height: 640px) {
   .poster .credits, .poster .art::after { display: none; }
 }
-/* Clearly upright windows use the upright photograph, and the name can run edge to edge. */
+/* Clearly upright windows use the upright photograph. He stands well below the name there,
+   so the name is one centred word and no cut-out is needed. */
 @media (max-aspect-ratio: 4/5) {
-  .poster .name { font-size: min(21vw, 22vh); }
+  .poster .name { display: flex; justify-content: center; column-gap: .19em; top: 5.2vh; font-size: min(20.5vw, 22vh); }
+  .poster .cut { display: none; }
 }
-/* Short landscape windows (a phone on its side): a smaller name, and frame him, not the top of the wall. */
+/* Short landscape windows (a phone on its side). */
 @media (min-aspect-ratio: 5001/4000) and (max-height: 560px) {
   :root { --peek: 60px; }
-  .poster .top { top: 6px; font-size: 9px; }
-  .poster .name { top: 19px; font-size: min(16.4vw, 24vh); }
-  .poster .art img { object-position: 50% 30%; }
   .poster .credits { display: none; }
 }
 
@@ -105,8 +107,7 @@ a:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
 @supports (animation-timeline: scroll()) {
   @media (prefers-reduced-motion: no-preference) {
     .poster .shade { animation: dim 1ms linear both; animation-timeline: scroll(root block); animation-range: 0 calc(100svh - var(--peek)); }
-    .poster .top { animation: fade 1ms linear both; animation-timeline: scroll(root block); animation-range: 0 16svh; }
-    .poster .name { animation: fade 1ms linear both; animation-timeline: scroll(root block); animation-range: 4svh 58svh; }
+    .poster .name { animation: fade 1ms linear both; animation-timeline: scroll(root block); animation-range: 6svh 60svh; }
     .poster .credits { animation: fade 1ms linear both; animation-timeline: scroll(root block); animation-range: 0 34svh; }
     /* The cue has done its job once the sheet is nearly up; it fades and stops taking clicks. */
     .grab { animation: gone 1ms linear both; animation-timeline: scroll(root block); animation-range: calc(62svh - var(--peek)) calc(96svh - var(--peek)); }
@@ -117,14 +118,11 @@ a:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
     @keyframes gone { to { opacity: 0; visibility: hidden; } }
     @keyframes away { to { visibility: hidden; } }
   }
-  /* With a mouse or trackpad there is room for depth as well: the camera pushes in and the
-     lettering drifts up with it. Touch screens keep to fades, which never stutter. */
+  /* With a mouse or trackpad there is room for depth as well: the camera pushes in on the
+     whole picture, lettering included. Touch screens keep to fades, which never stutter. */
   @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
-    .poster .art { transform-origin: 50% 42%; animation: push 1ms linear both; animation-timeline: scroll(root block); animation-range: 0 calc(100svh - var(--peek)); }
-    .poster .top { animation-name: liftfade; }
-    .poster .name { animation-name: liftfade; }
+    .poster .art { transform-origin: 50% 30%; animation: push 1ms linear both; animation-timeline: scroll(root block); animation-range: 0 calc(100svh - var(--peek)); }
     @keyframes push { to { transform: scale(1.085); } }
-    @keyframes liftfade { to { transform: translateY(-4vh); opacity: 0; } }
   }
 }
 
@@ -203,13 +201,18 @@ footer { clear: both; margin-top: 26px; padding-top: 14px; border-top: 1px solid
 </head>
 <body>
 <header class="poster">
-  <picture class="art">
-    <source media="(max-aspect-ratio: 4/5)" srcset="images/poster-tall-800.jpg 800w, images/poster-tall-1170.jpg 1170w" sizes="100vw">
-    <img src="images/poster-wide-1600.jpg" srcset="images/poster-wide-1600.jpg 1600w, images/poster-wide-2400.jpg 2400w" sizes="100vw" width="2400" height="1500" alt="Chris Hall standing against a white brick wall, beside a palm" fetchpriority="high" decoding="async">
-  </picture>
-  <p class="top">A Hall Media production</p>
-  <p class="name" aria-hidden="true">Chris Hall</p>
-  <p class="credits"><span><i>producer of</i> Y Combinator on YouTube</span> <span><i>executive producer for</i> Garry Tan</span> <span><i>executive producer of</i> The Social Radars</span> <span><i>with</i> Jessica Livingston <i>and</i> Carolynn Levy</span> <span><i>founder of</i> Hall Media</span> <span><i>New York City to</i> San Francisco</span> <span><i>inquiries</i> <a href="mailto:chris@hallmedia.co">chris@hallmedia.co</a></span></p>
+  <div class="art">
+    <picture>
+      <source media="(max-aspect-ratio: 4/5)" srcset="images/poster-tall-800.jpg 800w, images/poster-tall-1170.jpg 1170w" sizes="100vw">
+      <img src="images/poster-wide-1600.jpg" srcset="images/poster-wide-1600.jpg 1600w, images/poster-wide-2400.jpg 2400w" sizes="max(100vw, 160vh)" width="2400" height="1500" alt="Chris Hall standing against a white brick wall, beside a palm" fetchpriority="high" decoding="async">
+    </picture>
+    <p class="name" aria-hidden="true"><span>Chris</span><span>Hall</span></p>
+    <picture class="cut" aria-hidden="true">
+      <source media="(max-aspect-ratio: 4/5)" srcset="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+      <img src="images/poster-wide-1600.jpg" srcset="images/poster-wide-1600.jpg 1600w, images/poster-wide-2400.jpg 2400w" sizes="max(100vw, 160vh)" width="2400" height="1500" alt="" decoding="async">
+    </picture>
+  </div>
+  <p class="credits"><span><i>producer of</i> Y Combinator on YouTube</span> <span><i>executive producer for</i> Garry Tan</span> <span><i>executive producer of</i> The Social Radars</span> <span><i>with</i> Jessica Livingston <i>and</i> Carolynn Levy</span> <span><i>founder of</i> Hall Media</span> <span><i>New York City to</i> San Francisco</span> <span><i>inquiries</i> <a href="mailto:chris@chall.net">chris@chall.net</a></span></p>
   <div class="shade"></div>
 </header>
 
@@ -221,7 +224,7 @@ footer { clear: both; margin-top: 26px; padding-top: 14px; border-top: 1px solid
 <div class="article">
 <div class="ambox" role="note">
   <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="#36c"/><rect x="9" y="8.5" width="2" height="6.5" fill="#fff"/><circle cx="10" cy="5.8" r="1.3" fill="#fff"/></svg>
-  <p><b>Hall Media takes on client work.</b> For video, podcast and content strategy projects, email <a href="mailto:chris@hallmedia.co">chris@hallmedia.co</a>.</p>
+  <p><b>Hall Media takes on client work.</b> For video, podcast and content strategy projects, email <a href="mailto:chris@chall.net">chris@chall.net</a>.</p>
 </div>
 
 <aside class="infobox" aria-label="Summary">
@@ -236,36 +239,36 @@ footer { clear: both; margin-top: 26px; padding-top: 14px; border-top: 1px solid
     <tr><th scope="row">Company</th><td>Hall Media<br>Founder and executive producer (since 2019)</td></tr>
     <tr><th scope="row">Employer</th><td><a href="https://www.ycombinator.com/">Y Combinator</a><br>Senior Video Producer (since January 2026)</td></tr>
     <tr><th scope="row">Known for</th><td><ul class="plain"><li><a href="https://www.youtube.com/@ycombinator">Y Combinator on YouTube</a><small>Producer · nearly 2.5 million subscribers</small></li><li><a href="https://www.youtube.com/@garrytan">Garry Tan on YouTube</a><small>Executive producer since 2020</small></li><li><i><a href="https://www.youtube.com/@TheSocialRadars">The Social Radars</a></i><small>Executive producer</small></li></ul></td></tr>
-    <tr><th scope="row">Inquiries</th><td><a href="mailto:chris@hallmedia.co">chris@hallmedia.co</a></td></tr>
+    <tr><th scope="row">Inquiries</th><td><a href="mailto:chris@chall.net">chris@chall.net</a></td></tr>
   </table>
 </aside>
 
 <p><b>Chris Hall</b> is a New York City–born executive producer and media operator based in San Francisco. He is the producer of <a href="https://www.youtube.com/@ycombinator">Y Combinator’s YouTube channel</a>, which has nearly 2.5 million subscribers,<sup><a href="#ref3">[3]</a></sup> and has been Senior Video Producer at <a href="https://www.ycombinator.com/">Y Combinator</a> since January 2026.<sup><a href="#ref1">[1]</a></sup> He is also the founder of Hall Media, which builds media systems for founders, executives and investors.</p>
 <p>Since 2020, through Hall Media, Chris has been executive producer for <a href="https://x.com/garrytan">Garry Tan</a>, now president and CEO of Y Combinator. In that period Tan’s YouTube channel grew from 20,000 subscribers to nearly 300,000.<sup><a href="#ref1">[1]</a></sup> He is also executive producer of <i><a href="https://www.youtube.com/@TheSocialRadars">The Social Radars</a></i>, the podcast of Y Combinator co-founder <a href="https://x.com/jesslivingston">Jessica Livingston</a> and Carolynn Levy, creator of the SAFE.<sup><a href="#ref2">[2]</a></sup></p>
 
-<h2 id="early-life">Early life and education<span class="edit">[<a href="mailto:chris@hallmedia.co" aria-label="Email a correction to the section: Early life and education">edit</a>]</span></h2>
+<h2 id="early-life">Early life and education<span class="edit">[<a href="mailto:chris@chall.net" aria-label="Email a correction to the section: Early life and education">edit</a>]</span></h2>
 <p>Chris was born in New York City. He studied cinematography and film and video production at the Academy for Careers in Television and Film from 2009 to 2012. As a student he was a director with Next Step Pictures, the production crew attached to the school, where he directed and operated camera on more than ten for-hire productions.</p>
 
-<h2 id="career">Career<span class="edit">[<a href="mailto:chris@hallmedia.co" aria-label="Email a correction to the section: Career">edit</a>]</span></h2>
-<h3 id="freelance">Freelance work (2009–2019)<span class="edit">[<a href="mailto:chris@hallmedia.co" aria-label="Email a correction to the section: Freelance work (2009–2019)">edit</a>]</span></h3>
+<h2 id="career">Career<span class="edit">[<a href="mailto:chris@chall.net" aria-label="Email a correction to the section: Career">edit</a>]</span></h2>
+<h3 id="freelance">Freelance work (2009–2019)<span class="edit">[<a href="mailto:chris@chall.net" aria-label="Email a correction to the section: Freelance work (2009–2019)">edit</a>]</span></h3>
 <p>From 2009 to 2019 Chris worked in New York as an independent photographer, videographer and music producer, completing more than 220 projects. From 2012 to 2015 he was also Content &amp; Social Media Specialist at the <a href="https://ypc.org/">Young People’s Chorus of New York City</a>, where he oversaw social media and internal video production and produced more than 30 videos as a one-person crew. He sang with the chorus and toured with it to Japan, China and across the United States.</p>
 
-<h3 id="startups">Startups (2014–2019)<span class="edit">[<a href="mailto:chris@hallmedia.co" aria-label="Email a correction to the section: Startups (2014–2019)">edit</a>]</span></h3>
+<h3 id="startups">Startups (2014–2019)<span class="edit">[<a href="mailto:chris@chall.net" aria-label="Email a correction to the section: Startups (2014–2019)">edit</a>]</span></h3>
 <p>In 2014 Chris co-founded Kickster, which became the #1 sneaker app on the App Store and reached more than 200,000 monthly active users at its peak. In 2016 he was the architect of a Snapchat geofilter campaign with DJ Khaled that drew more than 300 million brand impressions. In October 2017 he co-founded Showroom Fashion Technologies, which helped some of the world’s largest influencers and brands sell high-quality merchandise that was closer to a fashion label than to “merch”. He was with the company until January 2019.</p>
 
-<h3 id="hall-media">Hall Media (2019–present)<span class="edit">[<a href="mailto:chris@hallmedia.co" aria-label="Email a correction to the section: Hall Media (2019–present)">edit</a>]</span></h3>
+<h3 id="hall-media">Hall Media (2019–present)<span class="edit">[<a href="mailto:chris@chall.net" aria-label="Email a correction to the section: Hall Media (2019–present)">edit</a>]</span></h3>
 <p>Chris founded Hall Media in March 2019. The company builds results-driven media systems for founders, executives, investors and high-net-worth individuals who need content made without unnecessary stress and exposure.</p>
 <p>Hall Media’s longest-running client is Garry Tan, whose YouTube channel Chris has produced since March 2020. Chris is also executive producer of <i>The Social Radars</i>, the first podcast from Y Combinator co-founder Jessica Livingston and Carolynn Levy, who created the SAFE (simple agreement for future equity). The show interviews the founders of top Y Combinator companies. Other Hall Media work includes merchandise strategy for Ray Dalio’s <i>Principles</i> and how it tied into the brand’s content.</p>
 <p>In 2021 Chris co-founded and built out <a href="https://www.boerumstudios.com/">Boerum Studios</a>, a full-service commercial photo and video studio in East Williamsburg, Brooklyn. He was with the studio until 2023. Hall Media continues to take on client work alongside Chris’s role at Y Combinator.</p>
 
-<h3 id="garry-tan">Work with Garry Tan (2020–present)<span class="edit">[<a href="mailto:chris@hallmedia.co" aria-label="Email a correction to the section: Work with Garry Tan (2020–present)">edit</a>]</span></h3>
+<h3 id="garry-tan">Work with Garry Tan (2020–present)<span class="edit">[<a href="mailto:chris@chall.net" aria-label="Email a correction to the section: Work with Garry Tan (2020–present)">edit</a>]</span></h3>
 <p>Chris began producing <a href="https://x.com/garrytan">Garry Tan</a>’s YouTube channel in March 2020, when Tan was co-founder and managing partner of the venture firm Initialized Capital. Hall Media also worked with Initialized Capital from 2020 to 2023. Over the course of the collaboration Tan’s channel grew from 20,000 subscribers to nearly 300,000.<sup><a href="#ref1">[1]</a></sup></p>
 <p>Tan became president and CEO of Y Combinator in January 2023, and Chris continued as his executive producer. In May 2025 Tan brought Chris to San Francisco so that the two could work together in person. Chris joined Y Combinator full-time the following January.</p>
 
-<h3 id="yc">Y Combinator (2026–present)<span class="edit">[<a href="mailto:chris@hallmedia.co" aria-label="Email a correction to the section: Y Combinator (2026–present)">edit</a>]</span></h3>
+<h3 id="yc">Y Combinator (2026–present)<span class="edit">[<a href="mailto:chris@chall.net" aria-label="Email a correction to the section: Y Combinator (2026–present)">edit</a>]</span></h3>
 <p>In January 2026 Chris joined Y Combinator full-time in San Francisco as Senior Video Producer. He produces the company’s YouTube channel, which has nearly 2.5 million subscribers.<sup><a href="#ref3">[3]</a></sup> His work with Tan, Livingston and Levy began through Hall Media, years before he joined the company.</p>
 
-<h2 id="clients">Selected clients<span class="edit">[<a href="mailto:chris@hallmedia.co" aria-label="Email a correction to the section: Selected clients">edit</a>]</span></h2>
+<h2 id="clients">Selected clients<span class="edit">[<a href="mailto:chris@chall.net" aria-label="Email a correction to the section: Selected clients">edit</a>]</span></h2>
 <div class="tables">
   <table class="wikitable">
     <tr><th scope="col">Client</th><th scope="col">Years</th></tr>
@@ -293,7 +296,7 @@ footer { clear: both; margin-top: 26px; padding-top: 14px; border-top: 1px solid
   </table>
 </div>
 
-<h2 id="disciplines">Disciplines<span class="edit">[<a href="mailto:chris@hallmedia.co" aria-label="Email a correction to the section: Disciplines">edit</a>]</span></h2>
+<h2 id="disciplines">Disciplines<span class="edit">[<a href="mailto:chris@chall.net" aria-label="Email a correction to the section: Disciplines">edit</a>]</span></h2>
 <p>Chris’s principal disciplines are content strategy, video production and podcasting.</p>
 <div class="tables">
   <table class="wikitable">
@@ -312,17 +315,17 @@ footer { clear: both; margin-top: 26px; padding-top: 14px; border-top: 1px solid
   </table>
 </div>
 
-<h2 id="contact">Contact<span class="edit">[<a href="mailto:chris@hallmedia.co" aria-label="Email a correction to the section: Contact">edit</a>]</span></h2>
-<p>Hall Media works with founders, executives and investors on video, podcasts and content strategy. Inquiries: <a href="mailto:chris@hallmedia.co">chris@hallmedia.co</a>.</p>
+<h2 id="contact">Contact<span class="edit">[<a href="mailto:chris@chall.net" aria-label="Email a correction to the section: Contact">edit</a>]</span></h2>
+<p>Hall Media works with founders, executives and investors on video, podcasts and content strategy. Inquiries: <a href="mailto:chris@chall.net">chris@chall.net</a>.</p>
 
-<h2 id="references">References<span class="edit">[<a href="mailto:chris@hallmedia.co" aria-label="Email a correction to the section: References">edit</a>]</span></h2>
+<h2 id="references">References<span class="edit">[<a href="mailto:chris@chall.net" aria-label="Email a correction to the section: References">edit</a>]</span></h2>
 <ol class="refs">
   <li id="ref1"><a href="https://www.linkedin.com/in/chrishall">“Chris Hall”</a>. <i>LinkedIn</i>.</li>
   <li id="ref2"><a href="https://www.youtube.com/@TheSocialRadars">“The Social Radars”</a>. <i>YouTube</i>.</li>
   <li id="ref3"><a href="https://www.youtube.com/@ycombinator">“Y Combinator”</a>. <i>YouTube</i>.</li>
 </ol>
 
-<h2 id="external">External links<span class="edit">[<a href="mailto:chris@hallmedia.co" aria-label="Email a correction to the section: External links">edit</a>]</span></h2>
+<h2 id="external">External links<span class="edit">[<a href="mailto:chris@chall.net" aria-label="Email a correction to the section: External links">edit</a>]</span></h2>
 <ul>
   <li><a href="https://www.linkedin.com/in/chrishall">Chris Hall</a> on LinkedIn</li>
   <li><a href="https://www.youtube.com/@TheSocialRadars">The Social Radars</a> on YouTube</li>
@@ -332,7 +335,7 @@ footer { clear: both; margin-top: 26px; padding-top: 14px; border-top: 1px solid
 <nav class="cats" aria-label="Categories"><span>Categories:</span> <ul><li><a href="#top">Living people</a></li><li><a href="#career">Video producers</a></li><li><a href="#hall-media">Podcast producers</a></li><li><a href="#early-life">People from New York City</a></li><li><a href="#yc">Y Combinator people</a></li></ul></nav>
 </div>
 
-<footer>Inquiries: <a href="mailto:chris@hallmedia.co">chris@hallmedia.co</a></footer>
+<footer>Inquiries: <a href="mailto:chris@chall.net">chris@chall.net</a></footer>
 </main>
 </div>
 </body>

@@ -6,9 +6,9 @@ retains its GitHub Pages deployment.
 
 The homepage has two stages in one page.
 
-1. **The poster.** A full-screen photograph of Chris set as a film poster: his
-   name lettered on the wall, "A Hall Media production" above it, and a credit
-   block of his real credits that ends with the contact address.
+1. **The poster.** A full-screen photograph of Chris set as a film poster. His
+   name is lettered on the wall and passes behind his head, and a billing
+   block of his real credits ends with the contact address.
 2. **The article.** An encyclopedia-style article about him: a notice that Hall
    Media takes on client work, an info box with his portrait, and sections for
    early life, career, selected clients, disciplines, contact, references, and
@@ -27,18 +27,32 @@ projects that live in this folder.
 Markup and styles live in `index.html`; there is no script. Files it uses:
 
 - `images/poster-wide-1600.jpg`, `images/poster-wide-2400.jpg` — the poster
-  photograph for windows wider than 5:4.
+  photograph for every window wider than 4:5.
+- `images/poster-wide-mask.png` — a cut-out of Chris in the wide photograph
+  (black, with his outline in the alpha channel). A second copy of the
+  photograph is drawn through it on top of the name, which is what puts the
+  name behind his head. It was made with the macOS person-segmentation
+  framework. If the wide photograph is ever re-cropped, the mask must be
+  regenerated from the same crop, and both must keep the same aspect ratio
+  and the same `object-position` / `mask-position`.
 - `images/poster-tall-800.jpg`, `images/poster-tall-1170.jpg` — the upright
-  crop for phones and narrow windows, where the credits sit centred at the foot.
+  crop for phones and narrow windows. He stands below the name there, so no
+  cut-out is used and the credits sit centred at the foot.
 - `images/chris-hall-2026-600.jpg`, `images/chris-hall-2026.jpg` — the info box
-  portrait. All six are crops of the August 2026 portrait by Oliver Covrett and
-  carry only his credit in their metadata.
+  portrait. All the photographs are crops of the August 2026 portrait by
+  Oliver Covrett and carry only his credit in their metadata.
 - `fonts/newsreader-display-500.woff2` — the name. Newsreader at its display
-  size and weight 500, cut down to letters and basic punctuation.
-- `fonts/archivo-condensed-caps.woff2` — the credit block. Archivo, widths
-  62–80 and weights 500–600, cut down to capitals, digits, and `. , @ & - · : /`.
-  A character outside those sets falls back to a system font, so re-cut the
-  file (fontTools `varLib.instancer` then `subset`) before using one.
+  size and weight 500, cut down to letters and basic punctuation. A character
+  outside that set falls back to a system font, so re-cut the file (fontTools
+  `varLib.instancer` then `subset`) before using one.
+- `fonts/six-caps-credits.woff2` — the billing block. Six Caps, the complete
+  Latin file. It is far narrower than any system font, so the stylesheet also
+  declares two width-matched stand-ins built from local Arial.
+
+The layout of the name depends on two measurements of the wide photograph:
+his head sits at the horizontal centre, and the gap between "Chris" and
+"Hall" is sized to it. The credits start a fixed distance to the right of his
+sleeve and their type is sized to the room that leaves.
 
 In the article the info box floats right on wide windows. At 720px and below
 it becomes a full-width block under the notice, the portrait crops to a
@@ -54,6 +68,7 @@ Keep these exact when editing:
   2020) and on The Social Radars predates that and was done through Hall
   Media. Y Combinator is his employer and is not listed as a client.
 - Carolynn Levy is spelled with two n's.
+- The contact address is `chris@chall.net`, everywhere on the page.
 - The Y Combinator YouTube subscriber figure is rounded from the channel page;
   re-check it before changing the wording.
 
